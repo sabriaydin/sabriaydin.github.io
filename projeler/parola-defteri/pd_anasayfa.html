@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABRİ AYDIN | Parola Defteri</title>
+    <meta name="description" content="Gözünüz arkada kalmadan verilerinizi güvenle saklayın.">
+    <meta name="keywords" content="sabri aydın, parola defteri, şifreleme, güvenlik">
+    <meta name="author" content="Sabri Aydın">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" href="paroladefteri-favicon.png" type="image/png">
+    <link rel="icon" href="paroladefteri-favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #07080a;
+            --primary: #00a8cc;
+            --secondary: #005f73;
+            --card-bg: rgba(15, 23, 42, 0.4);
+            --card-border: rgba(255, 255, 255, 0.04);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #0f766e;
+            --mail-color: #9d174d;
+            --accent-glow: rgba(0, 168, 204, 0.2);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 40%, rgba(0, 95, 115, 0.15), transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(0, 168, 204, 0.1), transparent 40%);
+            min-width: 1280px; 
+        }
+        
+        /* HEADER - SABİT DEĞİL VE DAHA AÇIK RENK */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 10%;
+            position: relative; /* Sabitliği kaldırdık */
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.02); /* Çok hafif, şeffaf bir arka plan */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--card-border);
+        }
+        
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), #0077b6, var(--primary));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: shine 4s linear infinite;
+            text-shadow: 0 0 40px rgba(0, 168, 204, 0.2);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            color: var(--text-main);
+            background: rgba(0, 168, 204, 0.05);
+            border-color: var(--primary);
+            transform: translateX(2px);
+        }
+        
+        /* BOŞLUKLAR AZALTILDI */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 40vh; /* Yükseklik azaltıldı */
+            padding: 30px 20px; /* Padding daraltıldı */
+            position: relative;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 12px; /* Boşluk azaltıldı */
+            color: #ffffff;
+            animation: fadeUp 1s ease-out;
+        }
+        .hero h1 span {
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0, 168, 204, 0.2);
+        }
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin-bottom: 20px; /* Boşluk azaltıldı */
+            line-height: 1.6;
+            animation: fadeUp 1s ease-out 0.2s both;
+        }
+        .trust-badges {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 25px; /* Boşluk azaltıldı */
+            animation: fadeUp 1s ease-out 0.3s both;
+        }
+        .badge {
+            background: rgba(0, 168, 204, 0.03);
+            border: 1px solid rgba(0, 168, 204, 0.15);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(5px);
+        }
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px; /* Butonlar arası boşluk azaltıldı */
+        }
+        .download-btn {
+            padding: 14px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 168, 204, 0.15);
+            animation: fadeUp 1s ease-out 0.4s both;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        .download-btn:hover::before {
+            left: 100%;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 168, 204, 0.3);
+        }
+        .secondary-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: fadeUp 1s ease-out 0.5s both;
+            width: 100%;
+        }
+        .outline-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 20px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--card-border);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 350px;
+        }
+        .outline-btn:hover {
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .outline-btn.vt:hover {
+            border-color: #14b8a6;
+            background: rgba(20, 184, 166, 0.03);
+            box-shadow: 0 0 20px rgba(20, 184, 166, 0.1);
+        }
+        .outline-btn.mail:hover {
+            border-color: #db2777;
+            background: rgba(219, 39, 119, 0.03);
+            box-shadow: 0 0 20px rgba(219, 39, 119, 0.1);
+        }
+        .features {
+            padding: 2.5rem 10%; /* İçerik boşluğu azaltıldı */
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px; /* Kartlar arası boşluk azaltıldı */
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 25px 20px; /* Kart içi boşluklar azaltıldı */
+            border-radius: 16px;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 168, 204, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .feature-icon {
+            font-size: 2.2rem;
+            margin-bottom: 12px; /* İkon altı boşluk azaltıldı */
+            display: inline-block;
+            opacity: 0.9;
+        }
+        .feature-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 8px; /* Başlık altı boşluk azaltıldı */
+            color: #ffffff;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-size: 0.85rem;
+        }
+        footer {
+            text-align: center;
+            padding: 2rem 10%; /* Footer boşluğu azaltıldı */
+            border-top: 1px solid var(--card-border);
+            margin-top: 2rem; /* Yukarı olan mesafe daraltıldı */
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Parola Defteri</div>
+        <div class="menu-container">
+            <a href="/" class="back-btn">
+                <span>&larr;</span> Ana Sayfaya Dön
+            </a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Dijital Hayatınızı<br><span>Askeri Düzeyde</span> Koruyun.</h1>
+        <p>AES-GCM 256-bit şifreleme teknolojisiyle donatılmış, ekran izlenmesini ve veri hırsızlığını donanımsal düzeyde engelleyen yeni nesil şifre yöneticisi.</p>
+        
+        <div class="trust-badges">
+            <div class="badge">🚫 İnternet Bağlantısı Gerektirmez</div>
+            <div class="badge">💎 Tamamen Ücretsiz</div>
+            <div class="badge">&#9749; Bağımsız Yapımcı (Indie)</div>
+        </div>
+
+        <div class="action-group">
+            <a class="download-btn" href="/ar-ge/parola-defteri/Parola%20Defteri%20-%20S%C3%BCr%C3%BCm%202026.03.16.rar">Windows için İndir (Sürüm: 2026.03.16)</a>
+            
+            <div class="secondary-actions">
+                <a class="outline-btn vt" href="https://www.virustotal.com/gui/file/64266df56bd385a5cae4cf541d6954a785cd33c9d67e85c3ee3aa7697aa3b918/detection" target="_blank">
+                    <span class="icon">🛡&#65039;</span> VirusTotal Raporunu İncele
+                </a>
+                <a class="outline-btn mail" href="https://forms.gle/vuh4wc1UifEvLbHK6">
+                    <span class="icon">&#9993;&#65039;</span> Bir sorun mu var? Bize bildirin.
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-card">
+            <div class="feature-icon">&#9729;&#65039;🚫</div>
+            <h3>Sıfır Bulut İhtiyacı</h3>
+            <p>Verileriniz asla internete yüklenmez. Sunucu çökmesi, veri sızıntısı veya hacklenme riski sıfırdır. Tüm şifreleriniz sadece sizin fiziksel makinenizde ve sizin kontrolünüzde kalır.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🛡&#65039;</div>
+            <h3>Kırılamaz Şifreleme</h3>
+            <p>Verileriniz SHA-256 ve SHA-512 algoritmalarıyla harmanlanmış AES-GCM ile korunur. Ana parolanız olmadan veriye erişmek imkansızdır.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">👁&#65039;&#8205;🗨&#65039;</div>
+            <h3>Ekran Görüntüsü Koruması</h3>
+            <p>Zararlı yazılımların veya ekran kaydedicilerin şifrelerinizi çalmasını önlemek için Windows API kullanılarak ekranın izlenmesi tamamen engellenir.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">💸</div>
+            <h3>Sınırsız ve Ücretsiz</h3>
+            <p>Güvenlik bir lüks değil, haktır. Aylık abonelikler, saçma sapan kısıtlamalar, reklamlar veya premium paketler yok. Parola Defteri ömür boyu ücretsizdir.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">&#9201;&#65039;</div>
+            <h3>Akıllı Pano &amp; Kilit</h3>
+            <p>Kopyaladığınız şifreler işiniz bittiğinde panodan otomatik silinir. Bilgisayar başından ayrıldığınızda uygulama kendini kilitler ve RAM belleği güvenle temizler.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🧑&#8205;💻</div>
+            <h3>Bağımsız Ruh</h3>
+            <p>Arkasında verilerinizi satmak isteyen dev teknoloji şirketleri yok. Tamamen şeffaflığa ve kullanıcı gizliliğine odaklanmış bir bağımsız geliştirici projesi.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎨</div>
+            <h3>Gelişmiş Kategoriler</h3>
+            <p>Onlarca hazır kategori ile hesaplarınızı kendi renk kodlarınızla filtreleyin ve aradığınızı anında bulun.</p>
+        </div>
+        
+        <div class="feature-card">
+            <div class="feature-icon">💥</div>
+            <h3>İmha Protokolü</h3>
+            <p>İstediğiniz taktirde "Verileri İmha Et" protokolü ile tüm veritabanınızı kalıcı, şifreli ve bir daha kurtarılamaz şekilde silebilirsiniz.</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🔄</div>
+            <h3>Güvenli Yedekleme</h3>
+            <p>Veritabanınızı tamamen şifrelenmiş olarak dışa aktarabilir, yeni bilgisayarınıza fiziki bellek ile güvenle taşıyıp kolayca içe aktarabilirsiniz.</p>
+        </div>
+    </section>
+
+    <footer>
+    <p>Sabri Aydın &#169; 2026 Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+            if(e.ctrlKey && e.keyCode == 'S'.charCodeAt(0)) return false;
+        };
+    </script>
+</body>
+</html>
