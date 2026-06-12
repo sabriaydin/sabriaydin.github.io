@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabri Aydın | HTML Online Editor</title>
+    <style>
+        /* Tasarım Değişkenleri */
+        :root {
+            --bg-color: #E7E9EB;
+            --header-bg: #f1f1f1;
+            --header-text: #000000;
+            --panel-bg: #ffffff;
+            --text-color: #000000;
+            --line-num-bg: #f5f5f5;
+            --line-num-text: #999999;
+            --border-color: #d3d3d3;
+            --button-secondary: #e7e9eb;
+            --button-secondary-hover: #dddddd;
+            --dragbar-bg: #DAE0E5;
+            --scrollbar-bg: #f1f1f1;
+            --scrollbar-thumb: #c1c1c1;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #15202B;
+            --header-bg: #1d2731;
+            --header-text: #ffffff;
+            --panel-bg: #15202B;
+            --text-color: #ffffff;
+            --line-num-bg: #1e2b38;
+            --line-num-text: #8899a6;
+            --border-color: #2b3947;
+            --button-secondary: #2b3947;
+            --button-secondary-hover: #3d4f61;
+            --dragbar-bg: #253341;
+            --scrollbar-bg: #15202B;
+            --scrollbar-thumb: #3d4f61;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.2s;
+        }
+
+        /* Üst Menü (Header) */
+        .header {
+            background-color: var(--header-bg);
+            padding: 6px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s, border-color 0.2s;
+            min-height: 38px;
+            gap: 15px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .header h2 {
+            color: var(--header-text);
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Önizleme Boyut Göstergesi */
+        .preview-dimension {
+            color: var(--header-text);
+            font-size: 12px;
+            font-family: Consolas, monospace;
+            opacity: 0.75;
+            background-color: var(--button-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        /* Entegre Sekme Alanı */
+        .tabs-container {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab {
+            background-color: var(--button-secondary);
+            color: var(--header-text);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+            max-width: 140px;
+        }
+
+        .tab.active {
+            background-color: #04AA6D;
+            color: white;
+            border-color: #04AA6D;
+        }
+
+        /* Düzenlenebilir Sekme Metni */
+        .tab-name {
+            display: inline-block;
+            min-width: 40px;
+            max-width: 100px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+
+        .tab-close {
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.6;
+            line-height: 1;
+        }
+
+        .tab-close:hover {
+            opacity: 1;
+            color: #ff4d4d;
+        }
+
+        .add-tab-btn {
+            background-color: var(--button-secondary);
+            border: 1px dashed var(--border-color);
+            color: var(--header-text);
+            padding: 3px 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .add-tab-btn:hover {
+            background-color: var(--button-secondary-hover);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* Buton Tasarımları */
+        .btn {
+            border: none;
+            padding: 6px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn {
+            background-color: var(--button-secondary);
+            color: var(--header-text);
+        }
+
+        .action-btn:hover {
+            background-color: var(--button-secondary-hover);
+        }
+
+        /* Ana İçerik Alanı */
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 8px;
+            box-sizing: border-box;
+            gap: 0px;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .container.row-layout { flex-direction: row; }
+        .container.col-layout { flex-direction: column; }
+
+        /* Paneller */
+        .panel {
+            background-color: var(--panel-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: background-color 0.2s, border-color 0.2s;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .row-layout .panel { width: calc(50% - 5px); }
+        .col-layout .panel { width: 100%; height: calc(50% - 5px); }
+
+        /* Satır Numaralı Editör Yapısı */
+        .editor-wrapper {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--panel-bg);
+            height: 100%;
+            min-height: 0;
+        }
+
+        .line-numbers {
+            width: 45px;
+            padding: 15px 0;
+            text-align: right;
+            padding-right: 12px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 15px;
+            line-height: 22px;
+            color: var(--line-num-text);
+            background-color: var(--line-num-bg);
+            user-select: none;
+            overflow: hidden;
+            border-right: 1px solid var(--border-color);
+            box-sizing: border-box;
+            height: 100%;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+            scrollbar-width: none;
+        }
+
+        .line-numbers::-webkit-scrollbar {
+            display: none;
+        }
+
+        #htmlCode {
+            flex: 1;
+            border: none;
+            resize: none;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 15px;
+            line-height: 22px;
+            padding: 15px 12px;
+            outline: none;
+            box-sizing: border-box;
+            background-color: var(--panel-bg);
+            color: var(--text-color);
+            white-space: pre;
+            overflow: auto;
+            height: 100%;
+            min-height: 0;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        /* İçerik Alanları Özel Scrollbar Tasarımı */
+        #htmlCode::-webkit-scrollbar,
+        .preview-wrapper::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+        #htmlCode::-webkit-scrollbar-track,
+        .preview-wrapper::-webkit-scrollbar-track {
+            background: var(--scrollbar-bg);
+        }
+        #htmlCode::-webkit-scrollbar-thumb,
+        .preview-wrapper::-webkit-scrollbar-thumb {
+            background-color: var(--scrollbar-thumb);
+            border-radius: 6px;
+            border: 3px solid var(--scrollbar-bg);
+        }
+
+        /* Sonuç Alanı (Iframe) */
+        .preview-wrapper {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            background-color: #ffffff;
+            overflow: auto;
+            min-height: 0;
+        }
+
+        #resultFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Sürükleme Çubuğu (Dragbar) */
+        .dragbar {
+            background-color: var(--bg-color);
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .row-layout .dragbar {
+            width: 10px;
+            cursor: ew-resize;
+            height: 100%;
+        }
+
+        .col-layout .dragbar {
+            height: 10px;
+            cursor: ns-resize;
+            width: 100%;
+        }
+
+        .dragbar::after {
+            content: "···";
+            color: #888;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+
+        .row-layout .dragbar::after { transform: rotate(90deg); }
+
+        body.is-dragging iframe, 
+        body.is-dragging textarea {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <h2>HTML Online Editor</h2>
+            <div class="tabs-container" id="tabsContainer"></div>
+        </div>
+        
+        <div class="preview-dimension" id="previewDimension" title="Önizleme Alanı Çözünürlüğü">Sekme Çözünürlüğü: 0x0</div>
+        
+        <div class="btn-group">
+            <button class="btn action-btn" onclick="clearCode()" title="Kod Alanını Hızlıca Temizle" style="color: #8b0000; font-weight: bold;">
+                🗑️ <span class="btn-text">Temizle</span>
+            </button>
+            <button class="btn action-btn" onclick="toggleOrientation()" title="Görünümü Değiştir (Yatay/Dikey)">
+                🔄 <span class="btn-text">Görünüm</span>
+            </button>
+            <button class="btn action-btn" onclick="toggleTheme()" title="Temayı Değiştir (Açık/Koyu)">
+                🌓 <span class="btn-text">Tema</span>
+            </button>
+            <button class="btn action-btn" onclick="saveCode()" title="Aktif Sekmedeki Kodu İndir">
+                💾 <span class="btn-text">Kaydet</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="container row-layout" id="mainContainer">
+        
+        <div class="panel" id="editorPanel">
+            <div class="editor-wrapper">
+                <div class="line-numbers" id="lineNumbers">1</div>
+                <textarea id="htmlCode" spellcheck="false" wrap="off"></textarea>
+            </div>
+        </div>
+
+        <div class="dragbar" id="dragbar"></div>
+
+        <div class="panel" id="previewPanel">
+            <div class="preview-wrapper">
+                <iframe id="resultFrame"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('mainContainer');
+        const editorPanel = document.getElementById('editorPanel');
+        const previewPanel = document.getElementById('previewPanel');
+        const dragbar = document.getElementById('dragbar');
+        const htmlCode = document.getElementById('htmlCode');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const tabsContainer = document.getElementById('tabsContainer');
+        const previewDimension = document.getElementById('previewDimension');
+
+        // Sekme Hafıza Yönetimi ve Maksimum Limit Kontrolü
+        const MAX_TABS = 5;
+        let tabCounter = 1;
+        
+        const cleanTemplate = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Sayfa Başlığı</title>
+</head>
+<body>
+
+<h1>Merhaba Dünya!</h1>
+<p>Kodlarınızı buraya yazabilirsiniz.</p>
+
+</body>
+</html>`;
+
+        // Sekmelere "editorWidth" ve "editorHeight" boyut hafızaları eklendi
+        let tabs = [
+            { id: 1, name: 'index.html', content: cleanTemplate, editorWidth: '', editorHeight: '' }
+        ];
+        let activeTabId = 1;
+        let debounceTimer;
+
+        // Önizleme Alanının Çözünürlüğünü Güncelleyen Fonksiyon
+        function updatePreviewDimensions() {
+            const width = previewPanel.clientWidth;
+            const height = previewPanel.clientHeight;
+            previewDimension.textContent = `Sekme Çözünürlüğü: ${width}x${height}`;
+        }
+
+        // 1. DINAMIK SEKMELERI EKRANA BASMA
+        function renderTabs() {
+            tabsContainer.innerHTML = '';
+            
+            tabs.forEach(tab => {
+                const tabEl = document.createElement('div');
+                tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
+                tabEl.title = "Yeniden adlandırmak için çift tıklayın";
+                
+                tabEl.onclick = () => switchTab(tab.id);
+                
+                tabEl.ondblclick = (e) => {
+                    e.stopPropagation();
+                    const newName = prompt("Yeni sekme adını girin:", tab.name);
+                    if (newName !== null && newName.trim() !== "") {
+                        tab.name = newName.trim();
+                        renderTabs();
+                    }
+                };
+                
+                const nameEl = document.createElement('span');
+                nameEl.className = 'tab-name';
+                nameEl.textContent = tab.name;
+
+                tabEl.appendChild(nameEl);
+
+                if (tabs.length > 1) {
+                    const closeEl = document.createElement('span');
+                    closeEl.className = 'tab-close';
+                    closeEl.innerHTML = '&times;';
+                    closeEl.title = 'Sekmeyi Kapat';
+                    closeEl.onclick = (e) => {
+                        e.stopPropagation();
+                        closeTab(tab.id);
+                    };
+                    tabEl.appendChild(closeEl);
+                }
+
+                tabsContainer.appendChild(tabEl);
+            });
+
+            if (tabs.length < MAX_TABS) {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'add-tab-btn';
+                addBtn.innerHTML = '+';
+                addBtn.title = 'Yeni Sekme Aç';
+                addBtn.onclick = addTab;
+                tabsContainer.appendChild(addBtn);
+            }
+        }
+
+        // 2. SEKME DEĞİŞTİRME (Çözünürlük Koruması Eklendi)
+        function switchTab(id) {
+            if (id === activeTabId) return;
+            
+            // Mevcut sekmeyi hafızaya kaydet (Çözünürlük dahil)
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            if (currentTab) {
+                currentTab.content = htmlCode.value;
+                currentTab.editorWidth = editorPanel.style.width;
+                currentTab.editorHeight = editorPanel.style.height;
+            }
+
+            activeTabId = id;
+            const newTab = tabs.find(t => t.id === activeTabId);
+            
+            // Yeni sekmenin tüm ayarlarını geri yükle
+            if (newTab) {
+                htmlCode.value = newTab.content;
+                editorPanel.style.width = newTab.editorWidth || '';
+                editorPanel.style.height = newTab.editorHeight || '';
+                
+                // Eğer özel boyut kaydedilmişse flex yapısını ez, yoksa temizle
+                if (newTab.editorWidth || newTab.editorHeight) {
+                    editorPanel.style.flex = 'none';
+                    previewPanel.style.flex = '1';
+                } else {
+                    editorPanel.style.flex = '';
+                    previewPanel.style.flex = '';
+                }
+            }
+            
+            renderTabs();
+            updateLineNumbers();
+            runCode();
+            // DOM tamamen oluştuktan sonra boyutu hesapla
+            setTimeout(updatePreviewDimensions, 10); 
+        }
+
+        // 3. YENI SEKME EKLEME
+        function addTab() {
+            if (tabs.length >= MAX_TABS) return;
+            
+            tabCounter++;
+            const newId = Date.now();
+            
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            if (currentTab) {
+                currentTab.content = htmlCode.value;
+                currentTab.editorWidth = editorPanel.style.width;
+                currentTab.editorHeight = editorPanel.style.height;
+            }
+
+            tabs.push({
+                id: newId,
+                name: `Sekme ${tabCounter}.html`,
+                content: cleanTemplate,
+                editorWidth: '',
+                editorHeight: ''
+            });
+            
+            activeTabId = newId;
+            htmlCode.value = cleanTemplate;
+            editorPanel.style.width = '';
+            editorPanel.style.height = '';
+            editorPanel.style.flex = '';
+            previewPanel.style.flex = '';
+            
+            renderTabs();
+            updateLineNumbers();
+            runCode();
+            setTimeout(updatePreviewDimensions, 10);
+        }
+
+        // 4. SEKME KAPATMA
+        function closeTab(id) {
+            const index = tabs.findIndex(t => t.id === id);
+            if (index === -1) return;
+
+            tabs.splice(index, 1);
+
+            if (activeTabId === id) {
+                activeTabId = tabs[index] ? tabs[index].id : tabs[index - 1].id;
+                const newTab = tabs.find(t => t.id === activeTabId);
+                
+                if (newTab) {
+                    htmlCode.value = newTab.content;
+                    editorPanel.style.width = newTab.editorWidth || '';
+                    editorPanel.style.height = newTab.editorHeight || '';
+                    
+                    if (newTab.editorWidth || newTab.editorHeight) {
+                        editorPanel.style.flex = 'none';
+                        previewPanel.style.flex = '1';
+                    } else {
+                        editorPanel.style.flex = '';
+                        previewPanel.style.flex = '';
+                    }
+                }
+            }
+
+            renderTabs();
+            updateLineNumbers();
+            runCode();
+            setTimeout(updatePreviewDimensions, 10);
+        }
+
+        // HIZLI TEMİZLEME FONKSİYONU
+        function clearCode() {
+            htmlCode.value = '';
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            if (currentTab) currentTab.content = '';
+            
+            updateLineNumbers();
+            runCode();
+            htmlCode.focus();
+        }
+
+        // 5. ANLIK ÖNİZLEME VE SATIR NUMARALARI MANTIĞI
+        function runCode() {
+            const iframe = document.getElementById("resultFrame");
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            iframeDoc.open();
+            iframeDoc.write(htmlCode.value);
+            iframeDoc.close();
+        }
+
+        function updateLineNumbers() {
+            const lines = htmlCode.value.split('\n').length;
+            let lineNumHTML = '';
+            for (let i = 1; i <= lines; i++) {
+                lineNumHTML += i + '<br>';
+            }
+            lineNumbers.innerHTML = lineNumHTML;
+        }
+
+        htmlCode.addEventListener('input', function() {
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            if (currentTab) currentTab.content = htmlCode.value;
+
+            updateLineNumbers();
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(runCode, 300);
+        });
+
+        htmlCode.addEventListener('scroll', function() {
+            lineNumbers.scrollTop = htmlCode.scrollTop;
+        });
+
+        // 6. GÖRÜNÜM DEĞİŞTİRME (ORIENTATION)
+        function toggleOrientation() {
+            editorPanel.style.width = '';
+            editorPanel.style.height = '';
+            editorPanel.style.flex = '';
+            previewPanel.style.flex = '';
+            
+            // Görünüm yönü değiştiğinde eski boyutların çatışmasını önlemek için 
+            // diğer sekmelerin kaydedilmiş boyutlarını sıfırla.
+            tabs.forEach(tab => {
+                tab.editorWidth = '';
+                tab.editorHeight = '';
+            });
+            
+            if (container.classList.contains('row-layout')) {
+                container.classList.remove('row-layout');
+                container.classList.add('col-layout');
+            } else {
+                container.classList.remove('col-layout');
+                container.classList.add('row-layout');
+            }
+            setTimeout(updatePreviewDimensions, 50);
+        }
+
+        // 7. TEMA DEĞİŞTİRME (THEME)
+        function toggleTheme() {
+            if (document.body.getAttribute('data-theme') === 'dark') {
+                document.body.removeAttribute('data-theme');
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+        }
+
+        // 8. SEKME İSMİYLE DOSYA KAYDETME (SAVE)
+        function saveCode() {
+            const currentTab = tabs.find(t => t.id === activeTabId);
+            if (!currentTab) return;
+
+            let fileName = currentTab.name;
+            if (!fileName.endsWith('.html') && !fileName.endsWith('.htm')) {
+                fileName += '.html';
+            }
+
+            const blob = new Blob([htmlCode.value], { type: 'text/html' });
+            const link = document.createElement('a');
+            
+            link.download = fileName;
+            link.href = window.URL.createObjectURL(blob);
+            link.style.display = 'none';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 9. SÜRÜKLENEBİLİR AYIRICI (DRAGBAR) MANTIĞI
+        let isDragging = false;
+
+        dragbar.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            isDragging = true;
+            document.body.classList.add('is-dragging'); 
+            document.body.style.cursor = container.classList.contains('row-layout') ? 'ew-resize' : 'ns-resize';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+
+            const containerRect = container.getBoundingClientRect();
+
+            if (container.classList.contains('row-layout')) {
+                let pointerX = e.clientX - containerRect.left;
+                if (pointerX < 150) pointerX = 150;
+                if (pointerX > containerRect.width - 150) pointerX = containerRect.width - 150;
+                
+                editorPanel.style.width = pointerX + 'px';
+                editorPanel.style.flex = 'none'; 
+                previewPanel.style.flex = '1';
+            } else {
+                let pointerY = e.clientY - containerRect.top;
+                if (pointerY < 100) pointerY = 100;
+                if (pointerY > containerRect.height - 100) pointerY = containerRect.height - 100;
+                
+                editorPanel.style.height = pointerY + 'px';
+                editorPanel.style.flex = 'none';
+                previewPanel.style.flex = '1';
+            }
+            
+            updatePreviewDimensions();
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                document.body.classList.remove('is-dragging'); 
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        window.addEventListener('resize', updatePreviewDimensions);
+
+        // Sayfa Başlangıç Tetikleyicileri
+        htmlCode.value = cleanTemplate;
+        renderTabs();
+        updateLineNumbers();
+        runCode();
+        updatePreviewDimensions();
+    </script>
+</body>
+</html>

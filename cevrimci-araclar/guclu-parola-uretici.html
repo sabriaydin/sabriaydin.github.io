@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABRİ AYDIN | Güçlü Parola Üretici</title>
+    <meta name="description" content="Geliştiricisinin özgürce takıldığı bir oyun alanı.">
+    <meta name="keywords" content="sabri aydın, oyunlar, programlama, yazılım, teknoloji, web portal">
+    <meta name="author" content="Sabri Aydın">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.png" type="image/png">
+    
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <div id="header-alani"></div>
+
+    <div class="main-content">
+        <style>
+:root {
+    --primary-color: #cda4a4; /* Gül kurusu / Mat pastel ton - Göz yormaz */
+    --secondary-color: #8c7373; /* Soluk toprak tonu */
+    --success-color: #a4cda4; /* Mat pastel yeşil */
+    --danger-color: #cd8484; /* Mat kırmızı */
+    --border-color: #401a1a; /* #110000 zeminle uyumlu hafif belirgin kenarlık */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --text-color: #e8dbdb; /* Kirli/pudramsı beyaz - Göz yormaz */
+}
+
+#password-generator-widget {
+    font-family: var(--font-family);
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    padding: 20px 0;
+    position: relative; 
+    width: 100%; 
+    max-width: 800px;
+    margin: 0 auto; 
+    background-color: transparent; /* Zemin tamamen şeffaf */
+    color: var(--text-color);
+}
+
+#password-generator-widget * {
+    box-sizing: border-box; 
+    color: inherit;
+}
+
+#password-generator-widget h3, 
+#password-generator-widget p {
+    margin: 0;
+    padding: 0;
+    color: inherit;
+}
+
+#password-generator-widget .generator-container {
+    width: 100%; 
+    background-color: transparent; /* Arkaplan kaldırıldı */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+}
+
+#password-generator-widget h3 {
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    font-size: 1.8rem;
+    font-weight: 400; /* Daha zarif bir görünüm için inceltildi */
+}
+
+#password-generator-widget .description {
+    color: var(--secondary-color);
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+}
+
+#password-generator-widget .slider-group, 
+#password-generator-widget .checkbox-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    text-align: left;
+    background-color: transparent; /* Arkaplan kaldırıldı */
+}
+
+#password-generator-widget .slider-label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: var(--text-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#password-generator-widget #length {
+    width: 100%;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 5px;
+    outline: none;
+}
+
+#password-generator-widget #length::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+}
+
+#password-generator-widget #length::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+}
+
+#password-generator-widget .checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#password-generator-widget .checkbox-container label {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+#password-generator-widget .checkbox-container input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+    background-color: transparent;
+}
+
+#password-generator-widget .button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+#password-generator-widget button {
+    padding: 12px 20px;
+    background-color: transparent; /* Arkaplan kaldırıldı */
+    border: 1px solid var(--primary-color);
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    flex-grow: 1;
+    color: var(--primary-color);
+}
+
+#password-generator-widget button:hover {
+    background-color: var(--primary-color);
+    color: #110000; /* Hover durumunda buton yazısı zemin rengini alır */
+}
+
+#password-generator-widget #copyButton {
+    border-color: var(--secondary-color);
+    color: var(--secondary-color);
+    display: none; 
+}
+
+#password-generator-widget #copyButton:hover {
+    background-color: var(--secondary-color);
+    color: #110000;
+}
+
+#password-generator-widget #result-container {
+    margin-top: 25px;
+    padding: 15px;
+    background-color: transparent; /* Arkaplan kaldırıldı */
+    border: 1px dashed var(--success-color); /* Daha zarif bir kutu çizgisi */
+    border-radius: 8px;
+    display: none;
+    word-break: break-all;
+}
+
+#password-generator-widget #result {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--success-color);
+    letter-spacing: 2px;
+}
+
+#password-generator-widget .error {
+    color: var(--danger-color);
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+#password-generator-widget .footer {
+    margin-top: 30px;
+    color: var(--secondary-color);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+#password-generator-widget #toast-notification {
+    visibility: hidden; 
+    min-width: 250px;
+    background-color: #000000;
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed; 
+    z-index: 1000; 
+    left: 50%;
+    bottom: 30px; 
+    transform: translateX(-50%); 
+    opacity: 0;
+    transition: opacity 0.5s, visibility 0.5s;
+    backdrop-filter: blur(5px); /* Zarif bir bulanıklık efekti */
+}
+
+#password-generator-widget #toast-notification.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+#password-generator-widget .history-section {
+    width: 100%;
+    margin-top: 30px;
+    padding: 20px;
+    background-color: transparent; /* Arkaplan kaldırıldı */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    text-align: left;
+}
+
+#password-generator-widget .history-section h4 {
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+#password-generator-widget #history-list {
+    list-style: none;
+    padding: 0;
+    max-height: 200px; 
+    overflow-y: auto; 
+}
+
+/* Scrollbar özelleştirmesi (Opsiyonel zarif dokunuş) */
+#password-generator-widget #history-list::-webkit-scrollbar {
+    width: 6px;
+}
+#password-generator-widget #history-list::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+}
+
+#password-generator-widget #history-list li {
+    background-color: transparent; /* Arkaplan kaldırıldı */
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--text-color);
+    word-break: break-all;
+    justify-content: space-between; 
+}
+
+#password-generator-widget #history-list li:last-child {
+    border-bottom: none;
+}
+
+#password-generator-widget .password-text {
+    padding-right: 10px; 
+    flex-grow: 1; 
+    word-break: break-all;
+    min-width: 0; 
+}
+
+#password-generator-widget .copy-btn-container {
+    width: 30px; 
+    display: flex;
+    justify-content: flex-end; 
+    flex-shrink: 0; 
+}
+
+#password-generator-widget .copy-history-btn {
+    background: none;
+    border: none; 
+    color: var(--primary-color);
+    font-size: 1rem;
+    padding: 0;
+    cursor: pointer;
+    width: 100%; 
+    text-align: right;
+    transition: color 0.2s;
+}
+
+#password-generator-widget .copy-history-btn:hover {
+    color: var(--text-color);
+    background-color: transparent;
+}
+</style>
+
+<div id="password-generator-widget">
+    <div class="generator-container">
+        <h3>Güçlü Parola Üretici</h3>
+        <p class="description">Hesap güvenliğiniz için karmaşık, uzun ve tahmin edilmesi zor parolalar oluşturun.</p>
+        
+        <div class="slider-group">
+            <label class="slider-label">
+                Parola Uzunluğu (1-24): <span id="lengthValue">12</span>
+            </label>
+            <input id="length" max="24" oninput="updateLengthValue()" type="range" value="12" />
+        </div>
+
+        <div class="checkbox-group">
+            <div class="checkbox-container">
+                <label><input checked="" id="lowercase" type="checkbox" /> Küçük Harfler (a-z)</label>
+                <label><input checked="" id="uppercase" type="checkbox" /> Büyük Harfler (A-Z)</label>
+                <label><input checked="" id="numbers" type="checkbox" /> Rakamlar (0-9)</label>
+                <label><input checked="" id="special" type="checkbox" /> Özel Karakterler (!@#$...)</label>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button id="generateButton" onclick="generatePassword()">Parola Oluştur</button>
+            <button id="copyButton" onclick="copyPassword()">Manuel Kopyala</button>
+        </div>
+
+        <div id="result-container">
+            <p id="result">Parolanız burada görünecek.</p>
+        </div>
+
+        <p class="error" id="error-message"></p>
+
+        <div class="footer">
+            <p>SABRİ AYDIN © 2025</p>
+        </div>
+    </div>
+    
+    <div class="history-section">
+        <h4>Geçmiş Parolalar</h4>
+        <ul id="history-list">
+            </ul>
+        <p id="no-history-message" style="color: var(--secondary-color); font-size: 0.9em;">Henüz oluşturulmuş bir parola yok.</p>
+    </div>
+
+    <div id="toast-notification">Parola oluşturuldu ve kopyalandı!</div>
+</div>
+
+<script>
+    const PASSWORD_STORAGE_KEY = 'passwordHistory';
+    const MAX_HISTORY_LENGTH = 10;
+    const EXPIRY_TIME_MS = 24 * 60 * 60 * 1000; 
+
+    // --- GENEL İŞLEMLER ---
+
+    function showToast(message = "Parola başarıyla kopyalandı!") {
+        const toast = document.getElementById("toast-notification");
+        toast.innerText = message;
+        toast.classList.add("show");
+        
+        setTimeout(function(){ 
+            toast.classList.remove("show"); 
+        }, 3000);
+    }
+
+    // --- LOCALSTORAGE İŞLEMLERİ ---
+
+    function loadHistory() {
+        try {
+            const storedData = localStorage.getItem(PASSWORD_STORAGE_KEY);
+            if (!storedData) { return []; }
+            
+            const data = JSON.parse(storedData);
+            const currentTime = new Date().getTime();
+            
+            if (data.timestamp && (currentTime - data.timestamp) > EXPIRY_TIME_MS) {
+                localStorage.removeItem(PASSWORD_STORAGE_KEY);
+                return [];
+            }
+
+            return data.passwords || [];
+
+        } catch (e) {
+            console.error("LocalStorage yüklenemedi veya çözümlenemedi:", e);
+            localStorage.removeItem(PASSWORD_STORAGE_KEY); 
+            return [];
+        }
+    }
+
+    function savePassword(password) {
+        const history = loadHistory();
+        
+        history.unshift(password); 
+        
+        if (history.length > MAX_HISTORY_LENGTH) {
+            history.pop();
+        }
+
+        const dataToStore = {
+            passwords: history,
+            timestamp: new Date().getTime()
+        };
+
+        try {
+            localStorage.setItem(PASSWORD_STORAGE_KEY, JSON.stringify(dataToStore));
+        } catch (e) {
+            console.error("LocalStorage kaydedilemedi:", e);
+        }
+        
+        displayHistory(history);
+    }
+
+    // --- KOPYALAMA İŞLEVİ ---
+    
+    function copyHistoryPassword(event) {
+        const password = event.currentTarget.getAttribute('data-password'); 
+        
+        if (!password) {
+            showToast("Kopyalanacak parola bulunamadı.");
+            return;
+        }
+
+        navigator.clipboard.writeText(password).then(() => {
+            showToast("Geçmiş parola kopyalandı!");
+        }).catch(err => {
+            console.error('Kopyalama sırasında bir hata oluştu:', err);
+            alert('Parola kopyalanamadı. Lütfen manuel olarak kopyalayın.');
+        });
+    }
+
+    // --- GÖRÜNTÜLEME İŞLEMLERİ ---
+
+    function displayHistory(history) {
+        const list = document.getElementById('history-list');
+        const noHistoryMessage = document.getElementById('no-history-message');
+        list.innerHTML = ''; 
+
+        if (history.length === 0) {
+            noHistoryMessage.style.display = 'block';
+            return;
+        }
+
+        noHistoryMessage.style.display = 'none';
+
+        history.forEach(p => {
+            const listItem = document.createElement('li');
+            
+            const passwordText = document.createElement('span');
+            passwordText.className = 'password-text';
+            passwordText.innerText = p;
+            
+            const copyBtnContainer = document.createElement('div');
+            copyBtnContainer.className = 'copy-btn-container';
+            
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-history-btn';
+            copyBtn.innerHTML = '📄';
+            copyBtn.setAttribute('data-password', p); 
+            copyBtn.addEventListener('click', copyHistoryPassword); 
+            
+            copyBtnContainer.appendChild(copyBtn);
+
+            listItem.appendChild(passwordText);
+            listItem.appendChild(copyBtnContainer); 
+            list.appendChild(listItem);
+        });
+    }
+
+    // --- TEMEL WIDGET FONKSİYONLARI ---
+
+    function updateLengthValue() {
+        const length = document.getElementById('length').value;
+        document.getElementById('lengthValue').innerText = length;
+    }
+
+    function generatePassword() {
+        const length = parseInt(document.getElementById('length').value);
+        const includeLowercase = document.getElementById('lowercase').checked;
+        const includeUppercase = document.getElementById('uppercase').checked;
+        const includeNumbers = document.getElementById('numbers').checked;
+        const includeSpecial = document.getElementById('special').checked;
+
+        document.getElementById('error-message').innerText = '';
+        document.getElementById('result').innerText = '';
+        document.getElementById('result-container').style.display = 'none';
+        document.getElementById('copyButton').style.display = 'none';
+        
+        let chars = '';
+        if (includeLowercase) chars += 'abcdefghijklmnopqrstuvwxyz';
+        if (includeUppercase) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        if (includeNumbers) chars += '0123456789';
+        if (includeSpecial) chars += '!@#$%^&*()_+=-[]{}\\|;:\'",.<>/?`~';
+
+        if (chars.length === 0) {
+            document.getElementById('error-message').innerText = "Lütfen parola için en az bir karakter türü seçin.";
+            return;
+        }
+
+        let password = '';
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * chars.length);
+            password += chars[randomIndex];
+        }
+
+        document.getElementById('result').innerText = password;
+        document.getElementById('result-container').style.display = 'block';
+        document.getElementById('copyButton').style.display = 'inline-block';
+        
+        savePassword(password);
+
+        // OTOMATİK KOPYALAMA İŞLEMİ BURADA YAPILIYOR
+        navigator.clipboard.writeText(password).then(() => {
+            showToast("Parola oluşturuldu ve kopyalandı!");
+        }).catch(err => {
+            console.error('Kopyalama sırasında bir hata oluştu:', err);
+        });
+    }
+
+    function copyPassword() {
+        const password = document.getElementById('result').innerText;
+        
+        if (password === '' || password === 'Parolanız burada görünecek.') {
+             document.getElementById('error-message').innerText = "Lütfen önce bir parola oluşturun.";
+             return;
+        }
+
+        navigator.clipboard.writeText(password).then(() => {
+            showToast("Parola başarıyla kopyalandı!");
+        }).catch(err => {
+            console.error('Kopyalama sırasında bir hata oluştu:', err);
+            alert('Parola kopyalanamadı. Lütfen manuel olarak kopyalayın.');
+        });
+    }
+
+    // --- BAŞLANGIÇ İŞLEVİ ---
+    window.onload = function() {
+        // Ayarları Yükle
+        if (document.getElementById('length')) updateLengthValue();
+        if (document.getElementById('lowercase')) document.getElementById('lowercase').checked = true;
+        if (document.getElementById('uppercase')) document.getElementById('uppercase').checked = true;
+        if (document.getElementById('numbers')) document.getElementById('numbers').checked = true;
+        if (document.getElementById('special')) document.getElementById('special').checked = true;
+
+        // Geçmiş parolaları yükle
+        const initialHistory = loadHistory();
+        displayHistory(initialHistory);
+    };
+</script>
+    </div>
+
+    <div id="footer-alani"></div>
+
+    <script>
+        // header.html dosyasını çek ve header-alani id'li elemente bas
+        fetch('/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-alani').innerHTML = data;
+            });
+
+        // footer.html dosyasını çek ve footer-alani id'li elemente bas
+        fetch('/footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-alani').innerHTML = data;
+            });
+
+        // Sağ Tık ve F12 Engelleme Kodları (Her sayfada çalışması için buraya aldık)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = e => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) return false;
+        };
+    </script>
+
+</body>
+</html>

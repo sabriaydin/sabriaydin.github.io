@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABRİ AYDIN | İletişim</title>
+    <meta name="description" content="Geliştiricisinin özgürce takıldığı bir oyun alanı.">
+    <meta name="keywords" content="sabri aydın, oyunlar, programlama, yazılım, teknoloji, web portal">
+    <meta name="author" content="Sabri Aydın">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.png" type="image/png">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="header-alani"></div>
+
+    <div class="main-content">
+        <div style="width: 100%; height: 100vh;">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdZaZ_1xtduZcWlLXJ-s8qanFj8mzYUoafPqkouEgO34yUP4g/viewform?usp=sharing&ouid=118292077442889642544" style="width: 100%; height: 100%; border: none; overflow: auto;" title="iletişim"></iframe>
+        </div>
+    </div>
+
+    <div id="footer-alani"></div>
+
+    <script>
+        // header.html dosyasını çek ve header-alani id'li elemente bas
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-alani').innerHTML = data;
+            });
+
+        // footer.html dosyasını çek ve footer-alani id'li elemente bas
+        fetch('footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-alani').innerHTML = data;
+            });
+
+        // Sağ Tık ve F12 Engelleme Kodları (Her sayfada çalışması için buraya aldık)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = e => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) return false;
+        };
+    </script>
+
+</body>
+</html>
