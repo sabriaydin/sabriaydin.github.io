@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SABRİ AYDIN | IPRadar</title>
+    <link rel="icon" href="IPRadar-favicon.png" type="image/png">
+    <link rel="icon" href="IPRadar-favicon.ico" type="image/x-icon">
+    <style>
+        /* Modern Reset ve Değişkenler */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0f1115 0%, #161920 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            /* Seçimi engelleme (kod kopyalamayı zorlaştırmak için) */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 1280px Sınırlandırmalı Ana Konteyner */
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            color: #ffffff;
+        }
+
+        /* Header Tasarımı ve Düzeni */
+        header {
+            width: 100%;
+            padding: 25px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffffff;
+            display: inline-block;
+        }
+
+        .brand span {
+            background: linear-gradient(90deg, #ff3b30, #ff2d55);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Göze Batmayan Ana Sayfa Butonu */
+        .btn-home {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-home:hover {
+            color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Ana Bölüm (Hero) Grid Düzeni */
+        .main-hero {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 48px;
+            padding: 60px 0;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.15;
+            color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .hero-content h1 span {
+            background: linear-gradient(135deg, #ffffff 30%, #a0aec0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 36px;
+        }
+
+        /* Buton Gruplama ve Tasarımları */
+        .download-area {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        /* Birinci Buton - İndirme (Tonlu Geçiş) */
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-decoration: none;
+            background: linear-gradient(135deg, #e53e3e 0%, #b7791f 100%); 
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(229, 62, 62, 0.25);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(229, 62, 62, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* İkinci Buton - VirusTotal (Outline Glassmorphism) */
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            color: #ffffff;
+        }
+
+        .version-info {
+            font-size: 0.85rem;
+            color: #64748b;
+            padding-left: 4px;
+        }
+
+        /* Terminal Görünümü (Glassmorphism) */
+        .terminal-panel {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .terminal-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .terminal-body pre {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        /* Özellikler Kartları Gridi */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            padding-bottom: 80px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 32px;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(229, 62, 62, 0.2);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            text-align: center;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        /* Duyarlılık (Responsive) Ayarları */
+        @media (max-width: 968px) {
+            .header-content {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            .main-hero {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                text-align: center;
+            }
+            .button-group {
+                justify-content: center;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .hero-content h1 {
+                font-size: 2.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-content">
+            <div class="brand">IP<span>Radar</span></div>
+            <a href="/" class="btn-home">
+                &#8592; Ana Sayfaya Dön
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="main-hero">
+            <div class="hero-content">
+                <h1><span>Yerel Ağınızdaki</span><br>Cihazları Keşfedin</h1>
+                <p>Güçlü asenkron mimarisi, ICMP, akıllı port analizörleri ve alt seviye ARP garantörlük mekanizmasıyla ağınızdaki tüm aktif unsurları derinlemesine raporlayın.</p>
+                
+                <div class="download-area">
+                    <div class="button-group">
+                        <a href="https://sabriaydin.neocities.org/ar-ge/ip-radar/IPRadar.exe" class="btn-download" download>
+                            Uygulamayı İndir
+                        </a>
+                        <a href="https://www.virustotal.com/gui/file/d32786eea9d4383811cfc9513a92f3ca7b366ca2c060f77eba85135d1b24d5f2?nocache=1" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+                            🛡️ VirusTotal Raporunu İncele
+                        </a>
+                    </div>
+                    <span class="version-info">Windows Konsol Uygulaması</span>
+                </div>
+            </div>
+
+            <div class="terminal-panel">
+                <div class="terminal-header">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <div class="terminal-body">
+<pre>
+     ___  ____  ____            __        
+    / _/ / __ \/ __ \____  ____/ /___ ______
+   / /  / /_/ / /_/ / __ `/ __  / __ `/ ___/
+ _/ /  / ____/ _, _/ /_/ / /_/ / /_/ / /    
+/___/ /_/   /_/ |_|\__,_/\__,_/\__,_/_/     
+
+[+] Tespit edilen yerel ağ: 192.168.1.x
+[+] Derin analiz yapılıyor, lütfen bekleyin...
+[*] Taranan IP Sayısı: 254/254 | Cihaz: 5
+[BAŞARILI] Rapor masaüstüne kaydedildi!
+</pre>
+                </div>
+            </div>
+        </section>
+
+        <section class="features-grid">
+            <div class="feature-card">
+                <h3>Hibrit Protokol</h3>
+                <p>Yalnızca ping paketlerine bağlı kalmaz; açık portları ve ARP tablolarını çapraz sorgulayarak görünmez cihazları bile listeler.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Hassas Tanımlama</h3>
+                <p>MAC adresleri üzerinden entegre OUI veritabanını kullanarak cihazların üreticilerini ve tahmini türlerini yüksek doğrulukla analiz eder.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Lokal Güvenlik</h3>
+                <p>Tüm tarama süreçleri ve elde edilen veriler tamamen yerel ağınızda koşturulur, dış dünyaya hiçbir veri sızdırılmaz.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <span>Sabri Aydın</span> tarafından geliştirilmiştir.
+        </div>
+    </footer>
+
+    <script>
+        // 1. Sağ Tıklamayı Engelle
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // 2. Kritik Geliştirici Kısayollarını Engelle
+        document.addEventListener('keydown', function(e) {
+            // F12 Engelleme
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+I (İncele), Ctrl+Shift+C (Element Seçici), Ctrl+Shift+J (Konsol)
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j')) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+U (Kaynak Kodunu Görüntüle) ve Ctrl+S (Sayfayı Kaydet)
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // 3. Geliştirici Araçları Açıkken Kod Akışını Devtools Kilitlemesi ile Yavaşlatma
+        setInterval(function() {
+            Function("debugger")();
+        }, 100);
+    </script>
+</body>
+</html>
