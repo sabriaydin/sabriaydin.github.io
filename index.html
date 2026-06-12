@@ -3,39 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benim Web Sitem</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .container {
-            text-align: center;
-            background: #fff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #0366d6;
-        }
-        p {
-            font-size: 1.2em;
-        }
-    </style>
+    <title>SABRİ AYDIN | Ana Sayfa</title>
+    <meta name="description" content="Geliştiricisinin özgürce takıldığı bir oyun alanı.">
+    <meta name="keywords" content="sabri aydın, oyunlar, programlama, yazılım, teknoloji, web portal">
+    <meta name="author" content="Sabri Aydın">
+    <meta name="robots" content="index, follow">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Merhaba Dünya!</h1>
-        <p>Bu benim GitHub Pages üzerindeki ilk web sitem.</p>
+
+    <div id="header-alani"></div>
+
+    <div class="main-content">
+        <style>
+  .accordion-gallery {
+    display: flex;
+    height: calc(100vh - 330px);
+    min-height: 400px;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  }
+
+  .accordion-item {
+    flex: 1;
+    transition: flex 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .accordion-item:last-child {
+    border-right: none;
+  }
+
+  .accordion-item::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    transition: background 0.5s;
+  }
+
+  .title-only {
+    position: relative;
+    z-index: 1;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2rem;
+    transition: opacity 0.3s;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 2px;
+  }
+
+  .text-box {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    background: rgba(20, 0, 0, 0.7);
+    padding: 20px;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    width: 80%;
+    text-align: center;
+    color: #fff;
+  }
+
+  .text-box h2 { 
+    color: #ff4d4d; 
+    margin-top: 0; 
+  }
+
+  .accordion-item:hover { 
+    flex: 5; 
+  }
+
+  .accordion-item:hover::before { 
+    background: rgba(0, 0, 0, 0.4); 
+  }
+
+  .accordion-item:hover .title-only { 
+    opacity: 0; 
+  }
+
+  .accordion-item:hover .text-box { 
+    opacity: 1; 
+  }
+</style>
+
+<div class="accordion-gallery">
+  <div class="accordion-item" style="background-image: url('/resimler/anasayfa/AnaSayfa-Galeri2.jpg');">
+    <div class="title-only">KODLAMA</div>
+    <div class="text-box">
+      <h2>KODLAMA</h2>
+      <p>İlk satır meraktan yazılır, gerisi inatla devam eder.</p>
     </div>
+  </div>
+  
+  <div class="accordion-item" style="background-image: url('/resimler/anasayfa/AnaSayfa-Galeri3.jpg');">
+    <div class="title-only">OYUN DÜNYASI</div>
+    <div class="text-box">
+      <h2>OYUN DÜNYASI</h2>
+      <p>Kaybetmek öğretir, kazanmak tekrar oynatır.</p>
+    </div>
+  </div>
+
+  <div class="accordion-item" style="background-image: url('/resimler/anasayfa/AnaSayfa-Galeri4.jpg');">
+    <div class="title-only">BAĞIMSIZ PROJELER</div>
+    <div class="text-box">
+      <h2>BAĞIMSIZ PROJELER</h2>
+      <p>Neden olmasın? diye başlayan hikâyeler.</p>
+    </div>
+  </div>
+
+  <div class="accordion-item" style="background-image: url('/resimler/anasayfa/AnaSayfa-Galeri5.jpg');">
+    <div class="title-only">TEMBELLİK</div>
+    <div class="text-box">
+      <h2>TEMBELLİK</h2>
+      <p>Az eforla çok sonuç alma sanatı.</p>
+    </div>
+  </div>
+  
+  <div class="accordion-item" style="background-image: url('/resimler/anasayfa/AnaSayfa-Galeri1.jpg');">
+    <div class="title-only">DAHA FAZLASI...</div>
+    <div class="text-box">
+      <h2>Yerinde Saymak Yok!</h2>
+      <p>Hiçbir zaman belirli kalıplara bağlı kalmayı sevmedik sevmeyeceğiz. Gerekirse o çizgiyi aşacağız!</p>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <div id="footer-alani"></div>
+
+    <script>
+        // header.html dosyasını çek ve header-alani id'li elemente bas
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-alani').innerHTML = data;
+            });
+
+        // footer.html dosyasını çek ve footer-alani id'li elemente bas
+        fetch('footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-alani').innerHTML = data;
+            });
+
+        // Sağ Tık ve F12 Engelleme Kodları (Her sayfada çalışması için buraya aldık)
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = e => {
+            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || (e.ctrlKey && e.keyCode === 85)) return false;
+        };
+    </script>
+
 </body>
 </html>
