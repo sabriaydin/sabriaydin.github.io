@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA SA - CLEO 4 Mod Paketi | 2014</title>
+    <style>
+        /* GTA SA İkonik Fontları */
+        @font-face {
+            font-family: 'Pricedown';
+            src: url('https://fonts.cdnfonts.com/s/14881/PricedownBl-Regular.woff') format('woff');
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
+        /* Renk Tonları - Tekdüze renkler yerine tonlamalar */
+        :root {
+            --asphalt-1: #333333;
+            --asphalt-2: #222222;
+            --asphalt-3: #0a0a0a;
+            
+            --grove-green-1: #38b000;
+            --grove-green-2: #008000;
+            --grove-green-3: #004b23;
+            
+            --sa-orange-1: #ff9e00;
+            --sa-orange-2: #e85d04;
+            
+            --text-main: #f0f0f0;
+            --text-muted: #e0e0e0; /* Yazılar daha net okunsun diye biraz açıldı */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            /* Yazıların ekranda jilet gibi net durması için optimizasyon */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            
+            /* DİKKAT: ARKA PLAN GÖRSELİ AYARI BURADA */
+            background-color: var(--asphalt-3); 
+            /* Siyahlık epey hafifletildi (0.8 -> 0.45 civarına çekildi) */
+            background-image: 
+                linear-gradient(rgba(10, 10, 10, 0.45), rgba(10, 10, 10, 0.65)), 
+                url('/projeler/gtasa-50cleomodpaketi/GTASanAndreas-wallpaper.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        .portal-container {
+            width: 100%;
+            max-width: 1600px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        /* Ana İçerik - Pusluluk yapan 3D efekt kaldırıldı */
+        .mod-showcase {
+            background: linear-gradient(145deg, rgba(34,34,34,0.85) 0%, rgba(17,17,17,0.9) 100%);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 2px solid var(--asphalt-1);
+            border-radius: 15px;
+            padding: 50px;
+            box-shadow: 15px 15px 0px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        /* Sprey Boya Efekti Dekorasyon */
+        .mod-showcase::before {
+            content: "GROVE ST. 4 LIFE";
+            font-family: 'Permanent Marker', cursive;
+            position: absolute;
+            top: -25px;
+            right: -10px;
+            font-size: 3.5rem;
+            color: var(--grove-green-2);
+            opacity: 0.25;
+            transform: rotate(12deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .mod-title-area {
+            position: relative;
+            z-index: 1;
+            border-bottom: 2px dashed var(--asphalt-1);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Nabız (Pulse) Animasyonu */
+        @keyframes neonPulse {
+            0% { text-shadow: 2px 2px 4px #000, 0 0 10px rgba(255, 158, 0, 0.2); }
+            50% { text-shadow: 2px 2px 4px #000, 0 0 20px rgba(255, 158, 0, 0.6); }
+            100% { text-shadow: 2px 2px 4px #000, 0 0 10px rgba(255, 158, 0, 0.2); }
+        }
+
+        .badge-2017 {
+            font-family: 'Permanent Marker', cursive;
+            color: var(--sa-orange-1);
+            font-size: 1.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            animation: neonPulse 2s infinite;
+        }
+
+        .mod-title-area h1 {
+            font-family: 'Pricedown', sans-serif;
+            font-size: 5rem;
+            margin: 0;
+            color: var(--text-main);
+            text-shadow: 4px 4px 0px var(--asphalt-3), 7px 7px 0px var(--grove-green-3);
+            letter-spacing: 3px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .description {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: var(--text-muted);
+            background: linear-gradient(90deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+            padding: 25px;
+            border-left: 5px solid var(--grove-green-1);
+            border-radius: 0 12px 12px 0;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .features {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+        }
+
+        .features li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--asphalt-2);
+            display: flex;
+            align-items: flex-start;
+            font-size: 1.05rem;
+        }
+
+        .features li::before {
+            content: "★";
+            color: var(--sa-orange-1);
+            margin-right: 15px;
+            font-size: 1.3rem;
+            line-height: 1;
+        }
+
+        .features li strong {
+            color: var(--text-main);
+            margin-right: 5px;
+        }
+
+        /* Aksiyon Butonları */
+        .action-box {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            padding: 20px 25px;
+            font-size: 1.4rem;
+            font-family: 'Pricedown', sans-serif;
+            letter-spacing: 2px;
+            border-radius: 8px;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            border: 2px solid #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: all 0.4s ease;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--grove-green-1) 0%, var(--grove-green-3) 100%);
+            color: var(--text-main);
+            box-shadow: 6px 6px 0px var(--asphalt-3);
+        }
+
+        .btn-download:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0px var(--asphalt-3);
+            background: linear-gradient(135deg, #4ade80 0%, var(--grove-green-2) 100%);
+            color: #fff;
+        }
+
+        .btn-download:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--asphalt-3);
+        }
+
+        .btn-virus {
+            background: linear-gradient(135deg, var(--asphalt-1) 0%, var(--asphalt-2) 100%);
+            color: var(--text-muted);
+            box-shadow: 6px 6px 0px var(--asphalt-3);
+        }
+
+        .btn-virus:hover {
+            background: linear-gradient(135deg, var(--asphalt-2) 0%, var(--asphalt-1) 100%);
+            color: var(--sa-orange-1);
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0px var(--asphalt-3);
+        }
+        
+        .btn-virus:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px var(--asphalt-3);
+        }
+
+        @media (max-width: 960px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            .mod-title-area h1 {
+                font-size: 3.8rem;
+            }
+            .mod-showcase {
+                padding: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portal-container">
+        
+        <main class="mod-showcase">
+            <div class="mod-title-area">
+                <span class="badge-2017">#SABRİ_AYDIN</span>
+                <h1>GTA San Andreas Cleo Mod Paketi</h1>
+            </div>
+
+            <div class="content-grid">
+                <div class="details-col">
+                    <div class="description">
+                        Hoş geldin dostum. Burası Los Santos sokaklarının kurallarını yeniden yazanların mekanı. Yapımcısının orta okul yıllarında bir araya getirmeye başladığı ve son olarak 2017 yılında bizzat elden geçirilmiş, aksiyonun dibine vurduran 50 adet safkan CLEO4 modu bu pakette toplandı. Sadece indir, yükle ve kaosu başlat!
+                    </div>
+
+                    <ul class="features">
+                        <li><strong>Tam 50 adet birbirinden efsane modlar.</strong></li>
+                        <li><strong>CJ için yeni yetenekler, gizli silahlar ve görevler.</li>
+                        <li><strong>Kusursuz %100 Türkçe oyun keyfi.</li>
+                        <li><strong>Hızlı ve sorunsuz kurulum.</strong></li>
+                    </ul>
+                </div>
+
+                <div class="action-box">
+                    <a href="#" class="btn btn-download">Mod Paketini İndir!</a>
+                    <a href="#" class="btn btn-virus">VirusTotal Raporunu İncele</a>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>
