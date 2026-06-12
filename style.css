@@ -3,9 +3,9 @@
 }
 
 body {
-    background-color: #110000;
+    background-color: #1e222b; /* Gözü yormayan modern ve soft füme tonu */
     background-attachment: fixed;
-    color: #e5e5e5;
+    color: #e2e8f0; /* Saf beyaz yerine okunabilirliği yüksek soft gri */
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -21,20 +21,20 @@ body {
 
 /* Varsayılan link görünümü */
 a {
-    color: #e5e5e5; /* Normal renk */
-    text-decoration: none; /* Alt çizgi yok*/
-    font-weight: bold; /* Kalın yazı */
-    transition: color 0.3s ease; /* Yumuşak geçiş */
+    color: #e2e8f0; 
+    text-decoration: none; 
+    font-weight: bold; 
+    transition: color 0.3s ease; 
 }
 
 /* Üzerine gelince (hover) */
 a:hover {
-    color: #3498db; /* Mavi renk */
+    color: #3b82f6; /* Modern profesyonel mavi */
 }
 
 header {
-    background-color: #0a0a0a;
-    border-bottom: 2px solid #330000;
+    background-color: #12151c; /* Arkaplan ile uyumlu, bir tık daha koyu header */
+    border-bottom: 2px solid #2d3139; /* İnce ve yumuşak geçiş çizgisi */
     padding: 0 75px;
 }
 
@@ -56,7 +56,7 @@ header {
 }
 
 .logo span {
-    color: #660000;
+    color: #3b82f6; /* Vurgu rengi maviye dönüştürüldü */
 }
 
 nav ul {
@@ -81,7 +81,7 @@ nav ul li a {
 
 nav ul li a:hover {
     color: #ffffff;
-    background-color: #560000;
+    background-color: #2563eb; /* Premium mavi hover efekti */
 }
 
 .logo:hover {
@@ -93,9 +93,9 @@ nav ul li a:hover {
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: #0a0a0a;
+    background-color: #12151c;
     min-width: 200px;
-    border: 1px solid #1a0000;
+    border: 1px solid #2d3139;
     z-index: 100;
 }
 
@@ -106,7 +106,7 @@ nav ul li a:hover {
 }
 
 .dropdown-menu li a:hover {
-    background-color: #560000;
+    background-color: #2563eb;
     color: #ffffff;
 }
 
@@ -121,10 +121,10 @@ nav ul li:hover .dropdown-menu {
 }
 
 footer {
-    background-color: #0a0a0a;
+    background-color: #12151c;
     color: #ffffff;
     padding: 50px 75px;
-    border-top: 1px solid #1a0000;
+    border-top: 1px solid #2d3139;
 }
 
 .footer-grid {
@@ -139,12 +139,12 @@ footer {
     color: #ffffff;
     margin-top: 0;
     margin-bottom: 20px;
-    border-left: 2px solid #330000;
+    border-left: 2px solid #3b82f6;
     padding-left: 10px;
 }
 
 .footer-col p {
-    color: #ffffff;
+    color: #cbd5e1; /* Footer metinleri için daha yumuşak ton */
     font-size: 14px;
     line-height: 1.6;
     margin: 0;
