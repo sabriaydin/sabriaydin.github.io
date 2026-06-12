@@ -3,68 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa Bulunamadı - 404</title>
+    <title>404 - Sayfa Bulunamadı</title>
     <style>
         * {
             box-sizing: border-box;
         }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f7f9fa;
-            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #a9b7c6;
+            font-family: 'Consolas', 'Courier New', monospace;
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            margin: 0;
-            text-align: center;
+            overflow: hidden;
+            position: relative;
         }
-        .container {
-            max-width: 500px;
-            padding: 40px 20px;
-            background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        /* İnce Tarama Çizgileri (Ciddi Monitör Efekti) */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
         }
-        h1 {
-            font-size: 72px;
-            margin: 0;
-            color: #ff4d4f;
-            line-height: 1;
+        .terminal-window {
+            width: 90%;
+            max-width: 800px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            z-index: 20;
+            position: relative;
         }
-        h2 {
-            font-size: 24px;
-            margin: 20px 0 10px 0;
+        .terminal-header {
+            background-color: #2d2d2d;
+            padding: 10px 15px;
+            border-bottom: 1px solid #333;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: center;
         }
-        p {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.5;
+        .terminal-buttons {
+            display: flex;
+            gap: 8px;
         }
         .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #0366d6;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: background-color 0.2s;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
-        .btn:hover {
-            background-color: #024ea1;
+        .btn-red { background-color: #ff5f56; }
+        .btn-yellow { background-color: #ffbd2e; }
+        .btn-green { background-color: #27c93f; }
+        .terminal-title {
+            color: #888;
+            font-size: 0.9rem;
+            margin-left: 15px;
+        }
+        .terminal-body {
+            padding: 30px;
+            min-height: 250px;
+        }
+        .error-code {
+            color: #cc6666;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        .log-output {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .log-line {
+            margin-bottom: 10px;
+        }
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.1rem;
+            background-color: #a9b7c6;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 2px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .action-container {
+            margin-top: 40px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .return-link {
+            display: inline-block;
+            color: #6a8759;
+            text-decoration: none;
+            border: 1px solid #6a8759;
+            padding: 8px 20px;
+            transition: all 0.2s;
+            background: transparent;
+            font-weight: bold;
+        }
+        .return-link:hover {
+            background-color: #6a8759;
+            color: #1e1e1e;
         }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <h1>404</h1>
-        <h2>Aradığınız Sayfa Bulunamadı</h2>
-        <p>Gitmek istediğiniz sayfa silinmiş, ismi değiştirilmiş veya geçici olarak kullanım dışı kalmış olabilir. Lütfen URL adresini kontrol edin.</p>
-        <a href="/" class="btn">Ana Sayfaya Dön</a>
+    <div class="scanlines"></div>
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <div class="btn btn-red"></div>
+                <div class="btn btn-yellow"></div>
+                <div class="btn btn-green"></div>
+            </div>
+            <div class="terminal-title">sunucu_loglari - root@github-pages:~</div>
+        </div>
+        <div class="terminal-body">
+            <div class="error-code">[SİSTEM] HATA 404: KRİTİK İSTİSNA</div>
+            <div class="log-output">
+                <span id="typing-area"></span><span class="cursor" id="cursor"></span>
+            </div>
+            <div class="action-container" id="action-btn">
+                <a href="/" class="return-link">&gt; ./ana_dizine_don.sh</a>
+            </div>
+        </div>
     </div>
 
+    <script>
+        const logs = [
+            "> İstek yapılan URL sunucu kayıtlarında bulunamadı.",
+            "> Dizin erişim reddedildi veya dosya taşınmış olabilir.",
+            "> Oturum kurtarma protokolü başlatılıyor...",
+            "> Lütfen ana dizine dönüş yapın."
+        ];
+        
+        let logIndex = 0;
+        let charIndex = 0;
+        const typingSpeed = 30;
+        const area = document.getElementById("typing-area");
+        
+        function typeLog() {
+            if (logIndex < logs.length) {
+                const currentStr = logs[logIndex];
+                if (charIndex < currentStr.length) {
+                    area.innerHTML += currentStr.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeLog, typingSpeed);
+                } else {
+                    area.innerHTML += "<br>";
+                    logIndex++;
+                    charIndex = 0;
+                    setTimeout(typeLog, 400); 
+                }
+            } else {
+                document.getElementById("action-btn").style.opacity = "1";
+            }
+        }
+        
+        window.onload = () => {
+            setTimeout(typeLog, 500);
+        };
+    </script>
 </body>
 </html>
