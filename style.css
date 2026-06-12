@@ -3,9 +3,9 @@
 }
 
 body {
-    background-color: #141010; /* Kırmızı alt tonlu, çok derin bir siyah/antrasit */
+    background-color: #0d0d0d; /* Gözü yormayan, derin ve asil bir antrasit/siyah geçişi */
     background-attachment: fixed;
-    color: #e8e4e4;
+    color: #e5e5e5; 
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -21,20 +21,20 @@ body {
 
 /* Varsayılan link görünümü */
 a {
-    color: #e8e4e4; 
+    color: #e5e5e5; 
     text-decoration: none; 
     font-weight: bold; 
-    transition: color 0.3s ease, background-color 0.3s ease; 
+    transition: color 0.3s ease; 
 }
 
 /* Üzerine gelince (hover) */
 a:hover {
-    color: #e63946; /* Canlı ama parlaklığı dengelenmiş kırmızı */
+    color: #cc0000; /* Hafif koyu ama oldukça parlak, tok kırmızı */
 }
 
 header {
-    background-color: #1c1212; /* Kırmızımsı koyu ton, siyah ile kırmızı arasında bir geçiş */
-    border-bottom: 2px solid #8a1c1c; /* Gözle görülür belirgin koyu kırmızı çizgi */
+    background-color: #000000; /* Tamamen siyah */
+    border-bottom: 2px solid #1a1a1a; /* Siyahı destekleyen çok hafif tonlu çizgi */
     padding: 0 75px;
 }
 
@@ -56,7 +56,7 @@ header {
 }
 
 .logo span {
-    color: #e63946; /* Logoda dikkat çeken kırmızı vurgu */
+    color: #cc0000; /* Logodaki o canlı ve tok kırmızı */
 }
 
 nav ul {
@@ -81,7 +81,7 @@ nav ul li a {
 
 nav ul li a:hover {
     color: #ffffff;
-    background-color: #731717; /* Üzerine gelince net, lüks bir şarap kırmızısı */
+    background-color: #990000; /* Çırtlak olmayan, premium ve zengin kırmızı hover arka planı */
 }
 
 .logo:hover {
@@ -93,10 +93,9 @@ nav ul li a:hover {
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: #1c1212;
+    background-color: #000000; /* Dropdown menü de tam siyah */
     min-width: 200px;
-    border: 1px solid #4a1515; /* Sınır çizgilerinde belirgin şarap rengi */
-    border-top: none;
+    border: 1px solid #1a1a1a;
     z-index: 100;
 }
 
@@ -107,7 +106,7 @@ nav ul li a:hover {
 }
 
 .dropdown-menu li a:hover {
-    background-color: #731717; /* Menü içi net kırmızı vurgu */
+    background-color: #990000; /* Açılır menü hover rengi */
     color: #ffffff;
 }
 
@@ -122,10 +121,10 @@ nav ul li:hover .dropdown-menu {
 }
 
 footer {
-    background-color: #1c1212;
+    background-color: #000000; /* Tamamen siyah */
     color: #ffffff;
     padding: 50px 75px;
-    border-top: 2px solid #8a1c1c; /* Header ile uyumlu kırmızı üst çizgi */
+    border-top: 1px solid #1a1a1a;
 }
 
 .footer-grid {
@@ -140,12 +139,12 @@ footer {
     color: #ffffff;
     margin-top: 0;
     margin-bottom: 20px;
-    border-left: 3px solid #e63946; /* Footer başlıklarında daha kalın ve canlı kırmızı */
+    border-left: 2px solid #cc0000; /* Başlık yanındaki çizgiler tok kırmızıya dönüştürüldü */
     padding-left: 10px;
 }
 
 .footer-col p {
-    color: #d1c7c7; /* Saf gri yerine ortama uyan sıcak alt tonlu gri metin */
+    color: #cccccc; /* Siyah arka planda gözü yormayan soft metin rengi */
     font-size: 14px;
     line-height: 1.6;
     margin: 0;
