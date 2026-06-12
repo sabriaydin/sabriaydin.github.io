@@ -1,0 +1,35 @@
+<footer>
+    <div class="footer-grid">
+        <div class="footer-col">
+            <h3>Hakkımızda</h3>
+            <p>Web sayfamız dijital hayatı kolaylaştırmak üzere düşünen, araştıran ve üreten bir projedir.</p>
+        </div>
+        <div class="footer-col">
+            <h3>Bilgi</h3>
+            <p id="degisen-yazi"></p>
+        </div>
+        <div class="footer-col">
+            <h3>İletişim</h3>
+            <p>Görüş, öneri ve şikayet talepleriniz için <a href="/iletisim.html">buraya tıklayarak</a> iletişim formumuza ulaşabilirsiniz.</p>
+        </div>
+    </div>
+</footer>
+<div style="background-color: #0a0a0a; text-align: center; padding: 10px 0; border-top: 1px solid #1a0000; font-size: 13px; color: #888888;">
+    Sabri Aydın &copy; 2026 Tüm hakları saklıdır.
+</div>
+
+<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" onload="
+    const yazilar = [
+        'Web sitemiz ve projelerimiz tek bir bağımsız yapımcı tarafından geliştirilmektedir.',
+        'Tarafımızdan üretilen içerik dosyalarını güvenlik açısından başka sitelerden indirmeyiniz! Lütfen (ç)alıntı yapılan içeriklerimizi bize bildirin.',
+        'Bağımsız yazılım projelerimizi indirmeden önce lütfen Virüs Total raporunu inceleyiniz. Virüs Total raporu ulaşılamayan projeler için iletişime geçiniz.',
+        'Geliştiricimiz sunulan projeler için hiç bir zaman sizden bağış veya kullanım ücreti talep etmemektedir! Lütfen dolandırıcılara itibar etmeyin ve bize bildirin.',
+        'Web sayfamız ve yazılım projelerimiz profesyonel bir şirkete ait değildir. Herşey kişisel hobi olarak ilerlenen bir yolun ürünüdür.'
+    ];
+    
+    const rastgeleYazi = yazilar[Math.floor(Math.random() * yazilar.length)];
+    document.getElementById('degisen-yazi').innerHTML = rastgeleYazi;
+    
+    /* İşlem bitince bu görünmez pikseli DOM'dan temizler */
+    this.remove();
+" style="display:none;">
