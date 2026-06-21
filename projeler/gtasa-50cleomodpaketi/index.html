@@ -217,7 +217,7 @@
         .btn-download:hover {
             transform: translate(-3px, -3px);
             box-shadow: 9px 9px 0px var(--asphalt-3);
-            background: linear-gradient(135deg, #4ade80 0%, var(--grove-green-2) 100%);
+            background: linear-gradient(135deg, #2b8a00 0%, var(--grove-green-2) 100%); /* Hover rengi matlaştırıldı */
             color: #fff;
         }
 
@@ -244,6 +244,29 @@
             box-shadow: 0px 0px 0px var(--asphalt-3);
         }
 
+        /* Ana Sayfaya Dön Butonu */
+        .btn-home {
+            position: absolute;
+            bottom: 20px; /* Sağ alt köşeye alındı */
+            right: 25px;  /* Sağ alt köşeye alındı */
+            text-decoration: none;
+            color: var(--text-muted);
+            font-family: 'Trebuchet MS', sans-serif;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .btn-home:hover {
+            opacity: 1;
+            color: var(--sa-orange-1);
+        }
+
+        .btn-home::before {
+            content: "← ";
+        }
+
         @media (max-width: 960px) {
             .content-grid {
                 grid-template-columns: 1fr;
@@ -262,6 +285,7 @@
     <div class="portal-container">
         
         <main class="mod-showcase">
+            <a href="/" class="btn-home">Ana Sayfaya Dön</a>
             <div class="mod-title-area">
                 <span class="badge-2017">#SABRİ_AYDIN</span>
                 <h1>GTA San Andreas Cleo Mod Paketi</h1>
@@ -290,5 +314,29 @@
 
     </div>
 
+    <!-- Kaynak Kodu Koruması -->
+    <script>
+        // Sağ tık menüsünü engelle
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // F12, Ctrl+U, Ctrl+Shift+I gibi kısayolları engelle
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) { // F12
+                return false;
+            }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
+                return false;
+            }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { // Ctrl+Shift+C
+                return false;
+            }
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
+                return false;
+            }
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U
+                return false;
+            }
+        }
+    </script>
 </body>
 </html>
