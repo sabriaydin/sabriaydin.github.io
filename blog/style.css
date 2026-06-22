@@ -73,7 +73,7 @@ a:hover {
 header {
     background-color: var(--header-bg); 
     color: var(--header-text); 
-    padding: 40px 20px; 
+    padding: 35px 20px; 
     text-align: center;
     border-bottom: 2px solid var(--border-dark);
 }
@@ -90,15 +90,16 @@ header h1 {
 header p { 
     color: var(--header-muted); 
     font-size: 0.85rem; 
+    margin-bottom: 0; 
     text-transform: uppercase; 
     letter-spacing: 2px;
 }
 
-/* --- 4. NAVİGASYON & ARAMA ÇUBUĞU (MENÜ İÇİ YERLEŞİM) --- */
+/* --- 4. NAVİGASYON & ARAMA ÇUBUĞU (DROPDOWN DAHİL) --- */
 .main-nav { 
     background-color: var(--dark-bg); 
     width: 100%; 
-    position: relative; /* Arama kutusunu sağa hizalamak için üst referans */
+    position: relative; /* İçindeki arama çubuğunu sağa yaslamak için temel referans */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -129,20 +130,20 @@ header p {
     background-color: var(--accent-hover); 
 }
 
-/* Menü İçindeki Arama Kutusu Konteyneri */
+/* Menü İçine Alınan ve Sağa Yaslanan Arama Çubuğu */
 .search-container {
     position: absolute;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
     width: 100%;
-    max-width: 220px; /* Menü sütun genişliğine uygun ideal boyut */
+    max-width: 220px;
     z-index: 10;
 }
 
 #blog-search {
     width: 100%;
-    padding: 6px 12px; /* Menü dikey yüksekliğine uyum sağlaması için optimize edildi */
+    padding: 7px 14px;
     background-color: #ffffff;
     border: 1px solid var(--border-light);
     color: var(--text-main);
@@ -328,7 +329,8 @@ footer {
     
     .main-nav {
         flex-direction: column;
-        padding: 10px 0;
+        position: static; /* Mobilde mutlak konumlandırmayı devredışı bırakıyoruz */
+        padding: 0;
     }
     
     .main-nav ul { 
@@ -342,11 +344,11 @@ footer {
         text-align: center; 
     }
     
-    /* Mobil cihazlarda arama çubuğu dikey menünün altına düzgünce ortalanır */
+    /* Mobilde dikey menünün en altına temiz bir şekilde yerleşir */
     .search-container {
-        position: static;
+        position: static; 
         transform: none;
-        margin: 15px auto 5px auto;
+        margin: 15px auto;
         max-width: 90%;
     }
     
