@@ -73,7 +73,7 @@ a:hover {
 header {
     background-color: var(--header-bg); 
     color: var(--header-text); 
-    padding: 25px 0 0 0; 
+    padding: 35px 0 0 0; /* Arama çubuğu alta geçtiği için üst boşluğu dengeledik */
     text-align: center;
     border-bottom: 2px solid var(--border-dark);
     position: relative; 
@@ -96,31 +96,34 @@ header p {
     letter-spacing: 2px;
 }
 
+/* Arama çubuğu için yeni şık ve ortalanmış konum */
 .search-container {
-    position: absolute;
-    top: 25px;
-    right: 20px;
+    position: relative;
+    margin: 0 auto 30px auto; /* Yatayda ortalar, header altında zarif bir boşluk bırakır */
     width: 100%;
-    max-width: 220px;
+    max-width: 320px; /* Formu biraz daha genişleterek ferahlattık */
     z-index: 10;
 }
 
 #blog-search {
     width: 100%;
-    padding: 8px 15px;
+    padding: 10px 22px; /* Daha rahat iç boşluk */
     background-color: #ffffff;
     border: 1px solid var(--border-light);
     color: var(--text-main);
-    border-radius: 4px;
+    border-radius: 50px; /* Modern ve zarif hap (pill) görünümü */
     font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    text-align: center; /* İçindeki yazıyı ortaladık */
     transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Hafif derinlik hissi */
 }
 
 #blog-search:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
+    transform: translateY(-1px); /* Tıklayınca çok hafif yukarı kalkma efekti */
 }
 #blog-search::placeholder { color: var(--header-muted); }
 
@@ -318,7 +321,6 @@ footer {
     }
     
     .search-container {
-        position: static; 
         margin: 0 auto 20px auto;
         max-width: 90%;
     }
@@ -357,7 +359,7 @@ footer {
     .main-nav .dropdown a {
         text-align: center;
         padding: 10px 15px;
-        background-color: #151d2b; /* Menü içi daha koyu ton */
+        background-color: #151d2b; 
     }
     
     .post-card { 
