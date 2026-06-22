@@ -4,7 +4,7 @@
 :root {
     /* Genel Gövde (Açık Tema) */
     --bg-main: #f8fafc;
-    --text-main: #334155;
+    --text-main: #000000;
     
     /* Vurgu Renkleri (Profesyonel Mavi) */
     --accent-color: #2563eb; 
