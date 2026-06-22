@@ -73,57 +73,58 @@ a:hover {
 header {
     background-color: var(--header-bg); 
     color: var(--header-text); 
-    padding: 35px 0 0 0; /* Arama çubuğu alta geçtiği için üst boşluğu dengeledik */
-    text-align: center;
+    padding: 20px 40px; 
     border-bottom: 2px solid var(--border-dark);
-    position: relative; 
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 5px 20px;
 }
 
 header h1 { 
-    font-size: 2.2rem; 
-    letter-spacing: 8px; 
+    grid-column: 1;
+    grid-row: 1;
+    font-size: 1.8rem; 
+    letter-spacing: 6px; 
     text-transform: uppercase; 
     font-weight: 300; 
     color: var(--header-text); 
-    margin-bottom: 5px;
+    text-align: left;
 }
 
 header p { 
+    grid-column: 1;
+    grid-row: 2;
     color: var(--header-muted); 
-    font-size: 0.85rem; 
-    margin-bottom: 20px; 
+    font-size: 0.8rem; 
     text-transform: uppercase; 
     letter-spacing: 2px;
+    text-align: left;
 }
 
-/* Arama çubuğu için yeni şık ve ortalanmış konum */
 .search-container {
-    position: relative;
-    margin: 0 auto 30px auto; /* Yatayda ortalar, header altında zarif bir boşluk bırakır */
-    width: 100%;
-    max-width: 320px; /* Formu biraz daha genişleterek ferahlattık */
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 240px;
     z-index: 10;
 }
 
 #blog-search {
     width: 100%;
-    padding: 10px 22px; /* Daha rahat iç boşluk */
+    padding: 8px 15px;
     background-color: #ffffff;
     border: 1px solid var(--border-light);
     color: var(--text-main);
-    border-radius: 50px; /* Modern ve zarif hap (pill) görünümü */
+    border-radius: 4px;
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    text-align: center; /* İçindeki yazıyı ortaladık */
+    font-size: 0.85rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Hafif derinlik hissi */
 }
 
 #blog-search:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
-    transform: translateY(-1px); /* Tıklayınca çok hafif yukarı kalkma efekti */
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.2);
 }
 #blog-search::placeholder { color: var(--header-muted); }
 
@@ -317,17 +318,29 @@ footer {
 /* --- 8. MOBİL UYUMLULUK (MEDIA QUERY) --- */
 @media (max-width: 768px) {
     header { 
-        padding-top: 30px; 
-    }
-    
-    .search-container {
-        margin: 0 auto 20px auto;
-        max-width: 90%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 25px 20px; 
     }
     
     header h1 { 
+        text-align: center;
         font-size: 1.8rem; 
         letter-spacing: 4px; 
+        margin-bottom: 5px;
+    }
+
+    header p {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .search-container {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 90%;
     }
     
     .main-nav ul { 
