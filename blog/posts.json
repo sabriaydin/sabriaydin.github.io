@@ -1,38 +1,6 @@
 [
   {
-    "id": 1,
-    "title": "İlk Yazımız",
-    "date": "11 Haziran 2026",
-    "url": "/blog/ilk-yazi.html",
-    "summary": "Blogumuzun ilk yazısına hoş geldiniz. Her şey sıfırdan ve kusursuz kuruldu.",
-    "category": "Genel"
-  },
-  {
     "id": 2,
-    "title": "Programlamaya Giriş",
-    "date": "10 Haziran 2026",
-    "url": "/blog/programlama.html",
-    "summary": "Kodlamaya başlarken dikkat edilmesi gereken temel prensipler.",
-    "category": "Programlama"
-  },
-  {
-    "id": 3,
-    "title": "Web Tasarım Trendleri",
-    "date": "09 Haziran 2026",
-    "url": "/blog/tasarim.html",
-    "summary": "Koyu tema (Dark mode) ve minimal tasarımın yükselişi.",
-    "category": "Tasarim"
-  },
-  {
-    "id": 4,
-    "title": "Sistemi Kuruyoruz",
-    "date": "08 Haziran 2026",
-    "url": "#",
-    "summary": "Neocities üzerinde JSON tabanlı blog yapısının inşası.",
-    "category": "Teknoloji"
-  },
-  {
-    "id": 5,
     "title": "Beşinci Yazı",
     "date": "07 Haziran 2026",
     "url": "#",
@@ -40,11 +8,11 @@
     "category": "Genel"
   },
   {
-    "id": 6,
-    "title": "Altıncı Yazı (2. Sayfa)",
-    "date": "06 Haziran 2026",
+    "id": 1,
+    "title": "Neden Chrome kullanmamalıyız?",
+    "date": "25 Haziran 2026",
     "url": "#",
-    "summary": "İşte sayfalama (pagination) özelliği burada devreye giriyor! İleri butonuna basınca burayı göreceksin.",
+    "summary": "Geçmişin alışkanlıklarından vazgeçme zamanı geldi de geçiyor bile. Kötü alışkanlıklarını bırakmaya hazırmısın?",
     "category": "Programlama"
   }
 ]
