@@ -17,11 +17,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-        const hRes = await fetch(`./header.html?v=${cb}`);
+        const hRes = await fetch(`/blog/header.html?v=${cb}`);
         if (!hRes.ok) throw new Error("header.html bulunamadı");
         document.getElementById('header-placeholder').innerHTML = await hRes.text();
         
-        const fRes = await fetch(`./footer.html?v=${cb}`);
+        const fRes = await fetch(`/blog/footer.html?v=${cb}`);
         if (!fRes.ok) throw new Error("footer.html bulunamadı");
         document.getElementById('footer-placeholder').innerHTML = await fRes.text();
     } catch (err) { 
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById('blog-container');
     if (container) {
         try {
-            const pRes = await fetch(`./posts.json?v=${cb}`);
+            const pRes = await fetch(`/blog/posts.json?v=${cb}`);
             if (!pRes.ok) throw new Error("posts.json dosyası bulunamadı veya okunamadı.");
             const allPosts = await pRes.json();
             
