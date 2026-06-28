@@ -3,7 +3,7 @@
 
 :root {
     /* Genel Gövde */
-    --bg-main: #5b5b5b;
+    --bg-main: #444444;
     --text-main: #e0e0e0;
     
     /* Vurgu Renkleri */
@@ -19,7 +19,7 @@
     --header-bg: #050505; 
     --header-text: #ffffff;
     --header-muted: #bbbbbb;
-    --dark-bg: #212121; 
+    --dark-bg: #222222; 
     
     /* Kenarlıklar */
     --border-light: #dddddd; 
