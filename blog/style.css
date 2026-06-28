@@ -35,7 +35,10 @@
 
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-main);
+    /* Göz yormayan mat gri arka plan ve noktalı desen eklendi */
+    background-color: #e8ecef; 
+    background-image: radial-gradient(#c8d0d8 2px, transparent 2px);
+    background-size: 25px 25px;
     color: var(--text-main);
     line-height: 1.6;
     display: flex;
