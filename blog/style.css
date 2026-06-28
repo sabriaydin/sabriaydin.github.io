@@ -3,7 +3,7 @@
 
 :root {
     /* Genel Gövde (Açık Tema) */
-    --bg-main: #6a7793;
+    --bg-main: #223560;
     --text-main: #000000;
     
     /* Vurgu Renkleri (Profesyonel Mavi) */
@@ -17,7 +17,7 @@
     
     /* Header, Nav & Footer (Koyu/Antrasit Tema) */
     --header-bg: #0f172a; 
-    --header-text: #f8fafc;
+    --header-text: #ffffff;
     --header-muted: #94a3b8;
     --dark-bg: #1e293b; 
     
