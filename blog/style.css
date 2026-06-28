@@ -3,7 +3,7 @@
 
 :root {
     /* Genel Gövde (Açık Tema) */
-    --bg-main: #223560;
+    --bg-main: #ffffff;
     --text-main: #000000;
     
     /* Vurgu Renkleri (Profesyonel Mavi) */
@@ -35,9 +35,9 @@
 
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Göz yormayan mat gri arka plan ve noktalı desen eklendi */
-    background-color: #e8ecef; 
-    background-image: radial-gradient(#c8d0d8 2px, transparent 2px);
+    /* Göz yormayan mat mavi-gri arka plan ve koyu noktalı desen eklendi */
+    background-color: #94a3b8; 
+    background-image: radial-gradient(#64748b 2px, transparent 2px);
     background-size: 25px 25px;
     color: var(--text-main);
     line-height: 1.6;
