@@ -104,7 +104,7 @@ header p {
     order: 2; 
 }
 
-/* Yan Yana Yaslı ve Zarif Arama Kutusu Yapısı */
+/* Yan Yana Yaslı Arama Kutusu Yapısı */
 .search-item {
     display: flex;
     align-items: center;
@@ -117,11 +117,13 @@ header p {
     position: relative;
     display: flex;
     align-items: center;
+    margin: 0;
+    padding: 0;
 }
 
 #blog-search {
-    width: 36px; /* Daha zarif olması için küçültüldü */
-    height: 36px; /* Daha zarif olması için küçültüldü */
+    width: 40px; /* Kapalıyken orijinal zarif daire (40x40) */
+    height: 40px; 
     padding: 0;
     margin: 0; 
     display: block; 
@@ -144,25 +146,25 @@ header p {
 /* Büyüteç Butonu */
 .search-icon {
     position: absolute;
-    right: 9px;
+    right: 11px; /* 40px'in tam merkezi */
     top: 50%; 
     transform: translateY(-50%); 
     color: var(--header-text);
     background: transparent;
     border: none;
     cursor: pointer;
-    /* İkon buton olduğunda tıklamanın inputa değil butona gitmesine izin veriyoruz */
     transition: all 0.4s ease;
     display: flex;
     align-items: center;
     outline: none;
 }
 
-/* Üzerine gelindiğinde veya tıklandığında genişleme */
+/* KUTU AÇILDIĞINDAKİ DURUM (Textbox yüksekliği burada azaltılıyor!) */
 .search-container:hover #blog-search,
 #blog-search:focus,
-#blog-search:valid { /* İçinde metin varken açık kalmasını sağlar */
+#blog-search:valid { 
     width: 240px;
+    height: 34px; /* Textbox daha ince ve menüyle kusursuz hizada */
     background-color: #ffffff;
     border: 1px solid var(--border-light); 
     outline: none; 
@@ -175,6 +177,7 @@ header p {
 #blog-search:focus + .search-icon,
 #blog-search:valid + .search-icon {
     color: #64748b; 
+    right: 13px; /* Kutu daraldığı için ikonu hafif merkezledik */
 }
 
 .search-container:hover #blog-search::placeholder,
@@ -442,12 +445,18 @@ footer {
 
     #blog-search {
         width: 100%;
-        height: 45px;
+        height: 42px; /* Mobilde parmakla rahat tıklanması için sabitlendi */
         background-color: #ffffff;
         color: #000000;
         padding: 10px 45px 10px 18px;
         cursor: text;
         border-radius: 50px;
+    }
+    
+    .search-container:hover #blog-search,
+    #blog-search:focus,
+    #blog-search:valid {
+        height: 42px; /* Mobilde incelmesini istemeyiz */
     }
 
     #blog-search::placeholder {
