@@ -125,7 +125,7 @@ header p {
     padding: 0;
     background-color: transparent;
     border: 1px solid transparent;
-    outline: none; /* Tarayıcının kaba mavi/siyah fokus çizgisini engeller */
+    outline: none;
     color: transparent; 
     border-radius: 50px; 
     font-family: 'Inter', sans-serif;
@@ -154,7 +154,7 @@ header p {
 #blog-search:focus {
     width: 240px;
     background-color: #ffffff;
-    border: 1px solid var(--border-light); /* Sadece ince, zarif bir gri çizgi kalır */
+    border: 1px solid var(--border-light); 
     outline: none; 
     color: #000000;
     padding: 0 45px 0 15px; 
@@ -184,6 +184,7 @@ header p {
 .main-nav ul { 
     display: flex; 
     list-style: none;
+    align-items: center; /* Tüm liste elemanlarını (butonlar ve arama) dikeyde hizalar */
 }
 
 .main-nav li { 
@@ -191,17 +192,18 @@ header p {
 }
 
 .main-nav a {
-    display: block; 
-    padding: 15px 25px; 
+    display: flex; 
+    align-items: center; /* Metni menü butonu içinde dikey ortalar */
+    padding: 16px 25px; /* Dikey denge için hafif ince ayar */
     color: var(--header-text) !important;
     font-weight: 500; 
     text-transform: uppercase; 
     font-size: 0.8rem; 
     letter-spacing: 1.5px;
+    line-height: 1; /* Font taban boşluğunu yokederek simetriği kusursuzlaştırır */
     transition: background-color 0.3s ease;
 }
 
-/* Ana menü elemanlarının hover rengi açılır menü ile eşitlendi */
 .main-nav a:hover { 
     background-color: #475569; 
     color: #ffffff !important;
@@ -244,7 +246,8 @@ header p {
 .main-nav .dropdown a {
     padding: 12px 20px; 
     text-align: left;
-    display: block;
+    display: block; /* Alt menü elemanlarının doğal blok akışında kalması daha sağlıklı */
+    line-height: 1.6;
 }
 
 .main-nav .dropdown a:hover {
@@ -383,13 +386,14 @@ footer {
     .main-nav ul { 
         flex-direction: column; 
         width: 100%;
-        align-items: stretch;
+        align-items: stretch; /* Mobilde tam genişlik butonlar için stretch devam etmeli */
     }
     
     .main-nav a { 
         padding: 12px 15px; 
         border-bottom: 1px solid var(--border-dark); 
         text-align: center; 
+        justify-content: center; /* Mobilde yazıyı ortaya almak için */
     }
     
     .main-nav .dropdown {
