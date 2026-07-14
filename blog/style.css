@@ -75,14 +75,13 @@ a:hover {
 header {
     background-color: var(--header-bg); 
     color: var(--header-text); 
-    padding: 40px 0; /* Simetri için üst ve alt boşluklar eşitlendi */
+    padding: 40px 0 0 0; /* Alt boşluk menünün tam oturması için sıfırlandı */
     border-bottom: 2px solid var(--border-dark);
-    position: relative; /* Arama çubuğunu bağımsız hizalamak için eklendi */
+    position: relative; /* Arama çubuğunu bağımsız hizalamak için gerekli */
     
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
 }
 
@@ -100,7 +99,7 @@ header h1 {
 header p { 
     color: var(--header-muted); 
     font-size: 0.85rem; 
-    margin-bottom: 0; /* Simetri için alt boşluk sıfırlandı */
+    margin-bottom: 40px; /* Arama kutusu bağımsız olunca kaybolan yüksekliği telafi eder, menüyü aşağı iter */
     text-transform: uppercase; 
     letter-spacing: 2px;
     padding: 0 20px;
@@ -110,8 +109,7 @@ header p {
 .search-container {
     position: absolute;
     right: 30px; /* Sağa yaslandı */
-    top: 50%;
-    transform: translateY(-50%); /* Alttan ve üstten tam ortaya hizalandı */
+    top: 55px; /* Başlık ve açıklama yazısının toplam yüksekliğine göre tam dikey ortalandı */
     width: 100%;
     max-width: 260px; /* Sağda daha zarif durması için genişlik ayarlandı */
     padding: 0;
@@ -333,16 +331,20 @@ footer {
 @media (max-width: 768px) {
     header { 
         padding-top: 35px; 
-        padding-bottom: 25px; /* Mobilde alt kısmı dengelemek için eklendi */
     }
     
+    header p {
+        margin-bottom: 25px; /* Mobilde arama kutusu sıraya gireceği için boşluk azaltıldı */
+    }
+
     .search-container {
-        position: relative; /* Mobilde bağımsız hizalamayı iptal ediyoruz */
+        position: relative; /* Mobilde bağımsız hizalama iptal edildi */
         right: auto;
         top: auto;
         transform: none;
         max-width: 90%;
-        margin: 20px auto 0 auto; /* Mobilde başlıkların altına simetrik yerleşir */
+        margin: 0 auto 25px auto; /* Başlıkların altına simetrik yerleşmesi sağlandı */
+        order: 3; /* Mobilde flex sıralamasına tekrar dahil ediliyor */
     }
     
     header h1 { 
