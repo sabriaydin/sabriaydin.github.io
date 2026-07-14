@@ -200,7 +200,7 @@ header p {
 }
 
 .main-nav a:hover { 
-    background-color: var(--accent-hover); 
+    background-color: var(--dark-bg); 
 }
 
 /* Dropdown Ana Gövde */
