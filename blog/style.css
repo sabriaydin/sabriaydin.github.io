@@ -109,7 +109,7 @@ header p {
 .search-container {
     position: absolute;
     right: 30px; /* Sağa yaslandı */
-    top: 55px; /* Başlık ve açıklama yazısının toplam yüksekliğine göre tam dikey ortalandı */
+    top: 75px; /* Başlık ve açıklama yazısının toplam yüksekliğine göre tam dikey ortalandı */
     width: 100%;
     max-width: 260px; /* Sağda daha zarif durması için genişlik ayarlandı */
     padding: 0;
