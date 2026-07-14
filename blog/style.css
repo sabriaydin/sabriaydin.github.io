@@ -110,7 +110,7 @@ header p {
     align-items: center;
     justify-content: center;
     padding-left: 10px;
-    padding-right: 15px; /* Menünün en sağında hafif boşluk */
+    padding-right: 15px;
 }
 
 .search-container {
@@ -120,13 +120,14 @@ header p {
 }
 
 #blog-search {
-    width: 40px; /* Zarif bir daire olması için en ve boy eşit */
+    width: 40px; 
     height: 40px;
     padding: 0;
     background-color: transparent;
     border: 1px solid transparent;
+    outline: none; /* Tarayıcının kaba mavi/siyah fokus çizgisini engeller */
     color: transparent; 
-    border-radius: 50px; /* Tam yuvarlak köşeler */
+    border-radius: 50px; 
     font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
     transition: all 0.4s ease;
@@ -140,7 +141,7 @@ header p {
 
 .search-icon {
     position: absolute;
-    right: 11px; /* İkonu 40px'lik dairenin tam ortasına hizalar */
+    right: 11px; 
     color: var(--header-text);
     pointer-events: none; 
     transition: all 0.4s ease;
@@ -148,12 +149,13 @@ header p {
     align-items: center;
 }
 
-/* Üzerine gelindiğinde zarifçe genişleme efekti */
+/* Üzerine gelindiğinde veya tıklandığında */
 .search-container:hover #blog-search,
 #blog-search:focus {
     width: 240px;
     background-color: #ffffff;
-    border-color: var(--border-light);
+    border: 1px solid var(--border-light); /* Sadece ince, zarif bir gri çizgi kalır */
+    outline: none; 
     color: #000000;
     padding: 0 45px 0 15px; 
     cursor: text;
@@ -199,8 +201,10 @@ header p {
     transition: background-color 0.3s ease;
 }
 
+/* Ana menü elemanlarının hover rengi açılır menü ile eşitlendi */
 .main-nav a:hover { 
-    background-color: var(--dark-bg); 
+    background-color: #475569; 
+    color: #ffffff !important;
 }
 
 /* Dropdown Ana Gövde */
