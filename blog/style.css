@@ -123,6 +123,8 @@ header p {
     width: 40px; 
     height: 40px;
     padding: 0;
+    margin: 0; /* Tarayıcının varsayılan dış boşluklarını sıfırlar */
+    display: block; /* Kesin yükseklik hesaplaması için blok elemana çevirir */
     background-color: transparent;
     border: 1px solid transparent;
     outline: none;
@@ -141,7 +143,9 @@ header p {
 
 .search-icon {
     position: absolute;
-    right: 11px; 
+    right: 11px;
+    top: 50%; /* Kutuya göre kesinlikle yüzde 50 ortalar */
+    transform: translateY(-50%); /* Kendi yüksekliğinin yarısı kadar yukarı çekip kusursuz hizalar */
     color: var(--header-text);
     pointer-events: none; 
     transition: all 0.4s ease;
@@ -200,10 +204,11 @@ header p {
     text-transform: uppercase; 
     font-size: 0.8rem; 
     letter-spacing: 1.5px;
-    line-height: 1; /* Font taban boşluğunu yokederek simetriği kusursuzlaştırır */
+    line-height: 1; /* Font taban boşluğunu yokederek simetriyi kusursuzlaştırır */
     transition: background-color 0.3s ease;
 }
 
+/* Ana menü elemanlarının hover rengi açılır menü ile eşitlendi */
 .main-nav a:hover { 
     background-color: #475569; 
     color: #ffffff !important;
@@ -386,7 +391,7 @@ footer {
     .main-nav ul { 
         flex-direction: column; 
         width: 100%;
-        align-items: stretch; /* Mobilde tam genişlik butonlar için stretch devam etmeli */
+        align-items: stretch;
     }
     
     .main-nav a { 
