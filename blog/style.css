@@ -10,12 +10,12 @@
     --accent-color: #2563eb; 
     --accent-hover: #1d4ed8; 
     
-    /* Post Kartları (İstenilen Saf Beyaz Renk) */
+    /* Post Kartları */
     --card-bg: #ffffff; 
     --card-text: #1e293b; 
     --card-muted: #64748b; 
     
-    /* Header, Nav & Footer (Dengeli Koyu Tema - Tam siyah yerine modern lacivert-gri) */
+    /* Header, Nav & Footer */
     --header-bg: #1e293b; 
     --header-text: #f8fafc;
     --header-muted: #94a3b8;
@@ -36,7 +36,6 @@
 body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-main);
-    /* Göz yormayan, açık-orta zemin üzerine hafif koyu noktalı zarif desen */
     background-image: radial-gradient(#cbd5e1 2.5px, transparent 2.5px);
     background-size: 32px 32px;
     color: var(--text-main);
@@ -65,7 +64,7 @@ a:hover {
     color: #ffffff; 
 }
 
-/* Kaydırma Çubuğu (Yeni Zeminle Uyumlu) */
+/* Kaydırma Çubuğu */
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-main); }
 ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
@@ -105,65 +104,67 @@ header p {
     order: 2; 
 }
 
-/* Açılır Arama Çubuğu */
+/* Yan Yana Yaslı Arama Kutusu Yapısı */
+.search-item {
+    display: flex;
+    align-items: center;
+}
+
 .search-container {
-    position: absolute;
-    right: 30px; 
+    position: relative;
     display: flex;
     align-items: center;
     height: 100%;
-    z-index: 10;
 }
 
 #blog-search {
-    width: 45px; /* Sadece ikon boyutu */
-    height: 45px;
-    padding: 10px;
+    width: 48px; /* Kapalıyken menü elemanı genişliğinde bir buton gibi davranır */
+    height: 100%;
+    min-height: 48px; /* Menü linklerinin padding yüksekliğiyle eşitlemek için */
+    padding: 12px;
     background-color: transparent;
-    border: 1px solid transparent;
+    border: none;
     color: transparent; 
-    border-radius: 50px; 
     font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    transition: all 0.4s ease;
+    font-size: 0.85rem;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
 }
 
 #blog-search::placeholder { 
     color: transparent; 
-    transition: color 0.4s ease;
+    transition: color 0.3s ease;
 }
 
 .search-icon {
     position: absolute;
-    right: 12px;
+    right: 15px; /* Menüdeki ortalamaya denk gelecek şekilde ayarlandı */
     color: var(--header-text);
-    pointer-events: none; /* Mouse tıklamalarının direkt inputa geçmesi için */
-    transition: color 0.4s ease;
+    pointer-events: none; 
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
 }
 
-/* Hover veya odaklanma durumunda genişleme efekti */
+/* Üzerine gelindiğinde veya tıklandığında sola doğru genişleme efekti */
 .search-container:hover #blog-search,
 #blog-search:focus {
-    width: 260px;
+    width: 240px;
     background-color: #ffffff;
-    border-color: var(--border-light);
     color: #000000;
-    padding: 10px 45px 10px 18px; /* Sağda ikona yer açmak için */
+    padding: 12px 40px 12px 16px; 
     cursor: text;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 .search-container:hover .search-icon,
 #blog-search:focus + .search-icon {
-    color: #888888; /* Kutu beyaz olunca ikon griye döner */
+    color: #64748b; 
+    right: 15px;
 }
 
 .search-container:hover #blog-search::placeholder,
 #blog-search:focus::placeholder {
-    color: #888888;
+    color: #94a3b8;
 }
 
 /* --- 4. NAVİGASYON & AÇILIR MENÜ (DROPDOWN) --- */
@@ -171,15 +172,15 @@ header p {
     background-color: var(--dark-bg); 
     width: 100%; 
     order: 4; 
-    position: relative; /* Arama kutusunu hizalamak için gerekli */
     display: flex;
-    justify-content: center; /* Menüyü ortalar */
+    justify-content: center; 
     align-items: center;
 }
 
 .main-nav ul { 
     display: flex; 
     list-style: none;
+    align-items: stretch; /* Elemanların ve arama kutusunun aynı yükseklikte kalması için */
 }
 
 .main-nav li { 
@@ -374,14 +375,10 @@ footer {
         margin-bottom: 25px; 
     }
 
-    .main-nav {
-        flex-direction: column;
-        padding-bottom: 20px; /* Arama kutusu için boşluk */
-    }
-
     .main-nav ul { 
         flex-direction: column; 
         width: 100%;
+        align-items: stretch;
     }
     
     .main-nav a { 
@@ -412,31 +409,33 @@ footer {
         background-color: #1e293b; 
     }
 
-    /* Mobilde arama kutusunu menünün altına, daimi açık konumlandırıyoruz */
+    /* Mobilde arama alanı listeden bağımsız alt kısma tam genişlikte açılır */
+    .search-item {
+        display: block;
+        width: 100%;
+    }
+
     .search-container {
-        position: relative;
-        right: auto;
         width: 90%;
-        margin: 20px auto 0 auto; 
-        height: auto;
-        justify-content: center;
+        margin: 15px auto 5px auto; 
     }
 
     #blog-search {
         width: 100%;
         background-color: #ffffff;
-        border-color: var(--border-light);
         color: #000000;
         padding: 10px 45px 10px 18px;
         cursor: text;
+        border-radius: 4px;
     }
 
     #blog-search::placeholder {
-        color: #888888;
+        color: #94a3b8;
     }
 
     .search-icon {
-        color: #888888;
+        color: #64748b;
+        right: 15px;
     }
     
     .post-card { 
