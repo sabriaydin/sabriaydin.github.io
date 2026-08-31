@@ -10,7 +10,7 @@
     <meta name="robots" content="index, follow">
     <link rel="icon" href="paroladefteri-favicon.png" type="image/png">
     <link rel="icon" href="paroladefteri-favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -30,10 +30,6 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
         body {
             background-color: var(--bg-color);
@@ -42,7 +38,6 @@
             background-image: 
                 radial-gradient(circle at 15% 40%, rgba(0, 95, 115, 0.15), transparent 40%),
                 radial-gradient(circle at 85% 20%, rgba(0, 168, 204, 0.1), transparent 40%);
-            min-width: 1280px; 
         }
         
         /* HEADER - SABİT DEĞİL VE DAHA AÇIK RENK */
@@ -282,6 +277,25 @@
         @keyframes shine {
             to { background-position: 200% center; }
         }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem 5%;
+            }
+            .hero {
+                padding: 30px 15px;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            .features {
+                padding: 2.5rem 5%;
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -299,20 +313,20 @@
         <p>AES-GCM 256-bit şifreleme teknolojisiyle donatılmış, ekran izlenmesini ve veri hırsızlığını donanımsal düzeyde engelleyen yeni nesil şifre yöneticisi.</p>
         
         <div class="trust-badges">
-            <div class="badge">🚫 İnternet Bağlantısı Gerektirmez</div>
-            <div class="badge">💎 Tamamen Ücretsiz</div>
-            <div class="badge">&#9749; Bağımsız Yapımcı (Indie)</div>
+            <div class="badge"><span aria-hidden="true">🚫</span> İnternet Bağlantısı Gerektirmez</div>
+            <div class="badge"><span aria-hidden="true">💎</span> Tamamen Ücretsiz</div>
+            <div class="badge"><span aria-hidden="true">&#9749;</span> Bağımsız Yapımcı (Indie)</div>
         </div>
 
         <div class="action-group">
-            <a class="download-btn" href="https://sabriaydin.github.io/projeler/parola-defteri/ParolaDefteri-Sürüm20260825.rar">Windows için İndir (Sürüm: 2026.08.25)</a>
+            <a class="download-btn" href="https://sabriaydin.github.io/projeler/parola-defteri/ParolaDefteri-Sürüm20260825.rar" download>Windows için İndir (Sürüm: 2026.08.25)</a>
             
             <div class="secondary-actions">
-                <a class="outline-btn vt" href="https://www.virustotal.com/gui/file/64266df56bd385a5cae4cf541d6954a785cd33c9d67e85c3ee3aa7697aa3b918/detection" target="_blank">
-                    <span class="icon">🛡&#65039;</span> VirusTotal Raporunu İncele
+                <a class="outline-btn vt" href="https://www.virustotal.com/gui/file/64266df56bd385a5cae4cf541d6954a785cd33c9d67e85c3ee3aa7697aa3b918/detection" target="_blank" rel="noopener noreferrer">
+                    <span class="icon" aria-hidden="true">🛡&#65039;</span> VirusTotal Raporunu İncele
                 </a>
                 <a class="outline-btn mail" href="https://forms.gle/vuh4wc1UifEvLbHK6">
-                    <span class="icon">&#9993;&#65039;</span> Bir sorun mu var? Bize bildirin.
+                    <span class="icon" aria-hidden="true">&#9993;&#65039;</span> Bir sorun mu var? Bize bildirin.
                 </a>
             </div>
         </div>
@@ -320,55 +334,55 @@
 
     <section class="features">
         <div class="feature-card">
-            <div class="feature-icon">&#9729;&#65039;🚫</div>
+            <div class="feature-icon" aria-hidden="true">&#9729;&#65039;🚫</div>
             <h3>Sıfır Bulut İhtiyacı</h3>
             <p>Verileriniz asla internete yüklenmez. Sunucu çökmesi, veri sızıntısı veya hacklenme riski sıfırdır. Tüm şifreleriniz sadece sizin fiziksel makinenizde ve sizin kontrolünüzde kalır.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">🛡&#65039;</div>
+            <div class="feature-icon" aria-hidden="true">🛡&#65039;</div>
             <h3>Kırılamaz Şifreleme</h3>
             <p>Verileriniz SHA-256 ve SHA-512 algoritmalarıyla harmanlanmış AES-GCM ile korunur. Ana parolanız olmadan veriye erişmek imkansızdır.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">👁&#65039;&#8205;🗨&#65039;</div>
+            <div class="feature-icon" aria-hidden="true">👁&#65039;&#8205;🗨&#65039;</div>
             <h3>Ekran Görüntüsü Koruması</h3>
             <p>Zararlı yazılımların veya ekran kaydedicilerin şifrelerinizi çalmasını önlemek için Windows API kullanılarak ekranın izlenmesi tamamen engellenir.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">💸</div>
+            <div class="feature-icon" aria-hidden="true">💸</div>
             <h3>Sınırsız ve Ücretsiz</h3>
             <p>Güvenlik bir lüks değil, haktır. Aylık abonelikler, saçma sapan kısıtlamalar, reklamlar veya premium paketler yok. Parola Defteri ömür boyu ücretsizdir.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">&#9201;&#65039;</div>
+            <div class="feature-icon" aria-hidden="true">&#9201;&#65039;</div>
             <h3>Akıllı Pano &amp; Kilit</h3>
             <p>Kopyaladığınız şifreler işiniz bittiğinde panodan otomatik silinir. Bilgisayar başından ayrıldığınızda uygulama kendini kilitler ve RAM belleği güvenle temizler.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">🧑&#8205;💻</div>
+            <div class="feature-icon" aria-hidden="true">🧑&#8205;💻</div>
             <h3>Bağımsız Ruh</h3>
             <p>Arkasında verilerinizi satmak isteyen dev teknoloji şirketleri yok. Tamamen şeffaflığa ve kullanıcı gizliliğine odaklanmış bir bağımsız geliştirici projesi.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">🎨</div>
+            <div class="feature-icon" aria-hidden="true">🎨</div>
             <h3>Gelişmiş Kategoriler</h3>
             <p>Onlarca hazır kategori ile hesaplarınızı kendi renk kodlarınızla filtreleyin ve aradığınızı anında bulun.</p>
         </div>
         
         <div class="feature-card">
-            <div class="feature-icon">💥</div>
+            <div class="feature-icon" aria-hidden="true">💥</div>
             <h3>İmha Protokolü</h3>
             <p>İstediğiniz taktirde "Verileri İmha Et" protokolü ile tüm veritabanınızı kalıcı, şifreli ve bir daha kurtarılamaz şekilde silebilirsiniz.</p>
         </div>
 
         <div class="feature-card">
-            <div class="feature-icon">🔄</div>
+            <div class="feature-icon" aria-hidden="true">🔄</div>
             <h3>Güvenli Yedekleme</h3>
             <p>Veritabanınızı tamamen şifrelenmiş olarak dışa aktarabilir, yeni bilgisayarınıza fiziki bellek ile güvenle taşıyıp kolayca içe aktarabilirsiniz.</p>
         </div>
