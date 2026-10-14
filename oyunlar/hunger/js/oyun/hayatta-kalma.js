@@ -32,7 +32,7 @@ const GRAV=18,JUMP=7;
 function vertStep(dt){
  const gy=Scene.groundY(G.px,G.py);
  if(G.pz===undefined){G.pz=gy;G.vz=0;G.air=false}
- if(!G.air&&inp.keys.Space&&ui.state==='play'&&G.stam>=9){G.vz=JUMP;G.air=true;HG.useStam(9);HG.snd('jump')}
+ if(!G.air&&(HG.keyDown('jump')||inp.touchJump)&&ui.state==='play'&&G.stam>=9){G.vz=JUMP;G.air=true;HG.useStam(9);HG.snd('jump')}
  if(G.air){
   G.vz-=GRAV*dt;G.pz+=G.vz*dt;
   if(G.pz<=gy&&G.vz<=0){
@@ -44,7 +44,7 @@ function vertStep(dt){
     G.pvx*=.55;G.pvy*=.55;                                 /* inişte hız kesilir */
     if(imp>10.2&&!wet){                                      /* yaklaşık 3 m ve üzeri düşüşte hasar */
      HG.hurt(Math.round((imp-10.2)*7),'Yüksekten düşerek öldün.');
-     HG.useStam(25);
+     HG.useStam(25);if(G.hp>0)HG.flag('fell');
     }
    }
    G.vz=0;
@@ -56,8 +56,9 @@ function vertStep(dt){
 /* Hareket: ivmelenme ve atalet, eğime göre hız, havada sınırlı kontrol, duvara sürtünme */
 function moveStep(dt){
  const k=inp.keys,j=inp.joy;
- let ix=(k.KeyD||k.ArrowRight?1:0)-(k.KeyA||k.ArrowLeft?1:0)+j.x;
- let iz=(k.KeyS||k.ArrowDown?1:0)-(k.KeyW||k.ArrowUp?1:0)+j.y;
+ const kd=HG.keyDown;
+ let ix=(kd('right')?1:0)-(kd('left')?1:0)+j.x;
+ let iz=(kd('back')?1:0)-(kd('fwd')?1:0)+j.y;
  const m=Math.hypot(ix,iz);
  G.moving=m>.15;G.sprint=false;
  const sy=Math.sin(look.yaw),cy=Math.cos(look.yaw);
@@ -68,7 +69,7 @@ function moveStep(dt){
  if(G.moving){
   ix/=Math.max(m,1);iz/=Math.max(m,1);
   const vx=ix*cy+iz*sy,vy=-ix*sy+iz*cy;
-  G.sprint=!!(k.ShiftLeft||k.ShiftRight)&&G.hun>5&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
+  G.sprint=kd('sprint')&&G.hun>5&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
   let sp=(G.sprint?5.4:3.4)*(tl===T.SHAL?.55:1)*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
   /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
   const g0=G.pz!==undefined&&!G.air?G.pz:Scene.groundY(G.px,G.py),grade=(Scene.groundY(G.px+vx*.7,G.py+vy*.7)-g0)/.7;

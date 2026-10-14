@@ -14,19 +14,106 @@ function newState(seed){
  HG.progInit();
  return G;
 }
-function saveExists(){try{const s=JSON.parse(localStorage.getItem(SAVE));return !!(s&&s.v===7)}catch(e){return false}}
-function save(){
- if(!G.obj||ui.state==='dead'||ui.state==='menu')return;
- try{
-  let s='';const o=G.obj;for(let i=0;i<o.length;i++)s+=String.fromCharCode(o[i]);
-  localStorage.setItem(SAVE,JSON.stringify({v:7,prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),timers:G.timers,npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),obj:btoa(s)}));
- }catch(e){}
+/* ---- kayıt altyapısı: otomatik kayıt + elle alınan yuvalar + dosya ---- */
+const IDX='hunger-yuvalar',SLOTKEY=id=>'hunger-yuva-'+id,MAXSLOT=10;
+/* Harita nesneleri: art arda tekrarlayan bayt dizileri (değer, uzunluk) olarak sıkıştırılır */
+function encObj(o){
+ let out='',i=0;const n=o.length;
+ while(i<n){const v=o[i];let c=1;while(i+c<n&&o[i+c]===v&&c<65535)c++;out+=String.fromCharCode(v,c&255,c>>8);i+=c}
+ return btoa(out);
 }
+function decObj(s){
+ const b=atob(s.objr!==undefined?s.objr:s.obj),n=HG.W*HG.H;
+ if(s.objr===undefined)return b.length===n?Array.from(b,ch=>ch.charCodeAt(0)):null;
+ const r=new Uint8Array(n);let k=0;
+ for(let i=0;i+2<b.length;i+=3){const v=b.charCodeAt(i),c=b.charCodeAt(i+1)|(b.charCodeAt(i+2)<<8);for(let q=0;q<c&&k<n;q++)r[k++]=v}
+ return k===n?r:null;
+}
+function snapshot(name){
+ const d=HG.dayNo();
+ return {game:'hunger-3d',v:7,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),timers:G.timers,npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
+}
+const validSave=s=>!!(s&&typeof s==='object'&&s.v===7&&typeof s.seed==='number'&&typeof s.px==='number'&&typeof s.py==='number'&&(typeof s.obj==='string'||typeof s.objr==='string')&&Array.isArray(s.inv));
+function readJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function slotIndex(){const x=readJSON(IDX);return Array.isArray(x)?x.filter(e=>e&&typeof e.id==='string'):[]}
+function writeIndex(a){try{localStorage.setItem(IDX,JSON.stringify(a));return true}catch(e){return false}}
+/* Yuva listesi: otomatik kayıt (varsa) ve elle alınanlar, en yeni önce */
+function listSlots(){
+ const out=[],a=readJSON(SAVE);
+ if(validSave(a))out.push({id:'auto',name:'Otomatik kayıt',ts:(a.meta&&a.meta.ts)||0,day:(a.meta&&a.meta.day)||Math.floor((a.clock||0)/HG.DAY)+1,lvl:(a.meta&&a.meta.lvl)||1,auto:true});
+ for(const e of slotIndex())if(localStorage.getItem(SLOTKEY(e.id)))out.push(Object.assign({},e));
+ return out.sort((x,y)=>y.ts-x.ts);
+}
+function readSlot(id){const s=readJSON(id==='auto'?SAVE:SLOTKEY(id));return validSave(s)?s:null}
+function saveExists(){return listSlots().length>0}
+function save(){
+ if(!G.obj||ui.state==='dead'||ui.state==='menu')return false;
+ try{localStorage.setItem(SAVE,JSON.stringify(snapshot('Otomatik kayıt')));return true}catch(e){return false}
+}
+/* Elle kaydet: oyun bir yuvadan başlatıldıysa orayı günceller, yoksa yeni yuva açar */
+function manualSave(quick){
+ if(!G.obj||ui.state==='dead'||ui.state==='menu')return false;
+ let idx=slotIndex(),e=G.slot&&idx.find(x=>x.id===G.slot);
+ if(!e){
+  if(idx.length>=MAXSLOT){HG.toast('Kayıt sınırına ulaşıldı ('+MAXSLOT+'). Ana menüdeki Kayıtlar bölümünden silin.');return false}
+  const id=Date.now().toString(36);let n=1;while(idx.some(x=>x.name==='Kayıt '+n))n++;
+  e={id,name:'Kayıt '+n};idx.push(e);G.slot=id;
+ }
+ const sn=snapshot(e.name);e.ts=sn.meta.ts;e.day=sn.meta.day;e.lvl=sn.meta.lvl;
+ try{localStorage.setItem(SLOTKEY(e.id),JSON.stringify(sn))}catch(x){HG.toast('Kayıt yapılamadı: tarayıcı depolama alanı dolu.');return false}
+ if(!writeIndex(idx)){HG.toast('Kayıt yapılamadı.');return false}
+ save();
+ HG.toast((quick?'Hızlı kayıt: ':'Oyun kaydedildi: ')+e.name);try{HG.snd('ui')}catch(x){}
+ return true;
+}
+function fname(sn,name){return 'hunger-'+String(name||sn.meta.name||'kayit').toLowerCase().replace(/[^a-z0-9ğüşıöç]+/gi,'-').replace(/^-|-$/g,'')+'-gun'+sn.meta.day+'.json'}
+function downloadData(sn,name){
+ try{
+  const b=new Blob([JSON.stringify(sn)],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download=fname(sn,name);document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);return true;
+ }catch(e){HG.toast('Dosya indirilemedi.');return false}
+}
+/* Çalışan oyunu dosya olarak indirir */
+function downloadCurrent(){
+ if(!G.obj||ui.state==='dead'||ui.state==='menu')return false;
+ const idx=slotIndex(),e=G.slot&&idx.find(x=>x.id===G.slot);
+ const ok=downloadData(snapshot(e?e.name:'Kayıt'),e?e.name:'Kayıt');
+ if(ok)HG.toast('Kayıt dosyası indirildi.');return ok;
+}
+function downloadSlot(id){const s=readSlot(id);if(!s){HG.toast('Kayıt okunamadı.');return false}const e=listSlots().find(x=>x.id===id);return downloadData(s,e?e.name:'kayit')}
+/* Dosyadan içe aktarma: geçerliyse yeni yuva olarak eklenir, yuva kimliği döner (hata: null) */
+function importText(text,fileName){
+ let s;try{s=JSON.parse(text)}catch(e){return {err:'Dosya okunamadı: geçerli bir kayıt dosyası değil.'}}
+ if(!validSave(s))return {err:'Bu dosya geçerli bir Hunger kaydı değil.'};
+ if(decObj(s)===null)return {err:'Kayıt dosyası bozuk: harita verisi okunamadı.'};
+ const idx=slotIndex();
+ if(idx.length>=MAXSLOT)return {err:'Kayıt sınırına ulaşıldı ('+MAXSLOT+'). Önce bir kayıt silin.'};
+ const id=Date.now().toString(36)+'i';
+ let name=(s.meta&&s.meta.name&&s.meta.name!=='Otomatik kayıt')?s.meta.name:String(fileName||'İçe aktarılan').replace(/\.json$/i,'').slice(0,40);
+ const meta=Object.assign({day:Math.floor((s.clock||0)/HG.DAY)+1,lvl:1,ts:Date.now()},s.meta||{});meta.name=name;meta.ts=Date.now();s.meta=meta;
+ try{localStorage.setItem(SLOTKEY(id),JSON.stringify(s))}catch(e){return {err:'Tarayıcı depolama alanı dolu.'}}
+ idx.push({id,name,ts:meta.ts,day:meta.day,lvl:meta.lvl});writeIndex(idx);
+ return {id,name};
+}
+function renameSlot(id,name){
+ name=String(name||'').trim().slice(0,40);if(!name||id==='auto')return false;
+ const idx=slotIndex(),e=idx.find(x=>x.id===id);if(!e)return false;
+ e.name=name;writeIndex(idx);
+ const s=readSlot(id);if(s){s.meta=Object.assign(s.meta||{},{name});try{localStorage.setItem(SLOTKEY(id),JSON.stringify(s))}catch(x){}}
+ return true;
+}
+function deleteSlot(id){
+ if(id==='auto'){try{localStorage.removeItem(SAVE)}catch(e){}return true}
+ try{localStorage.removeItem(SLOTKEY(id))}catch(e){}
+ writeIndex(slotIndex().filter(x=>x.id!==id));if(G.slot===id)G.slot=null;return true;
+}
+
 /* ---- yüklenme ekranı ---- */
 const TIPS=['Ateş yakmak için odun ve kıvılcım gerekir; geceleri ateş en güvenli dostundur.','Kurtlar gece sürü hâlinde dolaşır. Işıktan ve ateşten çekinirler.','Köylülerle ticaret yaparak altın kazanabilir, görev tamamlayarak ödül alabilirsin.','Kamplardaki sandıklarda hem değerli eşya hem de adanın geçmişini anlatan notlar bulunur.','Her 5. gece Kan Ayı doğar: düşmanlar çoğalır ve gökyüzü kızıllaşır.','Uyku tulumu veya yatakla geceyi atlatabilirsin; yalnızca güvenli bir barınakta uyu.','Yüksekten düşmek can götürür; uçurumlardan atlamadan önce yüksekliği ölç.','Suya düşen eşyalar bir süre yüzer, sonra derin suda batar.','Gelişim ekranında (K) kazandığın puanları yeteneklere harcayabilirsin.','Rüzgâr yönü ve yağmur oka da etki eder; uzak hedeflerde hafifçe yukarı nişan al.'];
-let tipI=0,tipT=0;
+let tipI=0,tipT=0,closeT=0;
 function ldOpen(title){
- const e=$('#load');if(!e)return;e.hidden=false;e.classList.remove('out');
+ const e=$('#load');if(!e)return;clearTimeout(closeT);e.hidden=false;e.classList.remove('out');
  $('#loadT').textContent=title||'Yükleniyor';$('#loadGo').hidden=true;$('#loadBar').parentNode.hidden=false;
  tipI=(Math.random()*TIPS.length)|0;$('#loadTip').textContent=TIPS[tipI];
  clearInterval(tipT);tipT=setInterval(()=>{tipI=(tipI+1)%TIPS.length;$('#loadTip').textContent=TIPS[tipI]},4200);
@@ -34,25 +121,23 @@ function ldOpen(title){
 }
 function ldSet(p,txt){const b=$('#loadBar');if(!b)return;b.style.width=Math.round(p*100)+'%';$('#loadPct').textContent=Math.round(p*100)+'%';if(txt!==undefined)$('#loadSub').textContent=txt}
 function ldClose(){
- const e=$('#load');if(!e)return;clearInterval(tipT);e.classList.add('out');setTimeout(()=>{e.hidden=true},500);
+ const e=$('#load');if(!e)return;clearInterval(tipT);e.classList.add('out');clearTimeout(closeT);closeT=setTimeout(()=>{e.hidden=true},500);
 }
 const nap=()=>new Promise(r=>setTimeout(r,20));
-async function startGame(load){
+async function startGame(load,slotId){
  if(HG.busy)return;
  HG.busy=true;
  for(const id of ['#menu','#dead','#pause'])$(id).hidden=true;
  ldOpen(load?'Kayıt yükleniyor':'Yeni oyun hazırlanıyor');
  await nap();
  let s=null;
- if(load){try{s=JSON.parse(localStorage.getItem(SAVE))}catch(e){}}
+ let slotUsed=null;
+ if(load){const ls=listSlots();const pick=slotId?ls.find(x=>x.id===slotId):ls[0];if(pick){s=readSlot(pick.id);slotUsed=pick.id}}
  if(s&&s.v===7){
   ldSet(.1,'Dünya yeniden kuruluyor');await nap();
   newState(s.seed);
   ldSet(.25,'Kayıt işleniyor');await nap();
-  try{
-   const b=atob(s.obj);
-   if(b.length===HG.W*HG.H){for(let i=0;i<b.length;i++){let o=b.charCodeAt(i);if(o===O.BUSH0)o=O.BUSH;if(o===O.PALM0)o=O.PALM;G.obj[i]=o}}
-  }catch(e){}
+  try{const b=decObj(s);if(b)for(let i=0;i<b.length;i++){let o=b[i];if(o===O.BUSH0)o=O.BUSH;if(o===O.PALM0)o=O.PALM;G.obj[i]=o}}catch(e){}
   Object.assign(G,{px:s.px,py:s.py,hp:s.hp,hun:s.hun,thr:s.thr,warm:s.warm,clock:s.clock,inv:s.inv,sel:s.sel||0,flags:s.flags||{},
    stam:s.stam===undefined?100:s.stam,san:s.san===undefined?100:s.san,bleed:s.bleed||0,torchFuel:s.torchFuel===undefined?360:s.torchFuel});
   G.drops=(Array.isArray(s.drops)?s.drops:[]).filter(d=>d&&HG.IT[d.id]&&d.n>0).map(d=>({id:d.id,n:d.n,x:d.x,y:d.y,z:d.z,vx:0,vz:0,vy:0,age:5,rest:false}));
@@ -61,6 +146,7 @@ async function startGame(load){
   HG.npcLoad(s.npcs);HG.progLoad(s.prog);
   if(Array.isArray(s.camps))s.camps.forEach((o,i)=>{if(G.camps[i])G.camps[i].open=!!o});
   look.yaw=s.yaw||0;look.pitch=0;
+  G.slot=slotUsed&&slotUsed!=='auto'?slotUsed:null;
   if(!Array.isArray(G.inv)||G.inv.length!==SLOTS)G.inv=Array(SLOTS).fill(null);
  }else{
   ldSet(.1,'Ada üretiliyor');await nap();
@@ -87,5 +173,5 @@ async function startGame(load){
  HG.lock();
  save();
 }
-Object.assign(HG,{newState,saveExists,save,startGame,ldOpen,ldSet,ldClose});
+Object.assign(HG,{newState,saveExists,save,manualSave,startGame,ldOpen,ldSet,ldClose,listSlots,readSlot,downloadCurrent,downloadSlot,importText,renameSlot,deleteSlot,MAXSLOT});
 })();

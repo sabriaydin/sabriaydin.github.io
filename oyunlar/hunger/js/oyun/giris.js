@@ -5,9 +5,11 @@ const {HOT,G,ui,inp,look,Scene,$}=HG;
 const cvs=$('#c');
 
 /* ---- Fare kilidi (FPS bakışı) ---- */
-const overlayOpen=()=>!$('#panel').hidden||!$('#trade').hidden||!$('#bigmap').hidden||!$('#jr').hidden;
+const overlayOpen=()=>!$('#panel').hidden||!$('#trade').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden;
 function lock(){
  if(ui.touch||ui.state!=='play'||overlayOpen())return;
+ /* Esc basılıyken kilit istenirse tarayıcının Esc işlemi kilidi hemen bozar ve oyun duraklar: tuş bırakılınca alınır */
+ if(inp.keys.Escape){ui.relock=true;return}
  try{const p=cvs.requestPointerLock&&cvs.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}
 }
 function unlock(forPanel){ui.panelUnlock=!!forPanel;if(document.exitPointerLock&&document.pointerLockElement)document.exitPointerLock()}
@@ -22,6 +24,7 @@ function resume(viaKey){
  if(viaKey)ui.relock=true;else lock();
 }
 function closeOverlay(){
+ if(!$('#gd').hidden){HG.toggleGuide(false);return true}
  if(!$('#trade').hidden){HG.closeTrade();return true}
  if(!$('#jr').hidden){HG.toggleJournal(false);return true}
  if(!$('#bigmap').hidden){HG.toggleMap(false);return true}
@@ -34,7 +37,7 @@ function setupInput(){
  /* klavye */
  addEventListener('keydown',e=>{
   HG.initAudio();
-  if(e.code==='Tab'||e.code==='Space'||e.code.startsWith('Arrow'))e.preventDefault();
+  if(e.code==='Tab'||e.code==='Space'||e.code.startsWith('Arrow')||HG.keyIs('qsave',e.code))e.preventDefault();
   if(e.repeat)return;
   inp.keys[e.code]=true;
   if(ui.state==='menu')return;
@@ -45,12 +48,15 @@ function setupInput(){
    return;
   }
   if(ui.state!=='play')return;
-  if(e.code==='KeyI'||e.code==='KeyC'||e.code==='Tab')HG.togglePanel();
-  else if(e.code==='KeyE')HG.useHeld();
-  else if(e.code==='KeyF')HG.placeHeld();
-  else if(e.code==='KeyM')HG.toggleMap();
-  else if(e.code==='KeyK')HG.toggleJournal();
-  else if(e.code==='KeyN'){ui.mute=!ui.mute;HG.toast(ui.mute?'Ses kapalı.':'Ses açık.')}
+  const K=HG.keyIs;
+  if(K('inv',e.code)||K('craft',e.code))HG.togglePanel();
+  else if(K('use',e.code))HG.useHeld();
+  else if(K('place',e.code))HG.placeHeld();
+  else if(K('map',e.code))HG.toggleMap();
+  else if(K('jr',e.code))HG.toggleJournal();
+  else if(K('guide',e.code))HG.toggleGuide();
+  else if(K('qsave',e.code))HG.manualSave(true);
+  else if(K('mute',e.code)){ui.mute=!ui.mute;HG.toast(ui.mute?'Ses kapalı.':'Ses açık.')}
   else if(/^Digit[1-8]$/.test(e.code)){G.sel=+e.code.slice(5)-1;ui.dirty=true;HG.snd('ui')}
  });
  addEventListener('keyup',e=>{inp.keys[e.code]=false;if(e.code==='Escape'&&ui.relock){ui.relock=false;if(ui.state==='play')lock()}});
@@ -180,8 +186,8 @@ function setupInput(){
  tA.addEventListener('pointerdown',e=>{HG.initAudio();inp.touchAct=true;HG.onActPress();tA.setPointerCapture(e.pointerId)});
  tA.addEventListener('pointerup',()=>inp.touchAct=false);tA.addEventListener('pointercancel',()=>inp.touchAct=false);
  $('#tB').addEventListener('pointerdown',()=>HG.placeHeld());
- $('#tJ').addEventListener('pointerdown',e=>{inp.keys.Space=true;e.target.setPointerCapture(e.pointerId)});
- $('#tJ').addEventListener('pointerup',()=>inp.keys.Space=false);$('#tJ').addEventListener('pointercancel',()=>inp.keys.Space=false);
+ $('#tJ').addEventListener('pointerdown',e=>{inp.touchJump=true;e.target.setPointerCapture(e.pointerId)});
+ $('#tJ').addEventListener('pointerup',()=>inp.touchJump=false);$('#tJ').addEventListener('pointercancel',()=>inp.touchJump=false);
  $('#tE').addEventListener('pointerdown',()=>HG.useHeld());
  $('#tI').addEventListener('pointerdown',()=>HG.togglePanel());
 }

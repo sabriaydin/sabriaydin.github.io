@@ -95,6 +95,7 @@ function render(){
   b.onclick=()=>{tab=i;render()};tabs.appendChild(b);
  });
  for(const r of TABS[tab][1])body.appendChild(row(r));
+ if(TABS[tab][0]==='Kontrol'&&HG.keyUI)HG.keyUI(body);
 }
 function open(from){
  if(!box)return;
@@ -120,7 +121,7 @@ function build(){
  box.addEventListener('pointerdown',e=>{if(e.target===box)close()});
  document.querySelectorAll('.bSet').forEach(b=>b.onclick=()=>{HG.initAudio&&HG.initAudio();open()});
  /* Esc yalnızca ayar penceresini kapatır */
- addEventListener('keydown',e=>{if(e.code==='Escape'&&!box.hidden){e.stopImmediatePropagation();e.preventDefault();close()}},true);
+ addEventListener('keydown',e=>{if(e.code==='Escape'&&!box.hidden&&!(HG.keyCapturing&&HG.keyCapturing())){e.stopImmediatePropagation();e.preventDefault();close()}},true);
  apply();
 }
 HG.settings={open,close,apply,DEF,get isOpen(){return !!box&&!box.hidden}};

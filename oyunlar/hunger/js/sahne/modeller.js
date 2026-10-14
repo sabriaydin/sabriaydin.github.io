@@ -164,25 +164,59 @@ S.onInit(()=>{
  ].map(p=>{p.cf=cf;return p});
  const rcf=(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);moss(x,y,z,nx,ny,nz,c)};
  MODEL.rock=merge(rockP(0x8d8b88,0x77757a,rcf),{ao:.7});
- const crystal=(c,x,y,z,r,l,rz,rx)=>part(blob(1,1,.12,Math.round(x*50+y*30),r,l,r),c,x,y,z,1,1,1,rx||0,0,rz||0,.08);
- const ore=(c,cEm)=>merge(rockP(0x5e5e68,0x4c4c56,strata).concat([
-  crystal(c,.22,.52,.2,.11,.24,-.3,.2),crystal(c,-.16,.47,.3,.1,.2,.4,-.2),crystal(c,.04,.64,-.14,.12,.26,.1,.1),crystal(c,.38,.3,-.2,.09,.19,-.7),crystal(c,-.38,.26,.18,.09,.17,.6)
- ]),{ao:.74});
- MODEL.coal=ore(0x15151a);MODEL.copper=ore(0xd0793a);MODEL.iron=ore(0xcaa98c);
- /* kademeli parçalanma: kaya/maden ilerledikçe küçülen parçalar */
- const stageModel=(st,c1,c2,cf,cry)=>{
-  const ps=st===1
-   ?[part(blob(.46,2,.28,31,1,.68,.9),c1,0,.23,0,1,1,1,0,.5,0,.16),part(blob(.2,2,.3,41),c2,-.3,.1,-.12,1,1,1,0,0,0,.16)]
-   :[part(blob(.28,2,.28,31,1,.7,.9),c1,.02,.13,0,1,1,1,0,.5,0,.16),part(blob(.1,1,.3,45),c2,.28,.05,.2,1,1,1,0,0,0,.16)];
-  ps.forEach(q=>{q.cf=cf});
-  if(cry)(st===1?cry.slice(0,3):cry.slice(0,1)).forEach(q=>ps.push(q));
+ /* Madenler: köşeli kırık ana kaya + yüzeye yayılan damarlar, benekler ve çıkıntılı cevher kümeleri */
+ const facet=(r,seed,amp,sx,sy,sz,detail)=>{
+  const g=new THREE.IcosahedronGeometry(1,detail===undefined?1:detail),p=g.attributes.position;
+  for(let i=0;i<p.count;i++){
+   const x=p.getX(i),y=p.getY(i),z=p.getZ(i),d=1+(fb3(x*1.9+seed,y*1.9,z*1.9,seed|0)-.5)*2*amp;
+   p.setXYZ(i,x*d*r*(sx||1),Math.max(y*d*r*(sy||1),-.5*r*(sy||1)),z*d*r*(sz||1));
+  }
+  g.computeVertexNormals();return g;           /* indekssiz: yüzey başına normal, köşeli görünüm */
+ };
+ const lerpC=(c,r,g,b,k)=>{c.r+=(r-c.r)*k;c.g+=(g-c.g)*k;c.b+=(b-c.b)*k};
+ /* yüzey başına sabit gürültü: düz gölgelemede bir yüzün üç köşesi aynı normali paylaşır, bu yüzden cevher "yüzler" hâlinde açığa çıkar */
+ const facen=(x,y,z,nx,ny,nz,sd)=>fb3(nx*3.6+x*.7+sd,ny*3.6+y*.7,nz*3.6+z*.7,sd|0);
+ const sm=(a,b,v)=>{v=Math.max(0,Math.min(1,(v-a)/(b-a)));return v*v*(3-2*v)};
+ const oreCf={
+  coal:(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);
+   const seam=sm(.5,.58,facen(x,y,z,nx,ny,nz,2)),band=sm(.72,.95,Math.sin(y*17+fb3(x*2,y*2,z*2,8)*6)*.5+.5);
+   lerpC(c,.012,.012,.016,Math.min(.95,seam*.9+band*.35));            /* parlak siyah kömür yüzleri ve bantları */
+   lerpC(c,.06,.065,.085,sm(.72,.82,fb3(x*14,y*14,z*14,4))*.5)},      /* parıltılı kırık yüzeyler */
+  copper:(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);
+   const seam=sm(.52,.6,facen(x,y,z,nx,ny,nz,6)),pat=sm(.52,.6,facen(x,y,z,nx,ny,nz,12))*(1-seam);
+   lerpC(c,.07,.27,.2,pat*.75);                                       /* malakit yeşili patina */
+   lerpC(c,.5,.19,.07,seam*.9);                                       /* bakır cevheri yüzleri */
+   lerpC(c,.62,.3,.12,sm(.76,.86,fb3(x*15,y*15,z*15,9))*.55)},        /* parlak bakır benekleri */
+  iron:(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);
+   const seam=sm(.52,.6,facen(x,y,z,nx,ny,nz,7)),band=sm(.6,.95,Math.sin(y*11+fb3(x*2,y,z*2,5)*5)*.5+.5),dark=sm(.55,.63,facen(x,y,z,nx,ny,nz,14))*(1-seam);
+   lerpC(c,.2,.065,.032,Math.min(.9,seam*.85+band*.3));               /* pas kızılı hematit */
+   lerpC(c,.045,.045,.06,dark*.8);lerpC(c,.34,.2,.09,sm(.78,.88,fb3(x*13,y*13,z*13,11))*.45)}   /* koyu manyetit ve oksit benekleri */
+ };
+ const oreCol={coal:0x2a2a30,copper:0xa8683a,iron:0x7a4a30},hostCol={coal:[0x4a4a52,0x3e3e46],copper:[0x6a6a72,0x5a5a62],iron:[0x706a68,0x605a58]};
+ const nugget=(k,x,y,z,r,sd,rx,ry,rz)=>{const q=part(facet(r,sd,.32,1,.8,1,0),oreCol[k],x,y,z,1,1,1,rx||0,ry||0,rz||0,.14);q.cf=oreCf[k];return q};
+ const oreParts=(k,st)=>{
+  const [h1,h2]=hostCol[k];
+  const ps=st===0
+   ?[part(facet(.56,31+k.length,.3,1,.78,.94,2),h1,0,.3,0,1,1,1,0,.5,0,.14),part(facet(.34,37,.32,1,.9,1,2),h2,.34,.17,.16,1,1,1,0,.3,0,.14),part(facet(.26,41,.32,1,.8,1,2),h2,-.36,.13,-.1,1,1,1,0,1,0,.14),part(facet(.2,43,.3,1,.9,1,2),h1,.02,.12,-.4,1,1,1,0,.7,0,.14)]
+   :st===1
+   ?[part(facet(.47,31+k.length,.3,1,.72,.92,2),h1,0,.24,0,1,1,1,0,.5,0,.14),part(facet(.22,41,.32,1,.8,1,2),h2,-.32,.1,-.12,1,1,1,0,1,0,.14)]
+   :[part(facet(.29,31+k.length,.3,1,.72,.9,2),h1,.02,.14,0,1,1,1,0,.5,0,.14),part(facet(.11,45,.3,1,.8,1,1),h2,.28,.05,.2,1,1,1,0,.3,0,.14)];
+  ps.forEach(q=>{q.cf=oreCf[k]});
+  const nug=st===0?[[.2,.5,.2,.12,3,.2,.4,-.3],[-.18,.46,.3,.1,5,-.2,.9,.4],[.04,.66,-.12,.11,7,.1,.2,.1],[.4,.28,-.22,.085,9,.3,1.4,-.5],[-.4,.24,.16,.08,11,-.2,.6,.6],[.1,.3,.42,.07,13,0,.3,.2],[-.08,.42,-.36,.09,15,.4,.8,0]]
+   :st===1?[[.18,.44,.18,.1,3,.2,.4,-.3],[-.16,.4,.26,.08,5,-.2,.9,.4],[.36,.2,-.18,.07,9,.3,1.4,-.5]]
+   :[[.04,.3,.02,.08,3,.1,.2,.1]];
+  nug.forEach(n=>ps.push(nugget(k,n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])));
   return merge(ps,{ao:.74});
  };
- for(const [k,c,cry] of [['rock',0,null],['coal',0x15151a,1],['copper',0xd0793a,1],['iron',0xcaa98c,1]]){
-  const c1=k==='rock'?0x8d8b88:0x5e5e68,c2=k==='rock'?0x77757a:0x4c4c56,cf=k==='rock'?rcf:strata;
-  const cr=cry?[crystal(c,.22,.5,.2,.1,.22,-.3,.2),crystal(c,-.16,.45,.28,.09,.18,.4,-.2),crystal(c,.04,.6,-.14,.1,.22,.1,.1)]:null;
-  MODEL[k+'_s1']=stageModel(1,c1,c2,cf,cr);MODEL[k+'_s2']=stageModel(2,c1,c2,cf,cr?[crystal(c,.04,.34,.02,.09,.16,.1,.1)]:null);
- }
+ for(const k of ['coal','copper','iron']){MODEL[k]=oreParts(k,0);MODEL[k+'_s1']=oreParts(k,1);MODEL[k+'_s2']=oreParts(k,2)}
+ const rockStage=(st)=>{
+  const ps=st===1
+   ?[part(blob(.46,2,.28,31,1,.68,.9),0x8d8b88,0,.23,0,1,1,1,0,.5,0,.16),part(blob(.2,2,.3,41),0x77757a,-.3,.1,-.12,1,1,1,0,0,0,.16)]
+   :[part(blob(.28,2,.28,31,1,.7,.9),0x8d8b88,.02,.13,0,1,1,1,0,.5,0,.16),part(blob(.1,1,.3,45),0x77757a,.28,.05,.2,1,1,1,0,0,0,.16)];
+  ps.forEach(q=>{q.cf=rcf});
+  return merge(ps,{ao:.74});
+ };
+ MODEL.rock_s1=rockStage(1);MODEL.rock_s2=rockStage(2);
  /* ---- çalılar ---- */
  const bush=(b)=>{
   const ps=[part(blob(.44,2,.2,51,1,.78,1),0x2f7a30,0,.33,0,1,1,1,0,0,0,.2),part(blob(.33,2,.22,53),0x3f9140,.24,.4,.1,1,1,1,0,0,0,.2),part(blob(.3,2,.22,57),0x2a6a2b,-.26,.3,-.1,1,1,1,0,0,0,.2),part(blob(.26,2,.2,59),0x4aa046,.02,.5,-.2,1,1,1,0,0,0,.2)];

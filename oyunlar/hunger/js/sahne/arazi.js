@@ -140,6 +140,17 @@ function buildTerrain(G){
  if(!terrainMat){
   terrainMat=sc.mat({map:sc.tex.detail,bumpMap:sc.tex.detail,bumpScale:1.4,roughness:.96});
   waterMat=sc.mat({transparent:true,roughness:.1,metalness:.05,depthWrite:false,normalMap:sc.tex.waterN,normalScale:new THREE.Vector2(.45,.45)});
+  waterMat.onBeforeCompile=sh=>{
+   sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_maps>',`
+   #ifdef USE_NORMALMAP
+   vec3 mapN=texture2D(normalMap,vUv).xyz*2.0-1.0;
+   vec3 mapN2=texture2D(normalMap,vUv*1.73+vec2(-uFogT*.019,uFogT*.013)).xyz*2.0-1.0;
+   vec3 mapN3=texture2D(normalMap,vUv*.47+vec2(uFogT*.006,-uFogT*.009)).xyz*2.0-1.0;
+   mapN=normalize(mapN+mapN2*.8+mapN3*.6);mapN.xy*=normalScale;
+   normal=perturbNormal2Arb(-vViewPosition,normal,mapN,faceDirection);
+   #endif`).replace('#include <dithering_fragment>',`#include <dithering_fragment>
+   {float fr=pow(1.0-clamp(dot(normalize(vViewPosition),normal),0.0,1.0),3.0);gl_FragColor.a=clamp(gl_FragColor.a+fr*.32,0.0,1.0);}`);
+  };
  }
  const ncx=Math.ceil(W/CT),ncz=Math.ceil(H/CT);
  for(let cz=0;cz<ncz;cz++)for(let cx=0;cx<ncx;cx++){

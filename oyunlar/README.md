@@ -37,6 +37,10 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Hava durumu: bulut, yağmur, şimşek | `js/sahne/hava.js` |
 | Ateş böcekleri, polen/toz parçacıkları | `js/sahne/atmosfer.js` |
 | Yükseklik sisi, rüzgâr simülasyonu (yön, hamle, şiddet) | `js/sahne/gerceklik.js` |
+| Oyun içi rehber (oynanış, hikâye, canavarlar, madenler, eşyalar, üretim) | `js/veri/rehber.js` (metinler), `js/oyun/rehber.js` (pencere) |
+| Tuş atamaları (Ayarlar › Kontrol) | `js/cekirdek/tuslar.js` |
+| Kayıt sistemi: otomatik kayıt, elle kayıt yuvaları, dosya indirme/yükleme, kayıtlar menüsü | `js/oyun/durum.js` (altyapı), `js/oyun/kayitlar.js` (pencere) |
+| Başarımlar | `js/oyun/basarimlar.js` |
 | Yaprak, duman, kıvılcım, adım tozu, su halkaları, soluk buharı | `js/sahne/parcaciklar.js` |
 | Yüklenme ekranı (ilerleme çubuğu, ipuçları, "Oyuna Gir") | `index.html` (`#load`), `js/oyun/durum.js` (`startGame`), `js/oyun/dongu.js` (`init`), `js/sahne/cekirdek.js` (`buildAsync`) |
 | Oyuncu fiziği (atalet, eğim, düşme hasarı), eşya sekmesi/yüzmesi, ok sürüklenmesi | `js/oyun/hayatta-kalma.js`, `js/oyun/dusenler.js`, `js/oyun/silah.js` |
