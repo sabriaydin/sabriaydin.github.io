@@ -72,7 +72,7 @@ function onKill(a,def){
  if(def.foe){
   if(a.fake)return;
   G.stats.shades++;HG.xpGain(16);
- }else{G.stats.hunted++;HG.xpGain(Math.round(3+def.hp/8))}
+ }else{G.stats.hunted++;HG.xpGain(def.xpv||5)}
  for(const id in G.quests||{}){
   const q=G.quests[id];
   if(q.st!==1||q.p>=q.n)continue;

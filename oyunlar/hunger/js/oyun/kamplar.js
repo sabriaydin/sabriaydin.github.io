@@ -7,10 +7,12 @@ const rnd=Math.random,R=(a,b)=>a+((rnd()*(b-a+1))|0);
 const LOOT=[
  [['bandage',1,3,5],['arrow',5,12,5],['cmeat',1,3,5],['wbottle',1,2,4],['torch',1,2,4],['coin',2,6,6],['leather',2,4,3],['bone',2,4,3],['berries',3,6,3]],
  [['bandage',2,4,4],['arrow',8,16,4],['cmeat',2,4,4],['torch',2,3,3],['coin',5,10,6],['iron_ingot',1,1,3],['copper_ingot',1,2,4],['coat',1,1,1],['wool',2,4,2],['bag',1,1,1]],
- [['bandage',3,5,4],['arrow',12,20,4],['coin',10,18,6],['iron_ingot',1,3,5],['pick2',1,1,2],['axe2',1,1,2],['bow',1,1,2],['spear',1,1,2],['coat',1,1,3],['bag',1,1,2],['cmeat',3,5,3]]
+ [['bandage',3,5,4],['arrow',12,20,4],['coin',10,18,6],['iron_ingot',1,3,5],['pick2',1,1,2],['axe2',1,1,2],['bow',1,1,2],['spear',1,1,2],['coat',1,1,3],['bag',1,1,2],['cmeat',3,5,3]],
+ /* mağaradaki mühürlü sandık: az ama değerli */
+ [['gold',1,3,6],['gem',1,2,5],['coin',18,32,5],['iron_ingot',2,4,4],['pick3',1,1,1.6],['axe3',1,1,1.6],['bandage',3,5,3],['arrow',16,26,3],['torch',3,4,3]]
 ];
 function roll(tier){
- const T=LOOT[tier],out=[];let k=R(3,4)+tier;
+ const T=LOOT[tier],out=[];let k=tier>2?R(4,5):R(3,4)+tier;
  while(k-->0){
   const tw=T.reduce((s,x)=>s+x[3],0);let r=rnd()*tw,e=T[0];
   for(const x of T){r-=x[3];if(r<=0){e=x;break}}
@@ -24,7 +26,7 @@ function updateCamps(dt){
  let best=2.6;
  for(const c of L){
   const d=Math.hypot(G.px-(c.x+.5),G.py-(c.y+.5));
-  if(d<14&&!G.flags['c'+c.id]){G.flags['c'+c.id]=1;HG.toast('Terk edilmiş bir kamp keşfedildi.');HG.xpGain(6)}
+  if(d<14&&!G.flags['c'+c.id]){G.flags['c'+c.id]=1;HG.toast(c.vault?'Mühürlü bir hazine odası bulundu.':'Terk edilmiş bir kamp keşfedildi.');HG.xpGain(c.vault?14:6)}
   if(!c.open&&d<best){best=d;G.nearCamp=c}
  }
 }
@@ -37,7 +39,7 @@ function openChest(){
   msg.push(n+' '+IT[id].n);
  }
  HG.snd('chest');HG.feed('Sandık: '+msg.join(', '));
- G.stats.chests++;HG.flag('chest');HG.xpGain(14+c.tier*8);
+ G.stats.chests++;HG.flag('chest');if(c.vault)HG.flag('vault');HG.xpGain(14+c.tier*8);
  /* kayıt */
  const N=HG.NOTES||[];
  if(N.length&&!G.notes.includes(c.note)){

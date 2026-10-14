@@ -171,6 +171,29 @@ function genWorld(seed){
    camps.push({id:camps.length,x,y,kind,q,tier,note:order[camps.length%nN],open:false});
   }
  }
+ /* mağara girişleri: dağ eteklerinde rastgele yerler (içerisi girişte seed ile üretilir) */
+ const caves=[];
+ {
+  const want=Math.max(3,Math.round(2.3*SC));let tries=0;
+  while(caves.length<want&&tries++<9000){
+   const x=10+((rnd()*(W-20))|0),y=10+((rnd()*(H-20))|0),relax=tries>5000;
+   if(Math.hypot(x-sx,y-sy)<40)continue;
+   if(villages.some(v=>Math.hypot(v.cx-x,v.cy-y)<30))continue;
+   if(camps.some(c=>Math.hypot(c.x-x,c.y-y)<24))continue;
+   if(caves.some(c=>Math.hypot(c.x-x,c.y-y)<(relax?40:62)))continue;
+   let ok=true,hmin=9,hmax=-9,rk=0;
+   for(let j=-4;j<=4&&ok;j++)for(let k=-4;k<=4;k++){const i=(y+j)*W+x+k,t=tile[i];if(t<=T.SHAL||t===T.POND||obj[i]===O.VDEC||obj[i]===O.FIRE){ok=false;break}if(t===T.ROCK)rk++;hmin=Math.min(hmin,hgt[i]);hmax=Math.max(hmax,hgt[i])}
+   if(!ok||hmax-hmin>(relax?2.4:1.8)||rk<(relax?4:14))continue;
+   const q=(rnd()*4)|0,dd=Math.hypot(x-sx,y-sy)/(W/2),tier=dd>.6?2:dd>.34?1:0;
+   const cq=Math.round(Math.cos(q*Math.PI/2)),sq=Math.round(Math.sin(q*Math.PI/2));
+   for(let j=-4;j<=4;j++)for(let k=-4;k<=4;k++)obj[(y+j)*W+x+k]=O.NONE;
+   /* yapı: arkada ve yanlarda kaya kütlesi, ortada geçit (yerel b yönü: ön) */
+   const mk=(a,b)=>{obj[(y+Math.round(-a*sq+b*cq))*W+x+Math.round(a*cq+b*sq)]=O.VDEC};
+   mk(-2,0);mk(2,0);mk(-2,-1);mk(-1,-1);mk(0,-1);mk(1,-1);mk(2,-1);
+   for(let j=-4;j<=4;j++)for(let k=-4;k<=4;k++)tile[(y+j)*W+x+k]===T.GRASS&&Math.hypot(j,k)<3&&(tile[(y+j)*W+x+k]=T.ROCK);
+   caves.push({id:caves.length,x,y,q,tier,seed:((rnd()*2147483647)|0),open:false});
+  }
+ }
  /* kıyı köpüğü maskesi */
  const shore=new Uint8Array(W*H);
  const wat=t=>t<=T.SHAL||t===T.POND;
@@ -201,7 +224,7 @@ function genWorld(seed){
    }
   }
  }
- return {tile,obj,hgt,shore,animals,villages,camps,sx:sx+.5,sy:sy+.5};
+ return {tile,obj,hgt,shore,animals,villages,camps,caves,sx:sx+.5,sy:sy+.5};
 }
 HG.genWorld=genWorld;
 })();

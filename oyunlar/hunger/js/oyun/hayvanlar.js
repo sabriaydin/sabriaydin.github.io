@@ -124,25 +124,43 @@ function killAnimal(a){
  for(const [id,n] of def.drops(a))HG.spawnDrop(id,n,{x:a.x+(rnd()-.5)*.8,z:a.z+(rnd()-.5)*.8,y:Scene.groundY(a.x,a.z)+.6,vx:(rnd()-.5)*2,vz:(rnd()-.5)*2});
  HG.flag('hunted');HG.snd('die_'+(def.snd||'sheep'),{x:a.x,z:a.z});
 }
-function hitAnimal(a,dmg){
- if(a.dying)return;
- const def=ANIMAL[a.t];
- a.hp-=dmg;a.hitT=.25;if(a.hp>0)HG.snd('cry_'+(def.snd||'sheep'),{x:a.x,z:a.z});
- const dx=a.x-G.px,dz=a.z-G.py,l=Math.hypot(dx,dz)||1,kb=(def.foe?3:5.5)/Math.max(.6,def.h+.3);
- a.kx=dx/l*kb;a.kz=dz/l*kb;
- if(def.foe){a.flinch=2.2;if(a.fake){a.dying=.001;a.gone=true}}else if(def.aggr)a.charge=10;else a.panic=5;
- Scene.burst(a.x,Scene.groundY(a.x,a.z)+def.h*.6,a.z,def.foe?0x20202a:0xa01818,5);
- if(a.hp<=0)killAnimal(a);
+/* Vurulan bölge: vuruş noktası canlının yerel eksenlerine çevrilir (ileri, yan, yükseklik oranı) */
+function zoneAt(a,def,hit){
+ if(!hit)return 'torso';
+ const gy=Scene.groundY(a.x,a.z),yf=(hit.y-gy)/def.h,sx=Math.sin(a.yaw),cz=Math.cos(a.yaw);
+ const dx=hit.x-a.x,dz=hit.z-a.z,fw=dx*sx+dz*cz,lat=Math.abs(dx*cz-dz*sx);
+ if(def.foe){                                   /* insansı gövde: kafa, kol, gövde, bacak */
+  if(yf>.8)return 'head';
+  if(yf<.42)return 'leg';
+  if(lat>def.r*.6)return 'arm';
+  return 'torso';
+ }
+ if(fw>def.r*.5&&yf>.42)return 'head';          /* dört ayaklı: ön ve üst kısım baştır */
+ if(yf<.34)return 'leg';
+ return 'torso';
 }
-/* elde tutulan eşyanın saldırı gücü */
+/* dmg: eşyanın taban hasarı (sağlık yüzdesi); hit: vuruş noktası {x,y,z} */
+function hitAnimal(a,dmg,hit){
+ if(a.dying)return;
+ const def=ANIMAL[a.t],zone=zoneAt(a,def,hit),zm=HG.ZONE[zone].m;
+ const real=dmg*zm*(def.weak||1);
+ a.hp-=real;a.hitT=.25;if(a.hp>0)HG.snd('cry_'+(def.snd||'sheep'),{x:a.x,z:a.z});
+ a.lastZone=zone;G.lastHit={a,t:performance.now(),zone,m:zm,dmg:real};
+ const dx=a.x-G.px,dz=a.z-G.py,l=Math.hypot(dx,dz)||1,kb=(def.foe?3:5.5)/Math.max(.6,def.h+.3)*(zone==='head'?1.3:1);
+ a.kx=dx/l*kb;a.kz=dz/l*kb;
+ if(def.foe){a.flinch=zone==='head'?3.2:2.2;if(a.fake){a.dying=.001;a.gone=true}}else if(def.aggr)a.charge=10;else a.panic=5;
+ if(zone==='leg'&&!def.foe&&a.hp>0)a.panic=Math.max(a.panic,8);
+ const hy=hit?hit.y:Scene.groundY(a.x,a.z)+def.h*.6;
+ Scene.burst(hit?hit.x:a.x,hy,hit?hit.z:a.z,def.foe?0x20202a:0xa01818,zone==='head'?8:5);
+ if(a.hp<=0){if(zone==='head')HG.flag('headshot');killAnimal(a)}
+ return zone;
+}
+/* elde tutulan eşyanın taban saldırı gücü (eşyaya özgü) */
 function weaponDamage(){return weaponDamage0()*(1+.15*HG.perk('hunt'))}
 function weaponDamage0(){
  const h=HG.held();if(!h)return DMG.hand;
- const t=h.it.tool;
- if(t==='axe'||t==='pick'||t==='spear')return DMG[t][h.it.tier]||DMG.other;
- if(t==='torch'||t==='bow')return DMG[t];
- if(t==='rod')return DMG.rod;
- return DMG.other;
+ const v=DMG.item[h.k];return v===undefined?DMG.other:v;
 }
-Object.assign(HG,{walkable,makeAnimals,updateAnimals,hitAnimal,killAnimal,weaponDamage});
+function arrowDamage(draw){return (DMG.arrowMin+(DMG.arrowMax-DMG.arrowMin)*Math.pow(draw,1.3))*(1+.15*HG.perk('hunt'))}
+Object.assign(HG,{walkable,makeAnimals,updateAnimals,hitAnimal,killAnimal,weaponDamage,arrowDamage,zoneAt});
 })();

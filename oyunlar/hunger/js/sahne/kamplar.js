@@ -61,6 +61,17 @@ function campParts(c,P){
   p(cyl(.28,.2,.3,10),IRON,2.1,.55,.8);p(cyl(.05,.05,.55,6),IRON,2.1,.2,.8);bp(.14,0x1c1a1c,2.1,.74,.8,1.3,.4,1.3,{d:1,amp:.06});
   fire(-1.2,3.4);
   stuff();
+ }else if(c.kind==='vault'){
+  /* mühürlü hazine odası: taş kürsü, dört sütun, kafatasları */
+  p(cyl(2.3,2.5,.22,14),0x4a494f,0,.11,0,1,1,1,0,0,0,stoneCf);
+  p(cyl(1.7,1.85,.18,14),0x66656c,0,.31,0,1,1,1,0,0,0,stoneCf);
+  for(let i=0;i<4;i++){
+   const t=i*PI/2+PI/4,h=1.9-.35*(i%2),ax=Math.cos(t)*2.0,bz=Math.sin(t)*2.0;
+   p(cyl(.22,.27,h,8),0x77757c,ax,h/2+.2,bz,1,1,1,0,0,0,stoneCf);
+   bp(.3,0x5c5a60,ax,h+.25,bz,1,.7,1,{d:1,amp:.08});
+   bp(.13,0xe8e4d6,Math.cos(t)*1.35,.52,Math.sin(t)*1.35,1,1,1.1,{d:1,amp:.04});
+  }
+  for(let i=0;i<5;i++){const t=hsh(id,i)*6.28,rr=2.4+hsh(id,i+5)*.9;p(cyl(.02,.02,.34,5),0xe8e4d6,Math.cos(t)*rr,.04,Math.sin(t)*rr,1,1,1,PI/2,t,0)}
  }else{
   for(let a=-1;a<=1;a++){const r=.95+hsh(id,a+4)*.35;bp(r,[0x7a7a82,0x6a6a72,0x8d8d92][(a+1+id)%3],a,r*.7,-1,1.1,.95,1,{d:2,amp:.12})}
   for(let i=0;i<9;i++){const t=hsh(id,i)*6.28,rr=1.2+hsh(id,i+5)*1.5;bp(.2+hsh(id,i+8)*.18,[0x7a7a82,0x8d8d92,0x6a6a72][i%3],Math.cos(t)*rr,.14,Math.sin(t)*rr+.3,1,.7,1,{d:1,amp:.1})}

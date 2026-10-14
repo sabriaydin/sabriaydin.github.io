@@ -65,6 +65,7 @@ S.onInit(()=>{
  stars=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:1.8,sizeAttenuation:false,transparent:true,opacity:0,fog:false,depthWrite:false}));stars.frustumCulled=false;stars.renderOrder=-9;scene.add(stars);
  /* gökyüzü kubbesi */
  dome=new THREE.Mesh(new THREE.SphereGeometry(300,32,16),skyMaterial());dome.frustumCulled=false;dome.renderOrder=-10;scene.add(dome);skyU=dome.material.uniforms;
+ sc.dome=dome;sc.moon=moon;sc.hemi=hemi;sc.lantern=lantern;     /* mağara modülü ışıkları buradan geçersiz kılar */
  /* yansıma ortamı: öğle gökyüzünden bir kez üretilir (PBR yansımaları ve gölge-ışığı için) */
  try{
   const es=new THREE.Scene(),em=skyMaterial(),u=em.uniforms;

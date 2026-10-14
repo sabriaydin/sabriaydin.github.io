@@ -28,7 +28,7 @@ function actionFor(tg){
  if(tg.an){
   const an=tg.an,def=HG.ANIMAL[an.t];
   if(an.dying)return null;
-  const name=def.n+' ('+Math.ceil(an.hp)+'/'+def.hp+')';
+  const name=def.n+' · %'+Math.ceil(an.hp);
   if(h&&h.k==='bottle'&&def.milk){
    return G.clock<an.milkAt?{block:'Süt vermiyor, biraz bekleyin.',name:def.n}:{kind:'milk',need:2,hint:'Basılı tut: süt sağ',name};
   }
@@ -94,7 +94,7 @@ function stepAction(dt){
   const key='hit,'+tg.an.id;
   if(key!==A.key){saveProgress();A.key=key;A.p=0;A.tick=0;A.memKey=null}
   A.tick-=dt;
-  if(A.tick<=0){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');HG.hitAnimal(tg.an,HG.weaponDamage()*sw);HG.hitMarker(tg.an.hp<=0)}
+  if(A.tick<=0){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z)}
   return;
  }
  if(kind==='milk'||kind==='shear'){
@@ -207,6 +207,7 @@ function eatHeld(){
 function useHeld(){
  if(HG.pickupNearest())return;
  if(HG.openChest())return;
+ if(HG.useCave())return;
  if(HG.talkNpc())return;
  const h=held();if(!h)return;
  if(h.it.food){const b=foodBlock(h.it.food);if(b)HG.toast(b);else eatHeld();return}

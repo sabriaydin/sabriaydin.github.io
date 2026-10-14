@@ -145,7 +145,7 @@ button.ghost:hover:not(:disabled){background:var(--panel2)}
 #bigmap{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(3,6,10,.9)}
 .bmbox{display:grid;gap:8px;justify-items:center}
 #bm{border:2px solid var(--line);border-radius:6px;background:#06121f;image-rendering:pixelated}
-#bmcap{font-size:13px;color:var(--mut)}
+#bmcap{font-size:13px;color:var(--mut);white-space:pre-line;text-align:center;max-width:94vw;line-height:1.5}
 #trade{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(5,5,6,.72);padding:16px;overflow:auto}
 #trade .card{width:min(520px,100%)}
 #trL{display:grid;gap:6px;text-align:left;margin:8px 0}
@@ -229,3 +229,11 @@ button.ghost:hover:not(:disabled){background:var(--panel2)}
 .kfix .keys{margin:6px 0}
 @media (max-width:760px){.kr{grid-template-columns:1fr 88px 88px}}
 #toast{z-index:60}
+
+/* hedef sağlık çubuğu, vurulan bölge */
+#tgt{position:absolute;left:50%;top:calc(50% + 70px);transform:translateX(-50%);width:150px;display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;font-size:12px;pointer-events:none;text-shadow:0 0 3px #000,0 0 3px #000}
+#tgt i{grid-column:1/-1;display:block;height:7px;background:rgba(0,0,0,.7);border:1px solid #000;border-radius:3px;overflow:hidden}
+#tgt u{display:block;height:100%;width:100%;transition:width .15s}
+#zn{position:absolute;left:50%;top:calc(50% - 56px);transform:translateX(-50%);font-weight:700;font-size:15px;letter-spacing:.06em;opacity:0;pointer-events:none;text-shadow:0 0 4px #000,0 0 4px #000;color:#fff}
+#zn.head{color:#ffd24a;font-size:18px}#zn.leg{color:#b8c4cc}#zn.arm{color:#d8d0c0}
+@media (pointer:coarse){#tgt{top:calc(50% + 50px)}}

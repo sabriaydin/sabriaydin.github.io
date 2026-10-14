@@ -5,6 +5,7 @@ const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
 
 /* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
 function calcShelter(){
+ if(G.cave)return true;                 /* mağara kapalı alandır */
  const sx=Math.floor(G.px),sy=Math.floor(G.py),start=sy*W+sx,seen=new Set([start]),q=[start];
  while(q.length){
   const c=q.pop(),x=c%W,y=(c/W)|0;
@@ -99,7 +100,7 @@ function update(dt){
  /* eylem */
  if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
- HG.updateAnimals(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateEvents(dt);
+ HG.updateAnimals(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
  HG.updateWeapons(dt);
  HG.updateBody(dt);
  if(A.hitT>0)A.hitT-=dt;
@@ -127,7 +128,7 @@ function update(dt){
  if(L>.55&&!G.sheltered)wr+=.55*L;
  if(G.sheltered&&L>.4)wr+=.3;
  G.warm=clamp(G.warm+wr*dt,0,100);
- if(G.sheltered&&L<.3){G.shelterT+=dt;if(G.shelterT>8)flag('shelter')}
+ if(G.sheltered&&L<.3&&!G.cave){G.shelterT+=dt;if(G.shelterT>8)flag('shelter')}
  let dmg=0;
  if(G.hun<=0){dmg+=1.2;G.cause='Açlıktan öldün.'}
  if(G.thr<=0){dmg+=1.8;G.cause='Susuzluktan öldün.'}
@@ -151,5 +152,5 @@ function die(){
  for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false;
  if(document.exitPointerLock)document.exitPointerLock();
 }
-Object.assign(HG,{calcShelter,solidAt,canStand,update,die});
+Object.assign(HG,{calcShelter,solidAt,canStand,canStandAt:canStand,update,die});
 })();

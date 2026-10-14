@@ -26,7 +26,7 @@ function hurt(dmg,cause,src,bleedP){
  if(bleedP&&Math.random()<bleedP&&!(G.bleed>0)){G.bleed=75;HG.toast('Kanıyorsun! Bandaj ile yarayı sar.')}
 }
 function addSan(v){if(v<0)v*=1-.15*HG.perk('mind');G.san=clamp(G.san+v,0,100)}
-function hitMarker(kill){body.hit=1;body.hitKill=!!kill;HG.snd('hitmark')}
+function hitMarker(kill,zone){body.hit=1;body.hitKill=!!kill;HG.snd('hitmark');if(zone){const z=HG.ZONE[zone];G.zn={t:performance.now(),txt:z.n+(z.m!==1?' ×'+z.m:''),zone}}}
 function swing(){
  const ok=G.stam>=5;G.stam=Math.max(0,G.stam-5);
  if(G.stam<=0)G.tired=true;

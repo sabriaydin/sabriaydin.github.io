@@ -31,7 +31,7 @@ const PROF={
   {give:['iron_ingot',1],cost:{coin:9},max:2,ev:[300,600],ch:.45},
   {give:['pick2',1],cost:{coin:26},max:1,ev:[900,1500],ch:.25},
   {give:['axe2',1],cost:{coin:24},max:1,ev:[900,1500],ch:.25}],
-  buy:{coal:2,copper_ore:4,iron_ore:8,stone:1,copper_ingot:7,iron_ingot:12}},
+  buy:{coal:2,copper_ore:4,iron_ore:8,stone:1,copper_ingot:7,iron_ingot:12,gold:30,gem:48}},
  healer:{n:'Şifacı',hi:'Yaran varsa söyle.',offers:[
   {give:['bandage',2],cost:{wool:1},max:4,ev:[120,260],ch:.7},
   {give:['wbottle',1],cost:{berries:4},max:2,ev:[140,300],ch:.5},
@@ -50,7 +50,7 @@ const PROF={
   {give:['copper_ore',1],cost:{wood:6},max:2,ev:[300,600],ch:.4},
   {give:['iron_ore',1],cost:{wood:10},max:2,ev:[500,900],ch:.25},
   {give:['pick1',1],cost:{coin:5},max:1,ev:[500,900],ch:.4}],
-  buy:{coal:2,stone:1,copper_ore:4,iron_ore:8,sand:1}}
+  buy:{coal:2,stone:1,copper_ore:4,iron_ore:8,sand:1,gold:26,gem:42}}
 };
 let nid=1;
 function makeNpcs(vils){

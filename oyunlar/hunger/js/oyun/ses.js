@@ -149,6 +149,7 @@ K.breath=d=>{N(d,{ft:'bandpass',f:R(900,1300),q:.7,d:.28,v:.1,att:.12,pink:true}
 K.hiss=d=>{N(d,{ft:'bandpass',f:5200,f2:2800,q:1.2,d:.6,v:.4,pink:true,att:.04});N(d,{ft:'highpass',f:7000,d:.4,v:.15})};
 K.scratch=d=>{for(let i=0;i<6;i++){N(d,{ft:'bandpass',f:R(2200,3400),q:4,d:.05,v:.3,t:i*.075});N(d,{ft:'lowpass',f:500,d:.06,v:.18,t:i*.075})}};
 K.whisper=d=>{const f=R(900,1500);N(d,{ft:'bandpass',f,f2:f*.7,q:8,d:1.5,v:.22,att:.5,pink:true});N(d,{ft:'bandpass',f:f*1.9,f2:f*1.3,q:9,d:1.2,v:.1,att:.45,t:.2,pink:true})};
+K.creak=d=>{Tn(d,{f:62,f2:48,d:1.4,type:'sawtooth',v:.07,att:.2,lp:260});N(d,{ft:'lowpass',f:380,d:1.1,v:.2,att:.25,pink:true})};
 K.stinger=d=>{Tn(d,{f:233,d:1.8,type:'sawtooth',v:.1,att:.04,lp:900});Tn(d,{f:246.9,d:1.8,type:'sawtooth',v:.09,att:.04,lp:900});Tn(d,{f:932,f2:880,d:1.2,type:'sine',v:.05,att:.03});N(d,{ft:'lowpass',f:300,d:1.4,v:.5,att:.02,pink:true});Tn(d,{f:48,d:1.6,v:.4,att:.02})};
 K.drip=d=>{Tn(d,{f:1300,f2:620,d:.07,v:.07,att:.002});N(d,{ft:'bandpass',f:900,q:2,d:.05,v:.06,t:.01})};
 K.bowdraw=d=>{Tn(d,{f:85,f2:150,d:.7,type:'sawtooth',v:.06,att:.05,lp:420,vib:5,vibf:14});N(d,{ft:'bandpass',f:1700,f2:2600,q:2,d:.55,v:.08,att:.15,pink:true})};
@@ -255,7 +256,7 @@ function scan(){
  sea=Math.pow(clamp(1-wd/36,0,1),1.2);
 }
 const tc=(p,v,tau)=>p.setTargetAtTime(v,AC.currentTime,tau||.7);
-let nextBird=4,nextCricket=2,nextOwl=30,beatT=0,stomachT=20,breathT=0,popT=0;
+let nextBird=4,nextCricket=2,nextOwl=30,nextDrip=3,nextCreak=20,beatT=0,stomachT=20,breathT=0,popT=0;
 
 function audioFrame(G,dt,mode){
  if(!AC||!bed.wind||AC.state!=='running')return;
@@ -297,7 +298,7 @@ function audioFrame(G,dt,mode){
  tc(bed.whisper.f[0].frequency,700+800*Math.abs(Math.sin(t*.63)),.2);tc(bed.whisper.f[1].frequency,1700+900*Math.abs(Math.sin(t*.41+1)),.2);
  /* barınakta ortam seslerini kıs, yankıyı artır */
  tc(ambLP.frequency,sh?3200:22000,.5);
- tc(sendS.gain,sh?.34:.1+.08*forest+.05*rain,.6);
+ tc(sendS.gain,G.cave?.5:sh?.34:.1+.08*forest+.05*rain,.6);
  /* ateş */
  let best=null,bd=1e9;
  for(const f of sc.fires||[]){const d=(f.x-G.px)**2+(f.z-G.py)**2;if(d<bd){bd=d;best=f}}
@@ -321,12 +322,17 @@ function audioFrame(G,dt,mode){
  nextCricket-=dt;
  if(nextCricket<=0){
   nextCricket=R(.25,.9);
-  if(L<.3&&rain<.2&&sea<.7&&!ui.mute&&Math.random()<quiet*clamp(1-fear*2,0,1))try{K.cricket(route(spatial(4,18,0,.4)))}catch(e){}
+  if(L<.3&&!G.cave&&rain<.2&&sea<.7&&!ui.mute&&Math.random()<quiet*clamp(1-fear*2,0,1))try{K.cricket(route(spatial(4,18,0,.4)))}catch(e){}
  }
  nextOwl-=dt;
  if(nextOwl<=0){
   nextOwl=R(28,70);
   if(L<.2&&rain<.4&&forest>.15&&!ui.mute)try{K.owl(route(spatial(14,38,4,9)))}catch(e){}
+ }
+ /* mağara: damlayan su ve uzaktan taş gıcırtısı */
+ if(play&&G.cave){
+  nextDrip-=dt;if(nextDrip<=0){nextDrip=R(1.6,6);if(!ui.mute)try{K.drip(route(spatial(3,20,0,1)))}catch(e){}}
+  nextCreak-=dt;if(nextCreak<=0){nextCreak=R(18,45);if(!ui.mute)try{K.creak(route(spatial(10,30,0,3)))}catch(e){}}
  }
  /* oyuncu durumu: kalp atışı, mide, nefes */
  if(play){

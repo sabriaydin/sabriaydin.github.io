@@ -26,6 +26,8 @@ const IT={
  arrow:{n:'Ok',s:40,d:'Yay için mühimmat. Isabet etmeyen oklar çoğunlukla geri toplanabilir.'},
  torch:{n:'Meşale',s:5,tool:'torch',tier:1,d:'Elde tutulunca aydınlatır; kurtları ve karanlık yaratıkları uzak tutar. Yaklaşık 6 dakika yanar, yağmurda daha çabuk tükenir.'},
  coin:{n:'Bakır Sikke',s:99,d:'Köylülerle ticarette kullanılır; eşya satarak kazanılır.'},
+ gold:{n:'Altın Külçe',s:20,d:'Mağaralarda bulunur. Demirci ve madenciye yüksek fiyata satılır.'},
+ gem:{n:'Kızıl Mücevher',s:20,d:'Mağaraların derinliklerinde bulunur. Çok değerlidir; demirci ve madenciye satılır.'},
  bag:{n:'Uyku Tulumu',s:1,sleep:true,d:'Gece, barınakta, ateş yanında veya köyde kullan: sabaha kadar uyursun. Dayanıklılık ve akıl yerine gelir, açlık ve susuzluk artar.'},
  bandage:{n:'Bandaj',s:10,heal:true,d:'Kanamayı durdurur ve biraz sağlık verir. Elde basılı tutarak sarın.'},
  axe1:{n:'Taş Balta',s:1,tool:'axe',tier:1},axe2:{n:'Bakır Balta',s:1,tool:'axe',tier:2},axe3:{n:'Demir Balta',s:1,tool:'axe',tier:3},

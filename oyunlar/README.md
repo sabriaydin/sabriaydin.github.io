@@ -63,6 +63,11 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Beden durumu: dayanıklılık, akıl sağlığı, kanama, meşale yakıtı, hasar geri bildirimi, bandaj | `js/oyun/vucut.js` |
 | Gölge yaratıklar (korku), sahte gözlemciler, gerilim, gece yönetmeni | `js/oyun/dusmanlar.js` |
 | Yay, ok fiziği, isabet ve geri toplama | `js/oyun/silah.js` |
+| Eşyaya özgü saldırı gücü (`DMG`), vuruş bölgesi çarpanları (`ZONE`), canlı canı (%100) | `js/veri/hayvanlar.js`, `js/oyun/hayvanlar.js` (`zoneAt`, `hitAnimal`) |
+| Mağara üretimi (odalar, tüneller, havuzlar, sandık odası, yaratık ve eşya yerleşimi) | `js/dunya/magara.js` (`HG.genCave`), giriş yerleşimi `js/dunya/uretim.js` |
+| Mağaraya giriş/çıkış (yüzey ile mağara katı değişimi), kayıt uyumu | `js/oyun/magara.js` |
+| Mağara girişi modeli, tavan, sarkıt-dikit, kristaller, karanlık atmosfer | `js/sahne/magara.js` |
+| Harita: kabartma, keşif sisi, ızgara, pusula, ölçek, yakınlaştırma, hedef işareti | `js/oyun/harita.js` (çağrılar `js/oyun/arayuz.js` içindedir) |
 
 Not: Harita 256×256 karedir (`js/cekirdek/ad-alani.js`). Kayıt anahtarı `hunger-save-v6`.
 | Açlık, susuzluk, üşüme, hareket, zıplama, sığınak | `js/oyun/hayatta-kalma.js` |

@@ -33,9 +33,12 @@ GUIDE.foes=[
 ];
 GUIDE.map=[
  ['Ada','Harita 384×384 karelik tek bir adadır. Kıyıda kum, içeride çimenlik ve orman, kuzey ile doğuda kayalık dağlar bulunur. Ortadaki tatlı su gölünden içilebilir. Derin su geçilmez, sığ sudan yürünür ama yavaşlatır.'],
- ['Haritayı kullanma','{map} ile tam ekran haritayı açın. Sağ üstteki mini harita sizi merkezde gösterir. Kırmızı ok sizsiniz ve baktığınız yönü gösterir.'],
+ ['Haritayı kullanma','{map} ile tam ekran haritayı açın. Sağ üstteki mini harita sizi merkezde gösterir. Kırmızı ok sizsiniz ve baktığınız yönü gösterir. Harita gölgelendirilmiş kabartma olarak çizilir; dağlar, ormanlar ve kıyılar ayırt edilir.'],
+ ['Keşif sisi','Gidilmeyen yerler karanlık sisle örtülüdür. Yürüdükçe çevrenizdeki alan açılır; keşfedilen oran harita altında yüzde olarak yazar. Keşif durumu kayda işlenir.'],
+ ['Yakınlaştırma ve hedef','Tam ekran haritada tekerlekle yakınlaştırın, sürükleyerek kaydırın, çift tıkla görünümü sıfırlayın. Haritaya tıklamak hedef bayrağı koyar; mini haritada yön oku ve mesafe görünür. Aynı yere tekrar tıklamak bayrağı kaldırır. Izgara harfleri ve rakamları sektör adını verir; pusula kuzeyi gösterir, ölçek çubuğu metre cinsindendir.'],
  ['Köyler','Haritada sarı kare ile işaretlenir ve ancak yaklaşıldığında keşfedilir. Her köyün bir adı, evleri, fenerleri, çeşitli meslekten köylüleri ve görev tahtası vardır. Gece lambalar yanar ve köy güvenli bölgedir.'],
  ['Kamplar','Eşkenar dörtgen işaret terk edilmiş seferi kamplarını gösterir. Her kampta bir sandık ve bir not bulunur. Açılmış sandıklar gri görünür.'],
+ ['Mağaralar','Dağ eteklerinde rastgele yerlerde mağara girişleri bulunur. Yaklaşıldığında haritaya kemerli işaretle eklenir. Ayrıntı için Mağaralar sekmesine bakın.'],
  ['Dağlar ve madenler','Kayalık bölgelerde kömür, bakır ve demir damarları yer alır. Kömür ve bakır daha alçakta, demir yüksek dağlarda bulunur. Ayrıntı için Madenler sekmesine bakın.'],
  ['Hayvanlar','Koyun ve inek çayırlarda, tavşan ve geyik ormanda, kurt ve domuz ormanın derinliklerinde bulunur.']
 ];
@@ -52,11 +55,23 @@ GUIDE.tips=[
  ['Meşale','Eliniz boşken kullanın: elde yanan meşale aydınlatır, kurtları ve Gölgeleri uzak tutar. Yaklaşık 6 dakika yanar; yağmurda daha çabuk tükenir. Odun ve kömürle üretilir.'],
  ['Yay ve ok','Yayı eline alıp sol tıkı basılı tutarak gerin, bırakınca ateşler. Ger süresi arttıkça menzil ve hasar artar. Ok gerekir; isabet etmeyen oklar çoğu zaman toplanabilir. Rüzgâr ve mesafe oku sürükler; uzak hedeflerde hafif yukarı nişan alın.'],
  ['Mızrak','Hayvanlara ve düşmanlara karşı en güçlü yakın silahlardan biridir. Odun, kemik ve deriden üretilir.'],
+ ['Hasar ve elde tutulan eşya','Her eşyanın kendine özgü saldırı gücü vardır: çıplak el en zayıfı, mızrak ve demir balta en güçlüleridir. Taş ve bakır aletler arada kalır. Ok hasarı ger süresine göre değişir; tam gerilmiş ok en sert vuruştur.'],
+ ['Vuruş bölgeleri','Hasar vurulan bedene göre değişir: <b>kafa</b> iki katından fazla, <b>gövde</b> normal, <b>kol</b> azaltılmış, <b>bacak</b> en düşük hasarı verir. Bacağa vurulan hayvan paniğe kapılıp kaçar. Vurulan bölge nişangâh yanında yazar; kafadan vurmak başarım kazandırır.'],
+ ['Can yüzdesi','Hayvanların ve yaratıkların sağlığı yüzde olarak tutulur. Bakıp durduğunuz canlının sağlık yüzdesi nişan ipucunda görünür. Gölgeler vuruşlara karşı dayanıklıdır; en çok kafadan ve ışıktan zarar görürler.'],
  ['Bandaj','Kanamayı durdurur ve biraz sağlık verir. Eldeyken sol tıkı basılı tutun.'],
  ['Olta','Suya bakıp sol tıkı basılı tutun. Balık çiğ yenmemelidir; ateşte pişirin.'],
  ['Makas','Koyuna bakıp sol tıkı basılı tutarak yün kırkın. Yün bir süre sonra yeniden büyür.'],
  ['Uyku tulumu','Gece, barınakta, ateş yanında veya köyde kullanıldığında sabaha kadar uyutur. Dayanıklılık ve akıl yenilenir, açlık ve susuzluk artar.'],
  ['Deri mont','Çantada taşınırken soğuktan korur.']
+];
+
+GUIDE.caves=[
+ ['Giriş','Dağ eteklerinde karanlık kemerli kaya geçitler vardır; kafatası dikmeleri girişi belli eder. Yaklaşıp {use} ile içeri girilir. Mağara her girişte aynı düzende yeniden kurulur; yalnızca sandığın açık olması kalıcıdır.'],
+ ['İç yapı','Mağaralar rastgele üretilir: geniş odalar, dolambaçlı tüneller, çıkmaz sokaklar ve yeraltı havuzları. Gün ışığı yoktur; Gölgeler burada gece gündüz fark etmeksizin dolaşır. Yanınızda meşale, bandaj ve ok bulundurun.'],
+ ['Karanlık ve ışık','Meşalesiz görüş birkaç metredir. Işıldayan kristaller (turkuaz, mor, mavi) yol gösterir; kırmızı kristaller sandık odasını belli eder. Mavi-beyaz ışık sütunu çıkıştır; yanında sönmeyen bir ateş vardır, güvenli sığınaktır. Yönünüzü haritadan takip edin; mağaranın kendi planı keşfettikçe açılır.'],
+ ['Tehlikeler','Gölge sayısı, mağaranın uzaklığına ve derinliğine göre artar. Sandık odasının yanında nöbetçi Gölgeler bulunur. Bakıldığında donarlar, bakış kayınca yaklaşırlar. Kafadan vurulduklarında daha çok yaralanır ve bir süre geri çekilirler. Dar tünellerde sırtınızı açık bırakmayın.'],
+ ['Ganimet','Az ama değerlidir: çıkmaz tünel uçlarında altın külçe veya kızıl mücevher, kenarlarda kömür-bakır-demir damarları, en derinde mühürlü sandık. Altın ve mücevher demirci ve madenciye yüksek fiyata satılır; sandıktan demir alet, ok ve meşale çıkabilir.'],
+ ['Kayıt','Mağaradayken kaydedilen oyun, girişin önünden devam eder. Sandık açıksa açık kalır; mağaradaki yaratıklar ve cevherler ise her girişte yenilenir.']
 ];
 
 /* Başarımlar: [kimlik, ad, açıklama, deneyim, koşul(G)] — koşullar basarimlar.js içinde */

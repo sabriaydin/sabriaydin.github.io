@@ -38,7 +38,13 @@ const ACH=[
  ['blood','Kızıl Gece','Bir Kan Ayı gecesini atlat.',30,()=>S('blood')>=1],
  ['lvl5','Deneyimli','5. seviyeye ulaş.',16,()=>(G.lvl||1)>=5],
  ['lvl10','Usta','10. seviyeye ulaş.',40,()=>(G.lvl||1)>=10],
- ['fall','Yer Çekimi','Yüksekten düşüp hayatta kal.',6,()=>F('fell')]
+ ['fall','Yer Çekimi','Yüksekten düşüp hayatta kal.',6,()=>F('fell')],
+ ['headshot','Tam Isabet','Bir canlıyı kafasından vurarak öldür.',10,()=>F('headshot')],
+ ['cave','Karanlığa İniş','Bir mağaraya gir.',12,()=>F('cave')],
+ ['cavedeep','Karanlıkta Ayakta','Bir mağarada en az yarım dakika hayatta kal.',14,()=>F('cavedeep')],
+ ['vault','Mühürlü Hazine','Bir mağaranın hazine sandığını aç.',28,()=>F('vault')],
+ ['gem','Kızıl Parıltı','Bir mücevher veya altın külçe taşı.',16,()=>HG.count&&(HG.count('gem')>=1||HG.count('gold')>=1)],
+ ['cave3','Mağara Kâşifi','Üç kez mağaraya gir.',26,()=>S('caves')>=3]
 ];
 HG.ACH=ACH.map(a=>[a[0],a[1],a[2],a[3]]);
 const prevI=HG.progInit,prevS=HG.progSave,prevL=HG.progLoad;

@@ -50,7 +50,7 @@ function foeAI(a,def,dt){
  }
  /* gün ışığında erir */
  if(L>.55){
-  a.hp-=dt*6;if(rnd()<dt*8)HG.Scene.burst(a.x+(rnd()-.5)*.4,HG.Scene.groundY(a.x,a.z)+1+rnd(),a.z+(rnd()-.5)*.4,0x20202a,2);
+  a.hp-=dt*27;if(rnd()<dt*8)HG.Scene.burst(a.x+(rnd()-.5)*.4,HG.Scene.groundY(a.x,a.z)+1+rnd(),a.z+(rnd()-.5)*.4,0x20202a,2);
   if(a.hp<=0){HG.killAnimal(a);return {head:a.yaw,spd:0}}
  }
  const ll=HG.lightLevel(a.x,a.z);
@@ -58,7 +58,7 @@ function foeAI(a,def,dt){
  if(ll>.12||a.flinch>0){
   if(a.flinch>0)a.flinch-=dt;
   if(ll>.55){
-   a.hp-=dt*9;a.hissT=(a.hissT||0)-dt;
+   a.hp-=dt*40;a.hissT=(a.hissT||0)-dt;
    if(a.hissT<=0){a.hissT=.9;HG.snd('hiss',{x:a.x,z:a.z})}
    if(rnd()<dt*14)HG.Scene.burst(a.x,HG.Scene.groundY(a.x,a.z)+1.2,a.z,0x2a2a38,2);
    if(a.hp<=0){HG.killAnimal(a);return {head:a.yaw,spd:0}}
@@ -113,13 +113,13 @@ function updateFoes(dt){
   real++;
   const d=Math.hypot(a.x-G.px,a.z-G.py);
   if(d<near){near=d;seenNear=!!a.seen}
-  if(d>80)a.gone=true,a.dying=.001;
+  if(d>80&&!G.cave)a.gone=true,a.dying=.001;
  }
  /* gerilim: yakındaki gölge, korku seviyesini yükseltir */
  const tf=near<32?clamp(1-near/32,0,1)*(seenNear?1:.75):0;
  sc.fear+=(tf-sc.fear)*(1-Math.exp(-dt*(tf>sc.fear?1.6:.35)));
  G.foeT=(G.foeT===undefined?50:G.foeT)-dt;
- if(dark>.55&&G.clock>80){
+ if(dark>.55&&G.clock>80&&!G.cave){
   const want=Math.min(G.blood?11:6,1+Math.floor((dayNo()-1)*.9)+(G.san<35?1:0)+(G.blood?4:0));
   if(real<want&&G.foeT<=0){
    if(spawnShade(false))G.foeT=clamp(28-dayNo()*2.2,10,28)*(.7+rnd()*.6)*(G.blood?.45:1);else G.foeT=4;
@@ -127,7 +127,7 @@ function updateFoes(dt){
  }
  /* akıl sağlığı düşükken kenarda duran sahte gözlemciler */
  G.watchSp=(G.watchSp===undefined?30:G.watchSp)-dt;
- if(G.san<48&&L<.7&&G.watchSp<=0){
+ if(G.san<48&&L<.7&&G.watchSp<=0&&!G.cave){
   G.watchSp=18+rnd()*28;
   if(fakes<2)spawnShade(true);
  }

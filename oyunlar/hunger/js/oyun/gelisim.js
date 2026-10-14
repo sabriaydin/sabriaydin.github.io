@@ -15,7 +15,7 @@ const PERKS=[
 const perk=k=>(G.perks&&G.perks[k])||0;
 function progInit(){
  G.xp=0;G.lvl=1;G.pts=0;G.perks={};G.notes=[];G.quests={};G.lastDay=1;G.blood=false;G.bloodDay=0;
- G.stats={kills:0,shades:0,hunted:0,chests:0,quests:0,traded:0,blood:0,crafted:0};
+ G.stats={kills:0,shades:0,hunted:0,chests:0,quests:0,traded:0,blood:0,crafted:0,caves:0};
 }
 function progSave(){return {xp:G.xp,lvl:G.lvl,pts:G.pts,perks:G.perks,notes:G.notes,quests:G.quests,stats:G.stats,lastDay:G.lastDay,blood:!!G.blood,bloodDay:G.bloodDay}}
 function progLoad(s){

@@ -3,7 +3,7 @@
 'use strict';
 const {G,ui,IT,RC,STN,ICON,ANIMAL,inp}=HG;
 const $=HG.$;
-const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['ach','Başarımlar'],['keys','Tuşlar']];
+const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['ach','Başarımlar']];
 let tab='play',openFrom=null;
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 /* {eylem} -> atanmış tuş */
@@ -41,11 +41,6 @@ function ach(){
   return `<div class="nt${ok?' hl':''}"><b>${ok?'★ ':'☆ '}${a[1]}</b><span>${a[2]}${ok?'':''}</span></div>`;
  }).join('');
 }
-function keys(){
- const L=[['fwd','İleri'],['back','Geri'],['left','Sola'],['right','Sağa'],['sprint','Koş'],['jump','Zıpla'],['use','Kullan / al / konuş'],['place','Yapıyı yerleştir'],['inv','Envanter'],['craft','Üretim'],['map','Harita'],['jr','Günlük'],['guide','Rehber'],['mute','Sesi aç/kapat'],['qsave','Hızlı kayıt']];
- return '<div class="mut">Tuşlar Ayarlar › Kontrol bölümünden değiştirilebilir.</div><div class="keys">'+L.map(x=>`<kbd>${esc(HG.keyLabel(HG.bind[x[0]][0]))}${HG.bind[x[0]][1]?' / '+esc(HG.keyLabel(HG.bind[x[0]][1])):''}</kbd><span>${x[1]}</span>`).join('')
-  +'<kbd>Sol tık</kbd><span>Kes, topla, kaz, vur, su doldur; yayı ger (basılı tut)</span><kbd>Sağ tık</kbd><span>Eşyayı kullan, yerdekini al, köylüyle konuş</span><kbd>1 - 8</kbd><span>Hızlı erişim kutuları</span><kbd>Tekerlek</kbd><span>Eşya seç</span><kbd>Esc</kbd><span>Pencereyi kapat / duraklat</span></div>';
-}
 function body(){
  switch(tab){
   case 'play':return sec(HG.GUIDE.play);
@@ -57,8 +52,9 @@ function body(){
   case 'items':return items();
   case 'recipes':return recipes();
   case 'tips':return sec(HG.GUIDE.tips);
+  case 'caves':return sec(HG.GUIDE.caves);
   case 'ach':return ach();
-  default:return keys();
+  default:return sec(HG.GUIDE.play);
  }
 }
 function render(){

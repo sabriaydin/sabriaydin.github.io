@@ -21,7 +21,7 @@ function recover(x,y,z,chance){
  if(Math.random()<chance)HG.spawnDrop('arrow',1,{x,z,y:y+.3,vx:0,vz:0});
 }
 function hitTarget(ar,ox,oy,oz){
- /* doğru parçası - dikey kapsül (küre zinciri) testi */
+ /* doğru parçası - dikey kapsül (küre zinciri) testi; vuruş noktası da döner */
  let best=null,bt=2;
  const dx=ar.x-ox,dy=ar.y-oy,dz=ar.z-oz;
  for(const a of G.animals||[]){
@@ -33,7 +33,7 @@ function hitTarget(ar,ox,oy,oz){
    const cy=gy+def.h*f,vx=a.x-ox,vy=cy-oy,vz=a.z-oz,L2=dx*dx+dy*dy+dz*dz||1e-6;
    let t=(vx*dx+vy*dy+vz*dz)/L2;t=clamp(t,0,1);
    const px=ox+dx*t-a.x,py=oy+dy*t-cy,pz=oz+dz*t-a.z;
-   if(px*px+py*py+pz*pz<rr*rr&&t<bt){bt=t;best=a}
+   if(px*px+py*py+pz*pz<rr*rr&&t<bt){bt=t;best={a,x:ox+dx*t,y:oy+dy*t,z:oz+dz*t}}
   }
  }
  return best;
@@ -57,11 +57,10 @@ function updateArrows(dt){
    /* canlılar */
    const tg=hitTarget(a,ox,oy,oz);
    if(tg){
-    const dmg=2.5+7.5*Math.pow(a.draw,1.3);
-    const def=ANIMAL[tg.t];
-    HG.hitAnimal(tg,dmg);HG.hitMarker(tg.hp<=0);
-    HG.snd('arrowflesh',{x:tg.x,z:tg.z,y:gy+def.h*.5});
-    recover(tg.x,gy,tg.z,.55);
+    const an=tg.a,def=ANIMAL[an.t];
+    const zone=HG.hitAnimal(an,HG.arrowDamage(a.draw),tg);HG.hitMarker(an.hp<=0,zone);
+    HG.snd('arrowflesh',{x:an.x,z:an.z,y:gy+def.h*.5});
+    recover(an.x,gy,an.z,.55);
     L.splice(k,1);break;
    }
    /* su */
