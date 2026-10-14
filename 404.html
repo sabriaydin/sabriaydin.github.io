@@ -1,180 +1,41 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa Bulunamadı!</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #121212;
-            color: #a9b7c6;
-            font-family: 'Consolas', 'Courier New', monospace;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-        /* İnce Tarama Çizgileri (Ciddi Monitör Efekti) */
-        .scanlines {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px;
-            z-index: 10;
-            pointer-events: none;
-        }
-        .terminal-window {
-            width: 90%;
-            max-width: 800px;
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            z-index: 20;
-            position: relative;
-        }
-        .terminal-header {
-            background-color: #2d2d2d;
-            padding: 10px 15px;
-            border-bottom: 1px solid #333;
-            border-radius: 6px 6px 0 0;
-            display: flex;
-            align-items: center;
-        }
-        .terminal-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .btn {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-        .btn-red { background-color: #ff5f56; }
-        .btn-yellow { background-color: #ffbd2e; }
-        .btn-green { background-color: #27c93f; }
-        .terminal-title {
-            color: #888;
-            font-size: 0.9rem;
-            margin-left: 15px;
-        }
-        .terminal-body {
-            padding: 30px;
-            min-height: 250px;
-        }
-        .error-code {
-            color: #cc6666;
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-        .log-output {
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-        .log-line {
-            margin-bottom: 10px;
-        }
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.1rem;
-            background-color: #a9b7c6;
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-            margin-left: 2px;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        .action-container {
-            margin-top: 40px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        .return-link {
-            display: inline-block;
-            color: #6a8759;
-            text-decoration: none;
-            border: 1px solid #6a8759;
-            padding: 8px 20px;
-            transition: all 0.2s;
-            background: transparent;
-            font-weight: bold;
-        }
-        .return-link:hover {
-            background-color: #6a8759;
-            color: #1e1e1e;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<title>Sayfa bulunamadı | Sabri Aydın</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b72a25'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%23efede9'/%3E%3C/svg%3E">
+<!-- Bu sayfa her adreste çalışsın diye tek başına yeterlidir: dış CSS/JS dosyası kullanmaz. -->
+<style>
+*{box-sizing:border-box;margin:0}
+body{min-height:100vh;display:grid;place-items:center;padding:24px;background:#1e1e21;color:#e9e6e1;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{width:100%;max-width:520px;padding:44px 40px;background:#e7e4df;color:#1c1c1e;border-radius:10px;border-left:6px solid #a8231f;text-align:left}
+.code{font-size:3.5rem;font-weight:800;line-height:1;color:#b72a25;letter-spacing:-.02em}
+h1{font-size:1.8rem;line-height:1.2;margin:14px 0 10px;letter-spacing:-.01em}
+p{color:#5b5853;margin-bottom:26px}
+.code{margin-bottom:0}
+a{display:inline-block;padding:11px 20px;border-radius:10px;background:#b72a25;color:#fff;font-weight:700;text-decoration:none}
+a:hover{background:#9a211d}a:focus-visible{outline:2px solid #ec6a63;outline-offset:2px}
+</style>
 </head>
 <body>
-    <div class="scanlines"></div>
-    <div class="terminal-window">
-        <div class="terminal-header">
-            <div class="terminal-buttons">
-                <div class="btn btn-red"></div>
-                <div class="btn btn-yellow"></div>
-                <div class="btn btn-green"></div>
-            </div>
-            <div class="terminal-title">sunucu_loglari - root@github-pages:~</div>
-        </div>
-        <div class="terminal-body">
-            <div class="error-code">[SİSTEM] HATA 404: KRİTİK İSTİSNA</div>
-            <div class="log-output">
-                <span id="typing-area"></span><span class="cursor" id="cursor"></span>
-            </div>
-            <div class="action-container" id="action-btn">
-                <a href="/" class="return-link">&gt; ./ana_dizine_don.sh</a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const logs = [
-            "> İstek yapılan URL sunucu kayıtlarında bulunamadı.",
-            "> Dizin erişim reddedildi veya dosya taşınmış olabilir.",
-            "> Oturum kurtarma protokolü başlatılıyor...",
-            "> Lütfen ana dizine dönüş yapın."
-        ];
-        
-        let logIndex = 0;
-        let charIndex = 0;
-        const typingSpeed = 30;
-        const area = document.getElementById("typing-area");
-        
-        function typeLog() {
-            if (logIndex < logs.length) {
-                const currentStr = logs[logIndex];
-                if (charIndex < currentStr.length) {
-                    area.innerHTML += currentStr.charAt(charIndex);
-                    charIndex++;
-                    setTimeout(typeLog, typingSpeed);
-                } else {
-                    area.innerHTML += "<br>";
-                    logIndex++;
-                    charIndex = 0;
-                    setTimeout(typeLog, 400); 
-                }
-            } else {
-                document.getElementById("action-btn").style.opacity = "1";
-            }
-        }
-        
-        window.onload = () => {
-            setTimeout(typeLog, 500);
-        };
-    </script>
+<main>
+<p class="code" aria-hidden="true">404</p>
+<h1>Sayfa bulunamadı</h1>
+<p>Aradığın sayfa yok ya da taşınmış.</p>
+<a id="home" href="/">Ana sayfaya dön</a>
+</main>
+<script>
+// GitHub Pages proje sitelerinde ana sayfa /depo-adi/ altındadır; kullanıcı sitelerinde ve özel alan adlarında kökte.
+function siteBase(host,path){
+  var seg=path.split('/');
+  if(/\.github\.io$/.test(host)&&seg.length>2&&seg[1]!=='posts'&&seg[1]!=='assets')return '/'+seg[1]+'/';
+  return '/';
+}
+document.getElementById('home').href=siteBase(location.hostname,location.pathname);
+</script>
 </body>
 </html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Renk Kodu Oluşturucu</title>
+<meta name="description" content="Renk seç, HEX, RGB ve HSL kodlarını tek tıkla kopyala; uyumlu renk önerileri al.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-10-13 08:44">
+<meta name="okuma" content="2">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Web sayfalarında renkler kodla yazılır. Bu araçla bir renk seçip CSS'te kullanabileceğin HEX, RGB ve HSL kodlarını anında alabilirsin. Uyumlu renk önerileri de gösterir.</p>
+<h2>Aracı dene</h2>
+<div class="arac">
+  <div class="renk" id="sw"><span id="swt"></span></div>
+  <div class="satir">
+    <label for="pick">Renk seç<input type="color" id="pick" value="#b72a25"></label>
+    <label for="hex">HEX kodu<input type="text" id="hex" maxlength="7" spellcheck="false" autocomplete="off"></label>
+  </div>
+  <div class="satir">
+    <label for="r">Kırmızı (R, 0-255)<input type="number" id="r" min="0" max="255"></label>
+    <label for="g">Yeşil (G, 0-255)<input type="number" id="g" min="0" max="255"></label>
+    <label for="b">Mavi (B, 0-255)<input type="number" id="b" min="0" max="255"></label>
+  </div>
+  <div class="satir">
+    <label for="h">Ton (H, 0-360)<input type="number" id="h" min="0" max="360"></label>
+    <label for="s">Doygunluk (S, %)<input type="number" id="s" min="0" max="100"></label>
+    <label for="l">Parlaklık (L, %)<input type="number" id="l" min="0" max="100"></label>
+  </div>
+  <div class="kod"><b>HEX</b><code id="o-hex"></code><button type="button" class="ikinci" data-kopyala="o-hex">Kopyala</button></div>
+  <div class="kod"><b>RGB</b><code id="o-rgb"></code><button type="button" class="ikinci" data-kopyala="o-rgb">Kopyala</button></div>
+  <div class="kod"><b>HSL</b><code id="o-hsl"></code><button type="button" class="ikinci" data-kopyala="o-hsl">Kopyala</button></div>
+  <div class="dugmeler"><button type="button" id="rastgele">Rastgele renk</button></div>
+  <h3>Uyumlu renkler (tıklayarak seç)</h3>
+  <div class="palet" id="palet"></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const sinir=(v,a,b)=>Math.min(b,Math.max(a,Math.round(+v||0)));
+const hex2rgb=h=>{const n=parseInt(h.slice(1),16);return[n>>16&255,n>>8&255,n&255]};
+const rgb2hex=(r,g,b)=>'#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+const rgb2hsl=(r,g,b)=>{r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,l=(mx+mn)/2;let h=0,s=0;
+  if(d){s=d/(1-Math.abs(2*l-1));h=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;if(h<0)h+=360}
+  return[Math.round(h),Math.round(s*100),Math.round(l*100)]};
+const hsl2rgb=(h,s,l)=>{s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  return[f(0),f(8),f(4)].map(v=>Math.round(v*255))};
+const lin=c=>{c/=255;return c<=.03928?c/12.92:Math.pow((c+.055)/1.055,2.4)};
+const yazi=c=>(.2126*lin(c[0])+.7152*lin(c[1])+.0722*lin(c[2]))>.179?'#000':'#fff';
+let renk=[183,42,37];
+const palet=()=>{const[h,s,l]=rgb2hsl(...renk);
+  const L=[['Tamamlayıcı',h+180,s,l],['Benzer -30°',h-30,s,l],['Benzer +30°',h+30,s,l],['Üçlü 1',h+120,s,l],['Üçlü 2',h+240,s,l],['Açık ton',h,s,Math.min(90,l+20)],['Koyu ton',h,s,Math.max(10,l-20)]];
+  $('palet').innerHTML=L.map(([ad,hh,ss,ll])=>{const c=hsl2rgb(((hh%360)+360)%360,ss,ll),hx=rgb2hex(...c);
+    return `<button type="button" data-c="${hx}" style="background:${hx};color:${yazi(c)}" aria-label="${ad}: ${hx}">${ad}<br>${hx}</button>`}).join('')};
+const yaz=kaynak=>{const[r,g,b]=renk,[h,s,l]=rgb2hsl(r,g,b),hx=rgb2hex(r,g,b);
+  if(kaynak!=='pick')$('pick').value=hx.toLowerCase();
+  if(kaynak!=='hex')$('hex').value=hx;
+  if(kaynak!=='rgb'){$('r').value=r;$('g').value=g;$('b').value=b}
+  if(kaynak!=='hsl'){$('h').value=h;$('s').value=s;$('l').value=l}
+  $('sw').style.background=hx;$('sw').style.color=yazi(renk);$('swt').textContent=hx;
+  $('o-hex').textContent=hx;$('o-rgb').textContent=`rgb(${r}, ${g}, ${b})`;$('o-hsl').textContent=`hsl(${h}, ${s}%, ${l}%)`;
+  $('hex').removeAttribute('aria-invalid');palet()};
+$('pick').oninput=()=>{renk=hex2rgb($('pick').value);yaz('pick')};
+$('hex').oninput=()=>{let v=$('hex').value.trim().replace(/^#/,'');
+  if(/^[0-9a-f]{3}$/i.test(v))v=v.replace(/./g,'$&$&');
+  if(/^[0-9a-f]{6}$/i.test(v)){renk=hex2rgb('#'+v);yaz('hex')}else $('hex').setAttribute('aria-invalid','true')};
+['r','g','b'].forEach(i=>$(i).oninput=()=>{renk=[sinir($('r').value,0,255),sinir($('g').value,0,255),sinir($('b').value,0,255)];yaz('rgb')});
+['h','s','l'].forEach(i=>$(i).oninput=()=>{renk=hsl2rgb(sinir($('h').value,0,360),sinir($('s').value,0,100),sinir($('l').value,0,100));yaz('hsl')});
+$('rastgele').onclick=()=>{renk=[0,0,0].map(()=>Math.floor(Math.random()*256));yaz()};
+$('palet').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=[...$('palet').children].indexOf(b);renk=hex2rgb(b.dataset.c);yaz('palet');$('palet').children[i].focus()};
+yaz();
+})();
+</script>
+<h2>Nasıl kullanılır?</h2>
+<ul>
+<li>Renk kutusuna tıklayıp rengi seç, ya da HEX, RGB ve HSL alanlarından birine değer yaz. Diğerleri kendiliğinden güncellenir.</li>
+<li>Kodun yanındaki <b>Kopyala</b> düğmesi kodu panoya alır.</li>
+<li><b>Rastgele renk</b> ile ilham al. Aşağıdaki uyumlu renklere tıklayarak onları seçebilirsin.</li>
+<li>Büyük renk kutusundaki yazı, rengin üzerinde okunabilir kalacak biçimde otomatik açık veya koyu olur; kendi sayfanda metin rengini seçerken de bu mantığı izle.</li>
+</ul>
+<h2>Kodlar ne demek?</h2>
+<table>
+<thead><tr><th>Biçim</th><th>Örnek</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td>HEX</td><td><code>#B72A25</code></td><td>Kırmızı, yeşil, mavi değerlerinin 16'lık sistemde yazımı. En yaygın biçim.</td></tr>
+<tr><td>RGB</td><td><code>rgb(183, 42, 37)</code></td><td>Kırmızı, yeşil, mavi miktarı (0-255).</td></tr>
+<tr><td>HSL</td><td><code>hsl(3, 66%, 43%)</code></td><td>Ton (0-360 derece), doygunluk ve parlaklık. Açık ve koyu tonlar üretmek için en kolayı.</td></tr>
+</tbody>
+</table>
+<h2>CSS'te kullanımı</h2>
+<pre>h1 {
+  color: #B72A25;
+  background-color: hsl(3, 66%, 93%);
+  border-bottom: 3px solid rgb(183, 42, 37);
+}</pre>
+<p>Üç yazım da aynı sonucu verir; birini seç ve tutarlı kullan. Rengi öğrendiklerini uygulamak için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracında deneyebilirsin.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

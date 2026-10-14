@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Git ve GitHub ile Sürüm Kontrolü</title>
+<meta name="description" content="Git kurulumu, repository, add, commit, branch, merge, push ve pull komutları, .gitignore, GitHub'a yükleme ve geri alma işlemleri.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 16:40">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p><b>Git</b>, dosyalardaki değişiklikleri kaydeden ve geçmişe dönmeyi sağlayan sürüm kontrol sistemidir. <b>GitHub</b> ise Git depolarını internette barındıran ve GitHub Pages ile ücretsiz web sitesi yayınlamayı sağlayan hizmettir. Bir sayfa üzerinde çalışırken "çalışan son sürüm" kaybolmaz, bozulan bir değişiklik geri alınabilir ve çalışma birden fazla kişiyle paylaşılabilir.</p>
+<h2>Temel kavramlar</h2>
+<table>
+<thead><tr><th>Kavram</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><b>Repository (depo)</b></td><td>Projenin dosyalarını ve tüm değişiklik geçmişini içeren klasör.</td></tr>
+<tr><td><b>Commit</b></td><td>Değişikliklerin açıklama notuyla kaydedilmiş bir anlık görüntüsü.</td></tr>
+<tr><td><b>Branch (dal)</b></td><td>Ana çalışmayı bozmadan paralel olarak geliştirme yapılan çizgi. Ana dal genellikle <code>main</code> adını taşır.</td></tr>
+<tr><td><b>Remote (uzak depo)</b></td><td>GitHub üzerindeki depo kopyası. Varsayılan adı <code>origin</code>'dir.</td></tr>
+<tr><td><b>Working directory / Staging area</b></td><td>Çalışma klasörü ve bir sonraki commit'e eklenmek üzere seçilmiş değişikliklerin bekleme alanı.</td></tr>
+</tbody>
+</table>
+<h2>Kurulum ve ilk ayar</h2>
+<p>Git, <a href="https://git-scm.com/">git-scm.com</a> adresinden (Windows için "Git for Windows") indirilir. Kurulum ve ayrıntılar için <a href="ucretsiz-21-git.html">Git</a> yazısına bakılabilir. Kurulumdan sonra bir kez ad ve e-posta tanımlanır; commit'lerde bu bilgiler görünür:</p>
+<pre>git config --global user.name "Ad Soyad"
+git config --global user.email "eposta@ornek.com"
+git config --global init.defaultBranch main
+
+git --version</pre>
+<blockquote>GitHub'da e-posta adresini gizlemek isteniyorsa GitHub'ın verdiği <code>...@users.noreply.github.com</code> adresi kullanılabilir.</blockquote>
+<h2>Yeni depo oluşturma ve ilk commit</h2>
+<pre>mkdir sayfam
+cd sayfam
+git init                      # klasörü Git deposu yapar
+
+# index.html ve style.css dosyaları oluşturulur
+
+git status                    # değişiklikleri gösterir
+git add index.html style.css  # dosyaları commit'e hazırlar (hepsi için: git add .)
+git commit -m "İlk sürüm: ana sayfa ve stil"</pre>
+<p><code>git add</code> seçilen değişiklikleri sahneye alır, <code>git commit</code> bunları açıklamasıyla birlikte kalıcı olarak kaydeder. Bu iki adımlı yapı, bir işte yapılan farklı değişikliklerin ayrı commit'ler olarak kaydedilmesini sağlar.</p>
+<h3>İyi commit mesajı</h3>
+<ul>
+<li>Kısa ve açıklayıcı olmalıdır: "Menüye iletişim bağlantısı eklendi", "Mobil görünümde taşma düzeltildi".</li>
+<li>"düzeltme", "son", "deneme" gibi anlamsız mesajlardan kaçınılır.</li>
+<li>Küçük ve sık commit atmak, büyük ve nadir commit atmaktan daha iyidir; geri almak da kolaylaşır.</li>
+</ul>
+<h2>Sık kullanılan komutlar</h2>
+<table>
+<thead><tr><th>Komut</th><th>Ne yapar?</th></tr></thead>
+<tbody>
+<tr><td><code>git status</code></td><td>Değişen, eklenen ve sahneye alınmış dosyaları listeler.</td></tr>
+<tr><td><code>git add .</code></td><td>Tüm değişiklikleri sahneye alır.</td></tr>
+<tr><td><code>git commit -m "mesaj"</code></td><td>Sahnedeki değişiklikleri kaydeder.</td></tr>
+<tr><td><code>git log --oneline</code></td><td>Commit geçmişini kısa liste halinde gösterir.</td></tr>
+<tr><td><code>git diff</code></td><td>Henüz sahneye alınmamış değişiklikleri satır satır gösterir.</td></tr>
+<tr><td><code>git branch</code></td><td>Dalları listeler.</td></tr>
+<tr><td><code>git switch -c yeni-dal</code></td><td>Yeni dal oluşturup ona geçer.</td></tr>
+<tr><td><code>git switch main</code></td><td><code>main</code> dalına geçer.</td></tr>
+<tr><td><code>git merge yeni-dal</code></td><td><code>yeni-dal</code> içindeki değişiklikleri bulunulan dala birleştirir.</td></tr>
+<tr><td><code>git clone adres</code></td><td>Uzak depoyu bilgisayara indirir.</td></tr>
+<tr><td><code>git pull</code></td><td>Uzak depodaki yeni commit'leri indirip birleştirir.</td></tr>
+<tr><td><code>git push</code></td><td>Yerel commit'leri uzak depoya gönderir.</td></tr>
+</tbody>
+</table>
+<h2>GitHub'a yükleme</h2>
+<ol>
+<li><a href="https://github.com">github.com</a> üzerinde hesap açılır ve <b>New repository</b> ile boş bir depo oluşturulur (README, .gitignore ekleme seçenekleri işaretlenmez).</li>
+<li>Açılan sayfadaki adres kopyalanır: <code>https://github.com/kullanici/sayfam.git</code></li>
+<li>Yerel klasörde aşağıdaki komutlar çalıştırılır:</li>
+</ol>
+<pre>git remote add origin https://github.com/kullanici/sayfam.git
+git branch -M main
+git push -u origin main</pre>
+<p>İlk <code>push</code> sırasında GitHub kimlik doğrulaması ister. Windows'ta Git ile birlikte gelen <b>Git Credential Manager</b> bir tarayıcı penceresi açar ve GitHub hesabıyla oturum açmak yeterlidir. Hesap parolası ile <code>push</code> yapılamaz; komut satırı kimlik doğrulaması için tarayıcı girişi veya kişisel erişim anahtarı (<b>Personal Access Token</b>) kullanılır.</p>
+<p><code>-u</code> parametresi, bu dalın uzak depoyla ilişkilendirilmesini sağlar; sonraki yüklemelerde yalnızca <code>git push</code> yazmak yeterli olur.</p>
+<h3>Günlük çalışma düzeni</h3>
+<pre>git pull                          # önce güncel hali al
+# ... dosyalarda değişiklik yap ...
+git add .
+git commit -m "Hakkında sayfası eklendi"
+git push</pre>
+<h2>GitHub Pages ile yayınlama</h2>
+<p>Depoda <b>Settings &gt; Pages</b> bölümünde <b>Source</b> olarak "Deploy from a branch", dal olarak <code>main</code> ve klasör olarak <code>/ (root)</code> seçilir. Birkaç dakika sonra site <code>https://kullanici.github.io/sayfam/</code> adresinde yayına girer. Bundan sonra her <code>git push</code>, siteyi otomatik günceller (bkz. <a href="html-11-proje-kisisel-sayfa.html">HTML Rehberi: Proje ve Yayınlama</a>).</p>
+<h2>Dallar (branch) ile güvenli deneme</h2>
+<p>Yeni bir özellik denenirken ana dalın bozulmaması için ayrı dal açılır:</p>
+<pre>git switch -c koyu-tema        # yeni dal aç ve geç
+# ... değişiklikleri yap, commit at ...
+git switch main                # ana dala dön
+git merge koyu-tema            # deneme başarılıysa birleştir
+git branch -d koyu-tema        # işi biten dalı sil</pre>
+<p>Deneme beğenilmezse dal hiç birleştirilmeden silinir (<code>git branch -D koyu-tema</code>) ve ana dal etkilenmez.</p>
+<h2>.gitignore: takip edilmeyecek dosyalar</h2>
+<p>Depoya girmemesi gereken dosyalar (gizli anahtarlar, derleme çıktıları, işletim sistemi dosyaları) kök dizindeki <code>.gitignore</code> dosyasına yazılır:</p>
+<pre>.DS_Store
+Thumbs.db
+node_modules/
+.env
+*.log</pre>
+<blockquote>Parola, API anahtarı gibi gizli bilgiler depoya commit edilmemelidir. Yanlışlıkla commit edilirse GitHub'a gönderilmemiş olsa bile önce anahtarın değiştirilmesi gerekir; geçmişten silmek tek başına yeterli güvenlik sağlamaz.</blockquote>
+<h2>Geri alma işlemleri</h2>
+<table>
+<thead><tr><th>Durum</th><th>Komut</th></tr></thead>
+<tbody>
+<tr><td>Commit edilmemiş dosya değişikliğini atmak</td><td><code>git restore dosya.html</code></td></tr>
+<tr><td><code>git add</code> ile eklenen dosyayı sahneden çıkarmak</td><td><code>git restore --staged dosya.html</code></td></tr>
+<tr><td>Son commit mesajını düzeltmek (henüz push edilmediyse)</td><td><code>git commit --amend -m "yeni mesaj"</code></td></tr>
+<tr><td>Yayınlanmış bir commit'in etkisini geri almak</td><td><code>git revert COMMIT_KODU</code> (geri alan yeni bir commit oluşturur)</td></tr>
+<tr><td>Eski bir sürüme bakmak</td><td><code>git switch --detach COMMIT_KODU</code>, ardından <code>git switch main</code> ile dönülür</td></tr>
+</tbody>
+</table>
+<blockquote><code>git restore</code> ile atılan commit edilmemiş değişiklikler <b>geri getirilemez</b>. <code>git reset --hard</code> ve <code>git push --force</code> komutları da veri kaybettirebilir; ne yaptığı bilinmeden kullanılmamalıdır. Paylaşılan geçmişi değiştirmek yerine <code>git revert</code> tercih edilir.</blockquote>
+<h2>Sık karşılaşılan hatalar</h2>
+<table>
+<thead><tr><th>Hata</th><th>Çözüm</th></tr></thead>
+<tbody>
+<tr><td><code>rejected ... fetch first</code> / <code>non-fast-forward</code></td><td>Uzak depoda yerelde olmayan commit'ler var. Önce <code>git pull</code>, sonra <code>git push</code> çalıştırılır.</td></tr>
+<tr><td><code>fatal: not a git repository</code></td><td>Komut, <code>git init</code> yapılmamış bir klasörde çalıştırılıyor; doğru klasöre geçilmelidir.</td></tr>
+<tr><td><code>Author identity unknown</code></td><td><code>user.name</code> ve <code>user.email</code> ayarlanmamış; ilk ayar komutları çalıştırılır.</td></tr>
+<tr><td>Birleştirme çakışması (merge conflict)</td><td>İki dalda aynı satır değişmiş. Dosyadaki <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code>, <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> işaretleri arasından doğru sürüm bırakılıp işaretler silinir, ardından <code>git add</code> ve <code>git commit</code> yapılır.</td></tr>
+</tbody>
+</table>
+<h2>Komut satırı istemeyenler için</h2>
+<p><a href="https://desktop.github.com/">GitHub Desktop</a> uygulaması, aynı işlemleri (commit, push, pull, dal) görsel arayüzle yapar. Visual Studio Code'da da sol taraftaki <b>Source Control</b> paneli yerleşik olarak Git desteği sunar.</p>
+<h2>Özet</h2>
+<ul>
+<li><code>git init</code> &gt; <code>git add</code> &gt; <code>git commit</code> ile değişiklikler kaydedilir.</li>
+<li><code>git push</code> ve <code>git pull</code> ile GitHub ile eşitlenir; GitHub Pages ile site yayınlanır.</li>
+<li>Deneme için dal açılır, olumlu sonuç alınırsa <code>main</code>'e birleştirilir.</li>
+<li>Gizli bilgiler asla commit edilmez; <code>.gitignore</code> kullanılır.</li>
+<li>Paylaşılan geçmişi değiştiren komutlar yerine <code>git revert</code> kullanılır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

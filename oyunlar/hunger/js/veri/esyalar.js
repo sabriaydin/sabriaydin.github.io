@@ -1,0 +1,42 @@
+/* Hunger 3D - eşya tanımları */
+(()=>{
+'use strict';
+const {O}=HG;
+/* ---------- Eşyalar ---------- */
+const IT={
+ wood:{n:'Odun',s:50},stone:{n:'Taş',s:50},coal:{n:'Kömür',s:50},sand:{n:'Kum',s:50},
+ copper_ore:{n:'Bakır Cevheri',s:50},iron_ore:{n:'Demir Cevheri',s:50},
+ copper_ingot:{n:'Bakır Külçe',s:50},iron_ingot:{n:'Demir Külçe',s:50},
+ berries:{n:'Yaban Meyvesi',s:30,food:{h:9,t:3},d:'Yenir: +9 açlık'},
+ coconut:{n:'Hindistan Cevizi',s:20,food:{h:10,t:16},d:'Yenir: +10 açlık, +16 susuzluk'},
+ fish:{n:'Çiğ Balık',s:20,food:{h:10,t:0,hp:-6},d:'Çiğ yenirse sağlığa zarar verir. Ateşte pişirin.'},
+ cfish:{n:'Pişmiş Balık',s:20,food:{h:38,t:0},d:'Yenir: +38 açlık'},
+ bottle:{n:'Boş Şişe',s:10,d:'Tatlı su gölüne bakıp sol tıkla doldurun.'},
+ wbottle:{n:'Su Şişesi',s:10,food:{h:0,t:45,ret:'bottle'},d:'İçilir: +45 susuzluk'},
+ meat:{n:'Çiğ Et',s:20,food:{h:14,t:0,hp:-8},d:'Çiğ yenirse sağlığa zarar verir. Ateşte pişirin.'},
+ cmeat:{n:'Pişmiş Et',s:20,food:{h:46,t:0},d:'Yenir: +46 açlık'},
+ milk:{n:'Süt Şişesi',s:10,food:{h:12,t:30,ret:'bottle'},d:'İçilir: +12 açlık, +30 susuzluk'},
+ leather:{n:'Deri',s:50,d:'Mızrak ve mont üretiminde kullanılır.'},
+ wool:{n:'Yün',s:50,d:'Mont üretiminde kullanılır.'},
+ bone:{n:'Kemik',s:50,d:'Mızrak üretiminde kullanılır.'},
+ spear:{n:'Mızrak',s:1,tool:'spear',tier:1,d:'Hayvanlara karşı güçlü silah.'},
+ shears:{n:'Makas',s:1,tool:'shears',tier:1,d:'Koyuna bakıp sol tıkı basılı tutarak yün kırkın.'},
+ coat:{n:'Deri Mont',s:1,d:'Çantada taşınırken soğuktan korur.'},
+ bow:{n:'Yay',s:1,tool:'bow',tier:1,d:'Basılı tut: ger, bırak: ateşle. Ok gerekir. Uzaktan avlanmak ve karanlık yaratıklara karşı kullanılır.'},
+ arrow:{n:'Ok',s:40,d:'Yay için mühimmat. Isabet etmeyen oklar çoğunlukla geri toplanabilir.'},
+ torch:{n:'Meşale',s:5,tool:'torch',tier:1,d:'Elde tutulunca aydınlatır; kurtları ve karanlık yaratıkları uzak tutar. Yaklaşık 6 dakika yanar, yağmurda daha çabuk tükenir.'},
+ coin:{n:'Bakır Sikke',s:99,d:'Köylülerle ticarette kullanılır; eşya satarak kazanılır.'},
+ bag:{n:'Uyku Tulumu',s:1,sleep:true,d:'Gece, barınakta, ateş yanında veya köyde kullan: sabaha kadar uyursun. Dayanıklılık ve akıl yerine gelir, açlık ve susuzluk artar.'},
+ bandage:{n:'Bandaj',s:10,heal:true,d:'Kanamayı durdurur ve biraz sağlık verir. Elde basılı tutarak sarın.'},
+ axe1:{n:'Taş Balta',s:1,tool:'axe',tier:1},axe2:{n:'Bakır Balta',s:1,tool:'axe',tier:2},axe3:{n:'Demir Balta',s:1,tool:'axe',tier:3},
+ pick1:{n:'Taş Kazma',s:1,tool:'pick',tier:1},pick2:{n:'Bakır Kazma',s:1,tool:'pick',tier:2},pick3:{n:'Demir Kazma',s:1,tool:'pick',tier:3},
+ rod:{n:'Olta',s:1,tool:'rod',tier:1,d:'Suya bakıp sol tıkı basılı tutun.'},
+ fire:{n:'Kamp Ateşi',s:10,place:O.FIRE,d:'Isıtır, aydınlatır. Balık pişirilir.'},
+ bench:{n:'Çalışma Tezgâhı',s:10,place:O.BENCH,d:'Bakır ve demir aletler yakınında üretilir.'},
+ furn:{n:'Ocak',s:10,place:O.FURN,d:'Cevher eritilir, şişe yapılır.'},
+ wallw:{n:'Tahta Duvar',s:50,place:O.WALLW},walls:{n:'Taş Duvar',s:50,place:O.WALLS},
+ door:{n:'Kapı',s:20,place:O.DOOR,d:'Geçilebilir, barınağı kapalı tutar.'}
+};
+const PLACE_ITEM={};for(const k in IT)if(IT[k].place)PLACE_ITEM[IT[k].place]=k;
+HG.IT=IT;HG.PLACE_ITEM=PLACE_ITEM;
+})();

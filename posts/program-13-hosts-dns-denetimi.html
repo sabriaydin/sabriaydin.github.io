@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hosts, DNS ve Proxy Bütünlük Denetimi (DNS Shield)</title>
+<meta name="description" content="hosts dosyasındaki yönlendirmeleri, DNS sunucularını ve proxy ayarlarını denetleyerek trafik yönlendirme saldırılarının izlerini arayan batch uygulaması.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-10-13 20:58">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Bazı kötü amaçlı yazılımlar, bir sitenin adresini sahte siteye yönlendirmek için <code>hosts</code> dosyasını, DNS sunucusu ayarını veya proxy ayarını değiştirir. Bu durumda tarayıcı doğru adresi gösterirken kullanıcı farkında olmadan sahte bir sayfaya ulaşabilir. Bu uygulama, üç ayarı kontrol eder ve alışılmadık olanları işaretler.</p>
+<h2>Ne yapar?</h2>
+<ul>
+<li><b>Hosts dosyası:</b> <code>hosts</code> dosyasındaki yorum olmayan satırları listeler. <code>127.0.0.1</code> ve <code>0.0.0.0</code> adreslerine yönlendirenleri engelleme/yerel giriş, diğerlerini <b>yönlendirme</b> olarak işaretler. Dosyanın son değişiklik tarihini gösterir.</li>
+<li><b>DNS sunucuları:</b> Bağdaştırıcıların kullandığı DNS adreslerini listeler; bilinen genel DNS sağlayıcıları (Cloudflare, Google, Quad9, OpenDNS) ve yerel ağ adresleri dışındakileri <b>tanınmayan</b> olarak işaretler.</li>
+<li><b>Proxy ayarları:</b> Sistem proxy'sinin ve otomatik proxy betiğinin (PAC) tanımlı olup olmadığını, ayrıca WinHTTP proxy ayarını gösterir.</li>
+<li>İstenirse DNS önbelleğini temizler.</li>
+</ul>
+<h2>Nasıl kullanılır?</h2>
+<ol>
+<li>Kod Not Defteri'ne yapıştırılır ve <code>dns_kalkani.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
+<li>Dosyaya çift tıklanarak çalıştırılır.</li>
+<li>Betik yönetici yetkisi gerektirmez. Sonunda DNS önbelleğinin temizlenip temizlenmeyeceği sorulur (<code>E</code> veya <code>H</code>).</li>
+</ol>
+<pre>@echo off
+setlocal EnableExtensions
+title [ DNS SHIELD ] Hosts, DNS ve Proxy Butunluk Denetimi
+color 0A
+cls
+echo.
+echo   ====================================================
+echo    [ DNS SHIELD ]  Hosts, DNS ve Proxy Denetimi
+echo   ====================================================
+echo.
+set /a UYARI=0
+
+echo [*] 1/4 Hosts dosyasi
+echo.
+set "HOSTS=%SystemRoot%\System32\drivers\etc\hosts"
+for %%f in ("%HOSTS%") do echo     Son degisiklik: %%~tf
+set /a GIRIS=0
+for /f "usebackq eol=# tokens=1,2" %%a in ("%HOSTS%") do call :hostsatir %%a %%b
+if %GIRIS% EQU 0 echo [+] Ozel giris yok ^(hosts dosyasi varsayilan durumda^).
+echo.
+
+echo [*] 2/4 DNS sunuculari
+echo.
+powershell -NoProfile -Command "$k='1.1.1.1','1.0.0.1','8.8.8.8','8.8.4.4','9.9.9.9','149.112.112.112','208.67.222.222','208.67.220.220'; Get-DnsClientServerAddress -AddressFamily IPv4 | ForEach-Object { foreach ($a in $_.ServerAddresses) { $d='[?] TANINMAYAN'; if ($k -contains $a) { $d='[+] bilinen saglayici' } elseif ($a -match '^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.)') { $d='[+] yerel ag' }; '    {0,-26} {1,-16} {2}' -f $_.InterfaceAlias,$a,$d } }"
+echo.
+
+echo [*] 3/4 Proxy ayarlari
+echo.
+set "IS=HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
+call :reg PROXYAC "%IS%" ProxyEnable
+call :reg PROXYSUNUCU "%IS%" ProxyServer
+call :reg OTOYAPI "%IS%" AutoConfigURL
+if "%PROXYAC%"=="0x1" echo [!] Sistem proxy'si ETKIN: %PROXYSUNUCU%
+if "%PROXYAC%"=="0x1" set /a UYARI+=1
+if not "%PROXYAC%"=="0x1" echo [+] Sistem proxy'si kapali.
+if not "%OTOYAPI%"=="Bilinmiyor" echo [!] Otomatik proxy betigi tanimli: %OTOYAPI%
+if not "%OTOYAPI%"=="Bilinmiyor" set /a UYARI+=1
+if "%OTOYAPI%"=="Bilinmiyor" echo [+] Otomatik proxy betigi ^(PAC^) tanimli degil.
+echo.
+echo     WinHTTP proxy:
+netsh winhttp show proxy
+echo.
+
+echo [*] 4/4 Ozet
+echo.
+if %UYARI% EQU 0 goto :temiz
+echo [!] %UYARI% bulgu var. Taniyamadiginiz yonlendirme ve proxy
+echo     kayitlarinin kaynagini arastirin; kendiniz eklemediyseniz
+echo     kaldirin ve virus taramasi yapin.
+goto :dns_sor
+:temiz
+echo [+] Belirgin bir yonlendirme veya proxy bulgusu yok.
+
+:dns_sor
+echo.
+choice /c EH /n /m "DNS onbellegi temizlensin mi? [E/H]: "
+if errorlevel 2 goto :bitti
+ipconfig /flushdns
+:bitti
+echo.
+pause
+exit /b 0
+
+rem ---------- Alt programlar ----------
+
+:hostsatir
+rem %1 = IP adresi, %2 = alan adi
+set "A=%~1"
+if "%A:~0,1%"=="#" exit /b
+set /a GIRIS+=1
+set "TUR=[!] YONLENDIRME"
+if "%~1"=="127.0.0.1" set "TUR=[i] yerel/engelleme"
+if "%~1"=="0.0.0.0" set "TUR=[i] yerel/engelleme"
+if "%~1"=="::1" set "TUR=[i] yerel/engelleme"
+echo     %TUR%: %~1  %~2
+if "%TUR%"=="[!] YONLENDIRME" set /a UYARI+=1
+exit /b
+
+:reg
+rem %1 = degisken adi, %2 = anahtar, %3 = deger adi
+set "%~1=Bilinmiyor"
+for /f "tokens=3" %%a in ('reg query "%~2" /v %~3 2^&gt;nul ^| findstr /i "%~3"') do set "%~1=%%a"
+exit /b</pre>
+<h2>Kod nasıl çalışıyor?</h2>
+<ul>
+<li><b><code>for /f ... eol=#</code>:</b> <code>hosts</code> dosyasını satır satır okur, <code>#</code> ile başlayan yorum satırlarını atlar. <code>tokens=1,2</code> satırdaki ilk iki parçayı (adres ve alan adı) alır, her satır <code>:hostsatir</code> alt programına gönderilir.</li>
+<li><b>Düzenli ifade:</b> PowerShell'deki <code>-match</code> kuralı <code>10.</code>, <code>192.168.</code>, <code>172.16-31.</code> ve <code>127.</code> ile başlayan adresleri yerel ağ olarak tanır.</li>
+<li><b>Kayıt defteri:</b> <code>ProxyEnable</code> değeri <code>0x1</code> ise sistem proxy'si açıktır. <code>ProxyServer</code> ve <code>AutoConfigURL</code> değerleri de aynı <code>:reg</code> alt programıyla okunur.</li>
+<li><b>Sayaç:</b> Her riskli bulgu <code>UYARI</code> değişkenini artırır; özet bölümü buna göre mesaj verir.</li>
+</ul>
+<h2>Sonuçların yorumlanması</h2>
+<ul>
+<li>Windows'un varsayılan <code>hosts</code> dosyası yalnızca yorum içerir. Kendiniz eklemediğiniz bir satır varsa şüphelidir; özellikle banka, e-posta veya arama motoru adlarının başka bir adrese yönlendirilmesi ciddi bir işarettir.</li>
+<li>Tanınmayan DNS sunucusu otomatik olarak kötü niyetli değildir (internet sağlayıcıları kendi sunucularını kullanır), ancak kurulmadığı hâlde değiştirilmişse yönlendirici ve bilgisayar ayarları kontrol edilmelidir.</li>
+<li>Kullanılmadığı hâlde etkin bir proxy veya PAC adresi, trafiğin başka bir sunucudan geçirildiği anlamına gelebilir. Kurumsal ağlarda bu ayarların bulunması normaldir.</li>
+<li>Bulgu tespit edildiğinde ilgili ayar kaldırılmalı, sistem virüs taramasından geçirilmeli ve önemli hesapların parolaları başka bir cihazdan değiştirilmelidir.</li>
+</ul>
+<blockquote><code>hosts</code> dosyası yalnızca okunur; betik dosyada değişiklik yapmaz. Tek değişiklik, istenirse DNS önbelleğinin temizlenmesidir.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Listeler</title>
+<meta name="description" content="Sırasız (ul), sıralı (ol) ve açıklama (dl) listeleri, iç içe listeler ve menü yapımında liste kullanımı.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 08:16">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Bilgileri madde madde sıralamak için listeler kullanılır. HTML'de üç tür liste vardır; en sık kullanılanlar sırasız ve sıralı listelerdir.</p>
+<h2>Sırasız liste: ul</h2>
+<p><code>&lt;ul&gt;</code> (unordered list) başına nokta konan maddeleri sıralar. Her madde <code>&lt;li&gt;</code> (list item) içinde yazılır.</p>
+<pre>&lt;ul&gt;
+  &lt;li&gt;Elma&lt;/li&gt;
+  &lt;li&gt;Armut&lt;/li&gt;
+  &lt;li&gt;Kiraz&lt;/li&gt;
+&lt;/ul&gt;</pre>
+<h2>Sıralı liste: ol</h2>
+<p><code>&lt;ol&gt;</code> (ordered list) maddeleri numaralandırır. Adım adım anlatımlar için uygundur.</p>
+<pre>&lt;ol&gt;
+  &lt;li&gt;Not Defteri'ni aç&lt;/li&gt;
+  &lt;li&gt;Kodu yaz&lt;/li&gt;
+  &lt;li&gt;index.html olarak kaydet&lt;/li&gt;
+&lt;/ol&gt;</pre>
+<p>Numaralandırmayı değiştirmek için nitelikler vardır:</p>
+<table>
+<thead><tr><th>Nitelik</th><th>Etkisi</th></tr></thead>
+<tbody>
+<tr><td><code>start="5"</code></td><td>Numaralandırma 5'ten başlar</td></tr>
+<tr><td><code>reversed</code></td><td>Numaralar tersten (3, 2, 1) gider</td></tr>
+<tr><td><code>type="a"</code></td><td>Harfle sıralar (a, b, c); <code>A</code>, <code>i</code>, <code>I</code> de olur</td></tr>
+</tbody>
+</table>
+<h2>İç içe listeler</h2>
+<p>Bir maddenin altına alt maddeler koymak için yeni bir liste, <b><code>&lt;li&gt;</code> etiketinin içine</b> yazılır:</p>
+<pre>&lt;ul&gt;
+  &lt;li&gt;Meyveler
+    &lt;ul&gt;
+      &lt;li&gt;Elma&lt;/li&gt;
+      &lt;li&gt;Armut&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Sebzeler
+    &lt;ul&gt;
+      &lt;li&gt;Havuç&lt;/li&gt;
+      &lt;li&gt;Kabak&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</pre>
+<p>İç liste <code>&lt;/li&gt;</code> kapanmadan önce yazılmalıdır; <code>&lt;ul&gt;</code> içine doğrudan <code>&lt;ul&gt;</code> koymak hatalıdır.</p>
+<h2>Açıklama listesi: dl</h2>
+<p>Terim ve tanım çiftleri için <code>&lt;dl&gt;</code> kullanılır. Terim <code>&lt;dt&gt;</code>, açıklaması <code>&lt;dd&gt;</code> ile yazılır. Sözlük, sık sorulan sorular veya bilgi kartları için idealdir.</p>
+<pre>&lt;dl&gt;
+  &lt;dt&gt;HTML&lt;/dt&gt;
+  &lt;dd&gt;Web sayfalarının yapısını kuran dil.&lt;/dd&gt;
+  &lt;dt&gt;CSS&lt;/dt&gt;
+  &lt;dd&gt;Sayfanın görünüşünü düzenleyen dil.&lt;/dd&gt;
+&lt;/dl&gt;</pre>
+<h2>Bağlantı listesi: menü</h2>
+<p>Sitelerdeki menüler aslında bağlantılardan oluşan bir listedir. Bu yapıyı ileride CSS ile yatay menüye çevireceksin:</p>
+<pre>&lt;ul&gt;
+  &lt;li&gt;&lt;a href="index.html"&gt;Ana Sayfa&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="hakkimda.html"&gt;Hakkımda&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href="iletisim.html"&gt;İletişim&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</pre>
+<h2>Sık yapılan hatalar</h2>
+<ul>
+<li><code>&lt;li&gt;</code> etiketini <code>&lt;ul&gt;</code> ya da <code>&lt;ol&gt;</code> dışında kullanmak</li>
+<li>Maddeleri <code>&lt;br&gt;</code> ile alt alta yazıp liste yerine geçirmek; ekran okuyucular bunu liste olarak tanımaz</li>
+<li>Kapanış etiketlerini unutmak</li>
+</ul>
+<p>Sonraki derste verileri satır ve sütunlarla düzenleyen tabloları öğreneceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

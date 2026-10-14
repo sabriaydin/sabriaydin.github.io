@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: PowerShell ve Yardımcı Araçlar</title>
+<meta name="description" content="Batch içinden PowerShell çağırma, çıktıyı değişkene alma, curl ile indirme, tar ile arşivleme, clip, mshta ve diğer yerleşik araçlar.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-10-13 21:40">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Batch dili basit işler için yeterlidir; ancak ondalık hesap, tarih aritmetiği, JSON işleme, web isteği ve metin dönüşümü gibi işlerde yetersiz kalır. Bu durumlarda betikten Windows'a dahil gelen diğer araçlar (özellikle PowerShell) çağrılır. Bu yazı, ek yazılım kurmadan kullanılabilecek araçları tanıtır.</p>
+<h2>PowerShell'i batch içinden çağırma</h2>
+<pre>powershell -NoProfile -Command "Get-Date"
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Betikler\islem.ps1"</pre>
+<table>
+<thead><tr><th>Parametre</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td><code>-NoProfile</code></td><td>Kullanıcı profilini yüklemez; başlangıç süresini kısaltır ve sonucun tutarlı olmasını sağlar</td></tr>
+<tr><td><code>-Command "..."</code></td><td>Verilen komutu çalıştırır</td></tr>
+<tr><td><code>-File betik.ps1</code></td><td><code>.ps1</code> dosyasını çalıştırır</td></tr>
+<tr><td><code>-ExecutionPolicy Bypass</code></td><td>Yalnızca bu çağrı için betik çalıştırma politikasını atlar</td></tr>
+<tr><td><code>-NonInteractive</code></td><td>Girdi beklemez</td></tr>
+</tbody>
+</table>
+<ul>
+<li>Batch ve PowerShell'de özel karakterler (<code>"</code>, <code>%</code>, <code>^</code>, <code>&amp;</code>, <code>|</code>) farklı yorumlanır. Karmaşık komutlarda çift tırnak yerine tek tırnak kullanılması işi kolaylaştırır.</li>
+<li>Batch dosyasında <code>%</code> karakteri PowerShell komutunda da gerekiyorsa <code>%%</code> olarak yazılır.</li>
+<li>Uzun PowerShell kodları için ayrı bir <code>.ps1</code> dosyası yazılıp <code>-File</code> ile çalıştırılır.</li>
+</ul>
+<h2>PowerShell çıktısını değişkene alma</h2>
+<pre>@echo off
+for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "(Get-CimInstance Win32_OperatingSystem).Caption"`) do set "SURUM=%%i"
+echo Surum: %SURUM%
+
+for /f %%i in ('powershell -NoProfile -Command "[math]::Round(10/3,2)"') do set "SONUC=%%i"
+echo 10/3 = %SONUC%
+pause</pre>
+<p>Örneklerdeki işlemler ve karşılıkları:</p>
+<table>
+<thead><tr><th>Amaç</th><th>PowerShell ifadesi</th></tr></thead>
+<tbody>
+<tr><td>Ondalık hesap</td><td><code>[math]::Round(10/3,2)</code></td></tr>
+<tr><td>Tarih biçimlendirme</td><td><code>Get-Date -Format yyyy-MM-dd</code></td></tr>
+<tr><td>7 gün öncesi</td><td><code>(Get-Date).AddDays(-7).ToString('yyyy-MM-dd')</code></td></tr>
+<tr><td>Büyük harf (Türkçe)</td><td><code>'merhaba'.ToUpper([Globalization.CultureInfo]'tr-TR')</code></td></tr>
+<tr><td>Dosya boyutu (MB)</td><td><code>[math]::Round((Get-Item 'dosya.zip').Length/1MB,1)</code></td></tr>
+<tr><td>Panodaki metin</td><td><code>Get-Clipboard</code></td></tr>
+<tr><td>Boş disk alanı (GB)</td><td><code>[math]::Round((Get-PSDrive C).Free/1GB,1)</code></td></tr>
+<tr><td>Rastgele parola</td><td><code>-join ((48..57)+(65..90)+(97..122) | Get-Random -Count 16 | % {[char]$_})</code></td></tr>
+</tbody>
+</table>
+<h2>İnternetten dosya indirme: curl</h2>
+<p>Windows 10 (1803) ve sonrasında <code>curl.exe</code> yerleşik gelir:</p>
+<pre>curl -L -o dosya.zip https://example.com/dosya.zip
+curl -s https://example.com/api/durum
+curl -I https://example.com               rem yalnizca basliklar
+curl -L -o indirilen.exe --retry 3 https://example.com/program.exe</pre>
+<ul>
+<li><code>-L</code> yönlendirmeleri takip eder; <code>-o</code> dosya adını belirler; <code>-s</code> ilerleme çıktısını gizler.</li>
+<li>PowerShell'deki <code>curl</code> takma adı farklı bir komuttur; <code>cmd</code> içinde <code>curl</code> zaten gerçek <code>curl.exe</code>'dir.</li>
+<li>İndirilen dosya çalıştırılmadan önce güvenilirliği doğrulanmalıdır; imza veya karma (hash) değeri kontrol edilebilir (bkz. <a href="program-09-hash-dogrulayici.html">Karma Değer Doğrulayıcı</a>).</li>
+</ul>
+<h2>Arşivleme: tar ve PowerShell</h2>
+<pre>rem zip olusturma (PowerShell)
+powershell -NoProfile -Command "Compress-Archive -Path 'C:\Proje\*' -DestinationPath 'C:\Yedek\proje.zip' -Force"
+
+rem zip acma
+powershell -NoProfile -Command "Expand-Archive -Path 'proje.zip' -DestinationPath 'C:\Cikti' -Force"
+
+rem tar ile (Windows 10 1803+) - zip de acabilir
+tar -a -c -f yedek.zip klasor
+tar -x -f arsiv.zip -C C:\Cikti</pre>
+<h2>Diğer yerleşik araçlar</h2>
+<table>
+<thead><tr><th>Araç</th><th>Kullanım</th></tr></thead>
+<tbody>
+<tr><td><code>clip</code></td><td>Girdiyi panoya kopyalar: <code>ipconfig | clip</code></td></tr>
+<tr><td><code>certutil</code></td><td>Karma değeri hesaplar: <code>certutil -hashfile dosya SHA256</code>. Base64: <code>certutil -encode giris.bin cikis.txt</code></td></tr>
+<tr><td><code>robocopy</code></td><td>Gelişmiş kopyalama ve eşitleme (bkz. <a href="egitim-07-dosya-klasor.html">Dosya ve Klasör İşlemleri</a>)</td></tr>
+<tr><td><code>fc</code></td><td>İki dosyayı karşılaştırır: <code>fc dosya1.txt dosya2.txt</code></td></tr>
+<tr><td><code>where</code></td><td>Programın yolunu bulur: <code>where python</code></td></tr>
+<tr><td><code>cipher /w:C:\</code></td><td>Boş disk alanını siler (silinen dosyaların kurtarılmasını zorlaştırır)</td></tr>
+<tr><td><code>schtasks</code></td><td>Zamanlanmış görevler (bkz. <a href="egitim-19-zamanlama-otomasyon.html">Zamanlama ve Otomasyon</a>)</td></tr>
+<tr><td><code>msg</code></td><td>Başka oturuma ileti gönderir (Pro ve üzeri)</td></tr>
+<tr><td><code>mshta</code>, <code>cscript</code></td><td>VBScript/JScript çalıştırır; ileri düzey ve güvenlik açısından hassas kullanım</td></tr>
+</tbody>
+</table>
+<pre>@echo off
+rem Mesaj kutusu gostermek icin (PowerShell)
+powershell -NoProfile -Command "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('Islem tamamlandi','Bilgi')" &gt; nul</pre>
+<h2>Ne zaman hangisi?</h2>
+<table>
+<thead><tr><th>İş</th><th>Öneri</th></tr></thead>
+<tbody>
+<tr><td>Dosya kopyalama, basit döngü, menü</td><td>Saf batch</td></tr>
+<tr><td>Ondalık hesap, tarih aritmetiği</td><td>PowerShell tek satır</td></tr>
+<tr><td>JSON/XML işleme, web API, karmaşık metin</td><td>PowerShell <code>.ps1</code> dosyası</td></tr>
+<tr><td>Karmaşık uygulama, grafik arayüz</td><td>PowerShell, Python veya başka dil</td></tr>
+</tbody>
+</table>
+<blockquote>Kurumsal ortamlarda PowerShell kullanımı politikalarla kısıtlanmış olabilir. Betiği başka bir bilgisayara götürmeden önce orada çalıştığı denenmelidir.</blockquote>
+<h2>Özet</h2>
+<ul>
+<li>Batch'in yetersiz kaldığı işlerde <code>powershell -NoProfile -Command</code> çağrılır.</li>
+<li>Çıktı <code>for /f</code> ile değişkene alınır.</li>
+<li><code>curl</code>, <code>tar</code>, <code>certutil</code>, <code>clip</code> ek kurulum olmadan kullanılabilir.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

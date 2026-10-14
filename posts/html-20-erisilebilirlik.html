@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Erişilebilirlik Temelleri</title>
+<meta name="description" content="Anlamsal etiketler, alt metin, etiketli formlar, klavye erişimi, odak göstergesi, karşıtlık ve temel ARIA kullanımıyla herkes tarafından kullanılabilen sayfalar.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 16:20">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Erişilebilirlik, bir sayfanın görme, işitme, hareket veya bilişsel engeli olan kişiler dahil herkes tarafından kullanılabilmesidir. Aynı önlemler; parlak güneş altında telefon kullananlara, fare kullanamayanlara ve yavaş bağlantıdaki ziyaretçilere de yarar sağlar. Erişilebilirliğin büyük bölümü ek bir çaba gerektirmez: HTML doğru kullanıldığında zaten sağlanır.</p>
+<h2>1. Anlamsal etiketleri kullanmak</h2>
+<p>Ekran okuyucular ve klavye gezinmesi, sayfanın yapısını etiketlerden öğrenir. Bu nedenle görünümü aynı olsa bile doğru etiket seçilmelidir.</p>
+<table>
+<thead><tr><th>Yanlış</th><th>Doğru</th><th>Neden?</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;div onclick="..."&gt;Gönder&lt;/div&gt;</code></td><td><code>&lt;button&gt;Gönder&lt;/button&gt;</code></td><td><code>button</code> klavyeyle odaklanır, <code>Enter</code> ve <code>Boşluk</code> ile çalışır, ekran okuyucuda "düğme" olarak okunur.</td></tr>
+<tr><td><code>&lt;div class="baslik"&gt;</code></td><td><code>&lt;h2&gt;</code></td><td>Başlıklar ekran okuyucu kullanıcılarına sayfa içi gezinme imkanı verir.</td></tr>
+<tr><td><code>&lt;div class="menu"&gt;</code></td><td><code>&lt;nav&gt;</code></td><td>Gezinme alanı olarak tanınır ve doğrudan atlanabilir.</td></tr>
+<tr><td>Bağlantı gibi görünen <code>span</code></td><td><code>&lt;a href="..."&gt;</code></td><td>Bağlantılar klavyeyle erişilebilir ve yeni sekmede açılabilir.</td></tr>
+</tbody>
+</table>
+<p>Sayfada bir tane <code>&lt;h1&gt;</code> bulunmalı, başlıklar atlanmadan sıralanmalıdır (<code>h1</code> → <code>h2</code> → <code>h3</code>). Başlık seviyesi, yazının büyüklüğüne göre değil içeriğin hiyerarşisine göre seçilir; büyüklük CSS ile ayarlanır.</p>
+<h2>2. Görsellere alternatif metin</h2>
+<ul>
+<li>Anlam taşıyan görsellere kısa ve açıklayıcı <code>alt</code> yazılır: <code>&lt;img src="grafik.png" alt="2025 yılında ziyaretçi sayısı %40 arttı"&gt;</code>.</li>
+<li>Süs amaçlı görsellerde boş <code>alt=""</code> kullanılır; ekran okuyucu görseli atlar. <code>alt</code> niteliğinin hiç yazılmaması ise dosya adının okunmasına yol açar.</li>
+<li>"Görsel" veya "resim" sözcüğüyle başlanmaz; ekran okuyucu zaten görsel olduğunu bildirir.</li>
+<li>Görselin içinde metin varsa o metin <code>alt</code> içinde yazılmalıdır.</li>
+<li>Karmaşık grafiklerde <code>alt</code> kısa tutulur, ayrıntı sayfa metninde veya tabloda verilir.</li>
+</ul>
+<h2>3. Etiketli formlar</h2>
+<p>Her form alanına bir <code>label</code> bağlanmalıdır. <code>placeholder</code> etiket yerine geçmez; yazı yazılmaya başlanınca kaybolur ve karşıtlığı genellikle düşüktür.</p>
+<pre>&lt;label for="eposta"&gt;E-posta adresi&lt;/label&gt;
+&lt;input type="email" id="eposta" name="eposta" autocomplete="email" required&gt;
+
+&lt;fieldset&gt;
+  &lt;legend&gt;Bildirim tercihi&lt;/legend&gt;
+  &lt;label&gt;&lt;input type="radio" name="bildirim" value="eposta"&gt; E-posta&lt;/label&gt;
+  &lt;label&gt;&lt;input type="radio" name="bildirim" value="sms"&gt; SMS&lt;/label&gt;
+&lt;/fieldset&gt;</pre>
+<ul>
+<li>İlişkili alanlar (radyo düğmeleri gibi) <code>fieldset</code> ve <code>legend</code> ile gruplanır.</li>
+<li><code>autocomplete</code> niteliği tarayıcının alanı doldurmasına yardım eder.</li>
+<li>Hata mesajları yalnızca renkle değil metinle de verilmelidir; mesaj alanına <code>role="alert"</code> verilirse ekran okuyucu anında okur.</li>
+</ul>
+<h2>4. Anlamlı bağlantı metinleri</h2>
+<p>Ekran okuyucu kullanıcıları sayfadaki bağlantıları liste olarak dinleyebilir. "Buraya tıklayın" veya "devamı" gibi metinler bu listede anlamsızdır.</p>
+<pre>&lt;!-- Yanlış --&gt;
+&lt;a href="rapor.pdf"&gt;Buraya tıklayın&lt;/a&gt;
+
+&lt;!-- Doğru --&gt;
+&lt;a href="rapor.pdf"&gt;2025 faaliyet raporunu indirin (PDF, 2 MB)&lt;/a&gt;</pre>
+<h2>5. Klavye erişimi ve odak</h2>
+<ul>
+<li>Sayfadaki her etkileşimin yalnızca klavyeyle (<code>Tab</code>, <code>Shift + Tab</code>, <code>Enter</code>, <code>Boşluk</code>, ok tuşları) yapılabilmesi gerekir. Sayfa, fare kullanılmadan denenerek kontrol edilebilir.</li>
+<li>Odak göstergesi kaldırılmamalıdır. <code>outline: none</code> yazılıyorsa yerine görünür bir gösterge tanımlanır.</li>
+<li><code>tabindex="0"</code> bir öğeyi sıraya ekler, <code>tabindex="-1"</code> yalnızca kodla odaklanabilir yapar. Pozitif değerler (<code>tabindex="3"</code>) sıralamayı bozduğu için kullanılmaz.</li>
+<li>Sayfa başına, tekrar eden menüyü atlatan bir "içeriğe geç" bağlantısı eklenir.</li>
+</ul>
+<pre>&lt;a class="atla" href="#icerik"&gt;İçeriğe geç&lt;/a&gt;
+...
+&lt;main id="icerik"&gt;...&lt;/main&gt;
+
+.atla { position: absolute; left: -999px; }
+.atla:focus { left: 8px; top: 8px; background: #fff; padding: 8px; }
+
+:focus-visible { outline: 3px solid #1a73e8; outline-offset: 2px; }</pre>
+<h2>6. Renk ve karşıtlık</h2>
+<ul>
+<li>Normal metinde yazı ile arka plan arasında en az <b>4,5:1</b>, büyük metinde (24px veya 19px kalın) en az <b>3:1</b> karşıtlık gerekir. <a href="html-arac-10-renk-kontrast-denetleyicisi.html">Renk Kontrast Denetleyicisi</a> ile ölçülebilir.</li>
+<li>Bilgi yalnızca renkle verilmez: zorunlu alan yalnızca kırmızı olarak değil, "(zorunlu)" yazısı veya simgeyle de belirtilir. Bağlantılar çevresindeki metinden yalnızca renkle değil, alt çizgiyle de ayrılmalıdır.</li>
+<li>Sayfa, tarayıcıda %200 büyütüldüğünde de kullanılabilir kalmalıdır; bu nedenle <code>rem</code> ve esnek düzenler tercih edilir.</li>
+</ul>
+<h2>7. Sayfa dili</h2>
+<pre>&lt;html lang="tr"&gt;</pre>
+<p><code>lang</code> niteliği ekran okuyucunun doğru telaffuz seçmesini sağlar. Sayfada başka dilde bir bölüm varsa o öğeye ayrıca verilir: <code>&lt;span lang="en"&gt;responsive design&lt;/span&gt;</code>.</p>
+<h2>8. ARIA: ne zaman kullanılmalı?</h2>
+<p>ARIA, yerel HTML etiketlerinin karşılayamadığı durumlarda ekran okuyuculara ek bilgi veren niteliklerdir. İlk kural: <b>yerel bir HTML etiketi varsa ARIA kullanılmaz.</b> Yanlış ARIA, hiç ARIA olmamasından kötüdür.</p>
+<table>
+<thead><tr><th>Nitelik</th><th>Kullanım</th></tr></thead>
+<tbody>
+<tr><td><code>aria-label</code></td><td>Görünür metni olmayan öğeye ad verir (örn. yalnızca simge içeren düğme).</td></tr>
+<tr><td><code>aria-labelledby</code></td><td>Öğenin adını sayfadaki başka bir öğeden alır.</td></tr>
+<tr><td><code>aria-expanded</code></td><td>Açılır menü, akordeon gibi öğelerin açık (<code>true</code>) veya kapalı (<code>false</code>) olduğunu bildirir.</td></tr>
+<tr><td><code>aria-hidden="true"</code></td><td>Öğeyi ekran okuyuculardan gizler (süs simgeleri için).</td></tr>
+<tr><td><code>aria-live="polite"</code></td><td>İçeriği değişen alanın değişikliğinin okunmasını sağlar.</td></tr>
+<tr><td><code>role="alert"</code></td><td>Önemli mesajın anında okunmasını sağlar.</td></tr>
+</tbody>
+</table>
+<pre>&lt;button aria-label="Menüyü aç" aria-expanded="false" aria-controls="menu"&gt;
+  &lt;svg aria-hidden="true"&gt;...&lt;/svg&gt;
+&lt;/button&gt;
+&lt;nav id="menu" hidden&gt;...&lt;/nav&gt;</pre>
+<p>Açılıp kapanan basit içerikler için betik yazmak yerine yerel <code>&lt;details&gt;</code> ve <code>&lt;summary&gt;</code> etiketleri kullanılabilir; klavye ve ekran okuyucu desteği hazır gelir.</p>
+<h2>Test yöntemleri</h2>
+<ol>
+<li><b>Klavye testi:</b> Fare bırakılıp yalnızca <code>Tab</code> ile sayfada gezinilir. Odak görünür mü, sıra mantıklı mı, her şeye ulaşılıyor mu kontrol edilir.</li>
+<li><b>Otomatik denetim:</b> Tarayıcı geliştirici araçlarındaki <b>Lighthouse</b> (Accessibility) veya <a href="https://www.deque.com/axe/devtools/">axe DevTools</a> eklentisi sık hataları bulur. Otomatik araçlar sorunların yalnızca bir kısmını yakalar.</li>
+<li><b>Ekran okuyucu:</b> Windows için ücretsiz <a href="https://www.nvaccess.org/">NVDA</a> ile sayfa dinlenebilir.</li>
+<li><b>Yakınlaştırma:</b> Tarayıcıda %200 büyütülerek yatay kaydırma ve taşma kontrol edilir.</li>
+</ol>
+<h2>Özet</h2>
+<ul>
+<li>Doğru HTML etiketi, erişilebilirliğin yarısıdır: <code>button</code>, <code>nav</code>, <code>main</code>, başlıklar.</li>
+<li>Her görselde <code>alt</code>, her form alanında <code>label</code> bulunur.</li>
+<li>Klavye ile erişim ve görünür odak sağlanır.</li>
+<li>Karşıtlık oranı ölçülür; bilgi yalnızca renkle verilmez.</li>
+<li>ARIA yalnızca yerel etiket yetersiz kaldığında eklenir.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

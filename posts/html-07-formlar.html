@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Formlar</title>
+<meta name="description" content="form, input türleri, label, select, textarea ve button ile kullanıcıdan veri alan formlar oluşturma.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 08:24">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Formlar kullanıcıdan bilgi toplar: arama kutusu, üyelik, iletişim, anket... Bir form; bilgi giriş alanlarından (<code>input</code>, <code>select</code>, <code>textarea</code>) ve gönder düğmesinden oluşur.</p>
+<h2>Temel form</h2>
+<pre>&lt;form action="/gonder" method="post"&gt;
+  &lt;label for="ad"&gt;Adın:&lt;/label&gt;
+  &lt;input type="text" id="ad" name="ad"&gt;
+  &lt;button type="submit"&gt;Gönder&lt;/button&gt;
+&lt;/form&gt;</pre>
+<ul>
+<li><code>&lt;form&gt;</code>: Tüm alanları kapsar. <code>action</code> bilginin gideceği adres, <code>method</code> gönderme yöntemidir (<code>get</code> veya <code>post</code>).</li>
+<li><code>&lt;label&gt;</code>: Alanın adıdır. <code>for</code> değeri alanın <code>id</code> değeriyle aynı olursa etikete tıklayınca alan seçilir; ekran okuyucular için de gereklidir.</li>
+<li><code>name</code>: Bilgi sunucuya bu isimle gider; yazmazsan alan gönderilmez.</li>
+</ul>
+<h2>input türleri</h2>
+<p><code>&lt;input&gt;</code> etiketinin <code>type</code> niteliği alanın türünü belirler. Tarayıcılar türe uygun klavye, denetim ve seçici sunar:</p>
+<table>
+<thead><tr><th>type</th><th>Ne için</th></tr></thead>
+<tbody>
+<tr><td><code>text</code></td><td>Tek satırlık metin</td></tr>
+<tr><td><code>email</code></td><td>E-posta adresi (biçimi denetlenir)</td></tr>
+<tr><td><code>password</code></td><td>Parola (karakterler gizlenir)</td></tr>
+<tr><td><code>number</code></td><td>Sayı</td></tr>
+<tr><td><code>date</code></td><td>Tarih seçici</td></tr>
+<tr><td><code>color</code></td><td>Renk seçici</td></tr>
+<tr><td><code>range</code></td><td>Kaydırma çubuğu</td></tr>
+<tr><td><code>checkbox</code></td><td>Çoklu seçim kutusu</td></tr>
+<tr><td><code>radio</code></td><td>Tekli seçim düğmesi</td></tr>
+<tr><td><code>file</code></td><td>Dosya seçici</td></tr>
+</tbody>
+</table>
+<h2>Seçim kutuları</h2>
+<pre>&lt;p&gt;Hangi platformlarda oynuyorsun?&lt;/p&gt;
+&lt;label&gt;&lt;input type="checkbox" name="platform" value="pc"&gt; PC&lt;/label&gt;
+&lt;label&gt;&lt;input type="checkbox" name="platform" value="konsol"&gt; Konsol&lt;/label&gt;
+
+&lt;p&gt;Deneyim düzeyin:&lt;/p&gt;
+&lt;label&gt;&lt;input type="radio" name="seviye" value="yeni" checked&gt; Yeni&lt;/label&gt;
+&lt;label&gt;&lt;input type="radio" name="seviye" value="orta"&gt; Orta&lt;/label&gt;</pre>
+<p>Aynı gruptaki radyo düğmelerinin <code>name</code> değeri <b>aynı</b> olmalıdır; böylece yalnızca biri seçilebilir.</p>
+<h2>Açılır liste ve çok satırlı metin</h2>
+<pre>&lt;label for="sehir"&gt;Şehir:&lt;/label&gt;
+&lt;select id="sehir" name="sehir"&gt;
+  &lt;option value=""&gt;Seç&lt;/option&gt;
+  &lt;option value="ankara"&gt;Ankara&lt;/option&gt;
+  &lt;option value="izmir"&gt;İzmir&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;label for="mesaj"&gt;Mesajın:&lt;/label&gt;
+&lt;textarea id="mesaj" name="mesaj" rows="4" cols="40"&gt;&lt;/textarea&gt;</pre>
+<h2>Yardımcı nitelikler</h2>
+<table>
+<thead><tr><th>Nitelik</th><th>Etkisi</th></tr></thead>
+<tbody>
+<tr><td><code>placeholder</code></td><td>Alan boşken soluk ipucu metni gösterir</td></tr>
+<tr><td><code>required</code></td><td>Alanın doldurulmasını zorunlu yapar</td></tr>
+<tr><td><code>value</code></td><td>Alanın başlangıç değerini belirler</td></tr>
+<tr><td><code>min</code> / <code>max</code></td><td>Sayı ve tarih alanlarının sınırlarını belirler</td></tr>
+<tr><td><code>minlength</code> / <code>maxlength</code></td><td>Metin uzunluğunu sınırlar</td></tr>
+<tr><td><code>disabled</code></td><td>Alanı kullanılamaz yapar</td></tr>
+</tbody>
+</table>
+<h2>Tam örnek</h2>
+<pre>&lt;form action="#" method="post"&gt;
+  &lt;fieldset&gt;
+    &lt;legend&gt;İletişim formu&lt;/legend&gt;
+
+    &lt;p&gt;
+      &lt;label for="ad"&gt;Ad soyad&lt;/label&gt;&lt;br&gt;
+      &lt;input type="text" id="ad" name="ad" required&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+      &lt;label for="eposta"&gt;E-posta&lt;/label&gt;&lt;br&gt;
+      &lt;input type="email" id="eposta" name="eposta" placeholder="ornek@eposta.com" required&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+      &lt;label for="konu"&gt;Konu&lt;/label&gt;&lt;br&gt;
+      &lt;select id="konu" name="konu"&gt;
+        &lt;option&gt;Genel&lt;/option&gt;
+        &lt;option&gt;Öneri&lt;/option&gt;
+        &lt;option&gt;Hata bildirimi&lt;/option&gt;
+      &lt;/select&gt;
+    &lt;/p&gt;
+    &lt;p&gt;
+      &lt;label for="mesaj"&gt;Mesaj&lt;/label&gt;&lt;br&gt;
+      &lt;textarea id="mesaj" name="mesaj" rows="5" required&gt;&lt;/textarea&gt;
+    &lt;/p&gt;
+    &lt;button type="submit"&gt;Gönder&lt;/button&gt;
+  &lt;/fieldset&gt;
+&lt;/form&gt;</pre>
+<p><code>&lt;fieldset&gt;</code> ve <code>&lt;legend&gt;</code> ilgili alanları bir çerçevede gruplar ve gruba ad verir.</p>
+<blockquote>Önemli: GitHub Pages gibi statik sitelerde form verisini alıp saklayacak bir sunucu yoktur. Bu yüzden <code>action</code> adresi bir form hizmetine ya da kendi sunucuna işaret etmelidir. Yukarıdaki örnek arayüzü öğretmek içindir; gönderince bir yere kaydedilmez.</blockquote>
+<p>Formu görerek denemek için kodu <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştır. Sonraki derste sayfayı anlamlı bölümlere ayıran etiketleri öğreneceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

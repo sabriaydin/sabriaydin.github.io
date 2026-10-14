@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Hunger 3D FPS | Sabri Aydın</title>
+<meta name="description" content="Hunger: ıssız bir adada geçen, tarayıcıda oynanan 3B birinci kişi hayatta kalma oyunu. Ağaç kes, maden topla, sığınak kur; açlığa, susuzluğa ve soğuğa karşı hayatta kal.">
+<meta name="theme-color" content="#0d0d0e">
+<link rel="stylesheet" href="css/stil.css">
+</head>
+<body>
+<div id="game">
+  <canvas id="c"></canvas>
+  <div class="vig" id="vr"></div><div class="vig" id="vc"></div><div class="vig" id="vh"></div><div class="vig" id="vs"></div>
+  <div id="dmg"><i></i></div>
+  <div id="hud" hidden>
+    <div class="bar" id="bHp"><span>Sağlık</span><i><b></b></i></div>
+    <div class="bar" id="bHun"><span>Açlık</span><i><b></b></i></div>
+    <div class="bar" id="bThr"><span>Susuzluk</span><i><b></b></i></div>
+    <div class="bar" id="bWar"><span>Sıcaklık</span><i><b></b></i></div>
+    <div class="bar" id="bSta"><span>Dayanıklılık</span><i><b></b></i></div>
+    <div class="bar" id="bSan"><span>Akıl</span><i><b></b></i></div>
+    <div id="sts"></div>
+    <div id="shel"></div>
+  </div>
+  <div id="clock" hidden></div>
+  <div id="goal" hidden></div>
+  <canvas id="mini" width="160" height="160" hidden></canvas>
+  <div id="cross" hidden></div>
+  <div id="hitm"><i></i><i></i><i></i><i></i></div>
+  <div id="tip" hidden></div>
+  <div id="prog" hidden><i></i></div>
+  <div id="feed"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="hot" hidden></div>
+  <div id="touch" hidden>
+    <div id="joy"><i></i></div>
+    <div class="tb" id="tA">Vur</div><div class="tb" id="tB">Koy</div>
+    <div class="tb" id="tJ">Zıpla</div><div class="tb" id="tE">Ye/Al</div><div class="tb" id="tK">Günlük</div><div class="tb" id="tI">Çanta</div>
+  </div>
+  <div id="panel" hidden>
+    <div id="pbox">
+      <div>
+        <h2>Envanter</h2>
+        <div id="grid"></div>
+        <div id="info"></div>
+        <p class="hp">Eşyaya tıklayıp başka bir kutuya tıklayarak yerini değiştirin. Sağ tık veya çift tık: kullan. İlk 8 kutu hızlı erişim çubuğudur.</p>
+        <button id="close" class="ghost" type="button">Kapat (I / Esc)</button>
+      </div>
+      <div><h2>Üretim</h2><div id="recipes"></div></div>
+    </div>
+  </div>
+  <div id="jr" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">GÜNLÜK</h1><div class="stabs" id="jrT"></div><div id="jrB"></div><div class="btns"><button id="jrX" class="ghost" type="button">Kapat (K / Esc)</button></div></div></div>
+  <div id="load"><div class="lbox"><h1>HUN<span>GER</span></h1><div class="l3">3B</div><div id="loadT">Yükleniyor</div><div class="lbar"><i id="loadBar"></i></div><div class="lrow"><span id="loadSub"></span><span id="loadPct">0%</span></div><button id="loadGo" type="button" hidden>Oyuna Gir</button><p id="loadTip"></p></div></div>
+  <div id="fade"></div>
+  <div id="bigmap" hidden><div class="bmbox"><canvas id="bm"></canvas><div id="bmcap"></div></div></div>
+  <div id="trade" hidden><div class="card"><h1 id="trT" style="font-size:26px;letter-spacing:.1em"></h1><p id="trS"></p><div id="trL"></div><div class="btns"><button id="trX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="menu">
+    <div class="card">
+      <h1>HUN<span>GER</span></h1>
+      <div style="color:var(--red);letter-spacing:.3em;font-size:12px;margin-top:-2px">3B</div>
+      <p>Issız bir adada hayatta kal. Ağaç kes, maden çıkar, sığınak kur; açlığa, susuzluğa ve soğuğa diren. Geceleri karanlıkta bir şeyler dolaşır: ışığı yanında tut.</p>
+      <div class="btns">
+        <button id="bCont" type="button" hidden>Devam Et</button>
+        <button id="bNew" type="button">Yeni Oyun</button>
+        <button class="ghost bSet" type="button">Ayarlar</button>
+      </div>
+      <div class="keys">
+        <kbd>W A S D</kbd><span>Hareket (<kbd>Shift</kbd> koşar, daha çok acıkır)</span>
+        <kbd>Sol tık</kbd><span>Kes, topla, kaz, su iç, yerleştir (basılı tut)</span>
+        <kbd>Sağ tık / E</kbd><span>Yerdeki eşyayı al, köylüyle konuş; yemek ye, su iç, eşyayı kullan</span>
+        <kbd>Boşluk</kbd><span>Zıpla (dayanıklılık harcar)</span>
+        <kbd>Yay</kbd><span>Sol tık basılı tut: ger, bırak: ateşle</span>
+        <kbd>Meşale</kbd><span>Eline al: aydınlatır, yaratıkları ve kurtları uzak tutar</span>
+        <kbd>Bandaj</kbd><span>Kanamayı durdurur (basılı tut)</span>
+        <kbd>F</kbd><span>Seçili yapıyı yerleştir</span>
+        <kbd>1-8</kbd><span>Hızlı erişim çubuğundan eşya seç</span>
+        <kbd>Fare</kbd><span>Etrafına bak (oyuna tıklayınca fare kilitlenir)</span>
+        <kbd>Tekerlek</kbd><span>Eşya seç</span>
+        <kbd>I</kbd><span>Envanter</span> <kbd>C</kbd><span>Üretim</span> <kbd>K</kbd><span>Günlük: seviye, yetenek, görev, kayıtlar</span>
+        <kbd>Esc</kbd><span>Duraklat (fareyi serbest bırakır)</span> <kbd>M</kbd><span>Haritayı tam ekran aç/kapat</span> <kbd>N</kbd><span>Sesi aç/kapat</span>
+      </div>
+      <a class="back" href="../../index.html">← Bloga dön</a>
+    </div>
+  </div>
+  <div id="pause" hidden><div class="card"><h1 style="font-size:34px">DURAKLATILDI</h1><div class="btns"><button id="bRes" type="button">Devam</button><button class="ghost bSet" type="button">Ayarlar</button><button id="bMenu" class="ghost" type="button">Ana menü</button></div></div></div>
+  <div id="dead" hidden><div class="card"><h1 style="font-size:36px">HAYATTA KALAMADIN</h1><p id="why"></p><p id="stat"></p><p id="stat2"></p><div class="btns"><button id="bAgain" type="button">Yeniden Dene</button></div></div></div>
+</div>
+<script src="../ortak/three.min.js"></script>
+<script src="js/cekirdek/ad-alani.js"></script>
+<script src="js/cekirdek/yardimcilar.js"></script>
+<script src="js/cekirdek/ayarlar.js"></script>
+<script src="js/veri/esyalar.js"></script>
+<script src="js/veri/notlar.js"></script>
+<script src="js/veri/tarifler.js"></script>
+<script src="js/veri/dugumler.js"></script>
+<script src="js/veri/hayvanlar.js"></script>
+<script src="js/dunya/uretim.js"></script>
+<script src="js/gorsel/simgeler.js"></script>
+<script src="js/sahne/cekirdek.js"></script>
+<script src="js/sahne/gerceklik.js"></script>
+<script src="js/sahne/dokular.js"></script>
+<script src="js/sahne/hava.js"></script>
+<script src="js/sahne/isik.js"></script>
+<script src="js/sahne/arazi.js"></script>
+<script src="js/sahne/modeller.js"></script>
+<script src="js/sahne/cim.js"></script>
+<script src="js/sahne/nesneler.js"></script>
+<script src="js/sahne/kol.js"></script>
+<script src="js/sahne/esya-modelleri.js"></script>
+<script src="js/sahne/dusenler.js"></script>
+<script src="js/sahne/efektler.js"></script>
+<script src="js/sahne/devrilme.js"></script>
+<script src="js/sahne/hayvan-modelleri.js"></script>
+<script src="js/sahne/hayvanlar.js"></script>
+<script src="js/sahne/koyluler.js"></script>
+<script src="js/sahne/koy-yapilari.js"></script>
+<script src="js/sahne/kamplar.js"></script>
+<script src="js/sahne/atmosfer.js"></script>
+<script src="js/sahne/parcaciklar.js"></script>
+<script src="js/sahne/oklar.js"></script>
+<script src="js/sahne/nisan.js"></script>
+<script src="js/sahne/sonisleme.js"></script>
+<script src="js/oyun/ses.js"></script>
+<script src="js/oyun/zaman.js"></script>
+<script src="js/oyun/envanter.js"></script>
+<script src="js/oyun/dusenler.js"></script>
+<script src="js/oyun/hayvanlar.js"></script>
+<script src="js/oyun/vucut.js"></script>
+<script src="js/oyun/dusmanlar.js"></script>
+<script src="js/oyun/silah.js"></script>
+<script src="js/oyun/koyluler.js"></script>
+<script src="js/oyun/gelisim.js"></script>
+<script src="js/oyun/gorevler.js"></script>
+<script src="js/oyun/kamplar.js"></script>
+<script src="js/oyun/olaylar.js"></script>
+<script src="js/oyun/uretim.js"></script>
+<script src="js/oyun/eylem.js"></script>
+<script src="js/oyun/hayatta-kalma.js"></script>
+<script src="js/oyun/hedefler.js"></script>
+<script src="js/oyun/durum.js"></script>
+<script src="js/oyun/arayuz.js"></script>
+<script src="js/oyun/giris.js"></script>
+<script src="js/oyun/dongu.js"></script>
+</body>
+</html>

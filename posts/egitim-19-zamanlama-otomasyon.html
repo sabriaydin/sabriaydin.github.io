@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Zamanlama ve Otomasyon</title>
+<meta name="description" content="Batch betiklerini Görev Zamanlayıcı ile belirli saatte veya olayda çalıştırma, schtasks komutu, başlangıç klasörü ve günlük yedek örneği.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-10-13 21:32">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Batch betikleri elle çalıştırılabildiği gibi belirli bir saatte, oturum açıldığında veya sistem başlarken otomatik de çalıştırılabilir. Bu yazıda Windows'un Görev Zamanlayıcı özelliği ve <code>schtasks</code> komutu anlatılır. Grafik arayüzle komut üretmek için <a href="arac-04-gorev-zamanlayici-komutu.html">Görev Zamanlayıcı Komut Üretici</a> aracı kullanılabilir.</p>
+<h2>Otomasyon yöntemleri</h2>
+<table>
+<thead><tr><th>Yöntem</th><th>Ne zaman çalışır?</th><th>Yönetici?</th></tr></thead>
+<tbody>
+<tr><td>Başlangıç klasörü</td><td>Kullanıcı oturum açtığında</td><td>Hayır</td></tr>
+<tr><td><code>schtasks</code></td><td>Belirli saat, gün, oturum açma, sistem başlangıcı</td><td>Kullanıcı görevleri için hayır, sistem görevleri için evet</td></tr>
+<tr><td><code>shell:startup</code> kısayolu</td><td>Oturum açıldığında</td><td>Hayır</td></tr>
+<tr><td>Kayıt defteri <code>Run</code> anahtarı</td><td>Oturum açıldığında</td><td>Hayır (<code>HKCU</code>)</td></tr>
+</tbody>
+</table>
+<h2>Başlangıç klasörü</h2>
+<p><code>Win + R</code> ile <code>shell:startup</code> yazılarak açılan klasöre betiğin kısayolu konulduğunda betik, kullanıcı oturum açtıkça çalışır. Betiğin içinden de bu yol kullanılabilir:</p>
+<pre>echo %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup</pre>
+<h2>schtasks ile görev oluşturma</h2>
+<pre>rem Her gun saat 22:00'de yedek betigini calistir
+schtasks /create /tn "GunlukYedek" /tr "C:\Betikler\yedek.bat" /sc daily /st 22:00
+
+rem Her pazartesi 09:30
+schtasks /create /tn "HaftalikRapor" /tr "C:\Betikler\rapor.bat" /sc weekly /d MON /st 09:30
+
+rem Kullanici oturum actiginda
+schtasks /create /tn "AcilistaCalis" /tr "C:\Betikler\acilis.bat" /sc onlogon
+
+rem Her 30 dakikada bir
+schtasks /create /tn "Kontrol" /tr "C:\Betikler\kontrol.bat" /sc minute /mo 30</pre>
+<table>
+<thead><tr><th>Parametre</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><code>/tn ad</code></td><td>Görev adı</td></tr>
+<tr><td><code>/tr yol</code></td><td>Çalıştırılacak betik veya program. Yolda boşluk varsa: <code>/tr "\"C:\Benim Betikler\yedek.bat\""</code></td></tr>
+<tr><td><code>/sc tür</code></td><td>Sıklık: <code>minute</code>, <code>hourly</code>, <code>daily</code>, <code>weekly</code>, <code>monthly</code>, <code>once</code>, <code>onlogon</code>, <code>onstart</code>, <code>onidle</code></td></tr>
+<tr><td><code>/st ss:dd</code></td><td>Başlangıç saati (24 saat biçimi)</td></tr>
+<tr><td><code>/d gün</code></td><td>Haftanın günü (<code>MON</code>, <code>TUE</code>, <code>WED</code>, <code>THU</code>, <code>FRI</code>, <code>SAT</code>, <code>SUN</code>)</td></tr>
+<tr><td><code>/mo n</code></td><td>Aralık çarpanı (her n dakika, n gün gibi)</td></tr>
+<tr><td><code>/ru SYSTEM</code></td><td>SYSTEM hesabıyla çalıştırır (yönetici gerekir; oturum açık olmasa da çalışır)</td></tr>
+<tr><td><code>/rl highest</code></td><td>En yüksek ayrıcalıkla çalıştırır</td></tr>
+<tr><td><code>/f</code></td><td>Aynı adlı görev varsa üzerine yazar</td></tr>
+</tbody>
+</table>
+<h2>Görevleri yönetme</h2>
+<pre>schtasks /query /tn "GunlukYedek"        rem gorev durumunu goster
+schtasks /query /fo list /v               rem tum gorevler (ayrintili, uzun)
+schtasks /run /tn "GunlukYedek"           rem simdi calistir
+schtasks /end /tn "GunlukYedek"           rem calisiyorsa durdur
+schtasks /change /tn "GunlukYedek" /disable
+schtasks /change /tn "GunlukYedek" /enable
+schtasks /delete /tn "GunlukYedek" /f     rem sil</pre>
+<blockquote>Zamanlanmış görev, kullanıcı oturumunda görünen bir pencere açmaz (arka planda çalışır). Bu nedenle betikte <code>pause</code> veya kullanıcıdan girdi bekleyen komutlar bulunmamalıdır; aksi halde görev sonsuza kadar bekler.</blockquote>
+<h2>Zamanlanmış betik için kurallar</h2>
+<ul>
+<li><b>Tam yol kullanılmalı.</b> Görev, betiğin klasöründe çalışmaz; ilk satırlara <code>cd /d "%~dp0"</code> eklenmelidir.</li>
+<li><b>Girdi beklememeli.</b> <code>pause</code>, <code>set /p</code>, <code>choice</code> kullanılmamalıdır.</li>
+<li><b>Çıktı log dosyasına yazılmalı.</b> Pencere görünmediğinden hatalar ancak log ile görülebilir (bkz. <a href="egitim-08-hata-yonetimi.html">Hata Yönetimi ve Log Tutma</a>).</li>
+<li><b>Kullanılan yollar erişilebilir olmalı.</b> Ağ sürücüleri (<code>Z:</code>) SYSTEM hesabında tanımlı olmaz; UNC yolu (<code>\\sunucu\paylasim</code>) kullanılmalıdır.</li>
+<li><b>Önce elle denenmeli.</b> Betik çift tıklanarak veya <code>schtasks /run</code> ile çalıştırılıp çıktısı doğrulanmalıdır.</li>
+</ul>
+<h2>Örnek: günlük yedek betiği</h2>
+<pre>@echo off
+setlocal
+cd /d "%~dp0"
+
+set "KAYNAK=%USERPROFILE%\Documents"
+set "HEDEF=D:\Yedekler"
+set "LOG=%~dp0yedek_log.txt"
+
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd"') do set "BUGUN=%%i"
+
+echo [%BUGUN%] Yedekleme basladi &gt;&gt; "%LOG%"
+robocopy "%KAYNAK%" "%HEDEF%\%BUGUN%" /e /r:2 /w:5 /np /log+:"%LOG%" &gt; nul
+
+rem robocopy: 0-7 arasi kodlar basaridir, 8 ve uzeri hatadir
+if %errorlevel% GEQ 8 (
+    echo [%BUGUN%] HATA: robocopy kodu %errorlevel% &gt;&gt; "%LOG%"
+    exit /b 1
+)
+
+echo [%BUGUN%] Yedekleme tamamlandi &gt;&gt; "%LOG%"
+
+rem 30 gunden eski yedek klasorlerini temizle
+forfiles /p "%HEDEF%" /d -30 /c "cmd /c if @isdir==TRUE rd /s /q @path" 2&gt;nul
+exit /b 0</pre>
+<p>Bu betik kaydedildikten sonra şu komutla her gün 22:00'de çalışacak biçimde zamanlanabilir:</p>
+<pre>schtasks /create /tn "GunlukYedek" /tr "C:\Betikler\yedek.bat" /sc daily /st 22:00 /f</pre>
+<blockquote><code>forfiles</code> ile silme satırı yedek klasörlerini kalıcı olarak siler. Önce <code>rd</code> yerine <code>echo</code> ile denenmelidir (bkz. <a href="egitim-15-tarih-saat.html">Tarih ve Saat İşlemleri</a>).</blockquote>
+<h2>Özet</h2>
+<ul>
+<li>Oturum açılışında çalışma için başlangıç klasörü, saat ve olay bazlı çalışma için <code>schtasks</code> kullanılır.</li>
+<li>Zamanlanmış betik girdi beklememeli, tam yol kullanmalı ve sonuçlarını log dosyasına yazmalıdır.</li>
+<li><code>schtasks /run</code> ile görev elle denenebilir, <code>/delete</code> ile kaldırılır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

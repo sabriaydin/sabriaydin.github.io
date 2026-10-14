@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Açık Port ve Bağlantı Denetçisi (Port Watch)</title>
+<meta name="description" content="Bilgisayarda dinleyen portları, dışarıya yapılmış aktif bağlantıları ve riskli portları program adlarıyla listeleyen menülü batch uygulaması.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-10-13 20:38">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Bilgisayarda dinleyen her port, ağdan gelebilecek bir erişim noktasıdır. Hangi programın hangi portu açtığını bilmek, gereksiz hizmetleri kapatmak ve şüpheli bağlantıları fark etmek için gereklidir. Bu uygulama, Windows'un yerleşik ağ komutlarıyla üç ayrı rapor sunan bir menü içerir.</p>
+<h2>Ne yapar?</h2>
+<ul>
+<li><b>Dinleyen portlar:</b> Bilgisayarın bağlantı beklediği TCP portlarını, portu açan programın adıyla listeler. Portun yalnızca bu bilgisayardan mı (<code>YEREL</code>) yoksa ağdan da mı (<code>AG</code>) erişilebilir olduğunu gösterir.</li>
+<li><b>Aktif bağlantılar:</b> Bilgisayarın dışarıdaki adreslerle kurduğu bağlantıları, ilgili programla birlikte gösterir.</li>
+<li><b>Riskli portlar:</b> FTP (21), Telnet (23), RPC (135), NetBIOS (139), SMB (445), Uzak Masaüstü (3389) ve VNC (5900) portlarından ağa açık olanları uyarı olarak işaretler.</li>
+</ul>
+<h2>Nasıl kullanılır?</h2>
+<ol>
+<li>Kod Not Defteri'ne yapıştırılır ve <code>port_denetcisi.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
+<li>Dosyaya çift tıklanarak çalıştırılır.</li>
+<li>Menüden <code>1</code>, <code>2</code>, <code>3</code> tuşlarıyla rapor seçilir; <code>4</code> çıkıştır. Daha fazla program bilgisi için betik yönetici olarak çalıştırılabilir.</li>
+</ol>
+<pre>@echo off
+setlocal EnableExtensions
+title [ PORT WATCH ] Acik Port ve Baglanti Denetcisi
+color 0A
+
+:menu
+cls
+echo.
+echo   ====================================================
+echo    [ PORT WATCH ]  Acik Port ve Baglanti Denetcisi
+echo   ====================================================
+echo.
+echo    1. Dinleyen portlar ^(disaridan erisim noktalari^)
+echo    2. Disariya yapilmis aktif baglantilar
+echo    3. Riskli portlar ^(telnet, SMB, RDP, VNC...^)
+echo    4. Cikis
+echo.
+choice /c 1234 /n /m "Seciminiz [1-4]: "
+if errorlevel 4 exit /b 0
+if errorlevel 3 goto :riskli
+if errorlevel 2 goto :aktif
+if errorlevel 1 goto :dinleyen
+goto :menu
+
+:dinleyen
+cls
+echo [*] Dinleyen TCP portlari
+echo.
+echo PORT    ERISIM   ADRES                  PROGRAM
+echo ---------------------------------------------------------
+powershell -NoProfile -Command "Get-NetTCPConnection -State Listen | Sort-Object LocalPort | ForEach-Object { $n=(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName; $e='YEREL'; if ($_.LocalAddress -notin '127.0.0.1','::1') { $e='AG' }; '{0,-7} {1,-8} {2,-22} {3}' -f $_.LocalPort,$e,$_.LocalAddress,$n }"
+echo.
+echo [i] ERISIM = AG ise port, ag uzerindeki diger cihazlardan erisilebilir.
+echo [i] ERISIM = YEREL ise port yalnizca bu bilgisayardan erisilebilir.
+echo.
+pause
+goto :menu
+
+:aktif
+cls
+echo [*] Disariya yapilmis aktif TCP baglantilari
+echo.
+echo PROGRAM              YEREL PORT  UZAK ADRES            UZAK PORT
+echo ---------------------------------------------------------------
+powershell -NoProfile -Command "Get-NetTCPConnection -State Established | Where-Object { $_.RemoteAddress -notin '127.0.0.1','::1' } | ForEach-Object { $n=(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).ProcessName; '{0,-20} {1,-11} {2,-21} {3}' -f $n,$_.LocalPort,$_.RemoteAddress,$_.RemotePort } | Sort-Object"
+echo.
+echo [i] Tanimadiginiz bir program bilinmeyen bir adrese baglaniyorsa,
+echo     program adini ve adresi arastirin; gerekirse virus taramasi yapin.
+echo.
+pause
+goto :menu
+
+:riskli
+cls
+echo [*] Riskli kabul edilen portlarin denetimi
+echo.
+powershell -NoProfile -Command "$r=@{21='FTP (sifresiz)';23='Telnet (sifresiz)';135='RPC';139='NetBIOS';445='SMB';3389='Uzak Masaustu (RDP)';5900='VNC'}; $b=Get-NetTCPConnection -State Listen | Where-Object { ($_.LocalAddress -notin '127.0.0.1','::1') -and $r.ContainsKey([int]$_.LocalPort) } | Sort-Object LocalPort -Unique; if (-not $b) { '[+] Riskli portlarda aga acik dinleme yok.' } else { $b | ForEach-Object { '[!] Port {0,-6} {1}' -f $_.LocalPort,$r[[int]$_.LocalPort] } }"
+echo.
+echo [i] Gerekli olmayan bir hizmet acik gorunuyorsa hizmeti kapatin
+echo     ve guvenlik duvari kurallarini kontrol edin.
+echo.
+pause
+goto :menu</pre>
+<h2>Kod nasıl çalışıyor?</h2>
+<ul>
+<li><b><code>choice</code> menüsü:</b> <code>choice /c 1234</code> yalnızca bu tuşları kabul eder. <code>if errorlevel</code> kontrolleri <b>büyükten küçüğe</b> yazılmalıdır; çünkü <code>if errorlevel N</code> "N veya daha büyük" anlamına gelir.</li>
+<li><b><code>Get-NetTCPConnection</code>:</b> Bağlantı listesini PowerShell nesneleri olarak verir. <code>-State Listen</code> dinleyenleri, <code>-State Established</code> kurulmuş bağlantıları seçer.</li>
+<li><b>Program adı:</b> Her bağlantıda <code>OwningProcess</code> (işlem numarası) alınır ve <code>Get-Process</code> ile program adına çevrilir.</li>
+<li><b>Erişim ayrımı:</b> Adres <code>127.0.0.1</code> veya <code>::1</code> ise port yalnızca yerel; <code>0.0.0.0</code> veya başka bir adres ise ağdan erişilebilirdir.</li>
+<li><b>Riskli port tablosu:</b> PowerShell sözlüğü (<code>@{...}</code>) port numaralarını açıklamalarıyla eşler; ağa açık portlar bu sözlükte aranır.</li>
+</ul>
+<h2>Sonuçların yorumlanması</h2>
+<ul>
+<li><code>AG</code> olarak işaretli ve tanımadığınız bir port için program adı araştırılmalıdır. Windows hizmetleri <code>svchost</code>, <code>System</code> gibi adlarla görünür; bunlar normaldir.</li>
+<li>Uzak Masaüstü, SMB gibi hizmetler kullanılmıyorsa kapatılmalı ve güvenlik duvarında dışarıya kapalı tutulmalıdır.</li>
+<li>Aktif bağlantılar listesinde bilinmeyen bir programın bilinmeyen bir adrese bağlandığı görülürse virüs taraması yapılmalıdır.</li>
+<li>Program adı boş görünüyorsa betik yönetici olarak çalıştırılmalıdır; bazı işlemlerin bilgisi yalnızca yönetici yetkisiyle okunabilir.</li>
+</ul>
+<blockquote>Betik yalnızca listeleme yapar; hiçbir bağlantıyı veya hizmeti kapatmaz. Bir hizmeti kapatmadan önce ne işe yaradığının araştırılması gerekir.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

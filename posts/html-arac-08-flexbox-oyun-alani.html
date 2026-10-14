@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS Flexbox Oyun Alanı</title>
+<meta name="description" content="Flexbox özelliklerini değiştirip kutuların nasıl dizildiğini canlı gör, CSS kodunu kopyala.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-10-13 09:12">
+<meta name="okuma" content="2">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Flexbox, öğeleri satır ya da sütun halinde hizalamanın en pratik yoludur. Menüler, kart sıraları ve ortalama işleri için kullanılır. Özellikleri ezberlemek yerine bu oyun alanında dene; ne olduğunu görerek öğrenirsin.</p>
+<h2>Aracı dene</h2>
+<div class="arac">
+  <div class="satir">
+    <label for="f-d">flex-direction
+      <select id="f-d"><option>row</option><option>row-reverse</option><option>column</option><option>column-reverse</option></select>
+    </label>
+    <label for="f-j">justify-content
+      <select id="f-j"><option>flex-start</option><option>center</option><option>flex-end</option><option>space-between</option><option>space-around</option><option>space-evenly</option></select>
+    </label>
+    <label for="f-a">align-items
+      <select id="f-a"><option>stretch</option><option>flex-start</option><option>center</option><option>flex-end</option><option>baseline</option></select>
+    </label>
+    <label for="f-w">flex-wrap
+      <select id="f-w"><option>nowrap</option><option>wrap</option><option>wrap-reverse</option></select>
+    </label>
+  </div>
+  <div class="satir">
+    <label for="f-g"><span>Boşluk (gap): <span id="f-gd">10</span>px</span><input type="range" id="f-g" min="0" max="40" value="10"></label>
+    <label for="f-n"><span>Kutu sayısı: <span id="f-nd">4</span></span><input type="range" id="f-n" min="1" max="10" value="4"></label>
+  </div>
+  <div id="f-kap" style="height:260px;padding:10px;border:2px dashed #8f8a82;border-radius:8px;background:#f3f1ed;overflow:hidden" role="img" aria-label="Flexbox önizlemesi"></div>
+  <h3>CSS kodu</h3>
+  <pre id="f-cikti"></pre>
+  <div class="dugmeler"><button type="button" data-kopyala="f-cikti">Kodu kopyala</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const guncelle=()=>{
+  const n=+$('f-n').value;$('f-gd').textContent=$('f-g').value;$('f-nd').textContent=n;
+  const k=$('f-kap');
+  while(k.children.length<n){const e=document.createElement('div');e.textContent=k.children.length+1;e.style.cssText='min-width:0;flex:0 1 auto;padding:14px 10px;background:#a8231f;color:#fff;font-weight:700;text-align:center;border-radius:6px';k.appendChild(e)}
+  while(k.children.length>n)k.lastChild.remove();
+  k.style.display='flex';k.style.flexDirection=$('f-d').value;k.style.justifyContent=$('f-j').value;k.style.alignItems=$('f-a').value;k.style.flexWrap=$('f-w').value;k.style.gap=$('f-g').value+'px';
+  $('f-cikti').textContent=`.kapsayici {\n  display: flex;\n  flex-direction: ${$('f-d').value};\n  justify-content: ${$('f-j').value};\n  align-items: ${$('f-a').value};\n  flex-wrap: ${$('f-w').value};\n  gap: ${$('f-g').value}px;\n}`};
+['f-d','f-j','f-a','f-w','f-g','f-n'].forEach(i=>$(i).addEventListener('input',guncelle));
+guncelle();
+})();
+</script>
+<h2>Özellikler ne yapar?</h2>
+<table>
+<thead><tr><th>Özellik</th><th>Görevi</th></tr></thead>
+<tbody>
+<tr><td><code>flex-direction</code></td><td>Öğelerin akış yönünü belirler: satır (row) veya sütun (column).</td></tr>
+<tr><td><code>justify-content</code></td><td>Öğeleri akış yönü boyunca hizalar ve aralarındaki boşluğu dağıtır.</td></tr>
+<tr><td><code>align-items</code></td><td>Öğeleri akışa dik yönde hizalar.</td></tr>
+<tr><td><code>flex-wrap</code></td><td>Öğeler sığmadığında yeni satıra geçip geçmeyeceğini belirler.</td></tr>
+<tr><td><code>gap</code></td><td>Öğeler arasındaki boşluğu belirler.</td></tr>
+</tbody>
+</table>
+<h2>Örnek kullanım</h2>
+<pre>.kapsayici {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}</pre>
+<blockquote>Bir öğeyi tam ortalamak için kapsayıcıya <code>display: flex; justify-content: center; align-items: center;</code> yazman yeterlidir.</blockquote>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

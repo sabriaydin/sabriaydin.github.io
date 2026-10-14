@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Flexbox ile Yerleşim</title>
+<meta name="description" content="display: flex ile öğeleri yatay veya dikey dizme, hizalama, boşluk bırakma, satıra sarma ve esnek boyutlandırma.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 15:52">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Flexbox, öğeleri tek bir sıra (yatay veya dikey) üzerinde düzenlemek için tasarlanmış yerleşim yöntemidir. Menüler, kart sıraları, ortalama ve eşit aralıklı dizme işlerinde yaygın olarak kullanılır.</p>
+<h2>Temel mantık</h2>
+<p>Bir öğeye <code>display: flex</code> verildiğinde o öğe <b>flex kapsayıcı</b>, doğrudan çocukları ise <b>flex öğeleri</b> olur.</p>
+<pre>&lt;div class="sira"&gt;
+  &lt;div&gt;1&lt;/div&gt;
+  &lt;div&gt;2&lt;/div&gt;
+  &lt;div&gt;3&lt;/div&gt;
+&lt;/div&gt;
+
+.sira {
+  display: flex;
+}</pre>
+<p>Çocuklar artık alt alta değil, yan yana dizilir. İki eksen vardır: <b>ana eksen</b> (öğelerin dizildiği yön, varsayılan yatay) ve <b>çapraz eksen</b> (ana eksene dik yön).</p>
+<h2>Kapsayıcı özellikleri</h2>
+<table>
+<thead><tr><th>Özellik</th><th>Değerler</th><th>Etkisi</th></tr></thead>
+<tbody>
+<tr><td><code>flex-direction</code></td><td><code>row</code> (varsayılan), <code>column</code>, <code>row-reverse</code>, <code>column-reverse</code></td><td>Ana ekseni belirler. <code>column</code> ile öğeler alt alta dizilir.</td></tr>
+<tr><td><code>justify-content</code></td><td><code>flex-start</code>, <code>center</code>, <code>flex-end</code>, <code>space-between</code>, <code>space-around</code>, <code>space-evenly</code></td><td>Öğeleri <b>ana eksen</b> boyunca hizalar.</td></tr>
+<tr><td><code>align-items</code></td><td><code>stretch</code> (varsayılan), <code>flex-start</code>, <code>center</code>, <code>flex-end</code>, <code>baseline</code></td><td>Öğeleri <b>çapraz eksen</b> boyunca hizalar.</td></tr>
+<tr><td><code>flex-wrap</code></td><td><code>nowrap</code> (varsayılan), <code>wrap</code></td><td>Sığmayan öğelerin alt satıra geçmesini sağlar.</td></tr>
+<tr><td><code>gap</code></td><td><code>16px</code>, <code>1rem 2rem</code></td><td>Öğeler arasında boşluk bırakır (<code>margin</code> gerekmez).</td></tr>
+</tbody>
+</table>
+<h2>Sık kullanılan örnekler</h2>
+<h3>Yatay menü</h3>
+<pre>nav ul {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  padding: 0;
+}</pre>
+<h3>Bir öğeyi tam ortalama</h3>
+<pre>.orta {
+  display: flex;
+  justify-content: center;  /* yatayda */
+  align-items: center;      /* dikeyde */
+  min-height: 100vh;
+}</pre>
+<h3>Logo solda, bağlantılar sağda</h3>
+<pre>header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}</pre>
+<h2>Öğe özellikleri</h2>
+<table>
+<thead><tr><th>Özellik</th><th>Etkisi</th></tr></thead>
+<tbody>
+<tr><td><code>flex-grow</code></td><td>Boş alan varsa öğenin ne kadar büyüyeceğini belirler (sayı, oran olarak).</td></tr>
+<tr><td><code>flex-shrink</code></td><td>Alan yetersizse öğenin küçülme oranı. <code>0</code> yazılırsa küçülmez.</td></tr>
+<tr><td><code>flex-basis</code></td><td>Büyüme veya küçülme öncesindeki başlangıç boyutu.</td></tr>
+<tr><td><code>flex</code></td><td>Üçünün kısa yazımı: <code>flex: 1</code> boş alanı eşit paylaşmayı sağlar.</td></tr>
+<tr><td><code>align-self</code></td><td>Tek bir öğenin çapraz eksen hizalamasını değiştirir.</td></tr>
+<tr><td><code>order</code></td><td>Öğelerin görsel sırasını değiştirir (HTML sırası aynı kalır).</td></tr>
+</tbody>
+</table>
+<pre>.yan-panel { width: 240px; }
+.icerik    { flex: 1; }          /* kalan alanı doldurur */</pre>
+<h2>Kart sırası örneği</h2>
+<pre>.kartlar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.kart {
+  flex: 1 1 250px;   /* büyüyebilir, küçülebilir, en az ~250px */
+}</pre>
+<p>Bu yapıda pencere daraldıkça kartlar otomatik olarak alt satıra geçer; ayrıca bir <code>@media</code> kuralı gerekmez.</p>
+<blockquote><code>justify-content</code> ve <code>align-items</code> değerleri <code>flex-direction: column</code> olduğunda ters çalışır: ana eksen dikey olduğu için <code>justify-content</code> dikey hizalamayı belirler.</blockquote>
+<h2>Özet</h2>
+<ul>
+<li>Kapsayıcıya <code>display: flex</code> verilir; çocuklar flex öğesi olur.</li>
+<li>Ana eksen için <code>justify-content</code>, çapraz eksen için <code>align-items</code> kullanılır.</li>
+<li><code>gap</code> ile aralık, <code>flex-wrap</code> ile satıra geçiş, <code>flex: 1</code> ile alan paylaşımı sağlanır.</li>
+<li>Flexbox tek boyutlu (satır veya sütun) düzenler içindir; satır ve sütunu birlikte yönetmek için Grid kullanılır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

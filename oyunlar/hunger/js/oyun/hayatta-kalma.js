@@ -1,0 +1,154 @@
+/* Hunger 3D - hayatta kalma: hareket, çarpışma, açlık-susuzluk-soğuk, barınak, ölüm */
+(()=>{
+'use strict';
+const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
+
+/* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
+function calcShelter(){
+ const sx=Math.floor(G.px),sy=Math.floor(G.py),start=sy*W+sx,seen=new Set([start]),q=[start];
+ while(q.length){
+  const c=q.pop(),x=c%W,y=(c/W)|0;
+  for(let d=0;d<4;d++){
+   const nx=x+(d===0?1:d===1?-1:0),ny=y+(d===2?1:d===3?-1:0);
+   if(nx<0||ny<0||nx>=W||ny>=H)return false;
+   const ni=ny*W+nx;if(seen.has(ni)||G.obj[ni])continue;
+   seen.add(ni);if(seen.size>40)return false;q.push(ni);
+  }
+ }
+ return true;
+}
+
+/* ---- Çarpışma ---- */
+function solidAt(x,y){
+ if(x<0||y<0||x>=W||y>=H)return true;
+ const i=y*W+x,t=G.tile[i];
+ return t===T.DEEP||t===T.POND||SOLID(G.obj[i]);
+}
+function canStand(x,y){const r=.27;return !(solidAt(Math.floor(x-r),Math.floor(y-r))||solidAt(Math.floor(x+r),Math.floor(y-r))||solidAt(Math.floor(x-r),Math.floor(y+r))||solidAt(Math.floor(x+r),Math.floor(y+r)))}
+
+/* ---- Hareket ---- */
+/* zemin yüksekliği ve zıplama */
+const GRAV=18,JUMP=7;
+function vertStep(dt){
+ const gy=Scene.groundY(G.px,G.py);
+ if(G.pz===undefined){G.pz=gy;G.vz=0;G.air=false}
+ if(!G.air&&inp.keys.Space&&ui.state==='play'&&G.stam>=9){G.vz=JUMP;G.air=true;HG.useStam(9);HG.snd('jump')}
+ if(G.air){
+  G.vz-=GRAV*dt;G.pz+=G.vz*dt;
+  if(G.pz<=gy&&G.vz<=0){
+   const imp=-G.vz,tl=G.tile[Math.floor(G.py)*W+Math.floor(G.px)],wet=tl<=T.SHAL||tl===T.POND;
+   G.pz=gy;G.air=false;
+   if(imp>5){
+    HG.snd(wet?'splash':'land');
+    G.landN=(G.landN||0)+1;G.landImp=Math.min(1,imp/13);
+    G.pvx*=.55;G.pvy*=.55;                                 /* inişte hız kesilir */
+    if(imp>10.2&&!wet){                                      /* yaklaşık 3 m ve üzeri düşüşte hasar */
+     HG.hurt(Math.round((imp-10.2)*7),'Yüksekten düşerek öldün.');
+     HG.useStam(25);
+    }
+   }
+   G.vz=0;
+  }
+ }else if(G.pz-gy>.3){G.air=true;G.vz=0}   /* uçurumdan düşme */
+ else G.pz=gy;
+}
+
+/* Hareket: ivmelenme ve atalet, eğime göre hız, havada sınırlı kontrol, duvara sürtünme */
+function moveStep(dt){
+ const k=inp.keys,j=inp.joy;
+ let ix=(k.KeyD||k.ArrowRight?1:0)-(k.KeyA||k.ArrowLeft?1:0)+j.x;
+ let iz=(k.KeyS||k.ArrowDown?1:0)-(k.KeyW||k.ArrowUp?1:0)+j.y;
+ const m=Math.hypot(ix,iz);
+ G.moving=m>.15;G.sprint=false;
+ const sy=Math.sin(look.yaw),cy=Math.cos(look.yaw);
+ G.fx=-sy;G.fy=-cy;                       /* bakılan yön (yerde) */
+ if(G.pvx===undefined){G.pvx=0;G.pvy=0}
+ const tl=G.tile[Math.floor(G.py)*W+Math.floor(G.px)];
+ let tvx=0,tvy=0;
+ if(G.moving){
+  ix/=Math.max(m,1);iz/=Math.max(m,1);
+  const vx=ix*cy+iz*sy,vy=-ix*sy+iz*cy;
+  G.sprint=!!(k.ShiftLeft||k.ShiftRight)&&G.hun>5&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
+  let sp=(G.sprint?5.4:3.4)*(tl===T.SHAL?.55:1)*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
+  /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
+  const g0=G.pz!==undefined&&!G.air?G.pz:Scene.groundY(G.px,G.py),grade=(Scene.groundY(G.px+vx*.7,G.py+vy*.7)-g0)/.7;
+  sp*=clamp(1-grade*.42,.55,1.2);
+  tvx=vx*sp;tvy=vy*sp;
+ }
+ const acc=G.air?1.4:(G.moving?14:(tl===T.SHAL?9:11));
+ const f=1-Math.exp(-acc*dt);
+ G.pvx+=(tvx-G.pvx)*f;G.pvy+=(tvy-G.pvy)*f;
+ const speed=Math.hypot(G.pvx,G.pvy);G.spdNow=speed;
+ if(speed<.03&&!G.moving){G.pvx=G.pvy=0;G.spdNow=0;return}
+ const reach=speed*dt,lim=Math.max(.05,reach*1.7);   /* çok dik yokuşa tırmanılamaz, zıplanır */
+ const ok=(x,y)=>canStand(x,y)&&(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim);
+ const nx=G.px+G.pvx*dt;if(ok(nx,G.py))G.px=nx;else G.pvx*=.15;
+ const ny=G.py+G.pvy*dt;if(ok(G.px,ny))G.py=ny;else G.pvy*=.15;
+ if(!G.air){
+  const w0=G.walk;G.walk+=dt*(speed/3.4);
+  if(speed>.6&&Math.floor(G.walk*1.6)!==Math.floor(w0*1.6))HG.snd(tl<=T.SHAL?'step_water':tl===T.SAND?'step_sand':tl===T.ROCK?'step_rock':'step')
+ }
+}
+
+/* ---- Her kare ---- */
+function update(dt){
+ G.clock+=dt;
+ moveStep(dt);
+ vertStep(dt);
+ /* eylem */
+ if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
+ HG.updateDrops(dt);
+ HG.updateAnimals(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateEvents(dt);
+ HG.updateWeapons(dt);
+ HG.updateBody(dt);
+ if(A.hitT>0)A.hitT-=dt;
+ /* barınak */
+ G.shelterCheck-=dt;
+ if(G.shelterCheck<=0){G.shelterCheck=.4;G.sheltered=calcShelter()}
+ /* istatistikler */
+ const L=daylight(),cold=1-L;
+ const eco=1-.12*HG.perk('eco');
+ G.hun=clamp(G.hun-dt*.17*eco*(G.sprint?1.8:1),0,100);
+ G.thr=clamp(G.thr-dt*.25*eco*(G.sprint?1.8:1),0,100);
+ let fd=99;
+ {const x0=Math.floor(G.px),y0=Math.floor(G.py);
+  for(let y=y0-5;y<=y0+5;y++)for(let x=x0-5;x<=x0+5;x++){
+   if(x<0||y<0||x>=W||y>=H)continue;
+   if(G.obj[y*W+x]===O.FIRE){const d=Math.hypot(x+.5-G.px,y+.5-G.py);if(d<fd)fd=d}
+  }}
+ G.nearFire=fd<=4;
+ let wr=-(cold*.62+.04);
+ if(G.tile[Math.floor(G.py)*W+Math.floor(G.px)]===T.SHAL)wr-=.45;
+ if(G.sheltered)wr*=.25;
+ if(wr<0)wr*=1-.15*HG.perk('cold');
+ if(wr<0&&HG.count('coat'))wr*=.5;            /* deri mont çantadayken soğuk yarıya iner */
+ if(G.nearFire)wr+=3.4*(1-fd/4.6);
+ if(L>.55&&!G.sheltered)wr+=.55*L;
+ if(G.sheltered&&L>.4)wr+=.3;
+ G.warm=clamp(G.warm+wr*dt,0,100);
+ if(G.sheltered&&L<.3){G.shelterT+=dt;if(G.shelterT>8)flag('shelter')}
+ let dmg=0;
+ if(G.hun<=0){dmg+=1.2;G.cause='Açlıktan öldün.'}
+ if(G.thr<=0){dmg+=1.8;G.cause='Susuzluktan öldün.'}
+ if(G.warm<=0){dmg+=1.5;G.cause='Soğuktan donarak öldün.'}
+ if(dmg>0)G.hp-=dmg*dt;
+ else if(G.hun>35&&G.thr>35&&G.warm>35)G.hp=clamp(G.hp+.8*dt,0,100);
+ if(G.hp<=0){die();return}
+ /* meyve ve hindistan cevizinin yeniden büyümesi */
+ for(let k=G.timers.length-1;k>=0;k--){const t=G.timers[k];if(G.clock>=t.at){const tx=t.i%W,tz=(t.i/W)|0;if(Math.hypot(G.px-tx-.5,G.py-tz-.5)<2.2){t.at=G.clock+15;continue}if(G.obj[t.i]===t.from&&!G.drops.some(d=>Math.hypot(d.x-tx-.5,d.z-tz-.5)<.9))HG.setObj(t.i,t.to);G.timers.splice(k,1)}}
+ if(dayNo()>=7)flag('day7');
+ /* otomatik kayıt */
+ G.saveT+=dt;if(G.saveT>20){G.saveT=0;HG.save()}
+}
+function die(){
+ ui.state='dead';
+ try{localStorage.removeItem(HG.SAVE)}catch(e){}
+ HG.$('#why').textContent=G.cause||'Hayatta kalamadın.';
+ HG.$('#stat').textContent=dayNo()+'. güne kadar dayandın.';
+ {const s=G.stats||{};HG.$('#stat2').textContent='Seviye '+G.lvl+' · Avlanan hayvan: '+(s.hunted||0)+' · Yok edilen Gölge: '+(s.shades||0)+'\nAçılan sandık: '+(s.chests||0)+' · Tamamlanan görev: '+(s.quests||0)+' · Atlatılan Kan Ayı: '+(s.blood||0)}
+ HG.$('#dead').hidden=false;HG.$('#panel').hidden=true;
+ for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false;
+ if(document.exitPointerLock)document.exitPointerLock();
+}
+Object.assign(HG,{calcShelter,solidAt,canStand,update,die});
+})();

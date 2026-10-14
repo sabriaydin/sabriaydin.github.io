@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Bağlantılar (a Etiketi)</title>
+<meta name="description" content="a etiketi ile dış ve iç bağlantılar, göreli ve mutlak yollar, sayfa içi atlama, e-posta ve telefon bağlantıları.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 08:08">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Web'in en temel özelliği bağlantılardır. Bir bağlantı oluşturmak için <code>&lt;a&gt;</code> (anchor, çıpa) etiketi ve gideceği adresi söyleyen <code>href</code> niteliği kullanılır.</p>
+<pre>&lt;a href="https://www.wikipedia.org"&gt;Vikipedi'ye git&lt;/a&gt;</pre>
+<p>Etiketin içindeki yazı (<b>bağlantı metni</b>) tıklanabilir olur. Kullanıcı bu metni okuyarak nereye gideceğini anlamalıdır: "buraya tıkla" yerine "HTML rehberini oku" gibi açıklayıcı yaz.</p>
+<h2>Yeni sekmede açma</h2>
+<pre>&lt;a href="https://www.wikipedia.org" target="_blank" rel="noopener"&gt;Yeni sekmede aç&lt;/a&gt;</pre>
+<p><code>target="_blank"</code> bağlantıyı yeni sekmede açar. Yanına <code>rel="noopener"</code> yazmak, açılan sayfanın seninkine müdahale etmesini önleyen güvenlik önlemidir.</p>
+<h2>Mutlak ve göreli adresler</h2>
+<ul>
+<li><b>Mutlak adres</b>: Başka bir siteye giderken <code>https://</code> ile başlayan tam adres yazılır.</li>
+<li><b>Göreli adres</b>: Kendi sitendeki dosyalara, bulunduğun dosyaya göre yol tarif edilir.</li>
+</ul>
+<table>
+<thead><tr><th>Yazım</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><code>href="hakkimda.html"</code></td><td>Aynı klasördeki hakkimda.html dosyası</td></tr>
+<tr><td><code>href="yazilar/ilk.html"</code></td><td>yazilar klasörünün içindeki ilk.html</td></tr>
+<tr><td><code>href="../index.html"</code></td><td>Bir üst klasördeki index.html</td></tr>
+<tr><td><code>href="/iletisim.html"</code></td><td>Sitenin ana klasöründeki iletisim.html</td></tr>
+</tbody>
+</table>
+<p>Dosya adlarında Türkçe karakter, boşluk ve büyük harf kullanmamak en güvenlisidir: <code>hakkimda.html</code>, <code>ilk-yazi.html</code>.</p>
+<h2>Sayfa içi bağlantılar</h2>
+<p>Uzun sayfalarda belirli bir bölüme atlamak için o bölüme <code>id</code> verilir, bağlantıda <code>#</code> ile çağrılır.</p>
+<pre>&lt;a href="#iletisim"&gt;İletişim bölümüne git&lt;/a&gt;
+
+&lt;!-- ... uzun içerik ... --&gt;
+
+&lt;h2 id="iletisim"&gt;İletişim&lt;/h2&gt;</pre>
+<p><code>id</code> değeri sayfada <b>benzersiz</b> olmalıdır. Başka sayfadaki bölüme gitmek için de <code>href="hakkimda.html#iletisim"</code> yazabilirsin.</p>
+<h2>E-posta, telefon ve indirme bağlantıları</h2>
+<pre>&lt;a href="mailto:ornek@eposta.com"&gt;Bana e-posta gönder&lt;/a&gt;
+&lt;a href="tel:+905551112233"&gt;Beni ara&lt;/a&gt;
+&lt;a href="belgeler/cv.pdf" download&gt;CV'mi indir&lt;/a&gt;</pre>
+<p><code>mailto:</code> kullanıcının e-posta programını açar. <code>tel:</code> telefonlarda arama başlatır. <code>download</code> niteliği dosyanın açılmak yerine indirilmesini sağlar.</p>
+<h2>Resmi bağlantı yapmak</h2>
+<p><code>&lt;a&gt;</code> etiketinin içine yalnızca metin değil, başka öğeler de koyabilirsin. Resim bağlantısı bir sonraki derste göreceğimiz <code>&lt;img&gt;</code> ile yapılır:</p>
+<pre>&lt;a href="https://ornek.com"&gt;&lt;img src="logo.png" alt="Örnek logosu"&gt;&lt;/a&gt;</pre>
+<h2>Sık yapılan hatalar</h2>
+<ul>
+<li>Dış adresin başına <code>https://</code> yazmayı unutmak: <code>href="www.google.com"</code> sitenin kendi içinde bir dosya gibi aranır.</li>
+<li>Dosya adındaki büyük/küçük harf farkı: GitHub Pages gibi sunucularda <code>Resim.jpg</code> ile <code>resim.jpg</code> farklı dosyalardır.</li>
+<li>Bağlantı metnini "tıkla" gibi anlamsız bırakmak.</li>
+</ul>
+<p>Sonraki derste sayfalara resim eklemeyi öğreneceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

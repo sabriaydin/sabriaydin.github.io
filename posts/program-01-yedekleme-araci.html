@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Otomatik Yedekleme Aracı</title>
+<meta name="description" content="Seçtiğin klasörü tarih damgalı olarak yedekleyen, eski yedekleri kendiliğinden temizleyen hazır batch programı.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-10-13 07:40">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Bu program bir klasörü (örneğin Belgelerim) her çalıştırdığında <b>tarih ve saat damgalı yeni bir klasöre</b> kopyalar. Hata olursa seni uyarır, her işlemi bir kayıt dosyasına yazar ve yalnızca en yeni birkaç yedeği saklayıp eskilerini siler. Böylece disk dolmaz.</p>
+<h2>Nasıl kullanılır?</h2>
+<ol>
+<li>Aşağıdaki kodu Not Defteri'ne yapıştır ve <code>yedekle.bat</code> adıyla kaydet (Kayıt türü: <b>Tüm dosyalar</b>).</li>
+<li>Dosyayı Not Defteri ile aç, yalnızca <b>AYARLAR</b> bölümündeki üç satırı kendine göre değiştir.</li>
+<li>Çift tıklayarak çalıştır. İlk denemeyi küçük bir klasörle yapman önerilir.</li>
+</ol>
+<pre>@echo off
+setlocal
+title Otomatik Yedekleme Araci
+
+rem ===== AYARLAR (sadece bu bolumu duzenle) =====
+set "KAYNAK=%USERPROFILE%\Documents"
+set "HEDEF=D:\Yedekler"
+set "SAKLANACAK=5"
+rem ===============================================
+
+if not exist "%KAYNAK%\" goto :kaynak_yok
+
+rem Tarih-saat damgasi (bolgesel ayardan bagimsiz): 2026-10-13_21-30
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm"') do set "ZAMAN=%%i"
+set "TAM_HEDEF=%HEDEF%\Yedek_%ZAMAN%"
+
+md "%HEDEF%" 2&gt;nul
+if not exist "%HEDEF%\" goto :hedef_yok
+
+echo Kaynak : %KAYNAK%
+echo Hedef  : %TAM_HEDEF%
+echo.
+echo Yedekleme basliyor, lutfen bekle...
+echo.
+
+robocopy "%KAYNAK%" "%TAM_HEDEF%" /E /R:2 /W:2 /NP /TEE /LOG+:"%HEDEF%\yedek_log.txt"
+set "SONUC=%errorlevel%"
+if %SONUC% GEQ 8 goto :kopya_hata
+
+echo.
+echo Yedekleme basariyla tamamlandi.
+
+rem En yeni SAKLANACAK kadar yedegi birak, gerisini sil
+for /f "skip=%SAKLANACAK% delims=" %%d in ('dir /b /ad /o-n "%HEDEF%\Yedek_*"') do (
+    echo Eski yedek siliniyor: %%d
+    rd /s /q "%HEDEF%\%%d"
+)
+
+echo.
+echo Cikmak icin bir tusa bas.
+pause &gt;nul
+exit /b 0
+
+:kaynak_yok
+echo HATA: Yedeklenecek klasor bulunamadi:
+echo %KAYNAK%
+pause
+exit /b 1
+
+:hedef_yok
+echo HATA: Hedef klasor olusturulamadi:
+echo %HEDEF%
+echo Surucu takili mi, yazma izni var mi kontrol et.
+pause
+exit /b 1
+
+:kopya_hata
+echo.
+echo HATA: Kopyalama sirasinda sorun olustu. Hata kodu: %SONUC%
+echo Ayrinti icin su dosyaya bak: %HEDEF%\yedek_log.txt
+pause
+exit /b %SONUC%</pre>
+<h2>Kod nasıl çalışıyor?</h2>
+<ul>
+<li><b>AYARLAR</b>: Yedeklenecek klasör (<code>KAYNAK</code>), yedeklerin toplanacağı yer (<code>HEDEF</code>) ve kaç yedeğin saklanacağı (<code>SAKLANACAK</code>). Başka hiçbir satıra dokunman gerekmez.</li>
+<li><b>Tarih damgası</b>: <code>%date%</code> ve <code>%time%</code> bölgesel ayara göre değiştiği için bunun yerine PowerShell'e saati sorarız. Çıktı <code>2026-10-13_21-30</code> gibi her bilgisayarda aynı biçimde gelir.</li>
+<li><b>robocopy</b>: Windows'un yerleşik kopyalama aracıdır. <code>/E</code> alt klasörleri de alır, <code>/R:2 /W:2</code> hata durumunda 2 kez, 2 saniye arayla yeniden dener, <code>/LOG+</code> ve <code>/TEE</code> ile hem ekrana hem kayıt dosyasına yazar.</li>
+<li><b>Hata kodu</b>: robocopy 0-7 arasındaki kodları "başarılı" sayar (dosya kopyalandı, değişiklik yok gibi). <b>8 ve üstü</b> gerçek hatadır; bu yüzden <code>if %SONUC% GEQ 8</code> ile kontrol edilir.</li>
+<li><b>Eski yedekleri silme</b>: <code>dir /b /ad /o-n</code> yedek klasörlerini en yeniden en eskiye sıralar. <code>skip=5</code> ilk 5 satırı atlar; geriye kalanlar (en eskiler) silinir. Klasör adları tarihle başladığı için sıralama adla yapılabilir.</li>
+</ul>
+<h2>Özelleştirme</h2>
+<ul>
+<li>Birden fazla klasör yedeklemek için <code>robocopy</code> satırını farklı <code>KAYNAK</code> değerleriyle tekrar yazabilirsin.</li>
+<li>Harici diske yedek alıyorsan <code>HEDEF=E:\Yedekler</code> gibi yaz. Disk takılı değilse program hata mesajı gösterir.</li>
+<li>Her gün otomatik çalışması için Başlat menüsünden <b>Görev Zamanlayıcı</b>'yı aç, "Temel görev oluştur" de ve <code>yedekle.bat</code> dosyasını seç.</li>
+</ul>
+<blockquote>Dikkat: Her yedek klasörün <b>tam kopyasıdır</b>, bu yüzden hedef diskte yeterli yer olmalı. Yolların sonuna ters bölü (\) koyma; <code>D:\Yedekler\</code> yerine <code>D:\Yedekler</code> yaz.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

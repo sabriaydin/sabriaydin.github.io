@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Ses, Video ve Gömülü İçerik</title>
+<meta name="description" content="audio ve video etiketleri, birden fazla kaynak, YouTube ve harita gibi içerikleri iframe ile sayfaya gömme.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 08:32">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>HTML ile sayfana ses ve video ekleyebilir, başka sitelerdeki içerikleri (YouTube videosu, harita) sayfanın içine gömebilirsin. Eklenti ya da ek program gerekmez; modern tarayıcılar bunları kendisi oynatır.</p>
+<h2>Ses: audio</h2>
+<pre>&lt;audio controls src="muzik/ornek.mp3"&gt;
+  Tarayıcın ses öğesini desteklemiyor.
+&lt;/audio&gt;</pre>
+<ul>
+<li><code>controls</code>: Oynat, durdur ve ses düğmelerini gösterir. Yazmazsan oynatıcı görünmez.</li>
+<li>Etiketin içindeki metin, tarayıcı etiketi tanımazsa gösterilir.</li>
+<li>En yaygın formatlar: MP3, OGG, WAV.</li>
+</ul>
+<h2>Video: video</h2>
+<pre>&lt;video controls width="640" poster="resimler/kapak.jpg"&gt;
+  &lt;source src="video/tanitim.mp4" type="video/mp4"&gt;
+  &lt;source src="video/tanitim.webm" type="video/webm"&gt;
+  Tarayıcın video öğesini desteklemiyor.
+&lt;/video&gt;</pre>
+<table>
+<thead><tr><th>Nitelik</th><th>Etkisi</th></tr></thead>
+<tbody>
+<tr><td><code>controls</code></td><td>Oynatıcı düğmelerini gösterir</td></tr>
+<tr><td><code>poster</code></td><td>Video başlamadan önce görünen kapak resmi</td></tr>
+<tr><td><code>width</code> / <code>height</code></td><td>Boyut (piksel)</td></tr>
+<tr><td><code>autoplay</code></td><td>Otomatik başlatır; tarayıcılar çoğunlukla yalnızca <code>muted</code> ile izin verir</td></tr>
+<tr><td><code>muted</code></td><td>Sesi kapalı başlatır</td></tr>
+<tr><td><code>loop</code></td><td>Bitince başa sarar</td></tr>
+<tr><td><code>preload="none"</code></td><td>Oynatılmadan dosyayı indirmez (veri tasarrufu)</td></tr>
+</tbody>
+</table>
+<p>Tarayıcı <code>&lt;source&gt;</code> etiketlerini sırayla dener ve oynatabildiği ilk dosyayı kullanır. Bugün MP4 (H.264) hemen her yerde çalışır.</p>
+<h2>Başka sitelerden içerik gömme: iframe</h2>
+<p><code>&lt;iframe&gt;</code> sayfanın içinde başka bir sayfa gösteren bir pencere açar. En yaygın kullanımı YouTube videosu ve harita gömmektir. YouTube'da videonun altındaki <b>Paylaş &gt; Yerleştir</b> seçeneği hazır kodu verir; şuna benzer:</p>
+<pre>&lt;iframe
+  width="560" height="315"
+  src="https://www.youtube.com/embed/VIDEO_KODU"
+  title="Video başlığı"
+  allowfullscreen&gt;
+&lt;/iframe&gt;</pre>
+<ul>
+<li><code>title</code>: Ekran okuyucular için iframe'in ne olduğunu söyler. Boş bırakma.</li>
+<li><code>src</code>: Gömülecek sayfanın adresi.</li>
+<li><code>allowfullscreen</code>: Tam ekran düğmesini açar.</li>
+</ul>
+<h2>Sayfaya sığdırma</h2>
+<p>Sabit genişlikli video küçük ekranda taşabilir. CSS ile kapsayıcı genişliğine uydurabilirsin:</p>
+<pre>&lt;style&gt;
+  iframe, video { max-width: 100%; }
+  .video-kutu iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border: 0; }
+&lt;/style&gt;
+
+&lt;div class="video-kutu"&gt;
+  &lt;iframe src="https://www.youtube.com/embed/VIDEO_KODU" title="Video başlığı" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;</pre>
+<h2>Dikkat edilecekler</h2>
+<ul>
+<li><b>Dosya boyutu</b>: Büyük video dosyaları sitenin açılışını yavaşlatır ve yükleme sınırlarına takılabilir. Uzun videoları bir video sitesine yükleyip <code>iframe</code> ile gömmek daha pratiktir.</li>
+<li><b>Telif hakkı</b>: Yalnızca kullanım hakkın olan müzik ve videoları yayınla.</li>
+<li><b>Otomatik ses</b>: Sayfa açılır açılmaz ses çalan sayfalar kullanıcıyı rahatsız eder; <code>autoplay</code> kullanıyorsan videoyu sessiz başlat.</li>
+<li><b>Yol hataları</b>: Dosya <code>src</code> içindeki yolda yoksa oynatıcı boş görünür. 4. dersteki yol kurallarının aynısı geçerli.</li>
+</ul>
+<blockquote>Denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına bir YouTube gömme kodu yapıştırıp çalıştığını görebilirsin.</blockquote>
+<p>Sonraki derste sayfana renk, yazı tipi ve düzen kazandıran CSS'e giriş yapacaksın.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

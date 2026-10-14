@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux Dağıtımı Nasıl Seçilir? Güvenli İndirme ve Kurulum USB'si</title>
+<meta name="description" content="Linux dağıtımı nedir, hangisini seçmelisin, ISO dosyasını güvenle indirme, sağlama doğrulama ve USB hazırlama.">
+<meta name="kategori" content="linuxos">
+<meta name="tarih" content="2026-10-13 10:08">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Linux tek bir işletim sistemi değil, aynı çekirdeği kullanan birçok <b>dağıtımın</b> ortak adıdır. Her dağıtım farklı bir masaüstü, paket yöneticisi ve güncelleme anlayışıyla gelir. Bu yazıda doğru dağıtımın nasıl seçileceği ve dosyanın güvenle nasıl indirileceği anlatılır.</p>
+<h2>Hangi dağıtımı seçmeliyim?</h2>
+<table>
+<thead><tr><th>Dağıtım</th><th>Kime uygun</th></tr></thead>
+<tbody>
+<tr><td><a href="linux-02-ubuntu.html">Ubuntu</a></td><td>Yeni başlayanlar, genel kullanım</td></tr>
+<tr><td><a href="linux-03-linux-mint.html">Linux Mint</a></td><td>Windows'tan geçenler, eski bilgisayarlar</td></tr>
+<tr><td><a href="linux-04-debian.html">Debian</a></td><td>Kararlılık, sunucu</td></tr>
+<tr><td><a href="linux-05-fedora-workstation.html">Fedora Workstation</a></td><td>Güncel yazılım, geliştiriciler</td></tr>
+<tr><td><a href="linux-06-arch-linux.html">Arch Linux</a></td><td>Deneyimli kullanıcılar, öğrenmek isteyenler</td></tr>
+<tr><td><a href="linux-07-opensuse.html">openSUSE</a></td><td>Araç zengini kararlı sistem</td></tr>
+<tr><td><a href="linux-08-pop-os.html">Pop!_OS</a></td><td>Geliştiriciler, oyuncular</td></tr>
+<tr><td><a href="linux-09-manjaro.html">Manjaro</a></td><td>Kolay Arch deneyimi</td></tr>
+<tr><td><a href="linux-10-kali-linux.html">Kali Linux</a></td><td>Güvenlik testleri</td></tr>
+<tr><td><a href="linux-11-zorin-os.html">Zorin OS</a></td><td>Windows benzeri şık arayüz</td></tr>
+</tbody>
+</table>
+<p>Hiç bilmiyorsan <b>Ubuntu</b> veya <b>Linux Mint</b> ile başla. Hemen kurmak zorunda değilsin; canlı modda denemek çoğu zaman yeterlidir.</p>
+<h2>Sadece resmi siteden indir</h2>
+<ul>
+<li>ISO dosyasını yalnızca dağıtımın <b>kendi sitesinden</b> indir. Bu seri yazılardaki bağlantılar resmi adreslere gider.</li>
+<li>Arama sonuçlarındaki reklam ve "ücretsiz indir" sitelerine tıklama; değiştirilmiş imajlar zararlı yazılım içerebilir.</li>
+<li>Adres çubuğundaki alan adının doğru yazıldığını ve bağlantının <b>https</b> olduğunu kontrol et.</li>
+</ul>
+<h2>Sağlama değerini (checksum) doğrula</h2>
+<p>Resmi sayfalarda ISO dosyası için bir <b>SHA256</b> değeri yayımlanır. İndirdiğin dosyanın değeri aynıysa dosya bozulmamış ve değiştirilmemiş demektir.</p>
+<p>Windows'ta PowerShell ile:</p>
+<pre>certutil -hashfile "C:\Users\Ad\Downloads\dosya.iso" SHA256</pre>
+<p>Linux'ta terminal ile:</p>
+<pre>sha256sum dosya.iso</pre>
+<p>Çıkan uzun değeri indirme sayfasındakiyle karşılaştır. Tek karakter bile farklıysa dosyayı yeniden indir.</p>
+<h2>Kurulum USB'si hazırlama</h2>
+<p>ISO dosyasını USB belleğe sıradan kopyalamayla yazamazsın. Bunun için bir yazma aracı kullanılır. Araçları da resmi sitelerinden indir:</p>
+<ul>
+<li><a href="https://rufus.ie/tr/">Rufus</a>: Windows için hızlı ve yaygın araç.</li>
+<li><a href="https://etcher.balena.io/">balenaEtcher</a>: Windows, macOS ve Linux'ta çalışan sade araç.</li>
+<li><a href="https://www.ventoy.net/">Ventoy</a>: USB'yi bir kez hazırlarsın, sonra birden fazla ISO'yu kopyalayarak seçmeli başlatırsın.</li>
+</ul>
+<blockquote>USB belleğe yazma işlemi içindekilerin hepsini siler. Önemli dosyalarını önce yedekle.</blockquote>
+<h2>Kuruluma başlamadan önce</h2>
+<ol>
+<li>Önemli dosyalarının <b>yedeğini</b> al.</li>
+<li>Bilgisayarı USB'den başlat (açılırken genellikle F12, F2, Esc veya Del tuşu boot menüsünü açar).</li>
+<li><b>Canlı modda</b> dene: Wi-Fi, ses ve ekran düzgün çalışıyor mu?</li>
+<li>Windows ile birlikte kuracaksan (çift önyükleme) disk bölümleme adımında dikkatli ol; emin değilsen önce sanal makinede dene.</li>
+</ol>
+<p>Sırada hangi dağıtımı merak ediyorsan yukarıdaki tablodan yazısına geçebilirsin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

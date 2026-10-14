@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metin Araçları: Sayaç ve Dönüştürücü</title>
+<meta name="description" content="Karakter, kelime ve cümle sayısını hesapla; metni büyük/küçük harfe çevir, satırları sırala, tekrarları sil ve Türkçe karakterleri sadeleştir.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-10-13 14:33">
+<meta name="okuma" content="3">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Yazı yazarken karakter sınırını kontrol etmek, bir listeyi sıralamak ya da tekrar eden satırları temizlemek sık karşılaşılan işlerdir. Bu araç, yapıştırılan metnin istatistiklerini canlı olarak hesaplar ve tek tıklamayla çeşitli dönüştürmeler uygular. Her işlem <b>Geri al</b> düğmesiyle geri alınabilir.</p>
+<h2>Aracı dene</h2>
+<div class="arac">
+  <label for="mt-m">Metin
+    <textarea id="mt-m" rows="9" placeholder="Metni buraya yaz veya yapıştır"></textarea>
+  </label>
+  <div class="satir" id="mt-say" role="status" aria-live="polite" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+    <div>Karakter<br><b id="mt-k">0</b></div>
+    <div>Karakter (boşluksuz)<br><b id="mt-ks">0</b></div>
+    <div>Kelime<br><b id="mt-w">0</b></div>
+    <div>Cümle<br><b id="mt-c">0</b></div>
+    <div>Satır<br><b id="mt-s">0</b></div>
+    <div>Paragraf<br><b id="mt-p">0</b></div>
+    <div>Okuma süresi<br><b id="mt-o">0 sn</b></div>
+    <div>Konuşma süresi<br><b id="mt-ko">0 sn</b></div>
+  </div>
+  <p style="margin:0"><b>En sık kullanılan kelimeler:</b> <span id="mt-top">-</span></p>
+  <label class="onay" for="mt-kk"><input type="checkbox" id="mt-kk" checked> Tekrarlayan satırları silerken büyük/küçük harfi yok say</label>
+  <div class="dugmeler" id="mt-btn" role="group" aria-label="Dönüştürme işlemleri"></div>
+  <div class="dugmeler">
+    <button type="button" data-kopyala="mt-m">Metni kopyala</button>
+    <button type="button" class="ikinci" id="mt-geri" disabled>Geri al</button>
+    <button type="button" class="ikinci" id="mt-temiz">Temizle</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const M=$('mt-m'),TR='tr-TR';
+const ASCII={'ç':'c','Ç':'C','ğ':'g','Ğ':'G','ı':'i','İ':'I','ö':'o','Ö':'O','ş':'s','Ş':'S','ü':'u','Ü':'U','â':'a','Â':'A','î':'i','Î':'I','û':'u','Û':'U'};
+const ascii=s=>s.replace(/[çÇğĞıİöÖşŞüÜâÂîÎûÛ]/g,c=>ASCII[c]);
+const sureStr=sn=>sn<60?sn+' sn':Math.floor(sn/60)+' dk '+(sn%60)+' sn';
+const satirlar=s=>s.split(/\r?\n/);
+const KOM=[
+ ['BÜYÜK HARF',s=>s.toLocaleUpperCase(TR)],
+ ['küçük harf',s=>s.toLocaleLowerCase(TR)],
+ ['Başlık Düzeni',s=>s.toLocaleLowerCase(TR).replace(/(^|[\s(\["“-])(\p{L})/gu,(m,a,b)=>a+b.toLocaleUpperCase(TR))],
+ ['Cümle düzeni',s=>s.toLocaleLowerCase(TR).replace(/(^\s*|[.!?…]\s+|\n\s*)(\p{L})/gu,(m,a,b)=>a+b.toLocaleUpperCase(TR))],
+ ['Fazla boşlukları temizle',s=>s.replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim()],
+ ['Satır başı/sonu boşluklarını sil',s=>satirlar(s).map(x=>x.trim()).join('\n')],
+ ['Boş satırları sil',s=>satirlar(s).filter(x=>x.trim()).join('\n')],
+ ['Tekrarlayan satırları sil',s=>{const k=$('mt-kk').checked,g=new Set();return satirlar(s).filter(x=>{const a=k?x.trim().toLocaleLowerCase(TR):x;if(g.has(a))return false;g.add(a);return true}).join('\n')}],
+ ['Satırları A → Z sırala',s=>satirlar(s).sort((a,b)=>a.localeCompare(b,'tr')).join('\n')],
+ ['Satırları Z → A sırala',s=>satirlar(s).sort((a,b)=>b.localeCompare(a,'tr')).join('\n')],
+ ['Satır sırasını ters çevir',s=>satirlar(s).reverse().join('\n')],
+ ['Satırları numarala',s=>satirlar(s).map((x,i)=>(i+1)+'. '+x).join('\n')],
+ ['Türkçe karakterleri sadeleştir',ascii],
+ ['Bağlantı uyumlu yazı (slug)',s=>ascii(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')]
+];
+const gecmis=[];
+const say=()=>{
+  const s=M.value;
+  const kel=s.match(/[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu)||[];
+  const cum=(s.match(/[^.!?…\n]+[.!?…]+|[^.!?…\n]+$/gm)||[]).filter(x=>x.trim()).length;
+  $('mt-k').textContent=[...s].length;
+  $('mt-ks').textContent=[...s.replace(/\s/g,'')].length;
+  $('mt-w').textContent=kel.length;
+  $('mt-c').textContent=cum;
+  $('mt-s').textContent=s?satirlar(s).length:0;
+  $('mt-p').textContent=s.split(/\n\s*\n/).filter(x=>x.trim()).length;
+  $('mt-o').textContent=sureStr(Math.round(kel.length/200*60));
+  $('mt-ko').textContent=sureStr(Math.round(kel.length/130*60));
+  const f={};kel.map(x=>x.toLocaleLowerCase(TR)).filter(x=>x.length>2).forEach(x=>f[x]=(f[x]||0)+1);
+  const t=Object.entries(f).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'tr')).slice(0,5);
+  $('mt-top').textContent=t.length?t.map(x=>x[0]+' ('+x[1]+')').join(', '):'-'};
+KOM.forEach(([ad,fn])=>{
+  const b=document.createElement('button');b.type='button';b.className='ikinci';b.textContent=ad;
+  b.onclick=()=>{if(!M.value)return;gecmis.push(M.value);if(gecmis.length>30)gecmis.shift();$('mt-geri').disabled=false;M.value=fn(M.value);say()};
+  $('mt-btn').append(b)});
+$('mt-geri').onclick=()=>{if(!gecmis.length)return;M.value=gecmis.pop();$('mt-geri').disabled=!gecmis.length;say()};
+$('mt-temiz').onclick=()=>{if(M.value)gecmis.push(M.value);M.value='';$('mt-geri').disabled=!gecmis.length;say();M.focus()};
+M.addEventListener('input',say);
+say();
+})();
+</script>
+<h2>Neler yapabilir?</h2>
+<table>
+<thead><tr><th>İşlem</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td>BÜYÜK / küçük harf</td><td>Türkçe kurallarına uyar: <code>i</code> harfi <code>İ</code>, <code>ı</code> harfi <code>I</code> olur.</td></tr>
+<tr><td>Başlık Düzeni</td><td>Her kelimenin ilk harfini büyük yapar.</td></tr>
+<tr><td>Cümle düzeni</td><td>Metnin ve her cümlenin ilk harfini büyük yapar.</td></tr>
+<tr><td>Fazla boşlukları temizle</td><td>Arka arkaya gelen boşlukları teke indirir, baş ve sondaki boşlukları siler.</td></tr>
+<tr><td>Tekrarlayan satırları sil</td><td>Aynı satırın yalnızca ilk geçtiği yeri bırakır. Büyük/küçük harf farkı yok sayılabilir.</td></tr>
+<tr><td>A → Z / Z → A sırala</td><td>Satırları Türkçe alfabe sırasına göre dizer.</td></tr>
+<tr><td>Satırları numarala</td><td>Her satırın başına sıra numarası ekler.</td></tr>
+<tr><td>Türkçe karakterleri sadeleştir</td><td><code>ç, ğ, ı, ö, ş, ü</code> harflerini <code>c, g, i, o, s, u</code> yapar.</td></tr>
+<tr><td>Bağlantı uyumlu yazı (slug)</td><td>Metni küçük harfli, tire ile ayrılmış bağlantı biçimine çevirir (örn. <code>Merhaba Dünya</code> → <code>merhaba-dunya</code>).</td></tr>
+</tbody>
+</table>
+<h2>İstatistikler nasıl hesaplanır?</h2>
+<ul>
+<li><b>Kelime:</b> harf ve rakamlardan oluşan sözcük grupları sayılır.</li>
+<li><b>Cümle:</b> nokta, ünlem, soru işareti veya üç nokta ile biten bölümler sayılır.</li>
+<li><b>Okuma süresi:</b> dakikada yaklaşık 200 kelime hızı esas alınır. <b>Konuşma süresi</b> için dakikada yaklaşık 130 kelime kullanılır.</li>
+<li><b>En sık kullanılan kelimeler:</b> üç harften kısa sözcükler dahil edilmez.</li>
+</ul>
+<p>Metin yalnızca tarayıcıda işlenir; hiçbir yere gönderilmez ve kaydedilmez.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

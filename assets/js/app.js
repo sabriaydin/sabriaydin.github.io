@@ -1,0 +1,132 @@
+(()=>{
+const S=window.SITE||{name:'Sabri Aydın',about:'',links:[],categories:{}};
+const C=S.categories||{};
+const {esc,fmt}=window.PostFrame;
+// En yeni yazı üstte: önce tarih ve saat, aynı anda yazılanlarda dosya adı (büyük numara önce)
+const key=p=>p.date+' '+(p.time||'23:59');
+const P=(window.POSTS||[]).slice().sort((a,b)=>key(b).localeCompare(key(a))||b.id.localeCompare(a.id));
+const $=(s,e=document)=>e.querySelector(s),q=new URLSearchParams(location.search);
+const page=document.body.dataset.page,root=document.body.dataset.root||'';
+const home=root+'index.html',url=p=>`${root}posts/${p.id}.html`;
+// Arama için: küçük harfe çevir, Türkçe karakterleri ve vurguları yok say (zeka = zekâ, ogrenmek = öğrenmek)
+const fold=s=>String(s).toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i');
+const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* Yazı metinleri (yalnızca http/https üzerinde, arama ilk kullanıldığında yüklenir) */
+const full={};let fullState=0;
+const loadFull=()=>{if(fullState||!/^https?:/.test(location.protocol))return;fullState=1;
+Promise.all(P.map(p=>fetch(url(p)).then(r=>r.ok?r.text():'').then(t=>{const b=new DOMParser().parseFromString(t,'text/html').querySelector('.post .body');if(b)b.querySelectorAll('script,style').forEach(e=>e.remove());full[p.id]=fold(b?b.textContent:'')}).catch(()=>{}))).then(()=>{fullState=2;if(s.value.trim())s.oninput()})};
+const find=t=>{t=fold(t.trim());return t?P.filter(p=>(fold(p.title+' '+p.excerpt+' '+(C[p.cat]||''))+' '+(full[p.id]||'')).includes(t)):P};
+
+const card=(p,h='h2')=>`<a class="card tilt" href="${url(p)}"><div class="side"><span class="tag">${esc(C[p.cat]||p.cat)}</span><small><time datetime="${p.date}">${fmt(p.date)}</time><span>${p.read} dk okuma</span></small></div><div class="main"><${h} class="ct">${esc(p.title)}</${h}><p>${esc(p.excerpt)}</p></div></a>`;
+const tilt=()=>{if(reduced)return;document.querySelectorAll('.tilt').forEach(el=>{if(el._t)return;el._t=1;const t=el,k=6;t.addEventListener('mousemove',e=>{const r=t.getBoundingClientRect();el.style.setProperty('--ry',((e.clientX-r.left)/r.width-.5)*k+'deg');el.style.setProperty('--rx',-((e.clientY-r.top)/r.height-.5)*k+'deg')});t.addEventListener('mouseleave',()=>{el.style.removeProperty('--rx');el.style.removeProperty('--ry')})})};
+
+/* Header ve footer */
+/* Kategori grupları (site.js > groups): grup başlığı + alt kategoriler; gruba girmeyenler tek başına */
+const fg=g=>({...g,items:(g.items||[]).filter(k=>C[k])});
+const G=(S.groups||[]).map(fg).filter(g=>g.key&&g.items.length);
+/* Ek açılır menüler (site.js > menus): öğe ya bir kategori kısa adı ya da kendi alt kategorileri olan bir grup nesnesidir */
+const M=(S.menus||[]).map(m=>m.link?(C[m.link]?{name:m.name,link:m.link,items:[]}:null):({name:m.name,items:(m.items||[]).map(it=>typeof it==='string'?(C[it]?it:null):(it&&it.url&&it.name?it:(it&&it.key?fg(it):null))).filter(it=>it&&(typeof it==='string'||it.url||it.items.length))})).filter(m=>m&&m.name&&(m.link||m.items.length));
+const AG=G.concat(M.flatMap(m=>m.items.filter(it=>typeof it!=='string'&&it.key)));
+const inG=new Set(AG.flatMap(g=>g.items).concat(M.flatMap(m=>m.link?[m.link]:m.items.filter(it=>typeof it==='string'))));
+const ca=k=>`<a href="${home}?cat=${k}">${esc(C[k])}</a>`;
+const sg=g=>`<div class="sg"><a class="mg" href="${home}?grup=${g.key}" aria-haspopup="true">${esc(g.name)}<span class="ar" aria-hidden="true">▸</span></a><div class="sm"><div>${g.items.map(k=>ca(k).replace('<a ','<a class="sub" ')).join('')}</div></div></div>`;
+const catHtml=G.map(sg).concat(Object.keys(C).filter(k=>!inG.has(k)).map(ca));
+$('#hdr').innerHTML=`<header class="top"><div class="wrap bar"><a class="logo" href="${home}">Sabri <b>Aydın</b></a><nav id="nav" aria-label="Ana menü"><a href="${home}"${page==='home'?' aria-current="page"':''}>Ana Sayfa</a><div class="dd"><button type="button" id="ddb" aria-haspopup="true" aria-expanded="false">Kategoriler ▾</button><div class="menu">${catHtml.join('')}</div></div>${M.map(m=>m.link?`<a href="${home}?cat=${m.link}">${esc(m.name)}</a>`:`<div class="dd"><button type="button" aria-haspopup="true" aria-expanded="false">${esc(m.name)} ▾</button><div class="menu">${m.items.map(it=>typeof it==='string'?ca(it):it.url?`<a href="${/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(it.url)?'':root}${esc(it.url)}"${/^https?:/.test(it.url)?' target="_blank" rel="noopener"':''}>${esc(it.name)}</a>`:sg(it)).join('')}</div></div>`).join('')}</nav><div class="search" role="search"><input id="s" type="search" placeholder="Sitede ara" aria-label="Sitede ara" autocomplete="off"><div id="res" hidden></div></div><button type="button" class="ib burger" id="bg" aria-label="Menüyü aç" aria-expanded="false" aria-controls="nav">☰</button></div></header>`;
+const links=(S.links||[]).map(l=>`<li><a href="${l.url}"${/^https?:/.test(l.url)?' target="_blank" rel="noopener"':''}>${l.text}</a></li>`).join('');
+$('#ftr').innerHTML=`<footer class="foot"><div class="wrap"><div class="cols"><div><h2>${S.name}</h2><p>${S.about}</p></div><div><h2>Son Yazılar</h2><ul>${P.slice(0,4).map(p=>`<li><a href="${url(p)}">${esc(p.title)}</a></li>`).join('')}</ul></div><div><h2>Bağlantılar</h2><ul>${links}</ul></div></div><p class="copy">© ${new Date().getFullYear()} ${S.name}. Tüm hakları saklıdır.</p></div></footer>`;
+
+/* Menü */
+const s=$('#s'),res=$('#res'),app=$('#app'),bg=$('#bg'),nav=$('#nav'),dds=[...document.querySelectorAll('.dd')];
+const setDd=(o,d)=>dds.forEach(x=>{const v=!!o&&x===d;x.classList.toggle('open',v);x.querySelector('button').setAttribute('aria-expanded',v)});
+dds.forEach(d=>{d.querySelector('button').onclick=()=>setDd(!d.classList.contains('open'),d);d.onmouseleave=()=>d.classList.contains('open')&&setDd(false)});
+bg.onclick=()=>{const o=nav.classList.toggle('open');bg.setAttribute('aria-expanded',o);bg.setAttribute('aria-label',o?'Menüyü kapat':'Menüyü aç')};
+document.addEventListener('click',e=>{if(!e.target.closest('.dd'))setDd(false);if(!e.target.closest('.search'))res.hidden=true});
+
+/* Arama kutusu: anlık sonuçlar, ok tuşlarıyla gezinme */
+let sel=-1;const items=()=>[...res.querySelectorAll('a')];
+const mark=()=>items().forEach((a,i)=>a.classList.toggle('sel',i===sel));
+s.value=q.get('q')||'';
+s.oninput=()=>{loadFull();const v=s.value.trim(),all=v?find(v):[],r=all.slice(0,5);sel=-1;res.innerHTML=r.length?`<div class="rh">${all.length>5?`${all.length} sonuçtan ilk 5'i`:`${all.length} sonuç`}</div>`+r.map(p=>`<a href="${url(p)}"><span class="rt">${esc(p.title)}</span><span class="rc">${esc(C[p.cat]||p.cat)}</span></a>`).join(''):v?'<em>Sonuç bulunamadı</em>':'';res.hidden=!res.innerHTML;window.onSearch&&window.onSearch()};
+s.onfocus=loadFull;
+s.onkeydown=e=>{const it=items();
+if(e.key==='ArrowDown'&&it.length){e.preventDefault();sel=(sel+1)%it.length;mark()}
+else if(e.key==='ArrowUp'&&it.length){e.preventDefault();sel=(sel-1+it.length)%it.length;mark()}
+else if(e.key==='Enter'){if(sel>=0&&it[sel])location.href=it[sel].href;else if(page!=='home')location.href=home+'?q='+encodeURIComponent(s.value)}};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){res.hidden=true;sel=-1;setDd(false)}});
+
+/* Ana sayfa */
+if(page==='home'){
+app.innerHTML=`<div class="wrap pg"><h1 class="sr">${S.name}: ${esc(S.description||'')}</h1><p class="status" id="cnt" hidden><span id="cntt"></span><a href="${home}">Tüm yazılara dön</a></p><div class="grid list" id="list"></div><nav class="pager" id="pager" aria-label="Sayfalama" hidden></nav><p class="sr" id="pgs" aria-live="polite"></p></div>`;
+const PER=5; // sayfa başına yazı sayısı
+const gk=v=>AG.some(g=>g.key===v)?v:'';
+let tot=1,cat=C[q.get('cat')]?q.get('cat'):'',grp=cat?'':gk(q.get('grup')),pg=Math.max(1,parseInt(q.get('sayfa'),10)||1),last=s.value.trim();
+const qs=n=>{const u=new URLSearchParams(),t=s.value.trim();if(cat)u.set('cat',cat);else if(grp)u.set('grup',grp);if(t)u.set('q',t);if(n>1)u.set('sayfa',n);return u.toString()};
+const href=n=>home+(qs(n)?'?'+qs(n):'');
+// Sayfa numaraları: az sayfada hepsi, çoksa 1 … önceki bu sonraki … son
+const nums=(n,c)=>{let a=[];if(n<=9)for(let i=1;i<=n;i++)a.push(i);else if(c<=4)a=[1,2,3,4,5,n];else if(c>=n-3)a=[1,n-4,n-3,n-2,n-1,n];else a=[1,c-1,c,c+1,n];const o=[];a.forEach((v,i)=>{if(i&&v-a[i-1]>1)o.push(0);o.push(v)});return o};
+const pb=(n,t,rel,off)=>off?`<span class="pgb off" aria-hidden="true">${t}</span>`:`<a class="pgb" rel="${rel}" href="${href(n)}" data-p="${n}">${t}</a>`;
+const pager=(n,c)=>`${pb(c-1,'‹ Önceki','prev',c<=1)}<ul>${nums(n,c).map(v=>v?`<li><a class="pgn" href="${href(v)}" data-p="${v}" aria-label="Sayfa ${v}"${v===c?' aria-current="page"':''}>${v}</a></li>`:'<li><button type="button" class="gap" data-gap aria-label="Sayfa numarası yaz ve git">…</button></li>').join('')}</ul>${pb(c+1,'Sonraki ›','next',c>=n)}`;
+const draw=()=>{const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi),r=find(term).filter(p=>cat?p.cat===cat:gi?gi.items.includes(p.cat):true);
+if(term!==last){pg=1;last=term}
+const n=Math.max(1,Math.ceil(r.length/PER));pg=Math.min(pg,n);tot=n;
+$('#cnt').hidden=!f;$('#cntt').textContent=[cat&&C[cat]+' kategorisi',gi&&gi.name+' kategorisi',term&&'“'+term+'” araması'].filter(Boolean).join(' ve ')+': '+r.length+' yazı';
+$('#list').innerHTML=r.length?r.slice((pg-1)*PER,pg*PER).map(p=>card(p)).join(''):`<p class="mu">${term?'Eşleşen yazı yok. Başka bir kelime dene.':'Bu kategoride henüz yazı yok.'}</p>`;
+const pn=$('#pager');pn.hidden=n<2;pn.innerHTML=n>1?pager(n,pg):'';$('#pgs').textContent=n>1?`Sayfa ${pg} / ${n}`:'';
+/* Adres çubuğunu güncel tut (yenileyince ve geri düğmesinde aynı sayfa gelsin); dosya olarak açıldığında tarayıcı izin vermez, sorun değil */
+try{const w=qs(pg);if(w!==location.search.slice(1))history.replaceState(null,'',location.pathname+(w?'?'+w:''))}catch(e){}
+tilt()};
+const go=p=>{pg=p;
+try{const w=qs(pg);history.pushState(null,'',location.pathname+(w?'?'+w:''))}catch(x){location.href=href(pg);return}
+draw();$('#list').scrollIntoView({behavior:reduced?'auto':'smooth',block:'start'})};
+$('#pager').addEventListener('click',e=>{
+/* ... düğmesi: yerine sayfa numarası kutusu açılır, Enter ile o sayfaya gidilir */
+const g=e.target.closest('button[data-gap]');
+if(g){const li=g.parentNode;li.innerHTML=`<input class="pgi" type="number" inputmode="numeric" min="1" max="${tot}" placeholder="1-${tot}" aria-label="Gidilecek sayfa (1-${tot})">`;const i=li.firstChild;i.focus();
+i.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();const v=parseInt(i.value,10);go(v>=1?Math.min(v,tot):pg)}else if(ev.key==='Escape'){ev.stopPropagation();$('#pager').innerHTML=pager(tot,pg)}};
+i.onblur=()=>setTimeout(()=>{if(i.isConnected)$('#pager').innerHTML=pager(tot,pg)},0);return}
+const a=e.target.closest('a[data-p]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey||e.button)return;e.preventDefault();go(+a.dataset.p)});
+addEventListener('popstate',()=>{const u=new URLSearchParams(location.search);cat=C[u.get('cat')]?u.get('cat'):'';grp=cat?'':gk(u.get('grup'));s.value=u.get('q')||'';last=s.value.trim();pg=Math.max(1,parseInt(u.get('sayfa'),10)||1);draw()});
+window.onSearch=draw;draw()}
+
+/* Yazı sayfası: yazı metni HTML içinde hazır gelir; burada üst bölüm (yayınlanmış sitede zaten hazırdır) ve ek bölümler eklenir */
+if(page==='post'){
+const art=$('article.post');
+/* Üst bölüm yoksa (ör. dosya bilgisayarda açıldıysa) sayfanın üstündeki bilgilerden oluştur */
+if(!$('h1',art)){
+const mt=n=>{const e=document.querySelector(`meta[name="${n}"]`);return e?e.content.trim():''};
+const suf=' | '+S.name;let title=document.title;if(title.endsWith(suf))title=title.slice(0,-suf.length);
+const body=$('.body',art),m={title,cat:mt('kategori'),date:mt('tarih').slice(0,10),read:parseInt(mt('okuma'),10)||PostFrame.minutes(body?body.textContent:'')};
+if(m.title&&m.cat&&/^\d{4}-\d{2}-\d{2}$/.test(m.date)){art.insertAdjacentHTML('afterbegin',PostFrame.frame(m,C,root));document.title=m.title+suf}}
+const id=decodeURIComponent(location.pathname.split('/').filter(Boolean).pop()||'').replace(/\.html$/,'');
+const i=P.findIndex(x=>x.id===id);
+const meta=$('.meta',art);
+if(meta){const cp=document.createElement('button');cp.type='button';cp.className='copy-link';cp.textContent='Bağlantıyı kopyala';
+cp.onclick=async()=>{const u=location.href.split('#')[0];let ok=false;
+try{await navigator.clipboard.writeText(u);ok=true}catch(e){const t=document.createElement('textarea');t.value=u;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(e2){}t.remove()}
+cp.textContent=ok?'Kopyalandı ✓':'Kopyalanamadı';setTimeout(()=>cp.textContent='Bağlantıyı kopyala',1800)};
+meta.appendChild(cp)}
+if(i>-1){
+/* Önceki / sonraki: ana sayfadaki liste sırasına göre */
+const prev=P[i-1],next=P[i+1];
+const pn=(p,l,c)=>p?`<a class="pn-item ${c}" href="${url(p)}"><small>${l}</small><b>${esc(p.title)}</b></a>`:'<span></span>';
+let h='';
+if(prev||next)h+=`<nav class="wrap pn" aria-label="Yazılar arası gezinme"><div class="pn-grid">${pn(prev,'‹ Önceki yazı','l')}${pn(next,'Sonraki yazı ›','r')}</div></nav>`;
+/* İlgili yazılar: aynı kategoride, listede yakın olanlar */
+const rel=P.map((x,j)=>({x,d:Math.abs(j-i)})).filter(o=>o.x.cat===P[i].cat&&o.x.id!==id&&o.x!==prev&&o.x!==next).sort((a,b)=>a.d-b.d).slice(0,2).map(o=>o.x);
+if(rel.length)h+=`<section class="wrap rel"><h2>Bunlar da ilgini çekebilir</h2><div class="grid">${rel.map(p=>card(p,'h3')).join('')}</div></section>`;
+app.insertAdjacentHTML('beforeend',h)}
+/* Yana kaydırılabilen kod blokları klavyeyle de kaydırılabilsin */
+const prePin=()=>art.querySelectorAll('pre,table').forEach(e=>{e.scrollWidth>e.clientWidth?e.tabIndex=0:e.removeAttribute('tabindex')});prePin();addEventListener('resize',prePin);
+/* Okuma ilerleme çubuğu */
+const pr=document.createElement('div');pr.className='progress';pr.setAttribute('aria-hidden','true');document.body.prepend(pr);
+window.updateProgress=()=>{const r=art.getBoundingClientRect(),t=r.height-innerHeight*.5;pr.style.transform=`scaleX(${Math.max(0,Math.min(1,-r.top/(t>0?t:1)))})`};
+updateProgress()}
+
+/* Yukarı çık düğmesi + kaydırma */
+const tt=document.createElement('button');tt.type='button';tt.className='totop';tt.hidden=true;tt.setAttribute('aria-label','Yukarı çık');tt.textContent='↑';
+tt.onclick=()=>scrollTo({top:0,behavior:reduced?'auto':'smooth'});document.body.appendChild(tt);
+let tick=false;addEventListener('scroll',()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{tick=false;tt.hidden=scrollY<700;window.updateProgress&&updateProgress()})},{passive:true});
+
+tilt();
+})();

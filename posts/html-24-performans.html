@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Web Sayfası Performansı</title>
+<meta name="description" content="Görsel optimizasyonu, lazy loading, yazı tipi ve betik yükleme, Core Web Vitals ölçütleri ve Lighthouse ile sayfa hızını artırma.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-10-13 16:36">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Sayfa hızı, kullanıcı deneyimini ve arama sıralamasını doğrudan etkiler. Yavaş açılan sayfalarda ziyaretçilerin önemli bir bölümü sayfayı beklemeden terk eder. Bu yazıda statik bir sitede hızı artıran temel yöntemler sıralanır.</p>
+<h2>Önce ölçmek</h2>
+<p>Hangi sorunun çözüleceği ölçümle belirlenir. İki ücretsiz araç yeterlidir:</p>
+<ul>
+<li><b>Lighthouse:</b> Chrome geliştirici araçlarında (<code>F12</code> &gt; Lighthouse) bulunur; sayfa için puan ve öneri listesi üretir.</li>
+<li><b><a href="https://pagespeed.web.dev/">PageSpeed Insights</a>:</b> Adresi girilen sayfa için hem laboratuvar ölçümü hem de gerçek kullanıcı verisini (varsa) gösterir.</li>
+</ul>
+<h3>Core Web Vitals</h3>
+<p>Google'ın sayfa deneyimi için kullandığı üç temel ölçüt:</p>
+<table>
+<thead><tr><th>Ölçüt</th><th>Neyi ölçer?</th><th>İyi sayılan değer</th></tr></thead>
+<tbody>
+<tr><td><b>LCP</b> (Largest Contentful Paint)</td><td>Sayfanın en büyük içeriğinin (genellikle ana görsel veya başlık) görünme süresi</td><td>2,5 saniye veya altı</td></tr>
+<tr><td><b>INP</b> (Interaction to Next Paint)</td><td>Kullanıcı eyleminden (tıklama, dokunma) sonra ekranın güncellenme gecikmesi</td><td>200 milisaniye veya altı</td></tr>
+<tr><td><b>CLS</b> (Cumulative Layout Shift)</td><td>Sayfa yüklenirken öğelerin beklenmedik kaymaları</td><td>0,1 veya altı</td></tr>
+</tbody>
+</table>
+<h2>1. Görseller</h2>
+<p>Görseller çoğu sayfada toplam boyutun büyük bölümünü oluşturur, bu nedenle en çok kazanç buradadır.</p>
+<ul>
+<li><b>Boyut:</b> Ekranda 400 piksel genişliğinde görünecek görsel için 4000 piksellik fotoğraf yüklenmez; görsel gösterileceği boyuta yakın küçültülür.</li>
+<li><b>Biçim:</b> Fotoğraflar için <b>WebP</b> veya <b>AVIF</b>, düz renkli çizimler ve logolar için <b>SVG</b> tercih edilir. JPEG ve PNG'ye göre aynı kalitede daha küçük dosya elde edilir.</li>
+<li><b>Sıkıştırma:</b> <a href="https://squoosh.app/">Squoosh</a> gibi ücretsiz araçlarla kalite kaybı gözle fark edilmeyecek şekilde dosya boyutu düşürülür.</li>
+<li><b><code>width</code> ve <code>height</code>:</b> Görsel etiketine boyutlar yazılırsa tarayıcı yer ayırır; görsel yüklenince içerik aşağı kaymaz (CLS düşer).</li>
+<li><b>Tembel yükleme:</b> Ekranın altındaki görseller <code>loading="lazy"</code> ile yalnızca kaydırılınca yüklenir.</li>
+<li><b>Duyarlı görsel:</b> <code>srcset</code> ile küçük ekranlara küçük dosya sunulur (bkz. <a href="html-17-duyarli-tasarim.html">Duyarlı Tasarım</a>).</li>
+</ul>
+<pre>&lt;!-- Sayfanın üstündeki ana görsel: hemen yüklensin --&gt;
+&lt;img src="kapak.webp" width="1200" height="630" alt="..." fetchpriority="high"&gt;
+
+&lt;!-- Aşağıdaki görseller: gerektiğinde yüklensin --&gt;
+&lt;img src="galeri1.webp" width="600" height="400" alt="..." loading="lazy"&gt;</pre>
+<blockquote><code>loading="lazy"</code> sayfanın ilk ekranındaki (LCP olan) görselde kullanılmamalıdır; aksi halde ana görselin gösterilmesi gecikir.</blockquote>
+<h2>2. Yazı tipleri</h2>
+<ul>
+<li>Gerekmiyorsa özel yazı tipi yerine sistem yazı tipleri kullanılır: <code>font-family: system-ui, sans-serif;</code>. Hiç indirme gerektirmez.</li>
+<li>Google Fonts kullanılıyorsa yalnızca gereken <b>kalınlıklar</b> (örn. 400 ve 700) seçilir; her ek kalınlık ek dosya demektir.</li>
+<li><code>display=swap</code> parametresi, yazı tipi inene kadar metnin yedek yazı tipiyle görünmesini sağlar (görünmez metin beklemesini önler).</li>
+<li><code>preconnect</code> ile yazı tipi sunucusuna bağlantı erkenden kurulur.</li>
+</ul>
+<pre>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap"&gt;</pre>
+<h2>3. CSS ve JavaScript</h2>
+<ul>
+<li><b><code>defer</code>:</b> Betikler <code>defer</code> ile yüklenirse sayfanın gösterilmesini engellemez: <code>&lt;script src="uygulama.js" defer&gt;&lt;/script&gt;</code>.</li>
+<li><b>Gereksiz kodu çıkarma:</b> Kullanılmayan kütüphaneler ve CSS kuralları kaldırılır. Küçük bir sayfa için büyük bir kütüphane (örn. tüm jQuery) gerekmeyebilir; modern JavaScript çoğu işi yapabilir.</li>
+<li><b>Küçültme (minify):</b> Boşluk ve yorumlar silinerek dosya boyutu düşürülür. Çevrimiçi araçlar veya <code>esbuild</code>, <code>terser</code> gibi komut satırı araçları kullanılır.</li>
+<li><b>Kritik CSS:</b> Küçük sitelerde tek bir küçük CSS dosyası yeterlidir; çok sayıda ayrı dosya istek sayısını artırır.</li>
+<li><b>Üçüncü taraf betikler:</b> Reklam, izleme, sohbet ve yerleştirme (embed) betikleri çoğu zaman sayfa yavaşlığının asıl nedenidir. Gerçekten gerekli olanlar tutulur.</li>
+</ul>
+<h2>4. Yerleşim kaymalarını önleme</h2>
+<ul>
+<li>Görsel ve videolara boyut verilir (<code>width</code>/<code>height</code> veya CSS <code>aspect-ratio</code>).</li>
+<li>Sonradan yüklenen reklam, yerleştirilmiş içerik ve yazı tipleri için yer ayrılır.</li>
+<li>Mevcut içeriğin üstüne sonradan öğe eklenmez; yeni içerik kullanıcı eylemiyle veya sayfanın altında gösterilir.</li>
+</ul>
+<pre>.video-kutu {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+}</pre>
+<h2>5. Önbellek ve sunucu</h2>
+<ul>
+<li>GitHub Pages gibi barındırma hizmetleri dosyaları CDN üzerinden sunar ve sıkıştırma (gzip/brotli) uygular; ek ayar gerekmez.</li>
+<li>Dosya adları değişmediği sürece tarayıcı önbelleği ikinci ziyaretlerde hızı artırır. Güncelleme sonrası eski sürümün görülmesi durumunda <code>Ctrl + F5</code> ile sayfa önbelleksiz yenilenir.</li>
+<li>Sayfa HTTPS üzerinden sunulmalıdır; HTTP/2 yalnızca HTTPS ile çalışır.</li>
+</ul>
+<h2>Kontrol listesi</h2>
+<table>
+<thead><tr><th>Madde</th><th>Yapıldı mı?</th></tr></thead>
+<tbody>
+<tr><td>Görseller gösterim boyutuna yakın ve WebP/AVIF/SVG biçiminde</td><td>☐</td></tr>
+<tr><td>Görsel etiketlerinde <code>width</code>, <code>height</code> ve <code>alt</code> var</td><td>☐</td></tr>
+<tr><td>Ekran altındaki görsellerde <code>loading="lazy"</code>, ana görselde <code>fetchpriority="high"</code></td><td>☐</td></tr>
+<tr><td>Yazı tipi sayısı ve kalınlıkları en aza indirildi, <code>display=swap</code> kullanıldı</td><td>☐</td></tr>
+<tr><td>Betikler <code>defer</code> ile yükleniyor, kullanılmayan kod temizlendi</td><td>☐</td></tr>
+<tr><td>Lighthouse puanı ölçüldü; LCP, INP ve CLS iyi aralıkta</td><td>☐</td></tr>
+</tbody>
+</table>
+<h2>Özet</h2>
+<ul>
+<li>Önce ölçülür (Lighthouse, PageSpeed Insights), sonra en büyük sorun giderilir.</li>
+<li>En büyük kazanç genellikle görsellerin küçültülmesi ve doğru biçime çevrilmesiyle elde edilir.</li>
+<li><code>defer</code>, <code>loading="lazy"</code> ve <code>width</code>/<code>height</code> düşük maliyetli ve etkili düzeltmelerdir.</li>
+<li>Üçüncü taraf betikler dikkatle seçilir.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

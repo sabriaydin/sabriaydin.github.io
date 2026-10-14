@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toplu Dosya Yeniden Adlandırıcı</title>
+<meta name="description" content="Bir klasördeki dosyaları önizleyip onayınla sıra numaralı yeni adlara çeviren ve geri alma dosyası üreten batch programı.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-10-13 07:56">
+<meta name="okuma" content="">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Telefondan aktardığın yüzlerce <code>IMG_4821.jpg</code> dosyasını tek tek yeniden adlandırmak yerine bu programa klasörü ve ön eki söylersin; dosyalar <code>tatil_001.jpg</code>, <code>tatil_002.jpg</code> biçiminde sıralanır. Yeniden adlandırma <b>önizleme + onay</b> ile çalışır ve ayrıca bir <b>geri alma dosyası</b> (<code>geri_al.bat</code>) üretir; bir hata yaparsan eski adlara dönebilirsin.</p>
+<h2>Nasıl kullanılır?</h2>
+<ol>
+<li>Kodu <code>adlandir.bat</code> adıyla kaydet.</li>
+<li>Çift tıkla. Klasör yolunu yaz (Gezgin adres çubuğundan kopyalayabilirsin) ya da boş bırakıp Enter'a bas; o zaman programın bulunduğu klasör kullanılır.</li>
+<li>Yeni adın başlangıcını (<code>tatil_</code>) ve dosya uzantısını (<code>jpg</code>) yaz. Önizlemeyi kontrol edip <code>E</code> ile onayla.</li>
+</ol>
+<pre>@echo off
+setlocal EnableDelayedExpansion
+title Toplu Yeniden Adlandirici
+
+echo ==========================================
+echo         TOPLU YENIDEN ADLANDIRICI
+echo ==========================================
+echo.
+echo Dosyalar su bicimde adlandirilir: baslangic + sira no + uzanti
+echo Ornek: tatil_001.jpg, tatil_002.jpg ...
+echo.
+
+set "KLASOR="
+set /p "KLASOR=Klasor yolu (bos birakirsan bu scriptin klasoru): "
+if not defined KLASOR set "KLASOR=%~dp0"
+set "KLASOR=%KLASOR:"=%"
+cd /d "%KLASOR%" 2&gt;nul || goto :klasor_yok
+
+set "ONEK="
+set "UZANTI="
+set /p "ONEK=Yeni adin baslangici (ornek: tatil_): "
+set /p "UZANTI=Dosya uzantisi (ornek: jpg): "
+if not defined UZANTI goto :eksik
+set "UZANTI=%UZANTI:.=%"
+
+echo.
+echo Onizleme:
+echo.
+set "SAYAC=0"
+for /f "delims=" %%f in ('dir /b /a-d "*.%UZANTI%" 2^&gt;nul') do (
+    if /i not "%%f"=="%~nx0" (
+        set /a SAYAC+=1
+        set "NO=000!SAYAC!"
+        echo   %%f   yeni adi:   !ONEK!!NO:~-3!%%~xf
+    )
+)
+if %SAYAC%==0 goto :dosya_yok
+
+echo.
+echo Toplam %SAYAC% dosya bulundu.
+choice /c EH /n /m "Bu dosyalar yeniden adlandirilsin mi? (E/H) "
+if errorlevel 2 goto :iptal
+
+rem Geri alma dosyasini baslat
+&gt;"geri_al.bat" echo @echo off
+
+set "SAYAC=0"
+set "BASARILI=0"
+for /f "delims=" %%f in ('dir /b /a-d "*.%UZANTI%" 2^&gt;nul') do (
+    if /i not "%%f"=="%~nx0" (
+        set /a SAYAC+=1
+        set "NO=000!SAYAC!"
+        set "YENI=!ONEK!!NO:~-3!%%~xf"
+        if exist "!YENI!" (
+            echo Atlandi, bu ad zaten var: !YENI!
+        ) else (
+            ren "%%f" "!YENI!"
+            &gt;&gt;"geri_al.bat" echo ren "!YENI!" "%%f"
+            set /a BASARILI+=1
+        )
+    )
+)
+
+if %BASARILI%==0 (
+    del "geri_al.bat" 2&gt;nul
+) else (
+    &gt;&gt;"geri_al.bat" echo echo Eski adlar geri yuklendi.
+    &gt;&gt;"geri_al.bat" echo pause
+)
+
+echo.
+echo %BASARILI% dosya yeniden adlandirildi.
+if %BASARILI% GTR 0 echo Geri almak istersen bu klasordeki geri_al.bat dosyasini calistir.
+echo.
+pause
+exit /b 0
+
+:klasor_yok
+echo.
+echo HATA: Klasor bulunamadi:
+echo %KLASOR%
+pause
+exit /b 1
+
+:eksik
+echo.
+echo HATA: Dosya uzantisi bos birakilamaz.
+pause
+exit /b 1
+
+:dosya_yok
+echo.
+echo Bu klasorde .%UZANTI% uzantili dosya bulunamadi.
+pause
+exit /b 1
+
+:iptal
+echo.
+echo Islem iptal edildi, hicbir dosya degistirilmedi.
+pause
+exit /b 0</pre>
+<h2>Kod nasıl çalışıyor?</h2>
+<ul>
+<li><b>Gecikmeli genişletme</b>: <code>setlocal EnableDelayedExpansion</code> ile döngü içinde değişen değerler <code>!SAYAC!</code> biçiminde okunur (10. ders). Bu olmadan sayaç her seferinde aynı sayıyı gösterirdi.</li>
+<li><b>Sıfırlı numara</b>: <code>NO=000!SAYAC!</code> değişkenin başına üç sıfır ekler (0007 gibi), <code>!NO:~-3!</code> ise sondan 3 karakteri alır (007). Böylece dosyalar Gezgin'de doğru sırada dizilir.</li>
+<li><b>Uzantı korunur</b>: <code>%%~xf</code> dosyanın gerçek uzantısını verir. <code>jpg</code> yazsan bile adı <code>.JPG</code> olan dosya adını <code>.JPG</code> olarak bırakır.</li>
+<li><b>Güvenlik</b>: Yeni ad zaten varsa (<code>if exist</code>) dosyanın üzerine yazmaz, atlar. Çalışan script'in kendisi de listeden çıkarılır.</li>
+<li><b>Geri alma dosyası</b>: Her başarılı işlemde <code>ren "yeni" "eski"</code> satırı <code>geri_al.bat</code> içine yazılır. Çalıştırınca tüm adlar eski haline döner.</li>
+<li><b>Temizlik</b>: Tırnaklı yol yapıştırsan bile <code>%KLASOR:"=%</code> tırnakları temizler, uzantıya yanlışlıkla nokta yazsan (<code>.jpg</code>) <code>%UZANTI:.=%</code> noktayı siler.</li>
+</ul>
+<h2>Özelleştirme</h2>
+<ul>
+<li>Üç haneli numara yerine dört hane için <code>NO=0000!SAYAC!</code> ve <code>!NO:~-4!</code> yaz. 999'dan fazla dosya varsa bunu yapmalısın.</li>
+<li>Sıra numarası yerine dosyaların tümüne ön ek eklemek istersen <code>YENI</code> satırını <code>set "YENI=!ONEK!%%f"</code> yap.</li>
+<li>Aynı işi alt klasörlerdeki dosyalar için yapmak istersen bu program yeterli değildir; her klasörde ayrı çalıştır.</li>
+</ul>
+<blockquote>Dikkat: Sıralama, dosya adlarının alfabetik sırasına göredir. Dosya adında ünlem işareti (!) varsa o dosya atlanabilir veya yanlış adlandırılabilir. Yeni adın başlangıcında şu karakterleri kullanma: \ / : * ? " &lt; &gt; |. İlk denemeni mutlaka dosyaların bir kopyası üzerinde yap.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

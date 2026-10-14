@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Form Oluşturucu</title>
+<meta name="description" content="Alan türü, etiket ve zorunluluk seçerek hazır HTML form kodu oluştur, önizle ve kopyala.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-10-13 09:16">
+<meta name="okuma" content="2">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Form; iletişim, kayıt ve anket gibi sayfalarda kullanıcıdan bilgi alır. Doğru yazılmış bir form için etiket, alan adı ve zorunluluk gibi parçaları bilmek gerekir. Bu araç alanları seçtikçe formu senin için yazar.</p>
+<h2>Aracı dene</h2>
+<div class="arac">
+  <div class="satir">
+    <label for="fm-t">Alan türü
+      <select id="fm-t"><option value="text">Metin</option><option value="email">E-posta</option><option value="password">Parola</option><option value="number">Sayı</option><option value="tel">Telefon</option><option value="date">Tarih</option><option value="textarea">Uzun metin</option><option value="select">Açılır liste</option><option value="checkbox">Onay kutusu</option></select>
+    </label>
+    <label for="fm-e">Etiket (görünen ad)<input type="text" id="fm-e" value="Adınız"></label>
+    <label for="fm-a">Alan adı (name)<input type="text" id="fm-a" value="ad" autocapitalize="off" spellcheck="false"></label>
+  </div>
+  <div class="satir">
+    <label for="fm-s" id="fm-sl" hidden>Seçenekler (virgülle ayır)<input type="text" id="fm-s" value="Seçenek 1, Seçenek 2"></label>
+    <label class="onay" for="fm-z"><input type="checkbox" id="fm-z"> Zorunlu alan</label>
+  </div>
+  <div class="dugmeler">
+    <button type="button" id="fm-ekle">Alanı forma ekle</button>
+    <button type="button" class="ikinci" id="fm-son">Son alanı sil</button>
+    <button type="button" class="ikinci" id="fm-temiz">Formu temizle</button>
+  </div>
+  <p class="not" id="fm-bilgi" role="status" aria-live="polite"></p>
+  <h3>Önizleme</h3>
+  <iframe class="onizle" id="fm-onizle" title="Form önizlemesi" sandbox style="height:300px"></iframe>
+  <h3>HTML kodu</h3>
+  <pre id="fm-cikti"></pre>
+  <div class="dugmeler"><button type="button" data-kopyala="fm-cikti">Kodu kopyala</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const ka=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const al=[{t:'text',e:'Adınız',a:'ad',z:true,s:''},{t:'email',e:'E-posta adresiniz',a:'eposta',z:true,s:''}];
+const kod=()=>{
+  const g=al.map(f=>{
+    const id='f-'+f.a,r=f.z?' required':'';
+    if(f.t==='checkbox')return `  <p><label><input type="checkbox" name="${ka(f.a)}"${r}> ${ka(f.e)}</label></p>`;
+    let k;
+    if(f.t==='textarea')k=`<textarea id="${ka(id)}" name="${ka(f.a)}" rows="4"${r}></textarea>`;
+    else if(f.t==='select')k=`<select id="${ka(id)}" name="${ka(f.a)}"${r}>\n${f.s.split(',').map(x=>x.trim()).filter(Boolean).map(x=>`      <option>${ka(x)}</option>`).join('\n')}\n    </select>`;
+    else k=`<input type="${f.t}" id="${ka(id)}" name="${ka(f.a)}"${r}>`;
+    return `  <p>\n    <label for="${ka(id)}">${ka(f.e)}</label>\n    ${k}\n  </p>`}).join('\n');
+  return `<form action="#" method="post">\n${g}\n  <button type="submit">Gönder</button>\n</form>`};
+const ciz=()=>{
+  const k=kod();
+  $('fm-cikti').textContent=k;
+  $('fm-onizle').srcdoc='<!DOCTYPE html><meta charset="utf-8"><style>body{font:16px system-ui,sans-serif;padding:12px;color:#222;background:#f3f1ed}input,select,textarea{display:block;width:100%;max-width:320px;padding:6px;margin-top:4px;box-sizing:border-box}input[type=checkbox]{display:inline;width:auto}p{margin:0 0 12px}button{padding:8px 16px}</style>'+k;
+  $('fm-bilgi').textContent=al.length+' alan var.'};
+const sec=()=>{$('fm-sl').hidden=$('fm-t').value!=='select'};
+$('fm-t').addEventListener('input',sec);
+$('fm-ekle').onclick=()=>{
+  const a=$('fm-a').value.trim().replace(/[^a-zA-Z0-9_-]/g,'');
+  if(!a||!$('fm-e').value.trim()){$('fm-bilgi').textContent='Etiket ve alan adı boş olamaz. Alan adında yalnızca harf, rakam, _ ve - kullanılır.';return}
+  al.push({t:$('fm-t').value,e:$('fm-e').value.trim(),a,z:$('fm-z').checked,s:$('fm-s').value});ciz()};
+$('fm-son').onclick=()=>{al.pop();ciz()};
+$('fm-temiz').onclick=()=>{al.length=0;ciz()};
+sec();ciz();
+})();
+</script>
+<h2>Nasıl kullanılır?</h2>
+<ol>
+<li><b>Alan türünü</b> seç (metin, e-posta, parola vb.).</li>
+<li>Kullanıcının göreceği <b>etiketi</b> ve sunucuya gidecek <b>alan adını</b> yaz.</li>
+<li>Gerekiyorsa <b>zorunlu alan</b> kutusunu işaretle ve <b>Alanı forma ekle</b> düğmesine bas.</li>
+<li>Önizlemeyi kontrol et, kodu kopyalayıp sayfana yapıştır.</li>
+</ol>
+<h2>Önemli notlar</h2>
+<ul>
+<li>Her alan bir <code>&lt;label&gt;</code> ile bağlanır; böylece etikete tıklayınca alan odaklanır ve ekran okuyucular alanı doğru okur.</li>
+<li><code>required</code> yazılan alan boş bırakılırsa tarayıcı formu göndermez.</li>
+<li>Form verisini kaydetmek için bir sunucu gerekir. GitHub Pages yalnızca statik dosya sunduğundan form göndermek için ayrı bir form servisi kullanman gerekir; koddaki <code>action="#"</code> değerini o servisin adresiyle değiştirirsin.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
