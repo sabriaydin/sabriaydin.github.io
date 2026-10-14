@@ -259,7 +259,7 @@ S.onInit(()=>{
   ...[-.3,-.15,0,.15,.3].map((x,i)=>part(rbox(.15,1.16,.09,.3,2),i%2?0x7a5430:0x84603a,x,.6,0)),
   part(box(.78,.07,.1),0x2c2c32,0,.34,0),part(box(.78,.07,.1),0x2c2c32,0,.9,0),part(blob(.05,1,.05,3),0xd2b24a,.3,.65,.09)
  ],{ao:.82});
- MODEL.matPlain=sc.mat();
- MODEL.matDS=sc.mat({side:THREE.DoubleSide});
+ MODEL.matPlain=sc.mat({pbr:true});
+ MODEL.matDS=sc.mat({side:THREE.DoubleSide,pbr:true});
 });
 })();

@@ -47,14 +47,20 @@ window.SITE = {
       ]
     },
     { name: 'Araçlar', link: 'araclar' },
-    // Projeler: kategori değil, doğrudan bağlantı. url alanına her projenin gerçek adresini yaz (şu an örnek adrestir).
+    // Projeler: kategori değil, doğrudan bağlantılardan oluşan alt menüler. url alanına her projenin gerçek adresini yaz (Hunger hariç örnek adrestir).
     {
       name: 'Projeler',
       items: [
-        { name: 'Parola Defteri', url: 'https://github.com/' },
-        { name: 'IPRadar', url: 'https://github.com/' },
-        { name: 'GTA SA: Mod Paketi', url: 'https://github.com/' },
-        { name: 'Hunger 3D (Oyun)', url: 'oyunlar/hunger/' }
+        { name: 'Oyunlar', items: [
+          { name: 'Hunger (Tarayıcı Tabanlı)', url: 'oyunlar/hunger/' }
+        ] },
+        { name: 'Programlar', items: [
+          { name: 'Parola Defteri', url: 'https://github.com/' },
+          { name: 'IPRadar', url: 'https://github.com/' }
+        ] },
+        { name: 'Diğer', items: [
+          { name: 'GTA SA: Mod Paketi', url: 'https://github.com/' }
+        ] }
       ]
     }
   ],

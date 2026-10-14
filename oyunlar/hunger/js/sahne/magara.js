@@ -87,9 +87,9 @@ function haloTexture(){
 }
 function buildCave(G){
  const lv=G.cave.lv,sd=lv.exit.x*7+lv.exit.y;
- if(!mat)mat=sc.mat({roughness:.95});
+ if(!mat)mat=sc.mat({roughness:.95,pbr:true});
  if(!glowMat)glowMat=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});
- if(!roofMat)roofMat=sc.mat({roughness:1,side:THREE.DoubleSide});
+ if(!roofMat)roofMat=sc.mat({roughness:1,side:THREE.DoubleSide,pbr:true});
  /* tavan */
  roof=new THREE.Mesh(roofGeo(lv,sd),roofMat);roof.receiveShadow=false;sc.scene.add(roof);
  /* sarkıtlar ve dikitler */
@@ -167,7 +167,7 @@ function buildCave(G){
 /* ---- yüzey girişleri ---- */
 function buildSurface(G){
  if(!G.caves||!G.caves.length)return;
- if(!mat)mat=sc.mat({roughness:.95});
+ if(!mat)mat=sc.mat({roughness:.95,pbr:true});
  for(const c of G.caves){
   const P=[];entranceParts(c,P);
   const m=new THREE.Mesh(merge(P,{ao:.8,jit:.09}),mat);m.castShadow=true;m.receiveShadow=true;sc.scene.add(m);groups.push(m);

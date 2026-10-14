@@ -138,7 +138,7 @@ function buildTerrain(G){
  HVg=new Float32Array(NX*NZ);
  for(let j=0;j<NZ;j++)for(let i=0;i<NX;i++)HVg[j*NX+i]=groundY(i/NF,j/NF);
  if(!terrainMat){
-  terrainMat=sc.mat({map:sc.tex.detail,bumpMap:sc.tex.detail,bumpScale:1.4,roughness:.96});sc.terrainMat=terrainMat;
+  terrainMat=sc.mat({pbr:true,roughness:.96});sc.terrainMat=terrainMat;
   waterMat=sc.mat({transparent:true,roughness:.1,metalness:.05,depthWrite:false,normalMap:sc.tex.waterN,normalScale:new THREE.Vector2(.45,.45)});
   waterMat.onBeforeCompile=sh=>{
    sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_maps>',`

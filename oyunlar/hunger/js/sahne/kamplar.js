@@ -87,7 +87,7 @@ function clearAll(){
 }
 function build(G){
  clearAll();
- if(!mat)mat=sc.mat({roughness:.9});
+ if(!mat)mat=sc.mat({roughness:.9,pbr:true});
  if(!chestGeo){const [a,b]=chestParts();chestGeo=a;lidGeo=b}
  for(const c of G.camps||[]){
   const g=new THREE.Group(),P=[];

@@ -47,7 +47,7 @@ const KEYOF={[O.PALM]:'palm',[O.PALM0]:'palm0',[O.ROCK]:'rock',[O.COAL]:'coal',[
 function buildInstances(G){
  for(const c of chunks.values()){sc.scene.remove(c.mesh);c.mesh.dispose&&c.mesh.dispose();if(c.lo){sc.scene.remove(c.lo);c.lo.dispose&&c.lo.dispose()}}
  chunks.clear();
- if(!matFol){matFol=windMat();matFolDS=windMat({side:THREE.DoubleSide});matRock=sc.mat()}
+ if(!matFol){matFol=windMat({pbr:true,leaf:true});matFolDS=windMat({side:THREE.DoubleSide,pbr:true,leaf:true});matRock=sc.mat({pbr:true})}
  const cnt=new Map();
  for(let z=0;z<H;z++)for(let x=0;x<W;x++){
   const o=G.obj[z*W+x];if(!o)continue;

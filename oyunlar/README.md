@@ -1,7 +1,7 @@
 # Oyunlar
 
 Her oyun kendi klasöründe durur: `oyunlar/<oyun-adi>/`. Ortak dosyalar `oyunlar/ortak/` içindedir (three.min.js).
-Menü bağlantısı `assets/js/site.js` → Projeler → `items` içinden eklenir.
+Menü bağlantısı `assets/js/site.js` → Projeler → Oyunlar → `items` içinden eklenir (Projeler menüsü Oyunlar, Programlar ve Diğer alt menülerinden oluşur).
 
 ## Hunger 3D FPS (`oyunlar/hunger/`)
 
@@ -21,7 +21,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Ada üretimi (arazi, dağlar, ağaç/maden sıklığı) | `js/dunya/uretim.js` |
 | Envanter simgeleri (2B) | `js/gorsel/simgeler.js` |
 | Renderer, renk/ton eşleme, kamera, FPS bakışı, kalite kademeleri | `js/sahne/cekirdek.js` |
-| Prosedürel dokular (arazi detayı, su normal haritası, parlama) | `js/sahne/dokular.js` |
+| Prosedürel dokular (arazi detayı, su normal haritası, parlama; çim, kabuk, kaya, kum ve yaprak PBR dokuları) | `js/sahne/dokular.js` |
 | Gökyüzü kubbesi (güneş, ay, bulut), güneş/ay ışığı, sis, yansıma ortamı, ateş ışıkları | `js/sahne/isik.js` |
 | Arazi (yumuşak yükseklik, renk karışımı) ve su | `js/sahne/arazi.js` |
 | Çimen tutamları (rüzgârda sallanır) | `js/sahne/cim.js` |
@@ -36,7 +36,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Son işleme: HDR, bloom, güneş ışınları, renk derecelendirme, vinyet | `js/sahne/sonisleme.js` |
 | Hava durumu: bulut, yağmur, şimşek | `js/sahne/hava.js` |
 | Ateş böcekleri, polen/toz parçacıkları | `js/sahne/atmosfer.js` |
-| Yükseklik sisi, rüzgâr simülasyonu (yön, hamle, şiddet) | `js/sahne/gerceklik.js` |
+| Yükseklik sisi, rüzgâr simülasyonu (yön, hamle, şiddet); yüzey detayı gölgelendiricisi (kabartma, pürüzlülük, üç düzlemli kaplama, yaprak boşlukları) | `js/sahne/gerceklik.js` |
 | Oyun içi rehber (oynanış, hikâye, canavarlar, madenler, eşyalar, üretim) | `js/veri/rehber.js` (metinler), `js/oyun/rehber.js` (pencere) |
 | Tuş atamaları (Ayarlar › Kontrol) | `js/cekirdek/tuslar.js` |
 | Kayıt sistemi: otomatik kayıt, elle kayıt yuvaları, dosya indirme/yükleme, kayıtlar menüsü | `js/oyun/durum.js` (altyapı), `js/oyun/kayitlar.js` (pencere) |

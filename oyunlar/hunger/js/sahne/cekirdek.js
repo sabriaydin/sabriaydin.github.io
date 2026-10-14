@@ -6,7 +6,13 @@ const S=HG.Scene,sc=HG.sc;
 THREE.ColorManagement.legacyMode=false;
 sc.mode='menu';sc.quality=3;sc.fpsAcc=0;sc.fpsN=0;sc.fov=75;
 sc.mats=[];
-sc.mat=extra=>{const m=new THREE.MeshStandardMaterial(Object.assign({vertexColors:true,flatShading:false,roughness:.92,metalness:0},extra||{}));sc.mats.push(m);return m};
+sc.mat=extra=>{
+ const o=Object.assign({},extra||{}),pbr=o.pbr,leaf=o.leaf;delete o.pbr;delete o.leaf;                 /* pbr: yüzey ayrıntı dokuları (gerceklik.js) uygulanır */
+ const m=new THREE.MeshStandardMaterial(Object.assign({vertexColors:true,flatShading:false,roughness:.92,metalness:0},o));
+ if(pbr||leaf)m.userData.pbr=1;
+ if(leaf)m.userData.leaf=1;                                   /* yaprak: kenarlar parçalanır */
+ sc.mats.push(m);return m;
+};
 sc.col=c=>new THREE.Color(c);
 
 /* Diğer sahne dosyaları buraya kayıt olur: onInit, onBuild, onSync, onFrame */

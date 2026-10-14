@@ -229,7 +229,7 @@ function clearAll(){
 }
 function build(G){
  clearAll();
- if(!mat){mat=sc.mat({roughness:.9});glowMat=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false})}
+ if(!mat){mat=sc.mat({roughness:.9,pbr:true});glowMat=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false})}
  if(!glowGeo)glowGeo=new THREE.PlaneGeometry(1,1);
  const smokeTex=sc.tex&&sc.tex.glow;
  for(const vl of G.villages||[]){
