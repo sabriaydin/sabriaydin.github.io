@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const S=HG.Scene,sc=HG.sc,{IT}=HG;
-const {blob,rbox,merge,part,cyl,cone,alongPart,fb3,box}=sc.g;
+const {blob,rbox,merge,part,cyl,cone,alongPart,fb3,box,stone,stonePart,toolParts}=sc.g;
 const V=(x,y,z)=>new THREE.Vector3(x,y,z);
 const PI=Math.PI;
 const geos={};
@@ -49,28 +49,38 @@ B.bottle=bottle(0xbfe6f0,0xcfe8ee);
 B.wbottle=()=>{const l=bottle(0x5fb0e0,0xcfe8ee)();l[4]=part(cyl(.072,.072,.05,14),0x2f8fcf,0,.12,0);return l};
 B.milk=()=>{const l=bottle(0xf4f1e8,0xe6e2d6)();l[4]=part(cyl(.072,.072,.05,14),0xc9423a,0,.12,0);return l};
 B.wood=()=>{
- const bark=(x,y,z,nx,ny,nz,c)=>{if(Math.abs(nx)>.85)c.setHex(0xd9b078);else{const v=noise(x*2,y,z*2,10);c.multiplyScalar(.75+v*.5)}};
- const a=part(cyl(.075,.08,.5,10,3),0x6b4423,0,.08,0,1,1,1,0,0,PI/2);a.cf=bark;
- const b=part(cyl(.065,.07,.44,10,3),0x73492a,.02,.07,.15,1,1,1,0,.35,PI/2);b.cf=bark;
- const c=part(cyl(.06,.065,.4,10,3),0x66401f,.03,.2,.07,1,1,1,0,-.2,PI/2);c.cf=bark;
- return [a,b,c,part(cone(.025,.12,5),0x5a381b,.1,.16,-.06,1,1,1,0,0,-1.2)];
+ const log=(r,len,x,y,z,ry,col,seed)=>{
+  const ax=[Math.cos(ry),0,-Math.sin(ry)];
+  const p=part(cyl(r,r*1.04,len,10,3),col,x,y,z,1,1,1,0,ry,PI/2);
+  p.cf=(X,Y,Z,nx,ny,nz,c)=>{
+   const d=Math.abs(nx*ax[0]+nz*ax[2]);
+   if(d>.85){const rr=Math.hypot(Y-y,(X-x)*ax[2]-(Z-z)*ax[0]);const ring=Math.sin(rr*(190)+noise(X,Y,Z,seed)*2);c.setHex(0xd9b078);c.multiplyScalar(.82+.14*ring+(rr<r*.18?-.08:0))}   /* kesit yüzü: yıllık halkalar */
+   else{const v=noise(X*2,Y,Z*2,10);c.multiplyScalar(.7+v*.6)}
+  };
+  return p;
+ };
+ return [log(.075,.5,0,.08,0,0,0x6b4423,3),log(.065,.44,.02,.07,.15,.35,0x73492a,5),log(.06,.4,.03,.2,.07,-.2,0x66401f,7),part(cone(.025,.12,5),0x5a381b,.1,.16,-.06,1,1,1,0,0,-1.2)];
 };
 const rockCf=(base,vein)=>(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,12);c.multiplyScalar(.82+v*.4);if(vein!==undefined&&Math.abs(fb3(x*7,y*7,z*7,5)-.5)<.07)c.setHex(vein)};
-B.stone=()=>{
- const a=part(blob(.12,2,.25,41,1.2,.75,1),0x8d8d92,0,.08,0),b=part(blob(.09,2,.25,42,1,.8,1.1),0x9a9aa0,.15,.06,.08),c=part(blob(.07,2,.25,43),0x7d7d83,-.1,.05,.14);
- a.cf=b.cf=c.cf=rockCf();return [a,b,c];
+/* kırık taş parçası: tabanı y=0'da */
+const lump=(sx,sy,sz,seed,o,col,x,z,ry,cf)=>{
+ const st=stone(sx,sy,sz,seed,o),dy=sy*(o.flat||0);
+ if(!cf)return stonePart(st,col,x,dy,z,ry||0);
+ const p=part(st.geo,col,x,dy,z,1,1,1,0,ry||0,0,.08);p.cf=cf;return p;
 };
+B.stone=()=>[lump(.12,.078,.095,41,{cuts:5,detail:2,amp:.2,flat:.7},0x8d8a85,0,0,.4),lump(.05,.034,.042,43,{cuts:3,detail:1,amp:.18,flat:.6},0x7d7a76,.16,.09,0),lump(.035,.025,.03,45,{cuts:2,detail:1,amp:.18,flat:.6},0x96928c,-.12,.11,1)];
 B.coal=()=>{
- const mk=(r,x,z,s)=>{const p=part(blob(r,1,.3,s,1,.8,1),0x17171c,x,r*.7,z);p.cf=(X,Y,Z,nx,ny,nz,c)=>{if(noise(X,Y,Z,14)>.68)c.setHex(0x40404c)};return p};
- return [mk(.1,0,0,51),mk(.075,.13,.07,52),mk(.07,-.1,.09,53),mk(.06,.02,-.12,54)];
+ const cf=(X,Y,Z,nx,ny,nz,c)=>{const n=noise(X,Y,Z,14);if(n>.68)c.setHex(0x40404c);c.multiplyScalar(.85+noise(X,Y,Z,15)*.4);if(ny>.5)c.multiplyScalar(1.15)};
+ return [lump(.1,.075,.085,51,{cuts:6,detail:2,amp:.2,flat:.72},0x1b1b20,0,0,.2,cf),lump(.07,.05,.06,52,{cuts:5,detail:1,amp:.2,flat:.7},0x1b1b20,.13,.07,1,cf),lump(.06,.045,.055,53,{cuts:5,detail:1,amp:.2,flat:.7},0x1b1b20,-.1,.09,2,cf),lump(.045,.035,.04,54,{cuts:4,detail:1,amp:.2,flat:.7},0x1b1b20,.02,-.12,0,cf)];
 };
 B.sand=()=>{const p=part(blob(.2,2,.08,61,1,.38,1),0xdac68c,0,.04,0);p.cf=(x,y,z,nx,ny,nz,c)=>{c.multiplyScalar(.9+noise(x,y,z,15)*.22)};return [p]};
-const ore=(c)=>()=>{
- const a=part(blob(.14,2,.22,71,1.1,.8,1),0x77777e,0,.1,0),b=part(blob(.08,2,.22,72),0x6c6c72,.14,.06,.09);
- a.cf=b.cf=(x,y,z,nx,ny,nz,col)=>{const v=noise(x,y,z,16);col.multiplyScalar(.85+v*.3);if(noise(x,y,z,17)>.64)col.setHex(c)};
- return [a,b];
+const ore=(c,cr)=>()=>{
+ const cf=(x,y,z,nx,ny,nz,col)=>{const v=noise(x,y,z,16);col.multiplyScalar(.85+v*.3);if(noise(x,y,z,17)>.6){const t=new THREE.Color(c);col.lerp(t,.85)}};
+ const ps=[lump(.14,.095,.11,71,{cuts:5,detail:2,amp:.22,flat:.7},0x5f5e66,0,0,.3,cf),lump(.08,.055,.07,72,{cuts:4,detail:1,amp:.2,flat:.7},0x56555c,.15,.09,1,cf)];
+ for(const [x,z,rz] of [[.02,.02,.3],[-.05,.04,-.4],[.08,-.04,.5]])ps.push(part(cone(.012,.07,5,1),cr,x,.11+z,z,1,1,1,rz,x*20,rz));
+ return ps;
 };
-B.copper_ore=ore(0xd37a3c);B.iron_ore=ore(0xb98862);
+B.copper_ore=ore(0xd37a3c,0x2f8a62);B.iron_ore=ore(0xb98862,0x92402a);
 const ingot=c=>()=>{
  const mk=(x,y,z,ry)=>{const p=part(rbox(.3,.075,.13,.3,3),c,x,y,z,1,1,1,0,ry,0);p.cf=(X,Y,Z,nx,ny,nz,col)=>{if(ny>.7)col.multiplyScalar(1.18)};return p};
  return [mk(0,.04,0,0),mk(.02,.115,.0,.5)];
@@ -98,7 +108,7 @@ B.cfish=fish(0xb07a35,0xd9b070,0x8a5a22,true);
 B.sardine=fish(0x6f8ea8,0xcfdde8,0x4f6c84,false);
 B.bass=fish(0x5e7a62,0xaebfae,0x3e5a46,false);
 B.tuna=fish(0x243e66,0x8fb0cc,0x1b2f50,false);
-B.rock=()=>B.stone();
+B.rock=()=>[lump(.17,.088,.1,41,{taper:.55,cuts:6,flat:.8,detail:3,amp:.26},0x6a655e,0,0,0)];
 const crabOf=(body,leg)=>()=>{
  const ps=[part(blob(.1,2,.06,111,1.25,.5,1),body,0,.07,0),part(blob(.04,1,.05,112),body,.0,.12,.07),part(blob(.04,1,.05,113),body,.0,.12,-.07)];
  for(const sx of [-1,1]){
@@ -157,8 +167,15 @@ B.wallw=()=>[0,1,2,3].map(i=>part(box(.34,.07,.05),i%2?0xa67848:0xb08050,0,.04+i
 B.walls=()=>{const a=part(rbox(.34,.3,.1,.2,3),0x8c8c94,0,.15,0);a.cf=rockCf();return [a]};
 B.door=()=>[part(box(.26,.38,.04),0x6b4a29,0,.19,0),part(box(.26,.03,.045),0x4a3220,0,.1,0),part(box(.26,.03,.045),0x4a3220,0,.3,0),part(blob(.018,1,0,150),0xbcc2c8,.09,.2,.03)];
 /* modelleri üret: kimliğe göre */
+/* aletler: ortak alet parçalarından üretilir (sap yatay, baş +X ucunda) */
+function toolGeo(it){
+ const tp=toolParts(it.tool,it.tier||1),g=merge([...tp.wood,...tp.head,...tp.cord],{jit:.03});
+ g.applyMatrix4(new THREE.Matrix4().makeRotationZ(-PI/2));g.computeBoundingBox();
+ const b=g.boundingBox;g.translate(-(b.min.x+b.max.x)/2,-b.min.y,0);return g;
+}
 function build(id){
  const it=IT[id];let fn=B[id];
+ if(it&&(it.tool==='axe'||it.tool==='pick'||it.tool==='rod'))return toolGeo(it);
  if(!fn&&it){if(it.tool&&B[it.tool])fn=()=>B[it.tool](it)}
  if(!fn)fn=()=>[part(blob(.1,2,.1,160),0xcccccc,0,.1,0)];
  const list=fn(it);

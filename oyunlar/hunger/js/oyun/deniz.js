@@ -80,6 +80,10 @@ function raftHit(d){
 HG.raftUse=raftUse;HG.raftHit=raftHit;HG.raftSpeed=raftSpeed;HG.dismountRaft=dismountRaft;
 
 /* ---- Köpek balığı ve denizanası zekâsı ---- */
+/* Köpek balıkları kıyıdan uzak, derin denizde yaşar (karadan en az SHARK_MIN kare). Çok nadiren tek bir köpek balığı
+   (a.coastal) kıyıya yakın suyun yüzeyinde dolaşır; saldırgan değildir ve bir süre sonra açığa döner. */
+const SHARK_MIN=26,SHARK_COAST=7,COASTAL_P=.035;
+const sdAt=(x,z)=>{const i=tileIdx(x,z);return i<0||!G.sdist?0:G.sdist[i]};
 function waterDepthAtPlayer(){return G.pz===undefined?0:Math.max(0,depthAt(G.px,G.py))}
 function stingPlayer(a){
  HG.hurt(ANIMAL.jelly.dmg,'Denizanası zehrinden öldün.',{x:a.x,z:a.z},0);
@@ -103,7 +107,10 @@ function seaAI(a,def,dt,dp,dx,dz,play){
  }
  /* köpek balığı: gezinme -> halka çizerek yaklaşma -> saldırı -> geri çekilme */
  const inw=play&&(G.swim||G.onRaft||waterDepthAtPlayer()>.5);
- const tgt=inw&&dp<def.aggr+(a.ss>0?10:0);
+ const minSd=a.coastal?SHARK_COAST:SHARK_MIN;
+ if(a.coastal&&(a.life=(a.life===undefined?110+rnd()*80:a.life)-dt)<=0){a.coastal=false;a.ss=0}      /* süre dolunca açığa yönelir */
+ /* oyuncu, köpek balığının bölgesinden çok uzaktaysa (kıyıya yakın yüzücü) saldırı olmaz */
+ const tgt=!a.coastal&&inw&&dp<def.aggr+(a.ss>0?10:0)&&sdAt(G.px,G.py)>=minSd-5;
  const ang=Math.atan2(dx,dz);
  if(a.ss===undefined)a.ss=0;
  if(a.charge>0){a.charge=0;if(a.hp<35){a.ss=3;a.rt=7}else{a.ss=2;a.ch=7}}
@@ -137,8 +144,22 @@ function seaAI(a,def,dt,dp,dx,dz,play){
   a.rt-=dt;head=ang+Math.PI;spd=def.run*.8;
   if(a.rt<=0){a.ss=(tgt&&a.hp>=35&&(a.bites||0)<4)?1:0;a.st=2+rnd()*2;a.tm=2}
  }
- let want=wy-.62;
- if(a.ss>=1&&play&&G.head&&G.pz!==undefined)want=clamp(G.pz-.25,gy+.2,wy-.5);
+ /* bölge sınırı: kıyıya doğru ilerliyorsa daha derin yöne döner */
+ if(spd>0){
+  const here=sdAt(a.x,a.z),ahead=sdAt(a.x+Math.sin(head)*5,a.z+Math.cos(head)*5);
+  if(ahead<minSd&&ahead<=here+1){
+   let bd=head,bv=-1;
+   for(let k=0;k<8;k++){const th=k*.785,v=sdAt(a.x+Math.sin(th)*6,a.z+Math.cos(th)*6);if(v>bv){bv=v;bd=th}}
+   head=bd;if(a.ss===2){a.ss=1;a.st=2}
+  }else if(a.coastal&&ahead>SHARK_MIN-6&&ahead>=here){
+   /* kıyıya yakın gezen köpek balığı derin açığa kaçmaz: kıyı şeridine (~14 kare) geri döner */
+   let bd=head,bv=1e9;
+   for(let k=0;k<8;k++){const th=k*.785,v=Math.abs(sdAt(a.x+Math.sin(th)*6,a.z+Math.cos(th)*6)-14);if(v<bv){bv=v;bd=th}}
+   head=bd;
+  }
+ }
+ let want=a.coastal?wy-.4:wy-.62;
+ if(!a.coastal&&a.ss>=1&&play&&G.head&&G.pz!==undefined)want=clamp(G.pz-.25,gy+.2,wy-.5);
  if(a.ss===3)want=Math.min(want,wy-1.1);
  want=Math.max(want,gy+.2);
  const nb=a.by+(want-a.by)*Math.min(1,2.2*dt);a.vy=(nb-a.by)/Math.max(dt,.001);a.by=nb;
@@ -180,8 +201,11 @@ function updateSea(dt){
  G.sharkCd=(G.sharkCd||0)-1.6;
  if(G.sharkCd<=0&&near('shark')<3){
   const d=32+rnd()*30,x=px+Math.cos(ang)*d,z=pz+Math.sin(ang)*d,i=tileIdx(x,z);
-  if(i>=0&&G.tile[i]===T.DEEP&&G.sdist&&G.sdist[i]>=10&&HG.swimmable.fish(x,z)&&near('shark',x,z,45)<1){
-   spawn('shark',x,z);G.sharkCd=30+rnd()*40;
+  const coast=rnd()<COASTAL_P&&!L.some(q=>q.coastal&&!q.dying);              /* çok nadir: kıyıya yakın yüzeyde gezinen tek köpek balığı */
+  const lo=coast?SHARK_COAST:SHARK_MIN,hi=coast?SHARK_MIN-6:999;
+  if(i>=0&&G.tile[i]===T.DEEP&&G.sdist&&G.sdist[i]>=lo&&G.sdist[i]<=hi&&HG.swimmable.fish(x,z)&&near('shark',x,z,45)<1){
+   const a=spawn('shark',x,z);if(coast){a.coastal=true;a.life=110+rnd()*80;a.by=HG.sc.WY-.4}
+   G.sharkCd=30+rnd()*40;
   }
  }
  /* denizanası: kıyıya yakın sularda */

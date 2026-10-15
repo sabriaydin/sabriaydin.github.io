@@ -4,6 +4,22 @@
 const {T,O,mulberry32,hash,fbm,clamp,smooth,ANIMAL}=HG;
 /* size: yalnızca eski (384) kayıtları yeniden kurmak için; verilmezse güncel harita boyutu kullanılır.
    Eski boyutta üretim, eski sürümle birebir aynı dünyayı verir (kayıtlı nesne dizisi uyuşsun diye). */
+/* Tatlı su gölleri: içlerinde ve çevrelerinde (2 kare) ağaç, palmiye ve meyve çalısı bulunmaz. Rastgele sayı kullanmaz; üretimin sonunda ve kayıt yüklenince uygulanır. */
+const PONDR=2,pondProt=o=>o===O.TREE||o===O.PALM||o===O.PALM0||o===O.BUSH||o===O.BUSH0;
+function pondNear(tile,N,i,R){
+ const x=i%N,y=(i/N)|0,r=R===undefined?PONDR:R;
+ for(let j=-r;j<=r;j++){const Y=y+j;if(Y<0||Y>=N)continue;for(let k=-r;k<=r;k++){const X=x+k;if(X>=0&&X<N&&tile[Y*N+X]===T.POND)return true}}
+ return false;
+}
+function pondClean(tile,obj,N){
+ let n=0;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+  if(tile[y*N+x]!==T.POND)continue;
+  for(let j=-PONDR;j<=PONDR;j++){const Y=y+j;if(Y<0||Y>=N)continue;for(let k=-PONDR;k<=PONDR;k++){const X=x+k;if(X<0||X>=N)continue;const i=Y*N+X;if(pondProt(obj[i])){obj[i]=O.NONE;n++}}}
+ }
+ return n;
+}
+HG.pondNear=pondNear;HG.pondClean=pondClean;
 function genWorld(seed,size){
  const LEG=!!size&&size!==HG.W,W=size||HG.W,H=W;
  const rnd=mulberry32(seed^0x9e3779b9);
@@ -347,6 +363,7 @@ function genWorld(seed,size){
    }
   }
  }
+ pondClean(tile,obj,W);
  return {tile,obj,hgt,shore,animals,villages,camps,caves,sx:sx+.5,sy:sy+.5,islets,reefs,size:W,entSC:SC};
 }
 /* Eski (384) dünyayı güncel büyük haritanın ortasına yerleştirir; çevresi açık denizdir. off: kaydırma (kare). */

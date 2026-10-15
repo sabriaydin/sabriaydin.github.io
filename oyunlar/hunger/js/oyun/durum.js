@@ -147,6 +147,7 @@ async function startGame(load,slotId){
   newState(s.seed,emb);
   ldSet(.25,'Kayıt işleniyor');await nap();
   try{const b=decObj(s,oldSz?oldSz*oldSz:N*N);if(b)for(let i=0;i<b.length;i++){let o=b[i];if(o===O.BUSH0)o=O.BUSH;if(o===O.PALM0)o=O.PALM;G.obj[mapI(i)]=o}}catch(e){}
+  HG.pondClean(G.tile,G.obj,N);                     /* gölet içi ve kenarındaki ağaç/çalı temizlenir */
   Object.assign(G,{px:s.px+off,py:s.py+off,hp:s.hp,hun:s.hun,thr:s.thr,warm:s.warm,clock:s.clock,inv:s.inv,sel:s.sel||0,flags:s.flags||{},
    o2:s.o2===undefined?100:s.o2,stam:s.stam===undefined?100:s.stam,san:s.san===undefined?100:s.san,bleed:s.bleed||0,torchFuel:s.torchFuel===undefined?360:s.torchFuel});
   G.drops=(Array.isArray(s.drops)?s.drops:[]).filter(d=>d&&HG.IT[d.id]&&d.n>0).map(d=>({id:d.id,n:d.n,x:d.x+off,y:d.y,z:d.z+off,vx:0,vz:0,vy:0,age:5,rest:false}));

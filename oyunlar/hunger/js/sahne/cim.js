@@ -23,27 +23,44 @@ function tuftGeo(){
  const nrm=g.attributes.normal;for(let i=0;i<nrm.count;i++)nrm.setXYZ(i,0,1,0);
  return g;
 }
+/* çiçek: çapraz iki şeritli eğik sap, iki yaprak, sarı göbek ve altı yapraklı taç; aTint: 1 = taç yaprağı (örnek rengiyle boyanır), 0 = yeşil/sarı kısımlar */
 function flowerGeo(){
- const pos=[],col=[],idx=[];
- const sh=.34;
- pos.push(-.012,0,0,.012,0,0,-.01,sh,0,.01,sh,0);for(let i=0;i<4;i++)col.push(.35,.6,.25);idx.push(0,1,2,1,3,2);
- let n=4;
- for(let k=0;k<5;k++){
-  const a=k/5*Math.PI*2,c=Math.cos(a),s=Math.sin(a);
-  pos.push(0,sh,0,c*.07-s*.025,sh+.015,s*.07+c*.025,c*.07+s*.025,sh+.015,s*.07-c*.025);
-  for(let i=0;i<3;i++)col.push(1,1,1);idx.push(n,n+1,n+2);n+=3;
+ const pos=[],col=[],tint=[],idx=[];
+ const v=(x,y,z,r,g,b,t)=>{pos.push(x,y,z);col.push(r,g,b);tint.push(t);return pos.length/3-1};
+ const sh=.36,bend=.035;
+ const sx=y=>bend*(y/sh)*(y/sh);                                          /* sap yukarıda hafif eğilir */
+ for(const rot of [0,Math.PI/2]){
+  const c=Math.cos(rot),s=Math.sin(rot),w=.011;let prev=null;
+  for(let i=0;i<=3;i++){
+   const y=sh*i/3,k=1-.35*i/3,x0=sx(y),a=v(x0-w*k*c,y,-w*k*s,.05,.17,.035,0),b=v(x0+w*k*c,y,w*k*s,.07,.22,.045,0);
+   if(prev)idx.push(prev[0],prev[1],a,prev[1],b,a);prev=[a,b];
+  }
  }
- pos.push(0,sh+.012,0,.02,sh+.012,0,0,sh+.012,.02);for(let i=0;i<3;i++)col.push(1,.85,.2);idx.push(n,n+1,n+2);
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();
+ for(const [yy,ang,len] of [[.1,.4,.1],[.19,-2.5,.085]]){                  /* yapraklar */
+  const c=Math.cos(ang),s=Math.sin(ang),x0=sx(yy);
+  const a=v(x0,yy,0,.04,.15,.03,0),b=v(x0+c*len*.5-s*.022,yy+.03,s*len*.5+c*.022,.07,.26,.05,0),d=v(x0+c*len*.5+s*.022,yy+.03,s*len*.5-c*.022,.07,.26,.05,0),e=v(x0+c*len,yy+.045,s*len,.1,.34,.07,0);
+  idx.push(a,b,d,b,e,d);
+ }
+ const top=sx(sh),cy=sh+.004;
+ const ctr=v(top,cy+.012,0,1,.62,.04,0);let ring=[];
+ for(let i=0;i<6;i++){const a=i/6*Math.PI*2;ring.push(v(top+Math.cos(a)*.022,cy+.004,Math.sin(a)*.022,.7,.36,.02,0))}
+ for(let i=0;i<6;i++)idx.push(ctr,ring[i],ring[(i+1)%6]);
+ for(let k=0;k<6;k++){
+  const a=k/6*Math.PI*2+.3,c=Math.cos(a),s=Math.sin(a),px=-s,pz=c;
+  const rb=.02,rm=.055,rt=.092,wm=.03;
+  const b0=v(top+c*rb,cy+.002,s*rb,.62,.62,.62,1),mL=v(top+c*rm-px*wm,cy+.014,s*rm-pz*wm,1,1,1,1),mR=v(top+c*rm+px*wm,cy+.014,s*rm+pz*wm,1,1,1,1),tp=v(top+c*rt,cy+.006,s*rt,.9,.9,.9,1);
+  idx.push(b0,mL,mR,mL,tp,mR);
+ }
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setAttribute('aTint',new THREE.Float32BufferAttribute(tint,1));g.setIndex(idx);g.computeVertexNormals();
  const nrm=g.attributes.normal;for(let i=0;i<nrm.count;i++)nrm.setXYZ(i,0,1,0);
  return g;
 }
-function windMat(amp){
+function windMat(amp,tinted){
  const m=sc.mat({side:THREE.DoubleSide,roughness:.9});
  m.onBeforeCompile=sh=>{
   sh.uniforms.uTime=uTime;sh.uniforms.uWindV=sc.U.uWindV;sh.uniforms.uWPh=sc.U.uWPh;
   sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\n normal=normalize(vNormal);');   /* iki yüzlü yaprak: arka yüz de ışık alır (karanlık yaprak kalmaz) */
-  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;uniform vec2 uWPh;').replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;uniform vec2 uWPh;'+(tinted?'\nattribute float aTint;':'')).replace('#include <color_vertex>','#include <color_vertex>'+(tinted?'\n#ifdef USE_INSTANCING_COLOR\n vColor.xyz=color.xyz*mix(vec3(1.),instanceColor.xyz,aTint);\n#endif':'')).replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
   #ifdef USE_INSTANCING
   float ph=instanceMatrix[3].x*.8+instanceMatrix[3].z*.6;
   float ws=.45+uWindV.z*1.2,wv=sin(uWPh.x+ph-dot(instanceMatrix[3].xz,vec2(.8,.6))*.35);   /* dalga yönü sabit: rüzgâr yönü yavaşça dönerken uzak bitkilerin fazı kaymaz */
@@ -51,6 +68,7 @@ function windMat(amp){
   transformed.z+=(cos(uTime*1.3+ph*1.2)*.4*ws+uWindV.y*uWindV.z*1.6)*position.y*position.y*${amp.toFixed(2)};
   #endif`);
  };
+ if(tinted)m.customProgramCacheKey=()=>'flowerTint';
  return m;
 }
 function mkMesh(geo,mat,cap){
@@ -59,8 +77,8 @@ function mkMesh(geo,mat,cap){
 }
 S.onInit(()=>{
  grass=mkMesh(tuftGeo(),windMat(.9),CAP);
- flow=mkMesh(flowerGeo(),windMat(.5),FCAP);
- sc.grass=grass;
+ flow=mkMesh(flowerGeo(),windMat(.5,true),FCAP);
+ sc.grass=grass;sc.flow=flow;
 });
 
 const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),cl=new THREE.Color();

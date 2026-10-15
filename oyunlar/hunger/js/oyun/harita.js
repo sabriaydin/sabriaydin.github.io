@@ -70,14 +70,34 @@ function drawFog(){
  if(!G.explore)return;
  if(fogDirty){
   const d=fogImg.data;
-  for(let i=0;i<CW*CH;i++){const q=i*4,e=G.explore[i];d[q]=FOGC[0];d[q+1]=FOGC[1];d[q+2]=FOGC[2];d[q+3]=e?0:244}
+  for(let i=0;i<CW*CH;i++){const q=i*4,e=G.explore[i];d[q]=FOGC[0];d[q+1]=FOGC[1];d[q+2]=FOGC[2];d[q+3]=e?0:255}      /* keşfedilmemiş yer tamamen kapalıdır: arazi, kıyı ve işaret sezdirilmez */
   fogCtx.putImageData(fogImg,0,0);fogDirty=false;
  }
 }
+/* keşfedilen (bayrağı kalkmış) köy, kamp, ada, resif ve mağaralar kendi çevreleriyle birlikte haritada açılır */
+function revealDisc(x,y,r){
+ const cx0=Math.floor((x-r)/CELL),cx1=Math.floor((x+r)/CELL),cy0=Math.floor((y-r)/CELL),cy1=Math.floor((y+r)/CELL);
+ for(let cy=cy0;cy<=cy1;cy++)for(let cx=cx0;cx<=cx1;cx++){
+  if(cx<0||cy<0||cx>=CW||cy>=CH)continue;
+  const i=cy*CW+cx;if(G.explore[i])continue;
+  if(Math.hypot((cx+.5)*CELL-x,(cy+.5)*CELL-y)<=r+CELL*.5){G.explore[i]=1;fogDirty=true}
+ }
+}
+function revealFound(){
+ const F=G.flags||{};
+ (G.villages||[]).forEach((v,i)=>{if(F['v'+i])revealDisc(v.cx,v.cy,16)});
+ for(const c of G.camps||[])if(F['c'+c.id])revealDisc(c.x+.5,c.y+.5,6);
+ for(const q of G.islets||[])if(F['isl'+q.id])revealDisc(q.x,q.y,q.r+4);
+ for(const q of G.reefs||[])if(F['reef'+q.id])revealDisc(q.x+.5,q.y+.5,q.r+3);
+ for(const c of G.caves||[])if(F['cave'+c.id])revealDisc(c.x+.5,c.y+.5,6);
+}
+/* işaret yalnızca keşfedilmiş bir hücredeyse çizilir */
+const seen=(x,y)=>{if(G.cave||!G.explore)return true;const cx=Math.floor(x/CELL),cy=Math.floor(y/CELL);return cx>=0&&cy>=0&&cx<CW&&cy<CH&&!!G.explore[cy*CW+cx]};
 /* oyuncunun çevresini keşfedilmiş say */
 function explore(dt){
  if(!G.explore)return;
  expT-=dt;if(expT>0)return;expT=.25;
+ if(!G.cave)revealFound();
  const R=G.cave?9:16,cx0=Math.floor((G.px-R)/CELL),cx1=Math.floor((G.px+R)/CELL),cy0=Math.floor((G.py-R)/CELL),cy1=Math.floor((G.py+R)/CELL);
  for(let cy=cy0;cy<=cy1;cy++)for(let cx=cx0;cx<=cx1;cx++){
   if(cx<0||cy<0||cx>=CW||cy>=CH)continue;
@@ -103,7 +123,7 @@ const explored=()=>{
 function markers(g,tx,ty,k,sz){
  /* köyler */
  (G.villages||[]).forEach((v,i)=>{
-  if(!G.flags['v'+i])return;
+  if(!G.flags['v'+i]||!seen(v.cx,v.cy))return;
   const x=tx(v.cx),y=ty(v.cy),s=Math.max(4,sz*1.1);
   g.fillStyle='#f0b040';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.rect(x-s,y-s,s*2,s*2);g.stroke();g.fill();
   if(sz>5){g.fillStyle='#fff';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText(v.name,x,y-s-4);g.fillText(v.name,x,y-s-4)}
@@ -111,7 +131,7 @@ function markers(g,tx,ty,k,sz){
  /* kamplar ve sandık odası */
  const SEAC={wreck:['#e0884a','Enkaz'],castaway:['#7ad07a','Kazazede'],lighthouse:['#ffffff','Fener']};
  for(const c of G.camps||[]){
-  if(!G.flags['c'+c.id])continue;
+  if(!G.flags['c'+c.id]||!seen(c.x+.5,c.y+.5))continue;
   const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(3.5,sz*.9),sea=SEAC[c.kind];
   g.fillStyle=c.open?'#8a8a8a':c.vault?'#ff5a6a':sea?sea[0]:'#e8e4da';g.strokeStyle='#000';g.lineWidth=2;
   g.beginPath();g.moveTo(x,y-s);g.lineTo(x+s,y);g.lineTo(x,y+s);g.lineTo(x-s,y);g.closePath();g.stroke();g.fill();
@@ -120,13 +140,13 @@ function markers(g,tx,ty,k,sz){
  /* keşfedilen adalar ve mercan resifleri */
  if(!G.cave){
   for(const q of G.islets||[]){
-   if(!G.flags['isl'+q.id])continue;
+   if(!G.flags['isl'+q.id]||!seen(q.x,q.y))continue;
    const x=tx(q.x),y=ty(q.y),s=Math.max(3.5,sz*.8);
    g.fillStyle='#5fb04a';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.arc(x,y,s,0,7);g.stroke();g.fill();
    if(sz>5){g.fillStyle='#fff';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Ada',x,y-s-4);g.fillText('Ada',x,y-s-4)}
   }
   for(const q of G.reefs||[]){
-   if(!G.flags['reef'+q.id])continue;
+   if(!G.flags['reef'+q.id]||!seen(q.x+.5,q.y+.5))continue;
    const x=tx(q.x+.5),y=ty(q.y+.5),r=Math.max(3.5,q.r*k*.8);
    g.strokeStyle='#ff7aa8';g.lineWidth=2;g.setLineDash([4,3]);g.beginPath();g.arc(x,y,r,0,7);g.stroke();g.setLineDash([]);
    if(sz>5){g.fillStyle='#ffd0e0';g.strokeStyle='#000';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Resif',x,y-r-4);g.fillText('Resif',x,y-r-4)}
@@ -134,7 +154,7 @@ function markers(g,tx,ty,k,sz){
  }
  /* mağara girişleri */
  for(const c of G.caves||[]){
-  if(!G.flags['cave'+c.id])continue;
+  if(!G.flags['cave'+c.id]||!seen(c.x+.5,c.y+.5))continue;
   const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(4,sz);
   g.fillStyle='#14161c';g.strokeStyle=c.vault?'#8a8a8a':'#ff5a4a';g.lineWidth=2;
   g.beginPath();g.moveTo(x-s,y+s*.8);g.lineTo(x-s,y-s*.1);g.quadraticCurveTo(x,y-s*1.6,x+s,y-s*.1);g.lineTo(x+s,y+s*.8);g.closePath();g.fill();g.stroke();
@@ -147,6 +167,7 @@ function markers(g,tx,ty,k,sz){
  }
  /* yerleştirilen kamp ateşleri */
  if(!G.cave)for(const f of HG.sc.fires||[]){
+  if(!seen(f.x,f.z))continue;
   const x=tx(f.x),y=ty(f.z),s=Math.max(2.4,sz*.55);
   g.fillStyle='#ff9a2a';g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.arc(x,y,s,0,7);g.stroke();g.fill();
  }
@@ -294,11 +315,11 @@ function big(){
  if(view.mx||view.my){const w=toWorld(view.mx,view.my,S);if(w.x>=0&&w.y>=0&&w.x<W&&w.y<H)cur=' · İmleç: '+Math.floor(w.x)+', '+Math.floor(w.y)}
  const sec=String.fromCharCode(65+clamp(Math.floor(G.px/step),0,N-1))+(clamp(Math.floor(G.py/step),0,N-1)+1);
  const gz=G.pz!==undefined?G.pz:0;
- const vils=(G.villages||[]).length,fv=(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length;
- const cvs=(G.caves||[]).length,fc=(G.caves||[]).filter(v=>G.flags['cave'+v.id]).length;
+ const fv=(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length;
+ const fc=(G.caves||[]).filter(v=>G.flags['cave'+v.id]).length;
  $('#bmcap').textContent=G.cave
   ?'Mağaranın içi · Keşfedilen: %'+Math.round(explored()*100)+' · Konum: '+Math.floor(G.px)+', '+Math.floor(G.py)+cur+' · M veya Esc: kapat'
-  :'Harita · Sektör '+sec+' · Konum: '+Math.floor(G.px)+', '+Math.floor(G.py)+' · Rakım: '+Math.max(0,gz).toFixed(1)+' m · Keşfedilen: %'+Math.round(explored()*100)+' · Köy '+fv+'/'+vils+' · Mağara '+fc+'/'+cvs+(G.wp?' · Hedef: '+Math.round(Math.hypot(G.wp.x-G.px,G.wp.y-G.py))+' m':'')+cur+'\n◆ kamp · ▲ mağara · ■ köy · ⚑ hedef · Tekerlek: yakınlaş · Sürükle: kaydır · Tık: hedef işaretle · Çift tık: sıfırla · M/Esc: kapat';
+  :'Harita · Sektör '+sec+' · Konum: '+Math.floor(G.px)+', '+Math.floor(G.py)+' · Rakım: '+Math.max(0,gz).toFixed(1)+' m · Keşfedilen: %'+Math.round(explored()*100)+' · Köy '+fv+' · Mağara '+fc+(G.wp?' · Hedef: '+Math.round(Math.hypot(G.wp.x-G.px,G.wp.y-G.py))+' m':'')+cur+'\n◆ kamp · ▲ mağara · ■ köy · ⚑ hedef · Tekerlek: yakınlaş · Sürükle: kaydır · Tık: hedef işaretle · Çift tık: sıfırla · M/Esc: kapat';
 }
 Object.assign(HG,{mapBuild:build,mapMini:mini,mapBig:big,mapOpen:open,mapExplore:explore,mapExplored:explored});
 })();

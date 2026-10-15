@@ -16,27 +16,27 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Ayarlar ve ayar menüsü (grafik, ses, kontrol, oyun; `hunger-ayar-v1`) | `js/cekirdek/ayarlar.js` |
 | Eşyalar (ad, yığın, yenilebilirlik) | `js/veri/esyalar.js` |
 | Üretim tarifleri, istasyonlar | `js/veri/tarifler.js` |
-| Ağaç/kaya/maden dayanıklılığı, araç kademesi çarpanı (`POWER`) | `js/veri/dugumler.js` |
+| Ağaç/kaya/maden dayanıklılığı, araç kademesi çarpanı (`POWER`); meyve çalıları katı değildir (içlerinden geçilir) | `js/veri/dugumler.js` |
 | Hayvan türleri (can, hız, düşen eşyalar, bölge aralığı `sp`, av/avcı, büyük baş), silah hasarı | `js/veri/hayvanlar.js` |
-| Ada üretimi (arazi, dağlar, ağaç/maden sıklığı) | `js/dunya/uretim.js` |
-| Envanter simgeleri (2B) | `js/gorsel/simgeler.js` |
-| Renderer, renk/ton eşleme, kamera, FPS bakışı, kalite kademeleri | `js/sahne/cekirdek.js` |
-| Prosedürel dokular (arazi detayı, su normal haritası, parlama; çim, kabuk, kaya, kum ve yaprak PBR dokuları) | `js/sahne/dokular.js` |
+| Ada üretimi (arazi, dağlar, ağaç/maden sıklığı); tatlı su göletlerinin içine ve kenarına ağaç/çalı konmaz (`HG.pondClean`) | `js/dunya/uretim.js` |
+| Envanter simgeleri (2B; taş, kaya, balta/kazma/olta simgeleri yenilendi) | `js/gorsel/simgeler.js` |
+| Renderer, renk/ton eşleme, kamera, FPS bakışı, kalite kademeleri; malzeme seçenekleri (`nocut`: palmiye yaprakları kesilmez) | `js/sahne/cekirdek.js` |
+| Prosedürel dokular (arazi detayı, su normal haritası, parlama; çim (yaprak darbeleri), kabuk (lifli/çatlaklı), kaya (tabakalı), kum ve yaprak (damarlı) PBR dokuları) | `js/sahne/dokular.js` |
 | Gökyüzü kubbesi (güneş, ay, bulut), güneş/ay ışığı, sis, yansıma ortamı, ateş ışıkları | `js/sahne/isik.js` |
 | Arazi (yumuşak yükseklik, renk karışımı) ve su | `js/sahne/arazi.js` |
-| Çimen tutamları (rüzgârda sallanır) | `js/sahne/cim.js` |
-| Yüksek ayrıntılı 3B modeller (ağaç, kaya, maden, duvar, kapı…) | `js/sahne/modeller.js` |
-| Dünya nesnelerinin sahneye yerleşimi (parçalı örnekleme, rüzgâr, alev) | `js/sahne/nesneler.js` |
-| Birinci şahıs kollar ve elde tutulan eşya | `js/sahne/kol.js` |
+| Çimen tutamları ve çiçekler (eğik sap, yaprak, taç; rüzgârda sallanır) | `js/sahne/cim.js` |
+| Yüksek ayrıntılı 3B modeller (çam/meşe/palmiye, kaya, maden, çalı, alet parçaları, duvar, kapı…) | `js/sahne/modeller.js` |
+| Dünya nesnelerinin sahneye yerleşimi (parçalı örnekleme, kaliteye bağlı LOD mesafesi, rüzgâr, alev) | `js/sahne/nesneler.js` |
+| Birinci şahıs kollar (gerçekçi el/parmak/ön kol, deri tonu) ve elde tutulan eşya; El Taşı iki elle tutulur; balta/kazma/olta modelleri | `js/sahne/kol.js` |
 | Parçacık efektleri | `js/sahne/efektler.js` |
 | Nişan, yerleştirme hayaleti | `js/sahne/nisan.js` |
-| Yerdeki eşyaların görünümü / ayrıntılı eşya modelleri | `js/sahne/dusenler.js`, `js/sahne/esya-modelleri.js` |
-| Ağaç devrilme, maden parçalanma efekti | `js/sahne/devrilme.js` |
+| Yerdeki eşyaların görünümü / ayrıntılı eşya modelleri (taş, kaya, kömür, maden, odun, alet) | `js/sahne/dusenler.js`, `js/sahne/esya-modelleri.js` |
+| Ağaç devrilme (ayakta duran ağaçla aynı model ve doku), maden parçalanma efekti | `js/sahne/devrilme.js` |
 | Uçan/saplanan oklar | `js/sahne/oklar.js` |
 | Son işleme: HDR, bloom, güneş ışınları, renk derecelendirme, vinyet | `js/sahne/sonisleme.js` |
 | Hava durumu: bulut, yağmur, şimşek | `js/sahne/hava.js` |
 | Ateş böcekleri, polen/toz parçacıkları | `js/sahne/atmosfer.js` |
-| Yükseklik sisi, rüzgâr simülasyonu (yön, hamle, şiddet); yüzey detayı gölgelendiricisi (kabartma, pürüzlülük, üç düzlemli kaplama, yaprak boşlukları) | `js/sahne/gerceklik.js` |
+| Yükseklik sisi, rüzgâr simülasyonu (yön, hamle, şiddet); yüzey detayı gölgelendiricisi (kabartma, pürüzlülük, üç düzlemli kaplama, yaprak boşlukları; `PBR_NOCUT`) | `js/sahne/gerceklik.js` |
 | Oyun içi rehber (oynanış, hikâye, canavarlar, madenler, eşyalar, üretim) | `js/veri/rehber.js` (metinler), `js/oyun/rehber.js` (pencere) |
 | Tuş atamaları (Ayarlar › Kontrol) | `js/cekirdek/tuslar.js` |
 | Kayıt sistemi: otomatik kayıt, elle kayıt yuvaları, dosya indirme/yükleme, kayıtlar menüsü | `js/oyun/durum.js` (altyapı), `js/oyun/kayitlar.js` (pencere) |

@@ -67,49 +67,75 @@ function canvasTex(size,fill,enc){
   }
   return out;
  };
- const pbr=(size,fn)=>{
+ const pbr=(size,fn,norm)=>{
   const t=canvasTex(size,(d)=>{
+   let sum=0;const buf=norm?new Float32Array(size*size*4):null;
    for(let y=0;y<size;y++)for(let x=0;x<size;x++){
     const r=fn(x/size,y/size,x,y),i=(y*size+x)*4;
-    d[i]=clamp(r[0],0,1)*255;d[i+1]=clamp(r[1],0,1)*255;d[i+2]=clamp(r[2],0,1)*255;d[i+3]=clamp(r[3],0,1)*255;
+    if(norm){buf[i]=r[0];buf[i+1]=r[1];buf[i+2]=r[2];buf[i+3]=r[3];sum+=r[0]*.3+r[1]*.59+r[2]*.11}
+    else{d[i]=clamp(r[0],0,1)*255;d[i+1]=clamp(r[1],0,1)*255;d[i+2]=clamp(r[2],0,1)*255;d[i+3]=clamp(r[3],0,1)*255}
    }
+   if(norm){const k=norm/(sum/(size*size));                    /* ortalama parlaklığı hedefe getirir: dokular malzeme rengiyle çarpıldığından renk ve parlaklık korunur */
+    for(let i=0;i<size*size;i++){d[i*4]=clamp(buf[i*4]*k,0,1)*255;d[i*4+1]=clamp(buf[i*4+1]*k,0,1)*255;d[i*4+2]=clamp(buf[i*4+2]*k,0,1)*255;d[i*4+3]=clamp(buf[i*4+3],0,1)*255}}
   },THREE.LinearEncoding);
   t.anisotropy=8;return t;
  };
  const SZ=512;
  const smooth01=(v,a,b)=>{const t=clamp((v-a)/(b-a),0,1);return t*t*(3-2*t)};
- /* çim: sık yaprak çizgileri, öbekler, sararmış ve koyu bölgeler */
- tex.pGrass=pbr(SZ,(u,v)=>{
-  const blade=fb(u,v,96,40,3,101),fine=fb(u,v,200,200,2,111),clump=fb(u,v,9,9,3,121),dry=fb(u,v,5,5,2,131);
-  const h=clamp(.15+blade*.5+fine*.25+clump*.3,0,1),l=.5+(h-.5)*.8-(1-clump)*.08;
-  /* yonca yaprakçıkları, küçük çiçek noktaları ve kuru sap çizgileri */
-  const gx=Math.floor(u*48),gy=Math.floor(v*48),hh=hash(gx,gy,141);let dot=0,fl=0;
-  if(hh>.8){const dx=u*48-gx-(.25+hash(gx,gy,151)*.5),dy=v*48-gy-(.25+hash(gx,gy,161)*.5),d=Math.hypot(dx,dy)/(.16+hash(gx,gy,171)*.1);if(d<1)dot=1-d;if(hh>.965&&d<.55)fl=1}
-  const dead=Math.max(0,fb(u,v,140,22,2,181)-.62)*3.2;
-  let r=l*(1+.2*dry)+dead*.22,g=l*(1.04-.1*dry)-dead*.04,b=l*(.86-.14*dry)-dead*.12;
-  r*=1-dot*.12;g*=1+dot*.16;b*=1-dot*.1;
-  if(fl){r=.95;g=.92;b=.6}
-  return [r,g,b,h+dot*.15];
- });
- /* toprak ve ağaç kabuğu: dikey çatlaklı sırtlar ve lifler */
+/* çim: tek tek eğri çimen yaprakları (koyu diplerden açık uçlara), öbek ve sararma değişimi; dikişsiz */
+ tex.pGrass=(()=>{
+  const N=SZ,R=new Float32Array(N*N),G=new Float32Array(N*N),B=new Float32Array(N*N),Hh=new Float32Array(N*N);
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+   const u=x/N,v=y/N,cl=fb(u,v,9,9,3,121),dry=fb(u,v,5,5,2,131),i=y*N+x,l=.3+.1*cl;
+   R[i]=l*(1.05+.18*dry);G[i]=l*(1.08-.1*dry);B[i]=l*.62;Hh[i]=.2+.1*cl;
+  }
+  const nb=2600;
+  for(let k=0;k<nb;k++){
+   const bx=hash(k,1,701)*N,by=hash(k,2,701)*N,len=12+hash(k,3,701)*30,ang=(hash(k,4,701)-.5)*.9,cur=(hash(k,5,701)-.5)*.9,wd=.9+hash(k,6,701)*1.5,
+    tone=hash(k,7,701),dryk=hash(k,8,701)>.88?1:0,lum=.9+hash(k,9,701)*.3;
+   const steps=Math.ceil(len*1.4);
+   for(let s2=0;s2<=steps;s2++){
+    const t=s2/steps,d=t*len,dx=Math.sin(ang+cur*t)*d,dy=-Math.cos(ang+cur*t*.6)*d,w=wd*(1-t*t*.85)*.55+.28;
+    const cx=bx+dx,cy=by+dy;
+    const base=.32+.4*t*(.7+tone*.5),r0=base*(dryk?1.35:.88+tone*.2)*lum,g0=base*(dryk?1.12:1.12-tone*.1)*lum,b0=base*(dryk?.62:.55+tone*.12)*lum;
+    for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){
+     if(ox*ox+oy*oy>w*w+.35)continue;
+     const px=((Math.round(cx+ox)%N)+N)%N,py=((Math.round(cy+oy)%N)+N)%N,i=py*N+px,hv=.3+.65*t;
+     if(hv>=Hh[i]*.82){R[i]=r0;G[i]=g0;B[i]=b0;Hh[i]=hv*(1-.18*(ox*ox+oy*oy>.5?1:0))}
+    }
+   }
+  }
+  const t=canvasTex(N,(d)=>{for(let i=0;i<N*N;i++){d[i*4]=clamp(R[i]*1.12,0,1)*255;d[i*4+1]=clamp(G[i]*1.12,0,1)*255;d[i*4+2]=clamp(B[i]*1.28,0,1)*255;d[i*4+3]=clamp(Hh[i],0,1)*255}},THREE.LinearEncoding);
+  t.anisotropy=8;return t;
+ })();
+ /* ağaç kabuğu: derin dikey çatlak ağı, aralarında pullu levhalar, kısa yatay çatlaklar, hafif liken lekeleri */
  tex.pBark=pbr(SZ,(u,v)=>{
-  const ridge=Math.abs(fb(u,v,18,3,4,201)-.5)*2,fiber=fb(u,v,70,6,2,211),crack=1-Math.min(1,Math.abs(fb(u,v,10,2,3,221)-.5)*9),spot=fb(u,v,6,6,2,231);
-  const h=clamp(.8-ridge*.65+fiber*.12-crack*.35,0,1),l=.5+(h-.5)*.85-crack*.1+(spot-.5)*.16;
-  return [l*(1.05+.08*spot),l,l*(.9-.08*spot),h];
- });
- /* kaya: katmanlı tabakalar, hücresel çatlaklar, tanecik */
+  const wu=u+(fb(u,v,6,3,2,501)-.5)*.045,wv=v+(fb(u,v,4,4,2,503)-.5)*.1;
+  const r1=Math.abs(fb(wu,wv,12,3,4,201)-.5)*2,fur=1-smooth01(r1,0,.13);
+  const r2=Math.abs(fb(wu+.31,wv,22,3,3,205)-.5)*2,fur2=(1-smooth01(r2,0,.1))*.55;
+  const plate=fb(wu,wv,44,12,3,211),fib=fb(u,v,120,5,2,213);
+  const cross=(1-smooth01(Math.abs(fb(wu,wv,26,46,2,221)-.5)*2,0,.09))*(1-fur);
+  const f=Math.min(1,fur+fur2*(1-fur));
+  const h=clamp(.82-f*.55-cross*.22+plate*.22+fib*.12,0,1);
+  const li=smooth01(fb(u,v,5,5,3,231),.66,.84)*.7;
+  const l=.5+(h-.74)*1.05-(f>.5?.05:0);
+  return [l*(1.07-.12*li),l*(1+.03*li),l*(.86-.04*li),h];
+ },.5);
+ /* kaya: yontulmuş yüzeyler, katmanlı tabakalar, hücresel çatlaklar, çukurcuklar ve tanecik; nötr gri, hafif sıcak-soğuk lekeler */
  {
-  const w=worley(SZ,7,301);
+  const w=worley(SZ,7,301),w2=worley(SZ,16,305);
   tex.pRock=pbr(SZ,(u,v,x,y)=>{
-   const rid=Math.abs(fb(u,v,6,6,5,311)-.5)*2,strata=Math.sin((v*9+fb(u,v,3,3,2,321)*1.8)*Math.PI*2)*.5+.5,grain=fb(u,v,120,120,2,331),fr=fb(u,v,14,14,3,351);
+   const rid=Math.abs(fb(u,v,6,6,5,311)-.5)*2,strata=Math.sin((v*11+fb(u,v,3,3,2,321)*2.2)*Math.PI*2)*.5+.5,grain=fb(u,v,140,140,2,331),fr=fb(u,v,14,14,3,351);
    const wk=w[((y+Math.round((fr-.5)*60))%SZ+SZ)%SZ*SZ+((x+Math.round((fb(u,v,16,16,3,361)-.5)*60))%SZ+SZ)%SZ];
-   const crack=(1-Math.min(1,wk*16))*(.35+.65*smooth01(fb(u,v,5,5,3,371),.35,.65));
-   const h=clamp(.55+(1-rid)*.3+strata*.1+grain*.14-crack*.2,0,1),l=.5+(h-.5)*.8-crack*.05+(grain-.5)*.12;
-   const tint=fb(u,v,4,4,2,341);
-   return [l*(1+.06*(tint-.5)*2),l*(1-.02*(tint-.5)*2),l*(1-.1*(tint-.5)*2),h];
-  });
+   const crack=(1-Math.min(1,wk*15))*(.35+.65*smooth01(fb(u,v,5,5,3,371),.35,.65));
+   const fc=w2[(y*SZ+x)],plateau=smooth01(fc,.02,.16);                         /* küçük kırık yüzler: kenarlarda koyu çizgi */
+   const pit=smooth01(fb(u,v,70,70,2,381),.7,.82);
+   const h=clamp(.5+(1-rid)*.26+strata*.12+grain*.14-crack*.3-(1-plateau)*.12-pit*.14,0,1),l=.5+(h-.52)*1.05-crack*.06+(grain-.5)*.14;
+   const tint=fb(u,v,4,4,2,341),rust=smooth01(fb(u,v,7,7,3,391),.62,.8);
+   return [l*(1+.05*(tint-.5)*2+.07*rust),l*(1-.01*(tint-.5)*2-.03*rust),l*(1-.06*(tint-.5)*2-.09*rust),h];
+  },.5);
  }
- /* kum: dalgacıklar ve ince tane */
+  /* kum: dalgacıklar ve ince tane */
  tex.pSand=pbr(SZ,(u,v)=>{
   const wave=Math.sin((v*14+fb(u,v,5,5,3,401)*3.2)*Math.PI*2)*.5+.5,grain=fb(u,v,220,220,2,411),pat=fb(u,v,7,7,3,421);
   const h=clamp(.45+wave*.25+grain*.25+pat*.2,0,1),l=.5+(h-.5)*.55+(pat-.5)*.1;
@@ -148,22 +174,47 @@ function canvasTex(size,fill,enc){
  },THREE.LinearEncoding);
  t.anisotropy=8;tex.pDirt=t;
 }
-/* Yaprak kümesi: şeffaf boşluklu, damarlı yaprak şekilleri (ağaç yapraklarının kenarını parçalar). Dikişsiz: kenarlara taşan yapraklar karşı tarafa da çizilir. */
+/* Birinci kişi kolları için dikişsiz dokular (nesne uzayında kullanılır): deri (gözenek, ince kırışıklık) ve dokuma kumaş (iplik örgüsü) */
+{
+ const SZ=256,pw=(u,v,px,py,s)=>pnoise(u*px,v*py,Math.round(px),s),clamp01=v=>v<0?0:v>1?1:v;
+ const mk=(fn)=>{const t=canvasTex(SZ,(d)=>{for(let y=0;y<SZ;y++)for(let x=0;x<SZ;x++){const r=fn(x/SZ,y/SZ),i=(y*SZ+x)*4;d[i]=clamp01(r[0])*255;d[i+1]=clamp01(r[1])*255;d[i+2]=clamp01(r[2])*255;d[i+3]=clamp01(r[3])*255}},THREE.LinearEncoding);t.anisotropy=8;return t};
+ /* deri: çok ince gözenek, çapraz kırışıklık çizgileri, hafif lekelenme (düşük karşıtlık: yakından bakınca gürültü gibi görünmez) */
+ tex.pSkin=mk((u,v)=>{
+  const l1=Math.abs(pw(u,v,18,18,831)-.5)*2,l2=Math.abs(pw(u+.3,v,16,16,841)-.5)*2,fine=pw(u,v,48,48,851),fine2=pw(u,v,110,110,857);
+  const line=Math.max(0,1-Math.min(l1,l2)*6)*.32;
+  const h=clamp01(.62+fine*.16+fine2*.07-line*.2);
+  const l=.5+(h-.5)*.45;
+  return [l*1.02,l*.99,l*.96,h];                      /* büyük ölçekli lekelenme yok: parçalar farklı yerel eksenlerde olduğundan eklemlerde basamak oluşturur */
+ });
+ /* kumaş: bir üstten bir alttan geçen iplikler (bez dokuma), iplik kalınlığı değişimi */
+ tex.pCloth=mk((u,v)=>{
+  const N=40,fu=u*N,fv=v*N,iu=Math.floor(fu),iv=Math.floor(fv),a=fu-iu,b=fv-iv,chk=(iu+iv)&1;
+  const wu=Math.sin(a*Math.PI),wv=Math.sin(b*Math.PI);                     /* çözgü ve atkı iplikleri */
+  const over=chk?wu*(.55+.45*wv*.5):wv*(.55+.45*wu*.5),under=chk?wv:wu;
+  const h=clamp01(.35+over*.5+under*.1+(hash(iu,iv,871)-.5)*.1+(pw(u,v,120,120,881)-.5)*.1);
+  const th=.9+hash(chk?iu:iv,chk?0:1,891)*.2,l=.5+(h-.5)*.8;
+  return [l*th,l*th,l*th,h];
+ });
+}
+/* Yaprak kümesi: şeffaf boşluklu, uçlu, damarlı ve renk tonu değişen yaprak şekilleri (ağaç yapraklarının kenarını parçalar). Dikişsiz: kenarlara taşan yapraklar karşı tarafa da çizilir. */
 {
  const size=256,c=document.createElement('canvas');c.width=c.height=size;
  const g=c.getContext('2d');
- const leaf=(x,y,r,ang,v)=>{
+ const leaf=(x,y,r,ang,v,hue)=>{
   g.save();g.translate(x,y);g.rotate(ang);
-  const s=Math.round(255*v);
-  g.fillStyle='rgb('+s+','+Math.min(255,s+14)+','+Math.round(s*.82)+')';
-  g.beginPath();g.ellipse(0,0,r,r*.42,0,0,6.2832);g.fill();
-  g.strokeStyle='rgb('+Math.round(s*.6)+','+Math.round(s*.68)+','+Math.round(s*.5)+')';g.lineWidth=Math.max(1,r*.07);
-  g.beginPath();g.moveTo(-r*.9,0);g.lineTo(r*.9,0);g.stroke();
+  const s=255*v,rr=Math.round(s*(1+hue*.22)),gg=Math.min(255,Math.round(s*1.07)),bb=Math.round(s*(.8-hue*.2)),w=r*.46;
+  const gr=g.createLinearGradient(0,-w,0,w);gr.addColorStop(0,'rgb('+Math.min(255,Math.round(rr*1.12))+','+Math.min(255,Math.round(gg*1.1))+','+Math.round(bb*1.05)+')');gr.addColorStop(1,'rgb('+Math.round(rr*.82)+','+Math.round(gg*.84)+','+Math.round(bb*.8)+')');
+  g.fillStyle=gr;
+  g.beginPath();g.moveTo(-r,0);g.bezierCurveTo(-r*.5,-w*1.15,r*.35,-w*1.0,r,0);g.bezierCurveTo(r*.35,w*1.0,-r*.5,w*1.15,-r,0);g.fill();
+  g.strokeStyle='rgba('+Math.round(rr*.55)+','+Math.round(gg*.62)+','+Math.round(bb*.5)+',.85)';g.lineWidth=Math.max(.7,r*.06);
+  g.beginPath();g.moveTo(-r*.95,0);g.lineTo(r*.92,0);g.stroke();
+  g.lineWidth=Math.max(.5,r*.035);g.globalAlpha=.55;
+  for(let k=1;k<=3;k++){const px=-r*.55+k*r*.3;g.beginPath();g.moveTo(px,0);g.lineTo(px+r*.2,-w*.62);g.moveTo(px,0);g.lineTo(px+r*.2,w*.62);g.stroke()}
   g.restore();
  };
  for(let i=0;i<150;i++){
-  const x=hash(i,1,501)*size,y=hash(i,2,501)*size,r=11+hash(i,3,501)*13,a=hash(i,4,501)*6.2832,v=.4+hash(i,5,501)*.28;
-  for(const ox of [-size,0,size])for(const oy of [-size,0,size])if(x+ox>-r*2&&x+ox<size+r*2&&y+oy>-r*2&&y+oy<size+r*2)leaf(x+ox,y+oy,r,a,v);
+  const x=hash(i,1,501)*size,y=hash(i,2,501)*size,r=10+hash(i,3,501)*13,a=hash(i,4,501)*6.2832,v=.38+hash(i,5,501)*.3,hu=hash(i,6,501)-.5;
+  for(const ox of [-size,0,size])for(const oy of [-size,0,size])if(x+ox>-r*2&&x+ox<size+r*2&&y+oy>-r*2&&y+oy<size+r*2)leaf(x+ox,y+oy,r,a,v,hu);
  }
  tex.pLeaf=new THREE.CanvasTexture(c);tex.pLeaf.wrapS=tex.pLeaf.wrapT=THREE.RepeatWrapping;tex.pLeaf.anisotropy=4;
 }

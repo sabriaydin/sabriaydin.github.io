@@ -71,7 +71,9 @@ SC.fog_fragment=`#ifdef USE_FOG
    float dpl=-(viewMatrix*vec4(vPW,1.)).z,lf=1.-smoothstep(24.,58.,dpl);
    vec4 l1=texture2D(tPL,vec2(vPW.x+vPW.y*.7,vPW.z+vPW.y*.5)*1.6),l2=texture2D(tPL,vec2(vPW.z-vPW.y*.6,vPW.x*.8+vPW.y)*2.9+.37);
    float mk=1.-(1.-l1.a)*(1.-l2.a);
+   #ifndef PBR_NOCUT
    if(mk<.48*lf)discard;
+   #endif
    diffuseColor.rgb*=mix(vec3(1.),(l1.rgb*l1.a+l2.rgb*(1.-l1.a)*l2.a)/max(mk,.02)*2.,lf);
   }
   #endif
@@ -119,6 +121,7 @@ SC.fog_fragment=`#ifdef USE_FOG
   sh.uniforms.uPQ=U.uPQ;sh.uniforms.tPG={value:sc.tex.pGrass};sh.uniforms.tPD={value:sc.tex.pBark};sh.uniforms.tPR={value:sc.tex.pRock};sh.uniforms.tPS={value:sc.tex.pSand};sh.uniforms.tPL={value:sc.tex.pLeaf};sh.uniforms.tPT={value:sc.tex.pDirt};
   if(this.userData.leaf)sh.fragmentShader='#define PBR_LEAF\n'+sh.fragmentShader;
   if(this.userData.ore)sh.fragmentShader='#define PBR_ORE\n'+sh.fragmentShader;
+  if(this.userData.nocut)sh.fragmentShader='#define PBR_NOCUT\n'+sh.fragmentShader;
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\n'+PV_P).replace('#include <project_vertex>',`#include <project_vertex>
    {vec4 pw4=vec4(transformed,1.);vec3 pn3=objectNormal;
     #ifdef USE_INSTANCING
@@ -129,7 +132,7 @@ SC.fog_fragment=`#ifdef USE_FOG
  };
  const base=function(sh){inject.call(this,sh)};
  Object.defineProperty(P,'onBeforeCompile',{configurable:true,get(){return this._obc||base},set(f){this._src=f?f.toString():'';this._obc=f?function(sh,r){f.call(this,sh,r);inject.call(this,sh)}:null}});
- P.customProgramCacheKey=function(){return (this._src||'')+(this.userData&&this.userData.pbr?'#pbr':'')+(this.userData&&this.userData.leaf?'L':'')+(this.userData&&this.userData.ore?'O':'')};
+ P.customProgramCacheKey=function(){return (this._src||'')+(this.userData&&this.userData.pbr?'#pbr':'')+(this.userData&&this.userData.leaf?'L':'')+(this.userData&&this.userData.ore?'O':'')+(this.userData&&this.userData.nocut?'N':'')};
 }
 
 /* ---- her kare: zaman, rüzgâr ve sis ---- */

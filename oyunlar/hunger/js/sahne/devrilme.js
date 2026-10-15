@@ -12,14 +12,15 @@ S.fell=(tx,tz,o,fromX,fromZ)=>{
  let key=o===O.TREE?(hh<.5?'treeA':'treeB'):o===O.PALM?'palm':'palm0';
  const geo=sc.MODEL[key];if(!geo)return;
  const t=sc.tintFor(key,hh,h2,h3);
- const mat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.92,color:new THREE.Color(t.r,t.g,t.b),side:(key==='palm'||key==='palm0')?THREE.DoubleSide:THREE.FrontSide});
- sc.mats.push(mat);
+ /* ayakta duran ağaçla aynı malzeme türü: yüzey dokuları ve yaprak kesimi (pbr+leaf) korunur, yoksa devrilirken görünüm değişir */
+ const isP=key==='palm'||key==='palm0',mat=sc.mat({pbr:true,leaf:true,nocut:isP,side:isP?THREE.DoubleSide:THREE.FrontSide});
+ mat.color.setRGB(t.r,t.g,t.b);
  const mesh=new THREE.Mesh(geo,mat);mesh.castShadow=true;mesh.receiveShadow=true;
  const sc2=(o===O.TREE?.8+h2*.4:.9+h2*.3),x=tx+.5+(hh-.5)*.2,z=tz+.5+(h2-.5)*.2,gy=S.groundY(x,z)-.04;
- mesh.position.set(x,gy,z);mesh.scale.set(sc2,sc2,sc2);
+ mesh.position.set(x,gy,z);mesh.scale.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
  let dx=x-fromX,dz=z-fromZ;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;
  sc.scene.add(mesh);
- falls.push({mesh,mat,x,z,gy,yaw:hh*6.28,dx,dz,t:0,hit:false,sc:sc2,key,tilt:(h3-.5)*.12});
+ falls.push({mesh,mat,x,z,gy,yaw:hh*6.28,dx,dz,t:0,hit:false,sc:sc2,ky:(o===O.TREE?1:.95),key,tilt:(h3-.5)*.12});
 };
 
 /* Kırıntılar: kaya/maden tamamen parçalandığında saçılan taş parçaları */
@@ -62,7 +63,7 @@ S.onFrame((G,t,dt)=>{
   f.mesh.position.y=f.gy+Math.min(1,f.t/FALL_T)*.35*f.sc;
   if(f.t>FALL_T+REST_T){
    const u=Math.min(1,(f.t-FALL_T-REST_T)/FADE_T),s=f.sc*(1-u*u);
-   f.mesh.scale.set(s,s,s);f.mesh.position.y=f.gy+.35*f.sc-u*.4;
+   f.mesh.scale.set(s,s*f.ky,s);f.mesh.position.y=f.gy+.35*f.sc-u*.4;
    if(u>=1){sc.scene.remove(f.mesh);f.mat.dispose();falls.splice(k,1)}
   }
  }

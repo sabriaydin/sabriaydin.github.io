@@ -50,7 +50,7 @@ const KEYOF={[O.PALM]:'palm',[O.PALM0]:'palm0',[O.ROCK]:'rock',[O.COAL]:'coal',[
 function buildInstances(G){
  for(const c of chunks.values()){sc.scene.remove(c.mesh);c.mesh.dispose&&c.mesh.dispose();if(c.lo){sc.scene.remove(c.lo);c.lo.dispose&&c.lo.dispose()}}
  chunks.clear();
- if(!matFol){matFol=windMat({pbr:true,leaf:true});matFolDS=windMat({side:THREE.DoubleSide,pbr:true,leaf:true});matRock=sc.mat({pbr:true});matOre=sc.mat({ore:true})}
+ if(!matFol){matFol=windMat({pbr:true,leaf:true});matFolDS=windMat({side:THREE.DoubleSide,pbr:true,leaf:true,nocut:true});matRock=sc.mat({pbr:true});matOre=sc.mat({ore:true})}
  const cnt=new Map();
  for(let z=0;z<H;z++)for(let x=0;x<W;x++){
   const o=G.obj[z*W+x];if(!o)continue;
@@ -177,7 +177,7 @@ S.onFrame((G,t,dt,info)=>{
  windU.uTime.value=t;
  /* parça görünürlüğü: görüş alanı veya gölge menzili içindekiler çizilir; uzaktakiler sade model kullanır */
  pm.multiplyMatrices(sc.cam.projectionMatrix,sc.cam.matrixWorldInverse);fr.setFromProjectionMatrix(pm);
- const play=info.mode==='play',dm=((HG.cfg&&HG.cfg.dist)||100)/100,CULL=CULL_DIST*dm,LOD=LOD_DIST*Math.min(1,dm);pp.set(G.px||0,0,G.py||0);
+ const play=info.mode==='play',dm=((HG.cfg&&HG.cfg.dist)||100)/100,CULL=CULL_DIST*dm,LOD=LOD_DIST*Math.min(1,dm)*[.4,.55,.8,1][sc.quality|0];      /* düşük kalitede ayrıntılı model daha yakında bırakılır */pp.set(G.px||0,0,G.py||0);
  if(!play)pp.set(W/2,0,H/2);
  for(const c of chunks.values()){
   if(!c.mesh.count){c.mesh.visible=false;if(c.lo)c.lo.visible=false;continue}
