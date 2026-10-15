@@ -166,6 +166,9 @@ B.furn=()=>{const a=part(rbox(.32,.34,.32,.15,3),0x77777f,0,.17,0);a.cf=rockCf()
 B.wallw=()=>[0,1,2,3].map(i=>part(box(.34,.07,.05),i%2?0xa67848:0xb08050,0,.04+i*.075,0));
 B.walls=()=>{const a=part(rbox(.34,.3,.1,.2,3),0x8c8c94,0,.15,0);a.cf=rockCf();return [a]};
 B.door=()=>[part(box(.26,.38,.04),0x6b4a29,0,.19,0),part(box(.26,.03,.045),0x4a3220,0,.1,0),part(box(.26,.03,.045),0x4a3220,0,.3,0),part(blob(.018,1,0,150),0xbcc2c8,.09,.2,.03)];
+/* İnşa Planı (yatık pano) ve Çekiç */
+B.plan=()=>[part(box(.32,.022,.42),0x3b2714,0,.011,0),part(box(.28,.026,.38),0x2f5f8f,0,.014,0),part(box(.2,.03,.012),0xe8f2ff,0,.02,.02),part(box(.012,.03,.1),0xe8f2ff,-.1,.02,-.03),part(box(.012,.03,.1),0xe8f2ff,.1,.02,-.03),part(box(.13,.03,.012),0xe8f2ff,-.05,.02,-.1,1,1,1,0,.62,0),part(box(.13,.03,.012),0xe8f2ff,.05,.02,-.1,1,1,1,0,-.62,0)];
+B.hammer=()=>[part(cyl(.022,.028,.5,7),0x74502e,0,.03,0,1,1,1,0,0,PI/2),part(box(.1,.1,.17),0x6d737a,.25,.05,0),part(box(.105,.03,.175),0x9aa0a8,.25,.1,0),part(box(.105,.1,.04),0x8d939a,.25,.05,.105),part(box(.105,.1,.04),0x8d939a,.25,.05,-.105),part(box(.06,.11,.115),0x3a3d42,.25,.05,0)];
 /* modelleri üret: kimliğe göre */
 /* aletler: ortak alet parçalarından üretilir (sap yatay, baş +X ucunda) */
 function toolGeo(it){

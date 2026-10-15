@@ -110,9 +110,16 @@ function syncObjects(G){
   let geo=null;
   if(o===O.FIRE)geo=sc.MODEL.fireBase;else if(o===O.BENCH)geo=sc.MODEL.bench;else if(o===O.FURN)geo=sc.MODEL.furn;
   else if(o===O.WALLW)geo=sc.MODEL.wallw;else if(o===O.WALLS)geo=sc.MODEL.walls;else if(o===O.DOOR)geo=sc.MODEL.door;
+  else if(o===O.WALLT)geo=sc.MODEL.wallt;else if(o===O.WALLM)geo=sc.MODEL.wallm;else if(o===O.DOORM)geo=sc.MODEL.doorm;else if(o===O.FENCE)geo=sc.MODEL.fence;
   if(!geo)continue;
   const me=new THREE.Mesh(geo,plm);me.position.set(x+.5,gy,z+.5);me.castShadow=true;me.receiveShadow=true;
-  if(o===O.DOOR){const isW=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS};const alongX=(x>0&&isW(i-1))||(x<W-1&&isW(i+1));me.rotation.y=alongX?0:Math.PI/2}
+  if(o===O.DOOR||o===O.DOORM){const isW=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS||q2===O.WALLT||q2===O.WALLM||q2===O.FENCE};const alongX=(x>0&&isW(i-1))||(x<W-1&&isW(i+1));me.rotation.y=alongX?0:Math.PI/2}
+  else if(o===O.WALLT||o===O.WALLM){
+   /* ince duvar: komşu yapıların doğrultusuna uzanır (yan yana ise doğu-batı, alt alta ise kuzey-güney) */
+   const cn=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS||q2===O.WALLT||q2===O.WALLM||q2===O.DOOR||q2===O.DOORM||q2===O.FENCE};
+   const ax=(x>0&&cn(i-1))||(x<W-1&&cn(i+1)),az=(z>0&&cn(i-W))||(z<H-1&&cn(i+W));
+   me.rotation.y=az&&!ax?Math.PI/2:ax?0:(hh<.5?0:Math.PI/2);
+  }
   else if(o===O.WALLW||o===O.WALLS)me.rotation.y=hh<.5?0:Math.PI;
   placedGroup.add(me);placedCells.add(i);
   if(o===O.FIRE){const f=flameGroup();f.position.set(x+.5,gy+.05,z+.5);placedGroup.add(f);sc.fires.push({x:x+.5,z:z+.5,y:gy});flames.push({g:f,ph:hh*10})}

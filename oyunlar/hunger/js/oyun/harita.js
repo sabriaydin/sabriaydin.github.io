@@ -34,7 +34,7 @@ function surfaceBase(im){
   if(o===O.TREE||o===O.PALM){r*=.62;g*=.78;bl*=.6}
   else if(o===O.BUSH||o===O.BUSH0){r*=.8;g*=.92;bl*=.78}
   else if(o===O.FIRE){r=250;g=150;bl=40}
-  else if(o===O.BENCH||o===O.FURN||o===O.WALLW||o===O.WALLS||o===O.DOOR){r=170;g=120;bl=70}
+  else if(o===O.BENCH||o===O.FURN||o===O.WALLW||o===O.WALLS||o===O.DOOR||o===O.WALLT||o===O.WALLM||o===O.DOORM||o===O.FENCE){r=170;g=120;bl=70}
   if(t>T.SHAL&&t!==T.POND){r*=sh;g*=sh;bl*=sh}
   /* kıyı köpüğü */
   if(G.shore&&G.shore[i]){r+=(235-r)*.35;g+=(240-g)*.35;bl+=(245-bl)*.35}
@@ -120,13 +120,14 @@ const explored=()=>{
 };
 
 /* ---- işaretler ---- */
+const LF=sz=>'600 '+Math.max(10,Math.min(12,sz*1.25))+'px system-ui,sans-serif';      /* işaret yazıları okunur ve küçük: 10-12 piksel */
 function markers(g,tx,ty,k,sz){
  /* köyler */
  (G.villages||[]).forEach((v,i)=>{
   if(!G.flags['v'+i]||!seen(v.cx,v.cy))return;
   const x=tx(v.cx),y=ty(v.cy),s=Math.max(4,sz*1.1);
   g.fillStyle='#f0b040';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.rect(x-s,y-s,s*2,s*2);g.stroke();g.fill();
-  if(sz>5){g.fillStyle='#fff';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText(v.name,x,y-s-4);g.fillText(v.name,x,y-s-4)}
+  if(sz>5){g.fillStyle='#fff';g.font=LF(sz);g.textAlign='center';g.strokeText(v.name,x,y-s-4);g.fillText(v.name,x,y-s-4)}
  });
  /* kamplar ve sandık odası */
  const SEAC={wreck:['#e0884a','Enkaz'],castaway:['#7ad07a','Kazazede'],lighthouse:['#ffffff','Fener']};
@@ -135,7 +136,7 @@ function markers(g,tx,ty,k,sz){
   const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(3.5,sz*.9),sea=SEAC[c.kind];
   g.fillStyle=c.open?'#8a8a8a':c.vault?'#ff5a6a':sea?sea[0]:'#e8e4da';g.strokeStyle='#000';g.lineWidth=2;
   g.beginPath();g.moveTo(x,y-s);g.lineTo(x+s,y);g.lineTo(x,y+s);g.lineTo(x-s,y);g.closePath();g.stroke();g.fill();
-  if(sea&&sz>5){g.fillStyle='#fff';g.strokeStyle='#000';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText(sea[1],x,y-s-4);g.fillText(sea[1],x,y-s-4)}
+  if(sea&&sz>5){g.fillStyle='#fff';g.strokeStyle='#000';g.font=LF(sz);g.textAlign='center';g.strokeText(sea[1],x,y-s-4);g.fillText(sea[1],x,y-s-4)}
  }
  /* keşfedilen adalar ve mercan resifleri */
  if(!G.cave){
@@ -143,13 +144,13 @@ function markers(g,tx,ty,k,sz){
    if(!G.flags['isl'+q.id]||!seen(q.x,q.y))continue;
    const x=tx(q.x),y=ty(q.y),s=Math.max(3.5,sz*.8);
    g.fillStyle='#5fb04a';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.arc(x,y,s,0,7);g.stroke();g.fill();
-   if(sz>5){g.fillStyle='#fff';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Ada',x,y-s-4);g.fillText('Ada',x,y-s-4)}
+   if(sz>5){g.fillStyle='#fff';g.font=LF(sz);g.textAlign='center';g.strokeText('Ada',x,y-s-4);g.fillText('Ada',x,y-s-4)}
   }
   for(const q of G.reefs||[]){
    if(!G.flags['reef'+q.id]||!seen(q.x+.5,q.y+.5))continue;
    const x=tx(q.x+.5),y=ty(q.y+.5),r=Math.max(3.5,q.r*k*.8);
    g.strokeStyle='#ff7aa8';g.lineWidth=2;g.setLineDash([4,3]);g.beginPath();g.arc(x,y,r,0,7);g.stroke();g.setLineDash([]);
-   if(sz>5){g.fillStyle='#ffd0e0';g.strokeStyle='#000';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Resif',x,y-r-4);g.fillText('Resif',x,y-r-4)}
+   if(sz>5){g.fillStyle='#ffd0e0';g.strokeStyle='#000';g.font=LF(sz);g.textAlign='center';g.strokeText('Resif',x,y-r-4);g.fillText('Resif',x,y-r-4)}
   }
  }
  /* mağara girişleri */
@@ -158,7 +159,7 @@ function markers(g,tx,ty,k,sz){
   const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(4,sz);
   g.fillStyle='#14161c';g.strokeStyle=c.vault?'#8a8a8a':'#ff5a4a';g.lineWidth=2;
   g.beginPath();g.moveTo(x-s,y+s*.8);g.lineTo(x-s,y-s*.1);g.quadraticCurveTo(x,y-s*1.6,x+s,y-s*.1);g.lineTo(x+s,y+s*.8);g.closePath();g.fill();g.stroke();
-  if(sz>5){g.fillStyle='#fff';g.strokeStyle='#000';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Mağara',x,y-s*1.5);g.fillText('Mağara',x,y-s*1.5)}
+  if(sz>5){g.fillStyle='#fff';g.strokeStyle='#000';g.font=LF(sz);g.textAlign='center';g.strokeText('Mağara',x,y-s*1.5);g.fillText('Mağara',x,y-s*1.5)}
  }
  /* mağaradan çıkış */
  if(G.cave){
@@ -224,7 +225,7 @@ function mini(m,mw){
 }
 
 /* ---- tam ekran harita ---- */
-function size(){return Math.floor(Math.min(innerWidth*.94,innerHeight*.84))}
+function size(){const wide=innerWidth>=innerHeight;return Math.floor(Math.min(innerWidth*.94-(wide?80:0),innerHeight*.84-(wide?0:64)))}      /* pusula için haritanın yanında (yatay) veya üstünde (dikey) yer ayrılır */
 const toWorld=(px,py,S)=>{const k=S/W*view.z;return {x:(px-S/2)/k+view.cx,y:(py-S/2)/k+view.cy}};
 function clampView(){
  const half=W/2/view.z;
@@ -297,12 +298,13 @@ function big(){
  markers(g,tx,ty,k,Math.max(5,S/90));
  g.restore();
  playerArrow(g,tx(G.px),ty(G.py),Math.max(6,S/60));
- /* pusula */
- {const r=Math.max(16,S/26),x=S-r-10,y=r+10;
-  g.fillStyle='rgba(6,12,20,.78)';g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=1.5;g.beginPath();g.arc(x,y,r,0,7);g.fill();g.stroke();
-  g.fillStyle='#d9463c';g.beginPath();g.moveTo(x,y-r*.78);g.lineTo(x+r*.26,y);g.lineTo(x-r*.26,y);g.closePath();g.fill();
-  g.fillStyle='#e8e4da';g.beginPath();g.moveTo(x,y+r*.78);g.lineTo(x+r*.26,y);g.lineTo(x-r*.26,y);g.closePath();g.fill();
-  g.fillStyle='#fff';g.font='700 '+Math.max(10,r*.5)+'px system-ui,sans-serif';g.textAlign='center';g.fillText('K',x,y-r*.84-3);
+ /* pusula: haritanın dışında, ayrı küçük bir tuvalde çizilir */
+ {const cc=$('#bmc');if(cc){const q=cc.getContext('2d'),r=cc.width*.46,x=cc.width/2,y=cc.height/2+5;
+  q.setTransform(1,0,0,1,0,0);q.clearRect(0,0,cc.width,cc.height);
+  q.fillStyle='rgba(6,12,20,.78)';q.strokeStyle='rgba(255,255,255,.5)';q.lineWidth=1.5;q.beginPath();q.arc(x,y,r,0,7);q.fill();q.stroke();
+  q.fillStyle='#d9463c';q.beginPath();q.moveTo(x,y-r*.78);q.lineTo(x+r*.26,y);q.lineTo(x-r*.26,y);q.closePath();q.fill();
+  q.fillStyle='#e8e4da';q.beginPath();q.moveTo(x,y+r*.78);q.lineTo(x+r*.26,y);q.lineTo(x-r*.26,y);q.closePath();q.fill();
+  q.fillStyle='#fff';q.font='700 11px system-ui,sans-serif';q.textAlign='center';q.fillText('K',x,y-r-2);}
  }
  /* ölçek çubuğu */
  {const len=view.z>=4?10:view.z>=2?25:50,px=len*k,x=14,y=S-16;

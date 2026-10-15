@@ -52,7 +52,7 @@ function setupInput(){
   const K=HG.keyIs;
   if(HG.cfg.sprintT&&K('sprint',e.code))G.sprintOn=!G.sprintOn;
   if(K('inv',e.code)||K('craft',e.code))HG.togglePanel();
-  else if(K('use',e.code))HG.useHeld();
+  else if(K('use',e.code))HG.useHeld('key');
   else if(K('place',e.code))HG.placeHeld();
   else if(K('map',e.code))HG.toggleMap();
   else if(K('jr',e.code))HG.toggleJournal();
@@ -78,17 +78,17 @@ function setupInput(){
   }
  });
  /* bazı tarayıcılarda imleç kilidi anında dev sıçrama değerleri üretir: tek hareket sınırlandırılır */
- document.addEventListener('mousemove',e=>{if(ui.locked)Scene.look(clampMv(e.movementX)*.0022,clampMv(e.movementY)*.0022)});
+ document.addEventListener('mousemove',e=>{if(!ui.locked)return;if(HG.radialOn&&HG.radialOn()){HG.radialMove(e.movementX,e.movementY);return}Scene.look(clampMv(e.movementX)*.0022,clampMv(e.movementY)*.0022)});
 
  /* fare tuşları (tuval) */
  cvs.addEventListener('pointerdown',e=>{
   HG.initAudio();if(ui.state!=='play')return;
   if(e.pointerType==='touch'){startLook(e);return}
   if(!ui.locked){lock();return}
-  if(e.button===2){HG.useHeld();return}
+  if(e.button===2){if(HG.radialOpen&&HG.radialOpen())return;HG.useHeld('mouse');return}
   if(e.button===0){inp.mouseDown=true;HG.onActPress()}
  });
- const up=e=>{if(e.button===0||e.type==='pointercancel')inp.mouseDown=false;endLook(e)};
+ const up=e=>{if(e.button===0||e.type==='pointercancel')inp.mouseDown=false;if((e.button===2||e.type==='pointercancel')&&HG.radialClose)HG.radialClose(e.type!=='pointercancel');endLook(e)};
  cvs.addEventListener('pointerup',up);cvs.addEventListener('pointercancel',up);
  cvs.addEventListener('contextmenu',e=>e.preventDefault());
  cvs.addEventListener('wheel',e=>{if(ui.state!=='play')return;e.preventDefault();G.sel=(G.sel+(e.deltaY>0?1:HOT-1))%HOT;ui.dirty=true;HG.snd('ui')},{passive:false});
@@ -125,8 +125,8 @@ function setupInput(){
   el.addEventListener('contextmenu',e=>{
    e.preventDefault();const s=e.target.closest('.slot');if(!s)return;
    const i=+s.dataset.i;
-   if(i<HOT){G.sel=i;HG.useHeld()}
-   else if(G.inv[i]&&HG.IT[G.inv[i].id].food){const o=G.sel;G.sel=i;HG.useHeld();G.sel=o}
+   if(i<HOT){G.sel=i;HG.useHeld('mouse')}
+   else if(G.inv[i]&&HG.IT[G.inv[i].id].food){const o=G.sel;G.sel=i;HG.useHeld('mouse');G.sel=o}
    ui.dirty=true;
   });
   el.addEventListener('mouseover',e=>{const s=e.target.closest('.slot');if(!s||sel!=='#grid')return;const v=G.inv[+s.dataset.i];$('#info').innerHTML=v?`<b>${HG.IT[v.id].n}</b>${HG.IT[v.id].d?'<br>'+HG.IT[v.id].d:''}`:''});
@@ -194,7 +194,7 @@ function setupInput(){
  $('#tB').addEventListener('pointerdown',()=>HG.placeHeld());
  $('#tJ').addEventListener('pointerdown',e=>{inp.touchJump=true;e.target.setPointerCapture(e.pointerId)});
  $('#tJ').addEventListener('pointerup',()=>inp.touchJump=false);$('#tJ').addEventListener('pointercancel',()=>inp.touchJump=false);
- $('#tE').addEventListener('pointerdown',()=>HG.useHeld());
+ $('#tE').addEventListener('pointerdown',()=>HG.useHeld('touch'));
  $('#tI').addEventListener('pointerdown',()=>HG.togglePanel());
 }
 Object.assign(HG,{lock,unlock,pause,resume,setupInput,overlayOpen});

@@ -18,10 +18,10 @@ function take(id,n){
  for(let i=SLOTS-1;i>=0&&n>0;i--){const s=G.inv[i];if(s&&s.id===id){const k=Math.min(s.n,n);s.n-=k;n-=k;if(s.n<=0)G.inv[i]=null}}
  ui.dirty=true;
 }
-/* Kaynak topla: yer varsa ekler, bildirim ve ses verir */
-function gain(id,n){
+/* Kaynak topla: yer varsa ekler, bildirim ve ses verir. q: vuruş başına kaynakta ses ve deneyim verilmez */
+function gain(id,n,q){
  if(!canAdd(id,n)){HG.toast('Envanter dolu.');return false}
- add(id,n);flag('got_'+id);HG.feed('+'+n+' '+IT[id].n);HG.snd('get');if(HG.xpGain)HG.xpGain(.5);return true;
+ add(id,n);flag('got_'+id);HG.feed('+'+n+' '+IT[id].n);if(!q){HG.snd('get');if(HG.xpGain)HG.xpGain(.5)}return true;
 }
 /* Çantayı düzenle: hızlı erişim çubuğu dışındaki kutular birleştirilir ve eşya sırasına göre dizilir */
 function sortInv(){

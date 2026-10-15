@@ -499,6 +499,33 @@ S.onInit(()=>{
   ...[-.32,-.1,.12,.32].flatMap(x=>[part(blob(.02,1,0,3),0x6a6a74,x,.34,.06),part(blob(.02,1,0,5),0x6a6a74,x,.9,.06)]),
   part(blob(.05,1,.05,3),0xd2b24a,.3,.65,.09),part(new THREE.TorusGeometry(.045,.01,5,10),0x2c2c32,.3,.65,.1)
  ],{ao:.82});
+ /* ---- İnşa Planı parçaları: çıta duvar, metal duvar, metal kapı, çit ---- */
+ const rail=(len,r,x,y,z,ax,col,k)=>{const p=part(cyl(r,r*1.04,len,7,2),col,x,y,z,1,1,1,ax==='x'?0:Math.PI/2,0,ax==='x'?Math.PI/2:Math.PI/2,.1);p.cf=grainCf(k);return p};
+ MODEL.wallt=merge([
+  ...Array.from({length:17},(_,i)=>{const x=-.48+i*.06,h=1.12+hash(i,3,1)*.2,lean=(hash(i,5,2)-.5)*.1,c=[0xb39a5c,0xa48c52,0xbfa468,0x9b8350][i%4];
+   const p=part(cyl(.017,.026,h,5,2),c,x,h/2,(hash(i,7,3)-.5)*.05,1,1,1,lean,0,(hash(i,9,4)-.5)*.08,.06);p.cf=grainCf(70+i);return p}),
+  ...[.28,.66,1.04].flatMap((y,j)=>[0,1].map(q=>rail(1.04,.03,0,y+(q?.03:-.03),q?.05:-.05,'x',[0x8e7640,0x86703c][q],90+j*2+q))),
+  part(rbox(1.04,.05,.16,.3,2),0x7d6a3a,0,1.3,0,1,1,1,0,0,0,.1)
+ ],{ao:.8,jit:.06});
+ const steel=(k,rust)=>(x,y,z,nx,ny,nz,c)=>{const b=fb3(x*70,y*3,z*70,k),r=fb3(x*8,y*8,z*8,k+5);c.multiplyScalar(.82+b*.3);if(rust&&r>.62){const q=Math.min(1,(r-.62)*3);c.r=c.r*(1-q*.5)+.25*q*.5;c.g=c.g*(1-q*.5)+.1*q*.5;c.b=c.b*(1-q*.5)+.05*q*.5}};
+ MODEL.wallm=merge([
+  ...[-.46,.46].map((x,i)=>{const q=part(rbox(.12,1.32,.2,.3,2),0x474c53,x,.66,0);q.cf=steel(110+i,false);return q}),
+  (()=>{const q=part(rbox(1.04,.1,.22,.3,2),0x474c53,0,1.3,0);q.cf=steel(114,false);return q})(),(()=>{const q=part(rbox(1.0,.08,.22,.3,2),0x474c53,0,.05,0);q.cf=steel(115,false);return q})(),
+  part(box(.9,1.22,.08),0x33373d,0,.66,0),
+  ...[.24,.65,1.06].map((y,i)=>{const q=part(rbox(.88,.4,.12,.3,3),0x6b727a,0,y,0,1,1,1,0,0,0,.04);q.cf=steel(120+i,true);return q}),
+  ...[.24,.65,1.06].flatMap(y=>[-.37,.37].flatMap(x=>[part(blob(.025,1,0,3),0x9aa1a9,x,y+.12,.06),part(blob(.025,1,0,5),0x9aa1a9,x,y-.12,.06),part(blob(.025,1,0,7),0x9aa1a9,x,y+.12,-.06),part(blob(.025,1,0,9),0x9aa1a9,x,y-.12,-.06)]))
+ ],{ao:.8});
+ MODEL.doorm=merge([
+  ...[-.46,.46].map((x,i)=>{const q=part(rbox(.13,1.32,.19,.3,2),0x3d4248,x,.66,0);q.cf=steel(130+i,false);return q}),(()=>{const q=part(rbox(1.05,.13,.19,.3,2),0x3d4248,0,1.3,0);q.cf=steel(134,false);return q})(),
+  (()=>{const q=part(rbox(.82,1.16,.09,.3,3),0x6a7078,0,.6,0,1,1,1,0,0,0,.04);q.cf=steel(135,true);return q})(),
+  part(rbox(.8,.07,.12,.3,2),0x4a4f56,0,.3,0),part(rbox(.8,.07,.12,.3,2),0x4a4f56,0,.9,0),part(rbox(.07,1.1,.12,.3,2),0x4a4f56,-.2,.6,0),part(rbox(.07,1.1,.12,.3,2),0x4a4f56,.2,.6,0),
+  ...[-.32,.32].flatMap(x=>[.2,.45,.75,1.0].map(y=>part(blob(.022,1,0,3),0x9aa1a9,x,y,.07))),
+  part(new THREE.TorusGeometry(.07,.016,6,14),0xb8bec6,.28,.62,.1),part(blob(.04,1,.04,3),0xd2b24a,.28,.62,.1)
+ ],{ao:.82});
+ MODEL.fence=merge([
+  (()=>{const q=part(rbox(.12,.88,.12,.3,2),0x7a5430,0,.44,0);q.cf=grainCf(140);return q})(),part(rbox(.14,.04,.14,.3,2),0x5a3a1e,0,.9,0),
+  ...[.34,.68].flatMap((y,j)=>[(()=>{const q=part(rbox(1.02,.075,.055,.3,2),[0x8a6038,0x80583a][j],0,y,0,1,1,1,0,0,0,.1);q.cf=grainCf(141+j);return q})(),(()=>{const q=part(rbox(.055,.075,1.02,.3,2),[0x84603a,0x8e6a40][j],0,y+.02,0,1,1,1,0,0,0,.1);q.cf=grainCf(143+j);return q})()])
+ ],{ao:.8});
  MODEL.matPlain=sc.mat({pbr:true});
  MODEL.matDS=sc.mat({side:THREE.DoubleSide,pbr:true});
 });

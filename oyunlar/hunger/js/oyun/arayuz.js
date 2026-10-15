@@ -142,7 +142,9 @@ function hud(){
   }else if(!tg.hidden){tg.hidden=true;hc.tg=null}
  }
  const pr=$('#prog');
- if(HG.A.key&&HG.A.p>0){pr.hidden=false;pr.firstElementChild.style.width=clamp(HG.A.p/HG.A.need,0,1)*100+'%'}else pr.hidden=true;
+ if(HG.A.key&&HG.A.p>0){pr.hidden=false;pr.firstElementChild.style.width=clamp(HG.A.p/HG.A.need,0,1)*100+'%'}
+ else if(HG.useProg&&HG.useProg.p>0){pr.hidden=false;pr.firstElementChild.style.width=clamp(HG.useProg.p/HG.useProg.need,0,1)*100+'%'}
+ else pr.hidden=true;
 }
 Object.assign(HG,{toast,feed,renderInv,renderRecipes,togglePanel,toggleMap,buildMini,hud});
 })();

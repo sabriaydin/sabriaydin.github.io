@@ -1,7 +1,7 @@
-/* Hunger 3D - eylemler: nişan alınan şeyi kesme, kazma, su içme, balık, yerleştirme, yeme */
+/* Hunger 3D - eylemler: nişan alınan şeyi kesme, kazma (Rust mantığı: vuruş başına kaynak, zayıf nokta), E ile toplama, su içme, balık, yerleştirme, yeme */
 (()=>{
 'use strict';
-const {W,T,O,PLACE_ITEM,NODE,POWER,NAMES,G,ui,A,inp,Scene,clamp,count,add,take,gain,held,setObj,flag}=HG;
+const {W,T,O,PLACE_ITEM,NODE,POWER,NAMES,G,ui,A,inp,Scene,clamp,count,add,take,gain,canAdd,held,setObj,flag}=HG;
 
 /* ---- Nişan alınan hedefin ne olduğu ve ne kadar süreceği ---- */
 function toolTier(kind){const h=held();return h&&h.it.tool===kind?h.it.tier:0}
@@ -24,8 +24,10 @@ function foodBlock(f){
 }
 function actionFor(tg){
  const h=held();
- /* su altı: deniz dibine bakıp midye, yosun ve inci toplanır */
- if(G.head&&!G.cave&&HG.look.pitch<-.2&&G.pz-Scene.groundY(G.px,G.py)<1.9)return {kind:'dive',need:1.7,hint:'Basılı tut: deniz dibini karıştır',name:'Deniz dibi'};
+ /* su altı: deniz dibine bakıp midye, yosun ve inci E ile toplanır */
+ if(diveAim())return {hint:'[E] Deniz dibini karıştır',name:'Deniz dibi'};
+ /* İnşa Planı / Çekiç: kurma ve yükseltme ipuçları insa.js içindedir */
+ if(h&&(h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaAction)return HG.insaAction(tg);
  if(G.head&&h&&(h.it.food||h.it.heal))return {block:'Su altında kullanılamaz.',name:h.it.n};
  /* elde yiyecek/içecek varsa sol tık basılı tutulunca yenir */
  if(h&&h.it.food){
@@ -55,12 +57,13 @@ function actionFor(tg){
  if(o){
   const name=NAMES[o]||'Nesne',nd=NODE[o];
   if(nd){
+   if(nd.collect)return {hint:'[E] '+(o===O.PALM?'Hindistan cevizi topla':'Meyve topla'),name};
    const lv=nd.tool?gatherLv(nd.tool):0;
    if(lv<0)return {block:nd.tool==='axe'?'Çıplak elle ağaç kesilemez. El Taşı veya balta gerekir.':nd.req>0?(nd.msg||'Bunun için kazma gerekir.'):'Çıplak elle kazılamaz. El Taşı veya kazma gerekir.',name};
    if(lv<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
-   return {kind:'node',need:nd.hp/(nd.tool?POWER[lv]:1),hint:'Basılı tut: '+(nd.tool==='axe'?'kes':nd.tool==='pick'?'kaz':'topla'),name};
+   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz')+' · sarı işarete vur: iki kat',name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
   }
-  if(PLACE_ITEM[o])return {kind:'pickup',need:1,hint:'Basılı tut: geri al',name};
+  if(pickupOk(o))return {hint:'[E] basılı tut: geri al',name};
   return null;
  }
  if(tl===T.POND){
@@ -73,7 +76,7 @@ function actionFor(tg){
   if(h&&h.k==='rod')return {kind:'fish',need:3,hint:'Basılı tut: balık tut',name:'Deniz'};
   return {block:'Deniz suyu tuzludur, içilemez.',name:'Deniz (tuzlu su)'};
  }
- if(tl===T.SAND)return {kind:'dig',need:.9,hint:'Basılı tut: kum kaz',name:'Kum'};
+ if(tl===T.SAND)return {hint:'[E] Kum kaz',name:'Kum'};
  return null;
 }
 
@@ -81,7 +84,7 @@ function actionFor(tg){
 let lastMsg=0;
 function msgOnce(m){const n=performance.now();if(n-lastMsg>1800){HG.toast(m);lastMsg=n}}
 /* Yarıda bırakılan toplama ilerlemesi hatırlanır: aynı nesneye dönülünce kaldığı yerden sürer */
-const MEMKINDS={node:1,pickup:1};
+const MEMKINDS={};      /* Rust mantığında düğüm hasarı düğümün kendisinde (G.dmg) saklanır */
 function saveProgress(){
  if(A.key&&A.p>0&&A.memKind&&A.memKey)A.mem[A.memKey]=A.p;
 }
@@ -90,6 +93,7 @@ function stepAction(dt){
  const tg=G.tg,act=actionFor(tg);
  if(!act){stopAction();return}
  if(act.block){msgOnce(act.block);stopAction();return}
+ if(!act.kind){stopAction();return}      /* yalnızca ipucu veren (E ile yapılan) eylemler */
  if(act.kind==='eat'){
   if(A.eatLock)return;
   if(A.key!=='eat'){saveProgress();A.key='eat';A.p=0;A.need=act.need;A.memKey=null}
@@ -126,44 +130,18 @@ function stepAction(dt){
   A.key='';
   return;
  }
- const i=tg.y*W+tg.x,o=G.obj[i],tl=G.tile[i];
- const key=kind+','+tg.x+','+tg.y+','+o;
+ if(kind==='node'){nodeSwing(tg);return}
+ const i=tg.y*W+tg.x,tl=G.tile[i];
+ const key=kind+','+tg.x+','+tg.y;
  if(key!==A.key){
   saveProgress();
-  A.key=key;A.tick=0;
-  A.memKind=!!MEMKINDS[kind];A.memKey=A.memKind?key:null;
-  A.p=A.memKind&&A.mem[key]?A.mem[key]:0;
+  A.key=key;A.tick=0;A.memKind=false;A.memKey=null;A.p=0;
   A.need=kind==='fish'?HG.fishNeed():act.need;
  }
  A.p+=dt;A.tick-=dt;
- /* kademeli parçalanma: kaya ve madenlerde ilerlemeye göre görünüm değişir */
- if(kind==='node'&&(o===O.ROCK||o===O.COAL||o===O.COPPER||o===O.IRON)){
-  const fr=Math.min(1,A.p/A.need),st=fr<.34?0:fr<.67?1:2;
-  if(A.stI!==i){A.stI=i;A.st=st}
-  else if(st>A.st&&fr<1){A.st=st;HG.snd('crack',{x:tg.x+.5,z:tg.y+.5})}
-  Scene.setDamage(i,fr);
- }
- if(A.tick<=0&&kind!=='drink'&&kind!=='fish'&&kind!=='fill'&&kind!=='dive'){
-  A.tick=.38;A.hitI=i;A.hitT=.18;HG.armSwing(.36);HG.snd(o===O.TREE||o===O.PALM||o===O.BUSH?'hit':o===O.ROCK?'rock':(o===O.COAL||o===O.COPPER||o===O.IRON)?'ore':tl===T.SAND?'step_sand':'pick');
-  const hy=tg.hy!==undefined?tg.hy:1;
-  const big=o===O.ROCK||o===O.COAL||o===O.COPPER||o===O.IRON;
-  Scene.burst(tg.hx!==undefined?tg.hx:tg.x+.5,hy,tg.hz!==undefined?tg.hz:tg.y+.5,o===O.TREE||o===O.BUSH?0x4a9440:o===O.PALM?0x3f8a3a:tl===T.SAND?0xd9c58b:o===O.COAL?0x222226:o===O.COPPER?0xc8743a:o===O.IRON?0xc2a287:0x9a9a9a,big?7:4);
- }
  if(A.p<A.need)return;
  A.p=0;
- if(kind==='node'){
-  const nd=NODE[o],lv0=nd.tool?gatherLv(nd.tool):-1,[id,n0]=nd.give(),n=nd.tool&&lv0>=0?yieldN(n0,lv0):n0;
-  if(!gain(id,n))return;
-  if(HG.perk('gath')&&Math.random()<.2*HG.perk('gath'))gain(id,1);
-  delete A.mem[key];if(G.dmg)delete G.dmg[i];
-  if(o===O.TREE){Scene.fell(tg.x,tg.y,o,G.px,G.py);HG.snd('creak',{x:tg.x+.5,z:tg.y+.5,y:3})}
-  else if(o===O.ROCK||o===O.COAL||o===O.COPPER||o===O.IRON){Scene.crumble(tg.x+.5,tg.y+.5,o);HG.snd('crumble',{x:tg.x+.5,z:tg.y+.5})}
-  setObj(i,nd.rm);G.shelterCheck=0;
-  if(nd.regrow)G.timers.push({i,at:G.clock+nd.regrow[1]*(.8+Math.random()*.4),to:nd.regrow[0],from:nd.rm});
-  A.key='';A.memKey=null;
- }else if(kind==='pickup'){
-  const id=PLACE_ITEM[o];if(!gain(id,1))return;setObj(i,O.NONE);G.shelterCheck=0;delete A.mem[key];A.key='';A.memKey=null;
- }else if(kind==='drink'){
+ if(kind==='drink'){
   G.thr=clamp(G.thr+12,0,100);flag('drank');HG.snd('drink');
   if(G.thr>=100){HG.toast('Susuzluk giderildi.');A.key=''}
  }else if(kind==='fill'){
@@ -172,19 +150,134 @@ function stepAction(dt){
  }else if(kind==='fish'){
   HG.catchFish(tl,tg.x,tg.y);
   A.need=HG.fishNeed();
- }else if(kind==='dig'){
-  gain('sand',1);
- }else if(kind==='dive'){
-  /* deniz dibi: sık midye ve yosun, nadiren inci */
-  HG.useStam(3);
-  if(HG.nearReef()&&Math.random()<.4){if(gain('coral',1)){HG.toast('Mercan toplandı.');HG.xpGain(3);if(G.stats)G.stats.coral=(G.stats.coral||0)+1}return}
-  const r=Math.random();
-  if(r<.03){if(gain('pearl',1)){HG.toast('İnci buldun!');HG.xpGain(4)}}
-  else if(r<.47){if(gain('shell',1)&&G.stats)G.stats.shells=(G.stats.shells||0)+1}
-  else if(r<.70)gain('kelp',1);
-  else if(r<.88)gain('sand',1);
-  else HG.toast('Dipte işe yarar bir şey çıkmadı.');
  }
+}
+
+/* ---- Rust mantığı: vuruş başına kaynak ve zayıf nokta ---- */
+const SWING=.5,HOT_R=.26;                  /* vuruş aralığı (sn), zayıf nokta isabet yarıçapı (m) */
+/* Düğümün modeldeki merkezi ve ölçeği (nesneler.js ile aynı yerleşim) */
+function nodeCenter(x,y,o){
+ const hh=HG.hash(x,y,21),h2=HG.hash(x,y,22);
+ return {x:x+.5+(hh-.5)*.2,z:y+.5+(h2-.5)*.2,s:o===O.TREE?.8+h2*.4:.9+h2*.3};
+}
+function makeHot(tg,i,o,nd){
+ const c=nodeCenter(tg.x,tg.y,o),a=Math.atan2(G.py-c.z,G.px-c.x)+(Math.random()-.5)*1.8,r=nd.hot.r*c.s,h=nd.hot.h0+Math.random()*(nd.hot.h1-nd.hot.h0);
+ return HG.hot={i,o,x:c.x+Math.cos(a)*r,y:Scene.groundY(c.x,c.z)+h*(o===O.TREE?c.s:1),z:c.z+Math.sin(a)*r,k:nd.hot.k,show:true};
+}
+/* Hedef bir düğümse ve elde uygun alet varsa zayıf nokta işareti gösterilir; her vuruştan sonra yeni yere taşınır */
+function updateHot(){
+ const tg=G.tg;let nd=null,i=-1,o=0;
+ if(ui.state==='play'&&tg&&!tg.an&&!G.head){
+  i=tg.y*W+tg.x;o=G.obj[i];nd=NODE[o];
+  if(nd&&nd.hot){const lv=gatherLv(nd.tool);if(lv<0||lv<nd.req)nd=null}else nd=null;
+ }
+ if(!nd){if(HG.hot)HG.hot.show=false;return}
+ const h=HG.hot;
+ if(!h||h.i!==i||h.o!==o)makeHot(tg,i,o,nd);else h.show=true;
+}
+/* Bakış ışınının zayıf noktaya yeterince yakın geçip geçmediği */
+function hotHit(){
+ const h=HG.hot;if(!h||!h.show||!Scene.aimRay)return false;
+ const r=Scene.aimRay(),vx=h.x-r.o.x,vy=h.y-r.o.y,vz=h.z-r.o.z,t=Math.max(0,vx*r.d.x+vy*r.d.y+vz*r.d.z);
+ return vx*vx+vy*vy+vz*vz-t*t<HOT_R*HOT_R;
+}
+/* Kaynak ver: çanta doluysa eşya yere düşer */
+function giveRes(id,n){
+ if(n<=0)return;
+ if(canAdd(id,n)){gain(id,n,true);return}
+ msgOnce('Envanter dolu: kaynak yere düşüyor.');
+ HG.spawnDrop(id,n);
+}
+function nodeSwing(tg){
+ const i=tg.y*W+tg.x,o=G.obj[i],nd=NODE[o];
+ const key='node,'+i+','+o;
+ if(key!==A.key){saveProgress();A.key=key;A.memKey=null;A.memKind=false;A.need=1}
+ A.p=(G.dmg&&G.dmg[i])||0;                              /* ilerleme çubuğu: düğümün hasar oranı */
+ if(G.clock<(A.nextSwing||0))return;                    /* tıklama hızlandırması yoktur: vuruş aralığı sabittir */
+ const lv=gatherLv(nd.tool);
+ A.nextSwing=G.clock+SWING*(G.tired?1.6:1);
+ A.hitI=i;A.hitT=.18;HG.armSwing(.36);
+ const weak=hotHit(),big=o!==O.TREE;
+ HG.snd(o===O.TREE?'hit':o===O.ROCK?'rock':'ore');
+ const hx=tg.hx!==undefined?tg.hx:tg.x+.5,hy=tg.hy!==undefined?tg.hy:1,hz=tg.hz!==undefined?tg.hz:tg.y+.5;
+ Scene.burst(hx,hy,hz,o===O.TREE?0x4a9440:o===O.COAL?0x222226:o===O.COPPER?0xc8743a:o===O.IRON?0xc2a287:0x9a9a9a,big?7:4);
+ let n=nd.y[Math.min(3,lv)]*(weak?2:1);
+ if(HG.perk('gath')&&Math.random()<.12*HG.perk('gath'))n+=1;
+ giveRes(nd.id,n);
+ if(nd.sec)giveRes(nd.sec[0],nd.sec[1]*(weak?2:1));
+ if(weak){HG.snd('crack',{x:tg.x+.5,z:tg.y+.5});HG.feed('★ Zayıf nokta: kaynak iki kat!')}
+ HG.hot=null;                                           /* işaret yeni bir yere taşınır */
+ if(!G.dmg)G.dmg={};
+ const fr=Math.min(1,(G.dmg[i]||0)+HIT_OF(lv)/nd.hp),st0=(G.dmg[i]||0)<.34?0:(G.dmg[i]||0)<.67?1:2,st=fr<.34?0:fr<.67?1:2;
+ G.dmg[i]=fr;A.p=fr;
+ if(big&&fr<1){Scene.setDamage(i,fr);if(st>st0)HG.snd('crack',{x:tg.x+.5,z:tg.y+.5})}
+ if(fr<1)return;
+ /* düğüm bitti: son vuruş ödülü, devrilme/parçalanma, yeniden büyüme */
+ giveRes(nd.id,nd.bonus);
+ HG.xpGain&&HG.xpGain(1.5);
+ delete G.dmg[i];
+ if(o===O.TREE){Scene.fell(tg.x,tg.y,o,G.px,G.py);HG.snd('creak',{x:tg.x+.5,z:tg.y+.5,y:3})}
+ else{Scene.crumble(tg.x+.5,tg.y+.5,o);HG.snd('crumble',{x:tg.x+.5,z:tg.y+.5})}
+ setObj(i,nd.rm);G.shelterCheck=0;
+ if(nd.regrow)G.timers.push({i,at:G.clock+nd.regrow[1]*(.8+Math.random()*.4),to:nd.regrow[0],from:nd.rm});
+ A.key='';A.memKey=null;A.p=0;
+}
+const HIT_OF=lv=>HG.HIT[Math.max(0,Math.min(3,lv))];
+
+/* ---- E ile toplama: meyve, hindistan cevizi, kum, deniz dibi; basılı tutarak geri alma ---- */
+const pickupOk=o=>!!PLACE_ITEM[o]&&o!==O.WALLW&&o!==O.WALLS;      /* duvarlar yalnızca Çekiç ile yıkılır */
+function diveAim(){return !!(G.head&&!G.cave&&HG.look.pitch<-.2&&G.pz-Scene.groundY(G.px,G.py)<1.9)}
+function collectNow(){
+ const tg=G.tg;if(!tg||tg.an||G.head)return false;
+ const i=tg.y*W+tg.x,o=G.obj[i],nd=NODE[o];
+ if(!nd||!nd.collect)return false;
+ const [id,n0]=nd.give(),n=n0+(HG.perk('gath')&&Math.random()<.2*HG.perk('gath')?1:0);
+ if(!gain(id,n))return true;
+ HG.armSwing(.3);HG.snd('hit');
+ Scene.burst(tg.hx!==undefined?tg.hx:tg.x+.5,tg.hy!==undefined?tg.hy:1,tg.hz!==undefined?tg.hz:tg.y+.5,o===O.PALM?0x3f8a3a:0x4a9440,4);
+ setObj(i,nd.rm);G.shelterCheck=0;
+ if(nd.regrow)G.timers.push({i,at:G.clock+nd.regrow[1]*(.8+Math.random()*.4),to:nd.regrow[0],from:nd.rm});
+ return true;
+}
+function digNow(){
+ const tg=G.tg;if(!tg||tg.an||G.head)return false;
+ const i=tg.y*W+tg.x;if(G.obj[i]||G.tile[i]!==T.SAND)return false;
+ if(G.clock<(A.nextDig||0))return true;
+ A.nextDig=G.clock+.4;HG.armSwing(.3);HG.snd('step_sand');
+ Scene.burst(tg.hx!==undefined?tg.hx:tg.x+.5,tg.hy!==undefined?tg.hy:.2,tg.hz!==undefined?tg.hz:tg.y+.5,0xd9c58b,4);
+ gain('sand',1);return true;
+}
+function diveNow(){
+ if(!diveAim())return false;
+ if(G.clock<(A.nextDive||0))return true;
+ A.nextDive=G.clock+.9;
+ /* deniz dibi: sık midye ve yosun, nadiren inci */
+ HG.useStam(3);
+ if(HG.nearReef()&&Math.random()<.4){if(gain('coral',1)){HG.toast('Mercan toplandı.');HG.xpGain(3);if(G.stats)G.stats.coral=(G.stats.coral||0)+1}return true}
+ const r=Math.random();
+ if(r<.03){if(gain('pearl',1)){HG.toast('İnci buldun!');HG.xpGain(4)}}
+ else if(r<.47){if(gain('shell',1)&&G.stats)G.stats.shells=(G.stats.shells||0)+1}
+ else if(r<.70)gain('kelp',1);
+ else if(r<.88)gain('sand',1);
+ else HG.toast('Dipte işe yarar bir şey çıkmadı.');
+ return true;
+}
+/* Yerleştirilmiş eşyayı geri alma: E basılı tutulur */
+let UP=null;
+function doPickup(i){
+ const o=G.obj[i],id=PLACE_ITEM[o];
+ if(!pickupOk(o)||!gain(id,1))return;
+ setObj(i,O.NONE);G.shelterCheck=0;HG.snd('craft');
+}
+function pickupAim(){
+ const tg=G.tg;if(!tg||tg.an||G.head)return -1;
+ const i=tg.y*W+tg.x;return pickupOk(G.obj[i])?i:-1;
+}
+function stepUse(dt){
+ if(!UP){HG.useProg=null;return}
+ if(ui.state!=='play'||!HG.keyDown('use')||pickupAim()!==UP.i){UP=null;HG.useProg=null;return}
+ UP.p+=dt;HG.useProg={p:UP.p,need:.8};
+ if(UP.p>=.8){const i=UP.i;UP=null;HG.useProg=null;doPickup(i)}
 }
 
 /* ---- Yerleştirme ---- */
@@ -215,6 +308,8 @@ function onActPress(){
  if(ui.state!=='play')return;
  const h=held(),tg=G.tg;
  if(h&&h.it.place&&tg&&!tg.an&&!G.obj[tg.y*W+tg.x])placeHeld();
+ else if(h&&h.it.tool==='plan'&&HG.insaPlace)HG.insaPlace();
+ else if(h&&h.it.tool==='hammer'&&HG.insaHammer)HG.insaHammer();
 }
 
 /* ---- Eşya kullanma (yeme-içme) ---- */
@@ -240,14 +335,28 @@ function useCands(){
  c.sort((a,b)=>b[0]-a[0]);
  return c;
 }
-function useHeld(){
+/* E (src='key'), sağ tık (src='mouse') veya dokunmatik düğme (src='touch'). Sıra: sal, yakındaki etkileşimler, meyve toplama,
+   elde tutulan eşyanın kullanımı, İnşa Planı/Çekiç, kum kazma, deniz dibi, yerleştirilmiş eşyayı geri alma. */
+function useHeld(src){
+ UP=null;
  if(HG.raftUse(held()))return;                 /* sal: biner veya iner */
  for(const c of useCands())if(c[2]())return;
- const h=held();if(!h)return;
- if(h.it.food){const b=foodBlock(h.it.food);if(b)HG.toast(b);else eatHeld();return}
- if(h.it.sleep){HG.sleep();return}
- if(h.it.heal){if(G.bleed>0||G.hp<95)HG.useMedical();else HG.toast('Yaralı değilsin.');return}
- if(h.it.place)placeHeld();
+ if(collectNow())return;
+ const h=held();
+ if(h){
+  if(h.it.food){const b=foodBlock(h.it.food);if(b)HG.toast(b);else eatHeld();return}
+  if(h.it.sleep){HG.sleep();return}
+  if(h.it.heal){if(G.bleed>0||G.hp<95)HG.useMedical();else HG.toast('Yaralı değilsin.');return}
+  if(h.it.place){placeHeld();return}
+  if((h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaCycle){HG.insaCycle();return}
+ }
+ if(diveNow())return;
+ const pi=pickupAim();
+ if(pi>=0){
+  if(src==='touch'){doPickup(pi);return}
+  if(src==='key'){UP={i:pi,p:0};return}
+ }
+ if(digNow())return;
 }
-Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
+Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,stepUse,updateHot,nodeCenter,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
 })();

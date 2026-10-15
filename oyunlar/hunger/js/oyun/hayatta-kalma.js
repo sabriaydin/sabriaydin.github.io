@@ -6,7 +6,7 @@ const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
 /* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
 /* Ağaç, palmiye ve çalılar duvar sayılmaz: yalnızca yapı, kaya ve kapı gibi kapatıcı nesneler alanı sınırlar.
    Hesap ayrılmış bir dizi üzerinde yapılır (her çağrıda yeni bellek ayrılmaz). */
-const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0]);
+const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE]);      /* alçak çit de alanı kapatmaz */
 let SEEN=null,STAMP=0;const QUE=new Int32Array(64);
 function calcShelter(){
  if(G.cave)return true;                 /* mağara kapalı alandır */
@@ -28,12 +28,31 @@ function calcShelter(){
 }
 
 /* ---- Çarpışma ---- */
-function solidAt(x,y){
+/* Kaya ve madenlerin üzerine çıkılabilir: ayak yüksekliği (pz) tepenin en fazla STEP altındaysa kare engel sayılmaz */
+const STEP=.42;
+function solidAt(x,y,pz){
  if(x<0||y<0||x>=W||y>=H)return true;
- const i=y*W+x,t=G.tile[i];
- return SOLID(G.obj[i]);                       /* sular geçilebilir: sığ yerde yürünür, derinde yüzülür */
+ const i=y*W+x,o=G.obj[i];
+ if(!SOLID(o))return false;                    /* sular geçilebilir: sığ yerde yürünür, derinde yüzülür */
+ const st=pz!==undefined&&HG.STAND[o];
+ if(st)return pz<Scene.groundY(x+.5,y+.5)+st-STEP;
+ return true;
 }
-function canStand(x,y){const r=.27;return !(solidAt(Math.floor(x-r),Math.floor(y-r))||solidAt(Math.floor(x+r),Math.floor(y-r))||solidAt(Math.floor(x-r),Math.floor(y+r))||solidAt(Math.floor(x+r),Math.floor(y+r)))}
+function canStand(x,y,pz){const r=.27;return !(solidAt(Math.floor(x-r),Math.floor(y-r),pz)||solidAt(Math.floor(x+r),Math.floor(y-r),pz)||solidAt(Math.floor(x-r),Math.floor(y+r),pz)||solidAt(Math.floor(x+r),Math.floor(y+r),pz))}
+/* Ayağın altındaki zemin: arazi veya üzerine çıkılmış kaya/maden tepesi */
+function supportY(x,y,pz){
+ let gy=Scene.groundY(x,y);
+ if(pz===undefined)return gy;
+ const r=.27;
+ for(let k=0;k<4;k++){
+  const cx=Math.floor(x+(k&1?r:-r)),cy=Math.floor(y+(k&2?r:-r));
+  if(cx<0||cy<0||cx>=W||cy>=H)continue;
+  const st=HG.STAND[G.obj[cy*W+cx]];if(!st)continue;
+  const top=Scene.groundY(cx+.5,cy+.5)+st;
+  if(top>gy&&pz>=top-STEP-.02)gy=top;
+ }
+ return gy;
+}
 
 /* Canlılar ve köylüler katıdır: oyuncu içlerinden geçemez, yürüyerek itemez */
 function creatureBlock(x,y){
@@ -57,7 +76,7 @@ function creatureBlock(x,y){
 const GRAV=18,JUMP=7;
 const EYE=HG.EYE;
 function vertStep(dt){
- const gy=Scene.groundY(G.px,G.py),WY=HG.sc.WY,wd=WY-gy;
+ const gy=supportY(G.px,G.py,G.pz),WY=HG.sc.WY,wd=WY-gy;
  if(G.pz===undefined){G.pz=gy;G.vz=0;G.air=false}
  /* salda: gövde su yüzeyinde dalgayla hafifçe sallanır; yüzme, zıplama ve su altı yoktur */
  if(G.onRaft){
@@ -138,7 +157,7 @@ function moveStep(dt){
  if(G.stats){const dd=speed*dt;if(G.swim)G.stats.swum=(G.stats.swum||0)+dd;else if(G.onRaft)G.stats.sailed=(G.stats.sailed||0)+dd;else if(!G.air)G.stats.walked=(G.stats.walked||0)+dd}
  if(speed<.03&&!G.moving){G.pvx=G.pvy=0;G.spdNow=0;return}
  const reach=speed*dt,lim=Math.max(.05,reach*1.7);   /* çok dik yokuşa tırmanılamaz, zıplanır */
- const ok=(x,y)=>canStand(x,y)&&!creatureBlock(x,y)&&(G.onRaft?HG.raftWater(x,y):(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim));
+ const ok=(x,y)=>canStand(x,y,G.pz)&&!creatureBlock(x,y)&&(G.onRaft?HG.raftWater(x,y):(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim));
  const nx=G.px+G.pvx*dt;if(ok(nx,G.py))G.px=nx;else G.pvx*=.15;
  const ny=G.py+G.pvy*dt;if(ok(G.px,ny))G.py=ny;else G.pvy*=.15;
  if(!G.air){
@@ -161,6 +180,7 @@ function update(dt){
  moveStep(dt);
  vertStep(dt);
  /* eylem */
+ HG.updateHot();HG.stepUse(dt);
  if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
  HG.updateAnimals(dt);HG.updateSea(dt);HG.updateDiscover(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
@@ -230,5 +250,5 @@ function die(){
  for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false;
  if(document.exitPointerLock)document.exitPointerLock();
 }
-Object.assign(HG,{calcShelter,solidAt,canStand,canStandAt:canStand,update,die});
+Object.assign(HG,{calcShelter,solidAt,canStand,supportY,canStandAt:canStand,update,die});
 })();

@@ -32,6 +32,7 @@ function frame(now){
  const play=ui.state!=='menu',h=play?held():null;
  let place=null;
  if(ui.state==='play'&&h&&h.it.place&&G.tg){const p=HG.placeTarget(h.k);if(p)place={x:p.x,y:p.y,ok:true};else{const t=G.tg;place={x:t.x,y:t.y,ok:false}}}
+ else if(ui.state==='play'&&h&&(h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaGhost)place=HG.insaGhost(h.k);
  HG.audioFrame(G,dt,ui.state);
  Scene.render(G,now,dt,{mode:play?'play':'menu',L:daylight(),tod:tod(),act:!!((inp.mouseDown||inp.touchAct)&&A.key),held:h?h.k:null,target:ui.state==='play'?G.tg:null,place,hitI:A.hitI,hitT:A.hitT,clock:ui.menuClock});
  requestAnimationFrame(frame);

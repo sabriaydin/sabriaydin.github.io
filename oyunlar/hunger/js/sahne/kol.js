@@ -221,6 +221,16 @@ function heldModel(id){
  else if(it.tool==='bow'){bowModel(g,add)}
  else if(it.tool==='torch'){torchModel(g,add)}
  else if(it.tool==='raft'){for(let i=0;i<4;i++)add(cyl(.045,.045,.5,7),i%2?0x8a5a30:0x6b4423,0,.18,(i-1.5)*.09,0,0,Math.PI/2);add(box(.04,.03,.4),0x4a3220,.12,.235,0);add(box(.04,.03,.4),0x4a3220,-.12,.235,0)}
+ else if(it.tool==='plan'){
+  add(box(.31,.42,.022),0x3b2714,0,.24,0);add(box(.27,.38,.026),0x2f5f8f,0,.24,0);add(box(.27,.05,.03),0x4a7fb5,0,.415,0);
+  add(box(.2,.012,.03),0xe8f2ff,0,.15,0);add(box(.012,.1,.03),0xe8f2ff,-.1,.2,0);add(box(.012,.1,.03),0xe8f2ff,.1,.2,0);
+  add(box(.13,.012,.03),0xe8f2ff,-.05,.285,0,0,0,.62);add(box(.13,.012,.03),0xe8f2ff,.05,.285,0,0,0,-.62);
+  add(box(.045,.07,.03),0xe8f2ff,0,.19,0);
+ }
+ else if(it.tool==='hammer'){
+  add(cyl(.022,.028,.66,7),0x74502e,0,.26,0);add(cyl(.03,.03,.05,7),0x5e3b1d,0,-.06,0);
+  add(box(.105,.1,.17),0x6d737a,0,.62,0);add(box(.11,.03,.175),0x9aa0a8,0,.665,0);add(box(.11,.1,.04),0x8d939a,0,.62,.105);add(box(.11,.1,.04),0x8d939a,0,.62,-.105);add(box(.115,.12,.06),0x3a3d42,0,.62,0);
+ }
  else if(it.heal){add(cyl(.07,.07,.16,10),0xe8e4da,0,.1,0,Math.PI/2);add(box(.17,.04,.075),0xd9463c,0,.1,0)}
  else if(id==='arrow'){add(cyl(.01,.01,.6,5),0xa87440,0,.3,0);add(cone(.025,.08,4),0xc3c9d0,0,.64,0);add(box(.002,.06,.1),0xd9463c,0,.04,0)}
  else if(it.place){const c={fire:0x8a5a30,bench:0xa47544,furn:0x77777f,wallw:0xa67848,walls:0x8c8c94,door:0x6b4a29}[id];add(box(.26,.26,.26),c,0,.16,0)}

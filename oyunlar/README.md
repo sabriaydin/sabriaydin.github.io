@@ -57,9 +57,10 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Gece-gündüz hesabı | `js/oyun/zaman.js` |
 | Envanter işlemleri | `js/oyun/envanter.js` |
 | Üretim mantığı | `js/oyun/uretim.js` |
-| Kesme/toplama/yerleştirme/yeme-içme; alet kademesi (`gatherLv`) ve verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` |
+| Kesme/toplama/yerleştirme/yeme-içme; vuruş başına kaynak ve zayıf nokta (Rust mantığı), E ile toplama ve basılı tutarak geri alma, alet kademesi (`gatherLv`), verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` (vuruş hasarı `HIT`: `js/veri/dugumler.js`) |
+| İnşa sistemi: İnşa Planı (duvar/kapı/çit kurma), Çekiç (Odun/Taş/Metal yükseltme, yıkma ve %50 iade), sağ tık radyal menüsü, yerleştirme gölgesi | `js/oyun/insa.js` (parça kataloğu `PIECES`), `css/stil.css` (`#radial`), `js/gorsel/simgeler.js` (parça simgeleri), `js/sahne/modeller.js` (`wallt`, `wallm`, `doorm`, `fence`) |
 | Yere atılan eşyalar (fizik, toplama) | `js/oyun/dusenler.js` |
-| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, iç içe geçme engeli), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
+| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, kovalama hızı oyuncunun koşusundan yavaş `cspd`, uzaklaşınca bırakma `giveUp`, iç içe geçme engeli), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
 | Beden durumu: dayanıklılık, akıl sağlığı, kanama, meşale yakıtı, hasar geri bildirimi, bandaj | `js/oyun/vucut.js` |
 | Gölge yaratıklar (korku), sahte gözlemciler, gerilim, gece yönetmeni | `js/oyun/dusmanlar.js` |
 | Yay, ok fiziği, isabet ve geri toplama | `js/oyun/silah.js` |
@@ -67,7 +68,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Mağara üretimi (odalar, tüneller, havuzlar, sandık odası, yaratık ve eşya yerleşimi) | `js/dunya/magara.js` (`HG.genCave`), giriş yerleşimi `js/dunya/uretim.js` |
 | Mağaraya giriş/çıkış (yüzey ile mağara katı değişimi), kayıt uyumu | `js/oyun/magara.js` |
 | Mağara girişi modeli, tavan, sarkıt-dikit, kristaller, karanlık atmosfer | `js/sahne/magara.js` |
-| Harita: kabartma, keşif sisi, ızgara, pusula, ölçek, yakınlaştırma, hedef işareti | `js/oyun/harita.js` (çağrılar `js/oyun/arayuz.js` içindedir) |
+| Harita: kabartma, keşif sisi, ızgara, pusula (harita üzerine binmez), küçük keşif etiketleri, ölçek, yakınlaştırma, hedef işareti | `js/oyun/harita.js` (çağrılar `js/oyun/arayuz.js` içindedir) |
 
 Not: Harita 768×768 karedir (`js/cekirdek/ad-alani.js`). Eski 384×384 kayıtlar yeni haritanın ortasına gömülür (`HG.embedLegacy`, `js/dunya/uretim.js`).
 | Açlık, susuzluk, üşüme, hareket, zıplama, sığınak; yüzme, dalış, nefes ve boğulma; canlılarla çarpışma | `js/oyun/hayatta-kalma.js` |

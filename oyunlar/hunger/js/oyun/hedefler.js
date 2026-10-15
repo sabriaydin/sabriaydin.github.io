@@ -4,7 +4,7 @@
 const {G}=HG;
 /* [bayrak, açıklama]: bayraklar envanter.js/eylem.js içinde işaretlenir (got_, made_, placed_, ...) */
 const GOALS=[
- ['got_wood','El Taşını elinde tut (1. yuva), bir ağaca bak ve sol tuşu basılı tutarak odun topla. Çıplak elle ağaç kesilmez.'],
+ ['got_wood','El Taşını elinde tut (1. yuva), bir ağaca bak ve sol tuşla art arda vurarak odun topla; kırmızı X işaretine vurmak iki kat verir. Çıplak elle ağaç kesilmez.'],
  ['got_stone','El Taşıyla yerdeki gri kayalardan taş topla.'],
  ['made_axe1','C tuşuyla üretim panelini aç ve Taş Balta üret.'],
  ['made_pick1','Taş Kazma üret. Kömür ve bakır ancak bununla çıkarılır.'],
@@ -13,6 +13,8 @@ const GOALS=[
  ['made_bow','Yay ve ok üret. Sol tuşu basılı tutup gerin, bırakınca ok atılır.'],
  ['drank','Mavi tatlı su gölüne bakıp sol tuşla su iç. Deniz suyu içilmez.'],
  ['made_bench','Çalışma Tezgâhı üret ve yerleştir.'],
+ ['made_plan','İnşa Planı (10 odun) ve Çekiç (12 odun, 8 taş) üret. Rust tarzı inşa: plan kurar, çekiç yükseltir ve yıkar.'],
+ ['built','İnşa Planı eldeyken sol tıkla duvar ve kapı kur; sağ tık basılı tutarak parça seç. Çekiçle duvarı Odun, Taş veya Metal seviyesine yükselt.'],
  ['shelter','Duvar ve kapıyla tamamen kapalı bir barınak yap, geceyi içinde geçir.'],
  ['made_copper_ingot','Ocak yap; bakır cevherini kömürle eriterek külçe üret.'],
  ['made_pick2','Bakır Kazma üret. Demir damarları ancak bununla çıkarılır.'],

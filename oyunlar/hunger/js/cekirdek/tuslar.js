@@ -6,7 +6,7 @@ const KEY='hunger-tuslar';
 const ACTS=[
  ['fwd','İleri','KeyW','ArrowUp'],['back','Geri','KeyS','ArrowDown'],['left','Sola','KeyA','ArrowLeft'],['right','Sağa','KeyD','ArrowRight'],
  ['sprint','Koş','ShiftLeft','ShiftRight'],['jump','Zıpla / yüzerken yüzeye çık','Space',''],['dive','Suya dal (yüzerken)','KeyX',''],
- ['use','Kullan / al / konuş','KeyE',''],['place','Yapıyı yerleştir','KeyF',''],
+ ['use','Topla / al / kullan / konuş','KeyE',''],['place','Yapıyı yerleştir','KeyF',''],
  ['inv','Envanter','KeyI','Tab'],['craft','Üretim','KeyC',''],['map','Harita','KeyM',''],['jr','Günlük','KeyK',''],
  ['guide','Rehber','KeyH',''],['mute','Sesi aç/kapat','KeyN',''],['qsave','Hızlı kaydet','F5',''],
  ['drop','Seçili eşyadan 1 adet at','KeyQ',''],['sort','Çantayı düzenle','KeyR','']
@@ -62,7 +62,7 @@ function keyUI(body){
   const rb=document.createElement('button');rb.type='button';rb.className='ghost';rb.textContent='Tuşları varsayılana döndür';
   rb.onclick=()=>{reset();persist();capture=null;draw()};f.appendChild(rb);wrap.appendChild(f);
   const fx=document.createElement('div');fx.className='kfix';
-  fx.innerHTML='<h3>Sabit kontroller</h3><div class="keys"><kbd>Sol tık</kbd><span>Kes, topla, kaz, vur; yayı ger (basılı tut)</span><kbd>Sağ tık</kbd><span>Eşyayı kullan, yerdekini al</span><kbd>1 - 8</kbd><span>Hızlı erişim kutuları</span><kbd>Tekerlek</kbd><span>Eşya seç</span><kbd>Fare</kbd><span>Etrafa bak (oyuna tıklayınca fare kilitlenir)</span><kbd>Esc</kbd><span>Pencereyi kapat / duraklat</span></div>';
+  fx.innerHTML='<h3>Sabit kontroller</h3><div class="keys"><kbd>Sol tık</kbd><span>Kes, kaz, vur (her vuruş kaynak verir); İnşa Planı ile kur, Çekiçle yükselt; yayı ger (basılı tut)</span><kbd>Sağ tık</kbd><span>Eşyayı kullan; İnşa Planı veya Çekiç eldeyken basılı tutup fareyle parça seç</span><kbd>1 - 8</kbd><span>Hızlı erişim kutuları</span><kbd>Tekerlek</kbd><span>Eşya seç</span><kbd>Fare</kbd><span>Etrafa bak (oyuna tıklayınca fare kilitlenir)</span><kbd>Esc</kbd><span>Pencereyi kapat / duraklat</span></div>';
   wrap.appendChild(fx);
  };
  draw();body.appendChild(wrap);

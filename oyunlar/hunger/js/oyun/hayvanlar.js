@@ -105,7 +105,7 @@ function updateAnimals(dt){
   const dx=G.px-a.x,dz=G.py-a.z,dp=Math.hypot(dx,dz);
   a.callT=(a.callT===undefined?8+rnd()*30:a.callT)-dt;
   if(a.callT<=0){a.callT=18+rnd()*40;const cr=a.t==='wolf'?70:22;if(dp<cr&&dp>2&&a.t!=='rabbit'&&!def.foe&&(a.t!=='wolf'||HG.daylight()<.5))HG.snd('call_'+def.snd,{x:a.x,z:a.z})}
-  a.hitT=Math.max(0,a.hitT-dt);a.cd-=dt;
+  a.hitT=Math.max(0,a.hitT-dt);a.cd-=dt;if(a.giveT>0)a.giveT-=dt;
   let spd=0,head=a.yaw;
   /* av hayvanları yakındaki kurttan kaçar */
   if(def.prey&&wolves.length){
@@ -121,17 +121,17 @@ function updateAnimals(dt){
   else if(def.night&&(a.hp<def.hp*.3||(!dark&&dp<14))){head=Math.atan2(-dx,-dz);spd=def.run}
   else if(a.fleeT>0&&a.fleeW&&!a.dying&&!(a.charge>0)){head=Math.atan2(a.x-a.fleeW.x,a.z-a.fleeW.z);spd=def.run}
   else if(a.charge>0){
-   a.charge-=dt;head=Math.atan2(dx,dz);spd=dp<def.r+.75?0:def.run;
+   a.charge-=dt;head=Math.atan2(dx,dz);spd=dp<def.r+.75?0:(def.cspd||Math.min(def.run,4.9));      /* kovalama hızı oyuncunun koşusundan düşüktür */
    if(dp<def.r+1.0&&a.cd<=0&&play){
     a.cd=def.cd||1.2;a.atkT=.45;HG.hurt(def.dmg,def.n+' saldırısında öldün.',{x:a.x,z:a.z},def.bleed||.35);HG.toast(def.n+' saldırdı!');
     /* büyük baş hayvanlar yalnızca birkaç kez karşılık verir, sonra kaçar */
     if(a.retal!==undefined&&--a.retal<=0){a.retal=undefined;a.charge=0;a.panic=10}
    }
-   if(dp>20)a.charge=0;
+   if(dp>(def.giveUp||14)){a.charge=0;a.retal=undefined;a.giveT=9+rnd()*4}      /* uzaklaşan oyuncu bırakılır, bir süre yeniden kovalanmaz */
   }else if(a.panic>0||(def.flee&&dp<def.flee)){
    if(a.panic>0)a.panic-=dt;
    head=Math.atan2(-dx,-dz);spd=def.run;
-  }else if(def.aggr&&dp<def.aggr&&play&&(!def.night||dark)){a.charge=def.chase||7}
+  }else if(def.aggr&&dp<def.aggr&&play&&(!def.night||dark)&&!(a.giveT>0)){a.charge=def.chase||7;a.cd=Math.max(a.cd,.7)}
   else if(def.pred&&(()=>{const r=huntStep(a,def,dt,L);if(!r)return false;head=r.head;spd=r.spd;return true})()){}
   else{
    a.tm-=dt;
@@ -234,7 +234,7 @@ function hitAnimal(a,dmg,hit){
  if(a.dying)return;
  const def=ANIMAL[a.t],zone=zoneAt(a,def,hit),zm=HG.ZONE[zone].m;
  const real=dmg*zm*(def.weak||1);
- a.hp-=real;a.hitT=.25;if(a.hp>0)HG.snd('cry_'+(def.snd||'sheep'),{x:a.x,z:a.z});
+ a.hp-=real;a.hitT=.25;a.giveT=0;if(a.hp>0)HG.snd('cry_'+(def.snd||'sheep'),{x:a.x,z:a.z});
  a.lastZone=zone;G.lastHit={a,t:performance.now(),zone,m:zm,dmg:real};
  const dx=a.x-G.px,dz=a.z-G.py,l=Math.hypot(dx,dz)||1,kb=(def.foe?3:5.5)/Math.max(.6,def.h+.3)*(zone==='head'?1.3:1);
  a.kx=dx/l*kb;a.kz=dz/l*kb;

@@ -14,13 +14,13 @@ const NOTE={sheep:'Zararsız; makasla yün kırkılır.',cow:'Zararsız; boş ş
 function fauna(){
  return '<div class="mut">Avlanan hayvanlar yerde bırakılan eşyalarla leş bırakır; eşyalar toplanınca leş kaybolur.</div>'+['sheep','cow','rabbit','deer','wolf','boar'].map(k=>{
   const a=ANIMAL[k];
-  return `<div class="nt"><b>${a.n}</b><span>Can: ${a.hp} · Yürüyüş ${a.walk} m/s, koşu ${a.run} m/s${a.aggr?' · Saldırı: '+a.dmg+' hasar':''}<br>Verir: ${DROPS[k]}<br>${NOTE[k]}</span></div>`;
+  return `<div class="nt"><b>${a.n}</b><span>Can: ${a.hp} · Yürüyüş ${a.walk} m/s, koşu ${a.run} m/s${a.cspd?' · Kovalama '+a.cspd+' m/s':''}${a.aggr?' · Saldırı: '+a.dmg+' hasar':''}<br>Verir: ${DROPS[k]}<br>${NOTE[k]}</span></div>`;
  }).join('');
 }
 function items(){
  const rows=Object.keys(IT).map(k=>{
   const it=IT[k];let d=it.d||'';
-  if(it.tool==='axe'||it.tool==='pick')d=(it.tool==='axe'?'Ağaç keser, düşmana vurur.':'Kaya ve maden kazar.')+' Kademe '+it.tier+'/3 · Toplama hızı ×'+HG.POWER[it.tier]+', verim ×'+HG.YIELD[it.tier]+'.';
+  if(it.tool==='axe'||it.tool==='pick')d=(it.tool==='axe'?'Ağaç keser, düşmana vurur.':'Kaya ve maden kazar.')+' Kademe '+it.tier+'/3 · Vuruş hasarı '+HG.HIT[it.tier]+', verim ×'+HG.YIELD[it.tier]+' (zayıf noktaya vuruş: iki kat).';
   if(it.place&&!d)d='Yerleştirilir.';
   if(!d)d='Üretim ve ticaret malzemesi.';
   return `<div class="rc"><img src="${ICON[k]||''}" alt=""><div><b>${it.n}</b><span>${esc(d)}</span></div><span class="stk">×${it.s}</span></div>`;

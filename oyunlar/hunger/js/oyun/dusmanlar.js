@@ -29,7 +29,7 @@ function walkableFoe(x,z){
   const tx=Math.floor(x+dx),tz=Math.floor(z+dz);
   if(tx<1||tz<1||tx>=W-1||tz>=H-1)return false;
   const i=tz*W+tx,t=G.tile[i],o=G.obj[i];
-  if(t<T.SAND||t===T.POND||SOLID(o)||o===O.DOOR||o===O.VDOOR)return false;
+  if(t<T.SAND||t===T.POND||SOLID(o)||o===O.DOOR||o===O.DOORM||o===O.VDOOR)return false;
  }
  return true;
 }
