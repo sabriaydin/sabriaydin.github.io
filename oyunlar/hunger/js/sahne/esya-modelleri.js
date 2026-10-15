@@ -95,6 +95,26 @@ const fish=(back,belly,fin,cooked)=>()=>{
 };
 B.fish=fish(0x6fa0c0,0xd8e2e8,0x5a8aa8,false);
 B.cfish=fish(0xb07a35,0xd9b070,0x8a5a22,true);
+B.sardine=fish(0x6f8ea8,0xcfdde8,0x4f6c84,false);
+B.bass=fish(0x5e7a62,0xaebfae,0x3e5a46,false);
+B.tuna=fish(0x243e66,0x8fb0cc,0x1b2f50,false);
+B.rock=()=>B.stone();
+const crabOf=(body,leg)=>()=>{
+ const ps=[part(blob(.1,2,.06,111,1.25,.5,1),body,0,.07,0),part(blob(.04,1,.05,112),body,.0,.12,.07),part(blob(.04,1,.05,113),body,.0,.12,-.07)];
+ for(const sx of [-1,1]){
+  ps.push(part(blob(.055,1,.1,114+sx,1.3,.6,.9),body,sx*.02,.09,sx*.15));
+  for(const k of [-1,0,1])ps.push(alongPart(cyl(.008,.01,.1,4),leg,V(k*.045,.07,sx*.1),V(k*.3,-.5,sx),.1));
+ }
+ return ps;
+};
+B.crab=crabOf(0xc24a2a,0xa83a22);B.ccrab=crabOf(0xb8381a,0x8f2a14);
+B.coral=()=>{
+ const ps=[part(blob(.08,2,.05,121,1.3,.4,1.1),0x9a8a7a,0,.03,0)];
+ for(let i=0;i<5;i++){const a=i/5*PI*2,r=.03+(i%2)*.025,h=.14+(i%3)*.05;ps.push(part(cone(.022,h,5,1),i%2?0xe86a8a:0xf08aa6,Math.cos(a)*r,.05+h*.5,Math.sin(a)*r,1,1,1,Math.sin(a)*.3,0,-Math.cos(a)*.3))}
+ return ps;
+};
+B.raft=()=>[0,1,2].map(i=>part(cyl(.05,.05,.5,8),i%2?0x8a5a30:0x6b4423,(i-1)*.1,.05,0,1,1,1,PI/2,0,0)).concat([part(box(.5,.03,.04),0x4a3220,0,.1,.12),part(box(.5,.03,.04),0x4a3220,0,.1,-.12)]);
+B.mask=()=>[part(box(.22,.1,.05),0x16232c,0,.07,0),part(blob(.045,1,.05,131),0x7fd0e8,-.06,.07,.03),part(blob(.045,1,.05,132),0x7fd0e8,.06,.07,.03),part(box(.3,.02,.02),0x2a2a30,0,.07,-.04)];
 B.coin=()=>[0,1,2,3].map(i=>part(cyl(.06,.06,.012,14),i%2?0xd9985a:0xc27a3c,(i%2)*.02,.008+i*.013,(i%2?.01:0)))
  .concat([part(cyl(.055,.055,.012,14),0xefc07c,.14,.01,.05,1,1,1,0,.4,0),part(cyl(.055,.055,.012,14),0xd9985a,.12,.024,.07,1,1,1,.1,.2,0)]);
 B.gold=()=>[part(box(.2,.07,.1),0xd9a82a,0,.04,0,1,1,1,0,.2,0),part(box(.18,.06,.09),0xf0c850,.02,.105,.01,1,1,1,0,-.1,0),part(box(.16,.05,.08),0xc4921c,-.01,.15,-.01,1,1,1,0,.3,0)];

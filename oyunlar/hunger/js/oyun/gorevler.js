@@ -7,13 +7,13 @@ const rnd=Math.random,R=(a,b)=>a+((rnd()*(b-a+1))|0);
 const FETCH={
  farmer:[['wood',8,14],['leather',3,5],['berries',8,12]],
  hunter:[['meat',4,7],['bone',5,8],['leather',3,5]],
- fisher:[['fish',4,7],['coconut',3,5],['sand',8,12]],
+ fisher:[['fish',4,7],['coconut',3,5],['sand',8,12],['sardine',4,7],['crab',2,3]],
  smith:[['coal',8,12],['iron_ore',2,3],['copper_ore',3,5]],
  healer:[['berries',8,12],['wool',4,6],['milk',2,3]],
  woodcut:[['wood',16,26],['coal',6,9]],
  miner:[['stone',16,26],['coal',8,12],['copper_ore',3,5]]
 };
-const VAL={wood:1,leather:2.5,berries:1,meat:2,bone:1.5,fish:2,coconut:2,sand:1,coal:2,iron_ore:7,copper_ore:4,wool:2,milk:3,stone:1};
+const VAL={sardine:2,bass:3,tuna:5,crab:3,coral:5,wood:1,leather:2.5,berries:1,meat:2,bone:1.5,fish:2,coconut:2,sand:1,coal:2,iron_ore:7,copper_ore:4,wool:2,milk:3,stone:1};
 const EXTRA=[['bandage',2],['torch',2],['arrow',8],['cmeat',2]];
 function gen(n){
  const vs=G.villages||[],r=rnd();
@@ -22,8 +22,8 @@ function gen(n){
   const f=FETCH[n.prof][R(0,FETCH[n.prof].length-1)],k=R(f[1],f[2]);
   q={t:'fetch',item:f[0],n:k,rw:{coin:Math.ceil(k*VAL[f[0]]*1.6)+2}};
  }else if(r<.72){
-  const a=rnd()<.55?'wolf':'boar',k=a==='wolf'?R(1,2):R(2,3);
-  q={t:'hunt',a,n:k,rw:{coin:k*(a==='wolf'?14:9)}};
+  const a=n.prof==='fisher'&&rnd()<.5?'shark':rnd()<.55?'wolf':'boar',k=a==='shark'?1:a==='wolf'?R(1,2):R(2,3);
+  q={t:'hunt',a,n:k,rw:{coin:k*(a==='shark'?30:a==='wolf'?14:9)}};
  }else if(r<.86){
   const k=R(1,2);q={t:'shade',n:k,rw:{coin:k*18}};
  }else if(vs.length>1){
@@ -72,7 +72,7 @@ function onKill(a,def){
  if(def.foe){
   if(a.fake)return;
   G.stats.shades++;HG.xpGain(16);
- }else{G.stats.hunted++;HG.xpGain(def.xpv||5)}
+ }else{G.stats.hunted++;HG.xpGain(def.xpv||5);if(a.t==='shark')G.stats.sharks=(G.stats.sharks||0)+1;if(a.t==='crab')G.stats.crabs=(G.stats.crabs||0)+1}
  for(const id in G.quests||{}){
   const q=G.quests[id];
   if(q.st!==1||q.p>=q.n)continue;

@@ -7,10 +7,10 @@ const S=HG.Scene,sc=HG.sc;
 const {blob,cone,merge,part}=sc.g;
 const PI=Math.PI;
 const uSW={value:0};
-let fish=null,weed=null,coral=null,roof=null,bub=null,fishLim=480,weedLim=1500;
+let fish=null,weed=null,coral=null,roof=null,bub=null,fishLim=480,weedLim=3600;
 let schools=[],fishCol=[];
 const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),cl=new THREE.Color();
-const FCAP=480,WCAP=1500,CCAP=260;
+const FCAP=480,WCAP=3600,CCAP=900,PCAP=1400;   /* FCAP: aynı anda çizilen balık; PCAP: haritadaki toplam balık */
 
 function fishGeo(){
  return merge([
@@ -74,7 +74,7 @@ S.onInit(()=>{
  bub=new THREE.Points(bg,new THREE.PointsMaterial({size:.07,map:sc.tex.glow,color:0xcdefff,transparent:true,opacity:.8,depthWrite:false,sizeAttenuation:true}));
  bub.frustumCulled=false;bub.visible=false;bub.userData.t=new Float32Array(40).fill(9);sc.scene.add(bub);
 });
-S.onQuality(qv=>{fishLim=[0,120,260,480][qv];weedLim=[0,450,900,1500][qv]});
+S.onQuality(qv=>{fishLim=[0,120,260,480][qv];weedLim=[0,800,1900,3600][qv]});
 
 /* Kurulum: su alanlarından balık sürüsü, bitki ve mercan yerleri seçilir */
 const wdAt=(x,z)=>sc.WY-S.groundY(x,z);
@@ -84,11 +84,21 @@ function plan(G){
  const rnd=mulberry32((G.seed|0)^0xf15f);
  const SCL=W*H/147456,isW=i=>G.tile[i]<=T.SHAL||G.tile[i]===T.POND;
  const PAL={
-  pond:[0xd8a040,0xc87a30,0xe8c060],shal:[0xc8d4dc,0xe8963a,0x7ab8d8,0xe8d070],deep:[0x3a78c8,0x9ab4c8,0x2a5a9a,0x5ac8c0],big:[0x1e3c66,0x3a4a5a]
+  pond:[0xd8a040,0xc87a30,0xe8c060],shal:[0xc8d4dc,0xe8963a,0x7ab8d8,0xe8d070],deep:[0x3a78c8,0x9ab4c8,0x2a5a9a,0x5ac8c0],big:[0x1e3c66,0x3a4a5a],reef:[0xff8a3a,0xffd23a,0x3ad0ff,0xff5a8a,0x7affc8]
  };
- let total=0;const cap=FCAP;
+ let total=0;const cap=PCAP;
  /* fideler, balıkları sığ ve derin sulara dağıtır */
- const goals=[['pond',999,.28],['shal',Math.round(34*SCL),.5],['deep',Math.round(52*SCL),1.5],['big',Math.round(14*SCL),2.2]];
+ const goals=[['pond',999,.28],['shal',Math.round(17*SCL),.5],['deep',Math.round(17*SCL),1.5],['big',Math.round(7*SCL),2.2]];
+ /* mercan resiflerinde renkli balık sürüleri */
+ for(const rf of G.reefs||[]){
+  for(let k=0;k<2&&total<cap-8;k++){
+   const a=rnd()*6.283,d=rnd()*rf.r*.3,cx=rf.x+.5+Math.cos(a)*d,cz=rf.y+.5+Math.sin(a)*d,n=6+((rnd()*5)|0);
+   const col=PAL.reef[(rnd()*PAL.reef.length)|0];
+   schools.push({cx,cz,r:Math.max(1.6,rf.r*.55),n,k0:total,sz:.7+rnd()*.25,sp:(.35+rnd()*.25)*(rnd()<.5?-1:1),ph:rnd()*6.28,wd:.4,df:.55,kind:'reef'});
+   for(let q=0;q<n;q++){cl.setHex(col);const v=.85+rnd()*.3;fishCol.push([cl.r*v,cl.g*v,cl.b*v,rnd(),rnd(),rnd()])}
+   total+=n;
+  }
+ }
  for(const [kind,want,minD] of goals){
   let c=0;
   for(let tr=0;tr<9000&&c<want&&total<cap-4;tr++){
@@ -113,9 +123,33 @@ function plan(G){
    total+=n;c++;
   }
  }
- /* su bitkileri ve mercan */
+ /* su bitkileri ve mercan: önce resifler ve yosun ormanları, sonra kıyılara rastgele dağılım */
  const wp=[],cp=[];
- for(let tr=0;tr<30000&&(wp.length<WCAP||cp.length<CCAP);tr++){
+ const okW=(px,pz)=>{const ix=Math.floor(px),iz=Math.floor(pz);return ix>=2&&iz>=2&&ix<W-2&&iz<H-2&&isW(iz*W+ix)};
+ for(const rf of G.reefs||[]){
+  let nc=0,nw=0;
+  for(let tr=0;tr<320&&(nc<30||nw<18);tr++){
+   const a=rnd()*6.283,d=Math.sqrt(rnd())*rf.r*.95,px=rf.x+.5+Math.cos(a)*d,pz=rf.y+.5+Math.sin(a)*d;
+   if(!okW(px,pz))continue;
+   const wd=wdAt(px,pz);if(wd<.18)continue;
+   const g=S.groundY(px,pz);
+   if(nc<30&&rnd()<.62&&cp.length<CCAP){cp.push([px,g,pz,.9+rnd()*1.1,rnd()*6.28,rnd()]);nc++}
+   else if(nw<18&&wp.length<WCAP)wp.push([px,g,pz,.8+rnd()*.8,rnd()*6.28]);
+  }
+ }
+ /* yosun ormanı: adaların ve batıkların çevresindeki derin sularda uzun yosunlar */
+ const kelpAt=(cx,cy,r0,r1,n)=>{
+  let c=0;
+  for(let tr=0;tr<n*8&&c<n&&wp.length<WCAP;tr++){
+   const a=rnd()*6.283,d=r0+rnd()*(r1-r0),px=cx+.5+Math.cos(a)*d,pz=cy+.5+Math.sin(a)*d;
+   if(!okW(px,pz)||G.tile[Math.floor(pz)*W+Math.floor(px)]!==T.DEEP)continue;
+   const wd=wdAt(px,pz);if(wd<1.3||wd>4.2)continue;
+   wp.push([px,S.groundY(px,pz),pz,2.1+rnd()*1.3,rnd()*6.28,1]);c++;
+  }
+ };
+ for(const q of G.islets||[])kelpAt(q.x,q.y,q.r*.9,q.r*1.9,Math.round(34+q.r*3));
+ for(const c of G.camps||[])if(c.kind==='wreck')kelpAt(c.x,c.y,2,8,26);
+ for(let tr=0;tr<90000&&(wp.length<WCAP||cp.length<CCAP);tr++){
   const x=2+((rnd()*(W-4))|0),y=2+((rnd()*(H-4))|0),i=y*W+x,t=G.tile[i];
   if(!isW(i))continue;
   const px=x+rnd(),pz=y+rnd(),wd=wdAt(px,pz);
@@ -131,7 +165,7 @@ function plan(G){
   });
   mesh.userData.n=arr.length;mesh.count=arr.length;mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
  };
- put(weed,wp,a=>cl.setRGB(.8+a[4]*.03,.9+a[3]*.08,.7+(a[4]%1)*.3));
+ put(weed,wp,a=>a[5]?cl.setRGB(1.05,.92,.5):cl.setRGB(.8+a[4]*.03,.9+a[3]*.08,.7+(a[4]%1)*.3));
  const CC=[0xe86a8a,0xf0904a,0xb06ae8,0xe8c84a,0xd8506a];
  put(coral,cp,a=>cl.setHex(CC[(a[5]*CC.length)|0]));
  weed.userData.pos=wp;coral.userData.pos=cp;
@@ -148,7 +182,7 @@ S.onFrame((G,t,dt,info)=>{
  roof.visible=under;
  if(under){
   roof.position.set(cam.x,WY+.003,cam.z);
-  const f=sc.scene.fog;f.color.setRGB(.05,.27,.36).multiplyScalar(.3+.7*info.L);f.density=.085*(HG.cfg.fog||100)/100+.02;
+  const f=sc.scene.fog;f.color.setRGB(.05,.27,.36).multiplyScalar(.3+.7*info.L);f.density=(.085*(HG.cfg.fog||100)/100+.02)*(G.mask?.5:1);
  }
  bub.visible=under;
  if(under){

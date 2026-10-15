@@ -109,11 +109,28 @@ function markers(g,tx,ty,k,sz){
   if(sz>5){g.fillStyle='#fff';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText(v.name,x,y-s-4);g.fillText(v.name,x,y-s-4)}
  });
  /* kamplar ve sandık odası */
+ const SEAC={wreck:['#e0884a','Enkaz'],castaway:['#7ad07a','Kazazede'],lighthouse:['#ffffff','Fener']};
  for(const c of G.camps||[]){
   if(!G.flags['c'+c.id])continue;
-  const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(3.5,sz*.9);
-  g.fillStyle=c.open?'#8a8a8a':c.vault?'#ff5a6a':'#e8e4da';g.strokeStyle='#000';g.lineWidth=2;
+  const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(3.5,sz*.9),sea=SEAC[c.kind];
+  g.fillStyle=c.open?'#8a8a8a':c.vault?'#ff5a6a':sea?sea[0]:'#e8e4da';g.strokeStyle='#000';g.lineWidth=2;
   g.beginPath();g.moveTo(x,y-s);g.lineTo(x+s,y);g.lineTo(x,y+s);g.lineTo(x-s,y);g.closePath();g.stroke();g.fill();
+  if(sea&&sz>5){g.fillStyle='#fff';g.strokeStyle='#000';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText(sea[1],x,y-s-4);g.fillText(sea[1],x,y-s-4)}
+ }
+ /* keşfedilen adalar ve mercan resifleri */
+ if(!G.cave){
+  for(const q of G.islets||[]){
+   if(!G.flags['isl'+q.id])continue;
+   const x=tx(q.x),y=ty(q.y),s=Math.max(3.5,sz*.8);
+   g.fillStyle='#5fb04a';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.arc(x,y,s,0,7);g.stroke();g.fill();
+   if(sz>5){g.fillStyle='#fff';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Ada',x,y-s-4);g.fillText('Ada',x,y-s-4)}
+  }
+  for(const q of G.reefs||[]){
+   if(!G.flags['reef'+q.id])continue;
+   const x=tx(q.x+.5),y=ty(q.y+.5),r=Math.max(3.5,q.r*k*.8);
+   g.strokeStyle='#ff7aa8';g.lineWidth=2;g.setLineDash([4,3]);g.beginPath();g.arc(x,y,r,0,7);g.stroke();g.setLineDash([]);
+   if(sz>5){g.fillStyle='#ffd0e0';g.strokeStyle='#000';g.font='600 '+Math.max(11,sz*2.1)+'px system-ui,sans-serif';g.textAlign='center';g.strokeText('Resif',x,y-r-4);g.fillText('Resif',x,y-r-4)}
+  }
  }
  /* mağara girişleri */
  for(const c of G.caves||[]){

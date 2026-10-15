@@ -4,8 +4,8 @@
 const {G}=HG;
 /* [bayrak, açıklama]: bayraklar envanter.js/eylem.js içinde işaretlenir (got_, made_, placed_, ...) */
 const GOALS=[
- ['got_wood','Bir ağaca bak ve sol tuşu basılı tutarak odun topla.'],
- ['got_stone','Yerdeki gri kayalardan taş topla.'],
+ ['got_wood','El Taşını elinde tut (1. yuva), bir ağaca bak ve sol tuşu basılı tutarak odun topla. Çıplak elle ağaç kesilmez.'],
+ ['got_stone','El Taşıyla yerdeki gri kayalardan taş topla.'],
  ['made_axe1','C tuşuyla üretim panelini aç ve Taş Balta üret.'],
  ['made_pick1','Taş Kazma üret. Kömür ve bakır ancak bununla çıkarılır.'],
  ['made_torch','Meşale üret (odun ve kömür). Geceleri karanlıkta yaratıklar dolaşır; ışık onları uzak tutar.'],
@@ -28,7 +28,10 @@ const GOALS=[
  ['day7','7. güne kadar hayatta kal.'],
  ['swam','Derin suya girip yüzmeyi dene. Boşluk yüzeye çıkarır, dal tuşu aşağı indirir.'],
  ['dived','Suyun altına dal ve nefes çubuğunu izle. Nefes biterse boğulursun.'],
- ['got_shell','Dalıp deniz dibine bakarak midye topla ve ateşte pişir.']
+ ['got_shell','Dalıp deniz dibine bakarak midye topla ve ateşte pişir.'],
+ ['made_raft','Tezgâhta Sal üret (odun, deri, yün). Elinde tutup suya bakarak E veya sağ tıkla bin.'],
+ ['isl_found','Salla açık denize çık ve yeni bir ada keşfet. Köpek balıklarına dikkat et: sal onlara karşı da sığınaktır.'],
+ ['wreck_open','Denizde bir gemi enkazı bul, dalıp dibindeki sandığı E ile aç. Dalış Maskesi nefesi uzatır.']
 ];
 function goalText(){
  let done=0;for(const g of GOALS)if(G.flags[g[0]])done++;

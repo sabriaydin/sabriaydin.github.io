@@ -6,6 +6,7 @@ let nextId=1;
 const FAR2=70*70;                       /* bu mesafeden uzaktaki hayvanlar seyrek güncellenir */
 const GRID=new Map();
 const rnd=Math.random;
+let frame=0;
 
 function makeAnimals(list){
  return (list||[]).filter(a=>ANIMAL[a.t]).map(a=>({
@@ -25,6 +26,7 @@ function walkable(x,z){
 }
 /* Hayvan katı bir karenin veya içilebilir suyun içindeyse çevresindeki en yakın yürünebilir noktaya taşınır */
 function unstick(a){
+ if(ANIMAL[a.t].sea)return;
  const i=Math.floor(a.z)*W+Math.floor(a.x);
  if(i<0||i>=W*H)return;
  if(!(SOLID(G.obj[i])||G.tile[i]<T.SAND||G.tile[i]===T.POND))return;
@@ -69,19 +71,19 @@ function updateAnimals(dt){
  const L=G.animals;if(!L)return;
  HG.updateFoes(dt);
  const wolves=[];for(const w of L)if(w.t==='wolf'&&!w.dying)wolves.push(w);
- const DT=dt,play=HG.ui.state==='play',dark=HG.daylight()<.55;
+ const DT=dt,play=HG.ui.state==='play',dark=HG.daylight()<.55,FRM=++frame;
  for(let k=L.length-1;k>=0;k--){
   const a=L[k],def=ANIMAL[a.t];
   /* uzaktaki hayvanlar seyrek güncellenir (oyuncu görmez): birikmiş süre tek adımda işlenir */
   if(!a.dying&&!def.foe&&!a.charge&&!a.kx&&!a.kz){
    const fx=G.px-a.x,fz=G.py-a.z;
-   if(fx*fx+fz*fz>FAR2){a.lodT=(a.lodT||0)+DT;if(a.lodT<.2)continue}
+   if(fx*fx+fz*fz>FAR2){a.lodT=(a.lodT===undefined?rnd()*.2:a.lodT)+DT;if(a.lodT<.2)continue}
   }
-  const dt=a.lodT>0?Math.min(.3,a.lodT):DT;a.lodT=0;
+  const dt=a.lodT>0?Math.min(.3,a.lodT):DT;a.lodT=0;a.fs=FRM;
   if(a.kx||a.kz){                       /* vuruş sonrası itilme: hız sönümlenerek kayar */
-   const nx=a.x+a.kx*dt,nz=a.z+a.kz*dt;
-   if(walkable(nx,a.z))a.x=nx;else a.kx*=-.2;
-   if(walkable(a.x,nz))a.z=nz;else a.kz*=-.2;
+   const nx=a.x+a.kx*dt,nz=a.z+a.kz*dt,wkb=def.sea?HG.swimmable[def.sea]:walkable;
+   if(wkb(nx,a.z))a.x=nx;else a.kx*=-.2;
+   if(wkb(a.x,nz))a.z=nz;else a.kz*=-.2;
    const f=Math.exp(-7*dt);a.kx*=f;a.kz*=f;if(Math.abs(a.kx)+Math.abs(a.kz)<.05)a.kx=a.kz=0;
   }
   if(a.dying){
@@ -113,7 +115,8 @@ function updateAnimals(dt){
   }
   if(a.fleeT>0)a.fleeT-=dt;
   const ll=def.fearLight?HG.lightLevel(a.x,a.z):0;
-  if(def.foe){const r=HG.foeAI(a,def,dt);head=r.head;spd=r.spd}
+  if(def.sea){const r=HG.seaAI(a,def,dt,dp,dx,dz,play);head=r.head;spd=r.spd}
+  else if(def.foe){const r=HG.foeAI(a,def,dt);head=r.head;spd=r.spd}
   else if(def.fearLight&&ll>.1){a.charge=0;head=Math.atan2(-dx,-dz);spd=def.run}
   else if(def.night&&(a.hp<def.hp*.3||(!dark&&dp<14))){head=Math.atan2(-dx,-dz);spd=def.run}
   else if(a.fleeT>0&&a.fleeW&&!a.dying&&!(a.charge>0)){head=Math.atan2(a.x-a.fleeW.x,a.z-a.fleeW.z);spd=def.run}
@@ -147,7 +150,7 @@ function updateAnimals(dt){
    const d=angDiff(a.yaw,head),turn=(spd>def.walk*1.5?7:3.5)*dt;
    a.yaw+=clamp(d,-turn,turn);
    const step=spd*dt*(Math.abs(d)>1.4?.2:1),nx=a.x+Math.sin(a.yaw)*step,nz=a.z+Math.cos(a.yaw)*step;
-   const wk0=def.foe?HG.walkableFoe:walkable,pm=def.foe?1.0:def.r+.45,d0=Math.hypot(a.x-G.px,a.z-G.py);
+   const wk0=def.foe?HG.walkableFoe:def.sea?HG.swimmable[def.sea]:walkable,pm=def.foe?1.0:def.r+.45,d0=Math.hypot(a.x-G.px,a.z-G.py);
    const wk=(x,z)=>wk0(x,z)&&!(Math.hypot(x-G.px,z-G.py)<pm&&Math.hypot(x-G.px,z-G.py)<d0);
    if(wk(nx,nz)){a.x=nx;a.z=nz}
    else if(wk(nx,a.z))a.x=nx;else if(wk(a.x,nz))a.z=nz;
@@ -162,15 +165,15 @@ function updateAnimals(dt){
   for(const b of GRID.values())b.length=0;
   for(const a of L){if(a.dying)continue;const k=((a.x/3)|0)*512+((a.z/3)|0);let b=GRID.get(k);if(!b)GRID.set(k,b=[]);b.push(a)}
   for(let pass=0;pass<2;pass++)for(const a of L){
-   if(a.dying)continue;const da=ANIMAL[a.t],cx=(a.x/3)|0,cz=(a.z/3)|0;
+   if(a.dying||a.fs!==FRM)continue;const da=ANIMAL[a.t],cx=(a.x/3)|0,cz=(a.z/3)|0;
    for(let ox=-1;ox<=1;ox++)for(let oz=-1;oz<=1;oz++){
     const bk=GRID.get((cx+ox)*512+cz+oz);if(!bk)continue;
     for(const b of bk){
-     if(b.id<=a.id||b.dying)continue;
+     if(b===a||b.dying||(b.fs===FRM&&b.id<a.id))continue;
      const dx=b.x-a.x,dz=b.z-a.z;if(dx>3||dx<-3||dz>3||dz<-3)continue;
      const mn=(da.r+ANIMAL[b.t].r)*1.2+.22,d2=dx*dx+dz*dz;if(d2>=mn*mn)continue;
      const d=Math.sqrt(d2)||.001,push=(mn-d)*.5,ux=d<.002?1:dx/d,uz=d<.002?0:dz/d;
-     const wa=da.foe?HG.walkableFoe:walkable,wb=ANIMAL[b.t].foe?HG.walkableFoe:walkable;
+     const wa=da.foe?HG.walkableFoe:da.sea?HG.swimmable[da.sea]:walkable,wb=ANIMAL[b.t].foe?HG.walkableFoe:ANIMAL[b.t].sea?HG.swimmable[ANIMAL[b.t].sea]:walkable;
      const oa=wa(a.x-ux*push,a.z-uz*push),ob=wb(b.x+ux*push,b.z+uz*push);
      if(oa){a.x-=ux*push;a.z-=uz*push}
      if(ob){b.x+=ux*push;b.z+=uz*push}
@@ -183,7 +186,7 @@ function updateAnimals(dt){
  /* yeniden doğma: haritadaki sayı hedefin altına düşerse uzak bir otlakta yeni hayvan çıkar */
  G.animTimer=(G.animTimer||0)-dt;
  if(G.animTimer<=0){
-  G.animTimer=22;const SCL=W*H/65536;
+  G.animTimer=22;const SCL=G.entSC||W*H/65536;
   const cnt={};for(const a of L)if(!a.dying)cnt[a.t]=(cnt[a.t]||0)+1;
   for(const t in ANIMAL){
    if((cnt[t]||0)>=ANIMAL[t].want*SCL*.8)continue;
@@ -208,13 +211,13 @@ function killAnimal(a){
   if(!a.fake){HG.flag('shade_killed');HG.addSan(8)}
   HG.snd('die_shade',{x:a.x,z:a.z});return;
  }
- for(const [id,n] of def.drops(a))HG.spawnDrop(id,n,{x:a.x+(rnd()-.5)*.8,z:a.z+(rnd()-.5)*.8,y:Scene.groundY(a.x,a.z)+.6,vx:(rnd()-.5)*2,vz:(rnd()-.5)*2});
+ for(const [id,n] of def.drops(a))HG.spawnDrop(id,n,{x:a.x+(rnd()-.5)*.8,z:a.z+(rnd()-.5)*.8,y:(def.sea?HG.sc.WY:Scene.groundY(a.x,a.z))+.6,vx:(rnd()-.5)*2,vz:(rnd()-.5)*2});
  HG.flag('hunted');HG.snd('die_'+(def.snd||'sheep'),{x:a.x,z:a.z});
 }
 /* Vurulan bölge: vuruş noktası canlının yerel eksenlerine çevrilir (ileri, yan, yükseklik oranı) */
 function zoneAt(a,def,hit){
  if(!hit)return 'torso';
- const gy=Scene.groundY(a.x,a.z),yf=(hit.y-gy)/def.h,sx=Math.sin(a.yaw),cz=Math.cos(a.yaw);
+ const gy=a.by!==undefined?a.by:Scene.groundY(a.x,a.z),yf=(hit.y-gy)/def.h,sx=Math.sin(a.yaw),cz=Math.cos(a.yaw);
  const dx=hit.x-a.x,dz=hit.z-a.z,fw=dx*sx+dz*cz,lat=Math.abs(dx*cz-dz*sx);
  if(def.foe){                                   /* insansı gövde: kafa, kol, gövde, bacak */
   if(yf>.8)return 'head';
@@ -244,7 +247,7 @@ function hitAnimal(a,dmg,hit){
  }
  else if(def.aggr)a.charge=10;else a.panic=5;
  if(zone==='leg'&&!def.foe&&a.hp>0)a.panic=Math.max(a.panic,8);
- const hy=hit?hit.y:Scene.groundY(a.x,a.z)+def.h*.6;
+ const hy=hit?hit.y:(a.by!==undefined?a.by:Scene.groundY(a.x,a.z))+def.h*.6;
  Scene.burst(hit?hit.x:a.x,hy,hit?hit.z:a.z,def.foe?0x20202a:0xa01818,zone==='head'?8:5);
  if(a.hp<=0){if(zone==='head')HG.flag('headshot');killAnimal(a)}
  return zone;

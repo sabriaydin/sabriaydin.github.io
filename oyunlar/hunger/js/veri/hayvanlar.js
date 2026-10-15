@@ -17,11 +17,18 @@ const ANIMAL={
   drops:()=>[['meat',R(1,2)],['leather',1],['bone',R(1,2)]]},
  shade:{n:'Gölge',snd:'shade',foe:true,hp:100,weak:0.6,xpv:16,walk:1.4,run:4.8,r:.6,h:2,want:0,dmg:14,bleed:.6,drops:()=>[]},
  boar:{n:'Yaban Domuzu',snd:'boar',hp:100,weak:0.7,xpv:5,walk:1.0,run:5.6,r:.6,h:.85,flee:0,aggr:4.5,dmg:11,cd:1.6,chase:6,want:9,sp:30,roam:10,prey:true,
-  drops:()=>[['meat',R(2,3)],['leather',1],['bone',R(1,2)]]}
+  drops:()=>[['meat',R(2,3)],['leather',1],['bone',R(1,2)]]},
+ /* deniz ve kıyı canlıları (dyn): oyuncunun çevresinde gerektikçe oluşur, kayda geçmez */
+ shark:{n:'Köpek Balığı',snd:'shark',sea:'fish',dyn:true,hp:100,weak:.8,xpv:14,walk:1.5,run:7.6,r:.8,h:.8,flee:0,aggr:22,dmg:13,bleed:.45,cd:2.1,want:0,
+  drops:()=>[['meat',R(3,4)],['bone',R(2,3)]]},
+ jelly:{n:'Denizanası',snd:'jelly',sea:'jelly',dyn:true,hp:100,weak:2.2,xpv:4,walk:.3,run:.8,r:.4,h:.6,flee:0,dmg:5,cd:1.6,want:0,
+  drops:()=>[]},
+ crab:{n:'Yengeç',snd:'crab',dyn:true,beach:true,hp:100,weak:1.5,xpv:3,walk:.55,run:2.6,r:.26,h:.22,flee:6,want:0,sp:8,roam:4,
+  drops:()=>[['crab',1]]}
 };
 /* silah hasarı: elde olan eşyaya göre */
 /* Silah hasarı: hedefin sağlığı %100 üzerinden. Eşyaya özgü taban değerler; vurulan bölge ve hedefin zayıflığı ile çarpılır. */
-const DMG={hand:9,other:5,item:{wood:8,stone:9,bone:10,coal:6,bottle:4,torch:12,rod:7,shears:5,bow:4,axe1:18,axe2:22,axe3:28,pick1:14,pick2:18,pick3:23,spear:34},arrowMin:18,arrowMax:60};
+const DMG={hand:1.2,other:2,item:{rock:3,wood:3,stone:3,bone:4,coal:2,bottle:2,torch:6,rod:3,shears:3,bow:2,axe1:18,axe2:22,axe3:28,pick1:14,pick2:18,pick3:23,spear:34},arrowMin:18,arrowMax:60};
 /* Vücut bölgeleri: hasar çarpanları */
 const ZONE={head:{n:'Kafa',m:2.2},torso:{n:'Gövde',m:1},arm:{n:'Kol',m:.75},leg:{n:'Bacak',m:.6}};
 HG.ANIMAL=ANIMAL;HG.DMG=DMG;HG.ZONE=ZONE;

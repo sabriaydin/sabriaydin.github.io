@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const {O}=HG;
-const POWER=[0.5,1.3,2.0,3.0];
+const POWER=[0.55,1.25,2.0,3.0];       /* toplama hızı: El Taşı, Taş, Bakır, Demir */
 /* düğümler: hp (saniye, güç=1), alet türü, gereken kademe, verilen */
 const NODE={};
 NODE[O.TREE]={hp:3.5,tool:'axe',req:0,give:()=>['wood',3+(Math.random()*3|0)],rm:O.NONE,regrow:[O.TREE,480]};

@@ -16,7 +16,7 @@ function animalHit(G){
   if(a.dying)continue;
   const def=HG.ANIMAL[a.t];
   if((a.x-G.px)**2+(a.z-G.py)**2>(REACH+def.r+.6)**2)continue;
-  const cy=S.groundY(a.x,a.z)+def.h*.55,vx=a.x-o.x,vy=cy-o.y,vz=a.z-o.z,t=vx*d.x+vy*d.y+vz*d.z;
+  const cy=(a.by!==undefined?a.by:S.groundY(a.x,a.z))+def.h*.55,vx=a.x-o.x,vy=cy-o.y,vz=a.z-o.z,t=vx*d.x+vy*d.y+vz*d.z;
   if(t<0)continue;
   const d2=vx*vx+vy*vy+vz*vz-t*t,r=def.r*1.05;
   if(d2>r*r)continue;
@@ -41,7 +41,7 @@ S.aim=G=>{
   const ob=G.obj[i],t=G.tile[i],gy=S.groundY(x,z);
   let hit=false;
   if(ob){const top=gy+(OBJTOP[ob]||1);if(y<top&&y>gy-.3)hit=true}
-  if(!hit&&y<=((t<=1||t===5)?WY:gy)+.02)hit=true;
+  if(!hit&&y<=((t<=1||t===5)&&!G.head?WY:gy)+.02)hit=true;
   if(hit&&ah&&ah.t<=s)return hitAn(ah);
   if(hit)return {x:tx,y:tz,ob,px:prev>=0?prev%W:-1,py:prev>=0?(prev/W)|0:-1,hx:x,hy:y,hz:z,dist:s};
  }

@@ -10,7 +10,7 @@ const clamp=HG.clamp,q=new THREE.Quaternion(),qp=new THREE.Quaternion(),qz=new T
 
 function make(a){
  const M=sc.ANIM[a.t],def=ANIMAL[a.t];
- if(!M)return null;
+ if(!M||def.sea)return null;                 /* yüzen deniz canlılarını sahne/deniz.js çizer */
  if(!mat)mat=sc.mat({roughness:.85});
  const g=new THREE.Group(),o={g,legs:[],a};
  if(def.foe&&!matF)matF=sc.mat({roughness:.55});

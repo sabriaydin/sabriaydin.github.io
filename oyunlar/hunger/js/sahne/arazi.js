@@ -140,6 +140,7 @@ function buildTerrain(G){
  if(!terrainMat){
   terrainMat=sc.mat({pbr:true,roughness:.96});sc.terrainMat=terrainMat;
   waterMat=sc.mat({transparent:true,roughness:.1,metalness:.05,depthWrite:false,normalMap:sc.tex.waterN,normalScale:new THREE.Vector2(.45,.45)});
+  sc.waterMat=waterMat;
   waterMat.onBeforeCompile=sh=>{
    sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_maps>',`
    #ifdef USE_NORMALMAP
@@ -155,9 +156,8 @@ function buildTerrain(G){
  const ncx=Math.ceil(W/CT),ncz=Math.ceil(H/CT);
  for(let cz=0;cz<ncz;cz++)for(let cx=0;cx<ncx;cx++){
   const c={cx,cz,x:Math.min(W,(cx+.5)*CT),z:Math.min(H,(cz+.5)*CT),lod:-1};
-  c.t0=terrainChunk(cx,cz,2);c.t1=terrainChunk(cx,cz,1);
-  c.w0=waterChunk(cx,cz,2);c.w1=waterChunk(cx,cz,1);
-  for(const m of [c.t0,c.t1,c.w0,c.w1])if(m){m.visible=false;sc.scene.add(m)}
+  c.t1=terrainChunk(cx,cz,1);c.w1=waterChunk(cx,cz,1);c.b0=false;   /* ayrıntılı (LOD0) parçalar yakınlaşınca üretilir */
+  for(const m of [c.t1,c.w1])if(m){m.visible=false;sc.scene.add(m)}
   chunks.push(c);
  }
  /* harita dışı uçsuz bucaksız okyanus: haritayı çevreleyen 4 şerit (içeride su parçaları vardır) */
@@ -169,11 +169,25 @@ function buildTerrain(G){
  og.setAttribute('position',new THREE.Float32BufferAttribute(pp,3));og.setAttribute('normal',new THREE.Float32BufferAttribute(nn,3));
  og.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));og.setAttribute('color',new THREE.Float32BufferAttribute(oc,4));og.setIndex(oi);
  oceanMesh=new THREE.Mesh(og,waterMat);oceanMesh.renderOrder=0;oceanMesh.frustumCulled=false;sc.scene.add(oceanMesh);
- updateLod(true,W/2,H/2);
+ updateLod(true,isFinite(G.px)?G.px:W/2,isFinite(G.py)?G.py:H/2);
+}
+/* Ayrıntılı parçalar yalnızca oyuncunun yakınında bellekte tutulur (büyük harita için bellek tasarrufu) */
+function build0(c){
+ c.b0=true;c.t0=terrainChunk(c.cx,c.cz,2);c.w0=waterChunk(c.cx,c.cz,2);
+ for(const m of [c.t0,c.w0])if(m){m.visible=false;sc.scene.add(m)}
+}
+function drop0(c){
+ for(const k of ['t0','w0']){const m=c[k];if(m){sc.scene.remove(m);m.geometry.dispose();c[k]=null}}
+ c.b0=false;
 }
 function updateLod(force,px,pz){
+ const t0=performance.now();let nb=0;
  for(const c of chunks){
-  const d=Math.hypot(c.x-px,c.z-pz),want=d<(c.lod===0?125:105)?0:1;
+  const d=Math.hypot(c.x-px,c.z-pz);let want=d<(c.lod===0?125:105)?0:1;
+  if(want===0&&!c.b0){
+   if(!force&&nb>0&&performance.now()-t0>5)want=1;          /* kare başına üretim süresi sınırlı: kalanlar sonraki karelerde */
+   else{build0(c);nb++}
+  }else if(c.b0&&d>230)drop0(c);
   if(!force&&want===c.lod)continue;
   c.lod=want;
   if(c.t0)c.t0.visible=want===0;if(c.t1)c.t1.visible=want===1;

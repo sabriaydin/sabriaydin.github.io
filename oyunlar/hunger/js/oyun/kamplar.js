@@ -11,8 +11,19 @@ const LOOT=[
  /* mağaradaki mühürlü sandık: az ama değerli */
  [['gold',1,3,6],['gem',1,2,5],['coin',18,32,5],['iron_ingot',2,4,4],['pick3',1,1,1.6],['axe3',1,1,1.6],['bandage',3,5,3],['arrow',16,26,3],['torch',3,4,3]]
 ];
-function roll(tier){
- const T=LOOT[tier],out=[];let k=tier>2?R(4,5):R(3,4)+tier;
+/* deniz kampları: enkaz, kazazede kampı ve deniz feneri; seviye 0-1 ve 2+ için iki ganimet listesi */
+const LOOT_SEA={
+ wreck:[[['coin',6,12,6],['iron_ingot',1,2,4],['mask',1,1,1.6],['bandage',1,3,4],['torch',1,2,3],['cfish',1,3,4],['wbottle',1,2,3],['gold',1,1,2]],
+        [['coin',12,22,6],['gold',1,2,4],['gem',1,1,3],['mask',1,1,2],['iron_ingot',2,3,4],['pick2',1,1,1.4],['axe2',1,1,1.4],['bandage',2,4,3],['arrow',8,14,3]]],
+ castaway:[[['coconut',3,6,6],['cfish',2,4,5],['raft',1,1,2.2],['mask',1,1,1],['wbottle',1,2,4],['bandage',1,2,3],['torch',1,2,3],['coin',3,7,4]],
+           [['coconut',4,8,5],['cfish',3,5,5],['raft',1,1,3],['mask',1,1,1.6],['bandage',2,3,3],['coin',6,12,5],['bag',1,1,1]]],
+ lighthouse:[[['bandage',3,5,5],['torch',3,5,5],['arrow',10,18,4],['coin',8,16,6],['cfish',2,4,4],['wbottle',2,3,3],['raft',1,1,2]],
+             [['bandage',3,5,5],['torch',3,5,4],['coin',12,22,6],['iron_ingot',1,3,4],['mask',1,1,2],['gold',1,1,1.5]]]
+};
+/* [keşif mesajı, deneyim, keşif mesafesi] */
+const KIND={wreck:['Bir gemi enkazı keşfedildi: sandık dipte.',10,22],castaway:['Issız bir adada kazazede kampı bulundu.',8,40],lighthouse:['Bir deniz feneri keşfedildi.',12,70]};
+function roll(tier,kind){
+ const T=LOOT_SEA[kind]?LOOT_SEA[kind][tier>=2?1:0]:LOOT[tier],out=[];let k=tier>2?R(4,5):R(3,4)+tier;
  while(k-->0){
   const tw=T.reduce((s,x)=>s+x[3],0);let r=rnd()*tw,e=T[0];
   for(const x of T){r-=x[3];if(r<=0){e=x;break}}
@@ -25,24 +36,28 @@ function updateCamps(dt){
  const L=G.camps;G.nearCamp=null;if(!L)return;
  let best=2.6;
  for(const c of L){
-  const d=Math.hypot(G.px-(c.x+.5),G.py-(c.y+.5));
-  if(d<14&&!G.flags['c'+c.id]){G.flags['c'+c.id]=1;HG.toast(c.vault?'Mühürlü bir hazine odası bulundu.':'Terk edilmiş bir kamp keşfedildi.');HG.xpGain(c.vault?14:6)}
+  const d=Math.hypot(G.px-(c.x+.5),G.py-(c.y+.5)),kd=KIND[c.kind];
+  if(d<(kd?kd[2]:14)&&!G.flags['c'+c.id]){
+   G.flags['c'+c.id]=1;HG.toast(kd?kd[0]:c.vault?'Mühürlü bir hazine odası bulundu.':'Terk edilmiş bir kamp keşfedildi.');HG.xpGain(kd?kd[1]:c.vault?14:6);
+   if(kd)HG.flag(c.kind+'_found');
+  }
+  if(c.kind==='wreck'&&G.onRaft){if(d<3&&!G.flags.wreckHint){G.flags.wreckHint=1;HG.toast('Enkaz sandığına ulaşmak için salı bırakıp suya girin.')}continue}   /* enkaz sandığı salın altındadır */
   if(!c.open&&d<best){best=d;G.nearCamp=c}
  }
 }
 function openChest(){
  const c=G.nearCamp;if(!c||c.open||ui.state!=='play')return false;
  c.open=true;G.nearCamp=null;
- const loot=roll(c.tier),msg=[];
+ const loot=roll(c.tier,c.kind),msg=[];
  for(const [id,n] of loot){
   const left=add(id,n);if(left>0)HG.spawnDrop(id,left);
   msg.push(n+' '+IT[id].n);
  }
  HG.snd('chest');HG.feed('Sandık: '+msg.join(', '));
- G.stats.chests++;HG.flag('chest');if(c.vault)HG.flag('vault');HG.xpGain(14+c.tier*8);
+ G.stats.chests++;HG.flag('chest');if(c.vault)HG.flag('vault');if(LOOT_SEA[c.kind])HG.flag(c.kind+'_open');HG.xpGain(14+c.tier*8);
  /* kayıt */
  const N=HG.NOTES||[];
- if(N.length&&!G.notes.includes(c.note)){
+ if(N.length&&c.note!==undefined&&!G.notes.includes(c.note)){
   G.notes.push(c.note);HG.xpGain(8);
   setTimeout(()=>{if(ui.state==='play')HG.toggleJournal(true,'not',c.note)},900);
  }

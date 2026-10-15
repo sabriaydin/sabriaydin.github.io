@@ -72,6 +72,65 @@ function campParts(c,P){
    bp(.13,0xe8e4d6,Math.cos(t)*1.35,.52,Math.sin(t)*1.35,1,1,1.1,{d:1,amp:.04});
   }
   for(let i=0;i<5;i++){const t=hsh(id,i)*6.28,rr=2.4+hsh(id,i+5)*.9;p(cyl(.02,.02,.34,5),0xe8e4d6,Math.cos(t)*rr,.04,Math.sin(t)*rr,1,1,1,PI/2,t,0)}
+ }else if(c.kind==='wreck'){
+  /* batık gemi: yan yatmış gövde, kaburgalar, kırık direk, yırtık yelken; sandık dipte */
+  const WYv=sc.WY,pw=(geo,col,a,off,b,sx,sy,sz,rx,ryy,rz,cf)=>{const [x,z]=W2(a,b);return p(geo,col,a,WYv-S.groundY(x,z)+off,b,sx,sy,sz,rx,ryy,rz,cf)};
+  const SAIL=0xcfc6ad,ROPE=0x8a7a52;
+  pw(box(8.2,.34,.56),TIMB,0,-.5,-1.5,1,1,1,0,0,.1,plankCf);                    /* omurga */
+  for(let i=-3;i<=3;i++){
+   const lean=.5+.05*(i%2);
+   for(const sg of [-1,1]){
+    pw(box(.15,1.9,.15),TIMB,i*1.05,.25-Math.abs(i)*.06,-1.5+sg*.82,1,1,1,-sg*lean,0,.1);
+    if(i%2===0||sg>0)pw(box(1.0,.08,1.0),WOOD,i*1.05+.2,-.25-Math.abs(i)*.05,-1.5+sg*.74,1,1,1,-sg*.9,0,.1,plankCf);
+   }
+  }
+  pw(box(1.9,1.3,1.9),WOOD,-3.1,.1,-1.5,1,1,1,0,0,.18,plankCf);                  /* kıç kasarası */
+  pw(box(2.0,.1,2.0),TIMB,-3.1,.78,-1.5,1,1,1,0,0,.18);
+  pw(cyl(.12,.17,3.8,7),TIMB,-.6,1.6,-1.5,1,1,1,.12,0,.2);                        /* kırık direk */
+  pw(cyl(.07,.07,2.4,6),TIMB,-.5,2.5,-1.5,1,1,1,PI/2-.18,0,.2);
+  const sail=pw(box(.04,1.7,2.0),SAIL,-.5,1.85,-1.5,1,1,1,.1,0,.2);sail.cf=(x,y,z,nx,ny,nz,cc)=>{if(Math.floor(y*3.1+z*2.3)%2===0)cc.multiplyScalar(.9)};
+  for(const sg of [-1,1])pw(cyl(.015,.015,2.6,4),ROPE,-1.7,1.3,-1.5+sg*.7,1,1,1,sg*.45,0,-.5);
+  for(let i=0;i<3;i++)p(cyl(.28,.28,.58,9),WOODL,1.3+i*.55,.29,.9-i*.35,1,1,1,0,.2*i,0,plankCf);   /* fıçılar */
+  p(box(.36,.7,.3),IRON,-1.4,.35,.9,1,1,1,0,.5,0);p(box(.6,.12,.12),IRON,-1.4,.7,.9,1,1,1,0,.5,0);   /* çapa */
+  for(let i=0;i<7;i++)p(box(1.0+hsh(id,i)*.8,.06,.2),WOOD,(hsh(id,i+2)-.5)*7,.05,-2.8+hsh(id,i+6)*3.4,1,1,1,0,hsh(id,i+4)*3,0,plankCf);
+ }else if(c.kind==='castaway'){
+  /* kazazede kampı: yaprak çatılı sığınak, kurutma askısı, ateş yeri, hindistan cevizi ve sal kalıntısı */
+  const LEAF=0x4f8a3a,LEAF2=0x5f9a42;
+  for(const sg of [-1,1]){p(cyl(.06,.07,1.9,5),TIMB,-2.4,.95,sg*1.1,1,1,1,0,0,sg*.0);p(cyl(.05,.06,1.1,5),TIMB,-1.0,.55,sg*1.1)}
+  p(cyl(.05,.05,2.5,5),TIMB,-1.7,1.5,0,1,1,1,PI/2,0,0);
+  for(let i=0;i<6;i++){
+   const sz=-1.05+i*.42,lf=p(box(1.55,.05,.52),i%2?LEAF:LEAF2,-1.7,1.25,sz,1,1,1,0,0,.5);
+   lf.cf=(x,y,z,nx,ny,nz,cc)=>{if(Math.floor((x+z)*9)%2===0)cc.multiplyScalar(.88)};
+  }
+  bp(.5,0x6a5a3a,-1.7,.1,0,2,.3,1.4,{d:1,amp:.05});
+  p(cyl(.025,.025,.9,5),WOOD,.9,.7,2.6);p(cyl(.025,.025,.9,5),WOOD,.9,.7,4.0);p(cyl(.02,.02,1.5,5),WOOD,.9,1.15,3.3,1,1,1,PI/2,0,0);
+  for(let i=0;i<3;i++)bp(.09,0xc8cdd2,.9,.95,2.9+i*.25,1.3,.35,.45,{d:1,amp:.03});
+  fire(1.2,.4+0);
+  for(let i=0;i<4;i++)bp(.11,0x5a4228,-.2+hsh(id,i)*1.6,.1,2.0+hsh(id,i+3)*1.3,1,.95,1,{d:1,amp:.03});
+  for(let i=0;i<3;i++)p(cyl(.07,.07,1.3,7),i%2?0x8a5a30:0x6b4423,2.4+i*.17,.07,-.6+i*.05,1,1,1,0,.15,PI/2,logCf);
+  p(box(1.3,.04,.1),0x4a3220,2.5,.17,-.55,1,1,1,0,.15,0);
+  stuff();
+ }else if(c.kind==='lighthouse'){
+  /* deniz feneri: taş kaide, kırmızı-beyaz şeritli kule, korkuluklu balkon, fener odası */
+  const RED=0xb8342a,WHT=0xf2efe8,GLASS=0xcfe8f0;
+  p(cyl(2.0,2.3,.6,14),0x7a7a82,0,.3,-2,1,1,1,0,0,0,stoneCf);
+  let y=.6,r=1.55;
+  for(let i=0;i<5;i++){
+   const h=2.5,r2=r-.13;
+   p(cyl(r2,r,h,14),i%2?RED:WHT,0,y+h/2,-2);
+   y+=h;r=r2;
+  }
+  p(cyl(1.5,1.35,.22,14),0x2a2a30,0,y+.11,-2);
+  for(let i=0;i<12;i++){const t=i/12*PI*2;p(cyl(.025,.025,.8,4),0x2a2a30,Math.cos(t)*1.42,y+.55,-2+Math.sin(t)*1.42)}
+  p(cyl(1.42,1.42,.04,14),0x2a2a30,0,y+.95,-2);
+  p(cyl(.72,.72,1.35,12),GLASS,0,y+.9,-2);
+  for(let i=0;i<6;i++){const t=i/6*PI*2;p(cyl(.04,.04,1.4,4),0x2a2a30,Math.cos(t)*.72,y+.9,-2+Math.sin(t)*.72)}
+  p(cone(1.05,.95,12),RED,0,y+2.05,-2);
+  bp(.12,0x2a2a30,0,y+2.6,-2,1,1,1,{d:1,amp:.02});
+  p(box(.62,1.15,.12),0x4a3322,0,.6+.57,-.5,1,1,1,0,0,0,plankCf);
+  for(let k=0;k<4;k++)p(box(.3,.14,.1),0x6a6a72,0,.6-.4+k*.1,-.1-k*.0+.0,1,1,1,0,0,0);
+  for(let i=0;i<4;i++){const t=hsh(id,i)*6.28,rr=2.6+hsh(id,i+4)*1.2;bp(.3+hsh(id,i+8)*.25,[0x7a7a82,0x6a6a72,0x8d8d92][i%3],Math.cos(t)*rr,.2,-2+Math.sin(t)*rr,1.2,.7,1,{d:1,amp:.1})}
+  stuff();
  }else{
   for(let a=-1;a<=1;a++){const r=.95+hsh(id,a+4)*.35;bp(r,[0x7a7a82,0x6a6a72,0x8d8d92][(a+1+id)%3],a,r*.7,-1,1.1,.95,1,{d:2,amp:.12})}
   for(let i=0;i<9;i++){const t=hsh(id,i)*6.28,rr=1.2+hsh(id,i+5)*1.5;bp(.2+hsh(id,i+8)*.18,[0x7a7a82,0x8d8d92,0x6a6a72][i%3],Math.cos(t)*rr,.14,Math.sin(t)*rr+.3,1,.7,1,{d:1,amp:.1})}

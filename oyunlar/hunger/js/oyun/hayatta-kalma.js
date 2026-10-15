@@ -59,6 +59,12 @@ const EYE=HG.EYE;
 function vertStep(dt){
  const gy=Scene.groundY(G.px,G.py),WY=HG.sc.WY,wd=WY-gy;
  if(G.pz===undefined){G.pz=gy;G.vz=0;G.air=false}
+ /* salda: gövde su yüzeyinde dalgayla hafifçe sallanır; yüzme, zıplama ve su altı yoktur */
+ if(G.onRaft){
+  if(wd<.2){HG.dismountRaft();return}
+  G.pz=WY+.06+Math.sin(G.clock*1.4)*.025*(1+HG.sc.rain*2.2);G.vz=0;G.air=false;G.swim=false;G.head=false;G.divT=0;
+  return;
+ }
  /* yüzme: su 1,5 m'den derinse ve gövde suya değiyorsa; yüzeyde süzülür, Boşluk ile çıkılır, dal tuşu ile aşağı inilir */
  if(wd>1.5&&(G.swim||G.pz<WY-.9)){
   const surf=WY+.12-EYE;
@@ -121,22 +127,24 @@ function moveStep(dt){
   let sp=(G.sprint?5.4:3.4)*(G.swim?(G.sprint?.62:.5):clamp(1-wd0*.34,.5,1))*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
   /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
   const g0=G.pz!==undefined&&!G.air?G.pz:Scene.groundY(G.px,G.py),grade=(Scene.groundY(G.px+vx*.7,G.py+vy*.7)-g0)/.7;
-  sp*=clamp(1-grade*.42,.55,1.2);
+  if(G.onRaft)sp=HG.raftSpeed(G.sprint,m);
+  else sp*=clamp(1-grade*.42,.55,1.2);
   tvx=vx*sp;tvy=vy*sp;
  }
- const acc=G.air?1.4:(G.swim?4:(G.moving?14:(tl===T.SHAL?9:11)));
+ const acc=G.onRaft?2.4:G.air?1.4:(G.swim?4:(G.moving?14:(tl===T.SHAL?9:11)));
  const f=1-Math.exp(-acc*dt);
  G.pvx+=(tvx-G.pvx)*f;G.pvy+=(tvy-G.pvy)*f;
  const speed=Math.hypot(G.pvx,G.pvy);G.spdNow=speed;
- if(G.stats){const dd=speed*dt;if(G.swim)G.stats.swum=(G.stats.swum||0)+dd;else if(!G.air)G.stats.walked=(G.stats.walked||0)+dd}
+ if(G.stats){const dd=speed*dt;if(G.swim)G.stats.swum=(G.stats.swum||0)+dd;else if(G.onRaft)G.stats.sailed=(G.stats.sailed||0)+dd;else if(!G.air)G.stats.walked=(G.stats.walked||0)+dd}
  if(speed<.03&&!G.moving){G.pvx=G.pvy=0;G.spdNow=0;return}
  const reach=speed*dt,lim=Math.max(.05,reach*1.7);   /* çok dik yokuşa tırmanılamaz, zıplanır */
- const ok=(x,y)=>canStand(x,y)&&!creatureBlock(x,y)&&(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim);
+ const ok=(x,y)=>canStand(x,y)&&!creatureBlock(x,y)&&(G.onRaft?HG.raftWater(x,y):(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim));
  const nx=G.px+G.pvx*dt;if(ok(nx,G.py))G.px=nx;else G.pvx*=.15;
  const ny=G.py+G.pvy*dt;if(ok(G.px,ny))G.py=ny;else G.pvy*=.15;
  if(!G.air){
   const w0=G.walk;G.walk+=dt*(speed/3.4);
-  if(speed>.6&&Math.floor(G.walk*1.6)!==Math.floor(w0*1.6))HG.snd(tl<=T.SHAL||tl===T.POND||G.swim?'step_water':tl===T.SAND?'step_sand':tl===T.ROCK?'step_rock':'step')
+  if(G.onRaft&&speed>.4){let d=Math.atan2(G.pvx,G.pvy)-(G.raftYaw||0);while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;G.raftYaw=(G.raftYaw||0)+d*Math.min(1,1.6*dt)}
+  if(speed>.6&&Math.floor(G.walk*1.6)!==Math.floor(w0*1.6))HG.snd(G.onRaft?'step_raft':tl<=T.SHAL||tl===T.POND||G.swim?'step_water':tl===T.SAND?'step_sand':tl===T.ROCK?'step_rock':'step')
  }
 }
 
@@ -155,7 +163,7 @@ function update(dt){
  /* eylem */
  if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
- HG.updateAnimals(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
+ HG.updateAnimals(dt);HG.updateSea(dt);HG.updateDiscover(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
  HG.updateWeapons(dt);
  HG.updateBody(dt);
  if(A.hitT>0)A.hitT-=dt;
@@ -181,7 +189,7 @@ function update(dt){
  const fd=G.fd;
  G.nearFire=fd<=4;
  let wr=-(cold*.62+.04);
- {const wd1=HG.sc.WY-Scene.groundY(G.px,G.py);if(G.swim)wr-=1.1;else if(wd1>.3)wr-=.45}
+ {const wd1=HG.sc.WY-Scene.groundY(G.px,G.py);if(G.swim)wr-=1.1;else if(wd1>.3&&!G.onRaft)wr-=.45}
  if(G.sheltered)wr*=.25;
  if(wr<0)wr*=1-.15*HG.perk('cold');
  if(wr<0&&HG.count('coat'))wr*=.5;            /* deri mont çantadayken soğuk yarıya iner */
@@ -193,7 +201,7 @@ function update(dt){
  let dmg=0;
  /* nefes: baş suyun altındayken tükenir, bitince boğulma hasarı başlar */
  if(G.o2===undefined)G.o2=100;
- if(G.head)G.o2=Math.max(0,G.o2-dt*(100/26)*(G.moving?1.25:1)/(1+.2*HG.perk('dive')));else G.o2=Math.min(100,G.o2+dt*45);
+ if(G.head)G.o2=Math.max(0,G.o2-dt*(100/26)*(G.moving?1.25:1)*(G.mask?.7:1)/(1+.2*HG.perk('dive')));else G.o2=Math.min(100,G.o2+dt*45);
  if(G.o2<28&&!G.o2w){G.o2w=true;HG.toast('Nefes tükeniyor: yüzeye çıkın!')}else if(G.o2>60)G.o2w=false;
  if(G.swim&&G.moving)G.stam=Math.max(0,G.stam-dt*(G.sprint?9:4)*(1-.2*HG.perk('dive')));
  if(G.o2<=0){dmg+=7;G.cause='Boğularak öldün.';if(Math.random()<dt*1.2)HG.snd('hurt')}

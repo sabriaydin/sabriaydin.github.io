@@ -3,7 +3,7 @@
 'use strict';
 /* HG: oyunun tek global nesnesi. Tüm dosyalar buraya kayıt olur. */
 window.HG={
- TS:32,W:384,H:384,DAY:420,REACH:3.4,SLOTS:24,HOT:8,EYE:1.65,SAVE:'hunger-save-v7',
+ TS:32,W:768,H:768,DAY:420,REACH:3.4,SLOTS:24,HOT:8,EYE:1.65,SAVE:'hunger-save-v7',
  T:{DEEP:0,SHAL:1,SAND:2,GRASS:3,ROCK:4,POND:5},
  O:{NONE:0,TREE:1,PALM:2,ROCK:3,COAL:4,COPPER:5,IRON:6,BUSH:7,BUSH0:8,PALM0:9,FIRE:10,BENCH:11,FURN:12,WALLW:13,WALLS:14,DOOR:15,VWALL:16,VDOOR:17,VDEC:18},
  G:{},                                   /* oyun durumu: dünya, oyuncu, istatistikler, envanter */

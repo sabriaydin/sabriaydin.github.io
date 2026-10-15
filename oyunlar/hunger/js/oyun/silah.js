@@ -28,7 +28,7 @@ function hitTarget(ar,ox,oy,oz){
   if(a.dying)continue;
   const def=ANIMAL[a.t];
   if((a.x-ox)**2+(a.z-oz)**2>(Math.hypot(dx,dz)+def.r+2)**2)continue;
-  const gy=Scene.groundY(a.x,a.z),rr=Math.max(def.r*1.1,def.h*.3)+.12;
+  const gy=a.by!==undefined?a.by:Scene.groundY(a.x,a.z),rr=Math.max(def.r*1.1,def.h*.3)+.12;
   for(const f of [.3,.55,.8]){
    const cy=gy+def.h*f,vx=a.x-ox,vy=cy-oy,vz=a.z-oz,L2=dx*dx+dy*dy+dz*dz||1e-6;
    let t=(vx*dx+vy*dy+vz*dz)/L2;t=clamp(t,0,1);

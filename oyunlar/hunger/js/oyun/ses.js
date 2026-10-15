@@ -180,9 +180,21 @@ function animalVoice(type,kind){
    else{N(d,{ft:'bandpass',f:4200,f2:2500,q:1.5,d:.7*L,v:.35,pink:true});Tn(d,{f:die?1200:800,f2:die?180:300,d:.6*L,type:'sawtooth',v:.09,lp:2600,vib:45,vibf:30});if(die)Tn(d,{f:60,f2:35,d:1.2,v:.4})}
   }
   else if(type==='deer'){Tn(d,{f:R(520,640),f2:R(380,460),d:.3*L,type:'sawtooth',v:.1*v,lp:1500,vib:15,vibf:21});N(d,{ft:'bandpass',f:1100,q:1.5,d:.25*L,v:.12*v,pink:true})}
+  else if(type==='shark'){
+   if(call)K.shark_warn(d);
+   else{N(d,{ft:'bandpass',f:800,f2:420,q:1.1,d:.45*L,v:.45*v,pink:true});Tn(d,{f:130,f2:62,d:.5*L,type:'sawtooth',v:.15*v,lp:900});if(die){K.splash(d);Tn(d,{f:70,f2:32,d:1,v:.3})}}
+  }
+  else if(type==='jelly'){Tn(d,{f:R(420,520),f2:R(160,220),d:.2*L,v:.12*v,att:.01});N(d,{ft:'lowpass',f:700,f2:260,d:.22*L,v:.25*v,pink:true});if(die)K.splash(d)}
+  else if(type==='crab'){const n=die?7:4;for(let i=0;i<n;i++)N(d,{ft:'bandpass',f:R(2800,3800),q:4,d:.02,v:.3*v,t:i*R(.045,.08)});if(die)Tn(d,{f:180,f2:90,d:.12,v:.15})}
  };
 }
-for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
+K.step_raft=d=>{const p=R(.85,1.15);N(d,{ft:'lowpass',f:520*p,d:.09,v:R(.2,.3)});Tn(d,{f:150*p,f2:95,d:.1,type:'triangle',v:.1});N(d,{ft:'bandpass',f:R(1000,1500),q:1.5,d:.05,v:.06,t:.02,pink:true})};
+K.shark_warn=d=>{Tn(d,{f:70,f2:48,d:1.4,type:'sawtooth',v:.12,att:.1,lp:240});Tn(d,{f:104,f2:60,d:1.2,type:'sawtooth',v:.06,att:.15,lp:260,t:.05});N(d,{ft:'lowpass',f:300,d:1.1,v:.22,att:.2,pink:true})};
+K.gull=d=>{const f=R(1500,1900),n=2+((Math.random()*3)|0);for(let i=0;i<n;i++)Tn(d,{f:f*R(.95,1.08),f2:f*.7,d:.2,v:.06,att:.01,t:i*.26,type:'sawtooth',lp:3200,vib:30,vibf:40});N(d,{ft:'bandpass',f:2600,q:2,d:.1,v:.03,t:.02,pink:true})};
+K.dolphin=d=>{for(let i=0;i<4;i++)Tn(d,{f:2400+i*160,f2:5200,d:.14,v:.05,t:i*.13,att:.004});Tn(d,{f:3000,f2:1800,d:.5,v:.04,t:.55,att:.02,vib:40,vibf:30});for(let i=0;i<7;i++)N(d,{ft:'bandpass',f:6200,q:5,d:.015,v:.1,t:.9+i*.045})};
+K.whale=d=>{Tn(d,{f:78,f2:132,d:2.4,v:.2,att:.6,vib:3,vibf:.8,lp:420});Tn(d,{f:130,f2:70,d:2.6,v:.12,att:.5,t:1.1,vib:2,vibf:.6,lp:420});Tn(d,{f:240,f2:160,d:2,v:.03,t:.6,att:.5})};
+K.bell=d=>{M(d,{f:520,v:.12,p:[[1,1,1.8],[2.4,.55,1.2],[4.1,.3,.8],[6.3,.15,.5]]})};
+for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
 
 /* ---------- konumlu çıkış ---------- */
 function route(pos){

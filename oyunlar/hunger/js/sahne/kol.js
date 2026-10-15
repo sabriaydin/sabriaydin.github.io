@@ -24,10 +24,11 @@ function heldModel(id){
  else if(it.tool==='rod'){add(cyl(.015,.025,1.1,5),0x8a5a30,0,.4,.1,.5);add(cyl(.004,.004,.7,3),0xdddddd,0,.55,.6,.2)}
  else if(it.tool==='bow'){bowModel(g,add)}
  else if(it.tool==='torch'){torchModel(g,add)}
+ else if(it.tool==='raft'){for(let i=0;i<4;i++)add(cyl(.045,.045,.5,7),i%2?0x8a5a30:0x6b4423,0,.18,(i-1.5)*.09,0,0,Math.PI/2);add(box(.04,.03,.4),0x4a3220,.12,.235,0);add(box(.04,.03,.4),0x4a3220,-.12,.235,0)}
  else if(it.heal){add(cyl(.07,.07,.16,10),0xe8e4da,0,.1,0,Math.PI/2);add(box(.17,.04,.075),0xd9463c,0,.1,0)}
  else if(id==='arrow'){add(cyl(.01,.01,.6,5),0xa87440,0,.3,0);add(cone(.025,.08,4),0xc3c9d0,0,.64,0);add(box(.002,.06,.1),0xd9463c,0,.04,0)}
  else if(it.place){const c={fire:0x8a5a30,bench:0xa47544,furn:0x77777f,wallw:0xa67848,walls:0x8c8c94,door:0x6b4a29}[id];add(box(.26,.26,.26),c,0,.16,0)}
- else{const c={wood:0x7a4f29,stone:0x8d8d92,coal:0x1a1a1f,sand:0xdac68c,copper_ore:0xc8743a,iron_ore:0xb99a80,copper_ingot:0xd9854a,coin:0xd9985a,bag:0x4a6a8a,iron_ingot:0xbcc2c8,berries:0xc42d3a,coconut:0x5b3a1c,fish:0x6fa0c0,cfish:0xb07a35,bottle:0xbfe6f0,wbottle:0x5fb0e0}[id]||0xcccccc;add(ico(.12),c,0,.12,0)}
+ else{const c={rock:0x86848b,sardine:0x6f8ea8,bass:0x5e7a62,tuna:0x243e66,crab:0xc24a2a,ccrab:0xb8381a,coral:0xe86a8a,mask:0x7fd0e8,wood:0x7a4f29,stone:0x8d8d92,coal:0x1a1a1f,sand:0xdac68c,copper_ore:0xc8743a,iron_ore:0xb99a80,copper_ingot:0xd9854a,coin:0xd9985a,bag:0x4a6a8a,iron_ingot:0xbcc2c8,berries:0xc42d3a,coconut:0x5b3a1c,fish:0x6fa0c0,cfish:0xb07a35,bottle:0xbfe6f0,wbottle:0x5fb0e0}[id]||0xcccccc;add(ico(.12),c,0,.12,0)}
  return cache[id]=g;
 }
 sc.itemModel=heldModel;
@@ -94,10 +95,27 @@ function animateHeld(G,t,dt,id){
   if(dr>.85){root.position.x+=Math.sin(t*40)*.002;root.position.y+=Math.cos(t*37)*.002}
  }else{hand.position.set(0,.02,-.52);hand.rotation.y=0}
 }
+/* Vurma animasyonu: kol geriye kalkar (hazırlık), hızla öne iner (vuruş), toparlanır. Elde eşya yoksa yumruk atılır. */
+sc.swingT=-1;sc.swingDur=.36;
+HG.armSwing=d=>{sc.swingT=0;sc.swingDur=d||.36};
+const GATHER=/^(node|hit|dig)/;
+function swingPose(dt,hasItem){
+ if(sc.swingT<0)return null;
+ sc.swingT+=dt;
+ const u=sc.swingT/sc.swingDur;
+ if(u>=1){sc.swingT=-1;return null}
+ const ease=x=>x*x*(3-2*x);
+ let a,h,z,y;
+ if(u<.34){const k=ease(u/.34);a=.62*k;h=.6*k;z=.05*k;y=.12*k}                                  /* hazırlık: kol yukarı-geri */
+ else if(u<.54){const k=(u-.34)/.2,e=k*k;a=.62-.98*e;h=.6-2.0*e;z=.05-.12*e;y=.12-.2*e}         /* vuruş: hızlı iniş */
+ else{const k=ease((u-.54)/.46);a=-.36*(1-k);h=-1.4*(1-k);z=-.07*(1-k);y=-.08*(1-k)}           /* toparlanma */
+ if(!hasItem){const st=u<.34?-.18*ease(u/.34):u<.54?-.18+.5*((u-.34)/.2):.32*(1-ease((u-.54)/.46));return {a:a*.45,h:0,z:st*-1.2,y:y*.5}}   /* yumruk: kol öne uzanır */
+ return {a,h,z,y};
+}
 S.onFrame((G,t,dt,info)=>{
  const play=info.mode==='play';
  if(!play&&sc.torchLight)sc.torchLight.intensity=0;
- root.visible=play&&!!info.held;if(!play)return;
+ root.visible=play&&(!!info.held||sc.swingT>=0);if(!play)return;
  const id=info.held;
  if(id!==heldId){heldId=id;while(hand.children.length)hand.remove(hand.children[0]);if(id)hand.add(heldModel(id))}
  const mv=G.moving,ph=mv?Math.sin(G.walk*10):0;
@@ -111,10 +129,13 @@ S.onFrame((G,t,dt,info)=>{
  const spk=Math.min(1.4,(G.spdNow||0)/3.4),spr=G.sprint?1:0,air=G.air?(G.vz>0?.02:-.015):0;
  root.position.set((mv?Math.cos(G.walk*5)*.012*spk:0)+ws.sx*.15,(mv?Math.abs(ph)*.015*spk:0)+ws.sy*.15+ws.dip*.05+air-spr*.02,spr*.03);
  root.rotation.set(spr*.22+ws.sy*.6,ws.sx*.7,ws.sx*.5+(mv?Math.cos(G.walk*5)*.01*spk:0));
- if(info.act){rArm.rotation.x=.25+Math.sin(t*15)*.6;rArm.rotation.y=-.1+Math.sin(t*15)*.12}
+ const spose=swingPose(dt,!!id);
+ if(spose){rArm.rotation.x=.12+spose.a;rArm.rotation.y=-.05+spose.y}
+ else if(info.act&&!GATHER.test(HG.A.key||'')){rArm.rotation.x=.25+Math.sin(t*15)*.6;rArm.rotation.y=-.1+Math.sin(t*15)*.12}
  else{rArm.rotation.x+=((id?.12:-.18)-rArm.rotation.x)*(1-Math.exp(-12*dt));rArm.rotation.y*=.85}
  hand.rotation.x=id?-.45:0;
  animateHeld(G,t,dt,id);
+ if(spose){hand.rotation.x+=spose.h;rArm.position.z=-.12+spose.z}else rArm.position.z=-.12;
  lArm.rotation.x=-.18+(mv?-ph*.06:0);
 });
 })();

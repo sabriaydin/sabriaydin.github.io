@@ -6,8 +6,6 @@ const S=HG.Scene,sc=HG.sc;
 const PER_TILE=5,RADIUS=58,CELL=16,CAP=34000,FCAP=5000,MOVE=5;
 const uTime={value:0};
 let grass=null,flow=null;
-let gN=0,gMe,gRgb,gTile,gR,gX,gZ,gCell;          /* çimen adayları (yapı-dizisi) */
-let fN=0,fMe,fRgb,fTile,fX,fZ,fCell;               /* çiçek adayları */
 const NC=Math.ceil(W/CELL);
 let lastX=-1e9,lastZ=-1e9,dirty=true;
 
@@ -43,12 +41,12 @@ function flowerGeo(){
 function windMat(amp){
  const m=sc.mat({side:THREE.DoubleSide,roughness:.9});
  m.onBeforeCompile=sh=>{
-  sh.uniforms.uTime=uTime;sh.uniforms.uWindV=sc.U.uWindV;
+  sh.uniforms.uTime=uTime;sh.uniforms.uWindV=sc.U.uWindV;sh.uniforms.uWPh=sc.U.uWPh;
   sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\n normal=normalize(vNormal);');   /* iki yüzlü yaprak: arka yüz de ışık alır (karanlık yaprak kalmaz) */
-  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;').replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;uniform vec2 uWPh;').replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
   #ifdef USE_INSTANCING
   float ph=instanceMatrix[3].x*.8+instanceMatrix[3].z*.6;
-  float ws=.45+uWindV.z*1.2,wv=sin(uTime*(1.7+uWindV.z*1.4)+ph-dot(instanceMatrix[3].xz,uWindV.xy)*.35);
+  float ws=.45+uWindV.z*1.2,wv=sin(uWPh.x+ph-dot(instanceMatrix[3].xz,vec2(.8,.6))*.35);   /* dalga yönü sabit: rüzgâr yönü yavaşça dönerken uzak bitkilerin fazı kaymaz */
   transformed.x+=((wv*.6+sin(uTime*3.1+ph*2.))*ws+uWindV.x*uWindV.z*1.6)*position.y*position.y*${amp.toFixed(2)};
   transformed.z+=(cos(uTime*1.3+ph*1.2)*.4*ws+uWindV.y*uWindV.z*1.6)*position.y*position.y*${amp.toFixed(2)};
   #endif`);
@@ -67,14 +65,20 @@ S.onInit(()=>{
 
 const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),cl=new THREE.Color();
 const FCOL=[0xffffff,0xffe14a,0xff7aa8,0xb48cff,0xff6a4a,0x7ac8ff];
-/* Arazi kurulduğunda bir kez: konum, dönüş, renk önceden hesaplanır; hücrelere (grid) göre sıralanır */
-function layout(G){
- const rnd=mulberry32(G.seed^0x51ed);
- const L=[],F=[];
- /* köy evlerinin zemini: içeride ve duvar altında çimen/çiçek bitmez */
- const hsx=[];for(const v of G.villages||[])for(const h of v.houses||[])hsx.push(h);
+/* Yapı kareleri: yerleştirilen ve üretilen yapıların kenarında çimen bitmez (sapları yapının içine girmesin) */
+const STR=new Uint8Array(32);for(const k of ['BENCH','FURN','FIRE','WALLW','WALLS','DOOR','VWALL','VDOOR','VDEC'])STR[O[k]]=1;
+const WATER_LIM=()=>sc.WY+.07;                       /* bu yüksekliğin altında (su içinde / su çizgisinde) çimen bitmez */
+/* Hücre (16x16 kare) bazlı tembel üretim: oyuncunun yaklaştığı hücrelerin konum, dönüş ve renkleri tohumdan hesaplanır, bellekte sınırlı sayıda tutulur */
+const cells=new Map(),CELL_KEEP=260;
+let cellSeed=0,cellG=null;
+function genCell(G,ci){
+ const cx=ci%NC,cz=(ci/NC)|0,x0=cx*CELL,z0=cz*CELL,x1=Math.min(W,x0+CELL),z1=Math.min(H,z0+CELL);
+ const rnd=mulberry32((cellSeed+ci*7919)>>>0);
+ const hsx=[];                                                     /* köy evlerinin zemini: içeride ve duvar altında çimen/çiçek bitmez */
+ for(const v of G.villages||[]){if(v.cx<x0-16||v.cx>x1+16||v.cy<z0-16||v.cy>z1+16)continue;for(const h of v.houses||[])hsx.push(h)}
  const inHouse=(x,z)=>{for(const h of hsx)if(Math.abs(x+.5-h.x)<2.6&&Math.abs(z+.5-h.z)<2.6)return true;return false};
- for(let z=0;z<H;z++)for(let x=0;x<W;x++){
+ const L=[],F=[],lim=WATER_LIM();
+ for(let z=z0;z<z1;z++)for(let x=x0;x<x1;x++){
   if(G.tile[z*W+x]!==T.GRASS)continue;
   if(hsx.length&&inHouse(x,z))continue;
   const patch=fbm(x/7,z/7,G.seed+61);
@@ -87,49 +91,60 @@ function layout(G){
  const pack=(arr,isG)=>{
   const items=[];
   for(const c of arr){
-   const y=S.groundY(c.x,c.z),sl=Math.abs(S.groundY(c.x+.3,c.z)-y)+Math.abs(S.groundY(c.x,c.z+.3)-y);
+   const y=S.groundY(c.x,c.z);
+   if(y<lim)continue;                                              /* su altında kalan veya su çizgisindeki noktalar */
+   const sl=Math.abs(S.groundY(c.x+.3,c.z)-y)+Math.abs(S.groundY(c.x,c.z+.3)-y);
    if(sl>.55)continue;
+   if(S.groundY(c.x+.45,c.z)<lim||S.groundY(c.x-.45,c.z)<lim||S.groundY(c.x,c.z+.45)<lim||S.groundY(c.x,c.z-.45)<lim)continue;   /* su kenarında sapların ucu suya girmesin */
    const sc2=isG?.7+c.r*.7:.8+c.r*.6;
    p.set(c.x,y-.02,c.z);e.set(0,c.r2*6.28,0);q.setFromEuler(e);s3.set(sc2,isG?sc2*(.8+c.r2*.6):sc2,sc2);m4.compose(p,q,s3);
    if(isG){S.colorAt(c.x,c.z,cl);const v=.9+c.r*.35;items.push({c,me:m4.elements.slice(),rgb:[cl.r*v,cl.g*v,cl.b*v]})}
    else{cl.setHex(FCOL[c.c]);items.push({c,me:m4.elements.slice(),rgb:[cl.r,cl.g,cl.b]})}
   }
-  items.sort((a,b)=>cellOf(a.c.x,a.c.z)-cellOf(b.c.x,b.c.z));
-  return items;
+  const n=items.length,me=new Float32Array(n*16),rgb=new Float32Array(n*3),tile=new Uint32Array(n),X=new Float32Array(n),Z=new Float32Array(n),R=new Float32Array(n);
+  items.forEach((it,k)=>{me.set(it.me,k*16);rgb.set(it.rgb,k*3);tile[k]=it.c.i;X[k]=it.c.x;Z[k]=it.c.z;R[k]=it.c.r3===undefined?0:it.c.r3});
+  return {n,me,rgb,tile,X,Z,R};
  };
- const cellOf=(x,z)=>Math.floor(z/CELL)*NC+Math.floor(x/CELL);
- const gi=pack(L,true),fi=pack(F,false);
- const store=(items)=>{
-  const n=items.length,me=new Float32Array(n*16),rgb=new Float32Array(n*3),tile=new Uint32Array(n),X=new Float32Array(n),Z=new Float32Array(n),R=new Float32Array(n),cell=new Int32Array(NC*NC+1);
-  items.forEach((it,k)=>{me.set(it.me,k*16);rgb.set(it.rgb,k*3);tile[k]=it.c.i;X[k]=it.c.x;Z[k]=it.c.z;R[k]=it.c.r3===undefined?0:it.c.r3;cell[cellOf(it.c.x,it.c.z)+1]++});
-  for(let k=0;k<NC*NC;k++)cell[k+1]+=cell[k];
-  return {n,me,rgb,tile,X,Z,R,cell};
- };
- const a=store(gi),b=store(fi);
- gN=a.n;gMe=a.me;gRgb=a.rgb;gTile=a.tile;gR=a.R;gX=a.X;gZ=a.Z;gCell=a.cell;
- fN=b.n;fMe=b.me;fRgb=b.rgb;fTile=b.tile;fX=b.X;fZ=b.Z;fCell=b.cell;
- dirty=true;lastX=-1e9;
+ return {g:pack(L,true),f:pack(F,false)};
 }
+function getCell(G,ci){
+ let c=cells.get(ci);
+ if(c){cells.delete(ci);cells.set(ci,c);return c}          /* en son kullanılan sona alınır */
+ c=genCell(G,ci);cells.set(ci,c);
+ if(cells.size>CELL_KEEP)cells.delete(cells.keys().next().value);
+ return c;
+}
+function layout(G){cells.clear();cellSeed=(G.seed^0x51ed)>>>0;cellG=G;dirty=true;lastX=-1e9}
 /* Oyuncunun çevresindeki aday örnekleri mesh'e doldurur (uzaklaştıkça seyrelir) */
 function rebuild(G,px,pz,frac){
- const R2=RADIUS*RADIUS;
+ const R2=RADIUS*RADIUS,ob=G.obj,lo=W+1,hi=W*H-W-2;
  const c0=Math.max(0,Math.floor((px-RADIUS)/CELL)),c1=Math.min(NC-1,Math.floor((px+RADIUS)/CELL)),r0=Math.max(0,Math.floor((pz-RADIUS)/CELL)),r1=Math.min(NC-1,Math.floor((pz+RADIUS)/CELL));
- const fill=(mesh,cap,N,Me,Rgb,Tile,X,Z,Rr,cell,keep)=>{
+ const fill=(mesh,cap,key,keep)=>{
   const ma=mesh.instanceMatrix.array,ca=mesh.instanceColor.array;let n=0;
   for(let r=r0;r<=r1&&n<cap;r++)for(let c=c0;c<=c1&&n<cap;c++){
-   const ci=r*NC+c;
-   for(let k=cell[ci];k<cell[ci+1];k++){
-    if(G.obj[Tile[k]])continue;
+   const cell=getCell(G,r*NC+c)[key],N=cell.n,Me=cell.me,Rgb=cell.rgb,Tile=cell.tile,X=cell.X,Z=cell.Z,Rr=cell.R;
+   for(let k=0;k<N;k++){
+    const i0=Tile[k];
+    if(ob[i0])continue;
     const dx=X[k]-px,dz=Z[k]-pz,d2=dx*dx+dz*dz;if(d2>R2)continue;
     if(!keep(Rr[k],d2))continue;
+    if(i0>lo&&i0<hi){                                          /* yapıların kenarındaki noktalar atlanır */
+     const fx=X[k]-(i0%W),fz=Z[k]-((i0/W)|0);
+     if((fx<.34&&STR[ob[i0-1]])||(fx>.66&&STR[ob[i0+1]])||(fz<.34&&STR[ob[i0-W]])||(fz>.66&&STR[ob[i0+W]]))continue;
+    }
     ma.set(Me.subarray(k*16,k*16+16),n*16);ca[n*3]=Rgb[k*3];ca[n*3+1]=Rgb[k*3+1];ca[n*3+2]=Rgb[k*3+2];
     if(++n>=cap)break;
    }
   }
   mesh.count=n;mesh.instanceMatrix.needsUpdate=true;mesh.instanceColor.needsUpdate=true;mesh.visible=n>0;
  };
- fill(grass,CAP,gN,gMe,gRgb,gTile,gX,gZ,gR,gCell,(r3,d2)=>r3<frac*(1-d2/R2*.85));
- fill(flow,FCAP,fN,fMe,fRgb,fTile,fX,fZ,new Float32Array(fN),fCell,(r,d2)=>frac>0&&d2<R2*.7);
+ fill(grass,CAP,'g',(r3,d2)=>r3<frac*(1-d2/R2*.85));
+ fill(flow,FCAP,'f',(r,d2)=>frac>0&&d2<R2*.7);
+}
+/* Yaklaşmakta olan hücreler her karede en fazla biri olmak üzere önceden hazırlanır (yürürken takılma olmaz) */
+function prefetch(G,px,pz){
+ const R=RADIUS+22,c0=Math.max(0,Math.floor((px-R)/CELL)),c1=Math.min(NC-1,Math.floor((px+R)/CELL)),r0=Math.max(0,Math.floor((pz-R)/CELL)),r1=Math.min(NC-1,Math.floor((pz+R)/CELL));
+ for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){const ci=r*NC+c;if(!cells.has(ci)){getCell(G,ci);return}}
 }
 S.onBuild(G=>layout(G));
 S.onSync(()=>{dirty=true});
@@ -140,7 +155,7 @@ S.onFrame((G,t,dt,info)=>{
  const play=info.mode==='play',frac=sc.grassFrac===undefined?1:sc.grassFrac;
  if(!grass||!G.obj)return;
  if(!play||frac<=0){grass.visible=false;flow.visible=false;lastX=-1e9;return}
- if(!dirty&&Math.hypot(G.px-lastX,G.py-lastZ)<MOVE)return;
+ if(!dirty&&Math.hypot(G.px-lastX,G.py-lastZ)<MOVE){prefetch(G,G.px,G.py);return}
  lastX=G.px;lastZ=G.py;dirty=false;
  rebuild(G,G.px,G.py,frac);
 });

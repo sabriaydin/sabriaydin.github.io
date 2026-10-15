@@ -18,12 +18,12 @@ sc.windU=windU;
 function windMat(extra){
  const m=sc.mat(extra);
  m.onBeforeCompile=sh=>{
-  sh.uniforms.uTime=windU.uTime;sh.uniforms.uWindV=sc.U.uWindV;
-  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;').replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
+  sh.uniforms.uTime=windU.uTime;sh.uniforms.uWindV=sc.U.uWindV;sh.uniforms.uWPh=sc.U.uWPh;
+  sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;uniform vec2 uWPh;').replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
   #ifdef USE_INSTANCING
   float wph=instanceMatrix[3].x*.6+instanceMatrix[3].z*.45;
   float wy=max(position.y-.6,0.);
-  float wk=.5+uWindV.z*1.1,gs=sin(uTime*(1.5+uWindV.z)+wph)*.6+sin(uTime*2.9+wph*1.7)*.4;
+  float wk=.5+uWindV.z*1.1,gs=sin(uWPh.y+wph)*.6+sin(uTime*2.9+wph*1.7)*.4;
   transformed.x+=(gs*.0035+uWindV.x*uWindV.z*.0045)*wk*wy*wy;
   transformed.z+=(cos(uTime*1.2+wph*1.3)*.0025+uWindV.y*uWindV.z*.0045)*wk*wy*wy;
   #endif`);

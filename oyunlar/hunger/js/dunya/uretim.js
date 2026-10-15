@@ -1,16 +1,55 @@
 /* Hunger 3D - harita üretimi (ada, göller, nesneler) */
 (()=>{
 'use strict';
-const {W,H,T,O,mulberry32,hash,fbm,clamp,smooth,ANIMAL}=HG;
-function genWorld(seed){
+const {T,O,mulberry32,hash,fbm,clamp,smooth,ANIMAL}=HG;
+/* size: yalnızca eski (384) kayıtları yeniden kurmak için; verilmezse güncel harita boyutu kullanılır.
+   Eski boyutta üretim, eski sürümle birebir aynı dünyayı verir (kayıtlı nesne dizisi uyuşsun diye). */
+function genWorld(seed,size){
+ const LEG=!!size&&size!==HG.W,W=size||HG.W,H=W;
  const rnd=mulberry32(seed^0x9e3779b9);
- const sp=mulberry32(seed^0x51ed270b),SC=W*H/65536;
+ const sp=mulberry32(seed^0x51ed270b),SC=LEG?W*H/65536:W*H/65536*.64;      /* yeni haritada kara oranı ~%64: sayılar karaya göre ölçeklenir */
+ const LAND=LEG?1:.8;                                                     /* ana adanın harita içindeki göreli genişliği; kalan alan açık deniz */
+ const half=W/2*LAND;
+ const rs=mulberry32(seed^0x5ea5c0de);                                    /* deniz özellikleri ayrı bir akıştan üretilir (ana akış değişmez) */
  /* her tohum farklı ada biçimi: eksen oranı, dönüş, kayma ve kıyı bükülmesi */
  const rot=sp()*6.283,cr=Math.cos(rot),sr=Math.sin(rot),axr=.8+sp()*.4,ayr=.8+sp()*.4,ox=(sp()-.5)*.14,oy=(sp()-.5)*.14,wp=.18+sp()*.3;
  const tile=new Uint8Array(W*H),obj=new Uint8Array(W*H),hgt=new Float32Array(W*H);
+ const dMain=(x,y)=>{const u=((x+.5)/W-.5-ox)*2/LAND,v=((y+.5)/H-.5-oy)*2/LAND,ru=(u*cr+v*sr)/axr,rv=(-u*sr+v*cr)/ayr;return Math.max(0,Math.sqrt(ru*ru+rv*rv)+(fbm(x/46,y/46,seed+3)-.5)*wp)};
+ /* açık deniz adacıkları: ana adadan uzak, birbirinden ayrık küçük kara parçaları */
+ const islets=[],reefs=[];
+ if(!LEG){
+  const want=Math.round(W*H/65536*1.6),sizes=[15,13,11,10,9,8,8,7,6,6,5,5,5,4,4];
+  for(let tr=0;tr<9000&&islets.length<want;tr++){
+   const r=sizes[islets.length%sizes.length]+rs()*2,x=Math.round(r+14+rs()*(W-2*r-28)),y=Math.round(r+14+rs()*(H-2*r-28));
+   if(dMain(x,y)<1.2+r/half*1.1)continue;
+   if(islets.some(q=>Math.hypot(q.x-x,q.y-y)<q.r+r+30))continue;
+   islets.push({x,y,r,id:islets.length});
+  }
+  /* mercan resifleri: açık denizde sığ (yürünebilir) sığlıklar */
+  const wantR=Math.round(W*H/65536*1.2);
+  for(let tr=0;tr<9000&&reefs.length<wantR;tr++){
+   const r=5+rs()*5,x=Math.round(r+14+rs()*(W-2*r-28)),y=Math.round(r+14+rs()*(H-2*r-28));
+   if(dMain(x,y)<1.14+r/half*1.1)continue;
+   if(islets.some(q=>Math.hypot(q.x-x,q.y-y)<q.r+r+16)||reefs.some(q=>Math.hypot(q.x-x,q.y-y)<q.r+r+22))continue;
+   reefs.push({x,y,r,id:reefs.length});
+  }
+ }
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-  const u=((x+.5)/W-.5-ox)*2,v=((y+.5)/H-.5-oy)*2,ru=(u*cr+v*sr)/axr,rv=(-u*sr+v*cr)/ayr,d=Math.max(0,Math.sqrt(ru*ru+rv*rv)+(fbm(x/46,y/46,seed+3)-.5)*wp);
-  const n=fbm(x/26,y/26,seed),isle=Math.max(0,fbm(x/9,y/9,seed+777)-.66)*2.4*smooth(.62,.9,d)*(1-smooth(.96,1.05,d)),e=(1-Math.pow(d,1.7))+(n-.5)*.75+isle;
+  const d=dMain(x,y);
+  const n=fbm(x/26,y/26,seed),isle=Math.max(0,fbm(x/9,y/9,seed+777)-.66)*2.4*smooth(.62,.9,d)*(1-smooth(.96,1.05,d));
+  let e=(1-Math.pow(d,1.7))+(n-.5)*.75+isle,onIslet=false;
+  if((islets.length||reefs.length)&&e<.3){
+   for(const q of islets){
+    const ax=x-q.x,ay=y-q.y;if(ax>q.r*1.3||ax<-q.r*1.3||ay>q.r*1.3||ay<-q.r*1.3)continue;
+    const ei=Math.min(.74,1-Math.pow(Math.hypot(ax,ay)/q.r,1.8)+(fbm(x/6,y/6,seed+91)-.5)*.55);
+    if(ei>e){e=ei;onIslet=true}
+   }
+   for(const q of reefs){
+    const ax=x-q.x,ay=y-q.y;if(ax>q.r*1.3||ax<-q.r*1.3||ay>q.r*1.3||ay<-q.r*1.3)continue;
+    const ei=Math.min(.17,1.05-Math.pow(Math.hypot(ax,ay)/q.r,1.4)+(fbm(x/5,y/5,seed+93)-.5)*.5);
+    if(ei>e)e=ei;
+   }
+  }
   let t,hh=0;
   if(e<.1){t=T.DEEP;hh=-Math.min(3.4,(.1-e)*13)}   /* açıklara doğru derinleşir */
   else if(e<.2)t=T.SHAL;else if(e<.28)t=T.SAND;
@@ -18,8 +57,10 @@ function genWorld(seed){
    /* yükseklik: dağlık bölgeler (kıyıya yaklaştıkça alçalır) */
    const m=clamp((fbm(x/22,y/22,seed+5)-.46)/.3,0,1);
    hh=Math.pow(m,1.3)*6.5*clamp((e-.32)/.25,0,1)+fbm(x/5,y/5,seed+8)*.5*clamp((e-.3)/.2,0,1);
+   if(onIslet)hh*=.2;
    t=T.GRASS;
-   if(hh>3.2||e>.9||(e>.5&&fbm(x/9,y/9,seed+99)>.76))t=T.ROCK;
+   if(onIslet){if(hh>.9)t=T.ROCK}
+   else if(hh>3.2||e>.9||(e>.5&&fbm(x/9,y/9,seed+99)>.76))t=T.ROCK;
    else if(e>.4&&e<.6&&hh<.7&&fbm(x/7,y/7,seed+7)>.74)t=T.POND;
   }
   tile[y*W+x]=t;hgt[y*W+x]=hh;
@@ -56,6 +97,14 @@ function genWorld(seed){
    const o=fbm(x/6,y/6,seed+55);
    if(o>.64&&r<.02){const q=rnd(),h=hgt[i];if(q<.72)obj[i]=O.COAL;else if(q<.93){if(h>1.6)obj[i]=O.COPPER}else if(h>3.4)obj[i]=O.IRON}
    else if(r<.008)obj[i]=O.ROCK;
+  }
+ }
+ /* adacıklar: kumsalda palmiye, çimenlikte ağaç ve çalı (ayrı akıştan) */
+ for(const q of islets){
+  for(let y=Math.max(1,Math.floor(q.y-q.r*1.3));y<=Math.min(H-2,Math.ceil(q.y+q.r*1.3));y++)for(let x=Math.max(1,Math.floor(q.x-q.r*1.3));x<=Math.min(W-2,Math.ceil(q.x+q.r*1.3));x++){
+   const i=y*W+x,t=tile[i],r=rs();if(obj[i])continue;
+   if(t===T.SAND){if(r<.16)obj[i]=O.PALM}
+   else if(t===T.GRASS){if(r<.07)obj[i]=O.TREE;else if(r<.12)obj[i]=O.BUSH;else if(r<.14)obj[i]=O.ROCK}
   }
  }
  /* aralık: ağaçlar en az 2, kaya ve madenler en az 3 kare arayla durur (sıkışık olanlar seyreltilir) */
@@ -180,7 +229,7 @@ function genWorld(seed){
    let ok=true,hmin=9,hmax=-9;
    for(let j=-4;j<=4&&ok;j++)for(let k=-4;k<=4;k++){const i=(y+j)*W+x+k;if(tile[i]!==T.GRASS||obj[i]===O.FIRE){ok=false;break}hmin=Math.min(hmin,hgt[i]);hmax=Math.max(hmax,hgt[i])}
    if(!ok||hmax-hmin>1.2)continue;
-   const q=(rnd()*4)|0,kind=['tent','ruin','stash'][(rnd()*3)|0],dd=Math.hypot(x-sx,y-sy)/(W/2),tier=dd>.62?2:dd>.38?1:0;
+   const q=(rnd()*4)|0,kind=['tent','ruin','stash'][(rnd()*3)|0],dd=Math.hypot(x-sx,y-sy)/half,tier=dd>.62?2:dd>.38?1:0;
    const cq=Math.round(Math.cos(q*Math.PI/2)),sq=Math.round(Math.sin(q*Math.PI/2));
    for(let j=-4;j<=4;j++)for(let k=-4;k<=4;k++)obj[(y+j)*W+x+k]=O.NONE;
    const mk=(a,b)=>{obj[(y+Math.round(-a*sq+b*cq))*W+x+Math.round(a*cq+b*sq)]=O.VDEC};
@@ -204,7 +253,7 @@ function genWorld(seed){
    let ok=true,hmin=9,hmax=-9,rk=0;
    for(let j=-4;j<=4&&ok;j++)for(let k=-4;k<=4;k++){const i=(y+j)*W+x+k,t=tile[i];if(t<=T.SHAL||t===T.POND||obj[i]===O.VDEC||obj[i]===O.FIRE){ok=false;break}if(t===T.ROCK)rk++;hmin=Math.min(hmin,hgt[i]);hmax=Math.max(hmax,hgt[i])}
    if(!ok||hmax-hmin>(relax?2.4:1.8)||rk<(relax?4:14))continue;
-   const q=(rnd()*4)|0,dd=Math.hypot(x-sx,y-sy)/(W/2),tier=dd>.6?2:dd>.34?1:0;
+   const q=(rnd()*4)|0,dd=Math.hypot(x-sx,y-sy)/half,tier=dd>.6?2:dd>.34?1:0;
    const cq=Math.round(Math.cos(q*Math.PI/2)),sq=Math.round(Math.sin(q*Math.PI/2));
    for(let j=-4;j<=4;j++)for(let k=-4;k<=4;k++)obj[(y+j)*W+x+k]=O.NONE;
    /* yapı: arkada ve yanlarda kaya kütlesi, ortada geçit (yerel b yönü: ön) */
@@ -212,6 +261,58 @@ function genWorld(seed){
    mk(-2,0);mk(2,0);mk(-2,-1);mk(-1,-1);mk(0,-1);mk(1,-1);mk(2,-1);
    for(let j=-4;j<=4;j++)for(let k=-4;k<=4;k++)tile[(y+j)*W+x+k]===T.GRASS&&Math.hypot(j,k)<3&&(tile[(y+j)*W+x+k]=T.ROCK);
    caves.push({id:caves.length,x,y,q,tier,seed:((rnd()*2147483647)|0),open:false});
+  }
+ }
+ /* ---- deniz özellikleri (yalnızca yeni harita): gemi enkazları, adacık sığınakları, deniz fenerleri ---- */
+ if(!LEG){
+  const PI2=Math.PI/2,WYv=-.16,isWat=i=>tile[i]<=T.SHAL,depthAt=i=>WYv-(tile[i]===T.DEEP?-1.3+hgt[i]:-.5);
+  const nN2=(HG.NOTES&&HG.NOTES.length)||14;
+  const map=(x,y,q,a,b)=>{const cq=Math.round(Math.cos(q*PI2)),sq=Math.round(Math.sin(q*PI2));return [x+Math.round(a*cq+b*sq),y+Math.round(-a*sq+b*cq)]};
+  const area=(x,y,q,a0,a1,b0,b1,ok)=>{for(let a=a0;a<=a1;a++)for(let b=b0;b<=b1;b++){const [X,Y]=map(x,y,q,a,b);if(X<2||Y<2||X>=W-2||Y>=H-2||!ok(Y*W+X))return false}return true};
+  const mark=(x,y,q,a0,a1,b0,b1)=>{for(let a=a0;a<=a1;a++)for(let b=b0;b<=b1;b++){const [X,Y]=map(x,y,q,a,b);obj[Y*W+X]=O.VDEC}};
+  const addCamp=(x,y,kind,q,tier)=>{camps.push({id:camps.length,x,y,kind,q,tier,note:(camps.length*5+3)%nN2,open:false});return camps[camps.length-1]};
+  /* batıklar: kıyıya yakın, 1,5-2,7 m derin sularda yan yatmış gemi gövdesi ve dibinde sandık */
+  const wantW=Math.max(4,Math.round(W*H/65536*.9));let nW=0;
+  for(let tr=0;tr<40000&&nW<wantW;tr++){
+   const x=16+((rs()*(W-32))|0),y=16+((rs()*(H-32))|0),i=y*W+x;
+   if(tile[i]!==T.DEEP)continue;
+   const dp=depthAt(i);if(dp<1.5||dp>2.7)continue;
+   if(camps.some(c=>Math.hypot(c.x-x,c.y-y)<(c.kind==='wreck'?64:18)))continue;
+   const q=(rs()*4)|0;
+   if(!area(x,y,q,-5,4,-3,2,j=>isWat(j)&&obj[j]===0&&depthAt(j)>=1.0))continue;
+   addCamp(x,y,'wreck',q,Math.min(2,1+((rs()*2.4)|0)));nW++;
+   mark(x,y,q,0,0,0,0);mark(x,y,q,-4,3,-2,-1);
+  }
+  /* adacık sığınakları: iri adacıkların ortasında sandıklı küçük barınak */
+  for(const t of islets){
+   if(t.r<7)continue;
+   let best=null,bd=1e9;
+   for(let y=Math.floor(t.y-t.r*.6);y<=Math.ceil(t.y+t.r*.6);y++)for(let x=Math.floor(t.x-t.r*.6);x<=Math.ceil(t.x+t.r*.6);x++){
+    const i=y*W+x;if(x<4||y<4||x>=W-4||y>=H-4||tile[i]<T.SAND||tile[i]===T.POND||tile[i]===T.ROCK)continue;
+    const q=(rs()*4)|0;
+    if(!area(x,y,q,-3,2,-2,2,j=>tile[j]===T.GRASS||tile[j]===T.SAND))continue;
+    const dd=Math.hypot(x-t.x,y-t.y);if(dd<bd){bd=dd;best={x,y,q}}
+   }
+   if(!best)continue;
+   const {x,y,q}=best;
+   for(let a=-3;a<=2;a++)for(let b=-2;b<=2;b++){const [X,Y]=map(x,y,q,a,b);obj[Y*W+X]=O.NONE}
+   addCamp(x,y,'castaway',q,dMain(x,y)>1.7?2:1);
+   mark(x,y,q,0,0,0,0);mark(x,y,q,-2,-1,-1,1);
+   t.camp=camps.length-1;
+  }
+  /* deniz fenerleri: ana ada kıyısında ve en büyük adacıklarda; yanında bekçi sandığı */
+  let nL=0;const wantL=Math.max(3,Math.round(W*H/65536*.45));
+  for(let tr=0;tr<60000&&nL<wantL;tr++){
+   const x=8+((rs()*(W-16))|0),y=8+((rs()*(H-16))|0),i=y*W+x;
+   if(tile[i]!==T.SAND)continue;
+   if(Math.hypot(x-sx,y-sy)<60||villages.some(v=>Math.hypot(v.cx-x,v.cy-y)<30)||camps.some(c=>Math.hypot(c.x-x,c.y-y)<(c.kind==='lighthouse'?150:20)))continue;
+   let wc=0;for(let j=-6;j<=6;j++)for(let k=-6;k<=6;k++){const X=x+k,Y=y+j;if(X>0&&Y>0&&X<W-1&&Y<H-1&&isWat(Y*W+X))wc++}
+   if(wc<46)continue;
+   const q=(rs()*4)|0;
+   if(!area(x,y,q,-2,2,-3,1,j=>tile[j]===T.SAND||tile[j]===T.GRASS))continue;
+   for(let a=-2;a<=2;a++)for(let b=-3;b<=1;b++){const [X,Y]=map(x,y,q,a,b);obj[Y*W+X]=O.NONE}
+   addCamp(x,y,'lighthouse',q,1);nL++;
+   mark(x,y,q,0,0,0,0);mark(x,y,q,-1,1,-3,-1);
   }
  }
  /* kıyı köpüğü maskesi */
@@ -246,7 +347,98 @@ function genWorld(seed){
    }
   }
  }
- return {tile,obj,hgt,shore,animals,villages,camps,caves,sx:sx+.5,sy:sy+.5};
+ return {tile,obj,hgt,shore,animals,villages,camps,caves,sx:sx+.5,sy:sy+.5,islets,reefs,size:W,entSC:SC};
 }
-HG.genWorld=genWorld;
+/* Eski (384) dünyayı güncel büyük haritanın ortasına yerleştirir; çevresi açık denizdir. off: kaydırma (kare). */
+function embedLegacy(w,size,seed){
+ const N=HG.W,off=(N-size)>>1,tile=new Uint8Array(N*N),obj=new Uint8Array(N*N),hgt=new Float32Array(N*N).fill(-3.4),shore=new Uint8Array(N*N);
+ for(let y=0;y<size;y++){
+  const d=(y+off)*N+off,r=y*size;
+  tile.set(w.tile.subarray(r,r+size),d);obj.set(w.obj.subarray(r,r+size),d);hgt.set(w.hgt.subarray(r,r+size),d);shore.set(w.shore.subarray(r,r+size),d);
+ }
+ for(const a of w.animals){a.x+=off;a.z+=off}
+ for(const v of w.villages){
+  v.cx+=off;v.cy+=off;
+  for(const n of v.npcs){n.x+=off;n.z+=off;n.ix+=off;n.iz+=off}
+  for(const h of v.houses){h.x+=off;h.z+=off;h.dX+=off;h.dZ+=off}
+  for(const e of v.extras){e.x+=off;e.z+=off}
+ }
+ for(const c of w.camps){c.x+=off;c.y+=off}
+ for(const c of w.caves){c.x+=off;c.y+=off}
+ /* Çevredeki geniş denize deniz özellikleri eklenir: aynı tohumun yeni haritasından uzak adacıklar, resifler ve
+    adacık kampları aktarılır; batıklar ayrı bir akıştan yerleştirilir. Yeni kamplar listenin sonuna eklenir (eski kayıt sırası bozulmaz). */
+ const islets=[],reefs=[],camps=w.camps,lo=off-10,hi=off+size+10;
+ const inSq=(x,y,R)=>x+R>lo&&x-R<hi&&y+R>lo&&y-R<hi;
+ if(seed!==undefined){
+  const nw=genWorld(seed);
+  const copyBox=(x,y,R)=>{for(let j=Math.max(1,Math.floor(y-R));j<=Math.min(N-2,Math.ceil(y+R));j++)for(let k=Math.max(1,Math.floor(x-R));k<=Math.min(N-2,Math.ceil(x+R));k++){const i=j*N+k;tile[i]=nw.tile[i];obj[i]=nw.obj[i];hgt[i]=nw.hgt[i];shore[i]=nw.shore[i]}};
+  const cmap=new Map();
+  for(const q of nw.islets){
+   const R=Math.ceil(q.r*1.3)+2;if(inSq(q.x,q.y,R))continue;
+   copyBox(q.x,q.y,R);const n={x:q.x,y:q.y,r:q.r,id:islets.length};islets.push(n);
+   if(q.camp!==undefined)cmap.set(q.camp,n);
+   for(let ci=0;ci<nw.camps.length;ci++){
+    const c=nw.camps[ci];if(c.kind==='wreck'||Math.abs(c.x-q.x)>R||Math.abs(c.y-q.y)>R)continue;
+    camps.push({id:camps.length,x:c.x,y:c.y,kind:c.kind,q:c.q,tier:c.tier,note:c.note,open:false});
+    if(cmap.get(q.camp)===n&&ci===q.camp)n.camp=camps.length-1;
+   }
+  }
+  for(const q of nw.reefs){
+   const R=Math.ceil(q.r*1.3)+2;if(inSq(q.x,q.y,R))continue;
+   copyBox(q.x,q.y,R);reefs.push({x:q.x,y:q.y,r:q.r,id:reefs.length});
+  }
+  /* batıklar: ayrı akış, 1,5-2,7 m derinlikte yan yatmış gövde (dibi kubbe biçiminde yükseltilir) */
+  const rw=mulberry32((seed^0x2c9f77b1)>>>0),PI2=Math.PI/2,nN2=(HG.NOTES&&HG.NOTES.length)||14;
+  const map=(x,y,q,a,b)=>{const cq=Math.round(Math.cos(q*PI2)),sq=Math.round(Math.sin(q*PI2));return [x+Math.round(a*cq+b*sq),y+Math.round(-a*sq+b*cq)]};
+  const wantW=Math.max(3,Math.round((N*N-size*size)/65536*.9));let nW=0;
+  for(let tr=0;tr<30000&&nW<wantW;tr++){
+   const x=16+((rw()*(N-32))|0),y=16+((rw()*(N-32))|0),i=y*N+x;
+   if(inSq(x,y,16)||tile[i]!==T.DEEP||obj[i])continue;
+   if(islets.some(q=>Math.hypot(q.x-x,q.y-y)<q.r*1.3+12)||reefs.some(q=>Math.hypot(q.x-x,q.y-y)<q.r*1.3+10))continue;
+   if(camps.some(c=>c.kind==='wreck'&&Math.hypot(c.x-x,c.y-y)<64))continue;
+   const q=(rw()*4)|0;let ok=true;
+   for(let a=-5;a<=4&&ok;a++)for(let b=-3;b<=2;b++){const [X,Y]=map(x,y,q,a,b),j=Y*N+X;if(tile[j]!==T.DEEP||obj[j]){ok=false;break}}
+   if(!ok)continue;
+   for(let j=y-11;j<=y+11;j++)for(let k=x-11;k<=x+11;k++){
+    const m=j*N+k,d=Math.hypot(k-x,j-y);if(d>11||tile[m]!==T.DEEP)continue;
+    hgt[m]=Math.max(hgt[m],-3.4+2.4*(1-smooth(5,11,d)));
+   }
+   camps.push({id:camps.length,x,y,kind:'wreck',q,tier:Math.min(2,1+((rw()*2.4)|0)),note:(camps.length*5+3)%nN2,open:false});
+   const mark=(a0,a1,b0,b1)=>{for(let a=a0;a<=a1;a++)for(let b=b0;b<=b1;b++){const [X,Y]=map(x,y,q,a,b);obj[Y*N+X]=O.VDEC}};
+   mark(0,0,0,0);mark(-4,3,-2,-1);nW++;
+  }
+  /* deniz fenerleri: en iri adacıkların kumsalında (en fazla 2) */
+  let nL=0;const big=islets.filter(q=>q.r>=8);
+  for(let tr=0;tr<20000&&nL<2&&big.length;tr++){
+   const t0=big[(rw()*big.length)|0],x=Math.round(t0.x+(rw()*2-1)*t0.r*1.2),y=Math.round(t0.y+(rw()*2-1)*t0.r*1.2),i=y*N+x;
+   if(x<8||y<8||x>=N-8||y>=N-8||tile[i]!==T.SAND)continue;
+   if(camps.some(c=>Math.hypot(c.x-x,c.y-y)<(c.kind==='lighthouse'?150:c.kind==='castaway'?8:20)))continue;
+   let wc=0;for(let j=-6;j<=6;j++)for(let k=-6;k<=6;k++)if(tile[(y+j)*N+x+k]<=T.SHAL)wc++;
+   if(wc<46)continue;
+   const q=(rw()*4)|0;let ok=true;
+   for(let a=-2;a<=2&&ok;a++)for(let b=-3;b<=1;b++){const [X,Y]=map(x,y,q,a,b),tt=tile[Y*N+X];if(tt!==T.SAND&&tt!==T.GRASS){ok=false;break}}
+   if(!ok)continue;
+   for(let a=-2;a<=2;a++)for(let b=-3;b<=1;b++){const [X,Y]=map(x,y,q,a,b);obj[Y*N+X]=O.NONE}
+   camps.push({id:camps.length,x,y,kind:'lighthouse',q,tier:1,note:(camps.length*5+3)%nN2,open:false});
+   const mk2=(a0,a1,b0,b1)=>{for(let a=a0;a<=a1;a++)for(let b=b0;b<=b1;b++){const [X,Y]=map(x,y,q,a,b);obj[Y*N+X]=O.VDEC}};
+   mk2(0,0,0,0);mk2(-1,1,-3,-1);nL++;
+  }
+ }
+ return Object.assign({},w,{tile,obj,hgt,shore,camps,sx:w.sx+off,sy:w.sy+off,islets,reefs,size:N,off,entSC:size*size/65536});
+}
+/* Karadan uzaklık alanı (kare): kara ve göl 0; açık denizde artar (255'e kadar). Köpekbalığı, martı vb. için kullanılır. */
+function seaDistField(tile,N){
+ const d=new Uint8Array(N*N).fill(255),q=new Int32Array(N*N);let h=0,t=0;
+ for(let i=0;i<N*N;i++)if(tile[i]>=T.SAND){d[i]=0;q[t++]=i}
+ while(h<t){
+  const i=q[h++],v=d[i]+1;if(v>=250)continue;
+  const x=i%N;
+  if(x>0&&d[i-1]===255){d[i-1]=v;q[t++]=i-1}
+  if(x<N-1&&d[i+1]===255){d[i+1]=v;q[t++]=i+1}
+  if(i>=N&&d[i-N]===255){d[i-N]=v;q[t++]=i-N}
+  if(i<N*N-N&&d[i+N]===255){d[i+N]=v;q[t++]=i+N}
+ }
+ return d;
+}
+HG.genWorld=genWorld;HG.embedLegacy=embedLegacy;HG.seaDistField=seaDistField;
 })();

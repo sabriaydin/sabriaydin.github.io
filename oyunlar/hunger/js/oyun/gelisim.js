@@ -13,12 +13,13 @@ const PERKS=[
  ['mind','Soğukkanlılık','Akıl kaybı %15 azalır.'],
  ['dive','Dalgıç','Nefes %20 daha uzun yeter, yüzerken dayanıklılık daha yavaş azalır.'],
  ['agile','Çevik','Dayanıklılık %15 daha hızlı yenilenir.'],
- ['medic','Şifa Eli','Bandaj her seviyede 5 ek sağlık verir.']
+ ['medic','Şifa Eli','Bandaj her seviyede 5 ek sağlık verir.'],
+ ['sail','Denizci','Sal %12 daha hızlı gider, balık daha çabuk tutulur ve köpek balığı ısırığı %15 azalır.']
 ].map(p=>p.concat(3));
 const perk=k=>(G.perks&&G.perks[k])||0;
 function progInit(){
  G.xp=0;G.lvl=1;G.pts=0;G.perks={};G.notes=[];G.quests={};G.lastDay=1;G.blood=false;G.bloodDay=0;
- G.stats={kills:0,shades:0,hunted:0,chests:0,quests:0,traded:0,blood:0,crafted:0,caves:0,walked:0,swum:0,shells:0};
+ G.stats={kills:0,shades:0,hunted:0,chests:0,quests:0,traded:0,blood:0,crafted:0,caves:0,walked:0,swum:0,shells:0,islets:0,reefs:0,sailed:0,sharks:0,coral:0,crabs:0};
 }
 function progSave(){return {xp:G.xp,lvl:G.lvl,pts:G.pts,perks:G.perks,notes:G.notes,quests:G.quests,stats:G.stats,lastDay:G.lastDay,blood:!!G.blood,bloodDay:G.bloodDay}}
 function progLoad(s){
@@ -67,7 +68,7 @@ function render(){
   h=`<p class="mut">Bulunan kayıt: ${G.notes.length}/${all.length}. Terk edilmiş kampların sandıklarında bulunur.</p>`;
   for(const i of G.notes)h+=`<div class="nt${i===hl?' hl':''}"><b>${esc(all[i].t)}</b><span>${esc(all[i].x)}</span></div>`;
  }else{
-  const s=G.stats,rows=[['Hayatta kalınan gün',dayNo()],['Seviye',G.lvl],['Avlanan hayvan',s.hunted],['Yok edilen Gölge',s.shades],['Açılan sandık',s.chests],['Tamamlanan görev',s.quests],['Ticaret işlemi',s.traded],['Atlatılan Kan Ayı',s.blood],['Üretilen eşya',s.crafted],['Bulunan kamp',(G.camps||[]).filter(c=>G.flags['c'+c.id]).length+'/'+(G.camps||[]).length],['Bulunan köy',(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length+'/'+(G.villages||[]).length],['Yürünen mesafe',Math.round(s.walked||0)+' m'],['Yüzülen mesafe',Math.round(s.swum||0)+' m'],['Toplanan midye',s.shells||0]];
+  const s=G.stats,rows=[['Hayatta kalınan gün',dayNo()],['Seviye',G.lvl],['Avlanan hayvan',s.hunted],['Yok edilen Gölge',s.shades],['Açılan sandık',s.chests],['Tamamlanan görev',s.quests],['Ticaret işlemi',s.traded],['Atlatılan Kan Ayı',s.blood],['Üretilen eşya',s.crafted],['Bulunan kamp',(G.camps||[]).filter(c=>G.flags['c'+c.id]).length+'/'+(G.camps||[]).length],['Bulunan köy',(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length+'/'+(G.villages||[]).length],['Yürünen mesafe',Math.round(s.walked||0)+' m'],['Yüzülen mesafe',Math.round(s.swum||0)+' m'],['Toplanan midye',s.shells||0],['Salla alınan yol',Math.round(s.sailed||0)+' m'],['Keşfedilen ada',(s.islets||0)+'/'+(G.islets||[]).length],['Keşfedilen resif',(s.reefs||0)+'/'+(G.reefs||[]).length],['Toplanan mercan',s.coral||0],['Öldürülen köpek balığı',s.sharks||0]];
   h=rows.map(r=>`<div class="st"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
  }
  b.innerHTML=h;

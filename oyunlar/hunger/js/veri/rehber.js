@@ -5,13 +5,13 @@ const GUIDE={};
 /* Her bölüm: [başlık, metin] */
 GUIDE.play=[
  ['Amaç','Issız bir adada hayatta kalmak. Açlık, susuzluk, soğuk ve geceleri dolaşan yaratıklara karşı dayanmak; adayı tanımak, köylülerle ilişki kurmak ve eskiden kalan notlardan adanın sırrını çözmek.'],
- ['Başlangıç','İlk iş ağaç kesmek ve taş toplamaktır. Eliniz boşken ağaca bakıp sol tuşu basılı tutarak odun toplayabilirsiniz. Odun ve taşla Taş Balta ile Taş Kazma üretin ({craft} veya {inv}). Ardından kamp ateşi yapın: ateş ısıtır, aydınlatır ve yemek pişirir.'],
+ ['Başlangıç','İlk iş ağaç kesmek ve taş toplamaktır. Başlangıçta 1. yuvada bir El Taşı bulunur: elinizde tutarken ağaca bakıp sol tuşu basılı tutarak odun, kayaya bakarak taş toplarsınız. Çıplak elle ağaç kesilmez, taş ve maden kazılmaz. Odun ve taşla Taş Balta ile Taş Kazma üretin ({craft} veya {inv}). Ardından kamp ateşi yapın: ateş ısıtır, aydınlatır ve yemek pişirir.'],
  ['Durum çubukları','<b>Sağlık:</b> sıfırlanırsa oyun biter; açlık, susuzluk ve sıcaklık yeterliyken yavaşça dolar.<br><b>Açlık / Susuzluk:</b> zamanla ve koşarken azalır. Yiyecek yiyin, tatlı su gölünden şişe doldurun ya da hindistan cevizi içine bakın.<br><b>Sıcaklık:</b> geceleri, yağmurda ve suda düşer. Ateş yanında, barınakta ve deri montla korunursunuz.<br><b>Dayanıklılık:</b> koşmak ve zıplamak harcar, durunca dolar. Tükenince yürüyüş yavaşlar.<br><b>Nefes:</b> yalnızca baş suyun altındayken görünür; yaklaşık 26 saniye yeter, bitince boğulma hasarı başlar.<br><b>Akıl:</b> karanlıkta ve yalnızken düşer. Düşük akılda ekranda bozulmalar, fısıltılar ve sahte siluetler görülür. Ateş başında ya da aydınlıkta dinlenmek akılı yeniler.'],
- ['Gün ve gece','Bir gün yaklaşık 7 dakikadır. Saatin yanında bakış yönü (K, KD, D, GD, G, GB, B, KB) görünür; ayarlardan kapatılabilir. Gece sıcaklık düşer, kurtlar ve Gölgeler çıkar. Akşam olmadan ateş, barınak ve meşale hazırlığı yapın. Her 5. gece Kan Ayı doğar: gökyüzü kızarır ve düşman sayısı artar.'],
+ ['Gün ve gece','Bir gün yaklaşık 7 dakikadır. Gün, saat ve seviye ekranın sağ altında görünür; bakış yönü ekranın üst ortasındaki pusulada (K, KD, D, GD, G, GB, B, KB) gösterilir ve ayarlardan kapatılabilir. Gece sıcaklık düşer, kurtlar ve Gölgeler çıkar. Akşam olmadan ateş, barınak ve meşale hazırlığı yapın. Her 5. gece Kan Ayı doğar: gökyüzü kızarır ve düşman sayısı artar.'],
  ['Barınak','Duvar ve kapıyla tamamen çevrilmiş, en fazla yaklaşık 40 karelik kapalı bir alan barınak sayılır. Barınakta soğuk azalır, yağmur hissedilmez ve Gölgeler içeri giremez. Bir kare bile açık kalırsa barınak sayılmaz; kapıyı kapalı tutun. Ağaç ve çalılar duvar yerine geçmez.'],
- ['Yüzme ve dalış','Derin suda yüzülür: Boşluk yüzeye çıkarır, <b>X</b> (ayarlardan değişir) suya daldırır; ileri yürürken yukarı veya aşağı bakmak da yönü belirler. Su altında nefes çubuğu azalır, yüzeye çıkınca yenilenir. Su altında balık sürüleri, su bitkileri ve mercanlar yaşar; balıklar yaklaşınca dağılır. Dibe yaklaşıp aşağı bakarak sol tuşu basılı tutun: midye, deniz yosunu ve nadiren inci toplanır. Derinlik, saatin altındaki durum satırında görünür.'],
+ ['Yüzme ve dalış','Derin suda yüzülür: Boşluk yüzeye çıkarır, <b>X</b> (ayarlardan değişir) suya daldırır; ileri yürürken yukarı veya aşağı bakmak da yönü belirler. Su altında nefes çubuğu azalır, yüzeye çıkınca yenilenir. Su altında balık sürüleri, su bitkileri ve mercanlar yaşar; balıklar yaklaşınca dağılır. Dibe yaklaşıp aşağı bakarak sol tuşu basılı tutun: midye, deniz yosunu ve nadiren inci toplanır. Derinlik durum satırında görünür. Mercan resiflerinde dalıp dibe bakarak mercan toplanır; çantada Dalış Maskesi varsa nefes daha uzun yeter. Yüzmeden açık denizde ilerlemek için Sal kullanılır (Deniz sekmesi).'],
  ['Yemek ve su','Çiğ et, balık ve midye hastalık yapar; ateşte pişirin. Meyve, hindistan cevizi ve süt bedava yiyecektir. Boş şişeyi tatlı su gölüne bakıp sol tıkla doldurun. Deniz suyu içilmez.'],
- ['Üretim ve ilerleme','Taş aletler → ocak ve tezgâh → bakır aletler → demir aletler. Bakır ve demir cevheri ocakta kömürle eritilir; külçeler tezgâhta alete dönüşür. Daha iyi balta ve kazma hem hızlı hem fazla verim sağlar. Ayrıntı için Madenler ve Üretim sekmelerine bakın.'],
+ ['Üretim ve ilerleme','Taş aletler → ocak ve tezgâh → bakır aletler → demir aletler. Bakır ve demir cevheri ocakta kömürle eritilir; külçeler tezgâhta alete dönüşür. Toplama aletleri dört düzeydedir: El Taşı, Taş, Bakır ve Demir; her düzey toplama hızını ve çıkan eşya miktarını artırır. Ayrıntı için Madenler ve Üretim sekmelerine bakın.'],
  ['Köyler ve ticaret','Haritada dağınık köyler bulunur. Her köylü yalnızca mesleğiyle ilgili eşyaların alım satımını yapar. Stoklar sınırlıdır; biten ürün bir süre sonra yenilenir. Köylülere ok atmayın: vurulan köylü bir süre küser ve konuşmaz. Köylüler geceleri evlerinde uyur. Gece köy fenerleri güvenli bir alan sağlar. Bulduğunuz köyler haritaya işlenir.'],
  ['Çanta','{drop} seçili eşyadan bir adet atar. {sort} (veya çanta panelindeki düğme) çantayı birleştirip eşya türüne göre sıralar; hızlı erişim çubuğuna dokunmaz.'],
  ['Gelişim','Eylemler deneyim kazandırır. Seviye atlayınca yetenek puanı verilir ({jr}: Günlük). Başarımlar ayrıca deneyim sağlar.'],
@@ -34,12 +34,12 @@ GUIDE.foes=[
  ['Kanama ve bandaj','Gölge ve kurt saldırıları kanamaya yol açar; kanama sağlığı azaltır. Bandaj eldeyken sol tıkı basılı tutarak sarın.']
 ];
 GUIDE.map=[
- ['Ada','Harita tek bir adadır. Kıyıda kum, içeride çimenlik ve orman, kuzey ile doğuda kayalık dağlar bulunur. Ortadaki tatlı su gölünden içilebilir. Göletler ve sığ sular yürünerek geçilir, derin sularda yüzülür; her iki durumda da hareket yavaşlar ve sıcaklık düşer.'],
+ ['Ada','Harita, geniş bir denizin ortasındaki ana adadan ve çevresindeki küçük adalardan oluşur. Ana adada kıyıda kum, içeride çimenlik ve orman, kuzey ile doğuda kayalık dağlar bulunur. Ortadaki tatlı su gölünden içilebilir. Göletler ve sığ sular yürünerek geçilir, derin sularda yüzülür; her iki durumda da hareket yavaşlar ve sıcaklık düşer.'],
  ['Haritayı kullanma','{map} ile tam ekran haritayı açın. Sağ üstteki mini harita sizi merkezde gösterir. Kırmızı ok sizsiniz ve baktığınız yönü gösterir. Yerleştirdiğiniz kamp ateşleri turuncu noktayla işaretlenir. Harita gölgelendirilmiş kabartma olarak çizilir; dağlar, ormanlar ve kıyılar ayırt edilir.'],
  ['Keşif sisi','Gidilmeyen yerler karanlık sisle örtülüdür. Yürüdükçe çevrenizdeki alan açılır; keşfedilen oran harita altında yüzde olarak yazar. Keşif durumu kayda işlenir.'],
  ['Yakınlaştırma ve hedef','Tam ekran haritada tekerlekle yakınlaştırın, sürükleyerek kaydırın, çift tıkla görünümü sıfırlayın. Haritaya tıklamak hedef bayrağı koyar; mini haritada yön oku ve mesafe görünür. Aynı yere tekrar tıklamak bayrağı kaldırır. Izgara harfleri ve rakamları sektör adını verir; pusula kuzeyi gösterir, ölçek çubuğu metre cinsindendir.'],
  ['Köyler','Haritada sarı kare ile işaretlenir ve ancak yaklaşıldığında keşfedilir. Her köyün bir adı, evleri, fenerleri, çeşitli meslekten köylüleri ve görev tahtası vardır. Gece lambalar yanar ve köy güvenli bölgedir.'],
- ['Kamplar','Eşkenar dörtgen işaret terk edilmiş seferi kamplarını gösterir. Her kampta bir sandık ve bir not bulunur. Açılmış sandıklar gri görünür.'],
+ ['Kamplar','Eşkenar dörtgen işaret terk edilmiş seferi kamplarını gösterir. Her kampta bir sandık ve bir not bulunur. Açılmış sandıklar gri görünür. Denizdeki kamplar renkle ayrılır: turuncu enkaz, yeşil kazazede kampı, beyaz deniz feneri. Keşfedilen adalar yeşil daire, resifler pembe kesik çizgili halka olarak işlenir.'],
  ['Mağaralar','Dağ eteklerinde rastgele yerlerde mağara girişleri bulunur. Yaklaşıldığında haritaya kemerli işaretle eklenir. Ayrıntı için Mağaralar sekmesine bakın.'],
  ['Dağlar ve madenler','Kayalık bölgelerde kömür, bakır ve demir damarları yer alır. Kömür ve bakır daha alçakta, demir yüksek dağlarda bulunur. Ayrıntı için Madenler sekmesine bakın.'],
  ['Hayvanlar','Koyun ve inek çayırlarda, tavşan ve geyik ormanda, kurt ve domuz ormanın derinliklerinde bulunur. Her tür kendi bölgesinde yaşar. Yırtıcılar av hayvanlarını avlar, diğer hayvanlar onlardan kaçar. İnek ve geyik gibi iri hayvanlar yaralandıklarında karşılık verebilir.']
@@ -49,15 +49,16 @@ GUIDE.ores=[
  ['Kömür','<b>Görünüm:</b> koyu gri kayada parlak siyah bantlar. <b>Gereken kazma:</b> Taş Kazma veya üstü. <b>Kullanım:</b> meşale, ocak yakıtı, eritme. Alçak kayalıklarda daha sık bulunur.'],
  ['Bakır','<b>Görünüm:</b> kayada turuncu bakır damarları ve yeşil patina (malakit) lekeleri. <b>Gereken kazma:</b> Taş Kazma veya üstü. <b>Kullanım:</b> ocakta kömürle Bakır Külçe olur; bakır alet, makas ve külçe ile ticaret. Orta yükseklikte bulunur.'],
  ['Demir','<b>Görünüm:</b> kayada pas kırmızısı bantlar ve koyu hematit benekleri. <b>Gereken kazma:</b> Bakır Kazma veya üstü. <b>Kullanım:</b> ocakta kömürle Demir Külçe olur; en güçlü alet ve silah. Yalnızca yüksek dağlarda çıkar ve nadirdir.'],
- ['Kazma kademeleri','Taş Kazma → kömür ve bakır. Bakır Kazma → demir. Demir Kazma → tüm madenlerde en hızlı kazı. Yanlış kademeyle kazmaya çalışırsanız ekranda bir uyarı çıkar.'],
+ ['Kazma kademeleri','El Taşı → ağaç ve yumuşak kaya. Taş Kazma → kömür ve bakır. Bakır Kazma → demir. Demir Kazma → tüm madenlerde en hızlı kazı. Yanlış kademeyle kazmaya çalışırsanız ekranda bir uyarı çıkar.'],
  ['Eritme','Ocak yakınında, elde cevher ve kömür varken Üretim listesinden külçe üretin: 1 cevher + 1 kömür = 1 külçe. Ocak için 12 taş gerekir.'],
  ['İpucu','Dağlarda yüksek kesimlere çıkmadan önce yiyecek, su ve meşale alın. Yüksekten düşmek hasar verir; yokuşta yavaşlarsınız, tırmanılamayacak kadar dik yerlerde zıplayarak ilerleyin.']
 ];
 GUIDE.tips=[
+ ['El Taşı','Oyun başında 1. yuvada bulunur. Çıplak elle ağaç kesilmez, taş ve maden kazılmaz; El Taşı ağaç ve yumuşak kaya için yeterlidir ama balta ve kazmalardan yavaştır ve daha az eşya verir. Vuruşlar el animasyonuyla görünür.'],
  ['Meşale','Eliniz boşken kullanın: elde yanan meşale aydınlatır, kurtları ve Gölgeleri uzak tutar. Yaklaşık 6 dakika yanar; yağmurda daha çabuk tükenir. Odun ve kömürle üretilir.'],
  ['Yay ve ok','Yayı eline alıp sol tıkı basılı tutarak gerin, bırakınca ateşler. Ger süresi arttıkça menzil ve hasar artar. Ok gerekir; isabet etmeyen oklar çoğu zaman toplanabilir. Rüzgâr ve mesafe oku sürükler; uzak hedeflerde hafif yukarı nişan alın.'],
  ['Mızrak','Hayvanlara ve düşmanlara karşı en güçlü yakın silahlardan biridir. Odun, kemik ve deriden üretilir.'],
- ['Hasar ve elde tutulan eşya','Her eşyanın kendine özgü saldırı gücü vardır: çıplak el en zayıfı, mızrak ve demir balta en güçlüleridir. Taş ve bakır aletler arada kalır. Ok hasarı ger süresine göre değişir; tam gerilmiş ok en sert vuruştur.'],
+ ['Hasar ve elde tutulan eşya','Her eşyanın kendine özgü saldırı gücü vardır: çıplak el hayvanlara ve düşmanlara neredeyse zarar vermez, mızrak ve demir balta en güçlüleridir. Taş ve bakır aletler arada kalır. Ok hasarı ger süresine göre değişir; tam gerilmiş ok en sert vuruştur.'],
  ['Vuruş bölgeleri','Hasar vurulan bedene göre değişir: <b>kafa</b> iki katından fazla, <b>gövde</b> normal, <b>kol</b> azaltılmış, <b>bacak</b> en düşük hasarı verir. Bacağa vurulan hayvan paniğe kapılıp kaçar. Kafadan vurmak başarım kazandırır.'],
  ['Can yüzdesi','Hayvanların ve yaratıkların sağlığı yüzde olarak tutulur. Bakıp durduğunuz canlının sağlık yüzdesi nişan ipucunda görünür. Gölgeler vuruşlara karşı dayanıklıdır; en çok kafadan ve ışıktan zarar görürler.'],
  ['Bandaj','Kanamayı durdurur ve biraz sağlık verir. Eldeyken sol tıkı basılı tutun.'],
@@ -65,6 +66,22 @@ GUIDE.tips=[
  ['Makas','Koyuna bakıp sol tıkı basılı tutarak yün kırkın. Yün bir süre sonra yeniden büyür.'],
  ['Uyku tulumu','Gece, barınakta, ateş yanında veya köyde kullanıldığında sabaha kadar uyutur. Dayanıklılık ve akıl yenilenir, açlık ve susuzluk artar.'],
  ['Deri mont','Çantada taşınırken soğuktan korur.']
+];
+
+GUIDE.sea=[
+ ['Açık deniz','Ana adanın çevresinde küçük adalar, mercan resifleri, gemi enkazları ve deniz fenerleri bulunur. Açık deniz güvenli değildir; hazırlıklı çıkın.'],
+ ['Sal','Tezgâhta odun, deri ve yünden üretilir. Elde tutup suya bakarak {use} ile binilir. Salda yüzme, nefes ve soğuk su kaybı yoktur; rüzgâr arkadan eserse sal hızlanır, karşıdan eserse yavaşlar. Karaya yaklaşıp {use} ile inilir. Köpek balığı ısırıkları salın dayanıklılığını azaltır; sıfırlanırsa sal parçalanır.'],
+ ['Dalış Maskesi','Çantada taşınırken su altında nefes daha uzun yeter ve görüş açılır. Enkaz sandıklarında ve kazazede kamplarında bulunabilir; balıkçıdan alınabilir veya tezgâhta üretilir.'],
+ ['Adalar','Bir ada ilk kez yaklaşıldığında keşfedilir ve haritaya işlenir. Bazı adalarda kazazede kampı vardır: sandıktan hindistan cevizi, pişmiş balık ve bazen Sal veya Dalış Maskesi çıkar.'],
+ ['Batıklar','Derin sularda yarı batmış gemi enkazları bulunur. Sandık dipte durur; dalıp ulaşmak gerekir. İçinden sikke, külçe, mücevher veya Dalış Maskesi çıkabilir. Salın üzerindeyken sandığa ulaşılamaz.'],
+ ['Deniz fenerleri','Kıyıda kırmızı-beyaz şeritli kulelerdir. Geceleri ışığı çok uzaktan görünür ve yön gösterir. Dibindeki sandıkta malzeme bulunur.'],
+ ['Mercan resifleri','Açık denizde sığ, renkli kayalıklardır; üzerinde balık sürüleri dolaşır. Dalıp dibe bakarak sol tuşu basılı tutunca mercan toplanır; balıkçıya satılır.'],
+ ['Yosun ormanları','Adaların ve enkazların çevresindeki derin sularda uzun yosunlar yetişir; dalarken görüşü kapatabilir.'],
+ ['Balık çeşitleri','Olta ile tutulan balık bölgeye göre değişir: sığ suda sardalya, kıyıya yakın derin suda levrek, açık denizde orkinos. Hepsi ateşte pişirilir; balıkçıya satılır. Kumsalda yengeç avlanır ve ateşte pişirilir.'],
+ ['Köpek balığı','<b>Tehlike: yüksek.</b> Yalnızca derin ve açık denizde dolaşır. Yüzen veya salda ilerleyen oyuncuya yaklaşır; önce halka çizer, sonra saldırır, ısırığı kanama yapar. Karada ve sığ suda tehlikesizdir. <i>Karşı koyma:</i> mızrak veya yayla karşılık verin; sağlığı azalınca geri çekilir. Balıkçı köylüler bazen bir köpek balığının avlanmasını ister.'],
+ ['Denizanası','<b>Tehlike: düşük.</b> Kıyıya yakın sularda süzülür. Temasta sokar ve dayanıklılığı azaltır; salda yakalanmazsınız.'],
+ ['Yunuslar, martılar, plankton','Açık denizde zaman zaman yunus sürüleri yanınızdan geçer. Gündüz kıyılarda martılar dolaşır. Geceleri su yüzeyinde parlayan plankton görülür; hareket ettikçe parlaması artar. Fırtınada dalgalar kabarır ve sal daha çok sallanır.'],
+ ['Denizci yeteneği','Günlükteki yetenekler arasındaki Denizci; sal hızını, balık tutma hızını ve köpek balığı ısırığına karşı dayanıklılığı artırır.']
 ];
 
 GUIDE.caves=[

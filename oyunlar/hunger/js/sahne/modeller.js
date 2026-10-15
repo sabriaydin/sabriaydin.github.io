@@ -203,7 +203,7 @@ S.onInit(()=>{
  const SHARD={coal:0x17171c,copper:0x2f8a62,iron:0x92402a};
  const SHARDS=[[.2,.4,.1,.36,.07,.3,-.25],[-.16,.36,.22,.3,.06,-.28,.2],[.02,.52,-.14,.4,.075,.1,.05],[.34,.22,-.2,.24,.055,.45,-.4],[-.34,.2,.0,.22,.05,-.1,.5],[.12,.3,.36,.2,.05,.4,.1]];
  const oreCol={coal:0x2a2a30,copper:0xa8683a,iron:0x7a4a30},hostCol={coal:[0x4c4c50,0x404044],copper:[0x6e665e,0x5e5650],iron:[0x6a625e,0x5a524e]};
- const nugget=(k,x,y,z,r,sd,rx,ry,rz)=>{const q=part(facet(r,sd,.32,1,.8,1,0),oreCol[k],x,y,z,1,1,1,rx||0,ry||0,rz||0,.14);q.cf=oreCf[k];return q};
+ const nugget=(k,x,y,z,r,sd,rx,ry,rz)=>{const q=part(facet(r,sd,.32,1,.8,1,k==='coal'?1:0),oreCol[k],x,y,z,1,1,1,rx||0,ry||0,rz||0,.14);q.cf=oreCf[k];return q};
  const oreParts=(k,st)=>{
   const [h1,h2]=hostCol[k];
   const ps=st===0
@@ -218,7 +218,7 @@ S.onInit(()=>{
   nug.forEach(n=>ps.push(nugget(k,n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])));
   /* kristal/kırık parça demetleri: cevher türüne göre renkli, ucu parlak */
   const SH=SHARD[k],sl=st===0?SHARDS:st===1?SHARDS.slice(0,3):SHARDS.slice(0,1);
-  for(const [x,y,z,h,r,rx,rz] of sl){
+  for(const [x,y,z,h,r,rx,rz] of (k==='coal'?[]:sl)){                    /* kömürde sivri kristal yok: yalnızca yuvarlak parçalar */
    const q=part(cone(r,h,k==='coal'?4:6,1),SH,x,y+h*.42,z,1,1,1,rx,x*3,rz,.1);
    q.cf=(px,py,pz,nx,ny,nz,c)=>{const t=Math.max(0,Math.min(1,(py-y)/h));c.r*=.62+.6*t;c.g*=.62+.6*t;c.b*=.62+.6*t};
    ps.push(q);

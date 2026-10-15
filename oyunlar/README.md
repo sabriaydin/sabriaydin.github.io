@@ -16,7 +16,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Ayarlar ve ayar menüsü (grafik, ses, kontrol, oyun; `hunger-ayar-v1`) | `js/cekirdek/ayarlar.js` |
 | Eşyalar (ad, yığın, yenilebilirlik) | `js/veri/esyalar.js` |
 | Üretim tarifleri, istasyonlar | `js/veri/tarifler.js` |
-| Ağaç/kaya/maden dayanıklılığı, araç gücü | `js/veri/dugumler.js` |
+| Ağaç/kaya/maden dayanıklılığı, araç kademesi çarpanı (`POWER`) | `js/veri/dugumler.js` |
 | Hayvan türleri (can, hız, düşen eşyalar, bölge aralığı `sp`, av/avcı, büyük baş), silah hasarı | `js/veri/hayvanlar.js` |
 | Ada üretimi (arazi, dağlar, ağaç/maden sıklığı) | `js/dunya/uretim.js` |
 | Envanter simgeleri (2B) | `js/gorsel/simgeler.js` |
@@ -57,7 +57,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Gece-gündüz hesabı | `js/oyun/zaman.js` |
 | Envanter işlemleri | `js/oyun/envanter.js` |
 | Üretim mantığı | `js/oyun/uretim.js` |
-| Kesme/toplama/yerleştirme/yeme-içme | `js/oyun/eylem.js` |
+| Kesme/toplama/yerleştirme/yeme-içme; alet kademesi (`gatherLv`) ve verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` |
 | Yere atılan eşyalar (fizik, toplama) | `js/oyun/dusenler.js` |
 | Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, iç içe geçme engeli), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
 | Beden durumu: dayanıklılık, akıl sağlığı, kanama, meşale yakıtı, hasar geri bildirimi, bandaj | `js/oyun/vucut.js` |
@@ -69,9 +69,11 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Mağara girişi modeli, tavan, sarkıt-dikit, kristaller, karanlık atmosfer | `js/sahne/magara.js` |
 | Harita: kabartma, keşif sisi, ızgara, pusula, ölçek, yakınlaştırma, hedef işareti | `js/oyun/harita.js` (çağrılar `js/oyun/arayuz.js` içindedir) |
 
-Not: Harita 256×256 karedir (`js/cekirdek/ad-alani.js`). Kayıt anahtarı `hunger-save-v6`.
+Not: Harita 768×768 karedir (`js/cekirdek/ad-alani.js`). Eski 384×384 kayıtlar yeni haritanın ortasına gömülür (`HG.embedLegacy`, `js/dunya/uretim.js`).
 | Açlık, susuzluk, üşüme, hareket, zıplama, sığınak; yüzme, dalış, nefes ve boğulma; canlılarla çarpışma | `js/oyun/hayatta-kalma.js` |
 | Su altı sisi/yüzeyi/kabarcıklar, balık sürüleri, su bitkileri, mercan | `js/sahne/sualti.js` |
+| Deniz oyun mantığı: sal (hız, dayanıklılık, kıyıya çıkış), dalış maskesi, köpek balığı/denizanası yapay zekâsı, canlı doğurma, bölgeye göre balık tutma, ada/resif keşfi | `js/oyun/deniz.js` |
+| Deniz görselleri: köpek balığı, yunus, martı, yengeç, sal modeli ve izi, parlayan plankton, fener ışığı, fırtına dalgası | `js/sahne/deniz.js` |
 | E tuşu hedef seçimi (bakılan yöne göre), nişan ipucu | `js/oyun/eylem.js` (`useCands`), `js/oyun/arayuz.js` |
 | Rehber hedefler | `js/oyun/hedefler.js` |
 | Yeni oyun, kayıt, yükleme | `js/oyun/durum.js` |

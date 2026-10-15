@@ -24,8 +24,10 @@ const PROF={
   {give:['cfish',2],cost:{stone:2},max:4,ev:[100,220],ch:.65},
   {give:['rod',1],cost:{wood:4},max:1,ev:[600,1000],ch:.3},
   {give:['bottle',2],cost:{sand:2},max:4,ev:[120,260],ch:.6},
-  {give:['rod',1],cost:{coin:7},max:1,ev:[500,900],ch:.4}],
-  buy:{fish:2,coconut:2,shell:2,kelp:1,pearl:16}},
+  {give:['rod',1],cost:{coin:7},max:1,ev:[500,900],ch:.4},
+  {give:['mask',1],cost:{coin:9},max:1,ev:[700,1200],ch:.3},
+  {give:['raft',1],cost:{wood:12,leather:2},max:1,ev:[800,1400],ch:.25}],
+  buy:{fish:2,coconut:2,shell:2,kelp:1,pearl:16,sardine:2,bass:3,tuna:6,crab:3,coral:6}},
  smith:{n:'Demirci',hi:'Ocak sönmez, kömür getir.',offers:[
   {give:['copper_ingot',1],cost:{coal:4},max:2,ev:[200,420],ch:.5},
   {give:['iron_ingot',1],cost:{coal:6,stone:3},max:1,ev:[350,700],ch:.4},
@@ -55,7 +57,7 @@ const PROF={
 };
 let nid=1;
 /* Tek seferlik eşyalar (alet, silah) için hak 1'dir */
-const ONE=new Set(['bow','rod','pick1','pick2','axe1','axe2','bag','coat','door']);
+const ONE=new Set(['bow','rod','pick1','pick2','axe1','axe2','bag','coat','door','raft','mask']);
 function rollDeals(prof){
  const P=PROF[prof],pool=[];
  P.offers.forEach((o,i)=>pool.push({t:'o',k:i}));

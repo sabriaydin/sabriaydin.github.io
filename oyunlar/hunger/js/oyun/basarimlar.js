@@ -56,6 +56,18 @@ const ACH=[
  ['heal','Yaralı Dostu','Bandajla bir yarayı sar.',6,()=>F('healed')],
  ['torch','Işık Taşıyıcı','Meşale üret.',6,()=>F('made_torch')],
  ['perks','Uzmanlaşma','Yeteneklere toplam 5 puan harca.',20,()=>HG.PERKS&&HG.PERKS.reduce((a,p)=>a+HG.perk(p[0]),0)>=5],
+ ['raft','Denizci','Bir sal üret ve üzerine bin.',12,()=>F('sailed')],
+ ['islet','Ada Kâşifi','Üç ada keşfet.',16,()=>S('islets')>=3],
+ ['islet8','Takımada','Sekiz ada keşfet.',34,()=>S('islets')>=8],
+ ['wreck','Batık Avcısı','Bir gemi enkazının sandığını aç.',22,()=>F('wreck_open')],
+ ['lighthouse','Fener Bekçisi','Bir deniz fenerinin sandığını aç.',22,()=>F('lighthouse_open')],
+ ['castaway','Kazazede Dostu','Bir kazazede kampının sandığını aç.',16,()=>F('castaway_open')],
+ ['shark','Köpek Balığı Avcısı','Bir köpek balığı öldür.',26,()=>S('sharks')>=1],
+ ['tuna','Orkinos Avı','Açık denizde bir orkinos tut.',14,()=>F('got_tuna')],
+ ['reef','Mercan Bahçesi','Bir resifte dalıp mercan topla.',14,()=>F('got_coral')],
+ ['sail1k','Açık Denizci','Salla toplam 1000 metre yol git.',28,()=>S('sailed')>=1000],
+ ['crab','Yengeç Avcısı','Bir yengeci avla.',10,()=>S('crabs')>=1],
+ ['mask','Dalış Takımı','Dalış Maskesi üret veya bul.',12,()=>F('made_mask')||F('got_mask')],
  ['lvl20','Bilge','20. seviyeye ulaş.',60,()=>(G.lvl||1)>=20],
  ['day30','Köklü','30. güne ulaş.',60,()=>HG.dayNo()>=30]
 ];

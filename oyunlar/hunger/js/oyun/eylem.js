@@ -5,6 +5,16 @@ const {W,T,O,PLACE_ITEM,NODE,POWER,NAMES,G,ui,A,inp,Scene,clamp,count,add,take,g
 
 /* ---- Nişan alınan hedefin ne olduğu ve ne kadar süreceği ---- */
 function toolTier(kind){const h=held();return h&&h.it.tool===kind?h.it.tier:0}
+/* Toplama düzeyi: -1 elde uygun alet yok (çıplak el), 0 El Taşı, 1-3 taş/bakır/demir alet */
+function gatherLv(tool){
+ const h=held();if(!h)return -1;
+ if(h.it.tool===tool)return h.it.tier;
+ if(h.it.tool==='rock')return 0;
+ return -1;
+}
+/* Alet düzeyine göre verim çarpanı (El Taşı, Taş, Bakır, Demir); kesirli kısım olasılıkla bir ek eşya verir */
+const YIELD=[.6,1,1.4,1.8];
+function yieldN(n,lv){const v=n*YIELD[Math.max(0,lv)],f=Math.floor(v);return Math.max(1,f+(Math.random()<v-f?1:0))}
 /* Döner: {kind,need,hint,name} veya {block:'mesaj',name} veya null */
 function foodBlock(f){
  const needH=f.h>0&&G.hun<=100-f.h*.5,needT=f.t>=8&&G.thr<=100-f.t*.5;
@@ -27,6 +37,7 @@ function actionFor(tg){
  /* bandaj */
  if(h&&h.it.heal)return (G.bleed>0||G.hp<95)?{kind:'heal',need:1.6,hint:'Basılı tut: yarayı sar',name:h.it.n}:{block:'Yaralı değilsin.',name:h.it.n};
  if(!tg)return null;
+ if(G.head&&!tg.an)return null;                 /* su altında yalnızca canlılara ve dibe eylem yapılır */
  /* hayvan */
  if(tg.an){
   const an=tg.an,def=HG.ANIMAL[an.t];
@@ -44,9 +55,10 @@ function actionFor(tg){
  if(o){
   const name=NAMES[o]||'Nesne',nd=NODE[o];
   if(nd){
-   const tier=nd.tool?toolTier(nd.tool):0;
-   if(tier<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
-   return {kind:'node',need:nd.hp/(nd.tool?POWER[tier]:1),hint:'Basılı tut: topla',name};
+   const lv=nd.tool?gatherLv(nd.tool):0;
+   if(lv<0)return {block:nd.tool==='axe'?'Çıplak elle ağaç kesilemez. El Taşı veya balta gerekir.':nd.req>0?(nd.msg||'Bunun için kazma gerekir.'):'Çıplak elle kazılamaz. El Taşı veya kazma gerekir.',name};
+   if(lv<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
+   return {kind:'node',need:nd.hp/(nd.tool?POWER[lv]:1),hint:'Basılı tut: '+(nd.tool==='axe'?'kes':nd.tool==='pick'?'kaz':'topla'),name};
   }
   if(PLACE_ITEM[o])return {kind:'pickup',need:1,hint:'Basılı tut: geri al',name};
   return null;
@@ -97,7 +109,7 @@ function stepAction(dt){
   const key='hit,'+tg.an.id;
   if(key!==A.key){saveProgress();A.key=key;A.p=0;A.tick=0;A.memKey=null}
   A.tick-=dt;
-  if(A.tick<=0){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z)}
+  if(A.tick<=0){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');HG.armSwing(.4);const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z)}
   return;
  }
  if(kind==='milk'||kind==='shear'){
@@ -121,7 +133,7 @@ function stepAction(dt){
   A.key=key;A.tick=0;
   A.memKind=!!MEMKINDS[kind];A.memKey=A.memKind?key:null;
   A.p=A.memKind&&A.mem[key]?A.mem[key]:0;
-  A.need=kind==='fish'?3+Math.random()*4:act.need;
+  A.need=kind==='fish'?HG.fishNeed():act.need;
  }
  A.p+=dt;A.tick-=dt;
  /* kademeli parçalanma: kaya ve madenlerde ilerlemeye göre görünüm değişir */
@@ -132,7 +144,7 @@ function stepAction(dt){
   Scene.setDamage(i,fr);
  }
  if(A.tick<=0&&kind!=='drink'&&kind!=='fish'&&kind!=='fill'&&kind!=='dive'){
-  A.tick=.38;A.hitI=i;A.hitT=.18;HG.snd(o===O.TREE||o===O.PALM||o===O.BUSH?'hit':o===O.ROCK?'rock':(o===O.COAL||o===O.COPPER||o===O.IRON)?'ore':tl===T.SAND?'step_sand':'pick');
+  A.tick=.38;A.hitI=i;A.hitT=.18;HG.armSwing(.36);HG.snd(o===O.TREE||o===O.PALM||o===O.BUSH?'hit':o===O.ROCK?'rock':(o===O.COAL||o===O.COPPER||o===O.IRON)?'ore':tl===T.SAND?'step_sand':'pick');
   const hy=tg.hy!==undefined?tg.hy:1;
   const big=o===O.ROCK||o===O.COAL||o===O.COPPER||o===O.IRON;
   Scene.burst(tg.hx!==undefined?tg.hx:tg.x+.5,hy,tg.hz!==undefined?tg.hz:tg.y+.5,o===O.TREE||o===O.BUSH?0x4a9440:o===O.PALM?0x3f8a3a:tl===T.SAND?0xd9c58b:o===O.COAL?0x222226:o===O.COPPER?0xc8743a:o===O.IRON?0xc2a287:0x9a9a9a,big?7:4);
@@ -140,7 +152,7 @@ function stepAction(dt){
  if(A.p<A.need)return;
  A.p=0;
  if(kind==='node'){
-  const nd=NODE[o],[id,n]=nd.give();
+  const nd=NODE[o],lv0=nd.tool?gatherLv(nd.tool):-1,[id,n0]=nd.give(),n=nd.tool&&lv0>=0?yieldN(n0,lv0):n0;
   if(!gain(id,n))return;
   if(HG.perk('gath')&&Math.random()<.2*HG.perk('gath'))gain(id,1);
   delete A.mem[key];if(G.dmg)delete G.dmg[i];
@@ -158,13 +170,14 @@ function stepAction(dt){
   if(count('bottle')){take('bottle',1);add('wbottle',1);flag('drank');HG.snd('drink');HG.feed('Şişe dolduruldu')}
   A.key='';
  }else if(kind==='fish'){
-  if(Math.random()<.78)gain('fish',1);else HG.toast('Balık kaçtı.');
-  A.need=3+Math.random()*4;
+  HG.catchFish(tl,tg.x,tg.y);
+  A.need=HG.fishNeed();
  }else if(kind==='dig'){
   gain('sand',1);
  }else if(kind==='dive'){
   /* deniz dibi: sık midye ve yosun, nadiren inci */
   HG.useStam(3);
+  if(HG.nearReef()&&Math.random()<.4){if(gain('coral',1)){HG.toast('Mercan toplandı.');HG.xpGain(3);if(G.stats)G.stats.coral=(G.stats.coral||0)+1}return}
   const r=Math.random();
   if(r<.03){if(gain('pearl',1)){HG.toast('İnci buldun!');HG.xpGain(4)}}
   else if(r<.47){if(gain('shell',1)&&G.stats)G.stats.shells=(G.stats.shells||0)+1}
@@ -228,6 +241,7 @@ function useCands(){
  return c;
 }
 function useHeld(){
+ if(HG.raftUse(held()))return;                 /* sal: biner veya iner */
  for(const c of useCands())if(c[2]())return;
  const h=held();if(!h)return;
  if(h.it.food){const b=foodBlock(h.it.food);if(b)HG.toast(b);else eatHeld();return}
@@ -235,5 +249,5 @@ function useHeld(){
  if(h.it.heal){if(G.bleed>0||G.hp<95)HG.useMedical();else HG.toast('Yaralı değilsin.');return}
  if(h.it.place)placeHeld();
 }
-Object.assign(HG,{useCands,actionFor,stepAction,stopAction,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
+Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
 })();

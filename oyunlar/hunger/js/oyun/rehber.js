@@ -3,7 +3,7 @@
 'use strict';
 const {G,ui,IT,RC,STN,ICON,ANIMAL,inp}=HG;
 const $=HG.$;
-const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['ach','Başarımlar']];
+const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['sea','Deniz'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['ach','Başarımlar']];
 let tab='play',openFrom=null;
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 /* {eylem} -> atanmış tuş */
@@ -20,7 +20,7 @@ function fauna(){
 function items(){
  const rows=Object.keys(IT).map(k=>{
   const it=IT[k];let d=it.d||'';
-  if(it.tool==='axe'||it.tool==='pick')d=(it.tool==='axe'?'Ağaç keser, düşmana vurur.':'Kaya ve maden kazar.')+' Kademe '+it.tier+'/3.';
+  if(it.tool==='axe'||it.tool==='pick')d=(it.tool==='axe'?'Ağaç keser, düşmana vurur.':'Kaya ve maden kazar.')+' Kademe '+it.tier+'/3 · Toplama hızı ×'+HG.POWER[it.tier]+', verim ×'+HG.YIELD[it.tier]+'.';
   if(it.place&&!d)d='Yerleştirilir.';
   if(!d)d='Üretim ve ticaret malzemesi.';
   return `<div class="rc"><img src="${ICON[k]||''}" alt=""><div><b>${it.n}</b><span>${esc(d)}</span></div><span class="stk">×${it.s}</span></div>`;
@@ -48,6 +48,7 @@ function body(){
   case 'foes':return sec(HG.GUIDE.foes);
   case 'fauna':return fauna();
   case 'map':return sec(HG.GUIDE.map);
+  case 'sea':return sec(HG.GUIDE.sea);
   case 'ores':return sec(HG.GUIDE.ores);
   case 'items':return items();
   case 'recipes':return recipes();

@@ -9,6 +9,7 @@ const U=sc.U={
  uHF:{value:new THREE.Vector4(.002,.42,0,0)},   /* x: sis yoğunluğu (1/m), y: yükseklikle sönüm, z: taban yüksekliği */
  uFogT:{value:0},
  uWindV:{value:new THREE.Vector3(.8,.3,.4)},    /* x,y: yön, z: şiddet */
+ uWPh:{value:new THREE.Vector2(0,0)},            /* birikimli sallanma fazı: x çimen, y ağaç (şiddet değişince sallanma hızı sıçramaz) */
  uPQ:{value:2}                                  /* yüzey ayrıntısı: 0 kapalı, 1 düz izdüşüm, 2 üç yönlü */
 };
 sc.wind={x:.8,z:.3,s:.4,gust:0};
@@ -146,6 +147,8 @@ S.onFrame((G,t,dt,info)=>{
  const s=clamp(.26+.2*Math.sin(t*.05)+.12*Math.sin(t*.17+2)+rain*.4+over*.15+gust*.75,.05,1.5);
  const w=sc.wind;w.x=Math.cos(wa);w.z=Math.sin(wa);w.s+=(s-w.s)*(1-Math.exp(-dt*1.6));w.gust=gust;
  U.uWindV.value.set(w.x,w.z,w.s);
+ /* faz zamanla birikir: frekans uTime ile çarpılırsa şiddet değişirken sin() argümanı sıçrar ve bitkiler bir an çok hızlı sallanır */
+ {const ph=U.uWPh.value,TP=Math.PI*2,d=Math.min(dt,.1);ph.x=(ph.x+d*(1.7+w.s*1.4))%TP;ph.y=(ph.y+d*(1.5+w.s))%TP}
  /* yükseklik sisi: şafakta yoğun, yağmurda ve geceleri hafif, Kan Ayı'nda kırmızımsı kalın */
  const dawn=Math.exp(-Math.pow((tod-.285)/.06,2)),dusk=Math.exp(-Math.pow((tod-.74)/.05,2))*.35;
  const k=(cf.mist===undefined?100:cf.mist)/100,bl=sc.bloodV||0;
