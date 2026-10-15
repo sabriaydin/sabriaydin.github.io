@@ -136,16 +136,19 @@ function updateAnimals(dt){
   a.spd+=(spd-a.spd)*Math.min(1,8*dt);
  }
  /* iç içe geçme engeli: canlılar birbirinden en az yarıçapları toplamı kadar uzak durur */
- for(let i=0;i<L.length;i++){
+ for(let pass=0;pass<2;pass++)for(let i=0;i<L.length;i++){
   const a=L[i];if(a.dying)continue;const da=ANIMAL[a.t];
   for(let j=i+1;j<L.length;j++){
    const b=L[j];if(b.dying)continue;
    const dx=b.x-a.x,dz=b.z-a.z;if(dx>3||dx<-3||dz>3||dz<-3)continue;
-   const mn=da.r+ANIMAL[b.t].r+.12,d2=dx*dx+dz*dz;if(d2>=mn*mn)continue;
+   const mn=(da.r+ANIMAL[b.t].r)*1.2+.22,d2=dx*dx+dz*dz;if(d2>=mn*mn)continue;
    const d=Math.sqrt(d2)||.001,push=(mn-d)*.5,ux=d<.002?1:dx/d,uz=d<.002?0:dz/d;
    const wa=da.foe?HG.walkableFoe:walkable,wb=ANIMAL[b.t].foe?HG.walkableFoe:walkable;
-   if(wa(a.x-ux*push,a.z-uz*push)){a.x-=ux*push;a.z-=uz*push}
-   if(wb(b.x+ux*push,b.z+uz*push)){b.x+=ux*push;b.z+=uz*push}
+   const oa=wa(a.x-ux*push,a.z-uz*push),ob=wb(b.x+ux*push,b.z+uz*push);
+   if(oa){a.x-=ux*push;a.z-=uz*push}
+   if(ob){b.x+=ux*push;b.z+=uz*push}
+   if(oa&&!ob&&wa(a.x-ux*push,a.z-uz*push)){a.x-=ux*push;a.z-=uz*push}
+   else if(ob&&!oa&&wb(b.x+ux*push,b.z+uz*push)){b.x+=ux*push;b.z+=uz*push}
   }
  }
  /* yeniden doğma: haritadaki sayı hedefin altına düşerse uzak bir otlakta yeni hayvan çıkar */

@@ -54,16 +54,35 @@ function genWorld(seed){
   }else if(t===T.SAND){if(r<.014)obj[i]=O.PALM}
   else if(t===T.ROCK){
    const o=fbm(x/6,y/6,seed+55);
-   if(o>.64&&r<.028){const q=rnd(),h=hgt[i];if(q<.6)obj[i]=O.COAL;else if(q<.9){if(h>1.6)obj[i]=O.COPPER}else if(h>3.4)obj[i]=O.IRON}
+   if(o>.64&&r<.02){const q=rnd(),h=hgt[i];if(q<.72)obj[i]=O.COAL;else if(q<.93){if(h>1.6)obj[i]=O.COPPER}else if(h>3.4)obj[i]=O.IRON}
    else if(r<.008)obj[i]=O.ROCK;
   }
  }
+ /* aralık: ağaçlar en az 2, kaya ve madenler en az 3 kare arayla durur (sıkışık olanlar seyreltilir) */
+ {const isR=v=>v===O.ROCK||v===O.COAL||v===O.COPPER||v===O.IRON,rare=v=>v===O.IRON?3:v===O.COPPER?2:v===O.COAL?1:0;
+  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
+   const i=y*W+x,v=obj[i];if(!v)continue;
+   const tr=v===O.TREE||v===O.PALM,rk=isR(v);if(!tr&&!rk)continue;
+   const R=tr?2:3;let bad=false;
+   for(let j=-R;j<=R&&!bad;j++)for(let k=-R;k<=R;k++){
+    if(!j&&!k)continue;const X=x+k,Y=y+j;if(X<1||Y<1||X>=W-1||Y>=H-1||j*j+k*k>R*R)continue;
+    const w=obj[Y*W+X];if(!w)continue;
+    if(tr?(w===O.TREE||w===O.PALM):isR(w)){
+     /* daha değerli olan korunur; eşitse önce işlenen kalır */
+     if(!rk||rare(w)>rare(v)||(rare(w)===rare(v)&&(Y<y||(Y===y&&X<x)))){bad=true;break}
+    }
+   }
+   if(bad)obj[i]=O.NONE;
+  }}
  /* başlangıç çevresi */
  for(let y=-3;y<=3;y++)for(let x=-3;x<=3;x++)obj[(sy+y)*W+sx+x]=O.NONE;
  const seeds=[[O.TREE,8],[O.ROCK,4],[O.BUSH,3],[O.TREE,4]];
  for(const [ob,cnt] of seeds){let c=0,g=0;while(c<cnt&&g++<400){
   const a=rnd()*Math.PI*2,rr=4+rnd()*5,x=Math.round(sx+Math.cos(a)*rr),y=Math.round(sy+Math.sin(a)*rr),i=y*W+x;
-  if(tile[i]===T.GRASS&&!obj[i]){obj[i]=ob;c++}
+  if(tile[i]===T.GRASS&&!obj[i]){
+  let near=false;const R=ob===O.TREE?2:ob===O.ROCK?3:1;
+  for(let j=-R;j<=R&&!near;j++)for(let k=-R;k<=R;k++){const w=obj[i+j*W+k];if(w&&(ob===O.TREE?(w===O.TREE||w===O.PALM):ob===O.ROCK?(w===O.ROCK||w===O.COAL||w===O.COPPER||w===O.IRON):w===ob)){near=true;break}}
+  if(!near){obj[i]=ob;c++}}
  }}
 
 
