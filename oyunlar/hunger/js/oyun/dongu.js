@@ -2,19 +2,33 @@
 (()=>{
 'use strict';
 const {W,T,G,ui,inp,A,Scene,$,tod,daylight,held}=HG;
-let last=performance.now(),recT=0;
+let last=performance.now(),recT=0,skip=false;
+/* Nesne değişimleri: önce artımlı senkron denenir, olmazsa tam senkron yapılır */
+function flushObjects(){
+ if(G.objDirty){Scene.sync(G);G.objDirty=false;if(G.oc)G.oc.length=0}
+ else if(G.oc&&G.oc.length){
+  const c=G.oc;
+  if(Scene.syncCells(G,c))Scene.markGrass&&Scene.markGrass();else Scene.sync(G);
+  c.length=0;
+ }
+}
 
+/* FPS göstergesi (ayardan açılır) */
+const fpsEl=document.createElement('div');fpsEl.id='fps';fpsEl.hidden=true;$('#game').appendChild(fpsEl);
+let fa=0,fn=0;
 function frame(now){
- const dt=Math.min(.05,(now-last)/1000);last=now;
+ const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;
+ if(HG.cfg.fps){fa+=raw;fn++;if(fa>=.5){fpsEl.textContent=Math.round(fn/fa)+' FPS';fa=0;fn=0}if(fpsEl.hidden)fpsEl.hidden=false}else if(!fpsEl.hidden)fpsEl.hidden=true;
  if(HG.busy){requestAnimationFrame(frame);return}   /* yükleme sürerken sahne çizilmez */
+ if(ui.state==='pause'){skip=!skip;if(skip){requestAnimationFrame(frame);return}}   /* duraklatmada çizim hızı yarıya iner */
  if(ui.state==='play'){
-  if(G.objDirty){Scene.sync(G);G.objDirty=false}
+  flushObjects();
   G.tg=Scene.aim(G);
   if($('#bigmap').hidden&&!ui.sleeping)HG.update(dt);
   if(ui.dirty)HG.renderInv();
   if(!$('#panel').hidden){recT-=dt;if(recT<=0){recT=.5;HG.renderRecipes()}}
   HG.hud();
- }else if(ui.state==='menu'){ui.menuClock+=dt;G.clock+=dt*5;if(G.objDirty){Scene.sync(G);G.objDirty=false}}
+ }else if(ui.state==='menu'){ui.menuClock+=dt;G.clock+=dt*5;flushObjects()}
  const play=ui.state!=='menu',h=play?held():null;
  let place=null;
  if(ui.state==='play'&&h&&h.it.place&&G.tg){const p=HG.placeTarget(h.k);if(p)place={x:p.x,y:p.y,ok:true};else{const t=G.tg;place={x:t.x,y:t.y,ok:false}}}

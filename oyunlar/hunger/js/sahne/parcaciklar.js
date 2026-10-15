@@ -120,7 +120,8 @@ S.onFrame((G,t,dt,info)=>{
  const dayK=.35+.65*L;
  for(const f of sc.fires||[]){
   const d2=(f.x-cam.x)**2+(f.z-cam.z)**2;if(d2>45*45)continue;
-  let a=fireAcc.get(f);if(!a){a={s:0,e:0};fireAcc.set(f,a)}
+  const fk=f.x*1000+f.z;                                  /* anahtar konumdan türetilir: tam senkronda biriken eski kayıtlar olmaz */
+  let a=fireAcc.get(fk);if(!a){a={s:0,e:0};fireAcc.set(fk,a)}
   const wet=1-clamp((sc.rain||0)*1.1,0,.85);
   a.s+=dt*(4.5*k)*wet;a.e+=dt*(8*k)*wet;
   while(a.s>=1){a.s--;puff({x:f.x+(rnd()-.5)*.25,y:f.y+.95,z:f.z+(rnd()-.5)*.25,vx:(rnd()-.5)*.25,vy:.8+rnd()*.6,vz:(rnd()-.5)*.25,s0:.22,s1:1.5+rnd()*.5,a:.3*dayK,life:2.6+rnd()*1.2,wind:1.1,col:0x9a9a9a})}

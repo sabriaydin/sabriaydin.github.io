@@ -55,8 +55,13 @@ function initAudio(){
    buildAmbience();
   }catch(e){console.warn('ses kurulamadı',e)}
  }
- if(AC&&AC.state==='suspended')AC.resume();
+ if(AC&&AC.state==='suspended'&&!document.hidden)AC.resume();
 }
+/* Sekme arka plana geçince ses bağlamı durdurulur (pil ve işlemci tasarrufu), dönünce sürdürülür */
+document.addEventListener('visibilitychange',()=>{
+ if(!AC)return;
+ try{if(document.hidden){if(AC.state==='running')AC.suspend()}else if(AC.state==='suspended')AC.resume()}catch(e){}
+});
 
 /* ---------- ses üreteç parçaları ---------- */
 function env(g,t,v,att,dec){

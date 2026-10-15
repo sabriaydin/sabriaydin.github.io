@@ -3,6 +3,8 @@
 'use strict';
 const {W,H,T,SOLID,ANIMAL,DMG,G,Scene,fbm,clamp}=HG;
 let nextId=1;
+const FAR2=70*70;                       /* bu mesafeden uzaktaki hayvanlar seyrek güncellenir */
+const GRID=new Map();
 const rnd=Math.random;
 
 function makeAnimals(list){
@@ -20,6 +22,17 @@ function walkable(x,z){
   if(t<T.SAND||t===T.POND||SOLID(G.obj[i]))return false;
  }
  return true;
+}
+/* Hayvan katı bir karenin veya içilebilir suyun içindeyse çevresindeki en yakın yürünebilir noktaya taşınır */
+function unstick(a){
+ const i=Math.floor(a.z)*W+Math.floor(a.x);
+ if(i<0||i>=W*H)return;
+ if(!(SOLID(G.obj[i])||G.tile[i]<T.SAND||G.tile[i]===T.POND))return;
+ for(let r=1;r<=8;r++)for(let k=0;k<12;k++){
+  const an=k/12*6.2832+r,x=a.x+Math.cos(an)*r,z=a.z+Math.sin(an)*r;
+  if(walkable(x,z)){a.x=x;a.z=z;a.moving=false;a.tm=1;return}
+ }
+ if(a.home&&walkable(a.home.x,a.home.z)){a.x=a.home.x;a.z=a.home.z}
 }
 const angDiff=(a,b)=>{let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
 
@@ -55,9 +68,16 @@ function huntStep(a,def,dt,L){
 function updateAnimals(dt){
  const L=G.animals;if(!L)return;
  HG.updateFoes(dt);
- const wolves=L.filter(w=>w.t==='wolf'&&!w.dying);
+ const wolves=[];for(const w of L)if(w.t==='wolf'&&!w.dying)wolves.push(w);
+ const DT=dt,play=HG.ui.state==='play',dark=HG.daylight()<.55;
  for(let k=L.length-1;k>=0;k--){
   const a=L[k],def=ANIMAL[a.t];
+  /* uzaktaki hayvanlar seyrek güncellenir (oyuncu görmez): birikmiş süre tek adımda işlenir */
+  if(!a.dying&&!def.foe&&!a.charge&&!a.kx&&!a.kz){
+   const fx=G.px-a.x,fz=G.py-a.z;
+   if(fx*fx+fz*fz>FAR2){a.lodT=(a.lodT||0)+DT;if(a.lodT<.2)continue}
+  }
+  const dt=a.lodT>0?Math.min(.3,a.lodT):DT;a.lodT=0;
   if(a.kx||a.kz){                       /* vuruş sonrası itilme: hız sönümlenerek kayar */
    const nx=a.x+a.kx*dt,nz=a.z+a.kz*dt;
    if(walkable(nx,a.z))a.x=nx;else a.kx*=-.2;
@@ -76,13 +96,15 @@ function updateAnimals(dt){
    if(a.gone){a.dying+=dt*2;if(a.dying>9)L.splice(k,1)}
    continue;
   }
+  /* güvenlik: bir nesnenin veya suyun içinde kalan hayvan en yakın uygun yere alınır */
+  a.stuckT=(a.stuckT||0)-dt;
+  if(a.stuckT<=0){a.stuckT=2+rnd();if(!def.foe)unstick(a)}
   if(a.sheared&&G.clock>a.shearAt)a.sheared=false;
   const dx=G.px-a.x,dz=G.py-a.z,dp=Math.hypot(dx,dz);
   a.callT=(a.callT===undefined?8+rnd()*30:a.callT)-dt;
   if(a.callT<=0){a.callT=18+rnd()*40;const cr=a.t==='wolf'?70:22;if(dp<cr&&dp>2&&a.t!=='rabbit'&&!def.foe&&(a.t!=='wolf'||HG.daylight()<.5))HG.snd('call_'+def.snd,{x:a.x,z:a.z})}
   a.hitT=Math.max(0,a.hitT-dt);a.cd-=dt;
   let spd=0,head=a.yaw;
-  const play=HG.ui.state==='play',dark=HG.daylight()<.55;
   /* av hayvanları yakındaki kurttan kaçar */
   if(def.prey&&wolves.length){
    let nw=null,nd=11;
@@ -135,20 +157,27 @@ function updateAnimals(dt){
   a.atkT=Math.max(0,(a.atkT||0)-dt);
   a.spd+=(spd-a.spd)*Math.min(1,8*dt);
  }
- /* iç içe geçme engeli: canlılar birbirinden en az yarıçapları toplamı kadar uzak durur */
- for(let pass=0;pass<2;pass++)for(let i=0;i<L.length;i++){
-  const a=L[i];if(a.dying)continue;const da=ANIMAL[a.t];
-  for(let j=i+1;j<L.length;j++){
-   const b=L[j];if(b.dying)continue;
-   const dx=b.x-a.x,dz=b.z-a.z;if(dx>3||dx<-3||dz>3||dz<-3)continue;
-   const mn=(da.r+ANIMAL[b.t].r)*1.2+.22,d2=dx*dx+dz*dz;if(d2>=mn*mn)continue;
-   const d=Math.sqrt(d2)||.001,push=(mn-d)*.5,ux=d<.002?1:dx/d,uz=d<.002?0:dz/d;
-   const wa=da.foe?HG.walkableFoe:walkable,wb=ANIMAL[b.t].foe?HG.walkableFoe:walkable;
-   const oa=wa(a.x-ux*push,a.z-uz*push),ob=wb(b.x+ux*push,b.z+uz*push);
-   if(oa){a.x-=ux*push;a.z-=uz*push}
-   if(ob){b.x+=ux*push;b.z+=uz*push}
-   if(oa&&!ob&&wa(a.x-ux*push,a.z-uz*push)){a.x-=ux*push;a.z-=uz*push}
-   else if(ob&&!oa&&wb(b.x+ux*push,b.z+uz*push)){b.x+=ux*push;b.z+=uz*push}
+ /* iç içe geçme engeli: canlılar birbirinden en az yarıçapları toplamı kadar uzak durur (ızgara ile yalnızca komşular denetlenir) */
+ {
+  for(const b of GRID.values())b.length=0;
+  for(const a of L){if(a.dying)continue;const k=((a.x/3)|0)*512+((a.z/3)|0);let b=GRID.get(k);if(!b)GRID.set(k,b=[]);b.push(a)}
+  for(let pass=0;pass<2;pass++)for(const a of L){
+   if(a.dying)continue;const da=ANIMAL[a.t],cx=(a.x/3)|0,cz=(a.z/3)|0;
+   for(let ox=-1;ox<=1;ox++)for(let oz=-1;oz<=1;oz++){
+    const bk=GRID.get((cx+ox)*512+cz+oz);if(!bk)continue;
+    for(const b of bk){
+     if(b.id<=a.id||b.dying)continue;
+     const dx=b.x-a.x,dz=b.z-a.z;if(dx>3||dx<-3||dz>3||dz<-3)continue;
+     const mn=(da.r+ANIMAL[b.t].r)*1.2+.22,d2=dx*dx+dz*dz;if(d2>=mn*mn)continue;
+     const d=Math.sqrt(d2)||.001,push=(mn-d)*.5,ux=d<.002?1:dx/d,uz=d<.002?0:dz/d;
+     const wa=da.foe?HG.walkableFoe:walkable,wb=ANIMAL[b.t].foe?HG.walkableFoe:walkable;
+     const oa=wa(a.x-ux*push,a.z-uz*push),ob=wb(b.x+ux*push,b.z+uz*push);
+     if(oa){a.x-=ux*push;a.z-=uz*push}
+     if(ob){b.x+=ux*push;b.z+=uz*push}
+     if(oa&&!ob&&wa(a.x-ux*push,a.z-uz*push)){a.x-=ux*push;a.z-=uz*push}
+     else if(ob&&!oa&&wb(b.x+ux*push,b.z+uz*push)){b.x+=ux*push;b.z+=uz*push}
+    }
+   }
   }
  }
  /* yeniden doğma: haritadaki sayı hedefin altına düşerse uzak bir otlakta yeni hayvan çıkar */

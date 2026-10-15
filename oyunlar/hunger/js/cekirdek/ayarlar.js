@@ -14,7 +14,9 @@ const TABS=[
   ['mist','Yer sisi','range',100,0,160,5,'%','Alçak bölgelerde ve şafakta toplanan sis.'],
   ['fx','Parçacık yoğunluğu','range',100,0,100,5,'%','Yaprak, toz, duman, kıvılcım ve su sıçraması.'],
   ['bright','Parlaklık','range',100,60,140,5,'%'],
-  ['fov','Görüş açısı (FOV)','range',75,60,110,1,'°']]],
+  ['dist','Çizim mesafesi','range',100,50,130,5,'%','Düşürmek uzaktaki ağaç ve kayaları daha erken gizler; başarımı artırır.'],
+  ['fov','Görüş açısı (FOV)','range',75,60,110,1,'°'],
+  ['fps','FPS göstergesi','toggle',false]]],
  ['Ses',[
   ['master','Ana ses','range',80,0,100,5,'%'],
   ['sfx','Efekt sesleri','range',100,0,100,5,'%','Adım, darbe, eşya ve hayvan sesleri.'],
@@ -23,13 +25,17 @@ const TABS=[
   ['tens','Gerilim ve fısıltı','range',40,0,100,5,'%','Korku anlarındaki alçak ton ve fısıltılar.']]],
  ['Kontrol',[
   ['sens','Fare / dokunma hassasiyeti','range',100,20,300,5,'%'],
-  ['invY','Dikey bakışı ters çevir','toggle',false]]],
+  ['invY','Dikey bakışı ters çevir','toggle',false],
+  ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.']]],
  ['Oyun',[
   ['hud','Durum çubukları','toggle',true],
   ['mini','Mini harita','toggle',true],
   ['clock','Saat','toggle',true],
   ['goal','Hedef bildirimi','toggle',true],
   ['tip','Eylem ipuçları','toggle',true],
+  ['cross','Nişan noktası','toggle',true],
+  ['compass','Saatte yön göstergesi','toggle',true],
+  ['ui','Arayüz boyutu','range',100,70,140,5,'%','Durum çubukları ve hızlı erişim çubuğunun boyutu.'],
   ['horror','Korku görsel efektleri','range',100,0,100,5,'%','Bozulma, renk kayması ve kararma şiddeti.'],
   ['shake','Kamera sarsıntısı','range',100,0,100,5,'%']]]
 ];
@@ -49,7 +55,8 @@ function persist(){
 function apply(key){
  const g=$('#game');if(!g)return;
  g.classList.toggle('no-hud',!cfg.hud);g.classList.toggle('no-mini',!cfg.mini);g.classList.toggle('no-clock',!cfg.clock);
- g.classList.toggle('no-goal',!cfg.goal);g.classList.toggle('no-tip',!cfg.tip);
+ g.classList.toggle('no-goal',!cfg.goal);g.classList.toggle('no-tip',!cfg.tip);g.classList.toggle('no-cross',!cfg.cross);
+ g.style.setProperty('--ui',String((cfg.ui||100)/100));
  const sc=HG.sc,S=HG.Scene;
  if(sc.R){
   sc.qMode=cfg.q;

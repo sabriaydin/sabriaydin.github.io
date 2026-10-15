@@ -46,7 +46,7 @@ async function swap(title,fn,spawn){
  HG.ldOpen(title);await nap();
  HG.ldSet(.2,'Dünya değişiyor');await nap();
  fn();
- G.pz=undefined;G.vz=0;G.air=false;G.pvx=0;G.pvy=0;G.tg=null;G.shelterCheck=0;G.objDirty=false;
+ G.pz=undefined;G.vz=0;G.air=false;G.pvx=0;G.pvy=0;G.tg=null;G.shelterCheck=0;G.objDirty=false;if(G.oc)G.oc.length=0;
  HG.ldSet(.3,'Sahne kuruluyor');
  await Scene.buildAsync(G,p=>HG.ldSet(.3+p*.55,'Sahne kuruluyor'));
  HG.buildMini();

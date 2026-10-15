@@ -88,7 +88,7 @@ let R,post=null;const cfg={on:false,samples:0,shafts:false,bloom:1,q:3};sc.postC
 const quadGeo=new THREE.PlaneGeometry(2,2);
 const quadCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 let quad,quadScene,mBright,mDown,mUp,mComp;
-const sv=new THREE.Vector3(),sv2=new THREE.Vector2();
+const sv=new THREE.Vector3(),sv2=new THREE.Vector2(),sv3=new THREE.Vector3(),fw3=new THREE.Vector3();
 
 function rtOpts(extra){return Object.assign({type:THREE.HalfFloatType,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:false,stencilBuffer:false},extra||{})}
 function hdrOK(){
@@ -155,7 +155,7 @@ function renderPost(scene,cam,t,dt,info){
  let sh=0;
  if(cfg.shafts&&sc.sunDirV){
   sv.copy(sc.sunDirV).multiplyScalar(100).add(cam.position);
-  const dir=sv.clone().sub(cam.position).normalize(),fw=new THREE.Vector3();cam.getWorldDirection(fw);
+  const dir=sv3.copy(sv).sub(cam.position).normalize(),fw=fw3;cam.getWorldDirection(fw);
   const f=fw.dot(dir);
   sv.project(cam);u.uSun.value.set(sv.x*.5+.5,sv.y*.5+.5);
   sh=Math.max(0,f)*Math.max(0,L-.15)*(1-over*.85)*(sc.sunUp||1);

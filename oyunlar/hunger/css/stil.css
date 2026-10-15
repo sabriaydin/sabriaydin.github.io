@@ -139,7 +139,11 @@ button.ghost:hover:not(:disabled){background:var(--panel2)}
 .sr input[type=checkbox]{width:20px;height:20px;accent-color:var(--red);justify-self:start;grid-column:2}
 .sr select{grid-column:2/4;font:inherit;color:var(--tx);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px}
 .sfoot{display:flex;justify-content:space-between;gap:8px;margin-top:14px}
-#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip{display:none!important}
+#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip,#game.no-cross #cross{display:none!important}
+#hud{transform:scale(var(--ui,1));transform-origin:left bottom}
+#hot{transform:translateX(-50%) scale(var(--ui,1));transform-origin:center bottom}
+@media (pointer:coarse){#hud{transform-origin:left top}}
+#fps{position:absolute;left:12px;top:12px;padding:2px 8px;background:rgba(13,13,14,.78);border:1px solid var(--line);border-radius:4px;font:600 12px/1.4 ui-monospace,Consolas,monospace;color:#9be08a;pointer-events:none;z-index:40}
 @media (max-width:760px){.sr{grid-template-columns:1fr 1fr 44px}}
 
 /* tam ekran harita ve köylü dükkânı */

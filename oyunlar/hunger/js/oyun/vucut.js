@@ -35,7 +35,7 @@ function swing(){
 function useStam(v){G.stam=Math.max(0,G.stam-v);if(G.stam<=0)G.tired=true}
 function useMedical(){
  if(!count('bandage'))return;
- take('bandage',1);G.bleed=0;G.hp=clamp(G.hp+14,0,100);G.san=clamp(G.san+3,0,100);
+ take('bandage',1);G.bleed=0;G.hp=clamp(G.hp+14+5*HG.perk('medic'),0,100);G.san=clamp(G.san+3,0,100);
  HG.snd('bandage');HG.toast('Yara sarıldı.');flag('healed');HG.ui.dirty=true;
 }
 
@@ -43,7 +43,7 @@ function updateBody(dt){
  const L=daylight(),play=ui.state==='play';
  /* meşale: elde ve yakıt varsa yanar */
  const h=held();
- G.torchLit=!!(h&&h.it.tool==='torch'&&G.torchFuel>0);
+ G.torchLit=!!(h&&h.it.tool==='torch'&&G.torchFuel>0&&!G.head);          /* meşale su altında yanmaz */
  if(G.torchLit){
   const wet=(sc.rain||0)>.5&&!G.sheltered?1.8:1;
   G.torchFuel-=dt*wet;
@@ -55,7 +55,7 @@ function updateBody(dt){
  /* dayanıklılık */
  const run=G.sprint&&G.moving;
  if(run)G.stam-=18*dt;
- else G.stam+=(G.moving?9:17)*dt*(G.hun>20&&G.thr>20?1:.5);
+ else G.stam+=(G.moving?9:17)*dt*(G.hun>20&&G.thr>20?1:.5)*(1+.15*HG.perk('agile'));
  G.stam=clamp(G.stam,0,100);
  if(G.stam<=0)G.tired=true;
  else if(G.tired&&G.stam>28)G.tired=false;

@@ -19,6 +19,12 @@ function dropSlot(i){
  spawnDrop(s.id,s.n);G.inv[i]=null;HG.ui.dirty=true;
  HG.feed('Atıldı: '+s.n+' '+IT[s.id].n);
 }
+/* Seçili hızlı erişim kutusundan 1 adet at */
+function dropOne(){
+ const s=G.inv[G.sel];if(!s||HG.ui.state!=='play')return;
+ spawnDrop(s.id,1);s.n--;if(s.n<=0)G.inv[G.sel]=null;
+ HG.ui.dirty=true;HG.snd('ui');HG.feed('Atıldı: 1 '+IT[s.id].n);
+}
 function updateDrops(dt){
  const L=G.drops;G.nearDrop=null;if(!L||!L.length)return;
  let best=PICK_R,near=null;
@@ -72,5 +78,5 @@ function pickupNearest(){
  if(left<=0)G.drops.splice(G.drops.indexOf(d),1);else d.n=left;
  G.nearDrop=null;return true;
 }
-Object.assign(HG,{spawnDrop,dropSlot,updateDrops,pickupNearest});
+Object.assign(HG,{spawnDrop,dropSlot,dropOne,updateDrops,pickupNearest});
 })();

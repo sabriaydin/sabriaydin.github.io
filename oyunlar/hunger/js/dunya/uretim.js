@@ -242,7 +242,7 @@ function genWorld(seed){
    for(let k=0;k<herd;k++){
     const xx=x+k*2.2*(rnd()-.3),yy=y+k*2.2*(rnd()-.3),j=Math.floor(yy)*W+Math.floor(xx);
     if(tile[j]!==T.GRASS||obj[j]||used.has(j))continue;
-    used.add(j);animals.push({t:type,x:xx+.5,z:yy+.5,yaw:rnd()*6.28});c++;
+    used.add(j);animals.push({t:type,x:Math.floor(xx)+.5,z:Math.floor(yy)+.5,yaw:rnd()*6.28});c++;
    }
   }
  }

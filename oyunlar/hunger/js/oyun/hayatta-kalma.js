@@ -4,16 +4,24 @@
 const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
 
 /* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
+/* Ağaç, palmiye ve çalılar duvar sayılmaz: yalnızca yapı, kaya ve kapı gibi kapatıcı nesneler alanı sınırlar.
+   Hesap ayrılmış bir dizi üzerinde yapılır (her çağrıda yeni bellek ayrılmaz). */
+const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0]);
+let SEEN=null,STAMP=0;const QUE=new Int32Array(64);
 function calcShelter(){
  if(G.cave)return true;                 /* mağara kapalı alandır */
- const sx=Math.floor(G.px),sy=Math.floor(G.py),start=sy*W+sx,seen=new Set([start]),q=[start];
- while(q.length){
-  const c=q.pop(),x=c%W,y=(c/W)|0;
+ if(!SEEN)SEEN=new Uint32Array(W*H);
+ if(++STAMP>=4294967295){SEEN.fill(0);STAMP=1}
+ const sx=Math.floor(G.px),sy=Math.floor(G.py),start=sy*W+sx;
+ let qh=0,qt=0;QUE[qt++]=start;SEEN[start]=STAMP;
+ while(qh<qt){
+  const c=QUE[qh++],x=c%W,y=(c/W)|0;
   for(let d=0;d<4;d++){
    const nx=x+(d===0?1:d===1?-1:0),ny=y+(d===2?1:d===3?-1:0);
    if(nx<0||ny<0||nx>=W||ny>=H)return false;
-   const ni=ny*W+nx;if(seen.has(ni)||G.obj[ni])continue;
-   seen.add(ni);if(seen.size>40)return false;q.push(ni);
+   const ni=ny*W+nx;if(SEEN[ni]===STAMP)continue;
+   const o=G.obj[ni];if(o&&!OPENOBJ.has(o))continue;
+   SEEN[ni]=STAMP;if(qt>=40)return false;QUE[qt++]=ni;
   }
  }
  return true;
@@ -64,9 +72,12 @@ function vertStep(dt){
   G.pz=clamp(G.pz+G.vz*dt,gy,Math.max(gy,surf));
   if(G.pz>=surf&&G.vz>0)G.vz=0;if(G.pz<=gy&&G.vz<0)G.vz=0;
   G.head=G.pz+EYE<WY-.02;
+  /* ilk yüzme/dalış bayrakları ve su altında kalma süresi */
+  HG.flag('swam');
+  if(G.head){HG.flag('dived');G.divT=(G.divT||0)+dt;if(G.divT>=20)HG.flag('deepbreath')}else G.divT=0;
   return;
  }
- if(G.swim){G.swim=false;G.head=false;G.vz=0}
+ if(G.swim){G.swim=false;G.head=false;G.vz=0;G.divT=0}
  if(!G.air&&(HG.keyDown('jump')||inp.touchJump)&&ui.state==='play'&&G.stam>=9){G.vz=JUMP;G.air=true;HG.useStam(9);HG.snd('jump')}
  if(G.air){
   G.vz-=GRAV*dt;G.pz+=G.vz*dt;
@@ -96,6 +107,7 @@ function moveStep(dt){
  let iz=(kd('back')?1:0)-(kd('fwd')?1:0)+j.y;
  const m=Math.hypot(ix,iz);
  G.moving=m>.15;G.sprint=false;
+ if(!G.moving||G.tired)G.sprintOn=false;          /* 'koşmayı aç/kapat' ayarı için */
  const sy=Math.sin(look.yaw),cy=Math.cos(look.yaw);
  G.fx=-sy;G.fy=-cy;                       /* bakılan yön (yerde) */
  if(G.pvx===undefined){G.pvx=0;G.pvy=0}
@@ -104,7 +116,7 @@ function moveStep(dt){
  if(G.moving){
   ix/=Math.max(m,1);iz/=Math.max(m,1);
   const vx=ix*cy+iz*sy,vy=-ix*sy+iz*cy;
-  G.sprint=kd('sprint')&&G.hun>5&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
+  G.sprint=(HG.cfg.sprintT?!!G.sprintOn:kd('sprint'))&&G.hun>5&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
   const wd0=Math.max(0,HG.sc.WY-Scene.groundY(G.px,G.py));
   let sp=(G.sprint?5.4:3.4)*(G.swim?(G.sprint?.62:.5):clamp(1-wd0*.34,.5,1))*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
   /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
@@ -116,6 +128,7 @@ function moveStep(dt){
  const f=1-Math.exp(-acc*dt);
  G.pvx+=(tvx-G.pvx)*f;G.pvy+=(tvy-G.pvy)*f;
  const speed=Math.hypot(G.pvx,G.pvy);G.spdNow=speed;
+ if(G.stats){const dd=speed*dt;if(G.swim)G.stats.swum=(G.stats.swum||0)+dd;else if(!G.air)G.stats.walked=(G.stats.walked||0)+dd}
  if(speed<.03&&!G.moving){G.pvx=G.pvy=0;G.spdNow=0;return}
  const reach=speed*dt,lim=Math.max(.05,reach*1.7);   /* çok dik yokuşa tırmanılamaz, zıplanır */
  const ok=(x,y)=>canStand(x,y)&&!creatureBlock(x,y)&&(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim);
@@ -127,6 +140,13 @@ function moveStep(dt){
  }
 }
 
+/* Yeniden büyüyen nesne, üzerinde canlı bulunan kareye çıkmaz (hayvan veya köylü nesnenin içinde kalırdı) */
+function occupied(tx,tz){
+ const cx=tx+.5,cz=tz+.5;
+ for(const a of G.animals||[])if(!a.dying&&Math.abs(a.x-cx)<1.2&&Math.abs(a.z-cz)<1.2)return true;
+ for(const n of G.npcs||[])if(Math.abs(n.x-cx)<1.2&&Math.abs(n.z-cz)<1.2)return true;
+ return false;
+}
 /* ---- Her kare ---- */
 function update(dt){
  G.clock+=dt;
@@ -147,12 +167,18 @@ function update(dt){
  const eco=1-.12*HG.perk('eco');
  G.hun=clamp(G.hun-dt*.17*eco*(G.sprint?1.8:1),0,100);
  G.thr=clamp(G.thr-dt*.25*eco*(G.sprint?1.8:1),0,100);
- let fd=99;
- {const x0=Math.floor(G.px),y0=Math.floor(G.py);
+ /* en yakın ateş: saniyede 4 kez aranır */
+ G.fireT=(G.fireT||0)-dt;
+ if(G.fireT<=0||G.fd===undefined){
+  G.fireT=.25;let fd0=99;
+  const x0=Math.floor(G.px),y0=Math.floor(G.py);
   for(let y=y0-5;y<=y0+5;y++)for(let x=x0-5;x<=x0+5;x++){
    if(x<0||y<0||x>=W||y>=H)continue;
-   if(G.obj[y*W+x]===O.FIRE){const d=Math.hypot(x+.5-G.px,y+.5-G.py);if(d<fd)fd=d}
-  }}
+   if(G.obj[y*W+x]===O.FIRE){const d=Math.hypot(x+.5-G.px,y+.5-G.py);if(d<fd0)fd0=d}
+  }
+  G.fd=fd0;
+ }
+ const fd=G.fd;
  G.nearFire=fd<=4;
  let wr=-(cold*.62+.04);
  {const wd1=HG.sc.WY-Scene.groundY(G.px,G.py);if(G.swim)wr-=1.1;else if(wd1>.3)wr-=.45}
@@ -167,8 +193,9 @@ function update(dt){
  let dmg=0;
  /* nefes: baş suyun altındayken tükenir, bitince boğulma hasarı başlar */
  if(G.o2===undefined)G.o2=100;
- if(G.head)G.o2=Math.max(0,G.o2-dt*(100/26)*(G.moving?1.25:1));else G.o2=Math.min(100,G.o2+dt*45);
- if(G.swim&&G.moving)G.stam=Math.max(0,G.stam-dt*(G.sprint?9:4));
+ if(G.head)G.o2=Math.max(0,G.o2-dt*(100/26)*(G.moving?1.25:1)/(1+.2*HG.perk('dive')));else G.o2=Math.min(100,G.o2+dt*45);
+ if(G.o2<28&&!G.o2w){G.o2w=true;HG.toast('Nefes tükeniyor: yüzeye çıkın!')}else if(G.o2>60)G.o2w=false;
+ if(G.swim&&G.moving)G.stam=Math.max(0,G.stam-dt*(G.sprint?9:4)*(1-.2*HG.perk('dive')));
  if(G.o2<=0){dmg+=7;G.cause='Boğularak öldün.';if(Math.random()<dt*1.2)HG.snd('hurt')}
  if(G.hun<=0){dmg+=1.2;G.cause='Açlıktan öldün.'}
  if(G.thr<=0){dmg+=1.8;G.cause='Susuzluktan öldün.'}
@@ -177,17 +204,20 @@ function update(dt){
  else if(G.hun>35&&G.thr>35&&G.warm>35)G.hp=clamp(G.hp+.8*dt,0,100);
  if(G.hp<=0){die();return}
  /* meyve ve hindistan cevizinin yeniden büyümesi */
- for(let k=G.timers.length-1;k>=0;k--){const t=G.timers[k];if(G.clock>=t.at){const tx=t.i%W,tz=(t.i/W)|0;if(Math.hypot(G.px-tx-.5,G.py-tz-.5)<2.2){t.at=G.clock+15;continue}if(G.obj[t.i]===t.from&&!G.drops.some(d=>Math.hypot(d.x-tx-.5,d.z-tz-.5)<.9))HG.setObj(t.i,t.to);G.timers.splice(k,1)}}
+ for(let k=G.timers.length-1;k>=0;k--){const t=G.timers[k];if(G.clock>=t.at){const tx=t.i%W,tz=(t.i/W)|0;if(Math.hypot(G.px-tx-.5,G.py-tz-.5)<2.2||occupied(tx,tz)){t.at=G.clock+12;continue}if(G.obj[t.i]===t.from&&!G.drops.some(d=>Math.hypot(d.x-tx-.5,d.z-tz-.5)<.9))HG.setObj(t.i,t.to);G.timers.splice(k,1)}}
  if(dayNo()>=7)flag('day7');
  /* otomatik kayıt */
  G.saveT+=dt;if(G.saveT>20){G.saveT=0;HG.save()}
 }
 function die(){
  ui.state='dead';
+ /* açık pencereler kapatılır; yay, eylem ve yüzme durumu sıfırlanır */
+ for(const id of ['#trade','#jr','#gd','#bigmap','#sv','#pause'])HG.$(id)&&(HG.$(id).hidden=true);
+ G.trading=null;ui.sleeping=false;try{HG.settings&&HG.settings.close();HG.stopAction();HG.bow.on=false;HG.bow.draw=0;HG.$('#fade').classList.remove('on')}catch(e){}
  try{localStorage.removeItem(HG.SAVE)}catch(e){}
  HG.$('#why').textContent=G.cause||'Hayatta kalamadın.';
  HG.$('#stat').textContent=dayNo()+'. güne kadar dayandın.';
- {const s=G.stats||{};HG.$('#stat2').textContent='Seviye '+G.lvl+' · Avlanan hayvan: '+(s.hunted||0)+' · Yok edilen Gölge: '+(s.shades||0)+'\nAçılan sandık: '+(s.chests||0)+' · Tamamlanan görev: '+(s.quests||0)+' · Atlatılan Kan Ayı: '+(s.blood||0)}
+ {const s=G.stats||{};HG.$('#stat2').textContent='Seviye '+G.lvl+' · Avlanan hayvan: '+(s.hunted||0)+' · Yok edilen Gölge: '+(s.shades||0)+'\nAçılan sandık: '+(s.chests||0)+' · Tamamlanan görev: '+(s.quests||0)+' · Atlatılan Kan Ayı: '+(s.blood||0)+'\nYürünen mesafe: '+Math.round(s.walked||0)+' m · Yüzülen mesafe: '+Math.round(s.swum||0)+' m'}
  HG.$('#dead').hidden=false;HG.$('#panel').hidden=true;
  for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false;
  if(document.exitPointerLock)document.exitPointerLock();

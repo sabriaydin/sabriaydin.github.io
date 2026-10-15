@@ -128,6 +128,11 @@ function markers(g,tx,ty,k,sz){
   const e=G.cave.lv.exit,x=tx(e.x+.5),y=ty(e.y+.5);
   g.fillStyle='#bcd2ff';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.arc(x,y,Math.max(3.5,sz*.8),0,7);g.stroke();g.fill();
  }
+ /* yerleştirilen kamp ateşleri */
+ if(!G.cave)for(const f of HG.sc.fires||[]){
+  const x=tx(f.x),y=ty(f.z),s=Math.max(2.4,sz*.55);
+  g.fillStyle='#ff9a2a';g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.arc(x,y,s,0,7);g.stroke();g.fill();
+ }
  /* hedef işareti */
  if(G.wp&&!G.cave){
   const x=tx(G.wp.x),y=ty(G.wp.y),s=Math.max(5,sz*1.2);

@@ -7,6 +7,7 @@ const {box,cone}=sc.g;
 const CH=32;                                   /* parça (chunk) boyutu: kare */
 const LOD_DIST=62,CULL_DIST=185;               /* yakın: ayrıntılı model · uzak: sade model · çok uzak: çizilmez */
 let inst=new Map(),chunks=new Map(),placedGroup=null,flames=[],wobIdx=-1;
+const placedCells=new Set();                    /* yerleştirilen yapıların kareleri: değişirse tam senkron gerekir */
 const staged=new Map();let stagedGroup=null;
 const wm=new THREE.Matrix4(),wq=new THREE.Quaternion(),wv=new THREE.Vector3(),ws=new THREE.Vector3();
 const INSTKEYS=['treeA','treeB','palm','palm0','rock','coal','copper','iron','bush','bush0'];
@@ -44,6 +45,7 @@ function mkInst(geo,mat,n,shadow){
  const im=new THREE.InstancedMesh(geo,mat,n);im.count=0;im.castShadow=shadow;im.receiveShadow=true;im.frustumCulled=false;
  im.setColorAt(0,tint.setRGB(1,1,1));sc.scene.add(im);return im;
 }
+const ALT={bush:'bush0',bush0:'bush',palm:'palm0',palm0:'palm'};
 const KEYOF={[O.PALM]:'palm',[O.PALM0]:'palm0',[O.ROCK]:'rock',[O.COAL]:'coal',[O.COPPER]:'copper',[O.IRON]:'iron',[O.BUSH]:'bush',[O.BUSH0]:'bush0'};
 function buildInstances(G){
  for(const c of chunks.values()){sc.scene.remove(c.mesh);c.mesh.dispose&&c.mesh.dispose();if(c.lo){sc.scene.remove(c.lo);c.lo.dispose&&c.lo.dispose()}}
@@ -52,7 +54,7 @@ function buildInstances(G){
  const cnt=new Map();
  for(let z=0;z<H;z++)for(let x=0;x<W;x++){
   const o=G.obj[z*W+x];if(!o)continue;
-  const ks=o===O.TREE?['treeA','treeB']:[KEYOF[o]];
+  const ks=o===O.TREE?['treeA','treeB']:ALT[KEYOF[o]]?[KEYOF[o],ALT[KEYOF[o]]]:[KEYOF[o]];   /* çalı ve palmiyede iki hâl de ayrılır: meyveli/meyvesiz geçiş artımlı yapılır */
   for(const key of ks){if(!key)continue;const k=chunkKey(key,x,z);cnt.set(k,(cnt.get(k)||0)+1)}
  }
  for(const [k,n] of cnt){
@@ -78,7 +80,7 @@ function syncObjects(G){
  placedGroup=new THREE.Group();sc.scene.add(placedGroup);
  if(stagedGroup)sc.scene.remove(stagedGroup);
  stagedGroup=new THREE.Group();sc.scene.add(stagedGroup);staged.clear();
- inst.clear();sc.fires.length=0;flames=[];
+ inst.clear();placedCells.clear();sc.fires.length=0;flames=[];
  for(const c of chunks.values())c.cnt=0;
  const plm=sc.MODEL.matPlain;
  const q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),m=new THREE.Matrix4();
@@ -88,16 +90,21 @@ function syncObjects(G){
   let key=null;
   if(o===O.TREE)key=hh<.5?'treeA':'treeB';else key=KEYOF[o];
   if(key){
-   const ch=chunks.get(chunkKey(key,x,z));if(!ch)continue;
-   const idx=ch.cnt++;
-   if(idx>=ch.n){ch.cnt--;continue}
    const sc2=(o===O.TREE?.8+h2*.4:o===O.PALM||o===O.PALM0?.9+h2*.3:.9+h2*.3);
    p.set(x+.5+(hh-.5)*.2,gy-.04,z+.5+(h2-.5)*.2);e.set((h3-.5)*.05,hh*6.28,(h2-.5)*.05);q.setFromEuler(e);s3.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
    m.compose(p,q,s3);
-   const t=tintFor(key,hh,h2,h3);
-   ch.mesh.setMatrixAt(idx,m);ch.mesh.setColorAt(idx,t);
-   if(ch.lo){ch.lo.setMatrixAt(idx,m);ch.lo.setColorAt(idx,t)}
-   inst.set(i,{mesh:ch.mesh,lo:ch.lo,idx,mat:m.clone(),tint:[t.r,t.g,t.b],key});
+   const mk=(k,hide)=>{
+    const ch=chunks.get(chunkKey(k,x,z));if(!ch)return null;
+    const idx=ch.cnt++;
+    if(idx>=ch.n){ch.cnt--;return null}
+    const t=tintFor(k,hh,h2,h3),mm=hide?ZERO:m;
+    ch.mesh.setMatrixAt(idx,mm);ch.mesh.setColorAt(idx,t);
+    if(ch.lo){ch.lo.setMatrixAt(idx,mm);ch.lo.setColorAt(idx,t)}
+    return {mesh:ch.mesh,lo:ch.lo,idx,mat:m.clone(),tint:[t.r,t.g,t.b],key:k};
+   };
+   const r=mk(key,false);if(!r)continue;
+   const ak=ALT[key];if(ak){const r2=mk(ak,true);if(r2){r.alt=r2;r2.alt=r}}
+   inst.set(i,r);
    continue;
   }
   let geo=null;
@@ -107,7 +114,7 @@ function syncObjects(G){
   const me=new THREE.Mesh(geo,plm);me.position.set(x+.5,gy,z+.5);me.castShadow=true;me.receiveShadow=true;
   if(o===O.DOOR){const isW=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS};const alongX=(x>0&&isW(i-1))||(x<W-1&&isW(i+1));me.rotation.y=alongX?0:Math.PI/2}
   else if(o===O.WALLW||o===O.WALLS)me.rotation.y=hh<.5?0:Math.PI;
-  placedGroup.add(me);
+  placedGroup.add(me);placedCells.add(i);
   if(o===O.FIRE){const f=flameGroup();f.position.set(x+.5,gy+.05,z+.5);placedGroup.add(f);sc.fires.push({x:x+.5,z:z+.5,y:gy});flames.push({g:f,ph:hh*10})}
   if(o===O.FURN){const gl=new THREE.Mesh(box(.42,.3,.04),new THREE.MeshBasicMaterial({color:0xff7a1a,toneMapped:false}));gl.position.set(x+.5,gy+.4,z+.5+.49);placedGroup.add(gl)}
  }
@@ -138,6 +145,31 @@ function applyDamage(i,frac,G,silent){
  stagedGroup.add(mesh);staged.set(i,{mesh,stage:st});
 }
 S.setDamage=(i,f)=>applyDamage(i,f,HG.G);
+/* Artımlı senkron: yalnızca değişen karelerin örnekleri gizlenir/geri gösterilir (tam senkron yüzlerce ms sürer).
+   Yeni tür veya yerleştirilen yapı gerekiyorsa false döner; çağıran tam senkrona geçer. */
+S.syncCells=(G,cells)=>{
+ if(!placedGroup||!chunks.size)return false;
+ const ops=[];
+ for(const i of cells){
+  if(placedCells.has(i))return false;
+  const o=G.obj[i],r=inst.get(i);
+  if(!o){if(r)ops.push([i,r,null]);continue}
+  const key=o===O.TREE?(r&&(r.key==='treeA'||r.key==='treeB')?r.key:null):KEYOF[o];
+  if(!key||!r)return false;
+  if(r.key===key)ops.push([i,null,r]);
+  else if(r.alt&&r.alt.key===key)ops.push([i,r,r.alt]);       /* meyveli ↔ meyvesiz çalı, palmiye */
+  else return false;
+ }
+ const setM=(r,mm)=>{r.mesh.setMatrixAt(r.idx,mm);r.mesh.instanceMatrix.needsUpdate=true;if(r.lo){r.lo.setMatrixAt(r.idx,mm);r.lo.instanceMatrix.needsUpdate=true}};
+ for(const [i,hide,show] of ops){
+  const cur=staged.get(i);
+  if(cur){stagedGroup.remove(cur.mesh);cur.mesh.material.dispose();staged.delete(i)}
+  if(hide)setM(hide,ZERO);
+  if(show){setM(show,show.mat);inst.set(i,show)}
+  if(wobIdx===i)wobIdx=-1;
+ }
+ return true;
+};
 S.onBuild(buildInstances);
 S.onSync(syncObjects);
 const fr=new THREE.Frustum(),pm=new THREE.Matrix4(),pp=new THREE.Vector3();
@@ -145,14 +177,14 @@ S.onFrame((G,t,dt,info)=>{
  windU.uTime.value=t;
  /* parça görünürlüğü: görüş alanı veya gölge menzili içindekiler çizilir; uzaktakiler sade model kullanır */
  pm.multiplyMatrices(sc.cam.projectionMatrix,sc.cam.matrixWorldInverse);fr.setFromProjectionMatrix(pm);
- const play=info.mode==='play';pp.set(G.px||0,0,G.py||0);
+ const play=info.mode==='play',dm=((HG.cfg&&HG.cfg.dist)||100)/100,CULL=CULL_DIST*dm,LOD=LOD_DIST*Math.min(1,dm);pp.set(G.px||0,0,G.py||0);
  if(!play)pp.set(W/2,0,H/2);
  for(const c of chunks.values()){
   if(!c.mesh.count){c.mesh.visible=false;if(c.lo)c.lo.visible=false;continue}
   const d=c.box.distanceToPoint(pp);
-  let vis=!play||(fr.intersectsBox(c.box)&&d<CULL_DIST)||d<34;
+  let vis=!play||(fr.intersectsBox(c.box)&&d<CULL)||d<34;
   if(!play)vis=true;
-  const near=!play?false:d<LOD_DIST;
+  const near=!play?false:d<LOD;
   c.mesh.visible=vis&&(near||!c.lo);
   if(c.lo)c.lo.visible=vis&&!near;
  }

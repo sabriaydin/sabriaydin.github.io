@@ -14,7 +14,10 @@ function foodBlock(f){
 }
 function actionFor(tg){
  const h=held();
- /* elde yiyecek/içecek varsa sol tık basılı tutulunca yenir (Minecraft tarzı) */
+ /* su altı: deniz dibine bakıp midye, yosun ve inci toplanır */
+ if(G.head&&!G.cave&&HG.look.pitch<-.2&&G.pz-Scene.groundY(G.px,G.py)<1.9)return {kind:'dive',need:1.7,hint:'Basılı tut: deniz dibini karıştır',name:'Deniz dibi'};
+ if(G.head&&h&&(h.it.food||h.it.heal))return {block:'Su altında kullanılamaz.',name:h.it.n};
+ /* elde yiyecek/içecek varsa sol tık basılı tutulunca yenir */
  if(h&&h.it.food){
   const b=foodBlock(h.it.food);
   return b?{block:b,name:h.it.n}:{kind:'eat',need:1.1,hint:'Basılı tut: '+(h.it.food.h===0?'iç':'ye'),name:h.it.n};
@@ -128,7 +131,7 @@ function stepAction(dt){
   else if(st>A.st&&fr<1){A.st=st;HG.snd('crack',{x:tg.x+.5,z:tg.y+.5})}
   Scene.setDamage(i,fr);
  }
- if(A.tick<=0&&kind!=='drink'&&kind!=='fish'&&kind!=='fill'){
+ if(A.tick<=0&&kind!=='drink'&&kind!=='fish'&&kind!=='fill'&&kind!=='dive'){
   A.tick=.38;A.hitI=i;A.hitT=.18;HG.snd(o===O.TREE||o===O.PALM||o===O.BUSH?'hit':o===O.ROCK?'rock':(o===O.COAL||o===O.COPPER||o===O.IRON)?'ore':tl===T.SAND?'step_sand':'pick');
   const hy=tg.hy!==undefined?tg.hy:1;
   const big=o===O.ROCK||o===O.COAL||o===O.COPPER||o===O.IRON;
@@ -159,6 +162,15 @@ function stepAction(dt){
   A.need=3+Math.random()*4;
  }else if(kind==='dig'){
   gain('sand',1);
+ }else if(kind==='dive'){
+  /* deniz dibi: sık midye ve yosun, nadiren inci */
+  HG.useStam(3);
+  const r=Math.random();
+  if(r<.03){if(gain('pearl',1)){HG.toast('İnci buldun!');HG.xpGain(4)}}
+  else if(r<.47){if(gain('shell',1)&&G.stats)G.stats.shells=(G.stats.shells||0)+1}
+  else if(r<.70)gain('kelp',1);
+  else if(r<.88)gain('sand',1);
+  else HG.toast('Dipte işe yarar bir şey çıkmadı.');
  }
 }
 

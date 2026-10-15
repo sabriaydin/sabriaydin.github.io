@@ -38,6 +38,22 @@ function hitTarget(ar,ox,oy,oz){
  }
  return best;
 }
+/* Köylüler: oklar içlerinden geçmez; vurulan köylü bir süre küser ve uzaklaşır */
+function hitNpc(ar,ox,oy,oz){
+ const dx=ar.x-ox,dy=ar.y-oy,dz=ar.z-oz,L2=dx*dx+dy*dy+dz*dz||1e-6;
+ for(const n of G.npcs||[]){
+  if(n.inside)continue;
+  if((n.x-ox)**2+(n.z-oz)**2>(Math.hypot(dx,dz)+1.5)**2)continue;
+  const gy=Scene.groundY(n.x,n.z);
+  for(const f of [.25,.55,.85]){
+   const cy=gy+1.7*f,vx=n.x-ox,vy=cy-oy,vz=n.z-oz;
+   const t=clamp((vx*dx+vy*dy+vz*dz)/L2,0,1);
+   const px=ox+dx*t-n.x,py=oy+dy*t-cy,pz=oz+dz*t-n.z;
+   if(px*px+py*py+pz*pz<.3*.3)return n;
+  }
+ }
+ return null;
+}
 function updateArrows(dt){
  const L=G.arrows;
  for(let k=L.length-1;k>=0;k--){
@@ -62,6 +78,13 @@ function updateArrows(dt){
     HG.snd('arrowflesh',{x:an.x,z:an.z,y:gy+def.h*.5});
     recover(an.x,gy,an.z,.55);
     L.splice(k,1);break;
+   }
+   /* köylüler */
+   const nv=hitNpc(a,ox,oy,oz);
+   if(nv){
+    L.splice(k,1);nv.anger=90;
+    HG.snd('arrowflesh',{x:nv.x,z:nv.z,y:gy+1});HG.toast(nv.name+' sana kızdı. Bir süre konuşmak istemeyecek.');
+    break;
    }
    /* su */
    if((tile<=T.SHAL||tile===T.POND)&&a.y<sc.WY){HG.snd('splash',{x:a.x,z:a.z,y:a.y});Scene.burst(a.x,sc.WY,a.z,0x9fd0f0,5);L.splice(k,1);break}

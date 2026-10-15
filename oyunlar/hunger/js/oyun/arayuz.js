@@ -30,7 +30,7 @@ function renderRecipes(){
   const need=Object.keys(r[2]).map(k=>{const have=count(k),ok=have>=r[2][k];return `<span class="${ok?'ok':'no'}">${IT[k].n} ${have}/${r[2][k]}</span>`}).join(' · ');
   h+=`<div class="rc${st===-1?' lock':''}"><img src="${ICON[r[0]]}" alt=""><div><b>${it.n}${r[1]>1?' ×'+r[1]:''}</b>${need}${r[3]?`<br><span class="${st===-1?'no':'ok'}">Gerekli: ${STN[r[3]]} yakını</span>`:''}${it.d?`<br><span>${it.d}</span>`:''}</div><button type="button" data-r="${i}"${st===1?'':' disabled'}>Üret</button></div>`;
  });
- $('#recipes').innerHTML=h;
+ if(hc.rc!==h){hc.rc=h;$('#recipes').innerHTML=h}      /* içerik değişmediyse DOM yeniden yazılmaz */
 }
 function togglePanel(force){
  if(ui.state!=='play')return;
@@ -56,20 +56,22 @@ function drawBig(){HG.mapBig()}
 
 /* ---- HUD ---- */
 const hc={};
+const DIRS=['K','KD','D','GD','G','GB','B','KB'];       /* kuzey, kuzeydoğu, doğu ... */
 function setBar(id,v){const k=Math.round(v);if(hc[id]===k)return;hc[id]=k;const e=$(id);e.querySelector('b').style.width=k+'%';e.classList.toggle('low',v<25)}
 function hud(){
  setBar('#bHp',G.hp);setBar('#bHun',G.hun);setBar('#bThr',G.thr);setBar('#bWar',G.warm);
  const hh=Math.floor(tod()*24),mm=Math.floor((tod()*24-hh)*60),L=daylight();
- const ck=`${G.cave?'⛏ Mağara ·':G.blood?'🌑':L>.45?'☀':'☾'} Gün ${dayNo()} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · Sv ${G.lvl||1}${G.pts?' ★'+G.pts:''}${G.blood?' · KAN AYI':''}`;
+ const bi=Math.round((((Math.atan2(G.fx||0,-(G.fy||-1)))/(Math.PI*2))+1)%1*8)%8;
+ const ck=`${G.cave?'⛏ Mağara ·':G.blood?'🌑':L>.45?'☀':'☾'} Gün ${dayNo()} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · Sv ${G.lvl||1}${G.pts?' ★'+G.pts:''}${G.blood?' · KAN AYI':''}${HG.cfg.compass?' · '+DIRS[bi]:''}`;
  if(hc.ck!==ck){hc.ck=ck;$('#clock').textContent=ck}
- const sh=G.sheltered?'Barınakta: soğuk azalır':G.nearFire?'Ateşin yanında: ısınıyorsun':'';
+ const sh=G.swim?'Su derinliği: '+Math.max(0,HG.sc.WY-HG.Scene.groundY(G.px,G.py)).toFixed(1)+' m':G.sheltered?'Barınakta: soğuk azalır':G.nearFire?'Ateşin yanında: ısınıyorsun':'';
  if(hc.sh!==sh){hc.sh=sh;$('#shel').textContent=sh}
  const gt=goalText();if(hc.gt!==gt){hc.gt=gt;$('#goal').innerHTML=gt}
  HG.bodyHud();
  $('#vr').style.opacity=clamp((35-G.hp)/35,0,.85);
  $('#vc').style.opacity=clamp((30-G.warm)/30,0,.8);
  /* mini harita: oyuncuyu ortalayan, keşfedildikçe açılan harita */
- HG.mapMini($('#mini').getContext('2d'),160);
+ {const nm=performance.now();if(nm-(hc.mm||0)>48){hc.mm=nm;HG.mapMini($('#mini').getContext('2d'),160)}}   /* mini harita saniyede ~20 kez çizilir */
  if(!$('#bigmap').hidden)drawBig();
  /* nişan ipucu */
  const a=HG.actionFor(G.tg);

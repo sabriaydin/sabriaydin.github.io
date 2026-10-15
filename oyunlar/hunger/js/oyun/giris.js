@@ -32,6 +32,7 @@ function closeOverlay(){
  return false;
 }
 
+const clampMv=v=>v>180?180:v<-180?-180:v;
 function setupInput(){
  ui.touch=matchMedia('(pointer:coarse)').matches;
  /* klavye */
@@ -49,6 +50,7 @@ function setupInput(){
   }
   if(ui.state!=='play')return;
   const K=HG.keyIs;
+  if(HG.cfg.sprintT&&K('sprint',e.code))G.sprintOn=!G.sprintOn;
   if(K('inv',e.code)||K('craft',e.code))HG.togglePanel();
   else if(K('use',e.code))HG.useHeld();
   else if(K('place',e.code))HG.placeHeld();
@@ -56,6 +58,8 @@ function setupInput(){
   else if(K('jr',e.code))HG.toggleJournal();
   else if(K('guide',e.code))HG.toggleGuide();
   else if(K('qsave',e.code))HG.manualSave(true);
+  else if(K('drop',e.code))HG.dropOne();
+  else if(K('sort',e.code))HG.sortInv();
   else if(K('mute',e.code)){ui.mute=!ui.mute;HG.toast(ui.mute?'Ses kapalı.':'Ses açık.')}
   else if(/^Digit[1-8]$/.test(e.code)){G.sel=+e.code.slice(5)-1;ui.dirty=true;HG.snd('ui')}
  });
@@ -73,7 +77,8 @@ function setupInput(){
    ui.panelUnlock=false;
   }
  });
- document.addEventListener('mousemove',e=>{if(ui.locked)Scene.look(e.movementX*.0022,e.movementY*.0022)});
+ /* bazı tarayıcılarda imleç kilidi anında dev sıçrama değerleri üretir: tek hareket sınırlandırılır */
+ document.addEventListener('mousemove',e=>{if(ui.locked)Scene.look(clampMv(e.movementX)*.0022,clampMv(e.movementY)*.0022)});
 
  /* fare tuşları (tuval) */
  cvs.addEventListener('pointerdown',e=>{
@@ -162,6 +167,7 @@ function setupInput(){
  document.addEventListener('pointercancel',endDrag);
  $('#recipes').addEventListener('click',e=>{const b=e.target.closest('button[data-r]');if(b){HG.craft(+b.dataset.r);HG.renderRecipes()}});
  $('#close').onclick=()=>HG.togglePanel(false);
+ $('#sortInv').onclick=()=>HG.sortInv();
  $('#panel').addEventListener('pointerdown',e=>{if(e.target===$('#panel'))HG.togglePanel(false)});
 
  /* menü düğmeleri */

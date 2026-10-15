@@ -7,6 +7,11 @@ function updateEvents(dt){
  const L=daylight(),d=dayNo();
  /* yeni gün: deneyim */
  if(d>(G.lastDay||1)){G.lastDay=d;HG.xpGain(20);HG.feed('Yeni gün: '+d)}
+ /* akşam bildirimi: gün ışığı yarının altına düştüğünde bir kez */
+ if(!G.cave){
+  if(G.prevL!==undefined&&G.prevL>=.5&&L<.5&&!G.blood&&d%5!==0)HG.toast('Akşam oluyor. Ateş, meşale ve barınak hazırlayın.');
+  G.prevL=L;
+ }else G.prevL=undefined;
  /* Kan Ayı: her 5. günün akşamı doğar, sabaha kadar sürer */
  if(!G.blood&&L<.3&&d%5===0&&G.bloodDay!==d&&G.clock>60){
   G.blood=true;G.bloodDay=d;

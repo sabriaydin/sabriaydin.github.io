@@ -133,6 +133,7 @@ function rebuild(G,px,pz,frac){
 }
 S.onBuild(G=>layout(G));
 S.onSync(()=>{dirty=true});
+S.markGrass=()=>{dirty=true};
 S.onQuality(()=>{dirty=true;lastX=-1e9});
 S.onFrame((G,t,dt,info)=>{
  uTime.value=t;

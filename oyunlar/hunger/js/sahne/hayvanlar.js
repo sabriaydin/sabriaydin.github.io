@@ -6,7 +6,7 @@ const S=HG.Scene,sc=HG.sc;
 const objs=new Map();
 let mat=null,matF=null;
 const VIEW=120;                                  /* bu mesafeden uzak hayvanlar çizilmez */
-const clamp=HG.clamp,q=new THREE.Quaternion(),qp=new THREE.Quaternion(),ax=new THREE.Vector3(1,0,0);
+const clamp=HG.clamp,q=new THREE.Quaternion(),qp=new THREE.Quaternion(),qz=new THREE.Quaternion(),ax=new THREE.Vector3(1,0,0),AY=new THREE.Vector3(0,1,0),AZ=new THREE.Vector3(0,0,1),alive=new Set();   /* kare başına yeni nesne ayrılmaz */
 
 function make(a){
  const M=sc.ANIM[a.t],def=ANIMAL[a.t];
@@ -31,7 +31,7 @@ function make(a){
 }
 S.onFrame((G,t,dt,info)=>{
  const L=G.animals||[];
- const alive=new Set(L);
+ alive.clear();for(const a of L)alive.add(a);
  for(const [a,o] of objs)if(!alive.has(a)){sc.scene.remove(o.g);objs.delete(a)}
  const play=info.mode==='play',px=play?G.px:HG.W/2,pz=play?G.py:HG.H/2,cam=sc.cam.position;
  for(const a of L){
@@ -67,8 +67,8 @@ S.onFrame((G,t,dt,info)=>{
   }
   o.g.position.set(a.x,y,a.z);
   o.g.rotation.set(0,0,0);
-  q.setFromAxisAngle(new THREE.Vector3(0,1,0),a.yaw);qp.setFromAxisAngle(ax,o.pitch+(o.extraPitch||0));
-  const qz=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),rz);
+  q.setFromAxisAngle(AY,a.yaw);qp.setFromAxisAngle(ax,o.pitch+(o.extraPitch||0));
+  qz.setFromAxisAngle(AZ,rz);
   o.g.quaternion.copy(q).multiply(qp).multiply(qz);
   const s=1-hit*.05;o.g.scale.set(s,Math.max(.05,sy)*(1+hit*.04),s);
   /* gövde: kırkılmış koyun */

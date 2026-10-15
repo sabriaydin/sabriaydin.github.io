@@ -44,7 +44,20 @@ const ACH=[
  ['cavedeep','Karanlıkta Ayakta','Bir mağarada en az yarım dakika hayatta kal.',14,()=>F('cavedeep')],
  ['vault','Mühürlü Hazine','Bir mağaranın hazine sandığını aç.',28,()=>F('vault')],
  ['gem','Kızıl Parıltı','Bir mücevher veya altın külçe taşı.',16,()=>HG.count&&(HG.count('gem')>=1||HG.count('gold')>=1)],
- ['cave3','Mağara Kâşifi','Üç kez mağaraya gir.',26,()=>S('caves')>=3]
+ ['cave3','Mağara Kâşifi','Üç kez mağaraya gir.',26,()=>S('caves')>=3],
+ ['swim','Yüzücü','Derin suda yüz.',8,()=>F('swam')],
+ ['dive','Dalgıç','Suyun altına dal.',10,()=>F('dived')],
+ ['breath','Derin Nefes','Su altında 20 saniye kal.',16,()=>F('deepbreath')],
+ ['shell','Midye Toplayıcı','On midye topla.',14,()=>S('shells')>=10],
+ ['pearl','İnci Avcısı','Deniz dibinde bir inci bul.',22,()=>F('got_pearl')],
+ ['sea500','Açık Deniz','Toplam 500 metre yüz.',24,()=>S('swum')>=500],
+ ['walk5k','Yolcu','Toplam 5000 metre yürü.',20,()=>S('walked')>=5000],
+ ['milk','Sütçü','Bir ineği sağ.',6,()=>F('milked')],
+ ['heal','Yaralı Dostu','Bandajla bir yarayı sar.',6,()=>F('healed')],
+ ['torch','Işık Taşıyıcı','Meşale üret.',6,()=>F('made_torch')],
+ ['perks','Uzmanlaşma','Yeteneklere toplam 5 puan harca.',20,()=>HG.PERKS&&HG.PERKS.reduce((a,p)=>a+HG.perk(p[0]),0)>=5],
+ ['lvl20','Bilge','20. seviyeye ulaş.',60,()=>(G.lvl||1)>=20],
+ ['day30','Köklü','30. güne ulaş.',60,()=>HG.dayNo()>=30]
 ];
 HG.ACH=ACH.map(a=>[a[0],a[1],a[2],a[3]]);
 const prevI=HG.progInit,prevS=HG.progSave,prevL=HG.progLoad;

@@ -25,7 +25,10 @@ const GOALS=[
  ['quest','Bir köylüyle konuş ve görevini tamamla. K tuşu günlüğü açar.'],
  ['shade_killed','Bir Gölge yaratığını ışıkla veya silahla yok et. Bakıldığında donar, bakılmadığında yaklaşır.'],
  ['blood','Kan Ayı gecesini (her 5. gün akşamı) sağ atlat. Fener ve ateşin yanında kal.'],
- ['day7','7. güne kadar hayatta kal.']
+ ['day7','7. güne kadar hayatta kal.'],
+ ['swam','Derin suya girip yüzmeyi dene. Boşluk yüzeye çıkarır, dal tuşu aşağı indirir.'],
+ ['dived','Suyun altına dal ve nefes çubuğunu izle. Nefes biterse boğulursun.'],
+ ['got_shell','Dalıp deniz dibine bakarak midye topla ve ateşte pişir.']
 ];
 function goalText(){
  let done=0;for(const g of GOALS)if(G.flags[g[0]])done++;

@@ -23,8 +23,18 @@ function gain(id,n){
  if(!canAdd(id,n)){HG.toast('Envanter dolu.');return false}
  add(id,n);flag('got_'+id);HG.feed('+'+n+' '+IT[id].n);HG.snd('get');if(HG.xpGain)HG.xpGain(.5);return true;
 }
+/* Çantayı düzenle: hızlı erişim çubuğu dışındaki kutular birleştirilir ve eşya sırasına göre dizilir */
+function sortInv(){
+ if(ui.state!=='play'||!G.inv)return;
+ const HOT=HG.HOT,tot={};
+ for(let i=HOT;i<SLOTS;i++){const s=G.inv[i];if(s)tot[s.id]=(tot[s.id]||0)+s.n}
+ const out=[];
+ for(const id of Object.keys(IT)){let n=tot[id]||0;const mx=IT[id].s;while(n>0){const k=Math.min(mx,n);out.push({id,n:k});n-=k}}
+ for(let i=HOT;i<SLOTS;i++)G.inv[i]=out[i-HOT]||null;
+ ui.picked=null;ui.dirty=true;HG.snd('ui');HG.toast('Çanta düzenlendi.');
+}
 const held=()=>{const s=G.inv[G.sel];return s?{k:s.id,it:IT[s.id],s}:null};
-const setObj=(i,v)=>{G.obj[i]=v;G.objDirty=true};
+const setObj=(i,v)=>{G.obj[i]=v;(G.oc||(G.oc=[])).push(i)};   /* değişen kareler biriktirilir; sahne yalnızca bunları günceller */
 const flag=f=>{if(!G.flags[f])G.flags[f]=1};
-Object.assign(HG,{count,canAdd,add,take,gain,held,setObj,flag});
+Object.assign(HG,{count,canAdd,add,take,gain,held,setObj,flag,sortInv});
 })();

@@ -25,7 +25,7 @@ const PROF={
   {give:['rod',1],cost:{wood:4},max:1,ev:[600,1000],ch:.3},
   {give:['bottle',2],cost:{sand:2},max:4,ev:[120,260],ch:.6},
   {give:['rod',1],cost:{coin:7},max:1,ev:[500,900],ch:.4}],
-  buy:{fish:2,coconut:2}},
+  buy:{fish:2,coconut:2,shell:2,kelp:1,pearl:16}},
  smith:{n:'Demirci',hi:'Ocak sönmez, kömür getir.',offers:[
   {give:['copper_ingot',1],cost:{coal:4},max:2,ev:[200,420],ch:.5},
   {give:['iron_ingot',1],cost:{coal:6,stone:3},max:1,ev:[350,700],ch:.4},
@@ -137,6 +137,8 @@ function updateNpcs(dt){
    }
    if(n.moving){const tx=n.tx-n.x,tz=n.tz-n.z;if(Math.hypot(tx,tz)<.25){n.moving=false;n.tm=1+rnd()*3}else{head=Math.atan2(tx,tz);spd=.8}}
   }
+  /* kızgın köylü oyuncudan uzaklaşır */
+  if(n.anger>0){n.anger-=dt;if(dp<10&&!n.inside&&!night){head=Math.atan2(-dx,-dz);spd=1.8}}
   const d=angDiff(n.yaw,head);n.yaw+=clamp(d,-4*dt,4*dt);
   if(spd>0&&Math.abs(d)<1.2){
    const st=spd*dt,nx=n.x+Math.sin(n.yaw)*st,nz=n.z+Math.cos(n.yaw)*st;
@@ -170,6 +172,9 @@ function updateNpcs(dt){
 const cst=o=>{const c={};for(const k in o.cost)c[k]=k==='coin'?Math.max(1,Math.round(o.cost[k]*1.3*(1-.07*HG.perk('trade')))):Math.ceil(o.cost[k]*1.25);return c};
 const costText=c=>Object.keys(c).map(k=>`<span class="${count(k)>=c[k]?'ok':'no'}">${IT[k].n} ${count(k)}/${c[k]}</span>`).join(' · ');
 const priceOf=(n,id)=>{const b=PROF[n.prof].buy[id],day=HG.dayNo?HG.dayNo():1;const m=.8+.4*HG.hash(day,n.vi*31+id.length*7+id.charCodeAt(0),77);return Math.max(1,Math.round(b*m*.55*(1+.08*HG.perk('trade'))))};
+/* karşılama: günün saatine göre */
+const greet=()=>{const h=HG.tod()*24;return h<11?'Günaydın.':h<17?'İyi günler.':'İyi akşamlar.'};
+const subText=n=>greet()+' '+PROF[n.prof].hi+' · Sikken: '+count('coin');
 const left=n=>n.deals.reduce((a,d)=>a+(d.lim>0?1:0),0);
 function renderTrade(){
  const n=G.trading;if(!n)return;
@@ -195,9 +200,10 @@ function renderTrade(){
 }
 function openTrade(n){
  if(daylight()<.25){HG.toast(n.name+' uyuyor. Dükkân sabah açılır.');return}
+ if(n.anger>0){HG.toast(n.name+' sana kızgın. Bir süre konuşmak istemiyor.');return}
  G.trading=n;
  $('#trT').textContent=n.name+' · '+PROF[n.prof].n;
- $('#trS').textContent=PROF[n.prof].hi+' · Sikken: '+count('coin');
+ $('#trS').textContent=subText(n);
  renderTrade();$('#trade').hidden=false;HG.snd('ui_open');HG.unlock(true);
 }
 function closeTrade(){
@@ -222,7 +228,7 @@ function sell(i,all){
  const pr=priceOf(n,id);
  if(!canAdd('coin',c*pr)){HG.toast('Envanter dolu.');return}
  take(id,c);add('coin',c*pr);d.lim-=c;HG.flag('traded');G.stats.traded++;HG.xpGain(.6*c);HG.snd('craft');HG.feed('+'+c*pr+' '+IT.coin.n);
- $('#trS').textContent=PROF[n.prof].hi+' · Sikken: '+count('coin');renderTrade();
+ $('#trS').textContent=subText(n);renderTrade();
 }
 function talkNpc(){
  const n=G.nearNpc;if(!n||ui.state!=='play')return false;
@@ -253,7 +259,7 @@ function sleep(){
 }
 function init(){
  const t=$('#trL');
- if(t)t.addEventListener('click',e=>{const b=e.target.closest('button[data-o]');if(b){buy(+b.dataset.o);$('#trS').textContent=PROF[G.trading.prof].hi+' · Sikken: '+count('coin');return}const q=e.target.closest('button[data-s]');if(q)sell(+q.dataset.s,false);const w=e.target.closest('button[data-sa]');if(w)sell(+w.dataset.sa,true)});
+ if(t)t.addEventListener('click',e=>{const b=e.target.closest('button[data-o]');if(b){buy(+b.dataset.o);$('#trS').textContent=subText(G.trading);return}const q=e.target.closest('button[data-s]');if(q)sell(+q.dataset.s,false);const w=e.target.closest('button[data-sa]');if(w)sell(+w.dataset.sa,true)});
  const x=$('#trX');if(x)x.onclick=closeTrade;
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
