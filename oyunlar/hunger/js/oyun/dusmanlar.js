@@ -49,11 +49,11 @@ function foeAI(a,def,dt){
   return {head:Math.atan2(dx,dz),spd:0};
  }
  /* gün ışığında erir */
- if(L>.55){
+ if(L>.55&&!G.cave){
   a.hp-=dt*27;if(rnd()<dt*8)HG.Scene.burst(a.x+(rnd()-.5)*.4,HG.Scene.groundY(a.x,a.z)+1+rnd(),a.z+(rnd()-.5)*.4,0x20202a,2);
   if(a.hp<=0){HG.killAnimal(a);return {head:a.yaw,spd:0}}
  }
- const ll=HG.lightLevel(a.x,a.z);
+ const ll=HG.lightLevel(a.x,a.z,!!G.cave);        /* mağarada yaratıklar meşaleden çekinmez */
  /* ışık: kaçar, yakından yanar */
  if(ll>.12||a.flinch>0){
   if(a.flinch>0)a.flinch-=dt;
@@ -71,7 +71,7 @@ function foeAI(a,def,dt){
  /* saldırı */
  a.cd-=0;
  if(dp<1.8){
-  if(a.cd<=0&&ui.state==='play'&&!G.sheltered){a.cd=1.5;a.atkT=.5;HG.hurt(def.dmg,'Bir Gölge seni parçaladı.',{x:a.x,z:a.z},def.bleed);HG.snd('cry_shade',{x:a.x,z:a.z})}
+  if(a.cd<=0&&ui.state==='play'&&(!G.sheltered||G.cave)){a.cd=1.5;a.atkT=.5;HG.hurt(def.dmg,'Bir Gölge seni parçaladı.',{x:a.x,z:a.z},def.bleed);HG.snd('cry_shade',{x:a.x,z:a.z})}
   return {head:Math.atan2(dx,dz),spd:0};
  }
  /* yaklaşma: uzaktan hızlı, yakında yavaş ve sinsi */

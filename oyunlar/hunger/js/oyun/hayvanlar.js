@@ -23,9 +23,39 @@ function walkable(x,z){
 }
 const angDiff=(a,b)=>{let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
 
+/* Avcı (kurt) ile av arasındaki ilişki: yakalama %40, kaçış %60; kaçışta kovalamaca sona erer */
+function killPrey(p){
+ const def=ANIMAL[p.t];p.dying=.001;p.hp=0;
+ for(const [id,n] of def.drops(p))HG.spawnDrop(id,n,{x:p.x+(rnd()-.5)*.8,z:p.z+(rnd()-.5)*.8,y:Scene.groundY(p.x,p.z)+.6,vx:(rnd()-.5)*2,vz:(rnd()-.5)*2});
+ HG.snd('die_'+(def.snd||'sheep'),{x:p.x,z:p.z});
+}
+function huntStep(a,def,dt,L){
+ if(a.huntCd>0)a.huntCd-=dt;
+ let p=a.prey;
+ if(p&&(p.dying||Math.hypot(p.x-a.x,p.z-a.z)>26||(a.huntT||0)>14||!L.includes(p))){if(!p.dying)a.huntCd=20+rnd()*15;p=a.prey=null}   /* av uzaklaştı: kovalamaca biter */
+ if(!p){
+  if(a.huntCd>0)return null;
+  a.scanT=(a.scanT||0)-dt;if(a.scanT>0)return null;a.scanT=1.4+rnd();
+  let bd=17;
+  for(const q of L){if(q.dying||!ANIMAL[q.t].prey)continue;const d=Math.hypot(q.x-a.x,q.z-a.z);if(d<bd){bd=d;p=q}}
+  if(!p)return null;
+  a.prey=p;a.huntT=0;
+ }
+ a.huntT=(a.huntT||0)+dt;
+ const dx=p.x-a.x,dz=p.z-a.z,d=Math.hypot(dx,dz);
+ if(d<def.r+ANIMAL[p.t].r+.55){
+  a.prey=null;a.huntCd=30+rnd()*25;
+  if(rnd()<.4)killPrey(p);
+  else{p.fleeW=a;p.fleeT=4;p.panic=0;if(p.charge)p.charge=0}
+  return {head:a.yaw,spd:0};
+ }
+ return {head:Math.atan2(dx,dz),spd:def.run*.95};
+}
+/* oyuncu çemberi: canlılar oyuncunun içine girmez */
 function updateAnimals(dt){
  const L=G.animals;if(!L)return;
  HG.updateFoes(dt);
+ const wolves=L.filter(w=>w.t==='wolf'&&!w.dying);
  for(let k=L.length-1;k>=0;k--){
   const a=L[k],def=ANIMAL[a.t];
   if(a.kx||a.kz){                       /* vuruş sonrası itilme: hız sönümlenerek kayar */
@@ -53,23 +83,36 @@ function updateAnimals(dt){
   a.hitT=Math.max(0,a.hitT-dt);a.cd-=dt;
   let spd=0,head=a.yaw;
   const play=HG.ui.state==='play',dark=HG.daylight()<.55;
+  /* av hayvanları yakındaki kurttan kaçar */
+  if(def.prey&&wolves.length){
+   let nw=null,nd=11;
+   for(const w of wolves){const d=Math.hypot(w.x-a.x,w.z-a.z);if(d<nd){nd=d;nw=w}}
+   if(nw&&(nw.prey===a||nd<7)){a.fleeW=nw;a.fleeT=2.2}
+  }
+  if(a.fleeT>0)a.fleeT-=dt;
   const ll=def.fearLight?HG.lightLevel(a.x,a.z):0;
   if(def.foe){const r=HG.foeAI(a,def,dt);head=r.head;spd=r.spd}
   else if(def.fearLight&&ll>.1){a.charge=0;head=Math.atan2(-dx,-dz);spd=def.run}
   else if(def.night&&(a.hp<def.hp*.3||(!dark&&dp<14))){head=Math.atan2(-dx,-dz);spd=def.run}
+  else if(a.fleeT>0&&a.fleeW&&!a.dying&&!(a.charge>0)){head=Math.atan2(a.x-a.fleeW.x,a.z-a.fleeW.z);spd=def.run}
   else if(a.charge>0){
    a.charge-=dt;head=Math.atan2(dx,dz);spd=dp<def.r+.75?0:def.run;
-   if(dp<def.r+1.0&&a.cd<=0&&play){a.cd=def.cd||1.2;a.atkT=.45;HG.hurt(def.dmg,def.n+' saldırısında öldün.',{x:a.x,z:a.z},def.bleed||.35);HG.toast(def.n+' saldırdı!')}
+   if(dp<def.r+1.0&&a.cd<=0&&play){
+    a.cd=def.cd||1.2;a.atkT=.45;HG.hurt(def.dmg,def.n+' saldırısında öldün.',{x:a.x,z:a.z},def.bleed||.35);HG.toast(def.n+' saldırdı!');
+    /* büyük baş hayvanlar yalnızca birkaç kez karşılık verir, sonra kaçar */
+    if(a.retal!==undefined&&--a.retal<=0){a.retal=undefined;a.charge=0;a.panic=10}
+   }
    if(dp>20)a.charge=0;
   }else if(a.panic>0||(def.flee&&dp<def.flee)){
    if(a.panic>0)a.panic-=dt;
    head=Math.atan2(-dx,-dz);spd=def.run;
   }else if(def.aggr&&dp<def.aggr&&play&&(!def.night||dark)){a.charge=def.chase||7}
+  else if(def.pred&&(()=>{const r=huntStep(a,def,dt,L);if(!r)return false;head=r.head;spd=r.spd;return true})()){}
   else{
    a.tm-=dt;
    if(a.tm<=0){
     if(a.moving){a.moving=false;a.tm=1.5+rnd()*4.5}
-    else{const ang=rnd()*6.28,r=2+rnd()*5;a.tx=a.home.x+Math.cos(ang)*r;a.tz=a.home.z+Math.sin(ang)*r;a.moving=true;a.tm=3+rnd()*4}
+    else{const ang=rnd()*6.28,r=2+rnd()*((def.roam||7)-2);a.tx=a.home.x+Math.cos(ang)*r;a.tz=a.home.z+Math.sin(ang)*r;a.moving=true;a.tm=3+rnd()*4}
    }
    if(a.moving){
     const tx=a.tx-a.x,tz=a.tz-a.z;
@@ -82,17 +125,28 @@ function updateAnimals(dt){
    const d=angDiff(a.yaw,head),turn=(spd>def.walk*1.5?7:3.5)*dt;
    a.yaw+=clamp(d,-turn,turn);
    const step=spd*dt*(Math.abs(d)>1.4?.2:1),nx=a.x+Math.sin(a.yaw)*step,nz=a.z+Math.cos(a.yaw)*step;
-   const wk=def.foe?HG.walkableFoe:walkable;
+   const wk0=def.foe?HG.walkableFoe:walkable,pm=def.foe?1.0:def.r+.45,d0=Math.hypot(a.x-G.px,a.z-G.py);
+   const wk=(x,z)=>wk0(x,z)&&!(Math.hypot(x-G.px,z-G.py)<pm&&Math.hypot(x-G.px,z-G.py)<d0);
    if(wk(nx,nz)){a.x=nx;a.z=nz}
    else if(wk(nx,a.z))a.x=nx;else if(wk(a.x,nz))a.z=nz;
    else{a.avoid=(rnd()<.5?-1:1)*(1.1+rnd()*.6);a.avoidT=.7;if(!a.panic&&!a.charge){a.moving=false;a.tm=.6}}
    a.walk+=step*3.2;
   }
-  /* saldıranlar oyuncunun içine giremez: en az bu mesafede dururlar */
-  {const mn=def.foe?1.15:def.r+.6,ex=a.x-G.px,ez=a.z-G.py,ed=Math.hypot(ex,ez);
-   if(ed<mn&&ed>1e-4&&!a.dying){const px2=G.px+ex/ed*mn,pz2=G.py+ez/ed*mn;if((def.foe?HG.walkableFoe:walkable)(px2,pz2)){a.x=px2;a.z=pz2}}}
   a.atkT=Math.max(0,(a.atkT||0)-dt);
   a.spd+=(spd-a.spd)*Math.min(1,8*dt);
+ }
+ /* iç içe geçme engeli: canlılar birbirinden en az yarıçapları toplamı kadar uzak durur */
+ for(let i=0;i<L.length;i++){
+  const a=L[i];if(a.dying)continue;const da=ANIMAL[a.t];
+  for(let j=i+1;j<L.length;j++){
+   const b=L[j];if(b.dying)continue;
+   const dx=b.x-a.x,dz=b.z-a.z;if(dx>3||dx<-3||dz>3||dz<-3)continue;
+   const mn=da.r+ANIMAL[b.t].r+.12,d2=dx*dx+dz*dz;if(d2>=mn*mn)continue;
+   const d=Math.sqrt(d2)||.001,push=(mn-d)*.5,ux=d<.002?1:dx/d,uz=d<.002?0:dz/d;
+   const wa=da.foe?HG.walkableFoe:walkable,wb=ANIMAL[b.t].foe?HG.walkableFoe:walkable;
+   if(wa(a.x-ux*push,a.z-uz*push)){a.x-=ux*push;a.z-=uz*push}
+   if(wb(b.x+ux*push,b.z+uz*push)){b.x+=ux*push;b.z+=uz*push}
+  }
  }
  /* yeniden doğma: haritadaki sayı hedefin altına düşerse uzak bir otlakta yeni hayvan çıkar */
  G.animTimer=(G.animTimer||0)-dt;
@@ -105,6 +159,7 @@ function updateAnimals(dt){
     const x=2+((rnd()*(W-4))|0),y=2+((rnd()*(H-4))|0),i=y*W+x;
     if(G.tile[i]!==T.GRASS||G.obj[i]||Math.hypot(x-G.px,y-G.py)<50||G.hgt[i]>3)continue;
     if((G.villages||[]).some(v=>Math.hypot(v.cx-x,v.cy-y)<16))continue;
+    if(L.some(q=>!q.dying&&(q.t===t?Math.hypot(q.x-x,q.z-y)<(ANIMAL[t].sp||16)*.6:Math.hypot(q.x-x,q.z-y)<4)))continue;
     const f=fbm(x/12,y/12,G.seed+33);
     if((t==='deer'||t==='boar'||t==='wolf')&&f<.5)continue;
     if((t==='sheep'||t==='cow')&&f>.55)continue;
@@ -148,7 +203,14 @@ function hitAnimal(a,dmg,hit){
  a.lastZone=zone;G.lastHit={a,t:performance.now(),zone,m:zm,dmg:real};
  const dx=a.x-G.px,dz=a.z-G.py,l=Math.hypot(dx,dz)||1,kb=(def.foe?3:5.5)/Math.max(.6,def.h+.3)*(zone==='head'?1.3:1);
  a.kx=dx/l*kb;a.kz=dz/l*kb;
- if(def.foe){a.flinch=zone==='head'?3.2:2.2;if(a.fake){a.dying=.001;a.gone=true}}else if(def.aggr)a.charge=10;else a.panic=5;
+ if(def.foe){a.flinch=zone==='head'?3.2:2.2;if(a.fake){a.dying=.001;a.gone=true}}
+ else if(def.big){
+  /* büyük baş: yalnızca ilk vuruşta %40 ihtimalle birkaç kez saldırır, sonra (veya hiç) kaçar */
+  if(!a.hurtOnce&&a.hp>0&&rnd()<.4){a.retal=2+((rnd()*2)|0);a.charge=14}
+  else if(!(a.retal>0)){a.charge=0;a.panic=8}
+  a.hurtOnce=true;
+ }
+ else if(def.aggr)a.charge=10;else a.panic=5;
  if(zone==='leg'&&!def.foe&&a.hp>0)a.panic=Math.max(a.panic,8);
  const hy=hit?hit.y:Scene.groundY(a.x,a.z)+def.h*.6;
  Scene.burst(hit?hit.x:a.x,hy,hit?hit.z:a.z,def.foe?0x20202a:0xa01818,zone==='head'?8:5);

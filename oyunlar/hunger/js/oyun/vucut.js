@@ -8,9 +8,9 @@ sc.shake=0;sc.fear=0;sc.insane=0;
 const angDiff=(a,b)=>{let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
 
 /* Işık düzeyi (0-1): kamp ateşi ve elde yanan meşale. Yaratıklar ve kurtlar bu değere göre kaçar. */
-function lightLevel(x,z){
+function lightLevel(x,z,noTorch){
  let m=0;
- if(G.torchLit){const d=Math.hypot(x-G.px,z-G.py);m=Math.max(m,clamp(1-d/8.5,0,1))}
+ if(G.torchLit&&!noTorch){const d=Math.hypot(x-G.px,z-G.py);m=Math.max(m,clamp(1-d/8.5,0,1))}
  for(const f of sc.fires||[]){const d=Math.hypot(x-f.x,z-f.z);if(d<10)m=Math.max(m,clamp(1-d/10,0,1))}
  for(const l of sc.lamps||[]){const d=Math.hypot(x-l.x,z-l.z);if(d<9)m=Math.max(m,clamp(1-d/9,0,1)*.9)}
  return m;
@@ -26,7 +26,7 @@ function hurt(dmg,cause,src,bleedP){
  if(bleedP&&Math.random()<bleedP&&!(G.bleed>0)){G.bleed=75;HG.toast('Kanıyorsun! Bandaj ile yarayı sar.')}
 }
 function addSan(v){if(v<0)v*=1-.15*HG.perk('mind');G.san=clamp(G.san+v,0,100)}
-function hitMarker(kill,zone){body.hit=1;body.hitKill=!!kill;HG.snd('hitmark');if(zone){const z=HG.ZONE[zone];G.zn={t:performance.now(),txt:z.n+(z.m!==1?' ×'+z.m:''),zone}}}
+function hitMarker(kill,zone){body.hit=1;body.hitKill=!!kill;HG.snd('hitmark')}
 function swing(){
  const ok=G.stam>=5;G.stam=Math.max(0,G.stam-5);
  if(G.stam<=0)G.tired=true;
@@ -101,11 +101,14 @@ function bodyHud(){
  sc.hurtRed=Math.min(.7,body.flash*.7);
  const vh=$('#vh');if(vh)vh.style.opacity=Math.min(1,body.flash+bl);
  const vs=$('#vs');if(vs)vs.style.opacity=clamp(sc.insane*.9+sc.fear*.25,0,1)*HG.cfg.horror/100;
+ const uw=$('#uw');if(uw)uw.style.opacity=G.head?1:0;
+ {const o2=$('#bO2');if(o2){const sh=G.o2!==undefined&&G.o2<99.5;if(o2.hidden===sh)o2.hidden=!sh;if(sh)bar('#bO2',G.o2)}}
  const dm=$('#dmg');if(dm){dm.style.opacity=body.dirT>0?Math.min(1,body.dirT):0;dm.style.transform='rotate('+(-body.dirA*57.2958)+'deg)'}
  const hm=$('#hitm');if(hm){hm.style.opacity=body.hit;hm.classList.toggle('kill',body.hitKill)}
  let s='';
  if(G.bleed>0)s+='Kanama · ';
  if(G.tired)s+='Bitkin · ';
+ if(G.swim)s+='Yüzüyor · ';
  if(G.torchLit)s+='Meşale '+Math.max(0,Math.round(G.torchFuel/360*100))+'% · ';
  if(G.san<30)s+='Akıl dağılıyor · ';
  else if(G.san<55)s+='Huzursuz · ';

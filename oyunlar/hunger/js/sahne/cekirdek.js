@@ -7,9 +7,10 @@ THREE.ColorManagement.legacyMode=false;
 sc.mode='menu';sc.quality=3;sc.fpsAcc=0;sc.fpsN=0;sc.fov=75;
 sc.mats=[];
 sc.mat=extra=>{
- const o=Object.assign({},extra||{}),pbr=o.pbr,leaf=o.leaf;delete o.pbr;delete o.leaf;                 /* pbr: yüzey ayrıntı dokuları (gerceklik.js) uygulanır */
+ const o=Object.assign({},extra||{}),pbr=o.pbr,leaf=o.leaf,ore=o.ore;delete o.pbr;delete o.leaf;delete o.ore;                 /* pbr: yüzey ayrıntı dokuları (gerceklik.js) uygulanır */
  const m=new THREE.MeshStandardMaterial(Object.assign({vertexColors:true,flatShading:false,roughness:.92,metalness:0},o));
  if(pbr||leaf)m.userData.pbr=1;
+ if(ore){m.userData.pbr=1;m.userData.ore=1}                 /* maden: kaya dokusu ve parlak cevher yüzleri */
  if(leaf)m.userData.leaf=1;                                   /* yaprak: kenarlar parçalanır */
  sc.mats.push(m);return m;
 };

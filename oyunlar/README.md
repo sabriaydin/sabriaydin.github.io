@@ -17,7 +17,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Eşyalar (ad, yığın, yenilebilirlik) | `js/veri/esyalar.js` |
 | Üretim tarifleri, istasyonlar | `js/veri/tarifler.js` |
 | Ağaç/kaya/maden dayanıklılığı, araç gücü | `js/veri/dugumler.js` |
-| Hayvan türleri (can, hız, düşen eşyalar), silah hasarı | `js/veri/hayvanlar.js` |
+| Hayvan türleri (can, hız, düşen eşyalar, bölge aralığı `sp`, av/avcı, büyük baş), silah hasarı | `js/veri/hayvanlar.js` |
 | Ada üretimi (arazi, dağlar, ağaç/maden sıklığı) | `js/dunya/uretim.js` |
 | Envanter simgeleri (2B) | `js/gorsel/simgeler.js` |
 | Renderer, renk/ton eşleme, kamera, FPS bakışı, kalite kademeleri | `js/sahne/cekirdek.js` |
@@ -44,7 +44,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Yaprak, duman, kıvılcım, adım tozu, su halkaları, soluk buharı | `js/sahne/parcaciklar.js` |
 | Yüklenme ekranı (ilerleme çubuğu, ipuçları, "Oyuna Gir") | `index.html` (`#load`), `js/oyun/durum.js` (`startGame`), `js/oyun/dongu.js` (`init`), `js/sahne/cekirdek.js` (`buildAsync`) |
 | Oyuncu fiziği (atalet, eğim, düşme hasarı), eşya sekmesi/yüzmesi, ok sürüklenmesi | `js/oyun/hayatta-kalma.js`, `js/oyun/dusenler.js`, `js/oyun/silah.js` |
-| Köyler, köylüler, takas dükkânı, stok yenilenmesi | `js/oyun/koyluler.js` (mantık), `js/sahne/koyluler.js` (model ve animasyon) |
+| Köyler, köylüler, mesleğe özgü takas/satış (1-3 işlem, işlem hakkı, yenileme), köylü uykusu | `js/oyun/koyluler.js` (mantık), `js/sahne/koyluler.js` (model ve animasyon) |
 | Köy evleri, avlu eşyaları, fenerler, patikalar, tabela | `js/sahne/koy-yapilari.js` |
 | Deneyim, seviye, yetenekler, günlük penceresi (K) | `js/oyun/gelisim.js` |
 | Köylü görevleri (getir, avla, Gölge avı, köy bul) | `js/oyun/gorevler.js` |
@@ -59,7 +59,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Üretim mantığı | `js/oyun/uretim.js` |
 | Kesme/toplama/yerleştirme/yeme-içme | `js/oyun/eylem.js` |
 | Yere atılan eşyalar (fizik, toplama) | `js/oyun/dusenler.js` |
-| Hayvan yapay zekâsı, vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
+| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, iç içe geçme engeli), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
 | Beden durumu: dayanıklılık, akıl sağlığı, kanama, meşale yakıtı, hasar geri bildirimi, bandaj | `js/oyun/vucut.js` |
 | Gölge yaratıklar (korku), sahte gözlemciler, gerilim, gece yönetmeni | `js/oyun/dusmanlar.js` |
 | Yay, ok fiziği, isabet ve geri toplama | `js/oyun/silah.js` |
@@ -70,7 +70,9 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Harita: kabartma, keşif sisi, ızgara, pusula, ölçek, yakınlaştırma, hedef işareti | `js/oyun/harita.js` (çağrılar `js/oyun/arayuz.js` içindedir) |
 
 Not: Harita 256×256 karedir (`js/cekirdek/ad-alani.js`). Kayıt anahtarı `hunger-save-v6`.
-| Açlık, susuzluk, üşüme, hareket, zıplama, sığınak | `js/oyun/hayatta-kalma.js` |
+| Açlık, susuzluk, üşüme, hareket, zıplama, sığınak; yüzme, dalış, nefes ve boğulma; canlılarla çarpışma | `js/oyun/hayatta-kalma.js` |
+| Su altı sisi/yüzeyi/kabarcıklar, balık sürüleri, su bitkileri, mercan | `js/sahne/sualti.js` |
+| E tuşu hedef seçimi (bakılan yöne göre), nişan ipucu | `js/oyun/eylem.js` (`useCands`), `js/oyun/arayuz.js` |
 | Rehber hedefler | `js/oyun/hedefler.js` |
 | Yeni oyun, kayıt, yükleme | `js/oyun/durum.js` |
 | HUD, envanter paneli, harita | `js/oyun/arayuz.js` |

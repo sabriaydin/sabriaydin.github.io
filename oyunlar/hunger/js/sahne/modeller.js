@@ -155,7 +155,7 @@ S.onInit(()=>{
  };
  MODEL.palm=mkPalm(true,false);MODEL.palm0=mkPalm(false,false);MODEL.palm_lo=mkPalm(true,true);MODEL.palm0_lo=mkPalm(false,true);
  /* ---- kaya ve madenler ---- */
- const moss=(x,y,z,nx,ny,nz,c)=>{if(ny>.55){const k=Math.min(1,(ny-.55)*2.2)*(.4+.6*fb3(x*3,y*3,z*3,15));c.r=c.r*(1-k)+.22*k;c.g=c.g*(1-k)+.4*k;c.b=c.b*(1-k)+.16*k}};
+ const moss=(x,y,z,nx,ny,nz,c)=>{if(ny>.55){const k=Math.min(1,(ny-.55)*2.2)*Math.max(0,fb3(x*3,y*3,z*3,15)*1.3-.35);c.r=c.r*(1-k)+.22*k;c.g=c.g*(1-k)+.4*k;c.b=c.b*(1-k)+.16*k}};
  const strata=(x,y,z,nx,ny,nz,c)=>{const b=Math.sin(y*14+fb3(x*2,y,z*2,4)*5)*.5+.5;const v=.88+b*.2;c.r*=v;c.g*=v;c.b*=v};
  const rockP=(c1,c2,cf)=>[
   part(blob(.52,2,.28,31,1,.74,.92),c1,0,.3,0,1,1,1,0,.5,0,.16,),
@@ -163,7 +163,6 @@ S.onInit(()=>{
   part(blob(.22,2,.3,41),c2,-.33,.13,-.1,1,1,1,0,0,0,.16)
  ].map(p=>{p.cf=cf;return p});
  const rcf=(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);moss(x,y,z,nx,ny,nz,c)};
- MODEL.rock=merge(rockP(0x8d8b88,0x77757a,rcf),{ao:.7});
  /* Madenler: köşeli kırık ana kaya + yüzeye yayılan damarlar, benekler ve çıkıntılı cevher kümeleri */
  const facet=(r,seed,amp,sx,sy,sz,detail)=>{
   const g=new THREE.IcosahedronGeometry(1,detail===undefined?1:detail),p=g.attributes.position;
@@ -177,22 +176,33 @@ S.onInit(()=>{
  /* yüzey başına sabit gürültü: düz gölgelemede bir yüzün üç köşesi aynı normali paylaşır, bu yüzden cevher "yüzler" hâlinde açığa çıkar */
  const facen=(x,y,z,nx,ny,nz,sd)=>fb3(nx*3.6+x*.7+sd,ny*3.6+y*.7,nz*3.6+z*.7,sd|0);
  const sm=(a,b,v)=>{v=Math.max(0,Math.min(1,(v-a)/(b-a)));return v*v*(3-2*v)};
+ /* Kaya: köşeli kırık yüzeyli ana kaya, yan kayalar ve çakıllar; yosun, liken ve tabakalaşma */
+ const rcf2=(x,y,z,nx,ny,nz,c)=>{rcf(x,y,z,nx,ny,nz,c);const lc=sm(.74,.82,fb3(x*9,y*9,z*9,21))*Math.max(0,.3+ny);lerpC(c,.5,.52,.32,lc*.4);const t=.82+.22*Math.max(0,ny)-.12*Math.max(0,-ny);c.r*=t;c.g*=t;c.b*=t};
+ const RK=[[.58,31,.34,1,.7,.95,0,.28,0,0x7f786f,.5],[.36,37,.36,1,.85,1,.36,.16,.18,0x6b655e,.3],[.28,41,.34,1,.8,1,-.38,.13,-.1,0x756e66,1],[.2,43,.3,1,.9,1,.05,.1,-.42,0x5f5a54,.7],[.13,47,.3,1,.8,1,.58,.06,-.2,0x726c64,0],[.1,49,.3,1,.8,1,-.2,.05,.46,0x68625c,.4]];
+ MODEL.rock=merge(RK.map(r=>{const q=part(facet(r[0],r[1],r[2],r[3],r[4],r[5],2),r[9],r[6],r[7],r[8],1,1,1,0,r[10],0,.12);q.cf=rcf2;return q}),{ao:.7});
+ /* damar ve yama gürültüsü: yüzey konumuna bağlı, yumuşak (üçgen başına rastgele renk yok) */
+ const vein=(x,y,z,sd,w)=>1-sm(0,w,Math.abs(fb3(x*3.4+sd,y*3.4,z*3.4,sd|0)-.5));
+ const patch=(x,y,z,sd,lo,hi)=>sm(lo,hi,fb3(x*4.6+sd,y*4.6,z*4.6,(sd+3)|0));
  const oreCf={
   coal:(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);
-   const seam=sm(.5,.58,facen(x,y,z,nx,ny,nz,2)),band=sm(.72,.95,Math.sin(y*17+fb3(x*2,y*2,z*2,8)*6)*.5+.5);
-   lerpC(c,.012,.012,.016,Math.min(.95,seam*.9+band*.35));            /* parlak siyah kömür yüzleri ve bantları */
-   lerpC(c,.06,.065,.085,sm(.72,.82,fb3(x*14,y*14,z*14,4))*.5)},      /* parıltılı kırık yüzeyler */
+   const pt=patch(x,y,z,2,.46,.58),band=sm(.75,.95,Math.sin(y*17+fb3(x*2,y*2,z*2,8)*6)*.5+.5);
+   lerpC(c,.016,.016,.02,Math.min(.95,pt*.92+band*.3));               /* parlak siyah kömür yamaları ve bantları */
+   lerpC(c,.5,.5,.52,vein(x,y,z,4,.03)*.35*(1-pt));                    /* ince kuvars damarları */
+   lerpC(c,.07,.075,.09,sm(.72,.82,fb3(x*14,y*14,z*14,4))*.5)},
   copper:(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);
-   const seam=sm(.52,.6,facen(x,y,z,nx,ny,nz,6)),pat=sm(.52,.6,facen(x,y,z,nx,ny,nz,12))*(1-seam);
-   lerpC(c,.07,.27,.2,pat*.75);                                       /* malakit yeşili patina */
-   lerpC(c,.5,.19,.07,seam*.9);                                       /* bakır cevheri yüzleri */
-   lerpC(c,.62,.3,.12,sm(.76,.86,fb3(x*15,y*15,z*15,9))*.55)},        /* parlak bakır benekleri */
+   const pt=patch(x,y,z,6,.47,.6),rim=patch(x,y,z,6,.4,.5)*(1-pt);
+   lerpC(c,.5,.22,.08,pt*.88);                                        /* bakır cevheri yamaları */
+   lerpC(c,.1,.36,.26,rim*.38+vein(x,y,z,12,.035)*.45);               /* malakit yeşili kenar ve damarlar */
+   lerpC(c,.72,.38,.16,sm(.78,.88,fb3(x*15,y*15,z*15,9))*.5)},        /* parlak bakır benekleri */
   iron:(x,y,z,nx,ny,nz,c)=>{strata(x,y,z,nx,ny,nz,c);
-   const seam=sm(.52,.6,facen(x,y,z,nx,ny,nz,7)),band=sm(.6,.95,Math.sin(y*11+fb3(x*2,y,z*2,5)*5)*.5+.5),dark=sm(.55,.63,facen(x,y,z,nx,ny,nz,14))*(1-seam);
-   lerpC(c,.2,.065,.032,Math.min(.9,seam*.85+band*.3));               /* pas kızılı hematit */
-   lerpC(c,.045,.045,.06,dark*.8);lerpC(c,.34,.2,.09,sm(.78,.88,fb3(x*13,y*13,z*13,11))*.45)}   /* koyu manyetit ve oksit benekleri */
+   const pt=patch(x,y,z,7,.47,.6),band=sm(.6,.95,Math.sin(y*11+fb3(x*2,y,z*2,5)*5)*.5+.5);
+   lerpC(c,.24,.075,.045,Math.min(.9,pt*.85+band*.22));               /* pas kızılı hematit */
+   lerpC(c,.05,.05,.065,vein(x,y,z,14,.04)*.6*(1-pt*.4));              /* koyu manyetit damarları */
+   lerpC(c,.4,.26,.14,sm(.78,.88,fb3(x*13,y*13,z*13,11))*.4)}
  };
- const oreCol={coal:0x2a2a30,copper:0xa8683a,iron:0x7a4a30},hostCol={coal:[0x4a4a52,0x3e3e46],copper:[0x6a6a72,0x5a5a62],iron:[0x706a68,0x605a58]};
+ const SHARD={coal:0x17171c,copper:0x2f8a62,iron:0x92402a};
+ const SHARDS=[[.2,.4,.1,.36,.07,.3,-.25],[-.16,.36,.22,.3,.06,-.28,.2],[.02,.52,-.14,.4,.075,.1,.05],[.34,.22,-.2,.24,.055,.45,-.4],[-.34,.2,.0,.22,.05,-.1,.5],[.12,.3,.36,.2,.05,.4,.1]];
+ const oreCol={coal:0x2a2a30,copper:0xa8683a,iron:0x7a4a30},hostCol={coal:[0x4c4c50,0x404044],copper:[0x6e665e,0x5e5650],iron:[0x6a625e,0x5a524e]};
  const nugget=(k,x,y,z,r,sd,rx,ry,rz)=>{const q=part(facet(r,sd,.32,1,.8,1,0),oreCol[k],x,y,z,1,1,1,rx||0,ry||0,rz||0,.14);q.cf=oreCf[k];return q};
  const oreParts=(k,st)=>{
   const [h1,h2]=hostCol[k];
@@ -206,14 +216,21 @@ S.onInit(()=>{
    :st===1?[[.18,.44,.18,.1,3,.2,.4,-.3],[-.16,.4,.26,.08,5,-.2,.9,.4],[.36,.2,-.18,.07,9,.3,1.4,-.5]]
    :[[.04,.3,.02,.08,3,.1,.2,.1]];
   nug.forEach(n=>ps.push(nugget(k,n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])));
+  /* kristal/kırık parça demetleri: cevher türüne göre renkli, ucu parlak */
+  const SH=SHARD[k],sl=st===0?SHARDS:st===1?SHARDS.slice(0,3):SHARDS.slice(0,1);
+  for(const [x,y,z,h,r,rx,rz] of sl){
+   const q=part(cone(r,h,k==='coal'?4:6,1),SH,x,y+h*.42,z,1,1,1,rx,x*3,rz,.1);
+   q.cf=(px,py,pz,nx,ny,nz,c)=>{const t=Math.max(0,Math.min(1,(py-y)/h));c.r*=.62+.6*t;c.g*=.62+.6*t;c.b*=.62+.6*t};
+   ps.push(q);
+  }
   return merge(ps,{ao:.74});
  };
  for(const k of ['coal','copper','iron']){MODEL[k]=oreParts(k,0);MODEL[k+'_s1']=oreParts(k,1);MODEL[k+'_s2']=oreParts(k,2)}
  const rockStage=(st)=>{
   const ps=st===1
-   ?[part(blob(.46,2,.28,31,1,.68,.9),0x8d8b88,0,.23,0,1,1,1,0,.5,0,.16),part(blob(.2,2,.3,41),0x77757a,-.3,.1,-.12,1,1,1,0,0,0,.16)]
-   :[part(blob(.28,2,.28,31,1,.7,.9),0x8d8b88,.02,.13,0,1,1,1,0,.5,0,.16),part(blob(.1,1,.3,45),0x77757a,.28,.05,.2,1,1,1,0,0,0,.16)];
-  ps.forEach(q=>{q.cf=rcf});
+   ?[part(facet(.46,31,.34,1,.68,.9,2),0x8d8b88,0,.23,0,1,1,1,0,.5,0,.12),part(facet(.2,41,.34,1,.8,1,2),0x77757a,-.3,.1,-.12,1,1,1,0,0,0,.12)]
+   :[part(facet(.28,31,.34,1,.7,.9,2),0x8d8b88,.02,.13,0,1,1,1,0,.5,0,.12),part(facet(.1,45,.3,1,.8,1,1),0x77757a,.28,.05,.2,1,1,1,0,0,0,.12)];
+  ps.forEach(q=>{q.cf=rcf2});
   return merge(ps,{ao:.74});
  };
  MODEL.rock_s1=rockStage(1);MODEL.rock_s2=rockStage(2);

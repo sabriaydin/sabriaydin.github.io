@@ -48,7 +48,7 @@ SC.fog_fragment=`#ifdef USE_FOG
  const P=THREE.Material.prototype;
 /* ---- yüzey ayrıntısı: malzeme rengine göre çim / kabuk-toprak / kaya / kum dokusu, üç yönlü izdüşüm ve türevden çıkıntı haritası ---- */
  const PV_P='varying vec3 vPW;varying vec3 vPN;',
- PF_P=`uniform sampler2D tPG,tPD,tPR,tPS,tPL;uniform float uPQ;varying vec3 vPW;varying vec3 vPN;
+ PF_P=`uniform sampler2D tPG,tPD,tPR,tPS,tPL,tPT;uniform float uPQ;varying vec3 vPW;varying vec3 vPN;
  vec4 pTri(sampler2D t,vec3 p,vec3 n,float s){
   vec4 r=texture2D(t,p.xz*s);
   if(uPQ<1.5)return r;
@@ -56,7 +56,7 @@ SC.fog_fragment=`#ifdef USE_FOG
   return r*w.y+texture2D(t,p.zy*s)*w.x+texture2D(t,p.xy*s)*w.z;
  }`,
  PF_C=`
- float pbrH=.5,pbrAmp=0.,pbrFade=0.;
+ float pbrH=.5,pbrAmp=0.,pbrFade=0.,pbrWet=0.,pbrOre=0.;
  if(uPQ>.5){
   vec3 pc=diffuseColor.rgb;
   float lum=dot(pc,vec3(.3,.59,.11));
@@ -79,11 +79,29 @@ SC.fog_fragment=`#ifdef USE_FOG
   float rk=clamp(1.-gr-sd-br,0.,1.);
   float gu=gr*up;rk+=gr-gu;gr=gu;               /* dik yamaçtaki çimen kayaya dönüşür */
   float ws=gr+br+sd+rk+1e-4;gr/=ws;br/=ws;sd/=ws;rk/=ws;
-  vec4 tg=texture2D(tPG,vPW.xz*.42),tb=pTri(tPD,vPW,pn,.85),tr=pTri(tPR,vPW,pn,.26),ts=texture2D(tPS,vPW.xz*.33);
+  /* büyük ölçekli değişim: tekrarı kırar, çıplak toprak yamaları ve kum dalgacıkları oluşturur */
+  float mac=texture2D(tPR,vPW.xz*.011).a,mac2=texture2D(tPS,vPW.xz*.037+.31).a;
+  #ifdef PBR_ORE
+  rk=1.;gr=0.;br=0.;sd=0.;
+  #endif
+  float dp=smoothstep(.66,.82,mac2*.5+mac*.5)*gr*.8;              /* çimenin seyrek olduğu çıplak toprak yamaları */
+  br+=dp;gr-=dp;
+  vec4 tg=texture2D(tPG,vPW.xz*.42);tg=mix(tg,texture2D(tPG,vPW.xz*.093+.27),.45);
+  vec4 tb=mix(pTri(tPD,vPW,pn,.85),pTri(tPT,vPW,pn,.5),clamp(dp*1.4+.35*br,0.,1.));
+  vec4 tr=pTri(tPR,vPW,pn,.26);tr=mix(tr,pTri(tPR,vPW+7.3,pn,.071),.4);
+  vec4 ts=texture2D(tPS,vPW.xz*.33);
   vec4 dt=tg*gr+tb*br+ts*sd+tr*rk;
   float dep=-(viewMatrix*vec4(vPW,1.)).z;
   pbrFade=1.-smoothstep(28.,85.,dep);
-  diffuseColor.rgb*=mix(vec3(1.),dt.rgb*2.,pbrFade);
+  vec3 mv=vec3(.92+.2*mac,.92+.2*mac,.92+.16*mac);
+  diffuseColor.rgb*=mix(vec3(1.),dt.rgb*2.*mix(vec3(1.),mv,gr+sd+rk*.5),pbrFade);
+  pbrWet=sd*(1.-smoothstep(-.16,.22,vPW.y));                   /* su kenarında ıslak kum: koyu ve parlak */
+  diffuseColor.rgb*=1.-.38*pbrWet;
+  #ifdef PBR_ORE
+  pbrOre=clamp(smoothstep(.1,.32,cr)+(1.-smoothstep(.02,.09,lum))*.8,0.,1.);
+  #endif
+  float rip=sin(dot(vPW.xz,vec2(.8,.6))*5.2+mac*7.)*.5+.5;
+  dt.a=mix(dt.a,dt.a*.6+rip*.4,sd);
   pbrH=dt.a;pbrAmp=gr*.035+br*.05+sd*.012+rk*.09;
  }`,
  PF_N=`
@@ -92,13 +110,14 @@ SC.fog_fragment=`#ifdef USE_FOG
   vec3 sX=dFdx(-vViewPosition),sY=dFdy(-vViewPosition),R1=cross(sY,normal),R2=cross(normal,sX);
   float fDet=dot(sX,R1);
   normal=normalize(abs(fDet)*normal-sign(fDet)*(dh.x*R1+dh.y*R2));
-  roughnessFactor=clamp(roughnessFactor*(.82+.36*pbrH),.2,1.);
+  roughnessFactor=clamp(roughnessFactor*(.82+.36*pbrH)*(1.-.55*pbrWet)*(1.-.5*pbrOre),.12,1.);
  }`;
  const inject=function(sh){
   sh.uniforms.uHF=U.uHF;sh.uniforms.uFogT=U.uFogT;
   if(!(this&&this.userData&&this.userData.pbr))return;
-  sh.uniforms.uPQ=U.uPQ;sh.uniforms.tPG={value:sc.tex.pGrass};sh.uniforms.tPD={value:sc.tex.pBark};sh.uniforms.tPR={value:sc.tex.pRock};sh.uniforms.tPS={value:sc.tex.pSand};sh.uniforms.tPL={value:sc.tex.pLeaf};
+  sh.uniforms.uPQ=U.uPQ;sh.uniforms.tPG={value:sc.tex.pGrass};sh.uniforms.tPD={value:sc.tex.pBark};sh.uniforms.tPR={value:sc.tex.pRock};sh.uniforms.tPS={value:sc.tex.pSand};sh.uniforms.tPL={value:sc.tex.pLeaf};sh.uniforms.tPT={value:sc.tex.pDirt};
   if(this.userData.leaf)sh.fragmentShader='#define PBR_LEAF\n'+sh.fragmentShader;
+  if(this.userData.ore)sh.fragmentShader='#define PBR_ORE\n'+sh.fragmentShader;
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\n'+PV_P).replace('#include <project_vertex>',`#include <project_vertex>
    {vec4 pw4=vec4(transformed,1.);vec3 pn3=objectNormal;
     #ifdef USE_INSTANCING
@@ -109,7 +128,7 @@ SC.fog_fragment=`#ifdef USE_FOG
  };
  const base=function(sh){inject.call(this,sh)};
  Object.defineProperty(P,'onBeforeCompile',{configurable:true,get(){return this._obc||base},set(f){this._src=f?f.toString():'';this._obc=f?function(sh,r){f.call(this,sh,r);inject.call(this,sh)}:null}});
- P.customProgramCacheKey=function(){return (this._src||'')+(this.userData&&this.userData.pbr?'#pbr':'')+(this.userData&&this.userData.leaf?'L':'')};
+ P.customProgramCacheKey=function(){return (this._src||'')+(this.userData&&this.userData.pbr?'#pbr':'')+(this.userData&&this.userData.leaf?'L':'')+(this.userData&&this.userData.ore?'O':'')};
 }
 
 /* ---- her kare: zaman, rüzgâr ve sis ---- */

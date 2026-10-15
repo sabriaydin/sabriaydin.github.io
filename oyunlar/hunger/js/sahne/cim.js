@@ -44,6 +44,7 @@ function windMat(amp){
  const m=sc.mat({side:THREE.DoubleSide,roughness:.9});
  m.onBeforeCompile=sh=>{
   sh.uniforms.uTime=uTime;sh.uniforms.uWindV=sc.U.uWindV;
+  sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\n normal=normalize(vNormal);');   /* iki yüzlü yaprak: arka yüz de ışık alır (karanlık yaprak kalmaz) */
   sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nuniform float uTime;uniform vec3 uWindV;').replace('#include <begin_vertex>',`vec3 transformed=vec3(position);
   #ifdef USE_INSTANCING
   float ph=instanceMatrix[3].x*.8+instanceMatrix[3].z*.6;
@@ -70,8 +71,12 @@ const FCOL=[0xffffff,0xffe14a,0xff7aa8,0xb48cff,0xff6a4a,0x7ac8ff];
 function layout(G){
  const rnd=mulberry32(G.seed^0x51ed);
  const L=[],F=[];
+ /* köy evlerinin zemini: içeride ve duvar altında çimen/çiçek bitmez */
+ const hsx=[];for(const v of G.villages||[])for(const h of v.houses||[])hsx.push(h);
+ const inHouse=(x,z)=>{for(const h of hsx)if(Math.abs(x+.5-h.x)<2.6&&Math.abs(z+.5-h.z)<2.6)return true;return false};
  for(let z=0;z<H;z++)for(let x=0;x<W;x++){
   if(G.tile[z*W+x]!==T.GRASS)continue;
+  if(hsx.length&&inHouse(x,z))continue;
   const patch=fbm(x/7,z/7,G.seed+61);
   for(let k=0;k<PER_TILE;k++){
    const px=x+rnd(),pz=z+rnd(),r=rnd(),r2=rnd(),r3=rnd();

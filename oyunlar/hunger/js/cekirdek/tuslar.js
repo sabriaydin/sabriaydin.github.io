@@ -5,7 +5,7 @@ const KEY='hunger-tuslar';
 /* eylem: [ad, birinci tuş, ikinci tuş] */
 const ACTS=[
  ['fwd','İleri','KeyW','ArrowUp'],['back','Geri','KeyS','ArrowDown'],['left','Sola','KeyA','ArrowLeft'],['right','Sağa','KeyD','ArrowRight'],
- ['sprint','Koş','ShiftLeft','ShiftRight'],['jump','Zıpla','Space',''],
+ ['sprint','Koş','ShiftLeft','ShiftRight'],['jump','Zıpla / yüzerken yüzeye çık','Space',''],['dive','Suya dal (yüzerken)','KeyX',''],
  ['use','Kullan / al / konuş','KeyE',''],['place','Yapıyı yerleştir','KeyF',''],
  ['inv','Envanter','KeyI','Tab'],['craft','Üretim','KeyC',''],['map','Harita','KeyM',''],['jr','Günlük','KeyK',''],
  ['guide','Rehber','KeyH',''],['mute','Sesi aç/kapat','KeyN',''],['qsave','Hızlı kaydet','F5','']

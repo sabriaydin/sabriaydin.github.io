@@ -47,7 +47,7 @@ function build(prof,v,f){
   if(tcf)ps[0].cf=ps[1].cf=tcf;
   if(right){
    if(prof==='smith'){ps.push(part(cyl(.02,.02,.4,6),0x6b4423,0,-.66,.1,1,1,1,PI2,0,0),part(box(.08,.08,.16),0x55555d,0,-.66,.3))}
-   else if(prof==='woodcut'){ps.push(part(cyl(.02,.025,.8,6),0x8a5a30,0,-.62,.1,1,1,1,PI2,0,0),part(box(.04,.18,.22),0xc3c9d0,0,-.6,.5))}
+   else if(prof==='woodcut'){ps.push(part(cyl(.02,.025,.8,6),0x8a5a30,0,-.62,.1,1,1,1,PI2,0,0),part(box(.04,.18,.22),0x7d838c,0,-.6,.5),part(box(.03,.18,.05),0xa6acb4,0,-.6,.62))}
    else if(prof==='miner'){ps.push(part(cyl(.02,.025,.8,6),0x8a5a30,0,-.62,.1,1,1,1,PI2,0,0),part(box(.05,.05,.5),0x8d8d92,0,-.6,.5))}
    else if(prof==='fisher'){ps.push(part(cyl(.012,.02,1.3,5),0x8a5a30,0,-.6,.2,1,1,1,PI2*.7,0,0))}
    else if(prof==='farmer'){ps.push(part(cyl(.02,.02,1.2,6),0x8a5a30,0,-.62,.0,1,1,1,0,0,0),part(box(.2,.02,.02),0x8d8d92,0,.0-.62+.6,0),
@@ -84,7 +84,14 @@ S.onFrame((G,t,dt,info)=>{
   if(!o){o=make(n);objs.set(n,o)}
   o.g.visible=true;
   const gy=S.groundY(n.x,n.z),ph=n.walk*2.2,amp=Math.min(1,n.spd/.8)*.7;
-  o.g.position.set(n.x,gy,n.z);o.g.rotation.y=n.yaw;
+  o.g.position.set(n.x,gy,n.z);o.g.rotation.order='YXZ';o.g.rotation.y=n.yaw;
+  if(n.sleep){
+   /* uyuyan köylü: sırtüstü yatar, yavaş nefes alır */
+   o.g.rotation.x=-Math.PI/2;o.g.position.set(n.x+Math.sin(n.yaw)*.85,gy+.2+Math.sin(t*1.1+n.id)*.008,n.z+Math.cos(n.yaw)*.85);
+   o.legL.rotation.set(0,0,0);o.legR.rotation.set(0,0,0);o.armL.rotation.set(0,0,.05);o.armR.rotation.set(0,0,-.05);o.torso.rotation.set(0,0,0);o.torso.scale.y=1+Math.sin(t*1.1+n.id)*.012;
+   continue;
+  }
+  o.g.rotation.x=0;
   o.legL.rotation.x=Math.sin(ph)*amp;o.legR.rotation.x=-Math.sin(ph)*amp;
   const talk=G.trading===n;
   o.armL.rotation.x=-Math.sin(ph)*amp*.8+Math.sin(t*1.3+n.id)*.02;

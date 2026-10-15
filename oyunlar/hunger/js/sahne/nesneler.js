@@ -29,7 +29,8 @@ function windMat(extra){
  };
  return m;
 }
-let matFol,matFolDS,matRock;
+let matFol,matFolDS,matRock,matOre;
+const ORE={coal:1,copper:1,iron:1};
 sc.getFolMats=()=>({matFol,matFolDS,matRock});
 const tint=new THREE.Color();
 function tintFor(key,a,b,c){
@@ -47,7 +48,7 @@ const KEYOF={[O.PALM]:'palm',[O.PALM0]:'palm0',[O.ROCK]:'rock',[O.COAL]:'coal',[
 function buildInstances(G){
  for(const c of chunks.values()){sc.scene.remove(c.mesh);c.mesh.dispose&&c.mesh.dispose();if(c.lo){sc.scene.remove(c.lo);c.lo.dispose&&c.lo.dispose()}}
  chunks.clear();
- if(!matFol){matFol=windMat({pbr:true,leaf:true});matFolDS=windMat({side:THREE.DoubleSide,pbr:true,leaf:true});matRock=sc.mat({pbr:true})}
+ if(!matFol){matFol=windMat({pbr:true,leaf:true});matFolDS=windMat({side:THREE.DoubleSide,pbr:true,leaf:true});matRock=sc.mat({pbr:true});matOre=sc.mat({ore:true})}
  const cnt=new Map();
  for(let z=0;z<H;z++)for(let x=0;x<W;x++){
   const o=G.obj[z*W+x];if(!o)continue;
@@ -56,7 +57,7 @@ function buildInstances(G){
  }
  for(const [k,n] of cnt){
   const [key,cx,cz]=k.split('|');
-  const mat=key==='palm'||key==='palm0'?matFolDS:WIND[key]?matFol:matRock;
+  const mat=key==='palm'||key==='palm0'?matFolDS:WIND[key]?matFol:ORE[key]?matOre:matRock;
   const isTree=key==='treeA'||key==='treeB'||key==='palm'||key==='palm0';
   const c={mesh:mkInst(sc.MODEL[key],mat,n,true),lo:sc.MODEL[key+'_lo']?mkInst(sc.MODEL[key+'_lo'],mat,n,true):null,n,cnt:0,key,
    box:new THREE.Box3(new THREE.Vector3(+cx*CH,-3,+cz*CH),new THREE.Vector3((+cx+1)*CH,16,(+cz+1)*CH))};
@@ -132,7 +133,7 @@ function applyDamage(i,frac,G,silent){
  /* örnek gizlenir, yerine aşamaya özel mesh konur */
  const pos=new THREE.Vector3(),qq=new THREE.Quaternion(),ss=new THREE.Vector3();r.mat.decompose(pos,qq,ss);
  wm.compose(pos,qq,new THREE.Vector3(1e-4,1e-4,1e-4));r.mesh.setMatrixAt(r.idx,wm);r.mesh.instanceMatrix.needsUpdate=true;
- const mat=matRock.clone();mat.color.setRGB(r.tint[0],r.tint[1],r.tint[2]);sc.mats.push(mat);
+ const mat=(ORE[key]?matOre:matRock).clone();mat.color.setRGB(r.tint[0],r.tint[1],r.tint[2]);sc.mats.push(mat);
  const mesh=new THREE.Mesh(sc.MODEL[key+'_s'+st],mat);mesh.matrixAutoUpdate=false;mesh.matrix.copy(r.mat);mesh.castShadow=true;mesh.receiveShadow=true;
  stagedGroup.add(mesh);staged.set(i,{mesh,stage:st});
 }

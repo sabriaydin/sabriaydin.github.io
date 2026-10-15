@@ -74,15 +74,19 @@ function hud(){
  /* nişan ipucu */
  const a=HG.actionFor(G.tg);
  let tip=(!G.tg&&!(a&&(a.kind==='eat'||a.block)))?'':(a?(a.name+(a.hint?' · '+a.hint:a.block?' · '+a.block:'')):(G.obj[G.tg.y*W+G.tg.x]?HG.NAMES[G.obj[G.tg.y*W+G.tg.x]]||'':''));
- const nn=G.nearNpc;if(nn&&!G.nearDrop)tip=(tip?tip+' · ':'')+'[E] '+nn.name+' ('+HG.PROF[nn.prof].n+') ile konuş';
- if(G.nearCamp&&!G.nearDrop)tip=(tip?tip+' · ':'')+'[E] Sandığı aç';
- if(G.nearCave&&!G.nearDrop&&!G.nearCamp)tip=(tip?tip+' · ':'')+(G.nearCave.exit?'[E] Mağaradan çık':'[E] Mağaraya gir (karanlık, tehlikeli)');
- const nd=G.nearDrop;if(nd)tip=(tip?tip+' · ':'')+'[E] '+IT[nd.id].n+(nd.n>1?' ×'+nd.n:'')+' al';
+ {
+  const uc=HG.useCands()[0];
+  if(uc){
+   const k=uc[1],nn=G.nearNpc,nd=G.nearDrop;
+   const t=k==='npc'?'[E] '+nn.name+' ('+HG.PROF[nn.prof].n+') ile konuş':k==='chest'?'[E] Sandığı aç':k==='cave'?(G.nearCave.exit?'[E] Mağaradan çık':'[E] Mağaraya gir (karanlık, tehlikeli)'):'[E] '+IT[nd.id].n+(nd.n>1?' ×'+nd.n:'')+' al';
+   tip=(tip?tip+' · ':'')+t;
+  }
+ }
  if(hc.tip!==tip){hc.tip=tip;const t=$('#tip');t.textContent=tip;t.hidden=!tip}
  const cr=!!(a&&a.kind&&G.tg);if(hc.cr!==cr){hc.cr=cr;$('#cross').classList.toggle('on',cr)}
  /* hedef sağlık çubuğu ve vurulan bölge yazısı */
  {
-  const ah=G.tg&&G.tg.an&&!G.tg.an.dying?G.tg.an:(G.lastHit&&performance.now()-G.lastHit.t<2500&&!G.lastHit.a.gone?G.lastHit.a:null);
+  const ah=G.tg&&G.tg.an&&!G.tg.an.dying?G.tg.an:null;
   const tg=$('#tgt');
   if(ah&&G.lastHit&&G.lastHit.a===ah&&ah.dying){/* ölünce kısa süre %0 göster */}
   if(ah){
@@ -91,8 +95,6 @@ function hud(){
    if(hc.tg!==k){hc.tg=k;tg.querySelector('b').textContent=def.n;tg.querySelector('u').style.width=p+'%';tg.querySelector('u').style.background=p>60?'#6fbf5a':p>30?'#d0a02f':'#d9463c';tg.querySelector('span').textContent='%'+p}
    tg.hidden=false;
   }else if(!tg.hidden){tg.hidden=true;hc.tg=null}
-  const z=$('#zn'),zn=G.zn;
-  if(zn&&performance.now()-zn.t<1100){z.textContent=zn.txt;z.className=zn.zone;z.style.opacity=1-(performance.now()-zn.t)/1100}else if(z.style.opacity!=='0')z.style.opacity=0;
  }
  const pr=$('#prog');
  if(HG.A.key&&HG.A.p>0){pr.hidden=false;pr.firstElementChild.style.width=clamp(HG.A.p/HG.A.need,0,1)*100+'%'}else pr.hidden=true;

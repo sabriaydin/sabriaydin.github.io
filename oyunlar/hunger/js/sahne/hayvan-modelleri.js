@@ -194,16 +194,32 @@ S.onInit(()=>{
  /* ---- Gölge: uzun, ince, kara siluet; gözleri parlar ---- */
  {
   const sk=0x0e0e15,sk2=0x181822;
-  const robe=part(cone(.34,1.5,10,1),sk,0,.74,0,1,1,1,0,0,0,.1);
-  const chest=part(blob(.26,2,.1,1,.62,2.0,.5),sk2,0,1.35,0,1,1,1,0,0,0,.1);
+  /* kumaş: dikey yırtık çizgileri, koyu etek, ara sıra solgun damar parıltısı */
+  const rag=(x,y,z,nx,ny,nz,c)=>{const t=fb3(x*7,y*2.4,z*7,7),v=fb3(x*11,y*11,z*11,12);c.multiplyScalar(.62+.7*t);c.multiplyScalar(.7+.3*Math.min(1,y/1.2));if(v>.72){c.r+=(v-.72)*.9;c.g+=(v-.72)*.1}};
+  const bone=(x,y,z,nx,ny,nz,c)=>{c.multiplyScalar(.8+.4*fb3(x*20,y*20,z*20,3))};
+  const robe=part(cone(.34,1.5,12,1),sk,0,.74,0,1,1,1,0,0,0,.1);robe.cf=rag;
+  const chest=part(blob(.26,2,.1,1,.62,2.0,.5),sk2,0,1.35,0,1,1,1,0,0,0,.1);chest.cf=rag;
+  const extra=[];
+  /* etek şeritleri */
+  for(let i=0;i<10;i++){const a=i/10*6.283+.3,ln=.45+((i*37)%7)/12;extra.push(alongPart(cone(.06+(i%3)*.012,ln,4,1),sk,V(Math.cos(a)*.3,.55,Math.sin(a)*.3),V(Math.cos(a)*.18,-1,Math.sin(a)*.18+.05),ln,1,.35))}
+  /* kaburgalar ve sırt dikenleri */
+  for(let i=0;i<5;i++){const y=1.62-i*.085,w=.19-i*.012;extra.push(part(cyl(.011,.011,w*2,5),0x5a5a68,0,y,.095+i*.004,1,1,1,0,0,Math.PI/2));extra.push(part(cyl(.011,.011,.3,5),0x5a5a68,0,y,.04,1,1,1,0,0,0))}
+  for(let i=0;i<6;i++)extra.push(alongPart(cone(.028-i*.002,.15,4,1),0x2c2c38,V(0,1.7-i*.14,-.15),V(0,.45,-1),.15));
+  /* boynuzlar ve çene */
+  for(const sg of [-1,1]){
+   extra.push(alongPart(cone(.024,.4,5,1),0x2a2a30,V(sg*.07,2.22,-.02),V(sg*.55,1,-.35),.4));
+   extra.push(alongPart(cone(.014,.2,4,1),0x2a2a30,V(sg*.17,2.43,-.12),V(sg*1.2,.9,-.1),.2));
+  }
+  extra.push(part(blob(.1,1,.05,6,.7,.7,1.1),sk2,0,2.06,.15));
+  extra.push(part(blob(.05,1,.04,8,1.7,.6,.9),0x08080c,0,1.99,.2));
   const arms=[],aL=[],aR=[];
   for(const s of [-1,1]){const arms=s<0?aL:aR;
    arms.push(alongPart(cyl(.03,.05,1.05,6),sk,V(s*.2,1.82,0),V(s*.2,-1,.15),1.05));
    arms.push(alongPart(cyl(.012,.03,.4,5),sk,V(s*.34,.8,.15),V(s*.15,-1,.35),.4));
-   for(const k of [-1,0,1])arms.push(alongPart(cone(.012,.2,4,1),sk,V(s*.36+k*.025,.42,.2),V(s*.1+k*.15,-1,.5),.2));
+   for(const k of [-1,-.33,.33,1])arms.push(alongPart(cone(.011,.34,4,1),0x20202a,V(s*.36+k*.022,.42,.2),V(s*.1+k*.14,-1,.55),.34));
   }
   AM.shade={
-   body:merge([robe,chest,part(blob(.15,2,.08,2,.85,1.35,1),sk,0,2.12,.02),part(cyl(.04,.06,.2,6),sk,0,1.98,0)],{ao:.9,jit:.08}),
+   body:merge([robe,chest,part(blob(.15,2,.08,2,.85,1.35,1),sk,0,2.12,.02),part(cyl(.04,.06,.2,6),sk,0,1.98,0)].concat(extra),{ao:.9,jit:.08}),
    armL:pivotGeo(aL,[-.2,1.82,0]),armR:pivotGeo(aR,[.2,1.82,0]),armLP:[-.2,1.82,0],armRP:[.2,1.82,0],
    leg:null,legs:[],
    extra:o=>{

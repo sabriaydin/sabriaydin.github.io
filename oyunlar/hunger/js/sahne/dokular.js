@@ -77,11 +77,19 @@ function canvasTex(size,fill,enc){
   t.anisotropy=8;return t;
  };
  const SZ=512;
+ const smooth01=(v,a,b)=>{const t=clamp((v-a)/(b-a),0,1);return t*t*(3-2*t)};
  /* çim: sık yaprak çizgileri, öbekler, sararmış ve koyu bölgeler */
  tex.pGrass=pbr(SZ,(u,v)=>{
   const blade=fb(u,v,96,40,3,101),fine=fb(u,v,200,200,2,111),clump=fb(u,v,9,9,3,121),dry=fb(u,v,5,5,2,131);
   const h=clamp(.15+blade*.5+fine*.25+clump*.3,0,1),l=.5+(h-.5)*.8-(1-clump)*.08;
-  return [l*(1+.2*dry),l*(1.04-.1*dry),l*(.86-.14*dry),h];
+  /* yonca yaprakçıkları, küçük çiçek noktaları ve kuru sap çizgileri */
+  const gx=Math.floor(u*48),gy=Math.floor(v*48),hh=hash(gx,gy,141);let dot=0,fl=0;
+  if(hh>.8){const dx=u*48-gx-(.25+hash(gx,gy,151)*.5),dy=v*48-gy-(.25+hash(gx,gy,161)*.5),d=Math.hypot(dx,dy)/(.16+hash(gx,gy,171)*.1);if(d<1)dot=1-d;if(hh>.965&&d<.55)fl=1}
+  const dead=Math.max(0,fb(u,v,140,22,2,181)-.62)*3.2;
+  let r=l*(1+.2*dry)+dead*.22,g=l*(1.04-.1*dry)-dead*.04,b=l*(.86-.14*dry)-dead*.12;
+  r*=1-dot*.12;g*=1+dot*.16;b*=1-dot*.1;
+  if(fl){r=.95;g=.92;b=.6}
+  return [r,g,b,h+dot*.15];
  });
  /* toprak ve ağaç kabuğu: dikey çatlaklı sırtlar ve lifler */
  tex.pBark=pbr(SZ,(u,v)=>{
@@ -93,8 +101,10 @@ function canvasTex(size,fill,enc){
  {
   const w=worley(SZ,7,301);
   tex.pRock=pbr(SZ,(u,v,x,y)=>{
-   const rid=Math.abs(fb(u,v,6,6,5,311)-.5)*2,strata=Math.sin((v*9+fb(u,v,3,3,2,321)*1.8)*Math.PI*2)*.5+.5,crack=1-Math.min(1,w[y*SZ+x]*7.5),grain=fb(u,v,120,120,2,331);
-   const h=clamp(.55+(1-rid)*.28+strata*.12+grain*.12-crack*.5,0,1),l=.5+(h-.5)*.8-crack*.12+(grain-.5)*.1;
+   const rid=Math.abs(fb(u,v,6,6,5,311)-.5)*2,strata=Math.sin((v*9+fb(u,v,3,3,2,321)*1.8)*Math.PI*2)*.5+.5,grain=fb(u,v,120,120,2,331),fr=fb(u,v,14,14,3,351);
+   const wk=w[((y+Math.round((fr-.5)*60))%SZ+SZ)%SZ*SZ+((x+Math.round((fb(u,v,16,16,3,361)-.5)*60))%SZ+SZ)%SZ];
+   const crack=(1-Math.min(1,wk*16))*(.35+.65*smooth01(fb(u,v,5,5,3,371),.35,.65));
+   const h=clamp(.55+(1-rid)*.3+strata*.1+grain*.14-crack*.2,0,1),l=.5+(h-.5)*.8-crack*.05+(grain-.5)*.12;
    const tint=fb(u,v,4,4,2,341);
    return [l*(1+.06*(tint-.5)*2),l*(1-.02*(tint-.5)*2),l*(1-.1*(tint-.5)*2),h];
   });
@@ -105,6 +115,38 @@ function canvasTex(size,fill,enc){
   const h=clamp(.45+wave*.25+grain*.25+pat*.2,0,1),l=.5+(h-.5)*.55+(pat-.5)*.1;
   return [l*1.04,l,l*.93,h];
  });
+}
+/* toprak: kuru çatlaklar, çakıl taşları, yaprak çöpü (ormanlık ve çıplak yamalar) */
+{
+ const SZ2=512,pn=(x,y,px,py,sd)=>{
+  const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);
+  const mx=n=>((n%px)+px)%px,my=n=>((n%py)+py)%py;
+  const a=hash(mx(xi),my(yi),sd),b=hash(mx(xi+1),my(yi),sd),c=hash(mx(xi),my(yi+1),sd),d=hash(mx(xi+1),my(yi+1),sd);
+  return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v;
+ };
+ const f=(u,v,px,py,oct,sd)=>{let t=0,a=.5,tot=0,fx=px,fy=py;for(let o=0;o<oct;o++){t+=a*pn(u*fx,v*fy,fx,fy,sd+o*7);tot+=a;a*=.52;fx*=2;fy*=2}return t/tot};
+ const cells=11,wx=new Float32Array(cells*cells),wy=new Float32Array(cells*cells);
+ for(let j=0;j<cells;j++)for(let i=0;i<cells;i++){wx[j*cells+i]=i+hash(i,j,601);wy[j*cells+i]=j+hash(i,j,603)}
+ const crackAt=(u,v)=>{
+  const fx=u*cells,fy=v*cells,cx=Math.floor(fx),cy=Math.floor(fy);let f1=9,f2=9;
+  for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){
+   const gx=((cx+i)%cells+cells)%cells,gy=((cy+j)%cells+cells)%cells,dx=wx[gy*cells+gx]+(cx+i-gx)-fx,dy=wy[gy*cells+gx]+(cy+j-gy)-fy,d=dx*dx+dy*dy;
+   if(d<f1){f2=f1;f1=d}else if(d<f2)f2=d;
+  }
+  return Math.sqrt(f2)-Math.sqrt(f1);
+ };
+ const t=canvasTex(SZ2,(d)=>{
+  for(let y=0;y<SZ2;y++)for(let x=0;x<SZ2;x++){
+   const u=x/SZ2,v=y/SZ2,base=f(u,v,12,12,4,611),fine=f(u,v,160,160,2,621),wu=u+(f(u,v,9,9,3,691)-.5)*.06,wv=v+(f(u,v,9,9,3,693)-.5)*.06,crack=(1-Math.min(1,crackAt(wu,wv)*18))*Math.max(0,f(u,v,4,4,2,695)*1.7-.45);
+   const gx=Math.floor(u*36),gy=Math.floor(v*36);let peb=0,pc=0;
+   if(hash(gx,gy,631)>.62){const dx=u*36-gx-(.25+hash(gx,gy,641)*.5),dy=v*36-gy-(.25+hash(gx,gy,651)*.5),r=.13+hash(gx,gy,661)*.16,dd=Math.hypot(dx,dy*1.2)/r;if(dd<1){peb=Math.sqrt(1-dd*dd);pc=hash(gx,gy,671)}}
+   const lit=Math.max(0,f(u,v,64,28,3,681)-.6)*3.4;
+   const hgt=clamp(.42+base*.28+fine*.2-crack*.18+peb*.55,0,1),l=.5+(hgt-.5)*.8-crack*.06+peb*(pc-.5)*.25;
+   const i=(y*SZ2+x)*4;
+   d[i]=clamp(l*(1.06+lit*.38+peb*(pc>.5?.12:-.02)),0,1)*255;d[i+1]=clamp(l*(1-lit*.1),0,1)*255;d[i+2]=clamp(l*(.86-lit*.4+peb*(pc>.5?-.05:.08)),0,1)*255;d[i+3]=clamp(hgt,0,1)*255;
+  }
+ },THREE.LinearEncoding);
+ t.anisotropy=8;tex.pDirt=t;
 }
 /* Yaprak kümesi: şeffaf boşluklu, damarlı yaprak şekilleri (ağaç yapraklarının kenarını parçalar). Dikişsiz: kenarlara taşan yapraklar karşı tarafa da çizilir. */
 {

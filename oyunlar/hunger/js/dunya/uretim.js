@@ -12,7 +12,8 @@ function genWorld(seed){
   const u=((x+.5)/W-.5-ox)*2,v=((y+.5)/H-.5-oy)*2,ru=(u*cr+v*sr)/axr,rv=(-u*sr+v*cr)/ayr,d=Math.max(0,Math.sqrt(ru*ru+rv*rv)+(fbm(x/46,y/46,seed+3)-.5)*wp);
   const n=fbm(x/26,y/26,seed),isle=Math.max(0,fbm(x/9,y/9,seed+777)-.66)*2.4*smooth(.62,.9,d)*(1-smooth(.96,1.05,d)),e=(1-Math.pow(d,1.7))+(n-.5)*.75+isle;
   let t,hh=0;
-  if(e<.1)t=T.DEEP;else if(e<.2)t=T.SHAL;else if(e<.28)t=T.SAND;
+  if(e<.1){t=T.DEEP;hh=-Math.min(3.4,(.1-e)*13)}   /* açıklara doğru derinleşir */
+  else if(e<.2)t=T.SHAL;else if(e<.28)t=T.SAND;
   else{
    /* yükseklik: dağlık bölgeler (kıyıya yaklaştıkça alçalır) */
    const m=clamp((fbm(x/22,y/22,seed+5)-.46)/.3,0,1);
@@ -208,7 +209,7 @@ function genWorld(seed){
  for(const type in ANIMAL){
   const def=ANIMAL[type];let c=0,g=0;
   const want=Math.round(def.want*SC);
-  while(c<want&&g++<want*60){
+  while(c<want&&g++<want*90){
    const x=2+((rnd()*(W-4))|0),y=2+((rnd()*(H-4))|0),i=y*W+x;
    if(tile[i]!==T.GRASS||obj[i]||used.has(i))continue;
    if(Math.hypot(x-sx,y-sy)<14||hgt[i]>3)continue;
@@ -216,9 +217,11 @@ function genWorld(seed){
    const f=fbm(x/12,y/12,seed+33);
    if((type==='deer'||type==='boar'||type==='wolf')&&f<.5)continue;
    if((type==='sheep'||type==='cow')&&f>.55)continue;
-   const herd=(type==='sheep'||type==='cow')?1+((rnd()*3)|0):type==='wolf'?2+((rnd()*2)|0):1;
+   /* bölgesellik: aynı tür başka bir kümeye yakın olamaz; farklı türler ise birbirine denk gelebilir */
+   if(animals.some(q=>q.t===type?Math.hypot(q.x-x,q.z-y)<(def.sp||16):Math.hypot(q.x-x,q.z-y)<5))continue;
+   const herd=(type==='sheep'||type==='cow'||type==='wolf')?1+((rnd()*2)|0):1;
    for(let k=0;k<herd;k++){
-    const xx=x+k*1.3*(rnd()-.3),yy=y+k*1.3*(rnd()-.3),j=Math.floor(yy)*W+Math.floor(xx);
+    const xx=x+k*2.2*(rnd()-.3),yy=y+k*2.2*(rnd()-.3),j=Math.floor(yy)*W+Math.floor(xx);
     if(tile[j]!==T.GRASS||obj[j]||used.has(j))continue;
     used.add(j);animals.push({t:type,x:xx+.5,z:yy+.5,yaw:rnd()*6.28});c++;
    }

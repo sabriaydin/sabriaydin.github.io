@@ -204,16 +204,24 @@ function eatHeld(){
   HG.addSan(f.h>=30?5:f.h>=10?1.5:.5);
  }
 }
+/* E ile etkileşime girilebilecek hedefler: yalnızca bakılan yöndekiler, en çok bakılan önce */
+function faceCos(x,z){const dx=x-G.px,dz=z-G.py,d=Math.hypot(dx,dz);return d<.9?1:(dx*G.fx+dz*G.fy)/d}
+function useCands(){
+ const c=[],dr=G.nearDrop,cp=G.nearCamp,cv=G.nearCave,np=G.nearNpc;
+ if(dr&&G.drops&&G.drops.includes(dr)){const f=faceCos(dr.x,dr.z);if(f>.55||Math.hypot(dr.x-G.px,dr.z-G.py)<1.3)c.push([Math.max(f,.9),'drop',HG.pickupNearest])}
+ if(cp&&!cp.open){const f=faceCos(cp.x+.5,cp.y+.5);if(f>.6)c.push([f,'chest',HG.openChest])}
+ if(cv){const q=cv.exit&&G.cave?G.cave.lv.exit:cv,f=faceCos(q.x+.5,q.y+.5);if(f>.6)c.push([f,'cave',HG.useCave])}
+ if(np){const f=faceCos(np.x,np.z);if(f>.75)c.push([f,'npc',HG.talkNpc])}
+ c.sort((a,b)=>b[0]-a[0]);
+ return c;
+}
 function useHeld(){
- if(HG.pickupNearest())return;
- if(HG.openChest())return;
- if(HG.useCave())return;
- if(HG.talkNpc())return;
+ for(const c of useCands())if(c[2]())return;
  const h=held();if(!h)return;
  if(h.it.food){const b=foodBlock(h.it.food);if(b)HG.toast(b);else eatHeld();return}
  if(h.it.sleep){HG.sleep();return}
  if(h.it.heal){if(G.bleed>0||G.hp<95)HG.useMedical();else HG.toast('Yaralı değilsin.');return}
  if(h.it.place)placeHeld();
 }
-Object.assign(HG,{actionFor,stepAction,stopAction,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
+Object.assign(HG,{useCands,actionFor,stepAction,stopAction,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
 })();
