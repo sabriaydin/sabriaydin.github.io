@@ -1,7 +1,7 @@
 /* Hunger 3D - hayvanlar: yapay zekâ (gezinme, kaçma, saldırı), vurma, süt, yün, yeniden doğma */
 (()=>{
 'use strict';
-const {W,H,T,SOLID,ANIMAL,DMG,G,Scene,fbm,clamp}=HG;
+const {W,H,T,O,SOLID,ANIMAL,DMG,G,Scene,fbm,clamp}=HG;
 let nextId=1;
 const FAR2=70*70;                       /* bu mesafeden uzaktaki hayvanlar seyrek güncellenir */
 const GRID=new Map();
@@ -14,13 +14,15 @@ function makeAnimals(list){
   moving:false,tm:rnd()*3,panic:0,charge:0,hitT:0,cd:0,walk:rnd()*6,spd:0,dying:a.dead?5:0,milkAt:0,shearAt:0,sheared:!!a.sheared,avoid:0,avoidT:0
  }));
 }
+/* Yabani hayvanlar kapıyı açamaz: kapılı barınak ve ağıl onları dışarıda tutar (gölgelerle aynı kural) */
+const SOLIDA=o=>SOLID(o)||o===O.DOOR||o===O.DOORM||o===O.VDOOR;
 function walkable(x,z){
  const r=.35,pts=[[0,0],[r,0],[-r,0],[0,r],[0,-r]];
  for(const [dx,dz] of pts){
   const tx=Math.floor(x+dx),tz=Math.floor(z+dz);
   if(tx<1||tz<1||tx>=W-1||tz>=H-1)return false;
   const i=tz*W+tx,t=G.tile[i];
-  if(t<T.SAND||t===T.POND||SOLID(G.obj[i]))return false;
+  if(t<T.SAND||t===T.POND||SOLIDA(G.obj[i]))return false;
  }
  return true;
 }
@@ -29,7 +31,7 @@ function unstick(a){
  if(ANIMAL[a.t].sea)return;
  const i=Math.floor(a.z)*W+Math.floor(a.x);
  if(i<0||i>=W*H)return;
- if(!(SOLID(G.obj[i])||G.tile[i]<T.SAND||G.tile[i]===T.POND))return;
+ if(!(SOLIDA(G.obj[i])||G.tile[i]<T.SAND||G.tile[i]===T.POND))return;
  for(let r=1;r<=8;r++)for(let k=0;k<12;k++){
   const an=k/12*6.2832+r,x=a.x+Math.cos(an)*r,z=a.z+Math.sin(an)*r;
   if(walkable(x,z)){a.x=x;a.z=z;a.moving=false;a.tm=1;return}

@@ -7,7 +7,10 @@ const {box,cone}=sc.g;
 const CH=32;                                   /* parça (chunk) boyutu: kare */
 const LOD_DIST=62,CULL_DIST=185;               /* yakın: ayrıntılı model · uzak: sade model · çok uzak: çizilmez */
 let inst=new Map(),chunks=new Map(),placedGroup=null,flames=[],wobIdx=-1;
-const placedCells=new Set();                    /* yerleştirilen yapıların kareleri: değişirse tam senkron gerekir */
+const placedCells=new Set();                    /* yerleştirilen yapıların kareleri */
+const placedBy=new Map();                       /* kare -> {o,objs,own,fire,flame}: yapı tek tek eklenip kaldırılabilir (artımlı güncelleme) */
+const STRUCT=new Set([O.FIRE,O.BENCH,O.FURN,O.WALLW,O.WALLS,O.DOOR,O.WALLT,O.WALLM,O.DOORM,O.FENCE]);
+const NBR=new Set([O.WALLT,O.WALLM,O.DOOR,O.DOORM]);   /* yönü komşu yapılara bağlı olanlar */
 const staged=new Map();let stagedGroup=null;
 const wm=new THREE.Matrix4(),wq=new THREE.Quaternion(),wv=new THREE.Vector3(),ws=new THREE.Vector3();
 const INSTKEYS=['treeA','treeB','palm','palm0','rock','coal','copper','iron','bush','bush0'];
@@ -57,6 +60,12 @@ function buildInstances(G){
   const ks=o===O.TREE?['treeA','treeB']:ALT[KEYOF[o]]?[KEYOF[o],ALT[KEYOF[o]]]:[KEYOF[o]];   /* çalı ve palmiyede iki hâl de ayrılır: meyveli/meyvesiz geçiş artımlı yapılır */
   for(const key of ks){if(!key)continue;const k=chunkKey(key,x,z);cnt.set(k,(cnt.get(k)||0)+1)}
  }
+ /* kesilmiş ve yeniden büyümeyi bekleyen ağaç/kaya/maden için de yer ayrılır: kayıt yüklendikten sonra yeniden büyüme tam senkron gerektirmesin */
+ for(const t of G.timers||[]){
+  if(!t||t.from!==O.NONE||G.obj[t.i])continue;
+  const x=t.i%W,z=(t.i-x)/W,ks=t.to===O.TREE?['treeA','treeB']:KEYOF[t.to]?[KEYOF[t.to]]:[];
+  for(const key of ks){const k=chunkKey(key,x,z);cnt.set(k,(cnt.get(k)||0)+1)}
+ }
  for(const [k,n] of cnt){
   const [key,cx,cz]=k.split('|');
   const mat=key==='palm'||key==='palm0'?matFolDS:WIND[key]?matFol:ORE[key]?matOre:matRock;
@@ -75,55 +84,81 @@ function flameGroup(){
  gl.scale.set(2.6,2.6,1);gl.position.y=.55;g.add(gl);g.userData.glow=gl;
  return g;
 }
+/* ---- Yerleştirilen yapılar: tek tek kurulur/kaldırılır (tam senkron yerine artımlı güncelleme) ---- */
+function buildStruct(G,i){
+ const x=i%W,z=(i-x)/W,o=G.obj[i],plm=sc.MODEL.matPlain;
+ let geo=null;
+ if(o===O.FIRE)geo=sc.MODEL.fireBase;else if(o===O.BENCH)geo=sc.MODEL.bench;else if(o===O.FURN)geo=sc.MODEL.furn;
+ else if(o===O.WALLW)geo=sc.MODEL.wallw;else if(o===O.WALLS)geo=sc.MODEL.walls;else if(o===O.DOOR)geo=sc.MODEL.door;
+ else if(o===O.WALLT)geo=sc.MODEL.wallt;else if(o===O.WALLM)geo=sc.MODEL.wallm;else if(o===O.DOORM)geo=sc.MODEL.doorm;else if(o===O.FENCE)geo=sc.MODEL.fence;
+ if(!geo)return;
+ const gy=S.groundY(x+.5,z+.5),hh=hash(x,z,21);
+ const me=new THREE.Mesh(geo,plm);me.position.set(x+.5,gy,z+.5);me.castShadow=true;me.receiveShadow=true;
+ if(o===O.DOOR||o===O.DOORM){const isW=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS||q2===O.WALLT||q2===O.WALLM||q2===O.FENCE};const alongX=(x>0&&isW(i-1))||(x<W-1&&isW(i+1));me.rotation.y=alongX?0:Math.PI/2}
+ else if(o===O.WALLT||o===O.WALLM){
+  /* ince duvar: komşu yapıların doğrultusuna uzanır (yan yana ise doğu-batı, alt alta ise kuzey-güney) */
+  const cn=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS||q2===O.WALLT||q2===O.WALLM||q2===O.DOOR||q2===O.DOORM||q2===O.FENCE};
+  const ax=(x>0&&cn(i-1))||(x<W-1&&cn(i+1)),az=(z>0&&cn(i-W))||(z<H-1&&cn(i+W));
+  me.rotation.y=az&&!ax?Math.PI/2:ax?0:(hh<.5?0:Math.PI/2);
+ }
+ else if(o===O.WALLW||o===O.WALLS)me.rotation.y=hh<.5?0:Math.PI;
+ placedGroup.add(me);placedCells.add(i);
+ const ent={o,objs:[me],own:[]};
+ if(o===O.FIRE){const f=flameGroup();f.position.set(x+.5,gy+.05,z+.5);placedGroup.add(f);const fr2={x:x+.5,z:z+.5,y:gy},fl={g:f,ph:hh*10};sc.fires.push(fr2);flames.push(fl);ent.objs.push(f);ent.fire=fr2;ent.flame=fl;ent.own.push(f)}
+ if(o===O.FURN){const gl=new THREE.Mesh(box(.42,.3,.04),new THREE.MeshBasicMaterial({color:0xff7a1a,toneMapped:false}));gl.position.set(x+.5,gy+.4,z+.5+.49);placedGroup.add(gl);ent.objs.push(gl);ent.own.push(gl)}
+ placedBy.set(i,ent);
+}
+function disposeEnt(e){
+ /* yapıya özgü (paylaşılmayan) geometri ve malzemeler: alev grubu, fırın parıltısı */
+ for(const ob of e.own)ob.traverse(n=>{if(n.geometry)n.geometry.dispose();if(n.material)n.material.dispose()});
+}
+function removeStruct(i){
+ const e=placedBy.get(i);if(!e)return;
+ for(const ob of e.objs)placedGroup.remove(ob);
+ if(e.flame){const k=flames.indexOf(e.flame);if(k>=0)flames.splice(k,1)}
+ if(e.fire){const k=sc.fires.indexOf(e.fire);if(k>=0)sc.fires.splice(k,1)}
+ disposeEnt(e);placedBy.delete(i);placedCells.delete(i);
+}
 function syncObjects(G){
  if(placedGroup){sc.scene.remove(placedGroup)}
  placedGroup=new THREE.Group();sc.scene.add(placedGroup);
  if(stagedGroup)sc.scene.remove(stagedGroup);
  stagedGroup=new THREE.Group();sc.scene.add(stagedGroup);staged.clear();
- inst.clear();placedCells.clear();sc.fires.length=0;flames=[];
+ for(const e of placedBy.values())disposeEnt(e);
+ inst.clear();placedCells.clear();placedBy.clear();sc.fires.length=0;flames=[];
  for(const c of chunks.values())c.cnt=0;
- const plm=sc.MODEL.matPlain;
  const q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),m=new THREE.Matrix4();
+ /* doğa nesnesi örneği: hideAll=true ise gizli olarak ayrılır (yeniden büyüme için hazır bekler) */
+ const putInst=(i,x,z,o,hideAll)=>{
+  const gy=S.groundY(x+.5,z+.5),hh=hash(x,z,21),h2=hash(x,z,22),h3=hash(x,z,23);
+  const key=o===O.TREE?(hh<.5?'treeA':'treeB'):KEYOF[o];
+  if(!key)return false;
+  const sc2=(o===O.TREE?.8+h2*.4:o===O.PALM||o===O.PALM0?.9+h2*.3:.9+h2*.3);
+  p.set(x+.5+(hh-.5)*.2,gy-.04,z+.5+(h2-.5)*.2);e.set((h3-.5)*.05,hh*6.28,(h2-.5)*.05);q.setFromEuler(e);s3.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
+  m.compose(p,q,s3);
+  const mk=(k,hide)=>{
+   const ch=chunks.get(chunkKey(k,x,z));if(!ch)return null;
+   const idx=ch.cnt++;
+   if(idx>=ch.n){ch.cnt--;return null}
+   const t=tintFor(k,hh,h2,h3),mm=hide?ZERO:m;
+   ch.mesh.setMatrixAt(idx,mm);ch.mesh.setColorAt(idx,t);
+   if(ch.lo){ch.lo.setMatrixAt(idx,mm);ch.lo.setColorAt(idx,t)}
+   return {mesh:ch.mesh,lo:ch.lo,idx,mat:m.clone(),tint:[t.r,t.g,t.b],key:k};
+  };
+  const r=mk(key,hideAll);if(!r)return true;
+  const ak=ALT[key];if(ak){const r2=mk(ak,true);if(r2){r.alt=r2;r2.alt=r}}
+  inst.set(i,r);
+  return true;
+ };
  for(let z=0;z<H;z++)for(let x=0;x<W;x++){
   const i=z*W+x,o=G.obj[i];if(!o)continue;
-  const gy=S.groundY(x+.5,z+.5),hh=hash(x,z,21),h2=hash(x,z,22),h3=hash(x,z,23);
-  let key=null;
-  if(o===O.TREE)key=hh<.5?'treeA':'treeB';else key=KEYOF[o];
-  if(key){
-   const sc2=(o===O.TREE?.8+h2*.4:o===O.PALM||o===O.PALM0?.9+h2*.3:.9+h2*.3);
-   p.set(x+.5+(hh-.5)*.2,gy-.04,z+.5+(h2-.5)*.2);e.set((h3-.5)*.05,hh*6.28,(h2-.5)*.05);q.setFromEuler(e);s3.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
-   m.compose(p,q,s3);
-   const mk=(k,hide)=>{
-    const ch=chunks.get(chunkKey(k,x,z));if(!ch)return null;
-    const idx=ch.cnt++;
-    if(idx>=ch.n){ch.cnt--;return null}
-    const t=tintFor(k,hh,h2,h3),mm=hide?ZERO:m;
-    ch.mesh.setMatrixAt(idx,mm);ch.mesh.setColorAt(idx,t);
-    if(ch.lo){ch.lo.setMatrixAt(idx,mm);ch.lo.setColorAt(idx,t)}
-    return {mesh:ch.mesh,lo:ch.lo,idx,mat:m.clone(),tint:[t.r,t.g,t.b],key:k};
-   };
-   const r=mk(key,false);if(!r)continue;
-   const ak=ALT[key];if(ak){const r2=mk(ak,true);if(r2){r.alt=r2;r2.alt=r}}
-   inst.set(i,r);
-   continue;
-  }
-  let geo=null;
-  if(o===O.FIRE)geo=sc.MODEL.fireBase;else if(o===O.BENCH)geo=sc.MODEL.bench;else if(o===O.FURN)geo=sc.MODEL.furn;
-  else if(o===O.WALLW)geo=sc.MODEL.wallw;else if(o===O.WALLS)geo=sc.MODEL.walls;else if(o===O.DOOR)geo=sc.MODEL.door;
-  else if(o===O.WALLT)geo=sc.MODEL.wallt;else if(o===O.WALLM)geo=sc.MODEL.wallm;else if(o===O.DOORM)geo=sc.MODEL.doorm;else if(o===O.FENCE)geo=sc.MODEL.fence;
-  if(!geo)continue;
-  const me=new THREE.Mesh(geo,plm);me.position.set(x+.5,gy,z+.5);me.castShadow=true;me.receiveShadow=true;
-  if(o===O.DOOR||o===O.DOORM){const isW=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS||q2===O.WALLT||q2===O.WALLM||q2===O.FENCE};const alongX=(x>0&&isW(i-1))||(x<W-1&&isW(i+1));me.rotation.y=alongX?0:Math.PI/2}
-  else if(o===O.WALLT||o===O.WALLM){
-   /* ince duvar: komşu yapıların doğrultusuna uzanır (yan yana ise doğu-batı, alt alta ise kuzey-güney) */
-   const cn=c=>{const q2=G.obj[c];return q2===O.WALLW||q2===O.WALLS||q2===O.WALLT||q2===O.WALLM||q2===O.DOOR||q2===O.DOORM||q2===O.FENCE};
-   const ax=(x>0&&cn(i-1))||(x<W-1&&cn(i+1)),az=(z>0&&cn(i-W))||(z<H-1&&cn(i+W));
-   me.rotation.y=az&&!ax?Math.PI/2:ax?0:(hh<.5?0:Math.PI/2);
-  }
-  else if(o===O.WALLW||o===O.WALLS)me.rotation.y=hh<.5?0:Math.PI;
-  placedGroup.add(me);placedCells.add(i);
-  if(o===O.FIRE){const f=flameGroup();f.position.set(x+.5,gy+.05,z+.5);placedGroup.add(f);sc.fires.push({x:x+.5,z:z+.5,y:gy});flames.push({g:f,ph:hh*10})}
-  if(o===O.FURN){const gl=new THREE.Mesh(box(.42,.3,.04),new THREE.MeshBasicMaterial({color:0xff7a1a,toneMapped:false}));gl.position.set(x+.5,gy+.4,z+.5+.49);placedGroup.add(gl)}
+  if(putInst(i,x,z,o,false))continue;
+  if(STRUCT.has(o))buildStruct(G,i);
+ }
+ /* kesilmiş, yeniden büyümeyi bekleyen kareler: gizli örnek hazır tutulur (kayıt yüklemesinden sonra da artımlı güncelleme yeter) */
+ for(const t of G.timers||[]){
+  if(!t||t.from!==O.NONE||G.obj[t.i]||inst.has(t.i)||placedBy.has(t.i))continue;
+  if(t.to===O.TREE||KEYOF[t.to]){const x=t.i%W;putInst(t.i,x,(t.i-x)/W,t.to,true)}
  }
  for(const c of chunks.values()){
   for(const mm of [c.mesh,c.lo]){if(!mm)continue;mm.count=c.cnt;mm.instanceMatrix.needsUpdate=true;if(mm.instanceColor)mm.instanceColor.needsUpdate=true}
@@ -153,13 +188,15 @@ function applyDamage(i,frac,G,silent){
 }
 S.setDamage=(i,f)=>applyDamage(i,f,HG.G);
 /* Artımlı senkron: yalnızca değişen karelerin örnekleri gizlenir/geri gösterilir (tam senkron yüzlerce ms sürer).
-   Yeni tür veya yerleştirilen yapı gerekiyorsa false döner; çağıran tam senkrona geçer. */
+   Yapılar (ateş, duvar, kapı…) tek tek eklenir/kaldırılır; yeni doğa nesnesi türü gerekiyorsa false döner ve çağıran tam senkrona geçer. */
 S.syncCells=(G,cells)=>{
  if(!placedGroup||!chunks.size)return false;
  const ops=[];
+ const st=new Set();                                  /* yerleştirilen yapıların değişen kareleri */
  for(const i of cells){
-  if(placedCells.has(i))return false;
   const o=G.obj[i],r=inst.get(i);
+  if(STRUCT.has(o)){if(r)ops.push([i,r,null]);st.add(i);continue}       /* yeni/değişen yapı (kademe yükseltme dahil) */
+  if(placedBy.has(i)){if(o)return false;st.add(i);continue}             /* yapı kalktı; yerine doğa nesnesi gelirse tam senkron */
   if(!o){if(r)ops.push([i,r,null]);continue}
   const key=o===O.TREE?(r&&(r.key==='treeA'||r.key==='treeB')?r.key:null):KEYOF[o];
   if(!key||!r)return false;
@@ -174,6 +211,12 @@ S.syncCells=(G,cells)=>{
   if(hide)setM(hide,ZERO);
   if(show){setM(show,show.mat);inst.set(i,show)}
   if(wobIdx===i)wobIdx=-1;
+ }
+ if(st.size){
+  /* yönü komşulara bağlı yapılar (ince duvar, kapı) yeniden kurulur: yeni duvar komşusunun doğrultusunu değiştirebilir */
+  const redo=new Set(st);
+  for(const i of st)for(const n of [i-1,i+1,i-W,i+W]){const e=placedBy.get(n);if(e&&NBR.has(e.o))redo.add(n)}
+  for(const i of redo){removeStruct(i);if(STRUCT.has(G.obj[i]))buildStruct(G,i)}
  }
  return true;
 };

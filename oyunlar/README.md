@@ -26,7 +26,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Arazi (yumuşak yükseklik, renk karışımı) ve su | `js/sahne/arazi.js` |
 | Çimen tutamları ve çiçekler (eğik sap, yaprak, taç; rüzgârda sallanır) | `js/sahne/cim.js` |
 | Yüksek ayrıntılı 3B modeller (çam/meşe/palmiye, kaya, maden, çalı, alet parçaları, duvar, kapı…) | `js/sahne/modeller.js` |
-| Dünya nesnelerinin sahneye yerleşimi (parçalı örnekleme, kaliteye bağlı LOD mesafesi, rüzgâr, alev) | `js/sahne/nesneler.js` |
+| Dünya nesnelerinin sahneye yerleşimi (parçalı örnekleme, kaliteye bağlı LOD mesafesi, rüzgâr, alev); kurulan yapılar (ateş, duvar, kapı, çit…) tek tek eklenir/kaldırılır, komşu duvar ve kapıların yönü yeniden hesaplanır (tam sahne yenilemesi gerekmez); kesilmiş ve yeniden büyümeyi bekleyen ağaç/kaya/maden için gizli örnek hazır tutulur (kayıt yüklendikten sonra da artımlı güncelleme) | `js/sahne/nesneler.js` (`buildStruct`, `removeStruct`, `S.syncCells`) |
 | Birinci şahıs kollar (gerçekçi el/parmak/ön kol, deri tonu) ve elde tutulan eşya; El Taşı iki elle tutulur; balta/kazma/olta modelleri | `js/sahne/kol.js` |
 | Parçacık efektleri | `js/sahne/efektler.js` |
 | Nişan, yerleştirme hayaleti | `js/sahne/nisan.js` |
@@ -58,9 +58,9 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Envanter işlemleri | `js/oyun/envanter.js` |
 | Üretim mantığı | `js/oyun/uretim.js` |
 | Kesme/toplama/yerleştirme/yeme-içme; vuruş başına kaynak ve zayıf nokta (Rust mantığı), E ile toplama ve basılı tutarak geri alma, alet kademesi (`gatherLv`), verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` (vuruş hasarı `HIT`: `js/veri/dugumler.js`) |
-| İnşa sistemi: İnşa Planı (duvar/kapı/çit kurma), Çekiç (Odun/Taş/Metal yükseltme, yıkma ve %50 iade), sağ tık radyal menüsü, yerleştirme gölgesi | `js/oyun/insa.js` (parça kataloğu `PIECES`), `css/stil.css` (`#radial`), `js/gorsel/simgeler.js` (parça simgeleri), `js/sahne/modeller.js` (`wallt`, `wallm`, `doorm`, `fence`) |
+| İnşa sistemi: İnşa Planı (duvar/kapı/çit kurma), Çekiç (Odun/Taş/Metal yükseltme, yıkma ve %50 iade), sağ tık radyal menüsü (menü açıkken eşya değişirse seçim uygulanmaz), yerleştir tuşu/dokunmatik düğme plan ve çekiçle de çalışır, yerleştirme gölgesi | `js/oyun/insa.js` (parça kataloğu `PIECES`), `css/stil.css` (`#radial`), `js/gorsel/simgeler.js` (parça simgeleri), `js/sahne/modeller.js` (`wallt`, `wallm`, `doorm`, `fence`) |
 | Yere atılan eşyalar (fizik, toplama) | `js/oyun/dusenler.js` |
-| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, kovalama hızı oyuncunun koşusundan yavaş `cspd`, uzaklaşınca bırakma `giveUp`, iç içe geçme engeli), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
+| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, kovalama hızı oyuncunun koşusundan yavaş `cspd`, uzaklaşınca bırakma `giveUp`, iç içe geçme engeli, yabani hayvanlar kapıdan geçemez `SOLIDA`), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
 | Beden durumu: dayanıklılık, akıl sağlığı, kanama, meşale yakıtı, hasar geri bildirimi, bandaj | `js/oyun/vucut.js` |
 | Gölge yaratıklar (korku), sahte gözlemciler, gerilim, gece yönetmeni | `js/oyun/dusmanlar.js` |
 | Yay, ok fiziği, isabet ve geri toplama | `js/oyun/silah.js` |
@@ -77,7 +77,7 @@ Not: Harita 768×768 karedir (`js/cekirdek/ad-alani.js`). Eski 384×384 kayıtla
 | Deniz görselleri: köpek balığı, yunus, martı, yengeç, sal modeli ve izi, parlayan plankton, fener ışığı, fırtına dalgası | `js/sahne/deniz.js` |
 | E tuşu hedef seçimi (bakılan yöne göre), nişan ipucu | `js/oyun/eylem.js` (`useCands`), `js/oyun/arayuz.js` |
 | Rehber hedefler | `js/oyun/hedefler.js` |
-| Yeni oyun, kayıt, yükleme | `js/oyun/durum.js` |
+| Yeni oyun, kayıt, yükleme (yarım kalmış kaya/ağaç/maden hasarı kayda dahildir; yeni oyun ve yüklemede alet/inşa bekleme sayaçları ile zayıf nokta işareti sıfırlanır; bozuk veya eski kayıttaki tanımsız eşya ve geçersiz sayılar temizlenir) | `js/oyun/durum.js` (`startGame`, `snapshotRaw`) |
 | HUD, envanter paneli, harita | `js/oyun/arayuz.js` |
 | Klavye, fare, dokunmatik, envanter sürükle-bırak | `js/oyun/giris.js` |
 | Ana döngü ve başlatma | `js/oyun/dongu.js` |

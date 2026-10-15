@@ -296,7 +296,10 @@ function placeTarget(itemKey){
  return null;
 }
 function placeHeld(){
- const h=held();if(!h||!h.it.place)return false;
+ const h=held();
+ if(h&&h.it.tool==='plan'&&HG.insaPlace)return HG.insaPlace();            /* yerleştir tuşu/dokunmatik düğme: inşa planı ve çekiç */
+ if(h&&h.it.tool==='hammer'&&HG.insaHammer)return HG.insaHammer();
+ if(!h||!h.it.place)return false;
  if(!G.tg){HG.toast('Yerleştirmek için yere bakın.');return false}
  const p=placeTarget(h.k);
  if(!p){HG.toast('Buraya yerleştirilemez.');return false}

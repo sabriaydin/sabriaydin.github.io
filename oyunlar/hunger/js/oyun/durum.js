@@ -36,7 +36,7 @@ function decObj(s,n){
 function snapshot(name){return HG.withSurface(()=>snapshotRaw(name))}
 function snapshotRaw(name){
  const d=HG.dayNo();
- return {game:'hunger-3d',v:7,hv:2,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
+ return {game:'hunger-3d',v:7,hv:2,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
 }
 const validSave=s=>!!(s&&typeof s==='object'&&s.v===7&&typeof s.seed==='number'&&typeof s.px==='number'&&typeof s.py==='number'&&(typeof s.obj==='string'||typeof s.objr==='string')&&Array.isArray(s.inv));
 function readJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
@@ -159,6 +159,8 @@ async function startGame(load,slotId){
    G.animals=HG.makeAnimals(s.animals);
   }
   if(Array.isArray(s.timers))G.timers=s.timers.filter(t=>t&&t.i>=0&&t.i<(oldSz?oldSz*oldSz:N*N)).map(t=>{t.i=mapI(t.i);return t});
+  /* yarım kalmış düğüm hasarı (kısmen kesilmiş ağaç, kırılmış kaya/maden) */
+  G.dmg={};if(s.dmg&&typeof s.dmg==='object')for(const k in s.dmg){const f=+s.dmg[k],i=mapI(+k);if(i>=0&&i<(oldSz?oldSz*oldSz:N*N)&&f>0&&f<1&&G.obj[mapI(+k)])G.dmg[i]=f}
   HG.npcLoad(s.npcs);HG.progLoad(s.prog);
   if(Array.isArray(s.camps))s.camps.forEach((o,i)=>{if(G.camps[i])G.camps[i].open=!!o});
   if(Array.isArray(s.cav))s.cav.forEach((o,i)=>{if(G.caves[i])G.caves[i].vault=!!o});
@@ -171,6 +173,10 @@ async function startGame(load,slotId){
   G.onRaft=!!(s.rf&&HG.count('raft')&&HG.raftWater(G.px,G.py));G.raftYaw=look.yaw;
   G.slot=slotUsed&&slotUsed!=='auto'?slotUsed:null;
   if(!Array.isArray(G.inv)||G.inv.length!==SLOTS)G.inv=Array(SLOTS).fill(null);
+  /* bozuk veya eski sürümden kalma kayıt: tanımsız eşya ve geçersiz sayılar temizlenir (aksi halde elde tutulan eşya hata verir) */
+  G.inv=G.inv.map(x=>x&&typeof x==='object'&&HG.IT[x.id]&&x.n>0?{id:x.id,n:Math.floor(x.n)}:null);
+  for(const [k,d] of [['hp',100],['hun',92],['thr',92],['warm',100],['clock',0],['px',0],['py',0]])if(!isFinite(G[k]))G[k]=d;
+  G.sel=Math.max(0,Math.min(HG.HOT-1,G.sel|0));
   /* eski kayıt: hiç alet yoksa El Taşı verilir */
   if(!G.inv.some(x=>x&&HG.IT[x.id]&&(HG.IT[x.id].tool==='axe'||HG.IT[x.id].tool==='pick'||x.id==='rock'))&&HG.canAdd('rock',1))HG.add('rock',1);
  }else{
@@ -190,6 +196,7 @@ async function startGame(load,slotId){
  go.hidden=true;
  Scene.setMode('play');
  ui.state='play';ui.picked=null;ui.dirty=true;A.key='';A.p=0;A.mem={};A.memKey=null;
+ A.nextSwing=A.nextDig=A.nextDive=0;A.hitI=-1;A.hitT=0;HG.hot=null;HG.useProg=null;HG.insaReset&&HG.insaReset();   /* sayaçlar oyun saatine bağlıdır: yeni oyun/kayıt yüklemede sıfırlanır */
  for(const id of ['#menu','#dead','#pause'])$(id).hidden=true;
  for(const id of ['#hud','#clock','#comp','#goal','#mini','#hot','#cross'])$(id).hidden=false;
  if(ui.touch)$('#touch').hidden=false;

@@ -91,19 +91,26 @@ if (!deployDir) {
 const OUT = path.resolve(deployDir);
 const outTop = path.relative(ROOT, OUT).split(path.sep)[0];
 fs.rmSync(OUT, { recursive: true, force: true });
-fs.cpSync(ROOT, OUT, {
-  recursive: true,
-  filter: src => {
-    const rel = path.relative(ROOT, src);
-    if (!rel) return true;
-    const top = rel.split(path.sep)[0];
-    if (['.git', '.github', 'scripts', 'node_modules'].includes(top) || top === outTop) return false;
-    if (rel === 'README.md') return false;
-    // Adı _ ile başlayan yazılar taslak sayılır, yayınlanmaz
-    if (path.dirname(rel) === 'posts' && path.basename(rel).startsWith('_')) return false;
-    return true;
+// Yayın klasörü kök klasörün içinde olabilir (_site); fs.cpSync bunu "kendi alt klasörüne kopyalama" diye reddeder, bu yüzden elle kopyalanır
+const keep = src => {
+  const rel = path.relative(ROOT, src);
+  if (!rel) return true;
+  const top = rel.split(path.sep)[0];
+  if (['.git', '.github', 'scripts', 'node_modules'].includes(top) || top === outTop) return false;
+  if (rel === 'README.md') return false;
+  // Adı _ ile başlayan yazılar taslak sayılır, yayınlanmaz
+  if (path.dirname(rel) === 'posts' && path.basename(rel).startsWith('_')) return false;
+  return true;
+};
+const copyTree = (from, to) => {
+  fs.mkdirSync(to, { recursive: true });
+  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    const a = path.join(from, e.name), b = path.join(to, e.name);
+    if (!keep(a)) continue;
+    if (e.isDirectory()) copyTree(a, b); else fs.copyFileSync(a, b);
   }
-});
+};
+copyTree(ROOT, OUT);
 fs.writeFileSync(path.join(OUT, 'posts', 'index.js'), manifest);
 if (!BASE) warn('--base verilmedi: sitemap.xml, feed.xml, canonical bağlantılar ve paylaşım görseli üretilmedi.');
 

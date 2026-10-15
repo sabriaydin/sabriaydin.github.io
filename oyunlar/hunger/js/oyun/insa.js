@@ -72,8 +72,9 @@ function hamEffect(r){
 
 /* ---- Eylemler ---- */
 let nextI=0;
+const cooling=()=>{if(nextI>G.clock+1)nextI=0;return G.clock<nextI};   /* oyun saati sıfırlanırsa (yeni oyun/yükleme) eski bekleme geçersiz sayılır */
 function insaPlace(){
- if(ui.state!=='play'||G.clock<nextI)return false;
+ if(ui.state!=='play'||cooling())return false;
  const p=PIECES[sel],t=p.tiers[0];
  if(G.head){HG.toast('Su altında inşa edilemez.');return false}
  const pos=planTarget(t.o);
@@ -85,7 +86,7 @@ function insaPlace(){
  return true;
 }
 function insaHammer(){
- if(ui.state!=='play'||G.clock<nextI)return false;
+ if(ui.state!=='play'||cooling())return false;
  const a=pieceAim();
  if(!a){HG.toast('Çekiç yalnızca kurulu duvar, kapı ve çit üzerinde kullanılır.');return false}
  const e=hamEffect(a.r);
@@ -146,7 +147,7 @@ function insaGhost(k){
 }
 
 /* ---- Radyal menü: sağ tık basılı tutulur, fare hareketiyle parça seçilir; kısa tık seçimi sıradakine geçirir ---- */
-let rEl=null,rItems=[],rOn=false,rShow=false,rT0=0,rx=0,ry=0,rPick=-1,rShowT=0,rList=[];
+let rEl=null,rItems=[],rOn=false,rShow=false,rT0=0,rx=0,ry=0,rPick=-1,rShowT=0,rList=[],rKind='';
 const ICO={};
 function ico(sp){
  if(!HG.SP||!HG.SP[sp])return '';
@@ -164,7 +165,7 @@ function build(h){
   rEl=document.createElement('div');rEl.id='radial';rEl.hidden=true;
   (document.getElementById('game')||document.body).appendChild(rEl);
  }
- rList=listFor(h);
+ rList=listFor(h);rKind=h.it.tool;
  const N=rList.length,R=104;
  rEl.innerHTML='<div class="rctr"><b></b><span></span></div>'+rList.map((e,j)=>{
   const a=-Math.PI/2+j*2*Math.PI/N;
@@ -209,7 +210,7 @@ function radialClose(commit){
  rOn=false;clearTimeout(rShowT);
  if(rEl)rEl.hidden=true;
  const pick=rPick;rPick=-1;rShow=false;
- if(!commit||!h)return;
+ if(!commit||!h||h.it.tool!==rKind)return;                 /* menü açıkken eşya değiştiyse seçim uygulanmaz */
  if(pick>=0){
   if(h.it.tool==='hammer')hsel=pick;else sel=PLAN_ORDER[pick];
   HG.snd('ui');HG.toast(selText());
@@ -219,5 +220,6 @@ function radialClose(commit){
 document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockElement)radialClose(false)});
 addEventListener('blur',()=>radialClose(false));
 
-Object.assign(HG,{insaPlace,insaHammer,insaCycle,insaAction,insaGhost,radialOpen,radialClose,radialOn,radialMove,INSA:{PIECES,HAM,OF}});
+function insaReset(){nextI=0;rOn=false;rPick=-1;clearTimeout(rShowT);if(rEl)rEl.hidden=true}
+Object.assign(HG,{insaReset,insaPlace,insaHammer,insaCycle,insaAction,insaGhost,radialOpen,radialClose,radialOn,radialMove,INSA:{PIECES,HAM,OF}});
 })();
