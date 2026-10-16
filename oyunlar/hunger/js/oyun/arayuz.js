@@ -127,6 +127,8 @@ function hud(){
    tip=(tip?tip+' · ':'')+t;
   }
  }
+ /* fare kilidi yoksa (oyun doğrudan başladığında tarayıcı kilide izin vermeyebilir) ekrana tıklama ipucu gösterilir */
+ if(!tip&&!ui.locked&&!ui.touch&&$('#panel').hidden&&$('#trade').hidden&&$('#bigmap').hidden&&$('#jr').hidden&&$('#gd').hidden)tip='Fareyle bakmak için ekrana tıklayın';
  if(hc.tip!==tip){hc.tip=tip;const t=$('#tip');t.textContent=tip;t.hidden=!tip}
  const cr=!!(a&&a.kind&&G.tg);if(hc.cr!==cr){hc.cr=cr;$('#cross').classList.toggle('on',cr)}
  /* hedef sağlık çubuğu ve vurulan bölge yazısı */

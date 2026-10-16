@@ -36,7 +36,7 @@ function decObj(s,n){
 function snapshot(name){return HG.withSurface(()=>snapshotRaw(name))}
 function snapshotRaw(name){
  const d=HG.dayNo();
- return {game:'hunger-3d',v:7,hv:2,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
+ return {game:'hunger-3d',v:7,hv:2,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
 }
 const validSave=s=>!!(s&&typeof s==='object'&&s.v===7&&typeof s.seed==='number'&&typeof s.px==='number'&&typeof s.py==='number'&&(typeof s.obj==='string'||typeof s.objr==='string')&&Array.isArray(s.inv));
 function readJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
@@ -45,7 +45,7 @@ function writeIndex(a){try{localStorage.setItem(IDX,JSON.stringify(a));return tr
 /* Yuva listesi: otomatik kayıt (varsa) ve elle alınanlar, en yeni önce */
 function listSlots(){
  const out=[],a=readJSON(SAVE);
- if(validSave(a))out.push({id:'auto',name:'Otomatik kayıt',ts:(a.meta&&a.meta.ts)||0,day:(a.meta&&a.meta.day)||Math.floor((a.clock||0)/HG.DAY)+1,lvl:(a.meta&&a.meta.lvl)||1,auto:true});
+ if(validSave(a))out.push({id:'auto',name:'Otomatik kayıt',ts:(a.meta&&a.meta.ts)||0,day:(a.meta&&a.meta.day)||Math.floor((a.clock||0)/HG.DAY)+1,lvl:(a.meta&&a.meta.lvl)||1,th:(a.meta&&a.meta.th)||'',auto:true});
  for(const e of slotIndex())if(localStorage.getItem(SLOTKEY(e.id)))out.push(Object.assign({},e));
  return out.sort((x,y)=>y.ts-x.ts);
 }
@@ -65,7 +65,7 @@ function manualSave(quick){
   const id=Date.now().toString(36);let n=1;while(idx.some(x=>x.name==='Kayıt '+n))n++;
   e={id,name:'Kayıt '+n};idx.push(e);G.slot=id;
  }
- const sn=snapshot(e.name);e.ts=sn.meta.ts;e.day=sn.meta.day;e.lvl=sn.meta.lvl;
+ const sn=snapshot(e.name);e.ts=sn.meta.ts;e.day=sn.meta.day;e.lvl=sn.meta.lvl;e.th=sn.meta.th||'';
  try{localStorage.setItem(SLOTKEY(e.id),JSON.stringify(sn))}catch(x){HG.toast('Kayıt yapılamadı: tarayıcı depolama alanı dolu.');return false}
  if(!writeIndex(idx)){HG.toast('Kayıt yapılamadı.');return false}
  save();
@@ -99,7 +99,7 @@ function importText(text,fileName){
  let name=(s.meta&&s.meta.name&&s.meta.name!=='Otomatik kayıt')?s.meta.name:String(fileName||'İçe aktarılan').replace(/\.json$/i,'').slice(0,40);
  const meta=Object.assign({day:Math.floor((s.clock||0)/HG.DAY)+1,lvl:1,ts:Date.now()},s.meta||{});meta.name=name;meta.ts=Date.now();s.meta=meta;
  try{localStorage.setItem(SLOTKEY(id),JSON.stringify(s))}catch(e){return {err:'Tarayıcı depolama alanı dolu.'}}
- idx.push({id,name,ts:meta.ts,day:meta.day,lvl:meta.lvl});writeIndex(idx);
+ idx.push({id,name,ts:meta.ts,day:meta.day,lvl:meta.lvl,th:typeof meta.th==='string'&&meta.th.startsWith('data:image/jpeg')&&meta.th.length<40000?meta.th:''});writeIndex(idx);
  return {id,name};
 }
 function renameSlot(id,name){
@@ -120,7 +120,7 @@ const TIPS=['Ateş yakmak için odun ve kıvılcım gerekir; geceleri ateş en g
 let tipI=0,tipT=0,closeT=0;
 function ldOpen(title){
  const e=$('#load');if(!e)return;clearTimeout(closeT);e.hidden=false;e.classList.remove('out');
- $('#loadT').textContent=title||'Yükleniyor';$('#loadGo').hidden=true;$('#loadBar').parentNode.hidden=false;
+ $('#loadT').textContent=title||'Yükleniyor';$('#loadBar').parentNode.hidden=false;
  tipI=(Math.random()*TIPS.length)|0;$('#loadTip').textContent=TIPS[tipI];
  clearInterval(tipT);tipT=setInterval(()=>{tipI=(tipI+1)%TIPS.length;$('#loadTip').textContent=TIPS[tipI]},4200);
  ldSet(0,'');
@@ -191,10 +191,8 @@ async function startGame(load,slotId){
  ldSet(.9,'Gölgelendiriciler derleniyor');await nap();
  Scene.warmup();
  ldSet(1,'Hazır');
- /* oyuna giriş bir kullanıcı tıklamasıyla yapılır: imleç kilidi ve ses için gerekli */
- const go=$('#loadGo');$('#loadBar').parentNode.hidden=true;go.hidden=false;go.focus();
- await new Promise(r=>{go.onclick=r});
- go.hidden=true;
+ /* yükleme bitince oyun doğrudan başlar (ses, menüdeki tıklamayla zaten açılmıştır; imleç kilidi alınamazsa ilk tıklamada alınır) */
+ await new Promise(r=>setTimeout(r,350));
  Scene.setMode('play');
  ui.state='play';ui.picked=null;ui.dirty=true;A.key='';A.p=0;A.mem={};A.memKey=null;
  A.nextSwing=A.nextDig=A.nextDive=0;A.hitI=-1;A.hitT=0;HG.useProg=null;HG.insaReset&&HG.insaReset();   /* sayaçlar oyun saatine bağlıdır: yeni oyun/kayıt yüklemede sıfırlanır */

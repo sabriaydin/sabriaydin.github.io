@@ -162,6 +162,27 @@ const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
   for(let i=0;i<rings;i++)for(let j=0;j<seg;j++){const a=i*R+j,b=a+1,d=a+R,e=d+1;idx.push(a,d,b,b,d,e)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return weld(g);
  }
+ /* Kök sivrilmeli gövde: yarıçap açıya da bağlıdır (yumuşak kök dilimleri, yukarı çıkıldıkça gövdeye karışır ve hafifçe burulur).
+    tv: halka konumları (tabanda sıklaştırılır), roots: [{a,s,w}] kök yönü/gücü/genişliği, fl: taban sivrilme oranı, hh: sönme yüksekliği */
+ function rootTube(pts,rf,seg,tv,ridge,seed,roots,fl,hh){
+  const cu=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],p[1],p[2]))),pos=[],idx=[],R=seg+1,rings=tv.length-1;
+  const tg=new THREE.Vector3(),nr=new THREE.Vector3(),bn=new THREE.Vector3(),c=new THREE.Vector3();let pn=null;
+  for(let i=0;i<=rings;i++){
+   const t=tv[i];cu.getPointAt(t,c);cu.getTangentAt(t,tg);
+   if(!pn){const up=Math.abs(tg.y)<.9;nr.set(up?0:1,up?1:0,0).cross(tg).normalize()}else nr.copy(pn).addScaledVector(tg,-pn.dot(tg)).normalize();
+   pn=nr.clone();bn.crossVectors(tg,nr);
+   const r0=rf(t,c.y),F=fl*(c.y>0?Math.exp(-c.y/hh):1),tw=.28*Math.max(0,c.y);
+   for(let j=0;j<=seg;j++){
+    const a=j/seg*6.2832,ca=Math.cos(a),sa=Math.sin(a);
+    let L=0;for(const q of roots){let d=a-q.a-tw;d-=6.2832*Math.round(d/6.2832);L+=q.s*Math.exp(-d*d/(2*q.w*q.w))}
+    let r=r0*(1+F*Math.min(1.5,L));
+    if(ridge){const q=1-Math.abs(fb3(ca*2.1+seed,c.y*.22+seed*.3,sa*2.1,seed|0)*2-1);r*=1+ridge*(q*q-.35)}
+    pos.push(c.x+(nr.x*ca+bn.x*sa)*r,c.y+(nr.y*ca+bn.y*sa)*r,c.z+(nr.z*ca+bn.z*sa)*r);
+   }
+  }
+  for(let i=0;i<rings;i++)for(let j=0;j<seg;j++){const a=i*R+j,b=a+1,d=a+R,e=d+1;idx.push(a,d,b,b,d,e)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return weld(g);
+ }
 
 /* stone() sonucunu konumlandırır: köşe renkleri yerel uzayda (konum ve y ekseni dönüşü hesaba katılarak) üretilir */
 function stonePart(st,col,x,y,z,ry,extra){
@@ -242,6 +263,19 @@ S.onInit(()=>{
   c.r*=v*w;c.g*=v*w;c.b*=v*w;
   if(y<1.1){const m=Math.max(0,fb3(x*3,y*2.2,z*3,17)*1.5-.55)*Math.max(0,1.1-y)*.55;c.r=c.r*(1-m)+.1*m;c.g=c.g*(1-m)+.2*m;c.b=c.b*(1-m)+.05*m}   /* gövde dibinde yosun */
  };
+ /* kök dilimleri: n yön (düzensiz aralık, farklı güç ve genişlik); halka konumları tabanda sıklaşır */
+ const mkRoots=(n,seed,wk)=>{const r=[];for(let k=0;k<n;k++)r.push({a:k/n*6.2832+(hash(k,seed,3)-.5)*.7,s:.62+hash(k,seed,5)*.5,w:(.4+hash(k,seed,7)*.18)*wk});return r};
+ const rootT=(n,p)=>{const tv=[];for(let i=0;i<=n;i++)tv.push(Math.pow(i/n,p));return tv};
+ /* yere yayılan kök kolu: gövde yüzeyinden çıkar, yere oturarak incelir ve toprağa gömülür (yarı yuvarlak, ince ucu toprak altında) */
+ const rootArm=(q,len,rad,hs,d0,seed)=>{
+  const ca=Math.cos(q.a),sa=Math.sin(q.a),px=-sa,pz=ca,N=6,pts=[];
+  const rr=s=>Math.max(.03,rad*Math.pow(1-s,.9)*.92+.02);
+  for(let i=0;i<=N;i++){
+   const s=i/N,d=d0+(len-d0)*Math.pow(s,.85),w=Math.sin(s*4.2+seed)*.12*len*s,y=rr(s)*.85+hs*Math.pow(1-s,3)-.12*s*s*s;
+   pts.push([ca*d+px*w,y,sa*d+pz*w]);
+  }
+  return tube(pts,rr,8,9,.1,seed);
+ };
  /* iğne yapraklı dal: yassı, ucu aşağı sarkan sivri demet; x ekseninde, tabanı x=0'da */
  const sprayC={};
  function spray(L,w,droop,sides,hs,seed){
@@ -257,9 +291,10 @@ S.onInit(()=>{
  }
  const mkPine=(lo)=>{
   const ps=[],H=9.4,nl=lo?9:14;
-  const tr=part(tube([[0,-.3,0],[.05,2.5,.03],[-.04,6,-.03],[0,H,0]],t=>.04+.46*Math.pow(1-t,1.1)+.2*Math.exp(-t*24),lo?6:11,lo?6:16,lo?0:.1,3),0x5a3a20,0,0,0,1,1,1,0,0,0,.08);tr.cf=bark;ps.push(tr);
-  if(!lo)for(let k=0;k<5;k++){const a=k/5*6.2832+.4,ca=Math.cos(a),sa=Math.sin(a);
-   const r=part(tube([[ca*.12,.55,sa*.12],[ca*.5,.2,sa*.5],[ca*1,-.12,sa*1]],t=>.2-.16*t,5,3,0,0),0x5a3a20,0,0,0,1,1,1,0,0,0,.08);r.cf=bark;ps.push(r)}
+  /* gövde: tabanda yumuşak kök dilimleri (ayrı sivri kök parçaları yerine) */
+  const rp=mkRoots(5,11,lo?1.4:1);
+  const tr=part(rootTube([[0,-.3,0],[.05,2.5,.03],[-.04,6,-.03],[0,H,0]],t=>.04+.46*Math.pow(1-t,1.1)+.2*Math.exp(-t*24),lo?9:14,rootT(lo?9:22,lo?1.7:2),lo?0:.1,3,rp,.5,.6),0x5a3a20,0,0,0,1,1,1,0,0,0,.08);tr.cf=bark;ps.push(tr);
+  if(!lo)rp.forEach((q,k)=>{const r=part(rootArm(q,1.2+hash(k,11,9)*.7,.13+.05*q.s,.38,.38,.3,3+k),0x5a3a20,0,0,0,1,.9,1,0,0,0,.04);r.cf=bark;ps.push(r)});
   const pcf=(x,y,z,nx,ny,nz,c)=>{const t=Math.min(1,Math.max(0,(y-2.1)/6.9)),Lm=2.5*Math.pow(1-t,.85)+.4,d=Math.min(1,Math.hypot(x,z)/Lm);c.multiplyScalar(.7+.5*d*d+.14*Math.max(0,ny))};
   const c0=new THREE.Color(0x1f5532),c1=new THREE.Color(0x4a9a4a);
   for(let k=0;k<6;k++){const a=k*1.7,y=1.1+k*.22;ps.push(alongPart(cyl(.035,.012,.45+(k%3)*.12,4,1),0x4a3320,V3(0,y,0),V3(Math.cos(a),.15,Math.sin(a)),.5))}   /* kurumuş alt dal kökleri */
@@ -281,10 +316,10 @@ S.onInit(()=>{
  MODEL.treeA=mkPine(false);MODEL.treeA_lo=mkPine(true);
  const mkOak=(lo)=>{
   const ps=[];
-  const trunk=part(tube([[0,-.3,0],[.1,1.5,.05],[-.05,3.2,-.05],[.05,4.5,0]],t=>.2+.3*Math.pow(1-t,1.4)+.3*Math.exp(-t*13),lo?7:12,lo?5:14,lo?0:.12,7),0x6a4626,0,0,0,1,1,1,0,0,0,.08);trunk.cf=bark;ps.push(trunk);
-  const nr=lo?3:6;
-  for(let k=0;k<nr;k++){const a=k/nr*6.2832+.3,ca=Math.cos(a),sa=Math.sin(a);
-   const r=part(tube([[ca*.1,1.1,sa*.1],[ca*.6,.45,sa*.6],[ca*1.45,-.15,sa*1.45]],t=>.4-.34*t,lo?4:6,lo?2:4,0,0),0x6a4626,0,0,0,1,1,1,0,0,0,.08);r.cf=bark;ps.push(r)}
+  /* gövde: tabanda yumuşak kök dilimleri (ayrı sivri kök parçaları yerine) */
+  const rp=mkRoots(6,23,lo?1.4:1);
+  const trunk=part(rootTube([[0,-.3,0],[.1,1.5,.05],[-.05,3.2,-.05],[.05,4.5,0]],t=>.2+.3*Math.pow(1-t,1.4)+.3*Math.exp(-t*13),lo?9:14,rootT(lo?9:22,lo?1.7:2),lo?0:.12,7,rp,.55,.7),0x6a4626,0,0,0,1,1,1,0,0,0,.08);trunk.cf=bark;ps.push(trunk);
+  if(!lo)rp.forEach((q,k)=>{const r=part(rootArm(q,1.5+hash(k,23,9)*.7,.2+.07*q.s,.5,.5,.4,7+k),0x6a4626,0,0,0,1,.9,1,0,0,0,.04);r.cf=bark;ps.push(r)});
   const nl=lo?3:5;
   for(let k=0;k<nl;k++){
    const a=k/nl*6.2832+.5,ca=Math.cos(a),sa=Math.sin(a),s=3.5+hash(k,1,2)*.6,e=1.6+hash(k,2,2)*.5;

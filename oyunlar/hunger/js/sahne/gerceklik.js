@@ -109,11 +109,15 @@ SC.fog_fragment=`#ifdef USE_FOG
  }`,
  PF_N=`
  if(uPQ>.5){
-  vec2 dh=vec2(dFdx(pbrH),dFdy(pbrH))*pbrAmp*pbrFade;
+  /* karıncalanma önlemi: piksel başına düşen dünya uzunluğu (eğik bakışta ve uzakta büyür) ince doku ayrıntısını aştığında
+     türevden çıkan çıkıntı sönümlenir, parlaklık dağılımı genişler (güneş parıltısı titremez) */
+  float pfp=length(fwidth(vPW)),pbf=1.-smoothstep(.008,.04,pfp);
+  vec2 dh=vec2(dFdx(pbrH),dFdy(pbrH))*pbrAmp*pbrFade*pbf;
   vec3 sX=dFdx(-vViewPosition),sY=dFdy(-vViewPosition),R1=cross(sY,normal),R2=cross(normal,sX);
   float fDet=dot(sX,R1);
   normal=normalize(abs(fDet)*normal-sign(fDet)*(dh.x*R1+dh.y*R2));
   roughnessFactor=clamp(roughnessFactor*(.82+.36*pbrH)*(1.-.55*pbrWet)*(1.-.5*pbrOre),.12,1.);
+  roughnessFactor=mix(roughnessFactor,max(roughnessFactor,.9),(1.-pbf)*(1.-pbrOre));
  }`;
  const inject=function(sh){
   sh.uniforms.uHF=U.uHF;sh.uniforms.uFogT=U.uFogT;

@@ -55,9 +55,9 @@
     </div>
   </div>
   <div id="jr" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">GÜNLÜK</h1><div class="stabs" id="jrT"></div><div id="jrB"></div><div class="btns"><button id="jrX" class="ghost" type="button">Kapat (K / Esc)</button></div></div></div>
-  <div id="load"><div class="lbox"><h1>HUN<span>GER</span></h1><div class="l3">3B</div><div id="loadT">Yükleniyor</div><div class="lbar"><i id="loadBar"></i></div><div class="lrow"><span id="loadSub"></span><span id="loadPct">0%</span></div><button id="loadGo" type="button" hidden>Oyuna Gir</button><p id="loadTip"></p></div></div>
+  <div id="load"><div class="lbox"><h1>HUN<span>GER</span></h1><div id="loadT">Yükleniyor</div><div class="lbar"><i id="loadBar"></i></div><div class="lrow"><span id="loadSub"></span><span id="loadPct">0%</span></div><p id="loadTip"></p></div><div id="loadBy">Bir Sabri Aydın oyunu.</div></div>
   <div id="gd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">REHBER</h1><div class="stabs" id="gdT"></div><div id="gdB"></div><div class="btns"><button id="gdX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
-  <div id="sv" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">KAYITLAR</h1><p id="svS"></p><div id="svL"></div><div class="btns"><button id="svF" type="button">Dosyadan kayıt yükle</button><button id="svX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="sv" hidden><div class="card"><div class="svh"><h1 style="font-size:26px;letter-spacing:.1em">KAYITLAR</h1><span id="svC"></span></div><p id="svS"></p><div id="svL"></div><div class="btns"><button id="svF" type="button">Dosyadan kayıt yükle</button><button id="svX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
   <input type="file" id="fileIn" accept=".json,application/json" hidden>
   <div id="fade"></div>
   <div id="bigmap" hidden><div class="bmbox"><div class="bmw"><canvas id="bm"></canvas><canvas id="bmc" width="56" height="62"></canvas></div><div id="bmcap"></div></div></div>
@@ -65,21 +65,19 @@
   <div id="menu">
     <div class="card">
       <h1>HUN<span>GER</span></h1>
-      <div style="color:var(--red);letter-spacing:.3em;font-size:12px;margin-top:-2px">3B</div>
       <p>Issız bir adada hayatta kal. Ağaç kes, maden çıkar, sığınak kur; açlığa, susuzluğa ve soğuğa diren. Geceleri karanlıkta bir şeyler dolaşır: ışığı yanında tut.</p>
       <div class="btns">
-        <button id="bCont" type="button" hidden>Devam Et</button>
-        <button id="bNew" type="button">Yeni Oyun</button>
+        <button id="bCont" class="wide" type="button" hidden>Devam Et</button>
+        <button id="bNew" class="wide" type="button">Yeni Oyun</button>
         <button id="bSaves" class="ghost" type="button">Kayıtlar</button>
         <button id="bLoadF" class="ghost" type="button">Kayıt dosyası yükle</button>
         <button class="ghost bGuide" type="button">Rehber</button>
         <button class="ghost bSet" type="button">Ayarlar</button>
       </div>
-      <p class="mh">Tuş bilgileri Ayarlar › Kontrol bölümündedir; eşya ve silah bilgileri Rehber içindedir.</p>
       <a class="back" href="../../index.html">← Bloga dön</a>
     </div>
   </div>
-  <div id="pause" hidden><div class="card"><h1 style="font-size:34px">DURAKLATILDI</h1><div class="btns"><button id="bRes" type="button">Devam</button><button id="bSave" class="ghost" type="button">Oyunu kaydet</button><button id="bDown" class="ghost" type="button">Kayıt dosyasını indir</button><button class="ghost bGuide" type="button">Rehber</button><button class="ghost bSet" type="button">Ayarlar</button><button id="bMenu" class="ghost" type="button">Ana menü</button></div></div></div>
+  <div id="pause" hidden><div class="card"><h1 style="font-size:34px">DURAKLATILDI</h1><div class="btns"><button id="bRes" type="button">Devam</button><button id="bSave" class="ghost" type="button">Oyunu kaydet</button><button id="bDown" class="ghost" type="button">Kayıt dosyasını indir</button><button id="bSaves2" class="ghost" type="button">Kayıtlar</button><button class="ghost bGuide" type="button">Rehber</button><button class="ghost bSet" type="button">Ayarlar</button><button id="bMenu" class="ghost" type="button">Ana menü</button></div></div></div>
   <div id="dead" hidden><div class="card"><h1 style="font-size:36px">HAYATTA KALAMADIN</h1><p id="why"></p><p id="stat"></p><p id="stat2"></p><div class="btns"><button id="bAgain" type="button">Yeniden Dene</button></div></div></div>
 </div>
 <script src="../ortak/three.min.js"></script>
