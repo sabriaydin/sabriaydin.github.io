@@ -171,9 +171,9 @@ function updateNpcs(dt){
  if(G.trading&&Math.hypot(G.trading.x-G.px,G.trading.z-G.py)>6)closeTrade();
 }
 /* ---- takas penceresi ---- */
-const cst=o=>{const c={};for(const k in o.cost)c[k]=k==='coin'?Math.max(1,Math.round(o.cost[k]*1.3*(1-.07*HG.perk('trade')))):Math.ceil(o.cost[k]*1.25);return c};
+const cst=o=>{const c={};for(const k in o.cost)c[k]=k==='coin'?Math.max(1,Math.round(o.cost[k]*1.3*(1-.07*HG.perk('trade'))*(HG.repK?HG.repK():1))):Math.ceil(o.cost[k]*1.25);return c};
 const costText=c=>Object.keys(c).map(k=>`<span class="${count(k)>=c[k]?'ok':'no'}">${IT[k].n} ${count(k)}/${c[k]}</span>`).join(' · ');
-const priceOf=(n,id)=>{const b=PROF[n.prof].buy[id],day=HG.dayNo?HG.dayNo():1;const m=.8+.4*HG.hash(day,n.vi*31+id.length*7+id.charCodeAt(0),77);return Math.max(1,Math.round(b*m*.55*(1+.08*HG.perk('trade'))))};
+const priceOf=(n,id)=>{const b=PROF[n.prof].buy[id],day=HG.dayNo?HG.dayNo():1;const m=.8+.4*HG.hash(day,n.vi*31+id.length*7+id.charCodeAt(0),77);return Math.max(1,Math.round(b*m*.55*(1+.08*HG.perk('trade'))*(HG.repK?HG.repK(true):1)))};
 /* karşılama: günün saatine göre */
 const greet=()=>{const h=HG.tod()*24;return h<11?'Günaydın.':h<17?'İyi günler.':'İyi akşamlar.'};
 const subText=n=>greet()+' '+PROF[n.prof].hi+' · Sikken: '+count('coin');

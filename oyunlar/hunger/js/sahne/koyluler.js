@@ -17,6 +17,7 @@ const LOOK={
  woodcut:{tun:0xa83a2e,leg:0x3a3226,hat:0x6b4a29},
  miner:{tun:0x6a6a72,leg:0x3a3a42,hat:0xd9b030}
 };
+sc.npcLook=LOOK;                    /* büyük güncelleme (51): yeni meslekler (gezgin tüccar) kendi görünümünü buraya ekler */
 function build(prof,v,f){
  const L=LOOK[prof],skin=SKIN[v%3],hair=HAIR[(v*7+prof.length)%5];
  const plaid=(x,y,z,nx,ny,nz,c)=>{if(Math.floor(x*18)%2===0||Math.floor(y*18)%2===0)c.multiplyScalar(.78)};
@@ -37,6 +38,7 @@ function build(prof,v,f){
  else if(prof==='healer'){torso.push(part(box(.1,.02,.02),0xd9463c,0,1.3,.14),part(box(.02,.1,.02),0xd9463c,0,1.3,.14),part(rbox(.16,.14,.07,.4,2),0x7a5a30,.28,.9,0))}
  else if(prof==='woodcut'){torso.push(Bp(.135,hair,0,1.7,0,1,.6,1,{amp:.03}),part(cyl(.12,.12,.14,8),0x2a2018,0,1.08,.14,1,1,1,PI2,0,0))}
  else if(prof==='miner'){torso.push(Bp(.16,L.hat,0,1.74,0,1.05,.75,1.1,{amp:.01}),part(cyl(.2,.2,.02,10),L.hat,0,1.7,0),part(cyl(.03,.03,.05,6),0xfff0b0,0,1.78,.17,1,1,1,PI2,0,0))}
+ else if(sc.npcExtra)sc.npcExtra(prof,torso,{part,cyl,cone,box,rbox,Bp,PI2,L,skin,hair});
  /* görünüm: yaka, kemer tokası, bot; kadınlarda etek ve uzun saç, erkeklerde bazen sakal */
  torso.push(part(rbox(.3,.05,.2,.4,2),0xe8e4da,0,1.5,.01),part(box(.07,.07,.02),0xc9a23a,0,.88,.15));
  if(f){torso.push(part(cyl(.2,.34,.52,10),L.tun,0,.7,0),Bp(.15,hair,0,1.6,-.07,1.05,1.3,.9,{amp:.04}),Bp(.05,hair,.1,1.5,-.08,1,2.2,1,{d:1,amp:.01}),Bp(.05,hair,-.1,1.5,-.08,1,2.2,1,{d:1,amp:.01}))}

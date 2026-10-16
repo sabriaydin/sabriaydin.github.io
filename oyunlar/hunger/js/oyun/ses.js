@@ -190,6 +190,17 @@ function animalVoice(type,kind){
   }
   else if(type==='jelly'){Tn(d,{f:R(420,520),f2:R(160,220),d:.2*L,v:.12*v,att:.01});N(d,{ft:'lowpass',f:700,f2:260,d:.22*L,v:.25*v,pink:true});if(die)K.splash(d)}
   else if(type==='crab'){const n=die?7:4;for(let i=0;i<n;i++)N(d,{ft:'bandpass',f:R(2800,3800),q:4,d:.02,v:.3*v,t:i*R(.045,.08)});if(die)Tn(d,{f:180,f2:90,d:.12,v:.15})}
+  else if(type==='bear'){
+   const Lb=call?1.5:die?1.9:.85;
+   Tn(d,{f:R(72,92),f2:50,d:.75*Lb,type:'sawtooth',v:.24*v,lp:560,lq:2,att:.1,vib:9,vibf:13});
+   Tn(d,{f:R(140,170),f2:90,d:.5*Lb,type:'sawtooth',v:.1*v,lp:900,att:.08,vib:24,vibf:19});
+   N(d,{ft:'bandpass',f:420,f2:230,q:1,d:.6*Lb,v:.32*v,att:.1,pink:true});
+   if(die){K.thud(d);Tn(d,{f:60,f2:32,d:1.1,v:.25,t:.2})}
+  }
+  else if(type==='dog'){
+   if(die){Tn(d,{f:760,f2:300,d:.55,type:'triangle',v:.1,vib:14,vibf:9,lp:2200});N(d,{ft:'bandpass',f:1500,q:2,d:.3,v:.05,pink:true})}
+   else{const n=call?1:2;for(let i=0;i<n;i++){const f=R(360,470);Tn(d,{f,f2:f*.58,d:.11,type:'sawtooth',v:.17*v,lp:1900,lq:2,t:i*.22,att:.006});N(d,{ft:'bandpass',f:1200,q:1.5,d:.09,v:.24*v,t:i*.22,pink:true});Tn(d,{f:f*2,f2:f*1.2,d:.07,v:.05*v,t:i*.22,att:.004})}}
+  }
  };
 }
 K.step_raft=d=>{const p=R(.85,1.15);N(d,{ft:'lowpass',f:520*p,d:.09,v:R(.2,.3)});Tn(d,{f:150*p,f2:95,d:.1,type:'triangle',v:.1});N(d,{ft:'bandpass',f:R(1000,1500),q:1.5,d:.05,v:.06,t:.02,pink:true})};
@@ -198,7 +209,10 @@ K.gull=d=>{const f=R(1500,1900),n=2+((Math.random()*3)|0);for(let i=0;i<n;i++)Tn
 K.dolphin=d=>{for(let i=0;i<4;i++)Tn(d,{f:2400+i*160,f2:5200,d:.14,v:.05,t:i*.13,att:.004});Tn(d,{f:3000,f2:1800,d:.5,v:.04,t:.55,att:.02,vib:40,vibf:30});for(let i=0;i<7;i++)N(d,{ft:'bandpass',f:6200,q:5,d:.015,v:.1,t:.9+i*.045})};
 K.whale=d=>{Tn(d,{f:78,f2:132,d:2.4,v:.2,att:.6,vib:3,vibf:.8,lp:420});Tn(d,{f:130,f2:70,d:2.6,v:.12,att:.5,t:1.1,vib:2,vibf:.6,lp:420});Tn(d,{f:240,f2:160,d:2,v:.03,t:.6,att:.5})};
 K.bell=d=>{M(d,{f:520,v:.12,p:[[1,1,1.8],[2.4,.55,1.2],[4.1,.3,.8],[6.3,.15,.5]]})};
-for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab','chicken'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
+for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab','chicken','bear','dog'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
+K.bark=d=>animalVoice('dog','cry')(d);
+K.clang=d=>{M(d,{f:1050,v:.2,p:[[1,1,.4],[2.76,.7,.28],[5.4,.4,.16]]});N(d,{ft:'bandpass',f:2400,q:2,d:.06,v:.35});Tn(d,{f:170,f2:80,d:.12,v:.3})};
+K.buzz=d=>{Tn(d,{f:R(205,245),d:.8,type:'sawtooth',v:.05,lp:900,att:.12,vib:34,vibf:58});N(d,{ft:'bandpass',f:1500,q:3,d:.7,v:.05,att:.15,pink:true})};
 K.zoom=d=>{Tn(d,{f:940,f2:620,d:.07,type:'triangle',v:.06});N(d,{ft:'highpass',f:4200,d:.03,v:.05})};
 K.shutter=d=>{N(d,{ft:'highpass',f:2600,d:.035,v:.32});N(d,{ft:'bandpass',f:1800,q:2,d:.05,v:.25,t:.07});Tn(d,{f:260,f2:180,d:.05,v:.1,t:.07})};
 

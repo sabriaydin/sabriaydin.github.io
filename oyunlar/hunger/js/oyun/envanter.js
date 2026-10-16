@@ -21,7 +21,7 @@ function take(id,n){
 /* Kaynak topla: yer varsa ekler, bildirim ve ses verir. q: vuruş başına kaynakta ses ve deneyim verilmez */
 function gain(id,n,q){
  if(!canAdd(id,n)){HG.toast('Envanter dolu.');return false}
- add(id,n);flag('got_'+id);HG.feed('+'+n+' '+IT[id].n);if(!q){HG.snd('get');if(HG.xpGain)HG.xpGain(.5)}return true;
+ add(id,n);flag('got_'+id);if(HG.extGain)HG.extGain(id,n);HG.feed('+'+n+' '+IT[id].n);if(!q){HG.snd('get');if(HG.xpGain)HG.xpGain(.5)}return true;
 }
 /* Çantayı düzenle: hızlı erişim çubuğu dışındaki kutular birleştirilir ve eşya sırasına göre dizilir */
 function sortInv(){
@@ -34,7 +34,7 @@ function sortInv(){
  ui.picked=null;ui.dirty=true;HG.snd('ui');HG.toast('Çanta düzenlendi.');
 }
 const held=()=>{const s=G.inv[G.sel];return s?{k:s.id,it:IT[s.id],s}:null};
-const setObj=(i,v)=>{G.obj[i]=v;(G.oc||(G.oc=[])).push(i)};   /* değişen kareler biriktirilir; sahne yalnızca bunları günceller */
+const setObj=(i,v)=>{const was=G.obj[i];G.obj[i]=v;(G.oc||(G.oc=[])).push(i);if(HG.journal)HG.journal.cell(i,v,was)};   /* değişen kareler biriktirilir; sahne yalnızca bunları günceller */
 const flag=f=>{if(!G.flags[f])G.flags[f]=1};
 Object.assign(HG,{count,canAdd,add,take,gain,held,setObj,flag,sortInv});
 })();

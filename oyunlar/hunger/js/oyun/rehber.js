@@ -3,16 +3,16 @@
 'use strict';
 const {G,ui,IT,RC,STN,ICON,ANIMAL,inp}=HG;
 const $=HG.$;
-const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['sea','Deniz'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['ach','Başarımlar']];
+const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['sea','Deniz'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['news','Yeni sistemler'],['ach','Başarımlar']];
 let tab='play',openFrom=null;
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 /* {eylem} -> atanmış tuş */
 const sub=t=>t.replace(/\{(\w+)\}/g,(m,a)=>HG.bind&&HG.bind[a]?'<kbd>'+esc(HG.keyLabel(HG.bind[a][0]))+'</kbd>':m);
 const sec=list=>list.map(x=>`<div class="nt"><b>${x[0]}</b><span>${sub(x[1])}</span></div>`).join('');
-const DROPS={sheep:'Çiğ et, yün',cow:'Çiğ et, deri, kemik; süt sağılabilir',rabbit:'Çiğ et, deri',deer:'Çiğ et, deri, kemik',wolf:'Çiğ et, deri, kemik',boar:'Çiğ et, deri, kemik',chicken:'Çiğ et, tüy; yumurta bırakır'};
-const NOTE={sheep:'Zararsız; makasla yün kırkılır.',cow:'Zararsız; boş şişeyle süt sağılır.',rabbit:'Hızlı kaçar, yakalaması zordur; ok işe yarar.',deer:'Ürkektir ve hızlıdır; uzaktan ok ile avlanır.',wolf:'Geceleri sürü hâlinde saldırır; ateşten çekinir.',boar:'Yaklaşırsanız saldırır; sert vurur.',chicken:'Zararsızdır; aralıklarla yumurta bırakır, kurtlardan kaçar.'};
+const DROPS={sheep:'Çiğ et, yün',cow:'Çiğ et, deri, kemik; süt sağılabilir',rabbit:'Çiğ et, deri',deer:'Çiğ et, deri, kemik',wolf:'Çiğ et, deri, kemik',boar:'Çiğ et, deri, kemik',chicken:'Çiğ et, tüy; yumurta bırakır',bear:'Çiğ et, deri, kemik, kürk',dog:'Hiçbir şey (evcil dost)'};
+const NOTE={sheep:'Zararsız; makasla yün kırkılır.',cow:'Zararsız; boş şişeyle süt sağılır.',rabbit:'Hızlı kaçar, yakalaması zordur; ok işe yarar.',deer:'Ürkektir ve hızlıdır; uzaktan ok ile avlanır.',wolf:'Geceleri sürü hâlinde saldırır; ateşten çekinir.',boar:'Yaklaşırsanız saldırır; sert vurur.',chicken:'Zararsızdır; aralıklarla yumurta bırakır, kurtlardan kaçar.',bear:'Dağlık ve ormanlık yerlerde yaşar; yaklaşırsanız çok sert saldırır. Kışın uykuya yatar ve yakına gelmedikçe dokunmaz. Demir Kılıç, yay ve ateş işe yarar.',dog:'Gezgin Tüccardan Köpek Yavrusu alınır. Sizi takip eder, tehlikeli yaratıklara saldırır; E ile beklet veya çağır, ette beslenir.'};
 function fauna(){
- return '<div class="mut">Avlanan hayvanlar yerde bırakılan eşyalarla leş bırakır; eşyalar toplanınca leş kaybolur.</div>'+['sheep','cow','rabbit','deer','wolf','boar','chicken'].map(k=>{
+ return '<div class="mut">Avlanan hayvanlar yerde bırakılan eşyalarla leş bırakır; eşyalar toplanınca leş kaybolur.</div>'+['sheep','cow','rabbit','deer','wolf','boar','bear','chicken','dog'].map(k=>{
   const a=ANIMAL[k];
   return `<div class="nt"><b>${a.n}</b><span>Can: ${a.hp} · Yürüyüş ${a.walk} m/s, koşu ${a.run} m/s${a.cspd?' · Kovalama '+a.cspd+' m/s':''}${a.aggr?' · Saldırı: '+a.dmg+' hasar':''}<br>Verir: ${DROPS[k]}<br>${NOTE[k]}</span></div>`;
  }).join('');
@@ -54,6 +54,7 @@ function body(){
   case 'recipes':return recipes();
   case 'tips':return sec(HG.GUIDE.tips);
   case 'caves':return sec(HG.GUIDE.caves);
+  case 'news':return sec(HG.GUIDE.news||[]);
   case 'ach':return ach();
   default:return sec(HG.GUIDE.play);
  }

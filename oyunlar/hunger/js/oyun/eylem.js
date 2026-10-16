@@ -46,6 +46,7 @@ function actionFor(tg){
   const an=tg.an,def=HG.ANIMAL[an.t];
   if(an.dying)return null;
   const name=def.n+' · %'+Math.ceil(an.hp);
+  if(an.pet&&HG.extAnimalAct){const r=HG.extAnimalAct(an,h);if(r)return r}                  /* evcil köpek: vurulmaz, E ile beslenir/yönetilir */
   if(h&&h.k==='bottle'&&def.milk){
    return G.clock<an.milkAt?{block:'Süt vermiyor, biraz bekleyin.',name:def.n}:{kind:'milk',need:2,hint:'Basılı tut: süt sağ',name};
   }
@@ -267,6 +268,7 @@ function validPlace(x,y,itemKey){
  const i=y*W+x,t=G.tile[i];
  if(G.obj[i]||t<T.SAND||t===T.POND)return false;
  if(Math.floor(G.px)===x&&Math.floor(G.py)===y&&HG.IT[itemKey].place!==O.DOOR)return false;
+ if(HG.extPlaceOk&&!HG.extPlaceOk(x,y,itemKey))return false;
  return true;
 }
 /* Yerleştirme karesi: nişanın değdiği boş kare, değilse bir önceki boş kare */
@@ -283,7 +285,7 @@ function placeHeld(){
  if(!h||!h.it.place)return false;
  if(!G.tg){HG.toast('Yerleştirmek için yere bakın.');return false}
  const p=placeTarget(h.k);
- if(!p){HG.toast('Buraya yerleştirilemez.');return false}
+ if(!p){HG.toast((HG.extPlaceMsg&&HG.extPlaceMsg(h.k))||'Buraya yerleştirilemez.');return false}
  setObj(p.y*W+p.x,h.it.place);take(h.k,1);flag('placed_'+h.k);HG.snd('craft');ui.dirty=true;G.shelterCheck=0;
  return true;
 }
@@ -304,6 +306,7 @@ function eatHeld(){
   G.hun=clamp(G.hun+f.h*(HG.cookK?HG.cookK(h.k):1),0,100);G.thr=clamp(G.thr+f.t,0,100);
   if(f.hp){G.hp=clamp(G.hp+f.hp,0,100);G.cause='Bozuk yiyecek yedin.';HG.snd('hurt');HG.toast('Çiğ yiyecek midene dokundu.')}
   take(h.k,1);if(f.ret)add(f.ret,1);
+  if(HG.extAte)HG.extAte(h.k,f);
   HG.snd('eat');
   HG.addSan(f.h>=30?5:f.h>=10?1.5:.5);
  }

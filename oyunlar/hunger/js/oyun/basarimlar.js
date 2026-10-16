@@ -85,7 +85,31 @@ const ACH=[
  ['tpost','Aydınlık Yol','Meşale Direği yerleştir.',8,()=>F('placed_tpost')],
  ['photo','Fotoğrafçı','Fotoğraf modunda (P) bir kare çek.',8,()=>F('photo')],
  ['msg1','Denizden Haber','Bir Şişedeki Mesaj oku.',14,()=>S('msgs')>=1],
- ['msg8','Mesajların Sahibi','Sekiz Şişedeki Mesajın hepsini oku.',40,()=>S('msgs')>=8]
+ ['msg8','Mesajların Sahibi','Sekiz Şişedeki Mesajın hepsini oku.',40,()=>S('msgs')>=8],
+ /* büyük güncelleme (51) */
+ ['crate','Depocu','Depo Sandığı yerleştir.',8,()=>F('placed_crate')],
+ ['sign','Yol Gösterici','Tabela yerleştir.',6,()=>F('placed_sign')],
+ ['apiary','Arıcı','Arı Kovanı yerleştir.',12,()=>F('placed_apiary')],
+ ['wildhive','Bal Hırsızı','Yabani bir kovandan bal topla.',14,()=>F('wildhive')],
+ ['honey10','Bal Ustası','Toplam on kez bal topla.',26,()=>S('honey')>=10],
+ ['ftrap','Kapan Kurucu','Balık Kapanından av çıkar.',12,()=>F('trapfish')],
+ ['treasure','Define','Gömülü bir hazine bul.',22,()=>S('treasure')>=1],
+ ['treasure5','Define Avcısı','Beş gömülü hazine bul.',44,()=>S('treasure')>=5],
+ ['bear','Ayı Avcısı','Bir ayı öldür.',30,()=>F('bear')||S('bears')>=1],
+ ['pet','Sadık Dost','Bir köpek sahiplen.',14,()=>F('pet')],
+ ['shield','Siperci','Kalkanla bir darbeyi engelle.',12,()=>F('blocked')],
+ ['wet','Sırılsıklam','Üzerin ıslansın.',6,()=>F('gotwet')],
+ ['fever','Ateşi Atlat','Ateşi bitki çayı veya merhemle düşür.',14,()=>F('cured')],
+ ['rumor','Kulak Misafiri','Bir köylüden söylenti dinle.',8,()=>F('rumor')],
+ ['rep','Köyün Dostu','Bir köyde itibar kazan.',16,()=>F('rep')],
+ ['trader2','Gezgin Dost','Gezgin Tüccarı gör.',10,()=>F('traderseen')],
+ ['daily1','Günün İşi','Bir günlük meydan okumayı tamamla.',10,()=>S('daily')>=1],
+ ['daily10','Düzenli','On günlük meydan okuma tamamla.',36,()=>S('daily')>=10],
+ ['winter','Kış Geldi','Kış mevsimine ulaş.',14,()=>HG.cfg.season!==false&&HG.x2season&&HG.x2season().id===3],
+ ['year','Bir Yıl','25. güne ulaş (bir mevsim turu).',40,()=>HG.dayNo()>=25],
+ ['apple','Elma Mevsimi','Beş elma topla.',10,()=>S('apples')>=5],
+ ['sword3','Demir Kılıç','Demir Kılıç üret.',20,()=>F('made_sword3')],
+ ['second','İkinci Şans','Öl ve doğma noktasında yeniden uyan.',10,()=>S('deaths')>=1]
 ];
 HG.ACH=ACH.map(a=>[a[0],a[1],a[2],a[3]]);
 const prevI=HG.progInit,prevS=HG.progSave,prevL=HG.progLoad;

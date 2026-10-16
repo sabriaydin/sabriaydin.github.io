@@ -5,7 +5,7 @@ const {HOT,G,ui,inp,look,Scene,$}=HG;
 const cvs=$('#c');
 
 /* ---- Fare kilidi (FPS bakışı) ---- */
-const overlayOpen=()=>!$('#panel').hidden||!$('#trade').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden;
+const overlayOpen=()=>!$('#panel').hidden||!$('#trade').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden||!!(HG.extOverlay&&HG.extOverlay());
 function lock(){
  if(ui.touch||ui.state!=='play'||overlayOpen())return;
  /* Esc basılıyken kilit istenirse tarayıcının Esc işlemi kilidi hemen bozar ve oyun duraklar: tuş bırakılınca alınır */
@@ -24,6 +24,7 @@ function resume(viaKey){
  if(viaKey)ui.relock=true;else lock();
 }
 function closeOverlay(){
+ if(HG.extClose&&HG.extClose())return true;
  if(!$('#gd').hidden){HG.toggleGuide(false);return true}
  if(!$('#trade').hidden){HG.closeTrade();return true}
  if(!$('#jr').hidden){HG.toggleJournal(false);return true}

@@ -84,7 +84,7 @@ S.onInit(()=>{
 const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),cl=new THREE.Color();
 const FCOL=[0xffffff,0xffe14a,0xff7aa8,0xb48cff,0xff6a4a,0x7ac8ff];
 /* Yapı kareleri: yerleştirilen ve üretilen yapıların kenarında çimen bitmez (sapları yapının içine girmesin) */
-const STR=new Uint8Array(32);for(const k of ['BENCH','FURN','FIRE','WALLW','WALLS','DOOR','VWALL','VDOOR','VDEC','WALLT','WALLM','DOORM','FENCE','BED','RACK','BARREL','TORCHP','SNARE','PLOT'])STR[O[k]]=1;
+const STR=new Uint8Array(64);for(const k of ['BENCH','FURN','FIRE','WALLW','WALLS','DOOR','VWALL','VDOOR','VDEC','WALLT','WALLM','DOORM','FENCE','BED','RACK','BARREL','TORCHP','SNARE','PLOT','CHEST','SIGN','APIARY','FTRAP','HIVEW'])STR[O[k]]=1;
 const WATER_LIM=()=>sc.WY+.07;                       /* bu yüksekliğin altında (su içinde / su çizgisinde) çimen bitmez */
 /* Hücre (16x16 kare) bazlı tembel üretim: oyuncunun yaklaştığı hücrelerin konum, dönüş ve renkleri tohumdan hesaplanır, bellekte sınırlı sayıda tutulur */
 const cells=new Map(),CELL_KEEP=260;

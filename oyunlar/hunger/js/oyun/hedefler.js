@@ -37,7 +37,17 @@ const GOALS=[
  ['placed_plot','Ekim Tarlası üret (odun, taş) ve yerleştir. Yaban meyvesinden Tohum üret; tarlaya bakıp elde tohumla E: ekim.'],
  ['harvest','Ekin olgunlaşınca (yaklaşık 5 dakika, yağmurda iki kat hızlı) E ile hasat et: buğday ve tohum verir, ateşte ekmek olur.'],
  ['placed_rack','Kurutma Rafı kur; çiğ et ve balık elde tutulup E ile asılır. Yağmur altında kurumaz, rafı çatı altına kurmak iyi olur.'],
- ['placed_bed','Hasır Yatak üret (tezgâhta), çatı altına koy ve gece E ile uyu: Uyku Tulumundan daha dinlendiricidir.']
+ ['placed_bed','Hasır Yatak üret (tezgâhta), çatı altına koy ve gece E ile uyu: Uyku Tulumundan daha dinlendiricidir.'],
+ ['placed_crate','Depo Sandığı üret ve yerleştir. E ile açılır; eşyalarını düzenle. Yatak koyarsan doğma noktan olur.'],
+ ['placed_sign','Tabela üret, yerleştir ve E ile üzerine yol bilgisi yaz.'],
+ ['wildhive','Ormanda ağaçlardaki yabani arı kovanını bul; elde meşale varken E ile bal ve balmumu topla.'],
+ ['placed_apiary','Balmumuyla Arı Kovanı üret ve çalılık bir yere kur; bal ve balmumu üretir.'],
+ ['placed_ftrap','Balık Kapanı üret ve su kenarındaki kuma kur; zamanla balık yakalar.'],
+ ['made_shovel','Kürek üret. Kuma veya toprağa bakıp E ile kazarak hazine ara.'],
+ ['treasure','Hazine Haritası (Gezgin Tüccar veya köylü söylentisi) ile gömülü bir hazine bul. Kürek eldeyken toprak ısındıkça yaklaşırsın.'],
+ ['made_shield','Kalkan üret. Elde tutup sağ tıkı basılı tutarak siper al; önden gelen darbeyi azaltır.'],
+ ['pet','Gezgin Tüccardan Köpek Yavrusu al. Köpek seni takip eder ve saldırganlara karşı korur.'],
+ ['bear','Bir ayıyı alt et (Demir Kılıç veya yay ile). Kürkünden Kürk Palto üretilir; kışın soğuğa karşı en iyi giysidir.']
 ];
 function goalText(){
  let done=0;for(const g of GOALS)if(G.flags[g[0]])done++;

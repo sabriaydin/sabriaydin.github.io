@@ -36,6 +36,8 @@ function surfaceBase(im){
   else if(o===O.FIRE||o===O.TORCHP){r=250;g=150;bl=40}
   else if(o===O.SHROOM){r*=.9;g*=.8;bl*=.8}
   else if(o===O.PLOT){r=110;g=84;bl=44}
+  else if(o===O.CHEST||o===O.SIGN||o===O.APIARY||o===O.FTRAP){r=170;g=120;bl=70}
+  else if(o===O.HIVEW){r=214;g=170;bl=60}
   else if(o===O.BED||o===O.RACK||o===O.BARREL||o===O.SNARE||o===O.BENCH||o===O.FURN||o===O.WALLW||o===O.WALLS||o===O.DOOR||o===O.WALLT||o===O.WALLM||o===O.DOORM||o===O.FENCE){r=170;g=120;bl=70}
   if(t>T.SHAL&&t!==T.POND){r*=sh;g*=sh;bl*=sh}
   /* kıyı köpüğü */
@@ -181,6 +183,7 @@ function markers(g,tx,ty,k,sz){
   g.strokeStyle='#fff';g.lineWidth=1.5;g.beginPath();g.moveTo(x,y);g.lineTo(x,y-s*2);g.stroke();
   g.fillStyle='#4ad0ff';g.strokeStyle='#000';g.lineWidth=1.5;g.beginPath();g.moveTo(x,y-s*2);g.lineTo(x+s*1.3,y-s*1.5);g.lineTo(x,y-s);g.closePath();g.fill();g.stroke();
  }
+ if(HG.extMapMarks)HG.extMapMarks(g,tx,ty,k,sz,seen);       /* büyük güncelleme (51): cenaze, yatak, tüccar, hazine bölgesi, bayraklar */
 }
 function playerArrow(g,x,y,r){
  const a=Math.atan2(G.fy,G.fx);
@@ -258,6 +261,7 @@ function bind(){
   if(wasMoved||e.target!==c||G.cave)return;
   const p=pos(e),w=toWorld(p.x,p.y,p.S);
   if(w.x<0||w.y<0||w.x>=W||w.y>=H)return;
+  if(HG.extMapClick&&HG.extMapClick(w.x,w.y,e,10/(p.S/W*view.z)))return;      /* Shift + tık: bayrak */
   if(G.wp&&Math.hypot(w.x-G.wp.x,w.y-G.wp.y)<10/(p.S/W*view.z)){G.wp=null;HG.toast('Hedef işareti kaldırıldı.')}
   else{G.wp={x:w.x,y:w.y};HG.toast('Hedef işaretlendi: '+Math.round(Math.hypot(w.x-G.px,w.y-G.py))+' m')}
  });

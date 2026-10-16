@@ -38,7 +38,16 @@ const TABS=[
   ['compass','Pusula (üst orta)','toggle',true,'Ekranın üstünde yön ve hedef işaretini gösteren pusula çubuğu.'],
   ['ui','Arayüz boyutu','range',100,70,140,5,'%','Durum çubukları ve hızlı erişim çubuğunun boyutu.'],
   ['horror','Korku görsel efektleri','range',100,0,100,5,'%','Bozulma, renk kayması ve kararma şiddeti.'],
-  ['shake','Kamera sarsıntısı','range',100,0,100,5,'%']]]
+  ['shake','Kamera sarsıntısı','range',100,0,100,5,'%'],
+  ['death','Ölünce','select','bed',[['bed','Doğma noktasında uyan; eşyalar cenaze çantasında'],['free','Doğma noktasında uyan; eşyalar kalsın'],['perm','Kalıcı ölüm (oyun biter)']],'Doğma noktası: yatak varsa yatak, yoksa ilk kamp. Cenaze çantası haritada işaretlenir.'],
+  ['season','Mevsimler','toggle',true,'Kapalıyken mevsim etkisi olmaz (her zaman nötr).'],
+  ['snow','Kış karı (görsel)','toggle',true,'Kışın yağan kar ve beyazlaşan zemin; kapatmak başarımı artırır.'],
+  ['wetsys','Islaklık ve ateş','toggle',true,'Islanınca soğuk daha çabuk işler; uzun süre ıslak kalmak ateşe yol açar.'],
+  ['peace','Barış modu','toggle',false,'Açıkken hayvanlar ve yaratıklar hasar vermez (inşa ve keşif için).']]],
+ ['Erişilebilirlik',[
+  ['cap','Ses altyazıları','toggle',false,'Önemli sesleri (hayvan, gök gürültüsü, saldırı) ekranda kısa yazıyla gösterir.'],
+  ['dmgnum','Hasar sayıları','toggle',true,'Vurulan hayvanın üzerinde verilen hasarı gösterir.'],
+  ['pad','Oyun kolu desteği','toggle',true,'Bağlı oyun koluyla oynanır. Sol çubuk: hareket, sağ çubuk: bakış, A: zıpla, X: E, RT: vur, B: çanta, Y: harita, LB/RB: kutu seç, L3: koş.']]]
 ];
 const DEF={};for(const [,rows] of TABS)for(const r of rows)DEF[r[0]]=r[3];
 const cfg=HG.cfg=Object.assign({},DEF);

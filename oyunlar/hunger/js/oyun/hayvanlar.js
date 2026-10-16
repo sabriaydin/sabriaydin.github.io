@@ -119,6 +119,7 @@ function updateAnimals(dt){
   const ll=def.fearLight?HG.lightLevel(a.x,a.z):0;
   if(def.sea){const r=HG.seaAI(a,def,dt,dp,dx,dz,play);head=r.head;spd=r.spd}
   else if(def.foe){const r=HG.foeAI(a,def,dt);head=r.head;spd=r.spd}
+  else if(def.pet&&HG.petAI){const r=HG.petAI(a,def,dt,L);head=r.head;spd=r.spd}
   else if(def.fearLight&&ll>.1){a.charge=0;head=Math.atan2(-dx,-dz);spd=def.run}
   else if(def.night&&(a.hp<def.hp*.3||(!dark&&dp<14))){head=Math.atan2(-dx,-dz);spd=def.run}
   else if(a.fleeT>0&&a.fleeW&&!a.dying&&!(a.charge>0)){head=Math.atan2(a.x-a.fleeW.x,a.z-a.fleeW.z);spd=def.run}

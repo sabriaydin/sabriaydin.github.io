@@ -25,7 +25,7 @@ function hitTarget(ar,ox,oy,oz){
  let best=null,bt=2;
  const dx=ar.x-ox,dy=ar.y-oy,dz=ar.z-oz;
  for(const a of G.animals||[]){
-  if(a.dying)continue;
+  if(a.dying||a.pet)continue;                  /* evcil köpek okla vurulmaz */
   const def=ANIMAL[a.t];
   if((a.x-ox)**2+(a.z-oz)**2>(Math.hypot(dx,dz)+def.r+2)**2)continue;
   const gy=a.by!==undefined?a.by:Scene.groundY(a.x,a.z),rr=Math.max(def.r*1.1,def.h*.3)+.12;

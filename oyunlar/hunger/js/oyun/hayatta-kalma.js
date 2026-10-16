@@ -6,7 +6,7 @@ const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
 /* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
 /* Ağaç, palmiye ve çalılar duvar sayılmaz: yalnızca yapı, kaya ve kapı gibi kapatıcı nesneler alanı sınırlar.
    Hesap ayrılmış bir dizi üzerinde yapılır (her çağrıda yeni bellek ayrılmaz). */
-const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE,O.SHROOM,O.SNARE,O.PLOT]);      /* alçak çit de alanı kapatmaz */
+const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE,O.SHROOM,O.SNARE,O.PLOT,O.SIGN,O.FTRAP,O.HIVEW,O.APIARY]);      /* alçak çit de alanı kapatmaz */
 let SEEN=null,STAMP=0;const QUE=new Int32Array(64);
 function calcShelter(wx,wy){
  const at=wx!==undefined;                /* konum verilirse o karenin çatı altında olup olmadığı sorulur (yapılar için) */
@@ -214,6 +214,7 @@ function update(dt){
  if(G.sheltered)wr*=.25;
  if(wr<0)wr*=1-.15*HG.perk('cold');
  if(wr<0&&HG.count('coat'))wr*=.5;            /* deri mont çantadayken soğuk yarıya iner */
+ if(wr<0&&HG.count('furcoat'))wr*=HG.count('coat')?.8:.4;            /* kürk palto: soğuğu daha çok keser (montla birlikte %60) */
  if(G.nearFire)wr+=3.4*(1-fd/4.6);
  if(L>.55&&!G.sheltered)wr+=.55*L;
  if(G.sheltered&&L>.4)wr+=.3;
@@ -239,6 +240,7 @@ function update(dt){
  G.saveT+=dt;if(G.saveT>20){G.saveT=0;HG.save()}
 }
 function die(){
+ if(HG.onDie&&HG.onDie())return;                     /* yeniden doğma sistemi (js/oyun/dogma.js) ölümü karşılayabilir */
  ui.state='dead';
  /* açık pencereler kapatılır; yay, eylem ve yüzme durumu sıfırlanır */
  for(const id of ['#trade','#jr','#gd','#bigmap','#sv','#pause'])HG.$(id)&&(HG.$(id).hidden=true);

@@ -112,6 +112,8 @@ S.onFrame((G,t,dt,info)=>{
     else if(a.t==='deer'){pt=run?-.5:0;yw=Math.sin(t*(run?10:2.5)+a.id)*.25}
     else if(a.t==='boar'){yw=Math.sin(t*4+a.id)*.35;pt=-.2}
     else if(a.t==='chicken'){yw=Math.sin(t*(idle?1.6:8)+a.id)*.12;pt=run?-.2:0}
+    else if(a.t==='dog'){yw=Math.sin(t*(idle?5:9)+a.id)*.5;pt=run?-.35:.25}                  /* köpek: kuyruk sallar */
+    else if(a.t==='bear'){yw=Math.sin(t*1.6+a.id)*.08;pt=-.1}
     o.tail.position.set(P[0],P[1]+by,P[2]);o.tail.rotation.set(pt,yw,0);
    }
   }

@@ -47,7 +47,7 @@ function buyPerk(k){
 }
 /* ---- günlük penceresi ---- */
 let tab='gel',hl=-1;
-const TABS=[['gel','Gelişim'],['gor','Görevler'],['not','Kayıtlar'],['ist','İstatistik']];
+const TABS=[['gel','Gelişim'],['gor','Görevler'],['mey','Meydan'],['not','Kayıtlar'],['ist','İstatistik']];
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function render(){
  const t=$('#jrT'),b=$('#jrB');if(!t||!b)return;
@@ -63,6 +63,8 @@ function render(){
  }else if(tab==='gor'){
   const L=HG.questList?HG.questList():[];
   h=L.length?L.map(({n,q})=>`<div class="pk"><div><b>${esc(HG.questTitle(q))}</b><span>${esc(n.name)} (${HG.PROF[n.prof].n}, ${esc(G.villages[n.vi].name)}) · ${esc(HG.questProg(q))}</span></div><span class="ok">${q.rw.coin} sikke</span></div>`).join(''):'<p class="mut">Aktif görev yok. Köylülerle konuşarak görev alınabilir.</p>';
+ }else if(tab==='mey'){
+  h=HG.extTabHtml?HG.extTabHtml(esc):'';
  }else if(tab==='not'){
   const all=HG.NOTES||[];
   h=`<p class="mut">Bulunan kayıt: ${G.notes.length}/${all.length}. Terk edilmiş kampların sandıklarında bulunur.</p>`;

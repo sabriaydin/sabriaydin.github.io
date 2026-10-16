@@ -7,6 +7,7 @@
 <meta name="description" content="Hunger: ıssız bir adada geçen, tarayıcıda oynanan 3B birinci kişi hayatta kalma oyunu. Ağaç kes, maden topla, sığınak kur; açlığa, susuzluğa ve soğuğa karşı hayatta kal.">
 <meta name="theme-color" content="#0d0d0e">
 <link rel="stylesheet" href="css/stil.css">
+<link rel="stylesheet" href="css/genisleme.css">
 </head>
 <body>
 <div id="game">
@@ -74,17 +75,19 @@
         <button class="ghost bGuide" type="button">Rehber</button>
         <button class="ghost bSet" type="button">Ayarlar</button>
       </div>
+      <div class="wrow"><input id="wcode" type="text" maxlength="7" placeholder="Dünya kodu (isteğe bağlı)" autocomplete="off" spellcheck="false" aria-label="Dünya kodu"></div>
       <a class="back" href="../../index.html">← Bloga dön</a>
     </div>
   </div>
-  <div id="pause" hidden><div class="card"><h1 style="font-size:34px">DURAKLATILDI</h1><div class="btns"><button id="bRes" type="button">Devam</button><button id="bSave" class="ghost" type="button">Oyunu kaydet</button><button id="bDown" class="ghost" type="button">Kayıt dosyasını indir</button><button id="bSaves2" class="ghost" type="button">Kayıtlar</button><button class="ghost bGuide" type="button">Rehber</button><button class="ghost bSet" type="button">Ayarlar</button><button id="bMenu" class="ghost" type="button">Ana menü</button></div></div></div>
-  <div id="dead" hidden><div class="card"><h1 style="font-size:36px">HAYATTA KALAMADIN</h1><p id="why"></p><p id="stat"></p><p id="stat2"></p><div class="btns"><button id="bAgain" type="button">Yeniden Dene</button></div></div></div>
+  <div id="pause" hidden><div class="card"><h1 style="font-size:34px">DURAKLATILDI</h1><p id="wcodeP" class="wcp"></p><div class="btns"><button id="bRes" type="button">Devam</button><button id="bSave" class="ghost" type="button">Oyunu kaydet</button><button id="bDown" class="ghost" type="button">Kayıt dosyasını indir</button><button id="bSaves2" class="ghost" type="button">Kayıtlar</button><button class="ghost bGuide" type="button">Rehber</button><button class="ghost bSet" type="button">Ayarlar</button><button id="bMenu" class="ghost" type="button">Ana menü</button></div></div></div>
+  <div id="dead" hidden><div class="card"><h1 style="font-size:36px">HAYATTA KALAMADIN</h1><p id="why"></p><p id="stat"></p><p id="stat2"></p><p id="deadTip" class="mut"></p><div class="btns"><button id="bAgain" type="button">Yeniden Dene</button><button id="bSame" class="ghost" type="button">Aynı adada yeniden başla</button></div></div></div>
 </div>
 <script src="../ortak/three.min.js"></script>
 <script src="js/cekirdek/ad-alani.js"></script>
 <script src="js/cekirdek/yardimcilar.js"></script>
 <script src="js/cekirdek/ayarlar.js"></script>
 <script src="js/cekirdek/tuslar.js"></script>
+<script src="js/cekirdek/hazirlik.js"></script>
 <script src="js/veri/esyalar.js"></script>
 <script src="js/veri/notlar.js"></script>
 <script src="js/veri/rehber.js"></script>
@@ -92,10 +95,12 @@
 <script src="js/veri/dugumler.js"></script>
 <script src="js/veri/hayvanlar.js"></script>
 <script src="js/veri/yenilikler.js"></script>
+<script src="js/veri/genisleme.js"></script>
 <script src="js/dunya/uretim.js"></script>
 <script src="js/dunya/magara.js"></script>
 <script src="js/gorsel/simgeler.js"></script>
 <script src="js/gorsel/yeni-simgeler.js"></script>
+<script src="js/gorsel/genisleme-simgeler.js"></script>
 <script src="js/sahne/cekirdek.js"></script>
 <script src="js/sahne/gerceklik.js"></script>
 <script src="js/sahne/dokular.js"></script>
@@ -124,6 +129,7 @@
 <script src="js/sahne/sualti.js"></script>
 <script src="js/sahne/deniz.js"></script>
 <script src="js/sahne/yenilikler.js"></script>
+<script src="js/sahne/genisleme-modeller.js"></script>
 <script src="js/sahne/sonisleme.js"></script>
 <script src="js/oyun/ses.js"></script>
 <script src="js/oyun/zaman.js"></script>
@@ -152,6 +158,10 @@
 <script src="js/oyun/basarimlar.js"></script>
 <script src="js/oyun/kayitlar.js"></script>
 <script src="js/oyun/yenilikler.js"></script>
+<script src="js/oyun/genisleme.js"></script>
+<script src="js/oyun/genisleme2.js"></script>
+<script src="js/oyun/genisleme3.js"></script>
+<script src="js/oyun/genisleme-arayuz.js"></script>
 <script src="js/oyun/giris.js"></script>
 <script src="js/oyun/dongu.js"></script>
 </body>

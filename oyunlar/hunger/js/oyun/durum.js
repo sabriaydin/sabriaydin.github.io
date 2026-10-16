@@ -181,7 +181,7 @@ async function startGame(load,slotId){
   if(!G.inv.some(x=>x&&HG.IT[x.id]&&(HG.IT[x.id].tool==='axe'||HG.IT[x.id].tool==='pick'||x.id==='rock'))&&HG.canAdd('rock',1))HG.add('rock',1);
  }else{
   ldSet(.1,'Ada üretiliyor');await nap();
-  newState((Math.random()*2147483647)|0);
+  {const sd=HG.pendingSeed;HG.pendingSeed=null;newState(Number.isInteger(sd)?sd:(Math.random()*2147483647)|0)}   /* dünya kodu girildiyse aynı ada üretilir */
   look.yaw=0;look.pitch=-.1;
  }
  HG.extStart&&HG.extStart();

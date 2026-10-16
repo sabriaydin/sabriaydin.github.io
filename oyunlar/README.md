@@ -87,4 +87,28 @@ Not: Harita 768×768 karedir (`js/cekirdek/ad-alani.js`). Eski 384×384 kayıtla
 | Klavye, fare, dokunmatik, envanter sürükle-bırak | `js/oyun/giris.js` |
 | Ana döngü ve başlatma | `js/oyun/dongu.js` |
 
+**Güncelleme 51 (büyük genişleme):**
+
+| Konu | Dosya |
+|---|---|
+| Çok oyunculu (co-op) hazırlık katmanı: oyuncu soyutlaması (`HG.me`, `HG.players`), olay yolu (`HG.on`/`HG.emit`), dünya değişiklik günlüğü (`HG.journal`), varlık kimlikleri (`HG.eid`), dünya kodu (`HG.worldCode`) | `js/cekirdek/hazirlik.js` |
+| Yeni eşyalar, tarifler, yapılar (Depo Sandığı, Tabela, Arı Kovanı, Balık Tuzağı, Hazine Haritası, Kürek, Kalkan, Çizme, Köpek Yavrusu, bal ürünleri, merhem, çay…), Ayı ve Köpek türleri, silah hasarı, rehber haberi | `js/veri/genisleme.js` |
+| Yeni eşya simgeleri | `js/gorsel/genisleme-simgeler.js` |
+| Yeni model ve görseller: sandık, tabela (yazılı levha), arı kovanı, balık tuzağı, ayı, köpek, Gezgin Tüccar görünümü, mezar haçı, kar yağışı | `js/sahne/genisleme-modeller.js` |
+| Mantık I: ortak durum kaydı `G.x2` (`HG.x2reg`), yapı varlıkları (`HG.x2ent`), sandık, tabela, arı kovanı, balık tuzağı, bal, gömülü hazine ve kürek, harita işaretleri, ölüm kuralları (mezar çantası, doğma noktası, kalıcı ölüm), yerleştirme kancaları | `js/oyun/genisleme.js` |
+| Mantık II: mevsimler (bahar-yaz-sonbahar-kış), ıslaklık, ateş (hastalık), çay/merhem/bal etkileri, kalkan siperi, barış kipi, çizme, durum satırı (`#x2s`) | `js/oyun/genisleme2.js` |
+| Mantık III: köpek yoldaş, ayılar (kışın uyur), Gezgin Tüccar, köy itibarı ve indirim, söylentiler, elma ve şifalı ot toplama, günlük meydan okumalar, Günlük › Meydan sekmesi | `js/oyun/genisleme3.js` |
+| Arayüz: sandık penceresi, tabela düzenleyici, kısayol panosu (F1), tarif arama/süzgeci ve çoklu üretim (Shift ×5, Ctrl ×60), ses altyazıları, hasar sayıları, harita işaretleri (Shift+tık bayrak), oyun kolu desteği | `js/oyun/genisleme-arayuz.js`, `css/genisleme.css` |
+| Küçük kancalar eklenen özgün dosyalar (davranışları değişmedi; yalnızca `HG.ext*`/`HG.petAI`/`HG.repK`/`sc.npcLook` çağrıları): ayarlar (Oyun sekmesi satırları), sahne (çim, nesneler, köylüler, hayvanlar), harita, durum, hayatta kalma, envanter, eylem, giriş, gelişim, köylüler, hayvanlar, silah, ses, başarımlar, hedefler, rehber | `js/cekirdek/ad-alani.js`, `js/cekirdek/ayarlar.js`, `js/sahne/cim.js`, `js/sahne/nesneler.js`, `js/sahne/koyluler.js`, `js/sahne/hayvanlar.js`, `js/oyun/*.js` |
+
+**Co-op (çok oyunculu) için kurallar** — yeni sistemler bunlara uyar:
+
+- Tüm yeni oyun durumu `G.x2` altında tutulur; her anahtar `HG.x2reg(anahtar, varsayılan, temizleyici)` ile kaydedilir (kayıt anahtarı `x2`, yüklemede temizlenir). Doğrudan `G` üzerine yeni kalıcı alan eklenmez.
+- Dünya nesnesi değişiklikleri yalnızca `HG.setObj` ile yapılır (bu çağrı `HG.journal` üzerinden `'obj'` olayı üretir). Yapıya bağlı veriler (`HG.x2ent`) hücre indeksine bağlıdır.
+- Durum değişiklikleri `HG.journal.push('x2', {k: ...})` ile günlüğe yazılır; ağ katmanı yalnızca günlüğü iletir.
+- Benzersiz kimlik gerekiyorsa `HG.eid(önek)` kullanılır; oyuncu bilgisi `HG.me` / `HG.players()` üzerinden okunur (tek oyuncuda dizi tek elemanlıdır).
+- Dünya üretimi ve günlük görevler tohumludur (`HG.mulberry32`, tohum + gün); aynı dünya kodu aynı adayı kurar.
+- Kare güncellemesi `HG.update` sarmalıyla eklenir; özgün dosyalara yalnızca küçük, ek kancalar yazılır.
+
+
 Not: Kayıt anahtarı `hunger-save-v5`; harita yapısı değişirse sürüm artırılmalıdır.

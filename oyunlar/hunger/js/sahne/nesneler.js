@@ -11,6 +11,7 @@ const placedCells=new Set();                    /* yerleştirilen yapıların ka
 const placedBy=new Map();                       /* kare -> {o,objs,own,fire,flame}: yapı tek tek eklenip kaldırılabilir (artımlı güncelleme) */
 const STRUCT=new Set([O.FIRE,O.BENCH,O.FURN,O.WALLW,O.WALLS,O.DOOR,O.WALLT,O.WALLM,O.DOORM,O.FENCE,O.BED,O.RACK,O.BARREL,O.TORCHP,O.SNARE,O.PLOT]);
 const NBR=new Set([O.WALLT,O.WALLM,O.DOOR,O.DOORM]);   /* yönü komşu yapılara bağlı olanlar */
+sc.STRUCT=STRUCT;sc.structModel=sc.structModel||{};sc.structRot=sc.structRot||{};     /* yeni yapı türleri bu tablolara kayıt olur (js/sahne/genisleme-modeller.js) */
 const staged=new Map();let stagedGroup=null;
 const wm=new THREE.Matrix4(),wq=new THREE.Quaternion(),wv=new THREE.Vector3(),ws=new THREE.Vector3();
 const INSTKEYS=['treeA','treeB','palm','palm0','rock','coal','copper','iron','bush','bush0','shroom'];
@@ -93,6 +94,7 @@ function buildStruct(G,i){
  else if(o===O.WALLT)geo=sc.MODEL.wallt;else if(o===O.WALLM)geo=sc.MODEL.wallm;else if(o===O.DOORM)geo=sc.MODEL.doorm;else if(o===O.FENCE)geo=sc.MODEL.fence;
  else if(o===O.BED)geo=sc.MODEL.bed;else if(o===O.RACK)geo=sc.MODEL.rack;else if(o===O.BARREL)geo=sc.MODEL.barrel;
  else if(o===O.TORCHP)geo=sc.MODEL.tpost;else if(o===O.SNARE)geo=sc.MODEL.snare;else if(o===O.PLOT)geo=sc.MODEL.plot;
+ else if(sc.structModel[o])geo=sc.MODEL[sc.structModel[o]];
  if(!geo)return;
  const gy=S.groundY(x+.5,z+.5),hh=hash(x,z,21);
  const me=new THREE.Mesh(geo,plm);me.position.set(x+.5,gy,z+.5);me.castShadow=true;me.receiveShadow=true;
@@ -105,6 +107,7 @@ function buildStruct(G,i){
  }
  else if(o===O.WALLW||o===O.WALLS)me.rotation.y=hh<.5?0:Math.PI;
  else if(o===O.BED)me.rotation.y=Math.floor(hh*4)*Math.PI/2;else if(o===O.RACK)me.rotation.y=hh<.5?0:Math.PI/2;else if(o===O.SNARE)me.rotation.y=hh*6.28;
+ else if(sc.structRot[o])me.rotation.y=sc.structRot[o](hh,x,z);
  placedGroup.add(me);placedCells.add(i);
  const ent={o,objs:[me],own:[]};
  if(o===O.FIRE){const f=flameGroup();f.position.set(x+.5,gy+.05,z+.5);placedGroup.add(f);const fr2={x:x+.5,z:z+.5,y:gy},fl={g:f,ph:hh*10};sc.fires.push(fr2);flames.push(fl);ent.objs.push(f);ent.fire=fr2;ent.flame=fl;ent.own.push(f)}
