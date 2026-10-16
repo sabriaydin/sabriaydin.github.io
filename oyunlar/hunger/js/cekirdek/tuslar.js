@@ -9,7 +9,7 @@ const ACTS=[
  ['use','Topla / al / kullan / konuş','KeyE',''],['place','Yapıyı yerleştir','KeyF',''],
  ['inv','Envanter','KeyI','Tab'],['craft','Üretim','KeyC',''],['map','Harita','KeyM',''],['jr','Günlük','KeyK',''],
  ['guide','Rehber','KeyH',''],['mute','Sesi aç/kapat','KeyN',''],['qsave','Hızlı kaydet','F5',''],
- ['drop','Seçili eşyadan 1 adet at','KeyQ',''],['sort','Çantayı düzenle','KeyR','']
+ ['drop','Seçili eşyadan 1 adet at','KeyQ',''],['sort','Çantayı düzenle','KeyR',''],['photo','Fotoğraf modu (arayüzü gizle)','KeyP','']
 ];
 const DEF={};for(const [k,,a,b] of ACTS)DEF[k]=[a,b];
 const bind=HG.bind={};

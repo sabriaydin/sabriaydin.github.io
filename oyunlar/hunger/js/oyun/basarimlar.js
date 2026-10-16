@@ -69,7 +69,23 @@ const ACH=[
  ['crab','Yengeç Avcısı','Bir yengeci avla.',10,()=>S('crabs')>=1],
  ['mask','Dalış Takımı','Dalış Maskesi üret veya bul.',12,()=>F('made_mask')||F('got_mask')],
  ['lvl20','Bilge','20. seviyeye ulaş.',60,()=>(G.lvl||1)>=20],
- ['day30','Köklü','30. güne ulaş.',60,()=>HG.dayNo()>=30]
+ ['day30','Köklü','30. güne ulaş.',60,()=>HG.dayNo()>=30],
+ ['plot','Çiftçi Adayı','Bir Ekim Tarlası yerleştir.',8,()=>F('placed_plot')],
+ ['harvest','İlk Hasat','Tarladan ilk ekini hasat et.',14,()=>F('harvest')],
+ ['harvest10','Bereketli Toprak','On kez hasat yap.',30,()=>S('harvest')>=10],
+ ['rack','Kış Hazırlığı','Kurutma Rafı yerleştir ve kuru yiyecek hazırla.',12,()=>F('dried')],
+ ['bed','Yumuşak Uyku','Hasır Yatakta sabaha kadar uyu.',12,()=>F('slept_bed')],
+ ['mush','Mantar Avcısı','On mantar topla.',10,()=>S('mush')>=10],
+ ['egg','Kümes Sahibi','Bir yumurta topla.',6,()=>F('got_egg')],
+ ['stew','Şef','Et Güveci pişir.',10,()=>F('made_stew')],
+ ['armor','Zırhlı','Deri Yelek veya Demir Göğüslük üret.',14,()=>F('made_vest')||F('made_iarmor')],
+ ['spy','Uzak Görüş','Dürbünle yakınlaştır.',8,()=>F('zoomed')],
+ ['trap','Tuzakçı','Av Tuzağıyla bir av yakala.',12,()=>S('trapped')>=1],
+ ['rainb','Yağmur Toplayıcı','Yağmur Varilinden şişe doldur.',10,()=>F('barrel_fill')],
+ ['tpost','Aydınlık Yol','Meşale Direği yerleştir.',8,()=>F('placed_tpost')],
+ ['photo','Fotoğrafçı','Fotoğraf modunda (P) bir kare çek.',8,()=>F('photo')],
+ ['msg1','Denizden Haber','Bir Şişedeki Mesaj oku.',14,()=>S('msgs')>=1],
+ ['msg8','Mesajların Sahibi','Sekiz Şişedeki Mesajın hepsini oku.',40,()=>S('msgs')>=8]
 ];
 HG.ACH=ACH.map(a=>[a[0],a[1],a[2],a[3]]);
 const prevI=HG.progInit,prevS=HG.progSave,prevL=HG.progLoad;

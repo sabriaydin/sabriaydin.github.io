@@ -9,11 +9,11 @@ const LOD_DIST=62,CULL_DIST=185;               /* yakın: ayrıntılı model · 
 let inst=new Map(),chunks=new Map(),placedGroup=null,flames=[],wobIdx=-1;
 const placedCells=new Set();                    /* yerleştirilen yapıların kareleri */
 const placedBy=new Map();                       /* kare -> {o,objs,own,fire,flame}: yapı tek tek eklenip kaldırılabilir (artımlı güncelleme) */
-const STRUCT=new Set([O.FIRE,O.BENCH,O.FURN,O.WALLW,O.WALLS,O.DOOR,O.WALLT,O.WALLM,O.DOORM,O.FENCE]);
+const STRUCT=new Set([O.FIRE,O.BENCH,O.FURN,O.WALLW,O.WALLS,O.DOOR,O.WALLT,O.WALLM,O.DOORM,O.FENCE,O.BED,O.RACK,O.BARREL,O.TORCHP,O.SNARE,O.PLOT]);
 const NBR=new Set([O.WALLT,O.WALLM,O.DOOR,O.DOORM]);   /* yönü komşu yapılara bağlı olanlar */
 const staged=new Map();let stagedGroup=null;
 const wm=new THREE.Matrix4(),wq=new THREE.Quaternion(),wv=new THREE.Vector3(),ws=new THREE.Vector3();
-const INSTKEYS=['treeA','treeB','palm','palm0','rock','coal','copper','iron','bush','bush0'];
+const INSTKEYS=['treeA','treeB','palm','palm0','rock','coal','copper','iron','bush','bush0','shroom'];
 const WIND={treeA:.022,treeB:.03,palm:.05,palm0:.05,bush:.025,bush0:.025};
 const windU={uTime:{value:0}};
 sc.windU=windU;
@@ -49,7 +49,7 @@ function mkInst(geo,mat,n,shadow){
  im.setColorAt(0,tint.setRGB(1,1,1));sc.scene.add(im);return im;
 }
 const ALT={bush:'bush0',bush0:'bush',palm:'palm0',palm0:'palm'};
-const KEYOF={[O.PALM]:'palm',[O.PALM0]:'palm0',[O.ROCK]:'rock',[O.COAL]:'coal',[O.COPPER]:'copper',[O.IRON]:'iron',[O.BUSH]:'bush',[O.BUSH0]:'bush0'};
+const KEYOF={[O.PALM]:'palm',[O.PALM0]:'palm0',[O.ROCK]:'rock',[O.COAL]:'coal',[O.COPPER]:'copper',[O.IRON]:'iron',[O.BUSH]:'bush',[O.BUSH0]:'bush0',[O.SHROOM]:'shroom'};
 function buildInstances(G){
  for(const c of chunks.values()){sc.scene.remove(c.mesh);c.mesh.dispose&&c.mesh.dispose();if(c.lo){sc.scene.remove(c.lo);c.lo.dispose&&c.lo.dispose()}}
  chunks.clear();
@@ -91,6 +91,8 @@ function buildStruct(G,i){
  if(o===O.FIRE)geo=sc.MODEL.fireBase;else if(o===O.BENCH)geo=sc.MODEL.bench;else if(o===O.FURN)geo=sc.MODEL.furn;
  else if(o===O.WALLW)geo=sc.MODEL.wallw;else if(o===O.WALLS)geo=sc.MODEL.walls;else if(o===O.DOOR)geo=sc.MODEL.door;
  else if(o===O.WALLT)geo=sc.MODEL.wallt;else if(o===O.WALLM)geo=sc.MODEL.wallm;else if(o===O.DOORM)geo=sc.MODEL.doorm;else if(o===O.FENCE)geo=sc.MODEL.fence;
+ else if(o===O.BED)geo=sc.MODEL.bed;else if(o===O.RACK)geo=sc.MODEL.rack;else if(o===O.BARREL)geo=sc.MODEL.barrel;
+ else if(o===O.TORCHP)geo=sc.MODEL.tpost;else if(o===O.SNARE)geo=sc.MODEL.snare;else if(o===O.PLOT)geo=sc.MODEL.plot;
  if(!geo)return;
  const gy=S.groundY(x+.5,z+.5),hh=hash(x,z,21);
  const me=new THREE.Mesh(geo,plm);me.position.set(x+.5,gy,z+.5);me.castShadow=true;me.receiveShadow=true;
@@ -102,9 +104,11 @@ function buildStruct(G,i){
   me.rotation.y=az&&!ax?Math.PI/2:ax?0:(hh<.5?0:Math.PI/2);
  }
  else if(o===O.WALLW||o===O.WALLS)me.rotation.y=hh<.5?0:Math.PI;
+ else if(o===O.BED)me.rotation.y=Math.floor(hh*4)*Math.PI/2;else if(o===O.RACK)me.rotation.y=hh<.5?0:Math.PI/2;else if(o===O.SNARE)me.rotation.y=hh*6.28;
  placedGroup.add(me);placedCells.add(i);
  const ent={o,objs:[me],own:[]};
  if(o===O.FIRE){const f=flameGroup();f.position.set(x+.5,gy+.05,z+.5);placedGroup.add(f);const fr2={x:x+.5,z:z+.5,y:gy},fl={g:f,ph:hh*10};sc.fires.push(fr2);flames.push(fl);ent.objs.push(f);ent.fire=fr2;ent.flame=fl;ent.own.push(f)}
+ if(o===O.TORCHP){const hd=new THREE.Group();hd.position.set(x+.5,gy+1.86,z+.5);hd.scale.setScalar(.4);const f=flameGroup();hd.add(f);placedGroup.add(hd);const fr2={x:x+.5,z:z+.5,y:gy+1},fl={g:f,ph:hh*10};sc.fires.push(fr2);flames.push(fl);ent.objs.push(hd);ent.fire=fr2;ent.flame=fl;ent.own.push(hd)}
  if(o===O.FURN){const gl=new THREE.Mesh(box(.42,.3,.04),new THREE.MeshBasicMaterial({color:0xff7a1a,toneMapped:false}));gl.position.set(x+.5,gy+.4,z+.5+.49);placedGroup.add(gl);ent.objs.push(gl);ent.own.push(gl)}
  placedBy.set(i,ent);
 }
@@ -245,8 +249,8 @@ S.onFrame((G,t,dt,info)=>{
   const gl=f.g.userData.glow;gl.material.opacity=(.25+.5*night)*(.9+Math.sin(t*17+f.ph)*.1);const gs=2.2+night*1.6;gl.scale.set(gs/f.g.scale.x,gs/f.g.scale.y,1);
  }
  /* vurulan nesne sallanması */
- if(wobIdx>=0&&(wobIdx!==info.hitI||info.hitT<=0)){const r=inst.get(wobIdx);if(r&&!staged.has(wobIdx)){r.mesh.setMatrixAt(r.idx,r.mat);if(r.lo)r.lo.setMatrixAt(r.idx,r.mat);r.mesh.instanceMatrix.needsUpdate=true;if(r.lo)r.lo.instanceMatrix.needsUpdate=true}wobIdx=-1}
- if(info.hitI>=0&&info.hitT>0&&!staged.has(info.hitI)){
+ if(wobIdx>=0&&(wobIdx!==info.hitI||info.hitT<=0)){const r=inst.get(wobIdx);if(r&&G.obj[wobIdx]&&!staged.has(wobIdx)){r.mesh.setMatrixAt(r.idx,r.mat);if(r.lo)r.lo.setMatrixAt(r.idx,r.mat);r.mesh.instanceMatrix.needsUpdate=true;if(r.lo)r.lo.instanceMatrix.needsUpdate=true}wobIdx=-1}
+ if(info.hitI>=0&&info.hitT>0&&G.obj[info.hitI]&&!staged.has(info.hitI)){        /* yok edilen nesne (G.obj boş) yeniden gösterilmez */
   const r=inst.get(info.hitI);
   if(r){
    const amt=Math.sin(t*90)*.07*(info.hitT/.18)*(r.key==='treeA'||r.key==='treeB'?.35:1);

@@ -67,8 +67,9 @@ function render(){
   const all=HG.NOTES||[];
   h=`<p class="mut">Bulunan kayıt: ${G.notes.length}/${all.length}. Terk edilmiş kampların sandıklarında bulunur.</p>`;
   for(const i of G.notes)h+=`<div class="nt${i===hl?' hl':''}"><b>${esc(all[i].t)}</b><span>${esc(all[i].x)}</span></div>`;
+  if(HG.extNotesHtml)h+=HG.extNotesHtml(esc);
  }else{
-  const s=G.stats,rows=[['Hayatta kalınan gün',dayNo()],['Seviye',G.lvl],['Avlanan hayvan',s.hunted],['Yok edilen Gölge',s.shades],['Açılan sandık',s.chests],['Tamamlanan görev',s.quests],['Ticaret işlemi',s.traded],['Atlatılan Kan Ayı',s.blood],['Üretilen eşya',s.crafted],['Bulunan kamp',(G.camps||[]).filter(c=>G.flags['c'+c.id]).length+'/'+(G.camps||[]).length],['Bulunan köy',(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length+'/'+(G.villages||[]).length],['Yürünen mesafe',Math.round(s.walked||0)+' m'],['Yüzülen mesafe',Math.round(s.swum||0)+' m'],['Toplanan midye',s.shells||0],['Salla alınan yol',Math.round(s.sailed||0)+' m'],['Keşfedilen ada',(s.islets||0)+'/'+(G.islets||[]).length],['Keşfedilen resif',(s.reefs||0)+'/'+(G.reefs||[]).length],['Toplanan mercan',s.coral||0],['Öldürülen köpek balığı',s.sharks||0]];
+  const s=G.stats,rows=[['Hayatta kalınan gün',dayNo()],['Seviye',G.lvl],['Avlanan hayvan',s.hunted],['Yok edilen Gölge',s.shades],['Açılan sandık',s.chests],['Tamamlanan görev',s.quests],['Ticaret işlemi',s.traded],['Atlatılan Kan Ayı',s.blood],['Üretilen eşya',s.crafted],['Bulunan kamp',(G.camps||[]).filter(c=>G.flags['c'+c.id]).length+'/'+(G.camps||[]).length],['Bulunan köy',(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length+'/'+(G.villages||[]).length],['Yürünen mesafe',Math.round(s.walked||0)+' m'],['Yüzülen mesafe',Math.round(s.swum||0)+' m'],['Toplanan midye',s.shells||0],['Salla alınan yol',Math.round(s.sailed||0)+' m'],['Keşfedilen ada',(s.islets||0)+'/'+(G.islets||[]).length],['Keşfedilen resif',(s.reefs||0)+'/'+(G.reefs||[]).length],['Toplanan mercan',s.coral||0],['Öldürülen köpek balığı',s.sharks||0]].concat(HG.extStatRows?HG.extStatRows(s):[]);
   h=rows.map(r=>`<div class="st"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
  }
  b.innerHTML=h;

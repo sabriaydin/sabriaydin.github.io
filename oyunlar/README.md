@@ -26,7 +26,12 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Arazi (yumuşak yükseklik, renk karışımı) ve su | `js/sahne/arazi.js` |
 | Çimen tutamları ve çiçekler (eğik sap, yaprak, taç; rüzgârda sallanır) | `js/sahne/cim.js` |
 | Yüksek ayrıntılı 3B modeller (çam/meşe/palmiye, kaya, maden, çalı, alet parçaları, duvar, kapı…) | `js/sahne/modeller.js` |
-| Dünya nesnelerinin sahneye yerleşimi (parçalı örnekleme, kaliteye bağlı LOD mesafesi, rüzgâr, alev); kurulan yapılar (ateş, duvar, kapı, çit…) tek tek eklenir/kaldırılır, komşu duvar ve kapıların yönü yeniden hesaplanır (tam sahne yenilemesi gerekmez); kesilmiş ve yeniden büyümeyi bekleyen ağaç/kaya/maden için gizli örnek hazır tutulur (kayıt yüklendikten sonra da artımlı güncelleme) | `js/sahne/nesneler.js` (`buildStruct`, `removeStruct`, `S.syncCells`) |
+| Güncelleme 49 eşyaları (tohum, buğday, ekmek, güveç, meyve suyu, kurutulmuş yiyecek, mantar, yumurta, tüy, merhem, şişedeki mesaj, zırh, Demir Mızrak, Dürbün), yeni yapı tarifleri, tavuk türü | `js/veri/yenilikler.js` |
+| Yeni eşya simgeleri | `js/gorsel/yeni-simgeler.js` |
+| Yeni yapı modelleri (yatak, raf, varil, meşale direği, tuzak, tarla, ekin aşamaları, mantar), tavuk modeli, yerdeki ve elde tutulan yeni eşya modelleri | `js/sahne/yeni-modeller.js` |
+| Yapıların üstündeki dinamik görseller (ekin aşaması, asılı yiyecek, varil suyu, tuzakta av), kayan yıldız, gökkuşağı, kuş sürüsü, dürbünde el gizleme | `js/sahne/yenilikler.js` |
+| Yapı etkileşimleri ve durumları (yatak, raf, varil, tuzak, tarla), Dürbün yakınlaştırma, zırh ve zorluk (`HG.hurt` sarmalı), tavuk yumurtası, mantar yerleşimi, fotoğraf modu (P), Şişedeki Mesaj, Çiftçi/Aşçı yetenekleri, köylü ticareti ve kamp ganimeti eklemeleri; durum `G.ext` olarak kayda işlenir | `js/oyun/yenilikler.js` |
+| Dünya nesnelerinin sahneye yerleşimi (parçalı örnekleme, kaliteye bağlı LOD mesafesi, rüzgâr, alev); kurulan yapılar (ateş, duvar, kapı, çit…) tek tek eklenir/kaldırılır, komşu duvar ve kapıların yönü yeniden hesaplanır (tam sahne yenilemesi gerekmez); kesilmiş ve yeniden büyümeyi bekleyen ağaç/kaya/maden için gizli örnek hazır tutulur (kayıt yüklendikten sonra da artımlı güncelleme) | `js/sahne/nesneler.js` (`buildStruct`, `removeStruct`, `S.syncCells`); Hasır Yatak, Kurutma Rafı, Yağmur Varili, Meşale Direği (ışık ve alev), Av Tuzağı ve Ekim Tarlası yapı olarak, Mantar örnekli (instanced) çizilir |
 | Birinci şahıs kollar (gerçekçi el/parmak/ön kol, deri tonu) ve elde tutulan eşya; El Taşı iki elle tutulur; balta/kazma/olta modelleri | `js/sahne/kol.js` |
 | Parçacık efektleri | `js/sahne/efektler.js` |
 | Nişan, yerleştirme hayaleti | `js/sahne/nisan.js` |
@@ -43,7 +48,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Başarımlar | `js/oyun/basarimlar.js` |
 | Yaprak, duman, kıvılcım, adım tozu, su halkaları, soluk buharı | `js/sahne/parcaciklar.js` |
 | Yüklenme ekranı (ilerleme çubuğu, ipuçları, "Oyuna Gir") | `index.html` (`#load`), `js/oyun/durum.js` (`startGame`), `js/oyun/dongu.js` (`init`), `js/sahne/cekirdek.js` (`buildAsync`) |
-| Oyuncu fiziği (atalet, eğim, düşme hasarı), eşya sekmesi/yüzmesi, ok sürüklenmesi | `js/oyun/hayatta-kalma.js`, `js/oyun/dusenler.js`, `js/oyun/silah.js` |
+| Oyuncu fiziği (atalet, eğim, düşme hasarı), eşya sekmesi/yüzmesi, ok sürüklenmesi; konuma göre barınak sorgusu (`HG.shelterAt`) | `js/oyun/hayatta-kalma.js`, `js/oyun/dusenler.js`, `js/oyun/silah.js` |
 | Köyler, köylüler, mesleğe özgü takas/satış (1-3 işlem, işlem hakkı, yenileme), köylü uykusu | `js/oyun/koyluler.js` (mantık), `js/sahne/koyluler.js` (model ve animasyon) |
 | Köy evleri, avlu eşyaları, fenerler, patikalar, tabela | `js/sahne/koy-yapilari.js` |
 | Deneyim, seviye, yetenekler, günlük penceresi (K) | `js/oyun/gelisim.js` |
@@ -52,12 +57,12 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Bulunan kayıtlar (hikâye notları) | `js/veri/notlar.js` |
 | Kan Ayı gecesi ve günlük deneyim | `js/oyun/olaylar.js`, `js/sahne/isik.js` (kızıl gökyüzü) |
 | Sikke ekonomisi, satış, Uyku Tulumu ve uyku | `js/oyun/koyluler.js` (`HG.sleep`), `js/veri/esyalar.js` (coin, bag) |
-| Hayvan modelleri / hayvan hareketi ve animasyonu | `js/sahne/hayvan-modelleri.js`, `js/sahne/hayvanlar.js` |
-| Ses motoru: 3B ses, yankı, ortam sesleri, hava, hayvan, adım, müzik | `js/oyun/ses.js` |
+| Hayvan modelleri / hayvan hareketi ve animasyonu (tavuk gagalaması dahil) | `js/sahne/hayvan-modelleri.js`, `js/sahne/hayvanlar.js` |
+| Ses motoru: 3B ses, yankı, ortam sesleri, hava, hayvan (tavuk dahil), adım, müzik, dürbün ve deklanşör sesi | `js/oyun/ses.js` |
 | Gece-gündüz hesabı | `js/oyun/zaman.js` |
 | Envanter işlemleri | `js/oyun/envanter.js` |
 | Üretim mantığı | `js/oyun/uretim.js` |
-| Kesme/toplama/yerleştirme/yeme-içme; vuruş başına kaynak ve zayıf nokta (Rust mantığı), E ile toplama ve basılı tutarak geri alma, alet kademesi (`gatherLv`), verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` (vuruş hasarı `HIT`: `js/veri/dugumler.js`) |
+| Kesme/toplama/yerleştirme/yeme-içme; vuruş başına kaynak (Rust mantığı), E ile toplama ve basılı tutarak geri alma, yeni yapı/ürün etkileşimleri için kancalar (`HG.useExtra`, `HG.extHint`, `HG.extHeldHint`, `HG.extPickupBlock`, `HG.extGot`, `HG.extSand`), alet kademesi (`gatherLv`), verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` (vuruş hasarı `HIT`: `js/veri/dugumler.js`) |
 | İnşa sistemi: İnşa Planı (duvar/kapı/çit kurma), Çekiç (Odun/Taş/Metal yükseltme, yıkma ve %50 iade), sağ tık radyal menüsü (menü açıkken eşya değişirse seçim uygulanmaz), yerleştir tuşu/dokunmatik düğme plan ve çekiçle de çalışır, yerleştirme gölgesi | `js/oyun/insa.js` (parça kataloğu `PIECES`), `css/stil.css` (`#radial`), `js/gorsel/simgeler.js` (parça simgeleri), `js/sahne/modeller.js` (`wallt`, `wallm`, `doorm`, `fence`) |
 | Yere atılan eşyalar (fizik, toplama) | `js/oyun/dusenler.js` |
 | Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, kovalama hızı oyuncunun koşusundan yavaş `cspd`, uzaklaşınca bırakma `giveUp`, iç içe geçme engeli, yabani hayvanlar kapıdan geçemez `SOLIDA`), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
@@ -77,7 +82,7 @@ Not: Harita 768×768 karedir (`js/cekirdek/ad-alani.js`). Eski 384×384 kayıtla
 | Deniz görselleri: köpek balığı, yunus, martı, yengeç, sal modeli ve izi, parlayan plankton, fener ışığı, fırtına dalgası | `js/sahne/deniz.js` |
 | E tuşu hedef seçimi (bakılan yöne göre), nişan ipucu | `js/oyun/eylem.js` (`useCands`), `js/oyun/arayuz.js` |
 | Rehber hedefler | `js/oyun/hedefler.js` |
-| Yeni oyun, kayıt, yükleme (yarım kalmış kaya/ağaç/maden hasarı kayda dahildir; yeni oyun ve yüklemede alet/inşa bekleme sayaçları ile zayıf nokta işareti sıfırlanır; bozuk veya eski kayıttaki tanımsız eşya ve geçersiz sayılar temizlenir) | `js/oyun/durum.js` (`startGame`, `snapshotRaw`) |
+| Yeni oyun, kayıt, yükleme (yarım kalmış kaya/ağaç/maden hasarı kayda dahildir; yeni oyun ve yüklemede alet/inşa bekleme sayaçları sıfırlanır; mantar ve eski kayıtlardaki tavuklar bir kez yerleştirilir (`HG.extStart`); bozuk veya eski kayıttaki tanımsız eşya ve geçersiz sayılar temizlenir) | `js/oyun/durum.js` (`startGame`, `snapshotRaw`) |
 | HUD, envanter paneli, harita | `js/oyun/arayuz.js` |
 | Klavye, fare, dokunmatik, envanter sürükle-bırak | `js/oyun/giris.js` |
 | Ana döngü ve başlatma | `js/oyun/dongu.js` |

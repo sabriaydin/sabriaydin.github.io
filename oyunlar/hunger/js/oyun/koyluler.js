@@ -57,7 +57,7 @@ const PROF={
 };
 let nid=1;
 /* Tek seferlik eşyalar (alet, silah) için hak 1'dir */
-const ONE=new Set(['bow','rod','pick1','pick2','axe1','axe2','bag','coat','door','raft','mask']);
+const ONE=new Set(['bow','rod','pick1','pick2','axe1','axe2','bag','coat','door','raft','mask','spear2','spyglass','vest','iarmor','bed','barrel']);
 function rollDeals(prof){
  const P=PROF[prof],pool=[];
  P.offers.forEach((o,i)=>pool.push({t:'o',k:i}));
@@ -237,7 +237,7 @@ function talkNpc(){
  openTrade(n);return true;
 }
 /* ---- uyku tulumu: geceyi güvenli yerde geçirir ---- */
-function sleep(){
+function sleep(bed){
  if(ui.sleeping)return;
  if(G.blood){HG.toast('Kan Ayı gecesinde uyunamaz. Sabaha kadar dayanmak gerekir.');return}
  if(daylight()>.35){HG.toast('Henüz akşam olmadı. Uyumak için gece olmalı.');return}
@@ -251,11 +251,11 @@ function sleep(){
  setTimeout(()=>{
   const fr=G.clock/HG.DAY,k=Math.floor(fr);let tg=(k+.02)*HG.DAY;if(tg<=G.clock)tg=(k+1.02)*HG.DAY;
   G.clock=tg;
-  G.hun=Math.max(Math.min(G.hun,5),G.hun-22);G.thr=Math.max(Math.min(G.thr,5),G.thr-26);
-  G.stam=100;G.san=Math.min(100,G.san+50);G.hp=Math.min(100,G.hp+15);
-  if(G.sheltered||G.nearFire||nearVil)G.warm=Math.max(G.warm,70);
+  G.hun=Math.max(Math.min(G.hun,5),G.hun-(bed?15:22));G.thr=Math.max(Math.min(G.thr,5),G.thr-(bed?18:26));
+  G.stam=100;G.san=Math.min(100,G.san+(bed?75:50));G.hp=Math.min(100,G.hp+(bed?30:15));
+  if(G.sheltered||G.nearFire||nearVil)G.warm=Math.max(G.warm,bed?85:70);
   for(const a of G.animals||[])if(HG.ANIMAL[a.t].foe&&!a.dying){a.gone=true;a.dying=.001}
-  HG.flag('slept');HG.toast('Sabah oldu. Dinlenerek uyandın.');
+  HG.flag('slept');if(bed)HG.flag('slept_bed');HG.toast(bed?'Sabah oldu. Yatakta iyice dinlendin.':'Sabah oldu. Dinlenerek uyandın.');
   setTimeout(()=>{f.classList.remove('on');ui.sleeping=false},500);
  },1000);
 }

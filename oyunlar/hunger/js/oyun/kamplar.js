@@ -5,11 +5,11 @@ const {G,ui,count,add,canAdd,IT}=HG;
 const rnd=Math.random,R=(a,b)=>a+((rnd()*(b-a+1))|0);
 /* ganimet: [eşya, en az, en çok, ağırlık]; seviye arttıkça güçlenir */
 const LOOT=[
- [['bandage',1,3,5],['arrow',5,12,5],['cmeat',1,3,5],['wbottle',1,2,4],['torch',1,2,4],['coin',2,6,6],['leather',2,4,3],['bone',2,4,3],['berries',3,6,3]],
- [['bandage',2,4,4],['arrow',8,16,4],['cmeat',2,4,4],['torch',2,3,3],['coin',5,10,6],['iron_ingot',1,1,3],['copper_ingot',1,2,4],['coat',1,1,1],['wool',2,4,2],['bag',1,1,1]],
- [['bandage',3,5,4],['arrow',12,20,4],['coin',10,18,6],['iron_ingot',1,3,5],['pick2',1,1,2],['axe2',1,1,2],['bow',1,1,2],['spear',1,1,2],['coat',1,1,3],['bag',1,1,2],['cmeat',3,5,3]],
+ [['bandage',1,3,5],['arrow',5,12,5],['cmeat',1,3,5],['wbottle',1,2,4],['torch',1,2,4],['coin',2,6,6],['leather',2,4,3],['bone',2,4,3],['berries',3,6,3],['jerky',1,3,3],['seed',2,4,2],['feather',2,5,2],['mushroom',2,4,2]],
+ [['bandage',2,4,4],['arrow',8,16,4],['cmeat',2,4,4],['torch',2,3,3],['coin',5,10,6],['iron_ingot',1,1,3],['copper_ingot',1,2,4],['coat',1,1,1],['wool',2,4,2],['bag',1,1,1],['jerky',2,4,3],['salve',1,2,2],['vest',1,1,1],['seed',3,5,2],['feather',3,6,2]],
+ [['bandage',3,5,4],['arrow',12,20,4],['coin',10,18,6],['iron_ingot',1,3,5],['pick2',1,1,2],['axe2',1,1,2],['bow',1,1,2],['spear',1,1,2],['coat',1,1,3],['bag',1,1,2],['cmeat',3,5,3],['salve',1,3,3],['iarmor',1,1,1.2],['spear2',1,1,1.2],['spyglass',1,1,1.2],['jerky',3,5,3]],
  /* mağaradaki mühürlü sandık: az ama değerli */
- [['gold',1,3,6],['gem',1,2,5],['coin',18,32,5],['iron_ingot',2,4,4],['pick3',1,1,1.6],['axe3',1,1,1.6],['bandage',3,5,3],['arrow',16,26,3],['torch',3,4,3]]
+ [['gold',1,3,6],['gem',1,2,5],['coin',18,32,5],['iron_ingot',2,4,4],['pick3',1,1,1.6],['axe3',1,1,1.6],['bandage',3,5,3],['arrow',16,26,3],['torch',3,4,3],['spyglass',1,1,1.2],['iarmor',1,1,1.2],['salve',2,3,3]]
 ];
 /* deniz kampları: enkaz, kazazede kampı ve deniz feneri; seviye 0-1 ve 2+ için iki ganimet listesi */
 const LOOT_SEA={

@@ -33,8 +33,10 @@ function surfaceBase(im){
   const o=G.obj[i];
   if(o===O.TREE||o===O.PALM){r*=.62;g*=.78;bl*=.6}
   else if(o===O.BUSH||o===O.BUSH0){r*=.8;g*=.92;bl*=.78}
-  else if(o===O.FIRE){r=250;g=150;bl=40}
-  else if(o===O.BENCH||o===O.FURN||o===O.WALLW||o===O.WALLS||o===O.DOOR||o===O.WALLT||o===O.WALLM||o===O.DOORM||o===O.FENCE){r=170;g=120;bl=70}
+  else if(o===O.FIRE||o===O.TORCHP){r=250;g=150;bl=40}
+  else if(o===O.SHROOM){r*=.9;g*=.8;bl*=.8}
+  else if(o===O.PLOT){r=110;g=84;bl=44}
+  else if(o===O.BED||o===O.RACK||o===O.BARREL||o===O.SNARE||o===O.BENCH||o===O.FURN||o===O.WALLW||o===O.WALLS||o===O.DOOR||o===O.WALLT||o===O.WALLM||o===O.DOORM||o===O.FENCE){r=170;g=120;bl=70}
   if(t>T.SHAL&&t!==T.POND){r*=sh;g*=sh;bl*=sh}
   /* kıyı köpüğü */
   if(G.shore&&G.shore[i]){r+=(235-r)*.35;g+=(240-g)*.35;bl+=(245-bl)*.35}

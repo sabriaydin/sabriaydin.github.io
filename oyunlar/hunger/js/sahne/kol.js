@@ -214,7 +214,8 @@ function heldModel(id){
  const it=IT[id],g=new THREE.Group();
  const add=(geo,c,x,y,z,rx,ry,rz)=>{const m=new THREE.Mesh(geo,pm(c));m.position.set(x,y,z);m.rotation.set(rx||0,ry||0,rz||0);g.add(m)};
  const tc=[0,0x8d8d92,0xc8743a,0xc3c9d0];
- if(it.tool==='rock'){const r=rockModel(false);g.add(r)}
+ if(sc.heldX&&sc.heldX[id])sc.heldX[id](g,add);
+ else if(it.tool==='rock'){const r=rockModel(false);g.add(r)}
  else if(id==='stone'){const r=rockModel(true);r.position.y=.07;g.add(r)}
  else if(it.tool==='axe'||it.tool==='pick'){toolModel(g,it.tool,it.tier||1)}
  else if(it.tool==='rod'){const r=toolModel(g,'rod',1);r.rotation.x=.5;r.position.set(0,.08,.04);add(cyl(.0035,.0035,.7,3),0xdddddd,0,.55,.6,.2)}

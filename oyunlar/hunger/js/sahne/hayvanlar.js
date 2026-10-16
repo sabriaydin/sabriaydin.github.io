@@ -95,7 +95,7 @@ S.onFrame((G,t,dt,info)=>{
   }else{
    if(o.head){
     /* otlama (sakin hayvanlar), tetikte baş kaldırma, saldırıda öne atılma, oyuncuya bakma */
-    const P=M.headP,graze=(a.t==='sheep'||a.t==='cow'||a.t==='deer')&&idle?(()=>{const f=((t*.06+a.id*.37)%1);return f<.4?Math.sin(Math.PI*f/.4):0})():0;
+    const P=M.headP,graze=(a.t==='sheep'||a.t==='cow'||a.t==='deer')&&idle?(()=>{const f=((t*.06+a.id*.37)%1);return f<.4?Math.sin(Math.PI*f/.4):0})():(a.t==='chicken'&&idle?Math.max(0,Math.sin(t*4.2+a.id*2.1)-.3)*1.3:0);
     const dxp=G.px-a.x,dzp=G.py-a.z,dpp=Math.hypot(dxp,dzp);
     let rel=0;if(idle&&dpp<14&&!graze){let d=Math.atan2(dxp,dzp)-a.yaw;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;rel=clamp(d,-.7,.7)*clamp((14-dpp)/6,0,1)}
     const alert=(def.flee&&dpp<def.flee*1.4)||a.panic>0?-.22:0;
@@ -111,6 +111,7 @@ S.onFrame((G,t,dt,info)=>{
     else if(a.t==='wolf'){pt=a.charge>0?-.55:(a.panic>0||run?-.15:.35);yw=Math.sin(t*3+a.id)*(a.charge>0?.1:.2)}
     else if(a.t==='deer'){pt=run?-.5:0;yw=Math.sin(t*(run?10:2.5)+a.id)*.25}
     else if(a.t==='boar'){yw=Math.sin(t*4+a.id)*.35;pt=-.2}
+    else if(a.t==='chicken'){yw=Math.sin(t*(idle?1.6:8)+a.id)*.12;pt=run?-.2:0}
     o.tail.position.set(P[0],P[1]+by,P[2]);o.tail.rotation.set(pt,yw,0);
    }
   }

@@ -4,7 +4,7 @@
 const {G}=HG;
 /* [bayrak, açıklama]: bayraklar envanter.js/eylem.js içinde işaretlenir (got_, made_, placed_, ...) */
 const GOALS=[
- ['got_wood','El Taşını elinde tut (1. yuva), bir ağaca bak ve sol tuşla art arda vurarak odun topla; kırmızı X işaretine vurmak iki kat verir. Çıplak elle ağaç kesilmez.'],
+ ['got_wood','El Taşını elinde tut (1. yuva), bir ağaca bak ve sol tuşla art arda vurarak odun topla. Çıplak elle ağaç kesilmez.'],
  ['got_stone','El Taşıyla yerdeki gri kayalardan taş topla.'],
  ['made_axe1','C tuşuyla üretim panelini aç ve Taş Balta üret.'],
  ['made_pick1','Taş Kazma üret. Kömür ve bakır ancak bununla çıkarılır.'],
@@ -33,7 +33,11 @@ const GOALS=[
  ['got_shell','Dalıp deniz dibine bakarak midye topla ve ateşte pişir.'],
  ['made_raft','Tezgâhta Sal üret (odun, deri, yün). Elinde tutup suya bakarak E veya sağ tıkla bin.'],
  ['isl_found','Salla açık denize çık ve yeni bir ada keşfet. Köpek balıklarına dikkat et: sal onlara karşı da sığınaktır.'],
- ['wreck_open','Denizde bir gemi enkazı bul, dalıp dibindeki sandığı E ile aç. Dalış Maskesi nefesi uzatır.']
+ ['wreck_open','Denizde bir gemi enkazı bul, dalıp dibindeki sandığı E ile aç. Dalış Maskesi nefesi uzatır.'],
+ ['placed_plot','Ekim Tarlası üret (odun, taş) ve yerleştir. Yaban meyvesinden Tohum üret; tarlaya bakıp elde tohumla E: ekim.'],
+ ['harvest','Ekin olgunlaşınca (yaklaşık 5 dakika, yağmurda iki kat hızlı) E ile hasat et: buğday ve tohum verir, ateşte ekmek olur.'],
+ ['placed_rack','Kurutma Rafı kur; çiğ et ve balık elde tutulup E ile asılır. Yağmur altında kurumaz, rafı çatı altına kurmak iyi olur.'],
+ ['placed_bed','Hasır Yatak üret (tezgâhta), çatı altına koy ve gece E ile uyu: Uyku Tulumundan daha dinlendiricidir.']
 ];
 function goalText(){
  let done=0;for(const g of GOALS)if(G.flags[g[0]])done++;

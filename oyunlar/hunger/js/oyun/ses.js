@@ -179,6 +179,10 @@ function animalVoice(type,kind){
    if(call)K.whisper(d);
    else{N(d,{ft:'bandpass',f:4200,f2:2500,q:1.5,d:.7*L,v:.35,pink:true});Tn(d,{f:die?1200:800,f2:die?180:300,d:.6*L,type:'sawtooth',v:.09,lp:2600,vib:45,vibf:30});if(die)Tn(d,{f:60,f2:35,d:1.2,v:.4})}
   }
+  else if(type==='chicken'){
+   if(call){const n=2+((Math.random()*2)|0);for(let i=0;i<n;i++){const f=R(520,640);Tn(d,{f,f2:f*.8,d:.1,type:'triangle',v:.09*v,t:i*.17,lp:1700,att:.01});N(d,{ft:'bandpass',f:1500,q:2,d:.07,v:.05*v,t:i*.17,pink:true})}}
+   else{const f=R(720,900);Tn(d,{f,f2:f*1.5,d:.3*L,type:'sawtooth',v:.1,lp:2500,vib:36,vibf:28});N(d,{ft:'bandpass',f:2100,q:1.5,d:.25*L,v:.1,pink:true});if(die)K.thud(d)}
+  }
   else if(type==='deer'){Tn(d,{f:R(520,640),f2:R(380,460),d:.3*L,type:'sawtooth',v:.1*v,lp:1500,vib:15,vibf:21});N(d,{ft:'bandpass',f:1100,q:1.5,d:.25*L,v:.12*v,pink:true})}
   else if(type==='shark'){
    if(call)K.shark_warn(d);
@@ -194,7 +198,9 @@ K.gull=d=>{const f=R(1500,1900),n=2+((Math.random()*3)|0);for(let i=0;i<n;i++)Tn
 K.dolphin=d=>{for(let i=0;i<4;i++)Tn(d,{f:2400+i*160,f2:5200,d:.14,v:.05,t:i*.13,att:.004});Tn(d,{f:3000,f2:1800,d:.5,v:.04,t:.55,att:.02,vib:40,vibf:30});for(let i=0;i<7;i++)N(d,{ft:'bandpass',f:6200,q:5,d:.015,v:.1,t:.9+i*.045})};
 K.whale=d=>{Tn(d,{f:78,f2:132,d:2.4,v:.2,att:.6,vib:3,vibf:.8,lp:420});Tn(d,{f:130,f2:70,d:2.6,v:.12,att:.5,t:1.1,vib:2,vibf:.6,lp:420});Tn(d,{f:240,f2:160,d:2,v:.03,t:.6,att:.5})};
 K.bell=d=>{M(d,{f:520,v:.12,p:[[1,1,1.8],[2.4,.55,1.2],[4.1,.3,.8],[6.3,.15,.5]]})};
-for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
+for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab','chicken'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
+K.zoom=d=>{Tn(d,{f:940,f2:620,d:.07,type:'triangle',v:.06});N(d,{ft:'highpass',f:4200,d:.03,v:.05})};
+K.shutter=d=>{N(d,{ft:'highpass',f:2600,d:.035,v:.32});N(d,{ft:'bandpass',f:1800,q:2,d:.05,v:.25,t:.07});Tn(d,{f:260,f2:180,d:.05,v:.1,t:.07})};
 
 /* ---------- konumlu çıkış ---------- */
 function route(pos){

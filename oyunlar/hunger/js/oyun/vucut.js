@@ -34,8 +34,9 @@ function swing(){
 }
 function useStam(v){G.stam=Math.max(0,G.stam-v);if(G.stam<=0)G.tired=true}
 function useMedical(){
- if(!count('bandage'))return;
- take('bandage',1);G.bleed=0;G.hp=clamp(G.hp+14+5*HG.perk('medic'),0,100);G.san=clamp(G.san+3,0,100);
+ const hh=held(),hk=hh&&hh.it.heal?hh.k:'bandage';
+ if(!count(hk))return;
+ take(hk,1);G.bleed=0;G.hp=clamp(G.hp+(HG.IT[hk].hp||14)+5*HG.perk('medic'),0,100);G.san=clamp(G.san+3,0,100);
  HG.snd('bandage');HG.toast('Yara sarıldı.');flag('healed');HG.ui.dirty=true;
 }
 

@@ -1,4 +1,4 @@
-/* Hunger 3D - eylemler: nişan alınan şeyi kesme, kazma (Rust mantığı: vuruş başına kaynak, zayıf nokta), E ile toplama, su içme, balık, yerleştirme, yeme */
+/* Hunger 3D - eylemler: nişan alınan şeyi kesme, kazma (Rust mantığı: vuruş başına kaynak), E ile toplama, su içme, balık, yerleştirme, yeme */
 (()=>{
 'use strict';
 const {W,T,O,PLACE_ITEM,NODE,POWER,NAMES,G,ui,A,inp,Scene,clamp,count,add,take,gain,canAdd,held,setObj,flag}=HG;
@@ -31,6 +31,7 @@ function actionFor(tg){
  if(G.head&&h&&(h.it.food||h.it.heal))return {block:'Su altında kullanılamaz.',name:h.it.n};
  /* elde yiyecek/içecek varsa sol tık basılı tutulunca yenir */
  if(h&&h.it.food){
+  {const xh=tg&&HG.extHeldHint&&HG.extHeldHint(tg,h);if(xh)return xh}
   const b=foodBlock(h.it.food);
   return b?{block:b,name:h.it.n}:{kind:'eat',need:1.1,hint:'Basılı tut: '+(h.it.food.h===0?'iç':'ye'),name:h.it.n};
  }
@@ -38,7 +39,7 @@ function actionFor(tg){
  if(h&&h.it.tool==='bow')return {kind:'bow',need:0,hint:count('arrow')?'Basılı tut: ger · bırak: ateşle':'Ok yok',name:'Yay · '+count('arrow')+' ok'};
  /* bandaj */
  if(h&&h.it.heal)return (G.bleed>0||G.hp<95)?{kind:'heal',need:1.6,hint:'Basılı tut: yarayı sar',name:h.it.n}:{block:'Yaralı değilsin.',name:h.it.n};
- if(!tg)return null;
+ if(!tg)return h&&h.it.tool==='spyglass'?{hint:'[E] veya sağ tık: yakınlaştır',name:h.it.n}:null;
  if(G.head&&!tg.an)return null;                 /* su altında yalnızca canlılara ve dibe eylem yapılır */
  /* hayvan */
  if(tg.an){
@@ -57,12 +58,13 @@ function actionFor(tg){
  if(o){
   const name=NAMES[o]||'Nesne',nd=NODE[o];
   if(nd){
-   if(nd.collect)return {hint:'[E] '+(o===O.PALM?'Hindistan cevizi topla':'Meyve topla'),name};
+   if(nd.collect)return {hint:'[E] '+(o===O.PALM?'Hindistan cevizi topla':o===O.SHROOM?'Mantar topla':'Meyve topla'),name};
    const lv=nd.tool?gatherLv(nd.tool):0;
    if(lv<0)return {block:nd.tool==='axe'?'Çıplak elle ağaç kesilemez. El Taşı veya balta gerekir.':nd.req>0?(nd.msg||'Bunun için kazma gerekir.'):'Çıplak elle kazılamaz. El Taşı veya kazma gerekir.',name};
    if(lv<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
-   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz')+' · sarı işarete vur: iki kat',name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
+   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz')+' · her vuruş kaynak verir',name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
   }
+  {const xh=HG.extHint&&HG.extHint(tg,o,h,i);if(xh)return xh}
   if(pickupOk(o))return {hint:'[E] basılı tut: geri al',name};
   return null;
  }
@@ -77,6 +79,7 @@ function actionFor(tg){
   return {block:'Deniz suyu tuzludur, içilemez.',name:'Deniz (tuzlu su)'};
  }
  if(tl===T.SAND)return {hint:'[E] Kum kaz',name:'Kum'};
+ if(h&&h.it.tool==='spyglass')return {hint:'[E] veya sağ tık: yakınlaştır',name:h.it.n};
  return null;
 }
 
@@ -153,33 +156,12 @@ function stepAction(dt){
  }
 }
 
-/* ---- Rust mantığı: vuruş başına kaynak ve zayıf nokta ---- */
-const SWING=.5,HOT_R=.26;                  /* vuruş aralığı (sn), zayıf nokta isabet yarıçapı (m) */
+/* ---- Rust mantığı: vuruş başına kaynak ---- */
+const SWING=.5;                            /* vuruş aralığı (sn) */
 /* Düğümün modeldeki merkezi ve ölçeği (nesneler.js ile aynı yerleşim) */
 function nodeCenter(x,y,o){
  const hh=HG.hash(x,y,21),h2=HG.hash(x,y,22);
  return {x:x+.5+(hh-.5)*.2,z:y+.5+(h2-.5)*.2,s:o===O.TREE?.8+h2*.4:.9+h2*.3};
-}
-function makeHot(tg,i,o,nd){
- const c=nodeCenter(tg.x,tg.y,o),a=Math.atan2(G.py-c.z,G.px-c.x)+(Math.random()-.5)*1.8,r=nd.hot.r*c.s,h=nd.hot.h0+Math.random()*(nd.hot.h1-nd.hot.h0);
- return HG.hot={i,o,x:c.x+Math.cos(a)*r,y:Scene.groundY(c.x,c.z)+h*(o===O.TREE?c.s:1),z:c.z+Math.sin(a)*r,k:nd.hot.k,show:true};
-}
-/* Hedef bir düğümse ve elde uygun alet varsa zayıf nokta işareti gösterilir; her vuruştan sonra yeni yere taşınır */
-function updateHot(){
- const tg=G.tg;let nd=null,i=-1,o=0;
- if(ui.state==='play'&&tg&&!tg.an&&!G.head){
-  i=tg.y*W+tg.x;o=G.obj[i];nd=NODE[o];
-  if(nd&&nd.hot){const lv=gatherLv(nd.tool);if(lv<0||lv<nd.req)nd=null}else nd=null;
- }
- if(!nd){if(HG.hot)HG.hot.show=false;return}
- const h=HG.hot;
- if(!h||h.i!==i||h.o!==o)makeHot(tg,i,o,nd);else h.show=true;
-}
-/* Bakış ışınının zayıf noktaya yeterince yakın geçip geçmediği */
-function hotHit(){
- const h=HG.hot;if(!h||!h.show||!Scene.aimRay)return false;
- const r=Scene.aimRay(),vx=h.x-r.o.x,vy=h.y-r.o.y,vz=h.z-r.o.z,t=Math.max(0,vx*r.d.x+vy*r.d.y+vz*r.d.z);
- return vx*vx+vy*vy+vz*vz-t*t<HOT_R*HOT_R;
 }
 /* Kaynak ver: çanta doluysa eşya yere düşer */
 function giveRes(id,n){
@@ -197,16 +179,14 @@ function nodeSwing(tg){
  const lv=gatherLv(nd.tool);
  A.nextSwing=G.clock+SWING*(G.tired?1.6:1);
  A.hitI=i;A.hitT=.18;HG.armSwing(.36);
- const weak=hotHit(),big=o!==O.TREE;
+ const big=o!==O.TREE;
  HG.snd(o===O.TREE?'hit':o===O.ROCK?'rock':'ore');
  const hx=tg.hx!==undefined?tg.hx:tg.x+.5,hy=tg.hy!==undefined?tg.hy:1,hz=tg.hz!==undefined?tg.hz:tg.y+.5;
  Scene.burst(hx,hy,hz,o===O.TREE?0x4a9440:o===O.COAL?0x222226:o===O.COPPER?0xc8743a:o===O.IRON?0xc2a287:0x9a9a9a,big?7:4);
- let n=nd.y[Math.min(3,lv)]*(weak?2:1);
+ let n=nd.y[Math.min(3,lv)];
  if(HG.perk('gath')&&Math.random()<.12*HG.perk('gath'))n+=1;
  giveRes(nd.id,n);
- if(nd.sec)giveRes(nd.sec[0],nd.sec[1]*(weak?2:1));
- if(weak){HG.snd('crack',{x:tg.x+.5,z:tg.y+.5});HG.feed('★ Zayıf nokta: kaynak iki kat!')}
- HG.hot=null;                                           /* işaret yeni bir yere taşınır */
+ if(nd.sec)giveRes(nd.sec[0],nd.sec[1]);
  if(!G.dmg)G.dmg={};
  const fr=Math.min(1,(G.dmg[i]||0)+HIT_OF(lv)/nd.hp),st0=(G.dmg[i]||0)<.34?0:(G.dmg[i]||0)<.67?1:2,st=fr<.34?0:fr<.67?1:2;
  G.dmg[i]=fr;A.p=fr;
@@ -233,6 +213,7 @@ function collectNow(){
  if(!nd||!nd.collect)return false;
  const [id,n0]=nd.give(),n=n0+(HG.perk('gath')&&Math.random()<.2*HG.perk('gath')?1:0);
  if(!gain(id,n))return true;
+ HG.extGot&&HG.extGot(id,n);
  HG.armSwing(.3);HG.snd('hit');
  Scene.burst(tg.hx!==undefined?tg.hx:tg.x+.5,tg.hy!==undefined?tg.hy:1,tg.hz!==undefined?tg.hz:tg.y+.5,o===O.PALM?0x3f8a3a:0x4a9440,4);
  setObj(i,nd.rm);G.shelterCheck=0;
@@ -245,7 +226,7 @@ function digNow(){
  if(G.clock<(A.nextDig||0))return true;
  A.nextDig=G.clock+.4;HG.armSwing(.3);HG.snd('step_sand');
  Scene.burst(tg.hx!==undefined?tg.hx:tg.x+.5,tg.hy!==undefined?tg.hy:.2,tg.hz!==undefined?tg.hz:tg.y+.5,0xd9c58b,4);
- gain('sand',1);return true;
+ gain('sand',1);HG.extSand&&HG.extSand();return true;
 }
 function diveNow(){
  if(!diveAim())return false;
@@ -266,7 +247,7 @@ function diveNow(){
 let UP=null;
 function doPickup(i){
  const o=G.obj[i],id=PLACE_ITEM[o];
- if(!pickupOk(o)||!gain(id,1))return;
+ if(!pickupOk(o)||(HG.extPickupBlock&&HG.extPickupBlock(i,o))||!gain(id,1))return;
  setObj(i,O.NONE);G.shelterCheck=0;HG.snd('craft');
 }
 function pickupAim(){
@@ -320,7 +301,7 @@ function eatHeld(){
  const h=held();if(!h||!h.it.food)return;
  {
   const f=h.it.food;
-  G.hun=clamp(G.hun+f.h,0,100);G.thr=clamp(G.thr+f.t,0,100);
+  G.hun=clamp(G.hun+f.h*(HG.cookK?HG.cookK(h.k):1),0,100);G.thr=clamp(G.thr+f.t,0,100);
   if(f.hp){G.hp=clamp(G.hp+f.hp,0,100);G.cause='Bozuk yiyecek yedin.';HG.snd('hurt');HG.toast('Çiğ yiyecek midene dokundu.')}
   take(h.k,1);if(f.ret)add(f.ret,1);
   HG.snd('eat');
@@ -345,6 +326,7 @@ function useHeld(src){
  if(HG.raftUse(held()))return;                 /* sal: biner veya iner */
  for(const c of useCands())if(c[2]())return;
  if(collectNow())return;
+ if(HG.useExtra&&HG.useExtra(src))return;
  const h=held();
  if(h){
   if(h.it.food){const b=foodBlock(h.it.food);if(b)HG.toast(b);else eatHeld();return}
@@ -361,5 +343,5 @@ function useHeld(src){
  }
  if(digNow())return;
 }
-Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,stepUse,updateHot,nodeCenter,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
+Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,stepUse,nodeCenter,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
 })();

@@ -116,7 +116,7 @@ function deleteSlot(id){
 }
 
 /* ---- yüklenme ekranı ---- */
-const TIPS=['Ateş yakmak için odun ve kıvılcım gerekir; geceleri ateş en güvenli dostundur.','Kurtlar gece sürü hâlinde dolaşır. Işıktan ve ateşten çekinirler.','Köylülerle ticaret yaparak altın kazanabilir, görev tamamlayarak ödül alabilirsin.','Kamplardaki sandıklarda hem değerli eşya hem de adanın geçmişini anlatan notlar bulunur.','Her 5. gece Kan Ayı doğar: düşmanlar çoğalır ve gökyüzü kızıllaşır.','Uyku tulumu veya yatakla geceyi atlatabilirsin; yalnızca güvenli bir barınakta uyu.','Yüksekten düşmek can götürür; uçurumlardan atlamadan önce yüksekliği ölç.','Suya düşen eşyalar bir süre yüzer, sonra derin suda batar.','Gelişim ekranında (K) kazandığın puanları yeteneklere harcayabilirsin.','Rüzgâr yönü ve yağmur oka da etki eder; uzak hedeflerde hafifçe yukarı nişan al.','Deniz dibine bakıp sol tuşu basılı tutarak midye, yosun ve nadiren inci toplanır; balıkçı bunları satın alır.','Derin suda nefes çubuğu azalır; yüzeye çıkmayı geciktirmeyin.','Çanta düzenleme tuşu, kutuları birleştirip eşya türüne göre sıralar.','Köylüler geceleri evlerinde uyur; ticaret için sabahı beklemek gerekir.','Ağaç ve çalılar barınak sayılmaz; duvar ve kapıyla kapatılmış bir alan gerekir.','Sal ile açık denize çıkabilirsin; köpek balıkları yüzenlere saldırır, salda daha güvendesin.','Batık gemilerin sandığı dipte durur. Dalış Maskesi nefesi uzatır.','Deniz fenerlerinin ışığı geceleri çok uzaktan görünür ve yön gösterir.','Başlangıçtaki El Taşı ağaç ve kaya için yeterlidir; balta ve kazma çok daha hızlıdır.','İnşa Planı ile duvar, kapı ve çit kurulur; Çekiçle Odun, Taş veya Metal seviyesine yükseltilir.','Ağaç ve kayada işaretli zayıf noktaya vurmak o vuruşun verdiği kaynağı iki katına çıkarır.'];
+const TIPS=['Ateş yakmak için odun ve kıvılcım gerekir; geceleri ateş en güvenli dostundur.','Kurtlar gece sürü hâlinde dolaşır. Işıktan ve ateşten çekinirler.','Köylülerle ticaret yaparak altın kazanabilir, görev tamamlayarak ödül alabilirsin.','Kamplardaki sandıklarda hem değerli eşya hem de adanın geçmişini anlatan notlar bulunur.','Her 5. gece Kan Ayı doğar: düşmanlar çoğalır ve gökyüzü kızıllaşır.','Uyku tulumu veya yatakla geceyi atlatabilirsin; yalnızca güvenli bir barınakta uyu.','Yüksekten düşmek can götürür; uçurumlardan atlamadan önce yüksekliği ölç.','Suya düşen eşyalar bir süre yüzer, sonra derin suda batar.','Gelişim ekranında (K) kazandığın puanları yeteneklere harcayabilirsin.','Rüzgâr yönü ve yağmur oka da etki eder; uzak hedeflerde hafifçe yukarı nişan al.','Deniz dibine bakıp sol tuşu basılı tutarak midye, yosun ve nadiren inci toplanır; balıkçı bunları satın alır.','Derin suda nefes çubuğu azalır; yüzeye çıkmayı geciktirmeyin.','Çanta düzenleme tuşu, kutuları birleştirip eşya türüne göre sıralar.','Köylüler geceleri evlerinde uyur; ticaret için sabahı beklemek gerekir.','Ağaç ve çalılar barınak sayılmaz; duvar ve kapıyla kapatılmış bir alan gerekir.','Sal ile açık denize çıkabilirsin; köpek balıkları yüzenlere saldırır, salda daha güvendesin.','Batık gemilerin sandığı dipte durur. Dalış Maskesi nefesi uzatır.','Deniz fenerlerinin ışığı geceleri çok uzaktan görünür ve yön gösterir.','Başlangıçtaki El Taşı ağaç ve kaya için yeterlidir; balta ve kazma çok daha hızlıdır.','İnşa Planı ile duvar, kapı ve çit kurulur; Çekiçle Odun, Taş veya Metal seviyesine yükseltilir.'];
 let tipI=0,tipT=0,closeT=0;
 function ldOpen(title){
  const e=$('#load');if(!e)return;clearTimeout(closeT);e.hidden=false;e.classList.remove('out');
@@ -184,6 +184,7 @@ async function startGame(load,slotId){
   newState((Math.random()*2147483647)|0);
   look.yaw=0;look.pitch=-.1;
  }
+ HG.extStart&&HG.extStart();
  ldSet(.35,'Harita çiziliyor');await nap();
  HG.buildMini();
  await Scene.buildAsync(G,p=>ldSet(.4+p*.45,'Sahne kuruluyor'));
@@ -196,7 +197,7 @@ async function startGame(load,slotId){
  go.hidden=true;
  Scene.setMode('play');
  ui.state='play';ui.picked=null;ui.dirty=true;A.key='';A.p=0;A.mem={};A.memKey=null;
- A.nextSwing=A.nextDig=A.nextDive=0;A.hitI=-1;A.hitT=0;HG.hot=null;HG.useProg=null;HG.insaReset&&HG.insaReset();   /* sayaçlar oyun saatine bağlıdır: yeni oyun/kayıt yüklemede sıfırlanır */
+ A.nextSwing=A.nextDig=A.nextDive=0;A.hitI=-1;A.hitT=0;HG.useProg=null;HG.insaReset&&HG.insaReset();   /* sayaçlar oyun saatine bağlıdır: yeni oyun/kayıt yüklemede sıfırlanır */
  for(const id of ['#menu','#dead','#pause'])$(id).hidden=true;
  for(const id of ['#hud','#clock','#comp','#goal','#mini','#hot','#cross'])$(id).hidden=false;
  if(ui.touch)$('#touch').hidden=false;

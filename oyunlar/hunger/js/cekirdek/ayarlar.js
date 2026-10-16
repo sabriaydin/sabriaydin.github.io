@@ -28,6 +28,7 @@ const TABS=[
   ['invY','Dikey bakışı ters çevir','toggle',false],
   ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.']]],
  ['Oyun',[
+  ['diff','Zorluk','select','1',[['0','Kolay'],['1','Normal'],['2','Zor']],'Açlık, susuzluk ve alınan hasar hızını değiştirir. Kolay: %25 daha az, Zor: %30 daha fazla.'],
   ['hud','Durum çubukları','toggle',true],
   ['mini','Mini harita','toggle',true],
   ['clock','Saat','toggle',true],

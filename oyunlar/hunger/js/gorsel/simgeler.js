@@ -222,9 +222,9 @@ function buildIcons(){
  for(const k in IT){
   const it=IT[k];
   const c=cv(32,32),g=c.getContext('2d');
-  if(it.place){const s={fire:SP.fire,bench:SP.bench,furn:SP.furn,wallw:SP.wallw,walls:SP.walls,door:SP.door}[k];g.drawImage(s,0,0)}
-  else if(it.tool&&it.tool!=='rod'&&!IC[k])tool(it.tool,it.tier)(g);
-  else IC[k](g);
+  if(it.place){const s={fire:SP.fire,bench:SP.bench,furn:SP.furn,wallw:SP.wallw,walls:SP.walls,door:SP.door}[k];if(s)g.drawImage(s,0,0)}      /* yeni yapıların simgeleri gorsel/yeni-simgeler.js içinde çizilir */
+  else if(it.tool&&it.tool!=='rod'&&!IC[k]&&['axe','pick'].includes(it.tool))tool(it.tool,it.tier)(g);
+  else if(IC[k])IC[k](g);
   ICON[k]=c.toDataURL();
   it.cv=c;
  }

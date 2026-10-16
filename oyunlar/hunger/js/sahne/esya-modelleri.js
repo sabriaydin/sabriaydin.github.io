@@ -15,7 +15,7 @@ function boneOf(from,dir,len,r){
  return [alongPart(cyl(r*.8,r,len,8,1),c,from,d,len),part(blob(r*1.5,1,.05,3),c,from.x,from.y,from.z),part(blob(r*1.5,1,.05,4),c,e1.x,e1.y,e1.z),
   part(blob(r*1.3,1,.05,5),c,from.x+0.0,from.y,from.z+r*1.1),part(blob(r*1.3,1,.05,6),c,e1.x,e1.y,e1.z+r*1.1)];
 }
-const B={};
+const B={};sc.dropB=B;
 B.meat=()=>{
  const m=part(blob(.14,2,.14,11,1.25,.8,1),0xb83a3e,0,.1,0);
  m.cf=(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,4);if(v>.6)c.setHex(0xe8c2b8);else if(ny<-.3)c.setHex(0x8a2a30)};

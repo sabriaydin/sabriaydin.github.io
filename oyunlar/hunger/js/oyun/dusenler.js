@@ -74,7 +74,7 @@ function pickupNearest(){
  const d=G.nearDrop;if(!d||!G.drops.includes(d))return false;
  const left=add(d.id,d.n);
  if(left>=d.n){HG.toast('Envanter dolu.');return true}
- flag('got_'+d.id);HG.feed('+'+(d.n-left)+' '+IT[d.id].n);HG.snd('get');
+ flag('got_'+d.id);HG.feed('+'+(d.n-left)+' '+IT[d.id].n);HG.snd('get');HG.extGot&&HG.extGot(d.id,d.n-left);
  if(left<=0)G.drops.splice(G.drops.indexOf(d),1);else d.n=left;
  G.nearDrop=null;return true;
 }

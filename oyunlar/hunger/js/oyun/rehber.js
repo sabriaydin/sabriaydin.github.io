@@ -9,10 +9,10 @@ const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[
 /* {eylem} -> atanmış tuş */
 const sub=t=>t.replace(/\{(\w+)\}/g,(m,a)=>HG.bind&&HG.bind[a]?'<kbd>'+esc(HG.keyLabel(HG.bind[a][0]))+'</kbd>':m);
 const sec=list=>list.map(x=>`<div class="nt"><b>${x[0]}</b><span>${sub(x[1])}</span></div>`).join('');
-const DROPS={sheep:'Çiğ et, yün',cow:'Çiğ et, deri, kemik; süt sağılabilir',rabbit:'Çiğ et, deri',deer:'Çiğ et, deri, kemik',wolf:'Çiğ et, deri, kemik',boar:'Çiğ et, deri, kemik'};
-const NOTE={sheep:'Zararsız; makasla yün kırkılır.',cow:'Zararsız; boş şişeyle süt sağılır.',rabbit:'Hızlı kaçar, yakalaması zordur; ok işe yarar.',deer:'Ürkektir ve hızlıdır; uzaktan ok ile avlanır.',wolf:'Geceleri sürü hâlinde saldırır; ateşten çekinir.',boar:'Yaklaşırsanız saldırır; sert vurur.'};
+const DROPS={sheep:'Çiğ et, yün',cow:'Çiğ et, deri, kemik; süt sağılabilir',rabbit:'Çiğ et, deri',deer:'Çiğ et, deri, kemik',wolf:'Çiğ et, deri, kemik',boar:'Çiğ et, deri, kemik',chicken:'Çiğ et, tüy; yumurta bırakır'};
+const NOTE={sheep:'Zararsız; makasla yün kırkılır.',cow:'Zararsız; boş şişeyle süt sağılır.',rabbit:'Hızlı kaçar, yakalaması zordur; ok işe yarar.',deer:'Ürkektir ve hızlıdır; uzaktan ok ile avlanır.',wolf:'Geceleri sürü hâlinde saldırır; ateşten çekinir.',boar:'Yaklaşırsanız saldırır; sert vurur.',chicken:'Zararsızdır; aralıklarla yumurta bırakır, kurtlardan kaçar.'};
 function fauna(){
- return '<div class="mut">Avlanan hayvanlar yerde bırakılan eşyalarla leş bırakır; eşyalar toplanınca leş kaybolur.</div>'+['sheep','cow','rabbit','deer','wolf','boar'].map(k=>{
+ return '<div class="mut">Avlanan hayvanlar yerde bırakılan eşyalarla leş bırakır; eşyalar toplanınca leş kaybolur.</div>'+['sheep','cow','rabbit','deer','wolf','boar','chicken'].map(k=>{
   const a=ANIMAL[k];
   return `<div class="nt"><b>${a.n}</b><span>Can: ${a.hp} · Yürüyüş ${a.walk} m/s, koşu ${a.run} m/s${a.cspd?' · Kovalama '+a.cspd+' m/s':''}${a.aggr?' · Saldırı: '+a.dmg+' hasar':''}<br>Verir: ${DROPS[k]}<br>${NOTE[k]}</span></div>`;
  }).join('');
@@ -20,7 +20,7 @@ function fauna(){
 function items(){
  const rows=Object.keys(IT).map(k=>{
   const it=IT[k];let d=it.d||'';
-  if(it.tool==='axe'||it.tool==='pick')d=(it.tool==='axe'?'Ağaç keser, düşmana vurur.':'Kaya ve maden kazar.')+' Kademe '+it.tier+'/3 · Vuruş hasarı '+HG.HIT[it.tier]+', verim ×'+HG.YIELD[it.tier]+' (zayıf noktaya vuruş: iki kat).';
+  if(it.tool==='axe'||it.tool==='pick')d=(it.tool==='axe'?'Ağaç keser, düşmana vurur.':'Kaya ve maden kazar.')+' Kademe '+it.tier+'/3 · Vuruş hasarı '+HG.HIT[it.tier]+', verim ×'+HG.YIELD[it.tier]+'.';
   if(it.place&&!d)d='Yerleştirilir.';
   if(!d)d='Üretim ve ticaret malzemesi.';
   return `<div class="rc"><img src="${ICON[k]||''}" alt=""><div><b>${it.n}</b><span>${esc(d)}</span></div><span class="stk">×${it.s}</span></div>`;

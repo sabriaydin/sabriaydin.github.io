@@ -75,7 +75,7 @@ S.sync=G=>syncFns.forEach(f=>f(G));
 S.setMode=m=>{sc.mode=m;sc.camInit=false};
 S.resize=()=>{const w=innerWidth,h=innerHeight;sc.R.setSize(w,h,false);sc.cam.aspect=w/h;sc.cam.updateProjectionMatrix()};
 /* Fare/dokunma ile bakış: dx sağa (yaw azalır), dy aşağı (pitch azalır) */
-S.look=(dx,dy)=>{const c=C(),k=c.sens/100;look.yaw-=dx*k;look.pitch=clamp(look.pitch-dy*k*(c.invY?-1:1),-1.5,1.5)};
+S.look=(dx,dy)=>{const c=C(),k=c.sens/100*(1-(sc.zoomK||0)*.65);look.yaw-=dx*k;look.pitch=clamp(look.pitch-dy*k*(c.invY?-1:1),-1.5,1.5)};
 
 const tgt=new THREE.Vector3(),orbit=new THREE.Vector3();
 S.render=(G,now,dt,info)=>{
@@ -96,7 +96,7 @@ S.render=(G,now,dt,info)=>{
   cam.position.set(G.px+Math.cos(look.yaw)*sway,gy+EYE+bob+cd.dip*.14+br,G.py-Math.sin(look.yaw)*sway);
   cam.rotation.set(look.pitch+cd.pch-(gnd?Math.abs(Math.sin(G.walk*10))*.004*spk:0)-cd.dip*.1,look.yaw,cd.roll+(gnd?Math.sin(G.walk*5)*.0035*spk:0));
   if(sc.shake>.002){const s=sc.shake*C().shake/100;cam.rotation.x+=(Math.random()-.5)*s*.05;cam.rotation.y+=(Math.random()-.5)*s*.05;cam.rotation.z+=(Math.random()-.5)*s*.04;sc.shake*=Math.exp(-dt*6)}
-  const tf=C().fov+(G.sprint?8:0)-(HG.bow?HG.bow.draw*24:0);sc.fov+=(tf-sc.fov)*(1-Math.exp(-6*dt));
+  const tf=(C().fov+(G.sprint?8:0)-(HG.bow?HG.bow.draw*24:0))*(1-(sc.zoomK||0)*.72);sc.fov+=(tf-sc.fov)*(1-Math.exp(-6*dt));
   if(Math.abs(cam.fov-sc.fov)>.05){cam.fov=sc.fov;cam.updateProjectionMatrix()}
  }else{
   const ay=info.clock*.05,r=62;orbit.set(W/2+Math.sin(ay)*r,34,H/2+Math.cos(ay)*r);

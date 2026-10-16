@@ -6,13 +6,14 @@ const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
 /* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
 /* Ağaç, palmiye ve çalılar duvar sayılmaz: yalnızca yapı, kaya ve kapı gibi kapatıcı nesneler alanı sınırlar.
    Hesap ayrılmış bir dizi üzerinde yapılır (her çağrıda yeni bellek ayrılmaz). */
-const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE]);      /* alçak çit de alanı kapatmaz */
+const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE,O.SHROOM,O.SNARE,O.PLOT]);      /* alçak çit de alanı kapatmaz */
 let SEEN=null,STAMP=0;const QUE=new Int32Array(64);
-function calcShelter(){
- if(G.cave)return true;                 /* mağara kapalı alandır */
+function calcShelter(wx,wy){
+ const at=wx!==undefined;                /* konum verilirse o karenin çatı altında olup olmadığı sorulur (yapılar için) */
+ if(!at&&G.cave)return true;                 /* mağara kapalı alandır */
  if(!SEEN)SEEN=new Uint32Array(W*H);
  if(++STAMP>=4294967295){SEEN.fill(0);STAMP=1}
- const sx=Math.floor(G.px),sy=Math.floor(G.py),start=sy*W+sx;
+ const sx=Math.floor(at?wx:G.px),sy=Math.floor(at?wy:G.py),start=sy*W+sx;
  let qh=0,qt=0;QUE[qt++]=start;SEEN[start]=STAMP;
  while(qh<qt){
   const c=QUE[qh++],x=c%W,y=(c/W)|0;
@@ -180,7 +181,7 @@ function update(dt){
  moveStep(dt);
  vertStep(dt);
  /* eylem */
- HG.updateHot();HG.stepUse(dt);
+ HG.stepUse(dt);
  if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
  HG.updateAnimals(dt);HG.updateSea(dt);HG.updateDiscover(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
@@ -192,7 +193,7 @@ function update(dt){
  if(G.shelterCheck<=0){G.shelterCheck=.4;G.sheltered=calcShelter()}
  /* istatistikler */
  const L=daylight(),cold=1-L;
- const eco=1-.12*HG.perk('eco');
+ const eco=(1-.12*HG.perk('eco'))*(HG.diffK?HG.diffK():1);
  G.hun=clamp(G.hun-dt*.17*eco*(G.sprint?1.8:1),0,100);
  G.thr=clamp(G.thr-dt*.25*eco*(G.sprint?1.8:1),0,100);
  /* en yakın ateş: saniyede 4 kez aranır */
@@ -250,5 +251,5 @@ function die(){
  for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false;
  if(document.exitPointerLock)document.exitPointerLock();
 }
-Object.assign(HG,{calcShelter,solidAt,canStand,supportY,canStandAt:canStand,update,die});
+Object.assign(HG,{shelterAt:(x,y)=>calcShelter(x,y),calcShelter,solidAt,canStand,supportY,canStandAt:canStand,update,die});
 })();
