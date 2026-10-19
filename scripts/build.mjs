@@ -156,7 +156,16 @@ if (BASE) {
   ].join('\n') + '\n</head>');
   fs.writeFileSync(file, html);
 
-  const urls = [{ loc: `${BASE}/`, lastmod: posts[0] && posts[0].date }, ...posts.map(p => ({ loc: `${BASE}/posts/${p.id}.html`, lastmod: p.date }))];
+  // Bağımsız sayfalar (araç, oyun, hakkında): canonical ve paylaşım görseli ekle, site haritasına kat
+  const EXTRA = ['hakkinda.html', 'araclar/html-editor/', 'oyunlar/hunger/'];
+  for (const e of EXTRA) {
+    const f = path.join(OUT, e.endsWith('/') ? e + 'index.html' : e);
+    if (!fs.existsSync(f)) continue;
+    let h = read(f);
+    if (!/rel="canonical"/.test(h)) h = h.replace('</head>', () => [`<link rel="canonical" href="${BASE}/${e}">`, `<meta property="og:url" content="${BASE}/${e}">`, `<meta property="og:image" content="${BASE}/assets/img/og.png">`, '<meta name="twitter:card" content="summary_large_image">'].join('\n') + '\n</head>');
+    fs.writeFileSync(f, h);
+  }
+  const urls = [{ loc: `${BASE}/`, lastmod: posts[0] && posts[0].date }, ...EXTRA.filter(e => fs.existsSync(path.join(OUT, e.endsWith('/') ? e + 'index.html' : e))).map(e => ({ loc: `${BASE}/${e}` })), ...posts.map(p => ({ loc: `${BASE}/posts/${p.id}.html`, lastmod: p.date }))];
   fs.writeFileSync(path.join(OUT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

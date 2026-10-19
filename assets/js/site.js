@@ -70,6 +70,7 @@ window.SITE = {
 
   // Footer'ın son sütunundaki bağlantılar (istediğin kadar ekleyebilir veya silebilirsin)
   links: [
+    { text: 'Hakkında ve Gizlilik', url: 'hakkinda.html' },
     { text: 'GitHub', url: 'https://github.com/' },
     { text: 'E-posta', url: 'mailto:ornek@eposta.com' }
   ]

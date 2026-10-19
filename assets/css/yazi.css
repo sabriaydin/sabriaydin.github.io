@@ -6,7 +6,7 @@ html{scroll-behavior:smooth}
 .px-hero::before{content:"";position:absolute;right:-34px;top:-34px;width:170px;height:170px;border-radius:26px;transform:rotate(18deg);background:rgba(255,255,255,.13);box-shadow:-100px 76px 0 -26px rgba(255,255,255,.10)}
 .px-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,#f25022,#7fba00,#00a4ef,#ffb900)}
 .px-hero small{position:relative;display:block;font:700 .75rem/1 var(--h);letter-spacing:.14em;text-transform:uppercase;opacity:.85}
-.px-hero p{position:relative;margin:10px 0 14px;max-width:38em;font:1.08rem/1.5 var(--h);color:#fff}
+.px-hero p{position:relative;margin:10px 0 0;max-width:38em;font:1.08rem/1.5 var(--h);color:#fff}
 .px-chips{position:relative;display:flex;flex-wrap:wrap;gap:8px}
 .px-chips span{padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);font:600 .84rem/1.4 var(--h);color:#fff}
 .post .body .px-toc{padding:16px 18px 12px;border-radius:14px;background:#fff;border:1px solid var(--pline);border-top:4px solid var(--a);box-shadow:0 6px 16px rgba(0,0,0,.08)}
@@ -37,9 +37,13 @@ html{scroll-behavior:smooth}
 .post .body>ul>li::marker{content:""}
 .post .body>blockquote{position:relative;padding:14px 18px 14px 52px;border:0;border-left:6px solid #e0a100;border-radius:12px;background:#fff7dc;color:#4a3a00;font:1.02rem/1.6 var(--h);font-style:normal}
 .post .body>blockquote::before{content:"i";position:absolute;left:14px;top:14px;width:26px;height:26px;border-radius:50%;background:#e0a100;color:#fff;font:800 .95rem/26px Georgia,serif;text-align:center}
-.post .body>table{border-radius:12px;border:1px solid var(--pline);background:#fff;overflow-x:auto}
-.post .body>table th{background:linear-gradient(135deg,var(--a),var(--b));color:#fff;border-color:transparent}
-.post .body>table tr:nth-child(even) td{background:rgba(0,0,0,.035)}
+/* Tablolar: tam genişlik, yuvarlak köşe, sağda boşluk bırakmaz */
+.post .body>table,.post .body>div[style*="--a"]>table{display:table;width:100%;max-width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--pline);border-radius:12px;background:#fff;overflow:hidden}
+.post .body>table :is(th,td),.post .body>div[style*="--a"]>table :is(th,td){border:0;border-right:1px solid var(--pline);border-bottom:1px solid var(--pline);overflow-wrap:anywhere}
+.post .body>table :is(th,td):last-child,.post .body>div[style*="--a"]>table :is(th,td):last-child{border-right:0}
+.post .body>table tr:last-child td,.post .body>div[style*="--a"]>table tr:last-child td{border-bottom:0}
+.post .body>table th,.post .body>div[style*="--a"]>table th{background:linear-gradient(135deg,var(--a),var(--b));color:#fff;border-color:rgba(255,255,255,.25)}
+.post .body>table tr:nth-child(even) td,.post .body>div[style*="--a"]>table tr:nth-child(even) td{background:rgba(0,0,0,.035)}
 .post .body>pre{position:relative;padding-top:30px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.2)}
 .post .body>pre::before{content:"";position:absolute;left:14px;top:11px;width:10px;height:10px;border-radius:50%;background:#ff5f57;box-shadow:16px 0 #febc2e,32px 0 #28c840}
 .px-dl{padding:18px 20px;border-radius:14px;border:2px solid var(--a);background:linear-gradient(180deg,#fff,#f4f4f6);box-shadow:0 8px 20px rgba(0,0,0,.12)}

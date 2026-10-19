@@ -56,9 +56,11 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 
 ## Klasör yapısı
 - `index.html`: ana sayfa
+- `araclar/html-editor/`: Online HTML Editörü; blog şablonundan bağımsız, tam sayfa tek başına çalışan araç (`index.html`, `editor.css`, `editor.js`, `templates.js`)
 - `posts/`: her yazı kendi `.html` dosyasında; `posts/index.js` otomatik üretilir, elle düzenlenmez
 - `posts/_sablon.html`: yeni yazı şablonu (yayınlanmaz)
 - `404.html`: bulunamadı sayfası
+- `hakkinda.html`: hakkında, iletişim ve gizlilik sayfası (footer'dan bağlanır; sitemap'e eklenir)
 - `assets/`: stil (`css`), kod (`js`; `arac.js` araç yazılarının ortak yardımcılarıdır), simge ve görseller (`img`)
 - `scripts/build.mjs`: yazıları tarar, liste/sitemap/RSS/paylaşım etiketlerini üretir
 - `.github/workflows/yayinla.yml`: her yüklemede build'i çalıştırıp siteyi yayınlar
@@ -69,7 +71,7 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 ## Neler hazır
 - Yeni yazı algılama: tek dosya yükle, liste, sitemap, RSS ve arama güncellensin
 - Ana sayfada sayfalama: 5'erli sayfalar, Önceki/Sonraki düğmeleri, sayfa numaraları; kategori ve arama sonuçlarında da çalışır
-- Arama motoru ve sosyal medya paylaşımı için canonical, Open Graph, Twitter ve `BlogPosting` verisi; `sitemap.xml`, `feed.xml`, `robots.txt`
+- Arama motoru ve sosyal medya paylaşımı için canonical, Open Graph, Twitter ve `BlogPosting` verisi; `sitemap.xml` (yazılar, araç, oyun ve hakkında sayfası dahil), `feed.xml`, `robots.txt`
 - Sitede arama: başlık, özet ve yazı metni; Türkçe karakterlerden bağımsız (zeka = zekâ), ok tuşlarıyla gezinme
 - Klavye ve ekran okuyucu desteği (içeriğe geç bağlantısı, açılır menü, odak göstergesi)
 - Yazı sayfalarında okuma çubuğu, önceki/sonraki yazı, benzer yazılar, bağlantıyı kopyalama, yazdırma düzeni

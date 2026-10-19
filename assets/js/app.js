@@ -36,7 +36,7 @@ const ca=k=>`<a href="${home}?cat=${k}">${esc(C[k])}</a>`;
 const sg=g=>`<div class="sg"><a class="mg" href="${home}?grup=${g.key}" aria-haspopup="true">${esc(g.name)}<span class="ar" aria-hidden="true">▸</span></a><div class="sm"><div>${g.items.map(k=>ca(k).replace('<a ','<a class="sub" ')).join('')}</div></div></div>`;
 const catHtml=G.map(sg).concat(Object.keys(C).filter(k=>!inG.has(k)).map(ca));
 $('#hdr').innerHTML=`<header class="top"><div class="wrap bar"><a class="logo" href="${home}">Sabri <b>Aydın</b></a><nav id="nav" aria-label="Ana menü"><a href="${home}"${page==='home'?' aria-current="page"':''}>Ana Sayfa</a><div class="dd"><button type="button" id="ddb" aria-haspopup="true" aria-expanded="false">Kategoriler ▾</button><div class="menu">${catHtml.join('')}</div></div>${M.map(m=>m.link?`<a href="${home}?cat=${m.link}">${esc(m.name)}</a>`:`<div class="dd"><button type="button" aria-haspopup="true" aria-expanded="false">${esc(m.name)} ▾</button><div class="menu">${m.items.map(it=>typeof it==='string'?ca(it):it.url?`<a href="${/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(it.url)?'':root}${esc(it.url)}"${/^https?:/.test(it.url)?' target="_blank" rel="noopener"':''}>${esc(it.name)}</a>`:it.links?su(it):sg(it)).join('')}</div></div>`).join('')}</nav><div class="search" role="search"><input id="s" type="search" placeholder="Sitede ara" aria-label="Sitede ara" autocomplete="off"><div id="res" hidden></div></div><button type="button" class="ib burger" id="bg" aria-label="Menüyü aç" aria-expanded="false" aria-controls="nav">☰</button></div></header>`;
-const links=(S.links||[]).map(l=>`<li><a href="${l.url}"${/^https?:/.test(l.url)?' target="_blank" rel="noopener"':''}>${l.text}</a></li>`).join('');
+const links=(S.links||[]).map(l=>`<li><a href="${/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(l.url)?'':root}${l.url}"${/^https?:/.test(l.url)?' target="_blank" rel="noopener"':''}>${l.text}</a></li>`).join('');
 $('#ftr').innerHTML=`<footer class="foot"><div class="wrap"><div class="cols"><div><h2>${S.name}</h2><p>${S.about}</p></div><div><h2>Son Yazılar</h2><ul>${P.slice(0,4).map(p=>`<li><a href="${url(p)}">${esc(p.title)}</a></li>`).join('')}</ul></div><div><h2>Bağlantılar</h2><ul>${links}</ul></div></div><p class="copy">© ${new Date().getFullYear()} ${S.name}. Tüm hakları saklıdır.</p></div></footer>`;
 
 /* Menü */
@@ -116,10 +116,9 @@ const PAL={windows:['#0067c0','#00a4ef'],windowsos:['#1f4e8c','#3d8bd9'],html:['
 const cat=(document.querySelector('meta[name="kategori"]')||{}).content||'',pc=PAL[cat]||['#b72a25','#ec6a63'];
 bd.style.setProperty('--a',pc[0]);bd.style.setProperty('--b',pc[1]);
 const hs=[...bd.querySelectorAll('h2')];hs.forEach((h,k)=>{if(!h.id)h.id='b'+(k+1);if(/indir/i.test(h.textContent)){const n=h.nextElementSibling;if(n&&n.tagName==='P'&&n.querySelector('a[href^="http"]'))n.classList.add('px-dl')}});
-const ds=(document.querySelector('meta[name="description"]')||{}).content||'',mt0=$('.meta',art),rd=mt0?(mt0.querySelector('span')||{}).textContent||'':'';
-const ch=[rd,hs.length>1?hs.length+' bölüm':'',bd.querySelector(':scope>ol')?'Adım adım':''].filter(Boolean);
+const ds=(document.querySelector('meta[name="description"]')||{}).content||'',mt0=$('.meta',art);
 const toc=hs.length>2?`<nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol>${hs.map(h=>`<li><a href="#${h.id}">${esc(h.textContent)}</a></li>`).join('')}</ol></nav>`:'';
-bd.insertAdjacentHTML('afterbegin',`<div class="px-hero"><small>${esc(C[cat]||cat)}</small><p>${esc(ds)}</p><div class="px-chips">${ch.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>${toc}`)}}
+bd.insertAdjacentHTML('afterbegin',`<div class="px-hero"><small>${esc(C[cat]||cat)}</small><p>${esc(ds)}</p></div>${toc}`)}}
 if(i>-1){
 /* Önceki / sonraki: ana sayfadaki liste sırasına göre */
 const prev=P[i-1],next=P[i+1];
@@ -138,9 +137,9 @@ window.updateProgress=()=>{const r=art.getBoundingClientRect(),t=r.height-innerH
 updateProgress()}
 
 /* Yukarı çık düğmesi + kaydırma */
-const tt=document.createElement('button');tt.type='button';tt.className='totop';tt.hidden=true;tt.setAttribute('aria-label','Yukarı çık');tt.textContent='↑';
+const tt=document.createElement('button');tt.type='button';tt.className='totop';tt.setAttribute('aria-label','Yukarı çık');tt.textContent='↑';
 tt.onclick=()=>scrollTo({top:0,behavior:reduced?'auto':'smooth'});document.body.appendChild(tt);
-let tick=false;addEventListener('scroll',()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{tick=false;tt.hidden=scrollY<700;window.updateProgress&&updateProgress()})},{passive:true});
+let tick=false;addEventListener('scroll',()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{tick=false;tt.classList.toggle('on',scrollY>=400);window.updateProgress&&updateProgress()})},{passive:true});
 
 tilt();
 })();
