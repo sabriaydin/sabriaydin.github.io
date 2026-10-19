@@ -18,10 +18,10 @@ const TABS=[
   ['fov','Görüş açısı (FOV)','range',75,60,110,1,'°'],
   ['fps','FPS göstergesi','toggle',false]]],
  ['Ses',[
-  ['master','Ana ses','range',80,0,100,5,'%'],
+  ['master','Ana ses','range',80,0,100,5,'%','Gerçek ses kayıtları Creative Commons lisanslıdır: Wildfire Games (0 A.D.) ve diğer sahipler. Ayrıntı: ses/KREDI.txt'],
   ['sfx','Efekt sesleri','range',100,0,100,5,'%','Adım, darbe, eşya ve hayvan sesleri.'],
-  ['amb','Ortam sesleri','range',70,0,100,5,'%','Rüzgâr, deniz, yağmur, orman, ateş.'],
-  ['mus','Müzik','range',0,0,100,5,'%','Varsayılan kapalıdır; sürekli ton istemeyenler için.'],
+  ['amb','Ortam sesleri','range',70,0,100,5,'%','Rüzgâr, deniz, yağmur, kuşlar, orman, ateş.'],
+  ['mus','Müzik','range',35,0,100,5,'%','Gün ve gece için ayrı parçalar; aralarında uzun sessizlik bırakılır. Korku anlarında kesilir.'],
   ['tens','Gerilim ve fısıltı','range',40,0,100,5,'%','Korku anlarındaki alçak ton ve fısıltılar.']]],
  ['Kontrol',[
   ['sens','Fare / dokunma hassasiyeti','range',100,20,300,5,'%'],

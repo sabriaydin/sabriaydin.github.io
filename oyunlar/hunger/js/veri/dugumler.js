@@ -4,15 +4,16 @@
 const {O}=HG;
 const POWER=[0.55,1.25,2.0,3.0];       /* alet kademesi göstergesi: El Taşı, Taş, Bakır, Demir (rehber metinleri için) */
 /* Rust mantığı: her vuruş düğümün canından düşer ve kaynağı hemen verir. Düğüm canı bitince ağaç devrilir, kaya/maden parçalanır.
-   HIT: kademeye göre vuruş hasarı · hp: düğüm canı · y: kademeye göre vuruş başına kaynak ·
-   bonus: son vuruşta ek kaynak · sec: her vuruşta ikincil kaynak */
+   HIT: kademeye göre vuruş hasarı · hp: düğüm canı · tot: düğümün tamamından alınacak taban kaynak (Taş kademesinde) ·
+   bonus: son vuruşta ek kaynak · sec: [eşya, toplam] ikincil kaynak · Kaynak miktarı alet kademesiyle çarpılır (YIELD, eylem.js):
+   alet ne kadar düşük kaliteliyse düğümden o kadar az kaynak çıkar. */
 const HIT=[8,16,22,30];
 const NODE={};
-NODE[O.TREE]={hp:100,tool:'axe',req:0,id:'wood',y:[1,2,3,4],bonus:3,rm:O.NONE,regrow:[O.TREE,480]};
-NODE[O.ROCK]={hp:100,tool:'pick',req:0,id:'stone',y:[1,2,3,4],bonus:3,rm:O.NONE,regrow:[O.ROCK,640]};
-NODE[O.COAL]={hp:140,tool:'pick',req:1,id:'coal',y:[0,1,2,3],bonus:2,rm:O.NONE,msg:'Kömür için en az Taş Kazma gerekir.',regrow:[O.COAL,900]};
-NODE[O.COPPER]={hp:170,tool:'pick',req:1,id:'copper_ore',y:[0,1,2,3],sec:['stone',1],bonus:2,rm:O.NONE,msg:'Bakır için en az Taş Kazma gerekir.',regrow:[O.COPPER,1500]};
-NODE[O.IRON]={hp:200,tool:'pick',req:2,id:'iron_ore',y:[0,0,1,2],sec:['stone',1],bonus:2,rm:O.NONE,msg:'Demir için en az Bakır Kazma gerekir.',regrow:[O.IRON,2400]};
+NODE[O.TREE]={hp:100,tool:'axe',req:0,id:'wood',tot:16,bonus:3,rm:O.NONE,regrow:[O.TREE,480]};
+NODE[O.ROCK]={hp:100,tool:'pick',req:0,id:'stone',tot:16,bonus:3,rm:O.NONE,regrow:[O.ROCK,640]};
+NODE[O.COAL]={hp:140,tool:'pick',req:1,id:'coal',tot:12,bonus:2,rm:O.NONE,msg:'Kömür için en az Taş Kazma gerekir.',regrow:[O.COAL,900]};
+NODE[O.COPPER]={hp:170,tool:'pick',req:1,id:'copper_ore',tot:10,sec:['stone',6],bonus:2,rm:O.NONE,msg:'Bakır için en az Taş Kazma gerekir.',regrow:[O.COPPER,1500]};
+NODE[O.IRON]={hp:200,tool:'pick',req:2,id:'iron_ore',tot:8,sec:['stone',5],bonus:2,rm:O.NONE,msg:'Demir için en az Bakır Kazma gerekir.',regrow:[O.IRON,2400]};
 /* toplanabilirler: E tuşu ile anında toplanır */
 NODE[O.SHROOM]={collect:true,give:()=>['mushroom',1+(Math.random()*2|0)],rm:O.NONE,regrow:[O.SHROOM,420]};
 NODE[O.BUSH]={collect:true,give:()=>['berries',2+(Math.random()*2|0)],rm:O.BUSH0,regrow:[O.BUSH,110]};

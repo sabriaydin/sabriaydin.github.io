@@ -1,11 +1,12 @@
 /* Hunger 3D - ses motoru (WebAudio): uzamsal (3B) ses, yankı, katmanlı ortam sesleri, hava, hayvanlar, adımlar, müzik.
-   Tüm sesler programla üretilir; dış ses dosyası kullanılmaz.
-   Dış API: HG.snd(ad, {x,z,y}?), HG.initAudio(), HG.audioFrame(G,dt,mode) */
+   Sesler iki katmanlıdır: ses-gercek.js ses/ klasöründeki gerçek kayıtları çalar; kayıt yoksa veya yüklenemezse
+   bu dosyadaki programla üretilen sesler (aşağıdaki K tablosu) devreye girer.
+   Dış API: HG.snd(ad, {x,z,y}?, ek?), HG.initAudio(), HG.audioFrame(G,dt,mode) */
 (()=>{
 'use strict';
 const {G,T,O,W,H,ui,look}=HG;
 const sc=HG.sc;
-let AC=null,master,comp,sfx,amb,ambLP,mus,sendS,sendM,verb,white,pink;
+let AC=null,master,comp,sfx,amb,ambLP,mus,sendS,sendM,verb,white,pink,uwLP;
 let lx=0,lz=0;
 const R=(a,b)=>a+Math.random()*(b-a);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -42,7 +43,8 @@ function initAudio(){
   try{
    comp=AC.createDynamicsCompressor();comp.threshold.value=-16;comp.knee.value=18;comp.ratio.value=4;comp.attack.value=.004;comp.release.value=.22;
    master=AC.createGain();master.gain.value=.0001;
-   comp.connect(master);master.connect(AC.destination);
+   uwLP=AC.createBiquadFilter();uwLP.type='lowpass';uwLP.frequency.value=22000;uwLP.Q.value=.5;     /* su altında tüm sesler boğuklaşır */
+   comp.connect(uwLP);uwLP.connect(master);master.connect(AC.destination);
    sfx=AC.createGain();sfx.gain.value=1;sfx.connect(comp);
    ambLP=AC.createBiquadFilter();ambLP.type='lowpass';ambLP.frequency.value=22000;ambLP.connect(comp);
    amb=AC.createGain();amb.gain.value=1;amb.connect(ambLP);
@@ -53,6 +55,7 @@ function initAudio(){
    sendM=AC.createGain();sendM.gain.value=.5;mus.connect(sendM);sendM.connect(verb);
    white=mkNoise(2,false);pink=mkNoise(6,true);
    buildAmbience();
+   if(HG.sesGercek)HG.sesGercek.init(HG.SES);
   }catch(e){console.warn('ses kurulamadı',e)}
  }
  if(AC&&AC.state==='suspended'&&!document.hidden)AC.resume();
@@ -123,7 +126,8 @@ K.milk=d=>{for(let i=0;i<4;i++){N(d,{ft:'bandpass',f:3200,q:2,d:.035,v:.14,t:i*.
 K.get=d=>{Tn(d,{f:660,f2:1000,d:.1,v:.16});Tn(d,{f:1320,d:.18,v:.07,t:.05,att:.002});N(d,{ft:'highpass',f:5000,d:.04,v:.06})};
 K.drink=d=>{for(let i=0;i<3;i++){Tn(d,{f:R(240,330),f2:R(120,170),d:.1,v:.14,t:i*.19});N(d,{ft:'bandpass',f:800,q:1,d:.1,v:.1,t:i*.19,pink:true})}};
 K.eat=d=>{for(let i=0;i<4;i++){N(d,{ft:'bandpass',f:R(1700,2600),q:1.4,d:.05,v:R(.25,.4),t:i*R(.07,.11)});N(d,{ft:'lowpass',f:420,d:.07,v:.2,t:i*.09})}};
-K.craft=d=>{K.hit(d);M(d,{f:880,v:.12,t:.06,p:[[1,1,.5],[2.7,.5,.3],[5.2,.3,.18]]});Tn(d,{f:660,d:.12,type:'triangle',v:.1,t:.12})};
+K.craftChime=d=>{M(d,{f:880,v:.12,t:.06,p:[[1,1,.5],[2.7,.5,.3],[5.2,.3,.18]]});Tn(d,{f:660,d:.12,type:'triangle',v:.1,t:.12})};
+K.craft=d=>{K.hit(d);K.craftChime(d)};
 K.hurt=d=>{Tn(d,{f:190,f2:75,d:.28,type:'sawtooth',v:.18,lp:700});N(d,{ft:'lowpass',f:700,d:.14,v:.45});N(d,{ft:'bandpass',f:1500,q:.8,d:.1,v:.2})};
 K.ui=d=>{Tn(d,{f:1250,d:.035,v:.05,att:.002})};
 K.ui_open=d=>{Tn(d,{f:520,f2:760,d:.12,v:.07,type:'triangle'});N(d,{ft:'bandpass',f:2400,q:1,d:.06,v:.05})};
@@ -209,7 +213,7 @@ K.gull=d=>{const f=R(1500,1900),n=2+((Math.random()*3)|0);for(let i=0;i<n;i++)Tn
 K.dolphin=d=>{for(let i=0;i<4;i++)Tn(d,{f:2400+i*160,f2:5200,d:.14,v:.05,t:i*.13,att:.004});Tn(d,{f:3000,f2:1800,d:.5,v:.04,t:.55,att:.02,vib:40,vibf:30});for(let i=0;i<7;i++)N(d,{ft:'bandpass',f:6200,q:5,d:.015,v:.1,t:.9+i*.045})};
 K.whale=d=>{Tn(d,{f:78,f2:132,d:2.4,v:.2,att:.6,vib:3,vibf:.8,lp:420});Tn(d,{f:130,f2:70,d:2.6,v:.12,att:.5,t:1.1,vib:2,vibf:.6,lp:420});Tn(d,{f:240,f2:160,d:2,v:.03,t:.6,att:.5})};
 K.bell=d=>{M(d,{f:520,v:.12,p:[[1,1,1.8],[2.4,.55,1.2],[4.1,.3,.8],[6.3,.15,.5]]})};
-for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab','chicken','bear','dog'])for(const kd of ['cry','die','call'])K[kd+'_'+ty]=animalVoice(ty,kd);
+for(const ty of ['sheep','cow','boar','rabbit','deer','wolf','shade','shark','jelly','crab','chicken','bear','dog'])for(const kd of ['cry','die','call','atk'])K[kd+'_'+ty]=animalVoice(ty,kd);
 K.bark=d=>animalVoice('dog','cry')(d);
 K.clang=d=>{M(d,{f:1050,v:.2,p:[[1,1,.4],[2.76,.7,.28],[5.4,.4,.16]]});N(d,{ft:'bandpass',f:2400,q:2,d:.06,v:.35});Tn(d,{f:170,f2:80,d:.12,v:.3})};
 K.buzz=d=>{Tn(d,{f:R(205,245),d:.8,type:'sawtooth',v:.05,lp:900,att:.12,vib:34,vibf:58});N(d,{ft:'bandpass',f:1500,q:3,d:.7,v:.05,att:.15,pink:true})};
@@ -228,12 +232,14 @@ function route(pos){
 }
 const last={};
 const LIMIT={step:.18,step_rock:.18,step_sand:.18,step_water:.18,ui:.04,cricket:.05};
-function snd(k,pos){
+function snd(k,pos,x){
  if(!AC||ui.mute||AC.state!=='running')return;
- const fn=K[k];if(!fn)return;
  const now=performance.now()/1000,lim=LIMIT[k]||0;
  if(lim&&last[k]&&now-last[k]<lim)return;
  last[k]=now;
+ /* önce gerçek kayıt; çalınamazsa programla üretilen ses */
+ try{if(HG.sesGercek&&HG.sesGercek.play(k,pos,x))return}catch(e){if(HG.audioDebug)console.error('gerçek ses',k,e.message)}
+ const fn=K[k];if(!fn)return;
  try{fn(route(pos))}catch(e){if(HG.audioDebug)console.error('ses',k,e.message)}
 }
 
@@ -309,6 +315,7 @@ function audioFrame(G,dt,mode){
  const C=HG.cfg;
  tc(master.gain,ui.mute?.0001:(ui.state==='pause'?.35:1)*C.master/100*(C.master>0?1:0)+.0001,.15);
  tc(sfx.gain,C.sfx/100,.1);tc(amb.gain,C.amb/100,.1);tc(mus.gain,C.mus/100,.1);
+ tc(uwLP.frequency,play&&G.head?520:22000,.12);
  /* çevre taraması */
  scanT-=dt;if(scanT<=0){scanT=.45;scan()}
  altitude=play&&G.pz!==undefined?G.pz:0;
@@ -354,7 +361,7 @@ function audioFrame(G,dt,mode){
  nextBird-=dt;
  if(nextBird<=0){
   nextBird=R(3.5,11)/(.35+forest*1.2);
-  if(L>.5&&rain<.25&&!ui.mute&&!sh&&fear<.3)try{K.bird(route(spatial(7,30,3,9)))}catch(e){}
+  if(L>.5&&rain<.25&&!ui.mute&&!sh&&fear<.3&&!(HG.sesGercek&&HG.sesGercek.has('kus')))try{K.bird(route(spatial(7,30,3,9)))}catch(e){}
  }
  nextCricket-=dt;
  if(nextCricket<=0){
@@ -391,13 +398,17 @@ function audioFrame(G,dt,mode){
   pad.bell-=dt;
   if(pad.bell<=0){
    pad.bell=R(8,21);
-   if(L>.3&&rain<.5&&!ui.mute&&!low)try{
+   if(L>.3&&rain<.5&&!ui.mute&&!low&&!(HG.sesGercek&&HG.sesGercek.muzikOk()))try{
     const root=PROG_DAY[pad.ci],n=hz(root+PENTA[(Math.random()*5)|0]+24+(Math.random()<.4?12:0));
     Tn(mus,{f:n,d:3.2,v:.05,att:.01,type:'sine'});Tn(mus,{f:n*2.005,d:1.6,v:.012,att:.01});
    }catch(e){}
   }
  }
+ /* gerçek kayıt katmanı: döngüsel ortam sesleri ve müzik */
+ if(HG.sesGercek)try{HG.sesGercek.frame({dt,t,mode,play,L,rain,over,sh,forest,sea,wind,open,swell,fear,ins,fd,cave:!!G.cave,low:play&&G.hp<32})}catch(e){if(HG.audioDebug)console.error('gerçek ses kare',e.message)}
 }
 
+/* ses-gercek.js için iç arayüz */
+HG.SES={ac:()=>AC,route,K,tc,amb:()=>amb,mus:()=>mus,pad:()=>pad,fire:()=>fireV,bed};
 HG.audioState=()=>AC?AC.state:'yok';HG.snd=snd;HG.initAudio=initAudio;HG.audioFrame=audioFrame;
 })();

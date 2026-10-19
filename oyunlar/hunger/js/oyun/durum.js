@@ -160,7 +160,7 @@ async function startGame(load,slotId){
   }
   if(Array.isArray(s.timers))G.timers=s.timers.filter(t=>t&&t.i>=0&&t.i<(oldSz?oldSz*oldSz:N*N)).map(t=>{t.i=mapI(t.i);return t});
   /* yarım kalmış düğüm hasarı (kısmen kesilmiş ağaç, kırılmış kaya/maden) */
-  G.dmg={};if(s.dmg&&typeof s.dmg==='object')for(const k in s.dmg){const f=+s.dmg[k],i=mapI(+k);if(i>=0&&i<(oldSz?oldSz*oldSz:N*N)&&f>0&&f<1&&G.obj[mapI(+k)])G.dmg[i]=f}
+  G.dmg={};G.yac={};if(s.dmg&&typeof s.dmg==='object')for(const k in s.dmg){const f=+s.dmg[k],i=mapI(+k);if(i>=0&&i<(oldSz?oldSz*oldSz:N*N)&&f>0&&f<1&&G.obj[mapI(+k)])G.dmg[i]=f}
   HG.npcLoad(s.npcs);HG.progLoad(s.prog);
   if(Array.isArray(s.camps))s.camps.forEach((o,i)=>{if(G.camps[i])G.camps[i].open=!!o});
   if(Array.isArray(s.cav))s.cav.forEach((o,i)=>{if(G.caves[i])G.caves[i].vault=!!o});

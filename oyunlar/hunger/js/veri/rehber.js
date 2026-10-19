@@ -64,6 +64,7 @@ GUIDE.ores=[
  ['Bakır','<b>Görünüm:</b> kayada turuncu bakır damarları ve yeşil patina (malakit) lekeleri. <b>Gereken kazma:</b> Taş Kazma veya üstü. <b>Kullanım:</b> ocakta kömürle Bakır Külçe olur; bakır alet, makas ve külçe ile ticaret. Orta yükseklikte bulunur.'],
  ['Demir','<b>Görünüm:</b> kayada pas kırmızısı bantlar ve koyu hematit benekleri. <b>Gereken kazma:</b> Bakır Kazma veya üstü. <b>Kullanım:</b> ocakta kömürle Demir Külçe olur; en güçlü alet ve silah. Yalnızca yüksek dağlarda çıkar ve nadirdir.'],
  ['Kazma kademeleri','El Taşı → ağaç ve yumuşak kaya. Taş Kazma → kömür ve bakır. Bakır Kazma → demir. Demir Kazma → tüm madenlerde en hızlı kazı. Yanlış kademeyle kazmaya çalışırsanız ekranda bir uyarı çıkar.'],
+ ['Alet kalitesi ve verim','Alet ne kadar kaliteliyse aynı ağaçtan, kayadan veya damardan o kadar çok malzeme çıkar. Verim çarpanı El Taşı ×0,6, Taş ×1, Bakır ×1,6 ve Demir ×2,4 şeklindedir; aynı kademe balta ve kazma için de geçerlidir. Baktığınız düğümde çarpan ekrandaki ipucunda yazar.'],
  ['Eritme','Ocak yakınında, elde cevher ve kömür varken Üretim listesinden külçe üretin: 1 cevher + 1 kömür = 1 külçe. Ocak için 12 taş gerekir.'],
  ['İpucu','Dağlarda yüksek kesimlere çıkmadan önce yiyecek, su ve meşale alın. Yüksekten düşmek hasar verir; yokuşta yavaşlarsınız, tırmanılamayacak kadar dik yerlerde zıplayarak ilerleyin.']
 ];

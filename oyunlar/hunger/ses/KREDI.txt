@@ -1,0 +1,64 @@
+HUNGER 3D - SES KAYITLARI: KAYNAKLAR VE LİSANSLAR
+==================================================
+
+Bu klasördeki sesler, aşağıda adı geçen sahiplerin Creative Commons (CC) veya MIT lisanslı kayıtlarının
+işlenmiş sürümleridir. Yapılan değişiklikler: sessiz kısımların kırpılması, ses seviyesinin eşitlenmesi,
+tek kanala ve mp3 biçimine çevrilmesi, bazı kayıtlarda perde/hız değişikliği, ortam seslerinin kesintisiz
+döngü olarak birleştirilmesi (çapraz geçiş), müzik parçalarında giriş/çıkış geçişi eklenmesi.
+Kayıtlar, oyunun kendi kodundan bağımsızdır; yalnızca ses dosyaları aşağıdaki lisanslara tabidir.
+Dosyalar paket-*.bin (kısa efektler), dongu-*.mp3 (döngüsel ortam sesleri) ve muzik-*.mp3 (müzik) adlarını taşır.
+
+
+1) WILDFIRE GAMES - 0 A.D.  (Creative Commons Attribution-ShareAlike 3.0, CC BY-SA 3.0)
+------------------------------------------------------------------------------------------
+Telif: Copyright (C) 2009 Wildfire Games  -  http://www.wildfiregames.com/
+Lisans: http://creativecommons.org/licenses/by-sa/3.0/
+Kaynak: https://github.com/0ad/0ad  (binaries/data/mods/public/audio/)
+Ses yönetmeni: Damian Kastbauer. Müzik: Omri Lahav, Allan Brown, Sam Gossner, Boris Hansen ve katkıda bulunanlar.
+
+Kullanılanlar:
+ - Adımlar: çim, çakıl/toprak, kaya, kum, tahta zemin
+ - Kaynak toplama ve inşa: ağaç kesme, ağaç devrilme, taş ve maden kazma, çekiç, testere, yaprak hışırtısı
+ - Dövüş: et darbesi/saplanma, ok uçuşu, oka karşı ahşap, kalkan vuruşu
+ - Hayvanlar: sığır, tavuk, koyun ve keçi, domuz, at (geyik sesi için perdesi değiştirilerek)
+ - Ortam: gök gürültüsü, rüzgâr ve fırtına, yaprak hışırtısı, deniz dalgaları, kıyı ve kayalık dalgaları,
+   yağmur, gündüz kuş seslerinin ortam kayıtları
+ - Müzik: "Sunrise", "Mountain Idyll", "As Seasons Change", "Albian Nocturne", "Dried Tears"
+Bu dosyalar CC BY-SA 3.0 altında aynı koşullarla (atıf + benzer paylaşım) dağıtılır.
+
+
+2) LUANTI / VOXELIBRE VE İLGİLİ PROJELERDEKİ KAYITLAR
+------------------------------------------------------------------------------------------
+Kaynak: https://github.com/VoxeLibre/VoxeLibre  (mods/ENTITIES/mobs_mc/LICENSE-media.md ve ilgili modların README dosyaları)
+
+CC0 1.0 (kamu malı bağışı, atıf gerekmez; yine de adlar belirtilmiştir):
+ - Kurt (hırlama, havlama, acı, ölüm) ve köpek sesleri: Hybrid Dog ("dogblocks")
+ - Tavşan sesleri: kessir, Alshred (freesound)
+ - Tavuk sesleri: evsecrets (freesound)
+ - İnek sesleri: Zozzy, Bird_man (freesound)
+ - Gölge için kullanılan canlı sesleri: pauliw (vex), Under7dude (zombi hırıltısı), Soundscapes55 (uzak inleme)
+ - Su damlası: mcl_dripping (CC0); içme sesi: mcl_potions (CC0); su sıçraması: tran5ient (freesound)
+
+CC BY 3.0 (atıf zorunlu: https://creativecommons.org/licenses/by/3.0/):
+ - Ayı sesleri: tbsounddesigns, YleArkisto (freesound)
+ - Gölge tıslaması: cmusounddesign (freesound)
+ - Yeme sesi: InspectorJ (freesound)
+ - Su içinde adım: AGFX (freesound)
+ - Ateş döngüsü: Dynamicell (freesound)
+ - Oyuncu hasar sesi: sonictechtonic (freesound)
+ - Koyun sesi: Blender Foundation
+
+CC BY-SA 3.0:
+ - Gök gürültüsü kayıtları: hantorio, juskiddink, IllusiaProductions (freesound)
+
+MIT:
+ - Domuz sesleri: TenPlus1 ("mobs_animal")
+
+
+3) PROGRAMLA ÜRETİLEN SESLER
+------------------------------------------------------------------------------------------
+Arayüz sesleri, kalp atışı, nefes, cırcır böceği, baykuş, kurt uluması, köpek balığı, deniz canlıları ve
+kayıtlar yüklenemediğinde devreye giren tüm yedek sesler oyunun kendi kodu (js/oyun/ses.js) tarafından üretilir.
+
+
+Not: Bir kayıt sahibi olarak itirazınız varsa blogdaki iletişim sayfasından (hakkinda.html) bildirildiğinde ilgili dosya kaldırılır.

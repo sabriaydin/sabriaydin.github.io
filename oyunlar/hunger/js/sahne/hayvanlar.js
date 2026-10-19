@@ -81,6 +81,7 @@ S.onFrame((G,t,dt,info)=>{
   if(hop){o.g.position.y+=hop}
   o.legs.forEach((l,i)=>{
    if(a.dying){l.rotation.x=(o.dyingTw||0)*(i%2?1:-1)+(a.dying>.3&&!def.foe?.3*(i<2?1:-1):0);return}
+   if(a.cph===0&&a.t==='boar'&&i<2){l.rotation.x=-.8*Math.max(0,Math.sin(t*13+i*3));return}      /* yaban domuzu atılmadan önce toprağı eşer */
    if(a.t==='rabbit'){l.rotation.x=(i<2?-1:1)*Math.sin(a.walk*1.6)*.9*mvk;return}
    if(run){l.rotation.x=Math.sin(ph+(i<2?0:2.3))*amp*1.15;return}
    l.rotation.x=Math.sin(ph)*amp*((i===0||i===3)?1:-1);
@@ -98,10 +99,10 @@ S.onFrame((G,t,dt,info)=>{
     const P=M.headP,graze=(a.t==='sheep'||a.t==='cow'||a.t==='deer')&&idle?(()=>{const f=((t*.06+a.id*.37)%1);return f<.4?Math.sin(Math.PI*f/.4):0})():(a.t==='chicken'&&idle?Math.max(0,Math.sin(t*4.2+a.id*2.1)-.3)*1.3:0);
     const dxp=G.px-a.x,dzp=G.py-a.z,dpp=Math.hypot(dxp,dzp);
     let rel=0;if(idle&&dpp<14&&!graze){let d=Math.atan2(dxp,dzp)-a.yaw;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;rel=clamp(d,-.7,.7)*clamp((14-dpp)/6,0,1)}
-    const alert=(def.flee&&dpp<def.flee*1.4)||a.panic>0?-.22:0;
+    const alert=(def.flee&&dpp<def.flee*1.4)||a.panic>0||a.alerted?-.22:0;
     const atk=a.atkT>0?Math.sin(Math.min(1,a.atkT/.45)*Math.PI):0;
     const chew=graze?Math.sin(t*9+a.id)*.04:0;
-    const hp=graze*.85+alert+atk*.55+Math.sin(ph*2)*.07*mvk*(run?1:.4)+(a.t==='boar'&&a.charge>0?.2:0)+chew+Math.sin(t*.9+a.id)*.012;
+    const hp=graze*.85+alert+atk*.55+Math.sin(ph*2)*.07*mvk*(run?1:.4)+(a.t==='boar'&&a.charge>0?.2:0)+(a.cph===0?(a.t==='bear'?-.4:.5):0)+chew+Math.sin(t*.9+a.id)*.012;
     o.head.position.set(P[0],P[1]+by,P[2]+atk*.3);
     o.head.rotation.set(hp,(o.head.rotation.y||0)+(rel-(o.head.rotation.y||0))*Math.min(1,5*dt),Math.sin(t*.7+a.id)*.015);
    }
@@ -120,8 +121,9 @@ S.onFrame((G,t,dt,info)=>{
   /* gölge kolları: yürürken sallanır, yaklaşırken ileri uzanır, saldırıda savrulur */
   if(o.armL&&o.armR){
    const reach=(a.seen?0:1)*clamp(1-Math.hypot(G.px-a.x,G.py-a.z)/16,0,1),atk=a.atkT>0?Math.sin(Math.min(1,a.atkT/.5)*Math.PI):0;
-   o.armL.rotation.set(-Math.sin(ph)*amp*.5-reach*1.1-atk*1.4,0,.12+Math.sin(t*1.7+a.id)*.05);
-   o.armR.rotation.set(Math.sin(ph)*amp*.5-reach*1.1-atk*1.4,0,-.12-Math.sin(t*1.3+a.id)*.05);
+   const wu=a.wind>.1?.9:0;                                  /* saldırı öncesi kollar geriye çekilir */
+   o.armL.rotation.set(-Math.sin(ph)*amp*.5-reach*1.1-atk*1.4+wu,0,.12+Math.sin(t*1.7+a.id)*.05);
+   o.armR.rotation.set(Math.sin(ph)*amp*.5-reach*1.1-atk*1.4+wu,0,-.12-Math.sin(t*1.3+a.id)*.05);
    if(a.seen&&!a.dying){o.body.position.x=Math.sin(t*70+a.id)*.012}else o.body.position.x=0;
   }
  }

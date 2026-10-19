@@ -9,11 +9,11 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 
 | Konu | Dosya |
 |---|---|
-| Sayfa iskeleti, HUD, menüler | `index.html` |
+| Sayfa iskeleti, HUD, menüler (sayfa başlığı "Hunger") | `index.html` |
 | Tüm arayüz stilleri | `css/stil.css` |
 | Sabitler (harita boyutu, gün süresi, erişim mesafesi) | `js/cekirdek/ad-alani.js` |
 | Matematik/gürültü yardımcıları | `js/cekirdek/yardimcilar.js` |
-| Ayarlar ve ayar menüsü (grafik, ses, kontrol, oyun; `hunger-ayar-v1`) | `js/cekirdek/ayarlar.js` |
+| Ayarlar ve ayar menüsü (grafik, ses, kontrol, oyun; `hunger-ayar-v1`; müzik varsayılanı %35, ses kaynakları için `ses/KREDI.txt` notu) | `js/cekirdek/ayarlar.js` |
 | Eşyalar (ad, yığın, yenilebilirlik) | `js/veri/esyalar.js` |
 | Üretim tarifleri, istasyonlar | `js/veri/tarifler.js` |
 | Ağaç/kaya/maden dayanıklılığı, araç kademesi çarpanı (`POWER`); meyve çalıları katı değildir (içlerinden geçilir) | `js/veri/dugumler.js` |
@@ -25,7 +25,7 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Gökyüzü kubbesi (güneş, ay, bulut), güneş/ay ışığı, sis, yansıma ortamı, ateş ışıkları | `js/sahne/isik.js` |
 | Arazi (yumuşak yükseklik, renk karışımı) ve su | `js/sahne/arazi.js` |
 | Çimen tutamları ve çiçekler (eğik sap, yaprak, taç; rüzgârda sallanır) | `js/sahne/cim.js` |
-| Yüksek ayrıntılı 3B modeller (çam/meşe/palmiye, kaya, maden, çalı, alet parçaları, duvar, kapı…); çam ve meşe gövdesinin kök kısmı: gövdeye bağlı yumuşak kök sivrilmesi (`rootTube`, `mkRoots`) ve yere yayılan ince kök kolları (`rootArm`) | `js/sahne/modeller.js` |
+| Yüksek ayrıntılı 3B modeller (çam/meşe/palmiye, kaya, maden, çalı, alet parçaları, duvar, kapı…); çam ve meşe gövdesinin kök kısmı: gövdeye bağlı yumuşak kök sivrilmesi (`rootTube`, `mkRoots`); gövde ve kök tüplerinin yüzey yönü düzeltildi (ağacın oyuncuya bakan yüzü kaybolmaz) ve yere yayılan ince kök kolları (`rootArm`) | `js/sahne/modeller.js` |
 | Güncelleme 49 eşyaları (tohum, buğday, ekmek, güveç, meyve suyu, kurutulmuş yiyecek, mantar, yumurta, tüy, merhem, şişedeki mesaj, zırh, Demir Mızrak, Dürbün), yeni yapı tarifleri, tavuk türü | `js/veri/yenilikler.js` |
 | Yeni eşya simgeleri | `js/gorsel/yeni-simgeler.js` |
 | Yeni yapı modelleri (yatak, raf, varil, meşale direği, tuzak, tarla, ekin aşamaları, mantar), tavuk modeli, yerdeki ve elde tutulan yeni eşya modelleri | `js/sahne/yeni-modeller.js` |
@@ -57,17 +57,19 @@ Dosyalar `index.html` içinde sırayla yüklenir. Bir değişiklik için yalnız
 | Bulunan kayıtlar (hikâye notları) | `js/veri/notlar.js` |
 | Kan Ayı gecesi ve günlük deneyim | `js/oyun/olaylar.js`, `js/sahne/isik.js` (kızıl gökyüzü) |
 | Sikke ekonomisi, satış, Uyku Tulumu ve uyku | `js/oyun/koyluler.js` (`HG.sleep`), `js/veri/esyalar.js` (coin, bag) |
-| Hayvan modelleri / hayvan hareketi ve animasyonu (tavuk gagalaması dahil) | `js/sahne/hayvan-modelleri.js`, `js/sahne/hayvanlar.js` |
-| Ses motoru: 3B ses, yankı, ortam sesleri, hava, hayvan (tavuk dahil), adım, müzik, dürbün ve deklanşör sesi | `js/oyun/ses.js` |
+| Hayvan modelleri / hayvan hareketi ve animasyonu (tavuk gagalaması dahil; Gölge saldırı hazırlığında kollar geri çekilir, tetikteki av hayvanı başını kaldırır, domuz hazırlık evresinde ön ayağıyla eşelenir) | `js/sahne/hayvan-modelleri.js`, `js/sahne/hayvanlar.js` |
+| Ses motoru: 3B ses (HRTF), yankı, su altı alçak geçiren süzgeç, programla üretilen yedek sesler, ortam sesleri, hava, hayvan (tavuk dahil), adım, müzik, dürbün ve deklanşör sesi; gerçek ses katmanı önce denenir, yoksa yedek ses çalar (`HG.SES`) | `js/oyun/ses.js` |
+| Gerçek ses katmanı: kayıt havuzları (paket dosyaları), yüzeye göre adımlar, alet/ağaç/kaya/maden, dövüş, hayvan ve Gölge sesleri, kesintisiz ortam döngüleri (rüzgâr, fırtına, yaprak, dalga, yağmur, kuş, ateş), müzik yöneticisi (gündüz/gece parçaları, aralıklı çalma) | `js/oyun/ses-gercek.js` (`HG.sesGercek`), `index.html` |
+| Ses kayıtları ve manifest (`dizin.json`), paketler (`paket-*.bin`), döngüler (`dongu-*.mp3`), müzik (`muzik-*.mp3`), kaynak ve lisans bilgisi (CC BY-SA 3.0 / CC BY 3.0 / CC0 / MIT; atıf gerekir) | `ses/` (`ses/KREDI.txt`) |
 | Gece-gündüz hesabı | `js/oyun/zaman.js` |
 | Envanter işlemleri | `js/oyun/envanter.js` |
 | Üretim mantığı | `js/oyun/uretim.js` |
 | Kesme/toplama/yerleştirme/yeme-içme; vuruş başına kaynak (Rust mantığı), E ile toplama ve basılı tutarak geri alma, yeni yapı/ürün etkileşimleri için kancalar (`HG.useExtra`, `HG.extHint`, `HG.extHeldHint`, `HG.extPickupBlock`, `HG.extGot`, `HG.extSand`), alet kademesi (`gatherLv`), verim (`YIELD`), çıplak elle toplama engeli | `js/oyun/eylem.js` (vuruş hasarı `HIT`: `js/veri/dugumler.js`) |
 | İnşa sistemi: İnşa Planı (duvar/kapı/çit kurma), Çekiç (Odun/Taş/Metal yükseltme, yıkma ve %50 iade), sağ tık radyal menüsü (menü açıkken eşya değişirse seçim uygulanmaz), yerleştir tuşu/dokunmatik düğme plan ve çekiçle de çalışır, yerleştirme gölgesi | `js/oyun/insa.js` (parça kataloğu `PIECES`), `css/stil.css` (`#radial`), `js/gorsel/simgeler.js` (parça simgeleri), `js/sahne/modeller.js` (`wallt`, `wallm`, `doorm`, `fence`) |
 | Yere atılan eşyalar (fizik, toplama) | `js/oyun/dusenler.js` |
-| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, kovalama hızı oyuncunun koşusundan yavaş `cspd`, uzaklaşınca bırakma `giveUp`, iç içe geçme engeli, yabani hayvanlar kapıdan geçemez `SOLIDA`), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
+| Hayvan yapay zekâsı (bölgesel gezinme, kurt avı %40/%60, büyük baş karşılığı, kovalama hızı oyuncunun koşusundan yavaş `cspd`, uzaklaşınca bırakma `giveUp`, iç içe geçme engeli, yabani hayvanlar kapıdan geçemez `SOLIDA`; gelişmiş davranış: kurt sürüsü (lider, kuşatma, geri çekilme `callPack`/`packTick`), yaban domuzu ve ayıda hazırlık-atılma-dinlenme evresi (`a.cph`, `chargeMove`), av hayvanlarında tetikte durumu ve sürü alarmı (`alarm`), zikzaklı kaçış, ses/gürültüye (`HG.noiseT`) ve rüzgâra duyarlılık, sürü merkezine gezinme), vurma, öldürme, düşen eşyalar | `js/oyun/hayvanlar.js` |
 | Beden durumu: dayanıklılık, akıl sağlığı, kanama, meşale yakıtı, hasar geri bildirimi, bandaj | `js/oyun/vucut.js` |
-| Gölge yaratıklar (korku), sahte gözlemciler, gerilim, gece yönetmeni | `js/oyun/dusmanlar.js` |
+| Gölge yaratıklar (korku), sahte gözlemciler, gerilim, gece yönetmeni; yapay zekâ: A* yol bulma (`findPath`, kare başına en çok 2 arama), engel arkasından dolanma, saldırı hazırlığı ve geri çekilme, atılma, kuşatma konumları, ışık kenarında dolanma, ışıktan kaçış | `js/oyun/dusmanlar.js` |
 | Yay, ok fiziği, isabet ve geri toplama | `js/oyun/silah.js` |
 | Eşyaya özgü saldırı gücü (`DMG`), vuruş bölgesi çarpanları (`ZONE`), canlı canı (%100) | `js/veri/hayvanlar.js`, `js/oyun/hayvanlar.js` (`zoneAt`, `hitAnimal`) |
 | Mağara üretimi (odalar, tüneller, havuzlar, sandık odası, yaratık ve eşya yerleşimi) | `js/dunya/magara.js` (`HG.genCave`), giriş yerleşimi `js/dunya/uretim.js` |

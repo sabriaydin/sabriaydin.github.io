@@ -34,6 +34,75 @@ function walkableFoe(x,z){
  return true;
 }
 
+/* ---- Gölge yön bulma ----
+   Doğrudan yol açıksa düz gider; engel (ağaç, kaya, göl, duvar) varsa kare ızgarasında A* ile dolaşır.
+   Arama sınırlıdır (pencere ve düğüm sayısı) ve gölge başına en fazla ~1 sn'de bir yapılır. */
+const NAVR=34,NAVMAX=700;
+function clearLine(ax,az,bx,bz){
+ const n=Math.ceil(Math.hypot(bx-ax,bz-az)/.45);
+ for(let i=1;i<=n;i++){const t=i/n;if(!walkableFoe(ax+(bx-ax)*t,az+(bz-az)*t))return false}
+ return true;
+}
+function findPath(ax,az,bx,bz){
+ const sx=Math.floor(ax),sz=Math.floor(az),gx=Math.floor(bx),gz=Math.floor(bz);
+ const x0=sx-NAVR,z0=sz-NAVR,S=NAVR*2+1,cache=new Map();
+ const wk=(x,z)=>{const k=z*4096+x;let v=cache.get(k);if(v===undefined){v=walkableFoe(x+.5,z+.5);cache.set(k,v)}return v};
+ const hf=(x,z)=>{const dx=Math.abs(x-gx),dz=Math.abs(z-gz);return Math.max(dx,dz)+.414*Math.min(dx,dz)};
+ const open=[],g=new Map(),from=new Map(),closed=new Set();
+ const push=(x,z,f)=>{open.push([f,x,z]);let i=open.length-1;while(i>0){const p=(i-1)>>1;if(open[p][0]<=open[i][0])break;[open[p],open[i]]=[open[i],open[p]];i=p}};
+ const pop=()=>{const t=open[0],l=open.pop();if(open.length){open[0]=l;let i=0;for(;;){let a=i*2+1,b=a+1,m=i;if(a<open.length&&open[a][0]<open[m][0])m=a;if(b<open.length&&open[b][0]<open[m][0])m=b;if(m===i)break;[open[m],open[i]]=[open[i],open[m]];i=m}}return t};
+ const K=(x,z)=>z*4096+x;
+ g.set(K(sx,sz),0);push(sx,sz,hf(sx,sz));
+ let best=[sx,sz],bh=hf(sx,sz),n=0,goal=null;
+ while(open.length&&n<NAVMAX){
+  const [,cx,cz]=pop(),ck=K(cx,cz);
+  if(closed.has(ck))continue;closed.add(ck);n++;
+  const h=hf(cx,cz);if(h<bh){bh=h;best=[cx,cz]}
+  if(Math.max(Math.abs(cx-gx),Math.abs(cz-gz))<=1){goal=[cx,cz];break}
+  const gc=g.get(ck);
+  for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){
+   if(!dx&&!dz)continue;
+   const nx=cx+dx,nz=cz+dz;
+   if(nx<x0||nz<z0||nx>=x0+S||nz>=z0+S||!wk(nx,nz))continue;
+   if(dx&&dz&&!(wk(cx+dx,cz)&&wk(cx,cz+dz)))continue;                 /* köşeden kesme yok */
+   const nk=K(nx,nz),ng=gc+(dx&&dz?1.414:1);
+   if(g.has(nk)&&g.get(nk)<=ng)continue;
+   g.set(nk,ng);from.set(nk,ck);push(nx,nz,ng+hf(nx,nz));
+  }
+ }
+ const end=goal||best,path=[];let k=K(end[0],end[1]);
+ while(k!==undefined&&k!==K(sx,sz)){path.push({x:k%4096+.5,z:Math.floor(k/4096)+.5});k=from.get(k)}
+ path.reverse();return {path,ok:!!goal};
+}
+let pathBudget=0;
+/* Gölgenin hedefe doğru gideceği yön: açık yolda düz, engelde A* yol noktaları */
+function navHead(a,tx,tz,dt){
+ const dx=tx-a.x,dz=tz-a.z;
+ a.dirT=(a.dirT||0)-dt;a.pathT=(a.pathT||0)-dt;
+ if(a.dirT<=0){a.dirT=.28+rnd()*.12;a.dirOk=clearLine(a.x,a.z,tx,tz)}
+ if(a.dirOk){a.path=null;return {head:Math.atan2(dx,dz),wait:false}}
+ if((!a.path||a.pathT<=0)&&pathBudget>0){
+  pathBudget--;a.pathT=.9+rnd()*.5;
+  const r=findPath(a.x,a.z,tx,tz);a.path=r.path;a.pi=0;a.pathOk=r.ok;
+ }
+ const p=a.path;
+ if(p&&p.length){
+  while(a.pi<p.length-1&&Math.hypot(p[a.pi].x-a.x,p[a.pi].z-a.z)<.8)a.pi++;
+  const w=p[Math.min(a.pi,p.length-1)];
+  if(a.pi>=p.length-1&&Math.hypot(w.x-a.x,w.z-a.z)<.8)return {head:Math.atan2(dx,dz),wait:!a.pathOk};      /* ulaşılabilecek en yakın noktaya varıldı */
+  return {head:Math.atan2(w.x-a.x,w.z-a.z),wait:false};
+ }
+ return {head:Math.atan2(dx,dz),wait:false};
+}
+/* Çevredeki en yakın ışık kaynağı: kamp ateşi, fener veya oyuncunun yanan meşalesi */
+function nearLight(x,z){
+ let b=null,bd=13;
+ if(G.torchLit){const d=Math.hypot(x-G.px,z-G.py);if(d<bd){bd=d;b={x:G.px,z:G.py}}}
+ for(const f of sc.fires||[]){const d=Math.hypot(x-f.x,z-f.z);if(d<bd){bd=d;b={x:f.x,z:f.z}}}
+ for(const l of sc.lamps||[]){const d=Math.hypot(x-l.x,z-l.z);if(d<bd){bd=d;b={x:l.x,z:l.z}}}
+ return b;
+}
+
 /* Tek bir gölgenin davranışı: {head,spd} döner */
 function foeAI(a,def,dt){
  const dx=G.px-a.x,dz=G.py-a.z,dp=Math.hypot(dx,dz),L=daylight();
@@ -54,7 +123,7 @@ function foeAI(a,def,dt){
   if(a.hp<=0){HG.killAnimal(a);return {head:a.yaw,spd:0}}
  }
  const ll=HG.lightLevel(a.x,a.z,!!G.cave);        /* mağarada yaratıklar meşaleden çekinmez */
- /* ışık: kaçar, yakından yanar */
+ /* ışık: kaçar, yakından yanar (ışık kaynağından uzaklaşır; kaçarken engel varsa dolanır) */
  if(ll>.12||a.flinch>0){
   if(a.flinch>0)a.flinch-=dt;
   if(ll>.55){
@@ -63,26 +132,59 @@ function foeAI(a,def,dt){
    if(rnd()<dt*14)HG.Scene.burst(a.x,HG.Scene.groundY(a.x,a.z)+1.2,a.z,0x2a2a38,2);
    if(a.hp<=0){HG.killAnimal(a);return {head:a.yaw,spd:0}}
   }
-  return {head:Math.atan2(-dx,-dz),spd:def.run};
+  const ls=nearLight(a.x,a.z);
+  a.wind=0;
+  return {head:ls&&ls.x!==a.x?Math.atan2(a.x-ls.x,a.z-ls.z):Math.atan2(-dx,-dz),spd:def.run};
+ }
+ /* saldırı: kısa hazırlık süresi vardır; oyuncu bu sürede geri çekilirse vuruş ıskalar */
+ if(a.retreat>0){                                    /* vurup geri çekilir, sonra yeniden yaklaşır */
+  a.retreat-=dt;
+  if(dp<9){a.wind=0;return {head:Math.atan2(-dx,-dz)+Math.sin(a.id*1.7)*.5,spd:3.1}}
+ }
+ if(a.wind>0){
+  a.wind-=dt;
+  if(a.wind<=0){
+   if(dp<2.3&&ui.state==='play'&&(!G.sheltered||G.cave)){HG.hurt(def.dmg,'Bir Gölge seni parçaladı.',{x:a.x,z:a.z},def.bleed);HG.snd('cry_shade',{x:a.x,z:a.z})}
+   a.cd=1.5;a.retreat=1.1+rnd()*.9;
+  }
+  return {head:Math.atan2(dx,dz),spd:0};
  }
  /* bakılan gölge donar (ama saldırıya açıktır) */
  if(inV&&dp>2.3){a.seenT=(a.seenT||0)+dt;return {head:Math.atan2(dx,dz),spd:0}}
  a.seenT=0;
- /* saldırı */
- a.cd-=0;
  if(dp<1.8){
-  if(a.cd<=0&&ui.state==='play'&&(!G.sheltered||G.cave)){a.cd=1.5;a.atkT=.5;HG.hurt(def.dmg,'Bir Gölge seni parçaladı.',{x:a.x,z:a.z},def.bleed);HG.snd('cry_shade',{x:a.x,z:a.z})}
+  if(a.cd<=0&&ui.state==='play'&&(!G.sheltered||G.cave)){a.wind=.32;a.atkT=.5;HG.snd('call_shade',{x:a.x,z:a.z})}
   return {head:Math.atan2(dx,dz),spd:0};
  }
- /* yaklaşma: uzaktan hızlı, yakında yavaş ve sinsi */
- const sp=dp>12?def.run:dp>4.5?3.4:2.3;
+ /* yaklaşma: uzaktan hızlı, yakında yavaş ve sinsi; görülmeden yakına gelince atılır */
+ let sp=dp>12?def.run:dp>4.5?3.4:2.3;
+ a.lungeCd=(a.lungeCd||0)-dt;
+ if(a.lunge>0){a.lunge-=dt;sp=Math.max(sp,4.5)}
+ else if(dp<6.5&&dp>2.4&&!inV&&a.lungeCd<=0&&!G.sheltered){a.lunge=.6;a.lungeCd=5+rnd()*4}
  const wob=dp<10?Math.sin(performance.now()*.004+a.id)*.5:0;
  /* duvar önünde bekleyip tırmalar */
  if(G.sheltered&&dp<5){
   a.scratchT=(a.scratchT||0)-dt;
   if(a.scratchT<=0){a.scratchT=1.8+rnd()*1.5;HG.snd('scratch',{x:a.x,z:a.z})}
  }
- return {head:Math.atan2(dx,dz)+wob,spd:sp};
+ /* yol: engel varsa dolanır; ulaşılamıyorsa en yakın noktada bekler (barınak) */
+ const nv=navHead(a,G.px,G.py,dt);
+ if(nv.wait)return {head:Math.atan2(dx,dz),spd:0};
+ let head=nv.head;
+ /* kuşatma: birden çok gölge oyuncuya farklı yönlerden yaklaşır */
+ if(!a.path){if(a.slot===undefined)a.slot=((a.id%5)-2)*.42;head+=a.slot*clamp((dp-4)/14,0,1)}
+ /* ışığın kenarında dolaşır: aydınlık alana girmeden çevresinde döner */
+ const ax=Math.sin(head),az=Math.cos(head);
+ if(HG.lightLevel(a.x+ax*2.4,a.z+az*2.4,!!G.cave)>.1){
+  const ls=nearLight(a.x+ax*2.4,a.z+az*2.4);
+  if(ls){
+   if(a.circ===undefined)a.circ=a.id%2?1:-1;
+   const base=Math.atan2(a.x-ls.x,a.z-ls.z);                       /* ışıktan dışarı doğru */
+   a.hissT=(a.hissT||0)-dt;if(a.hissT<=0&&dp<18){a.hissT=2.4+rnd()*2;HG.snd('hiss',{x:a.x,z:a.z})}
+   return {head:base+a.circ*1.45,spd:2.4};
+  }
+ }
+ return {head:head+(a.path?0:wob),spd:sp};
 }
 
 function spawnShade(fake){
@@ -105,6 +207,7 @@ function spawnShade(fake){
 /* Yönetmen: kaç gölge çıkacağını gece sayısına, akıl sağlığına ve hava durumuna göre belirler */
 function updateFoes(dt){
  if(ui.state!=='play'||!G.animals)return;
+ pathBudget=2;                                  /* kare başına en fazla iki yol araması */
  const L=daylight(),dark=Math.max(1-L,(sc.rain||0)*.5);
  let real=0,fakes=0,near=99,seenNear=false;
  for(const a of G.animals){

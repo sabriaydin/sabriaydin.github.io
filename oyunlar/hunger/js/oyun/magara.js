@@ -4,7 +4,7 @@
 'use strict';
 const {W,H,G,ui,look,Scene,sc}=HG;
 /* yüzeyden saklanıp mağarada boşaltılan alanlar */
-const SURF=['tile','obj','hgt','shore','animals','drops','timers','villages','camps','npcs','arrows','caves','dmg','explore','nearCamp','nearNpc','nearDrop'];
+const SURF=['tile','obj','hgt','shore','animals','drops','timers','villages','camps','npcs','arrows','caves','dmg','yac','explore','nearCamp','nearNpc','nearDrop'];
 const nap=()=>new Promise(r=>setTimeout(r,30));
 const CELL=4,CW=Math.ceil(W/CELL),CH=Math.ceil(H/CELL);
 
@@ -68,7 +68,7 @@ function enter(c){
   for(const f of lv.foes)f.hp=undefined;
   const camps=lv.camps.map(k=>Object.assign({},k,{id:1000+c.id,open:!!c.vault}));
   Object.assign(G,{tile:lv.tile,obj:lv.obj,hgt:lv.hgt,shore:lv.shore,animals:HG.makeAnimals(lv.foes),
-   drops:lv.drops.map(d=>Object.assign({},d)),timers:[],villages:[],camps,npcs:[],arrows:[],caves:[],dmg:{},explore:new Uint8Array(CW*CH),
+   drops:lv.drops.map(d=>Object.assign({},d)),timers:[],villages:[],camps,npcs:[],arrows:[],caves:[],dmg:{},yac:{},explore:new Uint8Array(CW*CH),
    nearCamp:null,nearNpc:null,nearDrop:null,cave:{id:c.id,tier:c.tier,lv,surf:sv,t:0},px:lv.sx,py:lv.sy,sheltered:true});
   c.entered=(c.entered||0)+1;G.stats.caves=(G.stats.caves||0)+1;
   look.yaw=0;look.pitch=-.05;

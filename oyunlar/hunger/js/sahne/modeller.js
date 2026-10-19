@@ -145,6 +145,7 @@ function stone(sx,sy,sz,seed,o){
 
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
  /* Eğri boyunca incelen boru (gövde, kök, dal): yan yüzey kabuk girintileriyle oynatılır. pts: [[x,y,z],…], rf(t,y): yarıçap */
+ /* Üçgen sırası dışa bakacak şekildedir (saat yönünün tersi): gövdenin oyuncuya bakan yüzü artık kaybolmaz */
  function tube(pts,rf,seg,rings,ridge,seed){
   const cu=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],p[1],p[2]))),pos=[],idx=[],R=seg+1;
   const tg=new THREE.Vector3(),nr=new THREE.Vector3(),bn=new THREE.Vector3(),c=new THREE.Vector3();let pn=null;
@@ -159,7 +160,7 @@ const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
     pos.push(c.x+(nr.x*ca+bn.x*sa)*r,c.y+(nr.y*ca+bn.y*sa)*r,c.z+(nr.z*ca+bn.z*sa)*r);
    }
   }
-  for(let i=0;i<rings;i++)for(let j=0;j<seg;j++){const a=i*R+j,b=a+1,d=a+R,e=d+1;idx.push(a,d,b,b,d,e)}
+  for(let i=0;i<rings;i++)for(let j=0;j<seg;j++){const a=i*R+j,b=a+1,d=a+R,e=d+1;idx.push(a,b,d,b,e,d)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return weld(g);
  }
  /* Kök sivrilmeli gövde: yarıçap açıya da bağlıdır (yumuşak kök dilimleri, yukarı çıkıldıkça gövdeye karışır ve hafifçe burulur).
@@ -180,7 +181,7 @@ const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
     pos.push(c.x+(nr.x*ca+bn.x*sa)*r,c.y+(nr.y*ca+bn.y*sa)*r,c.z+(nr.z*ca+bn.z*sa)*r);
    }
   }
-  for(let i=0;i<rings;i++)for(let j=0;j<seg;j++){const a=i*R+j,b=a+1,d=a+R,e=d+1;idx.push(a,d,b,b,d,e)}
+  for(let i=0;i<rings;i++)for(let j=0;j<seg;j++){const a=i*R+j,b=a+1,d=a+R,e=d+1;idx.push(a,b,d,b,e,d)}
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);return weld(g);
  }
 

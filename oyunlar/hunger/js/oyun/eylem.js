@@ -12,9 +12,9 @@ function gatherLv(tool){
  if(h.it.tool==='rock')return 0;
  return -1;
 }
-/* Alet düzeyine göre verim çarpanı (El Taşı, Taş, Bakır, Demir); kesirli kısım olasılıkla bir ek eşya verir */
-const YIELD=[.6,1,1.4,1.8];
-function yieldN(n,lv){const v=n*YIELD[Math.max(0,lv)],f=Math.floor(v);return Math.max(1,f+(Math.random()<v-f?1:0))}
+/* Alet düzeyine göre verim çarpanı (El Taşı, Taş, Bakır, Demir): bir düğümden çıkan toplam kaynak bu çarpanla ölçeklenir.
+   Her vuruşta verilen miktar, o vuruşun düğümden götürdüğü can oranına bağlıdır; kesirli kısım düğümde birikir ve sonraki vuruşa eklenir. */
+const YIELD=[.6,1,1.6,2.4];
 /* Döner: {kind,need,hint,name} veya {block:'mesaj',name} veya null */
 function foodBlock(f){
  const needH=f.h>0&&G.hun<=100-f.h*.5,needT=f.t>=8&&G.thr<=100-f.t*.5;
@@ -64,7 +64,7 @@ function actionFor(tg){
    if(lv<0){const xb=HG.extBare&&HG.extBare(o,i);if(xb)return xb}
    if(lv<0)return {block:nd.tool==='axe'?'Çıplak elle ağaç kesilemez. El Taşı veya balta gerekir.':nd.req>0?(nd.msg||'Bunun için kazma gerekir.'):'Çıplak elle kazılamaz. El Taşı veya kazma gerekir.',name};
    if(lv<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
-   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz')+' · her vuruş kaynak verir',name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
+   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz')+' · verim ×'+YIELD[Math.min(3,lv)],name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
   }
   {const xh=HG.extHint&&HG.extHint(tg,o,h,i);if(xh)return xh}
   if(pickupOk(o))return {hint:'[E] basılı tut: geri al',name};
@@ -174,6 +174,7 @@ function giveRes(id,n){
 }
 function nodeSwing(tg){
  const i=tg.y*W+tg.x,o=G.obj[i],nd=NODE[o];
+ HG.noiseT=performance.now()+1500;                          /* kesme ve kazma sesi hayvanları tetikte tutar */
  const key='node,'+i+','+o;
  if(key!==A.key){saveProgress();A.key=key;A.memKey=null;A.memKind=false;A.need=1}
  A.p=(G.dmg&&G.dmg[i])||0;                              /* ilerleme çubuğu: düğümün hasar oranı */
@@ -182,20 +183,26 @@ function nodeSwing(tg){
  A.nextSwing=G.clock+SWING*(G.tired?1.6:1);
  A.hitI=i;A.hitT=.18;HG.armSwing(.36);
  const big=o!==O.TREE;
- HG.snd(o===O.TREE?'hit':o===O.ROCK?'rock':'ore');
+ HG.snd(o===O.TREE?'hit':o===O.ROCK?'rock':'ore',null,o);
  const hx=tg.hx!==undefined?tg.hx:tg.x+.5,hy=tg.hy!==undefined?tg.hy:1,hz=tg.hz!==undefined?tg.hz:tg.y+.5;
  Scene.burst(hx,hy,hz,o===O.TREE?0x4a9440:o===O.COAL?0x222226:o===O.COPPER?0xc8743a:o===O.IRON?0xc2a287:0x9a9a9a,big?7:4);
- let n=nd.y[Math.min(3,lv)];
+ /* verim: düğümün tamamından çıkacak kaynak (tot × alet çarpanı), bu vuruşun götürdüğü can oranı kadarı verilir */
+ const dfr=Math.min(1-(G.dmg&&G.dmg[i]||0),HIT_OF(lv)/nd.hp),ym=YIELD[Math.max(0,Math.min(3,lv))];
+ if(!G.yac)G.yac={};
+ const ac=G.yac[i]||(G.yac[i]={m:0,s:0});
+ ac.m+=nd.tot*ym*dfr;let n=Math.floor(ac.m);ac.m-=n;
  if(HG.perk('gath')&&Math.random()<.12*HG.perk('gath'))n+=1;
  giveRes(nd.id,n);
- if(nd.sec)giveRes(nd.sec[0],nd.sec[1]);
+ if(nd.sec){ac.s+=nd.sec[1]*ym*dfr;const k=Math.floor(ac.s);ac.s-=k;giveRes(nd.sec[0],k)}
  if(!G.dmg)G.dmg={};
  const fr=Math.min(1,(G.dmg[i]||0)+HIT_OF(lv)/nd.hp),st0=(G.dmg[i]||0)<.34?0:(G.dmg[i]||0)<.67?1:2,st=fr<.34?0:fr<.67?1:2;
  G.dmg[i]=fr;A.p=fr;
  if(big&&fr<1){Scene.setDamage(i,fr);if(st>st0)HG.snd('crack',{x:tg.x+.5,z:tg.y+.5})}
  if(fr<1)return;
  /* düğüm bitti: son vuruş ödülü, devrilme/parçalanma, yeniden büyüme */
- giveRes(nd.id,nd.bonus);
+ giveRes(nd.id,Math.max(1,Math.round(ac.m+nd.bonus*ym)));
+ if(nd.sec&&ac.s>=.5)giveRes(nd.sec[0],1);
+ delete G.yac[i];
  HG.xpGain&&HG.xpGain(1.5);
  delete G.dmg[i];
  if(o===O.TREE){Scene.fell(tg.x,tg.y,o,G.px,G.py);HG.snd('creak',{x:tg.x+.5,z:tg.y+.5,y:3})}
