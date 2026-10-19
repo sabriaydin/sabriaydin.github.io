@@ -62,6 +62,7 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - `404.html`: bulunamadı sayfası
 - `yonlendir.html`: harici bağlantı yönlendirme sayfası (uyarılar, açık adres, 10 saniye geri sayım; `assets/js/yonlendir.js`, `assets/css/yonlendir.css`). Sitedeki tüm dış bağlantılar `app.js` ile buraya yönlendirilir; bir bağlantının doğrudan açılması için `data-direct` özelliği eklenir
 - `hakkinda.html`: hakkında, iletişim ve gizlilik sayfası (footer'dan bağlanır; sitemap'e eklenir)
+- `assets/css/linux.css`: Linux İşletim Sistemleri yazılarının terminal temalı özel tasarımı (terminal başlığı, özellik kartları, zorluk göstergesi); yazılarda `lx-hero` ve `lx-spec` blokları kullanılır
 - `assets/`: stil (`css`), kod (`js`; `arac.js` araç yazılarının ortak yardımcılarıdır), simge ve görseller (`img`)
 - `scripts/build.mjs`: yazıları tarar, liste/sitemap/RSS/paylaşım etiketlerini üretir
 - `.github/workflows/yayinla.yml`: her yüklemede build'i çalıştırıp siteyi yayınlar
