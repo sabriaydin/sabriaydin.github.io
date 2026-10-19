@@ -18,7 +18,9 @@ const loadFull=()=>{if(fullState||!/^https?:/.test(location.protocol))return;ful
 Promise.all(P.map(p=>fetch(url(p)).then(r=>r.ok?r.text():'').then(t=>{const b=new DOMParser().parseFromString(t,'text/html').querySelector('.post .body');if(b)b.querySelectorAll('script,style,.px-hero,.px-toc').forEach(e=>e.remove());full[p.id]=fold(b?b.textContent:'')}).catch(()=>{}))).then(()=>{fullState=2;if(s.value.trim())s.oninput()})};
 const find=t=>{t=fold(t.trim());return t?P.filter(p=>(fold(p.title+' '+p.excerpt+' '+(C[p.cat]||''))+' '+(full[p.id]||'')).includes(t)):P};
 
-const card=(p,h='h2')=>`<a class="card tilt" href="${url(p)}"><div class="side"><span class="tag">${esc(C[p.cat]||p.cat)}</span><small><time datetime="${p.date}">${fmt(p.date)}</time><span>${p.read} dk okuma</span></small></div><div class="main"><${h} class="ct">${esc(p.title)}</${h}><p>${esc(p.excerpt)}</p></div></a>`;
+/* Sabit yazı (yazıdaki <meta name="sabit">): kategori = kategori/grup sayfasında, ana = ana sayfada, hepsi = ikisinde en üstte */
+let pinCtx=0;const pinOn=p=>pinCtx&&p.pin&&(p.pin==='hepsi'||p.pin===(pinCtx===2?'kategori':'ana'));
+const card=(p,h='h2')=>`<a class="card tilt${p.pin?' pinned':''}" href="${url(p)}"><div class="side"><span class="tag">${esc(C[p.cat]||p.cat)}</span>${pinOn(p)?'<span class="pin">📌 Sabitlenmiş</span>':''}<small><time datetime="${p.date}">${fmt(p.date)}</time><span>${p.read} dk okuma</span></small></div><div class="main"><${h} class="ct">${esc(p.title)}</${h}><p>${esc(p.excerpt)}</p></div></a>`;
 const tilt=()=>{if(reduced)return;document.querySelectorAll('.tilt').forEach(el=>{if(el._t)return;el._t=1;const t=el,k=6;t.addEventListener('mousemove',e=>{const r=t.getBoundingClientRect();el.style.setProperty('--ry',((e.clientX-r.left)/r.width-.5)*k+'deg');el.style.setProperty('--rx',-((e.clientY-r.top)/r.height-.5)*k+'deg')});t.addEventListener('mouseleave',()=>{el.style.removeProperty('--rx');el.style.removeProperty('--ry')})})};
 
 /* Header ve footer */
@@ -70,7 +72,7 @@ const href=n=>home+(qs(n)?'?'+qs(n):'');
 const nums=(n,c)=>{let a=[];if(n<=9)for(let i=1;i<=n;i++)a.push(i);else if(c<=4)a=[1,2,3,4,5,n];else if(c>=n-3)a=[1,n-4,n-3,n-2,n-1,n];else a=[1,c-1,c,c+1,n];const o=[];a.forEach((v,i)=>{if(i&&v-a[i-1]>1)o.push(0);o.push(v)});return o};
 const pb=(n,t,rel,off)=>off?`<span class="pgb off" aria-hidden="true">${t}</span>`:`<a class="pgb" rel="${rel}" href="${href(n)}" data-p="${n}">${t}</a>`;
 const pager=(n,c)=>`${pb(c-1,'‹ Önceki','prev',c<=1)}<ul>${nums(n,c).map(v=>v?`<li><a class="pgn" href="${href(v)}" data-p="${v}" aria-label="Sayfa ${v}"${v===c?' aria-current="page"':''}>${v}</a></li>`:'<li><button type="button" class="gap" data-gap aria-label="Sayfa numarası yaz ve git">…</button></li>').join('')}</ul>${pb(c+1,'Sonraki ›','next',c>=n)}`;
-const draw=()=>{window.lxMount&&lxMount(cat,grp);const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi),r=find(term).filter(p=>cat?p.cat===cat:gi?gi.items.includes(p.cat):true).filter(p=>!window.LXF||LXF.pass(p));
+const draw=()=>{window.lxMount&&lxMount(cat,grp);const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi);let r=find(term).filter(p=>cat?p.cat===cat:gi?gi.items.includes(p.cat):true).filter(p=>!window.LXF||LXF.pass(p));pinCtx=term?0:(cat||gi?2:1);if(pinCtx)r=r.filter(pinOn).concat(r.filter(p=>!pinOn(p)));
 if(term!==last){pg=1;last=term}
 const n=Math.max(1,Math.ceil(r.length/PER));pg=Math.min(pg,n);tot=n;
 $('#cnt').hidden=!f;$('#cntt').textContent=[cat&&C[cat]+' kategorisi',gi&&gi.name+' kategorisi',term&&'“'+term+'” araması'].filter(Boolean).join(' ve ')+': '+r.length+' yazı';

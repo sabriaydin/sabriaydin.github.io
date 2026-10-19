@@ -17,6 +17,7 @@ Bundan sonra `main` dalına her dosya yüklediğinde site kendini yeniler (yakla
    - `kategori`: `assets/js/site.js` içindeki kısa ad (şu an `windows`, `windowsos`, `html`, `htmlaraclari`, `linuxos`, `batch`, `batchornek`, `sistemaraclari`, `medya`, `ofis`, `guvenlik`, `gelistirici` veya `eklentiler`)
    - `tarih`: `YIL-AY-GÜN` (örn. `2026-10-13`); aynı gün birden fazla yazı varsa sıralama için saat de eklenebilir (örn. `2026-10-13 14:30`)
    - `okuma`: dakika; boş bırakırsan otomatik hesaplanır
+   - `sabit` (isteğe bağlı): yazıyı listede başa sabitler; `kategori` (kategori/grup sayfasında), `ana` (ana sayfada) veya `hepsi`. Arama sırasında uygulanmaz
 3. "İçerik buraya gelecek" satırını sil, yazını `<div class="body">` içine yaz.
 4. Dosyayı `posts` klasörüne yükle. **Başka hiçbir yere bir şey eklemen gerekmez.**
 

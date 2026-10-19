@@ -67,7 +67,7 @@ for (const f of files) {
   const b = html.match(/<div class="body">([\s\S]*?)<\/div>\s*<\/article>/);
   const text = b ? decode(b[1].replace(/<!--px-->[\s\S]*?<!--\/px-->/g, ' ').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ')) : '';
   const okuma = parseInt(metaTag(html, 'okuma'), 10);
-  posts.push({ id, title, cat, date, time, read: okuma > 0 ? okuma : Frame.minutes(text), excerpt: desc });
+  posts.push({ id, title, cat, date, time, pin: ['kategori', 'ana', 'hepsi'].includes(metaTag(html, 'sabit')) ? metaTag(html, 'sabit') : '', read: okuma > 0 ? okuma : Frame.minutes(text), excerpt: desc });
 }
 // En yeni yazı üstte: önce tarih ve saat, aynı anda yazılanlarda dosya adı (büyük numara önce)
 const key = p => p.date + ' ' + (p.time || '23:59');
@@ -77,7 +77,7 @@ const q = s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'"
 const manifest = `// YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenleme.
 // Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmen yeterli.
 window.POSTS = [
-${posts.map(p => `  { id: ${q(p.id)}, title: ${q(p.title)}, cat: ${q(p.cat)}, date: ${q(p.date)},${p.time ? ` time: ${q(p.time)},` : ''} read: ${p.read}, excerpt: ${q(p.excerpt)} }`).join(',\n')}
+${posts.map(p => `  { id: ${q(p.id)}, title: ${q(p.title)}, cat: ${q(p.cat)}, date: ${q(p.date)},${p.time ? ` time: ${q(p.time)},` : ''}${p.pin ? ` pin: ${q(p.pin)},` : ''} read: ${p.read}, excerpt: ${q(p.excerpt)} }`).join(',\n')}
 ];
 `;
 

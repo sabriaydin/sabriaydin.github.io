@@ -33,3 +33,9 @@
 @media(max-width:560px){.post .body .lx-scr{padding:14px 14px 16px;font-size:.88rem}.post .body .lx-scr p.o:nth-of-type(2){font-size:1.25rem}}
 @media(prefers-reduced-motion:reduce){.post .body .lx-scr .cur{animation:none}}
 @media print{.post .body .lx-hero{display:none!important}}
+
+/* Adım akışı */
+.post .body .lx-flow{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;padding:0;counter-reset:f}
+.post .body .lx-flow>li{flex:1 1 120px;position:relative;padding:10px 12px 10px 40px;border-radius:12px;background:#fff;border:1px solid var(--pline);counter-increment:f;display:flex;flex-direction:column;margin:0}
+.post .body .lx-flow>li::before{content:counter(f);position:absolute;left:10px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--b));color:#fff;font-weight:700;font-size:.8rem;display:grid;place-items:center}
+.post .body .lx-flow small{color:#667}
