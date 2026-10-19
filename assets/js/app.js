@@ -141,5 +141,16 @@ const tt=document.createElement('button');tt.type='button';tt.className='totop';
 tt.onclick=()=>scrollTo({top:0,behavior:reduced?'auto':'smooth'});document.body.appendChild(tt);
 let tick=false;addEventListener('scroll',()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{tick=false;tt.classList.toggle('on',scrollY>=400);window.updateProgress&&updateProgress()})},{passive:true});
 
+/* Harici bağlantılar: önce yönlendirme sayfasına git (uyarı + adres + 10 sn geri sayım) */
+document.addEventListener('click',e=>{
+  if(e.defaultPrevented||e.button||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  const a=e.target.closest&&e.target.closest('a[href]');if(!a||a.hasAttribute('download')||a.hasAttribute('data-direct'))return;
+  let u;try{u=new URL(a.href)}catch(x){return}
+  if(!/^https?:$/.test(u.protocol)||u.origin===location.origin||page==='redirect')return;
+  e.preventDefault();
+  const dest=root+'yonlendir.html?u='+encodeURIComponent(u.href);
+  if(a.target==='_blank')window.open(dest,'_blank','noopener');else location.href=dest;
+});
+
 tilt();
 })();

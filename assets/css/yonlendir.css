@@ -1,0 +1,27 @@
+/* Harici bağlantı yönlendirme sayfası */
+.rd{max-width:680px;margin:0 auto;padding:36px 34px;background:var(--paper);color:var(--ink);border-radius:var(--r);border-left:6px solid var(--red);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.rd h1{font-size:1.7rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+.rd .rd-sub{color:var(--pmu);margin:0 0 22px}
+.rd .rd-host{display:inline-block;font-weight:800;color:var(--red);word-break:break-all}
+.rd .rd-url{display:block;margin:0 0 20px;padding:12px 14px;background:#fff;border:1px solid var(--pline);border-radius:8px;font:500 .92rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);word-break:break-all;user-select:all}
+.rd h2{font-size:1rem;margin:0 0 8px;text-transform:uppercase;letter-spacing:.06em;color:var(--pmu)}
+.rd ul{margin:0 0 24px;padding:0;list-style:none;display:grid;gap:8px}
+.rd li{position:relative;padding:10px 12px 10px 38px;background:#fff7e0;border:1px solid #ecd9a0;border-radius:8px;color:#4a3b0a;font-size:.95rem}
+.rd li::before{content:"!";position:absolute;left:12px;top:10px;width:18px;height:18px;border-radius:50%;background:#e0a100;color:#fff;font:800 .75rem/18px var(--h);text-align:center}
+.rd .rd-count{display:flex;align-items:center;gap:16px;margin:0 0 22px}
+.rd .rd-ring{position:relative;flex:none;width:68px;height:68px}
+.rd .rd-ring svg{width:68px;height:68px;transform:rotate(-90deg)}
+.rd .rd-ring circle{fill:none;stroke-width:6}
+.rd .rd-ring .bg{stroke:var(--pline)}
+.rd .rd-ring .fg{stroke:var(--red);stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.rd .rd-ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.5rem;font-weight:800}
+.rd .rd-msg{margin:0;color:var(--pmu)}
+.rd .rd-act{display:flex;flex-wrap:wrap;gap:10px}
+.rd .rd-b{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:var(--r);border:1px solid var(--pline);background:#fff;color:var(--ink);font:700 .95rem var(--h);cursor:pointer;text-decoration:none}
+.rd .rd-b:hover{border-color:var(--red);color:var(--red)}
+.rd .rd-b.pri{background:var(--red);border-color:var(--red);color:#fff}
+.rd .rd-b.pri:hover{background:#9a211d;color:#fff}
+.rd .rd-err{color:#8a1c18}
+@media(max-width:560px){.rd{padding:26px 20px}.rd h1{font-size:1.4rem}.rd .rd-act>*{flex:1 1 100%}}
+@media(prefers-reduced-motion:reduce){.rd .rd-ring .fg{transition:none}}
+@media print{.rd{box-shadow:none}}
