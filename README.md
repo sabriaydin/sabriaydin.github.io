@@ -16,7 +16,6 @@ Bundan sonra `main` dalına her dosya yüklediğinde site kendini yeniler (yakla
    - `description`: ana sayfada ve aramada görünen kısa özet
    - `kategori`: `assets/js/site.js` içindeki kısa ad (şu an `windows`, `windowsos`, `html`, `htmlaraclari`, `linuxos`, `batch`, `batchornek`, `sistemaraclari`, `medya`, `ofis`, `guvenlik`, `gelistirici` veya `eklentiler`)
    - `tarih`: `YIL-AY-GÜN` (örn. `2026-10-13`); aynı gün birden fazla yazı varsa sıralama için saat de eklenebilir (örn. `2026-10-13 14:30`)
-   - `okuma`: dakika; boş bırakırsan otomatik hesaplanır
    - `sabit` (isteğe bağlı): yazıyı listede başa sabitler; `kategori` (kategori/grup sayfasında), `ana` (ana sayfada) veya `hepsi`. Arama sırasında uygulanmaz
 3. "İçerik buraya gelecek" satırını sil, yazını `<div class="body">` içine yaz.
 4. Dosyayı `posts` klasörüne yükle. **Başka hiçbir yere bir şey eklemen gerekmez.**
@@ -30,7 +29,6 @@ Hesaplayıcı, oluşturucu gibi çalışan araçlar da yazı olarak eklenir. Ör
 1. Yazıyı normal şekilde hazırla (şablonu kopyala, bilgileri doldur).
 2. Gövdeye `<div class="arac"> ... </div>` içinde araç arayüzünü, hemen ardına kendi `<script>` kodunu yaz. Hazır stiller (`satir`, `kod`, `dugmeler`, `palet`, `onizle`) `style.css` içinde bulunur.
 3. Kopyalama ve indirme için yazının sonuna `<script src="../assets/js/arac.js"></script>` ekle; `data-kopyala="kutuId"` özellikli düğmeler o kutunun içeriğini kopyalar, `Arac.indir(metin, 'ad.html')` dosya indirir.
-4. Okuma süresini otomatik hesaplatmak yerine `okuma` satırına dakika yazabilirsin.
 
 ## Yazı içinde kullanabileceklerin
 ```html

@@ -20,7 +20,7 @@ const find=t=>{t=fold(t.trim());return t?P.filter(p=>(fold(p.title+' '+p.excerpt
 
 /* Sabit yazı (yazıdaki <meta name="sabit">): kategori = kategori/grup sayfasında, ana = ana sayfada, hepsi = ikisinde en üstte */
 let pinCtx=0;const pinOn=p=>pinCtx&&p.pin&&(p.pin==='hepsi'||p.pin===(pinCtx===2?'kategori':'ana'));
-const card=(p,h='h2')=>`<a class="card tilt${p.pin?' pinned':''}" href="${url(p)}"><div class="side"><span class="tag">${esc(C[p.cat]||p.cat)}</span>${pinOn(p)?'<span class="pin">📌 Sabitlenmiş</span>':''}<small><time datetime="${p.date}">${fmt(p.date)}</time><span>${p.read} dk okuma</span></small></div><div class="main"><${h} class="ct">${esc(p.title)}</${h}><p>${esc(p.excerpt)}</p></div></a>`;
+const card=(p,h='h2')=>`<a class="card tilt${p.pin?' pinned':''}" href="${url(p)}"><div class="side"><span class="tag">${esc(C[p.cat]||p.cat)}</span>${pinOn(p)?'<span class="pin">📌 Sabitlenmiş</span>':''}<small><time datetime="${p.date}">${fmt(p.date)}</time></small></div><div class="main"><${h} class="ct">${esc(p.title)}</${h}><p>${esc(p.excerpt)}</p></div></a>`;
 const tilt=()=>{if(reduced)return;document.querySelectorAll('.tilt').forEach(el=>{if(el._t)return;el._t=1;const t=el,k=6;t.addEventListener('mousemove',e=>{const r=t.getBoundingClientRect();el.style.setProperty('--ry',((e.clientX-r.left)/r.width-.5)*k+'deg');el.style.setProperty('--rx',-((e.clientY-r.top)/r.height-.5)*k+'deg')});t.addEventListener('mouseleave',()=>{el.style.removeProperty('--rx');el.style.removeProperty('--ry')})})};
 
 /* Header ve footer */
@@ -101,7 +101,7 @@ const art=$('article.post');
 if(!$('h1',art)){
 const mt=n=>{const e=document.querySelector(`meta[name="${n}"]`);return e?e.content.trim():''};
 const suf=' | '+S.name;let title=document.title;if(title.endsWith(suf))title=title.slice(0,-suf.length);
-const body=$('.body',art),m={title,cat:mt('kategori'),date:mt('tarih').slice(0,10),read:parseInt(mt('okuma'),10)||PostFrame.minutes(body?body.textContent:'')};
+const body=$('.body',art),m={title,cat:mt('kategori'),date:mt('tarih').slice(0,10)};
 if(m.title&&m.cat&&/^\d{4}-\d{2}-\d{2}$/.test(m.date)){art.insertAdjacentHTML('afterbegin',PostFrame.frame(m,C,root));document.title=m.title+suf}}
 const id=decodeURIComponent(location.pathname.split('/').filter(Boolean).pop()||'').replace(/\.html$/,'');
 const i=P.findIndex(x=>x.id===id);
