@@ -70,11 +70,11 @@ const href=n=>home+(qs(n)?'?'+qs(n):'');
 const nums=(n,c)=>{let a=[];if(n<=9)for(let i=1;i<=n;i++)a.push(i);else if(c<=4)a=[1,2,3,4,5,n];else if(c>=n-3)a=[1,n-4,n-3,n-2,n-1,n];else a=[1,c-1,c,c+1,n];const o=[];a.forEach((v,i)=>{if(i&&v-a[i-1]>1)o.push(0);o.push(v)});return o};
 const pb=(n,t,rel,off)=>off?`<span class="pgb off" aria-hidden="true">${t}</span>`:`<a class="pgb" rel="${rel}" href="${href(n)}" data-p="${n}">${t}</a>`;
 const pager=(n,c)=>`${pb(c-1,'‹ Önceki','prev',c<=1)}<ul>${nums(n,c).map(v=>v?`<li><a class="pgn" href="${href(v)}" data-p="${v}" aria-label="Sayfa ${v}"${v===c?' aria-current="page"':''}>${v}</a></li>`:'<li><button type="button" class="gap" data-gap aria-label="Sayfa numarası yaz ve git">…</button></li>').join('')}</ul>${pb(c+1,'Sonraki ›','next',c>=n)}`;
-const draw=()=>{const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi),r=find(term).filter(p=>cat?p.cat===cat:gi?gi.items.includes(p.cat):true);
+const draw=()=>{window.lxMount&&lxMount(cat,grp);const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi),r=find(term).filter(p=>cat?p.cat===cat:gi?gi.items.includes(p.cat):true).filter(p=>!window.LXF||LXF.pass(p));
 if(term!==last){pg=1;last=term}
 const n=Math.max(1,Math.ceil(r.length/PER));pg=Math.min(pg,n);tot=n;
 $('#cnt').hidden=!f;$('#cntt').textContent=[cat&&C[cat]+' kategorisi',gi&&gi.name+' kategorisi',term&&'“'+term+'” araması'].filter(Boolean).join(' ve ')+': '+r.length+' yazı';
-$('#list').innerHTML=r.length?r.slice((pg-1)*PER,pg*PER).map(p=>card(p)).join(''):`<p class="mu">${term?'Eşleşen yazı yok. Başka bir kelime dene.':'Bu kategoride henüz yazı yok.'}</p>`;
+$('#list').innerHTML=r.length?r.slice((pg-1)*PER,pg*PER).map(p=>card(p)).join(''):`<p class="mu">${term?'Eşleşen yazı yok. Başka bir kelime dene.':(window.LXF&&LXF.active?'Seçtiğin ölçütlere uyan dağıtım yok. Ölçütleri gevşetmeyi dene.':'Bu kategoride henüz yazı yok.')}</p>`;
 const pn=$('#pager');pn.hidden=n<2;pn.innerHTML=n>1?pager(n,pg):'';$('#pgs').textContent=n>1?`Sayfa ${pg} / ${n}`:'';
 /* Adres çubuğunu güncel tut (yenileyince ve geri düğmesinde aynı sayfa gelsin); dosya olarak açıldığında tarayıcı izin vermez, sorun değil */
 try{const w=qs(pg);if(w!==location.search.slice(1))history.replaceState(null,'',location.pathname+(w?'?'+w:''))}catch(e){}
@@ -90,7 +90,7 @@ i.onkeydown=ev=>{if(ev.key==='Enter'){ev.preventDefault();const v=parseInt(i.val
 i.onblur=()=>setTimeout(()=>{if(i.isConnected)$('#pager').innerHTML=pager(tot,pg)},0);return}
 const a=e.target.closest('a[data-p]');if(!a||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey||e.button)return;e.preventDefault();go(+a.dataset.p)});
 addEventListener('popstate',()=>{const u=new URLSearchParams(location.search);cat=C[u.get('cat')]?u.get('cat'):'';grp=cat?'':gk(u.get('grup'));s.value=u.get('q')||'';last=s.value.trim();pg=Math.max(1,parseInt(u.get('sayfa'),10)||1);draw()});
-window.onSearch=draw;draw()}
+window.onSearch=draw;window.lxRedraw=()=>{pg=1;draw()};draw()}
 
 /* Yazı sayfası: yazı metni HTML içinde hazır gelir; burada üst bölüm (yayınlanmış sitede zaten hazırdır) ve ek bölümler eklenir */
 if(page==='post'){
