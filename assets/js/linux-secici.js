@@ -59,23 +59,14 @@ window.LXF={active:false,pass:function(p){if(!this.active)return true;return !!e
 function esc(x){return String(x).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function chip(type,name,val,label,checked){return '<label class="lxw-c"><input type="'+type+'" name="'+name+'" value="'+val+'"'+(checked?' checked':'')+'><span>'+label+'</span></label>'}
 function html(){
-  var h='<div class="lxw-h"><span class="lxw-pr">$</span> <b>Sana uygun Linux’u bul</b><button type="button" class="lxw-x" id="lxw-x" aria-label="Kapat">×</button><small>Birkaç soruyu yanıtla; liste ve öneriler anında güncellenir.</small></div>'+'<div class="lxw-res" id="lxw-res" aria-live="polite"></div><form class="lxw-f" id="lxw-f" onsubmit="return false">';
-  h+='<fieldset><legend>1. Linux deneyimin</legend><div class="lxw-cs">'+[1,2,3].map(function(v){return chip('radio','exp',v,T.exp[v],String(st.exp)===String(v))}).join('')+'</div></fieldset>';
-  h+='<fieldset><legend>2. Ne için kullanacaksın? <i>(birden fazla seçilebilir)</i></legend><div class="lxw-cs">'+Object.keys(T.amac).map(function(v){return chip('checkbox','amac',v,T.amac[v],st.amac.indexOf(v)>-1)}).join('')+'</div></fieldset>';
-  h+='<fieldset><legend>3. Masaüstü görünümü</legend><div class="lxw-cs">'+chip('radio','mas','','Fark etmez',!st.mas)+Object.keys(T.mas).map(function(v){return chip('radio','mas',v,T.mas[v],st.mas===v)}).join('')+'</div></fieldset>';
-  h+='<fieldset><legend>4. Güncellik</legend><div class="lxw-cs">'+chip('radio','yayin','','Fark etmez',!st.yayin)+Object.keys(T.yayin).map(function(v){return chip('radio','yayin',v,T.yayin[v],st.yayin===v)}).join('')+'</div></fieldset>';
-  h+='<fieldset><legend>5. Taban <i>(biliyorsan)</i></legend><div class="lxw-cs">'+chip('radio','taban','','Fark etmez',!st.taban)+Object.keys(T.taban).map(function(v){return chip('radio','taban',v,T.taban[v],st.taban===v)}).join('')+'</div></fieldset>';
+  var h='<div class="lxw-h"><b>Sana uygun Linux’u bul</b><button type="button" class="lxw-x" id="lxw-x" aria-label="Kapat">×</button></div>'+'<form class="lxw-f" id="lxw-f" onsubmit="return false">';
+  h+='<fieldset><legend>Linux deneyimin</legend><div class="lxw-cs">'+[1,2,3].map(function(v){return chip('radio','exp',v,T.exp[v],String(st.exp)===String(v))}).join('')+'</div></fieldset>';
+  h+='<fieldset><legend>Ne için kullanacaksın? <i>birden fazla seçebilirsin</i></legend><div class="lxw-cs">'+Object.keys(T.amac).map(function(v){return chip('checkbox','amac',v,T.amac[v],st.amac.indexOf(v)>-1)}).join('')+'</div></fieldset>';
+  h+='<fieldset><legend>Masaüstü görünümü</legend><div class="lxw-cs">'+chip('radio','mas','','Fark etmez',!st.mas)+Object.keys(T.mas).map(function(v){return chip('radio','mas',v,T.mas[v],st.mas===v)}).join('')+'</div></fieldset>';
+  h+='<fieldset><legend>Güncellik</legend><div class="lxw-cs">'+chip('radio','yayin','','Fark etmez',!st.yayin)+Object.keys(T.yayin).map(function(v){return chip('radio','yayin',v,T.yayin[v],st.yayin===v)}).join('')+'</div></fieldset>';
+  h+='<fieldset><legend>Taban <i>biliyorsan</i></legend><div class="lxw-cs">'+chip('radio','taban','','Fark etmez',!st.taban)+Object.keys(T.taban).map(function(v){return chip('radio','taban',v,T.taban[v],st.taban===v)}).join('')+'</div></fieldset>';
   h+='<div class="lxw-act"><button type="button" id="lxw-clr">Seçimleri temizle</button></div></form>';
   return h
-}
-function href(id){return (document.body.dataset.root||'')+'posts/'+id+'.html'}
-function results(){
-  var res=document.getElementById('lxw-res');if(!res)return;
-  var P=(window.POSTS||[]).filter(function(p){return p.cat==='linuxos'});
-  if(!on()){res.innerHTML='<p class="lxw-n">Hiç ölçüt seçilmedi: tüm Linux yazıları listeleniyor. Listeyi daraltmak için aşağıdan seçim yap.</p>';return}
-  var r=P.map(function(p){var e=evalD(p.id);return e?{p:p,e:e}:null}).filter(Boolean).sort(function(a,b){return b.e.s-a.e.s||a.e.z-b.e.z});
-  if(!r.length){res.innerHTML='<p class="lxw-n lxw-no">Bu ölçütlere uyan dağıtım bulunamadı. Bazı seçimleri “Fark etmez” yaparak tekrar dene.</p>';return}
-  res.innerHTML='<h3>'+r.length+' dağıtım uygun</h3><ol class="lxw-top">'+r.slice(0,3).map(function(x,i){return '<li><a href="'+href(x.p.id)+'"><span class="lxw-rk">'+(i+1)+'</span><span><b>'+esc(x.p.title)+'</b><small>'+x.e.why.map(esc).join(' · ')+'</small></span></a></li>'}).join('')+'</ol>'+(r.length>3?'<p class="lxw-n">Diğer uygun dağıtımlar soldaki listede.</p>':'')
 }
 function read(){
   var f=document.getElementById('lxw-f');if(!f)return;
@@ -84,13 +75,13 @@ function read(){
   st.amac=[].slice.call(f.querySelectorAll('input[name=amac]:checked')).map(function(i){return i.value});
   save()
 }
-function update(){LXF.active=on();results();if(window.lxRedraw)window.lxRedraw()}
+function update(){LXF.active=on();if(window.lxRedraw)window.lxRedraw()}
 window.lxMount=function(cat,grp){
   var want=cat==='linuxos'||(!cat&&grp==='linux'),ex=document.getElementById('lxw');
   if(!want){if(ex){ex.remove();var t0=document.getElementById('lxw-tab');if(t0)t0.remove();document.body.classList.remove('lxw-open')}LXF.active=false;return}
   if(ex){LXF.active=on();return}
   var a=document.createElement('aside');a.id='lxw';a.className='lxw';a.setAttribute('aria-label','Linux seçici');a.innerHTML=html();document.body.appendChild(a);
-  var tab=document.createElement('button');tab.type='button';tab.id='lxw-tab';tab.className='lxw-tab';tab.setAttribute('aria-controls','lxw');tab.innerHTML='<span class="lxw-pr">$</span> Linux seçici';document.body.appendChild(tab);
+  var tab=document.createElement('button');tab.type='button';tab.id='lxw-tab';tab.className='lxw-tab';tab.setAttribute('aria-controls','lxw');tab.innerHTML='Linux seçici';document.body.appendChild(tab);
   var WIDE=window.matchMedia('(min-width:1760px)');
   function setOpen(v){document.body.classList.toggle('lxw-open',v);tab.setAttribute('aria-expanded',v);try{sessionStorage.setItem('lxw-open',v?'1':'0')}catch(e){}}
   var so=null;try{so=sessionStorage.getItem('lxw-open')}catch(e){}
@@ -102,6 +93,6 @@ window.lxMount=function(cat,grp){
   var f=a.querySelector('#lxw-f');
   f.addEventListener('change',function(){read();update()});
   a.querySelector('#lxw-clr').addEventListener('click',function(){f.querySelectorAll('input').forEach(function(i){i.checked=(i.type==='radio'&&i.value==='')});st={exp:'',amac:[],mas:'',yayin:'',taban:''};save();update()});
-  LXF.active=on();results()
+  LXF.active=on()
 };
 })();

@@ -1,42 +1,30 @@
-/* Linux kategorisi: "Sana uygun Linux'u bul" widget'ı — içerik alanından bağımsız, sağda sabit yan panel */
-.lxw{position:fixed;top:84px;right:16px;bottom:16px;width:340px;max-width:calc(100vw - 32px);z-index:45;display:flex;flex-direction:column;background:#0c0f14;color:#e6edf3;border:1px solid rgba(255,255,255,.09);border-radius:14px;box-shadow:0 18px 44px rgba(0,0,0,.5);overflow:hidden;transform:translateX(calc(100% + 24px));visibility:hidden;transition:transform .3s ease,visibility .3s}
-.lxw-open .lxw{transform:none;visibility:visible}
-.lxw::before{content:"";display:block;flex:none;height:4px;background:linear-gradient(90deg,#ec6a63,#f0a25a,#7fd37f)}
-.lxw-h{flex:none;position:relative;padding:14px 46px 12px 18px}
-.lxw-h b{font-size:1.08rem;letter-spacing:-.01em}
-.lxw-h small{display:block;margin-top:4px;color:#8b96a8;font-size:.84rem;line-height:1.4}
-.lxw-x{position:absolute;right:10px;top:10px;width:30px;height:30px;border-radius:8px;border:1px solid #2c3442;background:#141922;color:#c3ccd9;font:400 1.3rem/1 var(--h);cursor:pointer}
-.lxw-x:hover{border-color:#ec6a63;color:#fff}
-.lxw-pr{font:700 1rem ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#7fd37f;margin-right:4px}
-.lxw-tab{position:fixed;right:0;top:50%;z-index:44;transform:translateY(-50%);writing-mode:vertical-rl;padding:16px 10px;border:1px solid rgba(255,255,255,.12);border-right:0;border-radius:12px 0 0 12px;background:#0c0f14;color:#e6edf3;font:700 .9rem/1 var(--h);letter-spacing:.04em;cursor:pointer;box-shadow:-6px 8px 24px rgba(0,0,0,.4);transition:background .15s,padding .15s;animation:lxt 2.4s ease 1.2s 3}
-.lxw-tab:hover,.lxw-tab:focus-visible{background:#b72a25;padding-right:14px}
-.lxw-tab .lxw-pr{margin:0 0 6px}
-.lxw-open .lxw-tab{display:none}
-@keyframes lxt{0%,100%{box-shadow:-6px 8px 24px rgba(0,0,0,.4)}50%{box-shadow:-6px 8px 24px rgba(0,0,0,.4),0 0 0 6px rgba(236,106,99,.35)}}
-.lxw-res{flex:none;padding:12px 18px 14px;border-top:1px dashed #2c3442;border-bottom:1px dashed #2c3442;background:#0a0d11;margin-bottom:14px}
-.lxw-res h3{margin:0 0 10px;font:700 .8rem/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#7fd37f;letter-spacing:.04em;text-transform:uppercase}
-.lxw-top{list-style:none;margin:0 0 8px;padding:0;display:grid;gap:8px}
-.lxw-top a{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#141922;border:1px solid #232b38;color:#e6edf3;text-decoration:none;transition:border-color .15s,transform .15s}
-.lxw-top a:hover{border-color:#ec6a63;transform:translateX(2px)}
-.lxw-rk{flex:none;width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#d0423b,#b72a25);color:#fff;font:800 .85rem/26px var(--h);text-align:center}
-.lxw-top b{display:block;font-size:.98rem}
-.lxw-top small{display:block;margin-top:2px;color:#8b96a8;font-size:.78rem;line-height:1.4}
-.lxw-n{margin:0;color:#8b96a8;font-size:.85rem;line-height:1.5}
-.lxw-no{color:#f0a25a}
-.lxw-f{flex:1;min-height:0;overflow:auto;padding:0 18px 4px}
-.lxw-f fieldset{border:0;margin:0 0 14px;padding:0;min-width:0}
-.lxw-f legend{padding:0;margin-bottom:8px;font:700 .8rem/1.3 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.03em;color:#f0a25a}
-.lxw-f legend i{font-style:normal;font-weight:500;color:#7d8798}
-.lxw-cs{display:flex;flex-wrap:wrap;gap:6px}
+/* Linux kategorisi: "Sana uygun Linux'u bul" paneli — içerik alanından bağımsız, sağda sabit, sade ve yumuşak görünümlü */
+.lxw{position:fixed;top:92px;right:20px;width:320px;max-width:calc(100vw - 32px);max-height:calc(100vh - 116px);z-index:45;display:flex;flex-direction:column;background:rgba(26,26,30,.88);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2);color:#e9e6e1;border:1px solid rgba(255,255,255,.09);border-radius:20px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;transform:translateX(calc(100% + 32px));opacity:0;visibility:hidden;transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .3s ease,visibility .45s}
+.lxw-open .lxw{transform:none;opacity:1;visibility:visible}
+.lxw-h{flex:none;position:relative;padding:22px 52px 14px 24px}
+.lxw-h b{display:block;font:600 1.3rem/1.25 var(--b);letter-spacing:-.005em;color:#f3f0eb}
+.lxw-h small{display:block;margin-top:6px;color:#a09b94;font-size:.84rem;line-height:1.45}
+.lxw-x{position:absolute;right:16px;top:18px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.06);color:#bdb8b1;font:300 1.3rem/1 var(--h);cursor:pointer;transition:background .2s,color .2s}
+.lxw-x:hover,.lxw-x:focus-visible{background:rgba(255,255,255,.14);color:#fff}
+.lxw-f{flex:1;min-height:0;overflow:auto;padding:4px 24px 8px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.18) transparent}
+.lxw-f fieldset{border:0;margin:0;padding:14px 0;min-width:0;border-top:1px solid rgba(255,255,255,.07)}
+.lxw-f legend{float:left;width:100%;padding:0;margin:0 0 9px;font:600 .72rem/1.3 var(--h);letter-spacing:.11em;text-transform:uppercase;color:#a09b94}
+.lxw-f legend+*{clear:both}
+.lxw-f legend i{font-style:normal;font-weight:500;letter-spacing:.01em;text-transform:none;color:#7d7973;display:block;margin:3px 0 0}
+.lxw-cs{display:flex;flex-wrap:wrap;gap:7px}
 .lxw-c{position:relative;cursor:pointer}
 .lxw-c input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
-.lxw-c span{display:inline-block;padding:6px 12px;border-radius:999px;border:1px solid #2c3442;background:#141922;color:#c3ccd9;font:600 .84rem/1.25 var(--h);transition:background .15s,border-color .15s,color .15s}
-.lxw-c:hover span{border-color:#566176}
-.lxw-c input:checked+span{background:linear-gradient(135deg,#d0423b,#b72a25);border-color:transparent;color:#fff}
+.lxw-c span{display:inline-block;padding:6px 13px;border-radius:999px;border:1px solid rgba(255,255,255,.13);background:transparent;color:#cfcac3;font:500 .84rem/1.25 var(--h);transition:background .2s,border-color .2s,color .2s}
+.lxw-c:hover span{border-color:rgba(255,255,255,.3);color:#fff}
+.lxw-c input:checked+span{background:rgba(236,106,99,.16);border-color:rgba(236,106,99,.7);color:#ffc2bd}
 .lxw-c input:focus-visible+span{outline:2px solid #ec6a63;outline-offset:2px}
-.lxw-act{padding:2px 0 14px}
-.lxw-act button{background:none;border:1px solid #2c3442;color:#9fb0c3;border-radius:8px;padding:7px 12px;font:600 .82rem var(--h);cursor:pointer}
-.lxw-act button:hover{border-color:#ec6a63;color:#fff}
-@media(max-width:560px){.lxw{top:72px;right:8px;left:8px;width:auto;max-width:none;bottom:8px}}
+.lxw-act{padding:6px 0 14px}
+.lxw-act button{background:none;border:0;padding:4px 0;color:#a09b94;font:500 .84rem var(--h);cursor:pointer;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.2);transition:color .2s}
+.lxw-act button:hover,.lxw-act button:focus-visible{color:#ffc2bd}
+.lxw-tab{position:fixed;right:0;top:50%;z-index:44;transform:translateY(-50%);writing-mode:vertical-rl;padding:18px 9px;border:1px solid rgba(255,255,255,.1);border-right:0;border-radius:14px 0 0 14px;background:rgba(26,26,30,.85);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#d9d4cd;font:500 .86rem/1 var(--h);letter-spacing:.08em;cursor:pointer;box-shadow:-8px 10px 28px rgba(0,0,0,.35);transition:background .2s,color .2s,padding .2s;animation:lxt 2.6s ease 1.2s 3}
+.lxw-tab:hover,.lxw-tab:focus-visible{background:rgba(236,106,99,.85);color:#fff;padding-right:13px}
+.lxw-open .lxw-tab{display:none}
+@keyframes lxt{0%,100%{box-shadow:-8px 10px 28px rgba(0,0,0,.35)}50%{box-shadow:-8px 10px 28px rgba(0,0,0,.35),0 0 0 6px rgba(236,106,99,.28)}}
+@media(max-width:560px){.lxw{top:72px;right:8px;left:8px;width:auto;max-width:none;max-height:calc(100vh - 88px)}}
 @media(prefers-reduced-motion:reduce){.lxw,.lxw-tab,.lxw *{transition:none!important;animation:none!important}}
 @media print{.lxw,.lxw-tab{display:none!important}}
