@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Mavi ekran hatası (BSOD) nedenleri ve çözümü</title>
+<meta name="description" content="Windows mavi ekran hatalarında hata kodunu okuma ve izlenecek çözüm adımları.">
+<meta name="kategori" content="windows">
+<meta name="tarih" content="2026-07-02 10:21">
+<meta name="okuma" content="5">
+
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Mavi ekran (BSOD), Windows'un kendini korumak için sistemi durdurduğu kritik hata ekranıdır. Ekranda bir <b>durdurma kodu</b> görünür; çözümün anahtarı budur.</p>
+<h2>Sık görülen kodlar</h2>
+<ul>
+<li><b>CRITICAL_PROCESS_DIED</b>: Önemli bir sistem işlemi çöktü; sistem dosyası bozulması olabilir.</li>
+<li><b>IRQL_NOT_LESS_OR_EQUAL</b> ve <b>PAGE_FAULT_IN_NONPAGED_AREA</b>: Çoğunlukla RAM veya sürücü kaynaklıdır.</li>
+<li><b>SYSTEM_SERVICE_EXCEPTION</b>: Sürücü veya yazılım çakışması.</li>
+<li><b>INACCESSIBLE_BOOT_DEVICE</b>: Disk veya önyükleme sorunu.</li>
+<li><b>MEMORY_MANAGEMENT</b>: Bellek hatası.</li>
+</ul>
+<h2>Çözüm adımları</h2>
+<ol>
+<li><b>Son değişikliği geri al</b>: Mavi ekran yeni bir sürücü, program veya güncellemeden sonra başladıysa onu kaldır ya da <a href="windows-14-sistem-geri-yukleme-ile-eski-haline-donme.html">sistem geri yükleme</a> yap.</li>
+<li><b>Sistem dosyalarını onar</b>: Yönetici terminalinde <code>sfc /scannow</code> ve ardından <code>DISM /Online /Cleanup-Image /RestoreHealth</code> çalıştır.</li>
+<li><b>Sürücüleri güncelle</b>, özellikle ekran kartı ve yonga seti (<a href="windows-07-surucu-driver-guncelleme-ve-sorun-giderme.html">sürücü yazısı</a>).</li>
+<li><b>Belleği sına</b>: Başlat'ta <b>Windows Bellek Tanılama</b> yazıp çalıştır.</li>
+<li><b>Diski denetle</b>: <code>chkdsk C: /f</code> komutu bir sonraki açılışta diski tarar.</li>
+<li><b>Aşırı ısınma</b> belirtisi varsa fan ve toz temizliğini yap.</li>
+</ol>
+<h2>Mavi ekran kayıtlarını görme</h2>
+<p><b>Olay Görüntüleyicisi</b>'ni aç, <b>Windows Günlükleri &gt; Sistem</b> bölümünde <b>Kritik</b> ve <b>Hata</b> kayıtlarına bak. Sorun sürerse <a href="windows-15-guvenli-mod-ile-windows-i-acma.html">güvenli modda</a> çalışıp sorunlu yazılımı kaldır.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

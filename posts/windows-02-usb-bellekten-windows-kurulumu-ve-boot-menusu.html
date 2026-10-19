@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>USB bellekten Windows kurulumu ve boot menüsü</title>
+<meta name="description" content="Kurulum USB'si hazırlama ve bilgisayarı USB'den başlatma (boot menüsü tuşları).">
+<meta name="kategori" content="windows">
+<meta name="tarih" content="2026-06-02 15:54">
+<meta name="okuma" content="5">
+
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Windows'u yeniden kurmak için bilgisayarın USB bellekten başlatılması gerekir. Bunun için önce kurulum USB'si hazırlanır, sonra boot menüsüne girilir.</p>
+<h2>Kurulum USB'si hazırlama</h2>
+<ol>
+<li>En az 8 GB'lık bir USB bellek tak. Üzerindeki tüm veriler silinecektir.</li>
+<li>Microsoft'un resmi indirme sayfasından <b>Medya Oluşturma Aracı</b>nı indirip çalıştır.</li>
+<li>Dil ve sürümü seçip <b>USB flash sürücü</b> seçeneğini işaretle.</li>
+<li>Listeden USB belleği seç; araç dosyaları indirip belleğe yazar.</li>
+</ol>
+<p>İsteğe bağlı olarak <b>ISO</b> dosyasını indirip <a href="https://rufus.ie/tr/">Rufus</a> ile de belleğe yazabilirsin.</p>
+<h2>Boot menüsü tuşları</h2>
+<p>Bilgisayar açılırken logo ekranında aşağıdaki tuşa tekrar tekrar bas. Tuş üreticiye göre değişir:</p>
+<ul>
+<li><b>ASUS</b>: Esc veya F8</li>
+<li><b>Acer, Gigabyte</b>: F12</li>
+<li><b>HP</b>: Esc, ardından F9</li>
+<li><b>Dell, Lenovo</b>: F12</li>
+<li><b>MSI</b>: F11</li>
+<li><b>Casper, Monster, Exper</b>: genellikle F7 veya F12</li>
+</ul>
+<p>Açılan listeden USB belleği (çoğunlukla "UEFI: marka adı" biçiminde) seç.</p>
+<h2>Menü açılmıyorsa</h2>
+<ul>
+<li>Windows 11/10'da <b>Ayarlar &gt; Sistem &gt; Kurtarma &gt; Gelişmiş başlangıç &gt; Şimdi yeniden başlat</b> yolunu izleyip <b>Bir aygıt kullan</b>'ı seç.</li>
+<li>UEFI/BIOS ekranına girip (genellikle Del veya F2) <b>Boot</b> sırasında USB'yi en üste al.</li>
+<li><b>Hızlı Önyükleme (Fast Boot)</b> açıksa kapat.</li>
+</ul>
+<p>Kurulum adımları için <a href="windows-01-windows-11-format-atma-ve-temiz-kurulum.html">temiz kurulum yazısına</a> bak.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -10,6 +10,7 @@ window.SITE = {
   // Yazıdaki kategori satırında (kategori) soldaki kısa adı kullan. Yeni kategori için buraya bir satır ekle.
   // Listede en yeni yazı üstte görünür (sıralama yazının tarihine ve saatine göre yapılır).
   categories: {
+    windows: 'Windows Rehber',
     html: 'HTML Rehberi',
     htmlaraclari: 'HTML Araçları',
     linuxos: 'Linux İşletim Sistemleri',
@@ -28,8 +29,9 @@ window.SITE = {
   // name: menüde görünen grup adı, key: adres için kısa ad, items: gruba giren kategorilerin kısa adları
   // Hiçbir gruba girmeyen kategoriler (ör. batch) menüde tek başına görünür. Grupları silersen menü düz liste olur.
   groups: [
-    { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
+    { key: 'windows', name: 'Windows', items: ['windows'] },
     { key: 'linux', name: 'Linux', items: ['linuxos'] },
+    { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
     { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] }
   ],
 

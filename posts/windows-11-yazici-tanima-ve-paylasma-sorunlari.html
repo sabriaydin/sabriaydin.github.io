@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Yazıcı tanınmıyor: ekleme ve paylaşma çözümleri</title>
+<meta name="description" content="Windows'ta yazıcı ekleme, çevrimdışı görünme sorunu ve ağ üzerinden yazıcı paylaşma.">
+<meta name="kategori" content="windows">
+<meta name="tarih" content="2026-08-22 13:07">
+<meta name="okuma" content="5">
+
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Yazıcı sorunları çoğunlukla sürücü, kuyruk veya bağlantı kaynaklıdır.</p>
+<h2>Yazıcı ekleme</h2>
+<ol>
+<li>Yazıcıyı USB ile bağla veya Wi-Fi'a ekle, aç.</li>
+<li><b>Ayarlar &gt; Bluetooth ve cihazlar &gt; Yazıcılar ve tarayıcılar &gt; Cihaz ekle</b></li>
+<li>Yazıcı listede görünmezse <b>Yazıcı burada yok</b>'u seçip IP adresiyle ekle.</li>
+</ol>
+<h2>Üretici sürücüsü</h2>
+<p>Yazıcı marka ve model adıyla üreticinin destek sayfasından en son sürücü paketini indir. Windows'un genel sürücüsü bazı özellikleri sunmaz.</p>
+<h2>"Çevrimdışı" görünüyorsa</h2>
+<ul>
+<li>Yazıcının açık ve aynı ağda olduğunu doğrula.</li>
+<li>Yazıcı özelliklerinde <b>Yazıcıyı çevrimdışı kullan</b> seçeneğinin işaretsiz olduğuna bak.</li>
+<li>Kuyrukta takılı iş varsa <b>Yazdırma kuyruğunu aç</b> &gt; <b>Yazıcı &gt; Tüm belgeleri iptal et</b>.</li>
+</ul>
+<h2>Yazdırma kuyruğu hizmetini yenileme</h2>
+<pre>net stop spooler
+del /Q /F /S "%systemroot%\System32\spool\PRINTERS\*.*"
+net start spooler</pre>
+<p>Komutları yönetici terminalinde çalıştır.</p>
+<h2>Yazıcı paylaşma</h2>
+<ol>
+<li>Yazıcı bağlı bilgisayarda <b>Yazıcı özellikleri &gt; Paylaşım</b> sekmesinde <b>Bu yazıcıyı paylaş</b>'ı işaretle.</li>
+<li>Diğer bilgisayarda <b>Cihaz ekle &gt; Yazıcı burada yok &gt; Paylaşılan yazıcı seç</b> ile <code>\\BilgisayarAdı\YazıcıAdı</code> yazarak ekle.</li>
+</ol>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

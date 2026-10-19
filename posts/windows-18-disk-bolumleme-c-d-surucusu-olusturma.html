@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Disk bölümleme: C ve D sürücüsü oluşturma</title>
+<meta name="description" content="Disk Yönetimi ile bölüm küçültme, yeni sürücü oluşturma ve birleştirme.">
+<meta name="kategori" content="windows">
+<meta name="tarih" content="2026-10-12 19:40">
+<meta name="okuma" content="5">
+
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body">
+<p>Verilerin sistemden ayrı bir bölümde tutulması, yeniden kurulumda dosyaları korumayı kolaylaştırır. Windows'un Disk Yönetimi aracı, veri kaybetmeden bölüm oluşturabilir.</p>
+<h2>Önce yedek al</h2>
+<p>Bölümleme işlemleri nadiren sorun çıkarır ama önemli dosyaları yine de yedekle.</p>
+<h2>C sürücüsünü küçültme</h2>
+<ol>
+<li>Başlat'a sağ tıkla &gt; <b>Disk Yönetimi</b>.</li>
+<li>C: bölümüne sağ tıkla &gt; <b>Birimi Küçült</b>.</li>
+<li>Ayrılacak alanı MB cinsinden yaz (örneğin 100 GB için <code>102400</code>) &gt; <b>Küçült</b>.</li>
+</ol>
+<h2>Yeni bölüm oluşturma</h2>
+<ol>
+<li>Ortaya çıkan <b>Ayrılmamış</b> alana sağ tıkla &gt; <b>Yeni Basit Birim</b>.</li>
+<li>Sihirbazda sürücü harfini (D:) seç.</li>
+<li>Dosya sistemini <b>NTFS</b> bırakıp bir ad yaz &gt; <b>Son</b>.</li>
+</ol>
+<h2>Bölümü büyütme veya silme</h2>
+<ul>
+<li>Bir bölümü silersen boşalan alan, yalnızca <b>hemen sağındaki</b> bölüm <b>Birimi Genişlet</b> ile büyütülebilir.</li>
+<li>Bölüm silmek içindeki tüm verileri siler; dikkatli ol.</li>
+</ul>
+<h2>Yeni disk kullanıma alma</h2>
+<p>Yeni takılan boş disk için Disk Yönetimi bir <b>Diski Başlat</b> penceresi açar. <b>GPT</b> seçip tamam de, sonra disk üzerinde yeni basit birim oluştur.</p>
+<h2>Küçültme az alan veriyorsa</h2>
+<p>Hazırda bekletme dosyasını ve sayfa dosyasını geçici olarak kapatmak, sistem geri yükleme noktalarını silmek ve disk birleştirme yapmak küçültülebilir alanı artırabilir.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
