@@ -1,6 +1,7 @@
 // YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenleme.
 // Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmen yeterli.
 window.POSTS = [
+  { id: 'arac-09-online-html-editoru', title: 'Online HTML Editörü: Tam Sayfa Kod Yazma ve Canlı Önizleme', cat: 'araclar', date: '2026-10-18', time: '14:20', read: 4, excerpt: 'HTML, CSS ve JavaScript kodunu yaz, sonucu anında gör; renkli kod, Emmet, bul-değiştir, konsol ve tam ekran destekli tarayıcı editörü.' },
   { id: 'windows-20-windows-11-sistem-gereksinimleri-tpm-ve-guvenli-onyukleme', title: 'Windows 11 sistem gereksinimleri, TPM ve Güvenli Önyükleme', cat: 'windows', date: '2026-10-14', time: '12:28', read: 5, excerpt: 'Bilgisayarın Windows 11\'e uygunluğunu kontrol etme, TPM 2.0 ve Secure Boot ayarları.' },
   { id: 'windows-19-en-cok-kullanilan-klavye-kisayollari', title: 'Windows\'ta en çok kullanılan klavye kısayolları', cat: 'windows', date: '2026-10-13', time: '11:04', read: 4, excerpt: 'Günlük işleri hızlandıran temel ve ileri düzey Windows klavye kısayolları listesi.' },
   { id: 'windows-18-disk-bolumleme-c-d-surucusu-olusturma', title: 'Disk bölümleme: C ve D sürücüsü oluşturma', cat: 'windows', date: '2026-10-12', time: '19:40', read: 5, excerpt: 'Disk Yönetimi ile bölüm küçültme, yeni sürücü oluşturma ve birleştirme.' },
