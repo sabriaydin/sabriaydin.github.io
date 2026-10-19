@@ -1,5 +1,5 @@
 /* Harici bağlantı yönlendirme sayfası */
-.rd{max-width:680px;margin:0 auto;padding:36px 34px;background:var(--paper);color:var(--ink);border-radius:var(--r);border-left:6px solid var(--red);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.rd{max-width:none;margin:0;padding:36px 34px;background:var(--paper);color:var(--ink);border-radius:var(--r);border-left:6px solid var(--red);box-shadow:0 18px 50px rgba(0,0,0,.35)}
 .rd h1{font-size:1.7rem;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
 .rd .rd-sub{color:var(--pmu);margin:0 0 22px}
 .rd .rd-host{display:inline-block;font-weight:800;color:var(--red);word-break:break-all}
