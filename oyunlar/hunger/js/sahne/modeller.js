@@ -264,14 +264,14 @@ S.onInit(()=>{
   if(y<1.1){const m=Math.max(0,fb3(x*3,y*2.2,z*3,17)*1.5-.55)*Math.max(0,1.1-y)*.55;c.r=c.r*(1-m)+.1*m;c.g=c.g*(1-m)+.2*m;c.b=c.b*(1-m)+.05*m}   /* gövde dibinde yosun */
  };
  /* kök dilimleri: n yön (düzensiz aralık, farklı güç ve genişlik); halka konumları tabanda sıklaşır */
- const mkRoots=(n,seed,wk)=>{const r=[];for(let k=0;k<n;k++)r.push({a:k/n*6.2832+(hash(k,seed,3)-.5)*.7,s:.62+hash(k,seed,5)*.5,w:(.4+hash(k,seed,7)*.18)*wk});return r};
+ const mkRoots=(n,seed,wk)=>{const r=[];for(let k=0;k<n;k++)r.push({a:k/n*6.2832+(hash(k,seed,3)-.5)*.7,s:.62+hash(k,seed,5)*.5,w:(.5+hash(k,seed,7)*.2)*wk});return r};
  const rootT=(n,p)=>{const tv=[];for(let i=0;i<=n;i++)tv.push(Math.pow(i/n,p));return tv};
  /* yere yayılan kök kolu: gövde yüzeyinden çıkar, yere oturarak incelir ve toprağa gömülür (yarı yuvarlak, ince ucu toprak altında) */
  const rootArm=(q,len,rad,hs,d0,seed)=>{
   const ca=Math.cos(q.a),sa=Math.sin(q.a),px=-sa,pz=ca,N=6,pts=[];
   const rr=s=>Math.max(.03,rad*Math.pow(1-s,.9)*.92+.02);
   for(let i=0;i<=N;i++){
-   const s=i/N,d=d0+(len-d0)*Math.pow(s,.85),w=Math.sin(s*4.2+seed)*.12*len*s,y=rr(s)*.85+hs*Math.pow(1-s,3)-.12*s*s*s;
+   const s=i/N,d=d0+(len-d0)*Math.pow(s,.85),w=Math.sin(s*4.2+seed)*.12*len*s,y=rr(s)*.4+hs*Math.pow(1-s,3)-.1*s;
    pts.push([ca*d+px*w,y,sa*d+pz*w]);
   }
   return tube(pts,rr,8,9,.1,seed);
@@ -293,8 +293,8 @@ S.onInit(()=>{
   const ps=[],H=9.4,nl=lo?9:14;
   /* gövde: tabanda yumuşak kök dilimleri (ayrı sivri kök parçaları yerine) */
   const rp=mkRoots(5,11,lo?1.4:1);
-  const tr=part(rootTube([[0,-.3,0],[.05,2.5,.03],[-.04,6,-.03],[0,H,0]],t=>.04+.46*Math.pow(1-t,1.1)+.2*Math.exp(-t*24),lo?9:14,rootT(lo?9:22,lo?1.7:2),lo?0:.1,3,rp,.5,.6),0x5a3a20,0,0,0,1,1,1,0,0,0,.08);tr.cf=bark;ps.push(tr);
-  if(!lo)rp.forEach((q,k)=>{const r=part(rootArm(q,1.2+hash(k,11,9)*.7,.13+.05*q.s,.38,.38,.3,3+k),0x5a3a20,0,0,0,1,.9,1,0,0,0,.04);r.cf=bark;ps.push(r)});
+  const tr=part(rootTube([[0,-1.1,0],[.05,2.5,.03],[-.04,6,-.03],[0,H,0]],t=>.04+.46*Math.pow(1-t,1.1)+.2*Math.exp(-t*24),lo?9:24,rootT(lo?9:22,lo?1.7:2),lo?0:.1,3,rp,.38,.6),0x5a3a20,0,0,0,1,1,1,0,0,0,.08);tr.cf=bark;ps.push(tr);
+  /* ayrı kök kolları kaldırıldı: kökler gövdenin kendi yumuşak sivrilmesiyle oluşur */
   const pcf=(x,y,z,nx,ny,nz,c)=>{const t=Math.min(1,Math.max(0,(y-2.1)/6.9)),Lm=2.5*Math.pow(1-t,.85)+.4,d=Math.min(1,Math.hypot(x,z)/Lm);c.multiplyScalar(.7+.5*d*d+.14*Math.max(0,ny))};
   const c0=new THREE.Color(0x1f5532),c1=new THREE.Color(0x4a9a4a);
   for(let k=0;k<6;k++){const a=k*1.7,y=1.1+k*.22;ps.push(alongPart(cyl(.035,.012,.45+(k%3)*.12,4,1),0x4a3320,V3(0,y,0),V3(Math.cos(a),.15,Math.sin(a)),.5))}   /* kurumuş alt dal kökleri */
@@ -318,8 +318,8 @@ S.onInit(()=>{
   const ps=[];
   /* gövde: tabanda yumuşak kök dilimleri (ayrı sivri kök parçaları yerine) */
   const rp=mkRoots(6,23,lo?1.4:1);
-  const trunk=part(rootTube([[0,-.3,0],[.1,1.5,.05],[-.05,3.2,-.05],[.05,4.5,0]],t=>.2+.3*Math.pow(1-t,1.4)+.3*Math.exp(-t*13),lo?9:14,rootT(lo?9:22,lo?1.7:2),lo?0:.12,7,rp,.55,.7),0x6a4626,0,0,0,1,1,1,0,0,0,.08);trunk.cf=bark;ps.push(trunk);
-  if(!lo)rp.forEach((q,k)=>{const r=part(rootArm(q,1.5+hash(k,23,9)*.7,.2+.07*q.s,.5,.5,.4,7+k),0x6a4626,0,0,0,1,.9,1,0,0,0,.04);r.cf=bark;ps.push(r)});
+  const trunk=part(rootTube([[0,-1.1,0],[.1,1.5,.05],[-.05,3.2,-.05],[.05,4.5,0]],t=>.2+.3*Math.pow(1-t,1.4)+.3*Math.exp(-t*13),lo?9:24,rootT(lo?9:22,lo?1.7:2),lo?0:.12,7,rp,.4,.7),0x6a4626,0,0,0,1,1,1,0,0,0,.08);trunk.cf=bark;ps.push(trunk);
+  /* ayrı kök kolları kaldırıldı: kökler gövdenin kendi yumuşak sivrilmesiyle oluşur */
   const nl=lo?3:5;
   for(let k=0;k<nl;k++){
    const a=k/nl*6.2832+.5,ca=Math.cos(a),sa=Math.sin(a),s=3.5+hash(k,1,2)*.6,e=1.6+hash(k,2,2)*.5;
@@ -441,7 +441,7 @@ S.onInit(()=>{
   nug.forEach(n=>ps.push(nugget(k,n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])));
   /* kristal/kırık parça demetleri: cevher türüne göre renkli, ucu parlak */
   const SH=SHARD[k],sl=st===0?SHARDS:st===1?SHARDS.slice(0,3):SHARDS.slice(0,1);
-  for(const [x,y,z,h,r,rx,rz] of (k==='coal'?[]:sl)){                    /* kömürde sivri kristal yok: yalnızca yuvarlak parçalar */
+  for(const [x,y,z,h,r,rx,rz] of (k==='coal'||k==='copper'?[]:sl)){      /* kömür ve bakırda sivri kristal yok: yalnızca yuvarlak parçalar */
    const q=part(cone(r,h,k==='coal'?4:6,1),SH,x,y+h*.42,z,1,1,1,rx,x*3,rz,.1);
    q.cf=(px,py,pz,nx,ny,nz,c)=>{const t=Math.max(0,Math.min(1,(py-y)/h));c.r*=.62+.6*t;c.g*=.62+.6*t;c.b*=.62+.6*t};
    ps.push(q);

@@ -20,23 +20,10 @@
 #rcn{margin:2px 0}
 
 /* ---- Tabela düzenleyici ve kısayol panosu ---- */
-#sgn,#hlp{position:absolute;inset:0;display:grid;place-items:center;background:rgba(5,5,6,.78);padding:16px;overflow:auto}
-#sgn{z-index:40}
-#hlp{z-index:60}
+#sgn{z-index:40;position:absolute;inset:0;display:grid;place-items:center;background:rgba(5,5,6,.78);padding:16px;overflow:auto}
 #sgn .card{width:min(460px,100%)}
 #sgIn{font:inherit;font-size:16px;color:var(--tx);background:#000;border:1px solid var(--red);border-radius:6px;padding:9px 12px;width:100%;box-sizing:border-box;user-select:text;-webkit-user-select:text}
 #sgIn:focus{outline:none;box-shadow:0 0 0 2px rgba(217,70,60,.35)}
-#hlp .card{width:min(720px,100%);max-height:calc(100vh - 24px);display:flex;flex-direction:column;text-align:left}
-#hlp h1{text-align:center}
-#hlB{overflow:auto;margin:10px 0}
-.hcols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.hcols h3{margin:0 0 6px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-.hr{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:baseline;padding:4px 0;border-bottom:1px solid var(--line);font-size:13px}
-.hr span:last-child{color:var(--mut);text-align:right}
-.hcols>div:last-child .hr{grid-template-columns:minmax(120px,auto) 1fr}
-.hcols>div:last-child .hr span:last-child{text-align:left}
-#hlp kbd{font:600 12px ui-monospace,Consolas,monospace;background:#000;border:1px solid var(--line);border-radius:4px;padding:1px 6px;white-space:nowrap;color:var(--tx)}
-#hlp .btns{margin-top:6px}
 
 /* ---- Durum satırı (ıslaklık, ateş, siper, barış) ---- */
 #x2s{display:flex;flex-wrap:wrap;gap:4px;font-size:11px}
@@ -76,8 +63,7 @@
 @media (max-width:760px){
  #pbox.cst{grid-template-columns:1fr}
  #cgrid{grid-template-columns:repeat(6,minmax(0,1fr))}
- .hcols{grid-template-columns:1fr}
- #cap{bottom:260px}
+  #cap{bottom:260px}
 }
 @media (prefers-reduced-motion:reduce){#cap div,#dmgl span{animation-duration:.01s}}
 #game.photo #cap,#game.photo #dmgl,#game.photo #x2s{display:none!important}

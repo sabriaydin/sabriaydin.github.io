@@ -1,5 +1,5 @@
 /* Hunger 3D - büyük güncelleme (51) arayüzü: Depo Sandığı penceresi, Tabela düzenleyici, tarif arama ve süzgeci, çoklu üretim,
-   kısayol paneli (F1), ses altyazıları, hasar sayıları, harita işaretleri ve oyun kolu desteği.
+   F1 ile Ayarlar › Kontrol, ses altyazıları, hasar sayıları, harita işaretleri ve oyun kolu desteği.
    Özgün dosyalara yalnızca kancalar (extOverlay, extClose, extMapMarks, extMapClick, extTabHtml) üzerinden bağlanır. */
 (()=>{
 'use strict';
@@ -206,76 +206,25 @@ HG.openSign=function(i){
  setTimeout(()=>{const f=sg.querySelector('#sgIn');if(!sg.hidden)f.focus()},30);
 };
 
-/* ============================================================ Kısayol paneli (F1) ============================================================ */
-let hl=null;
-const KEYROWS=[['fwd','İleri'],['back','Geri'],['left','Sola'],['right','Sağa'],['sprint','Koş'],['jump','Zıpla'],['use','Topla / aç / kullan / konuş'],['place','Yapıyı yerleştir'],['inv','Çanta ve üretim'],['map','Harita'],['jr','Günlük'],['guide','Rehber'],['drop','Seçili eşyadan 1 at'],['sort','Çantayı düzenle'],['qsave','Hızlı kaydet'],['photo','Fotoğraf modu'],['mute','Sesi kapat']];
-const TIPS=[
- ['Sol tık','Vur / kullan; basılı tutarak kaynak topla'],
- ['Sağ tık','Elde kalkan varken basılı tut: siper (E de açıp kapatır)'],
- ['Sağ tık (çanta kutusu)','Eşyayı kullan / ye'],
- ['Shift + tık (çanta)','Açık sandığa hızlı koy'],
- ['Üret + Shift / Ctrl','Tarifi 5 kez / mümkün olduğu kadar üret'],
- ['Harita: Shift + tık','Bayrak koy / kaldır (en çok 8 işaret)'],
- ['Harita: tık','Hedef işareti koy / kaldır'],
- ['1 - 8 ve tekerlek','Hızlı erişim kutusunu seç'],
- ['F1','Bu pano']
-];
-function ensureHelp(){
- if(hl)return hl;
- hl=document.createElement('div');hl.id='hlp';hl.hidden=true;
- hl.innerHTML='<div class="card"><h1 style="font-size:24px;letter-spacing:.1em">KISAYOLLAR</h1><div id="hlB"></div><div class="btns"><button id="hlX" type="button">Kapat (F1 / Esc)</button></div></div>';
- ($('#game')||document.body).appendChild(hl);
- hl.querySelector('#hlX').onclick=()=>{hideHelp();if(ui.state==='play')regain()};
- hl.addEventListener('pointerdown',e=>{if(e.target===hl){hideHelp();if(ui.state==='play')regain()}});
- return hl;
-}
-function helpHtml(){
- const lab=c=>HG.keyLabel?HG.keyLabel(c):c;
- let h='<div class="hcols"><div><h3>Tuşlar</h3>';
- for(const [k,n] of KEYROWS){const b=HG.bind&&HG.bind[k];if(!b)continue;h+=`<div class="hr"><span>${esc(n)}</span><span><kbd>${esc(lab(b[0]))}</kbd>${b[1]?' <kbd>'+esc(lab(b[1]))+'</kbd>':''}</span></div>`}
- h+='</div><div><h3>Fare ve ipuçları</h3>';
- for(const [a,b] of TIPS)h+=`<div class="hr"><span><kbd>${esc(a)}</kbd></span><span>${esc(b)}</span></div>`;
- h+='</div></div>';
- return h;
-}
-function showHelp(){
- if(!ensureHelp())return;
- if(ui.state==='play'){clearKeys();HG.unlock(true)}
- hl.querySelector('#hlB').innerHTML=helpHtml();
- hl.hidden=false;HG.snd('ui_open');
-}
-function hideHelp(){
- if(!hl||hl.hidden)return false;
- hl.hidden=true;HG.snd('ui_close');return true;
-}
+/* ============================================================ F1: Ayarlar › Kontrol (tuşlar ve sabit kontroller tek sayfada) ============================================================ */
 addEventListener('keydown',e=>{
- if(e.code==='F1'){
-  if(ui.state==='menu'||ui.state==='dead')return;
-  e.preventDefault();e.stopImmediatePropagation();
-  if(e.repeat)return;
-  if(hl&&!hl.hidden){hideHelp();if(ui.state==='play')regain()}
-  else if(ui.state==='play'&&(HG.extOverlay()||!$('#panel').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden||!$('#trade').hidden))return;
-  else showHelp();
-  return;
+ if(e.code!=='F1')return;
+ if(ui.state==='menu'||ui.state==='dead')return;
+ e.preventDefault();e.stopImmediatePropagation();
+ if(e.repeat||!HG.settings)return;
+ if(HG.settings.isOpen)return;
+ if(ui.state==='play'){
+  if(HG.extOverlay()||!$('#panel').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden||!$('#trade').hidden)return;
+  clearKeys();HG.unlock(true);
  }
- /* duraklatılmışken Esc yalnızca panoyu kapatır */
- if(e.code==='Escape'&&hl&&!hl.hidden&&ui.state!=='play'){hideHelp();e.stopImmediatePropagation();e.preventDefault()}
+ HG.settings.open(null,'Kontrol');
 },true);
-{
- const pb=$('#pause .btns'),bm=$('#bMenu');
- if(pb&&!pb.querySelector('.bKeys')){
-  const b=document.createElement('button');b.type='button';b.className='ghost bKeys';b.textContent='Kısayollar (F1)';
-  b.onclick=()=>{HG.initAudio&&HG.initAudio();showHelp()};
-  pb.insertBefore(b,bm||null);
- }
-}
 
 /* ============================================================ Ortak: kapatma ve üst katman ============================================================ */
-HG.extOverlay=()=>!!((sg&&!sg.hidden)||(hl&&!hl.hidden));
+HG.extOverlay=()=>!!(sg&&!sg.hidden);
 HG.extClose=silent=>{
  let any=false;
  if(hideSign())any=true;
- if(hideHelp())any=true;
  if(silent&&cur){closeChestUi();any=true}
  if(silent){const a=document.activeElement;if(a&&a.blur&&a!==document.body)a.blur()}
  return any;

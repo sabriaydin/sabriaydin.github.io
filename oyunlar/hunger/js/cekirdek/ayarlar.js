@@ -114,8 +114,9 @@ function render(){
  for(const r of TABS[tab][1])body.appendChild(row(r));
  if(TABS[tab][0]==='Kontrol'&&HG.keyUI)HG.keyUI(body);
 }
-function open(from){
+function open(from,tabName){
  if(!box)return;
+ if(tabName){const k=TABS.findIndex(t=>t[0]===tabName);if(k>=0)tab=k}
  openFrom=from||null;box.hidden=false;render();
  const m=$('#menu'),p=$('#pause');
  if(m)m.dataset.h=m.hidden?'':'1';

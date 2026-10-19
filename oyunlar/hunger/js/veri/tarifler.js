@@ -4,7 +4,7 @@
 /* Tarif: [üretilen eşya, adet, {gerekenler}, istasyon(isteğe bağlı)] */
 const STN={fire:'Kamp Ateşi',bench:'Çalışma Tezgâhı',furn:'Ocak'};
 const RC=[
- ['rock',1,{}],['axe1',1,{wood:3,stone:3}],['pick1',1,{wood:3,stone:4}],['rod',1,{wood:4,stone:1}],
+ ['axe1',1,{wood:3,stone:3}],['pick1',1,{wood:3,stone:4}],['rod',1,{wood:4,stone:1}],
  ['fire',1,{wood:5,stone:3}],['bench',1,{wood:10,stone:2}],['furn',1,{stone:12}],
  ['plan',1,{wood:10}],['hammer',1,{wood:12,stone:8}],['door',1,{wood:4}],
  ['cfish',1,{fish:1},'fire'],['cfish',1,{sardine:2},'fire'],['cfish',1,{bass:1},'fire'],['cfish',2,{tuna:1},'fire'],['ccrab',1,{crab:1},'fire'],['cmeat',1,{meat:1},'fire'],['cshell',1,{shell:2},'fire'],

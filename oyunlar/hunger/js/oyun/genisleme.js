@@ -178,6 +178,24 @@ HG.x2chestCount=chestCount;
 /* ---------- E ile etkileşimler ---------- */
 const ACT=HG.x2act,HINT=HG.x2hint;
 ACT[O.CHEST]=i=>{ent(i,O.CHEST);if(HG.openStore){HG.openStore(i);return true}return false};
+/* El Taşı: ücretsiz tarif kaldırıldı. Elinde hiç alet (El Taşı, balta, kazma) olmayan oyuncu E ile yerdeki bir kayadan taş toplar; kaya başına günde bir kez */
+HG.x2reg('rl',()=>({}),v=>{const o={};let n=0;if(v&&typeof v==='object')for(const k in v){const i=+k;if(Number.isInteger(i)&&i>=0&&i<W*H&&Number.isInteger(v[k])&&n++<300)o[i]=v[k]}return o});
+const hasTool=()=>G.inv.some(s=>s&&IT[s.id]&&(IT[s.id].tool==='axe'||IT[s.id].tool==='pick'||s.id==='rock'));
+const looseBusy=i=>X().rl[i]===HG.dayNo();
+ACT[O.ROCK]=i=>{
+ if(hasTool())return false;
+ if(looseBusy(i)){HG.toast('Bu kayada uygun taş kalmadı; yarın tekrar bakın.');return true}
+ if(!canAdd('rock',1)){HG.toast('Çanta dolu.');return true}
+ const x=X(),d=HG.dayNo();
+ for(const k in x.rl)if(x.rl[k]!==d)delete x.rl[k];
+ x.rl[i]=d;gain('rock',1);HG.snd('get');HG.toast('Kayadan elverişli bir taş kopardın: El Taşı.');flag('looserock');
+ HG.journal&&HG.journal.push('x2',{k:'rock',i});
+ return true;
+};
+HG.extBare=(o,i)=>{
+ if(o!==O.ROCK||hasTool())return null;
+ return looseBusy(i)?{block:'Bu kayada uygun taş kalmadı; yarın tekrar bakın.',name:HG.NAMES[o]}:{hint:'[E] Yerden El Taşı topla',name:HG.NAMES[o]};
+};
 ACT[O.SIGN]=i=>{ent(i,O.SIGN);if(HG.openSign){HG.openSign(i);return true}return false};
 ACT[O.APIARY]=i=>{
  const e=ent(i,O.APIARY);
@@ -446,7 +464,7 @@ function makeGrave(){
  HG.journal&&HG.journal.push('x2',{k:'grave',i:p.i});
  return p;
 }
-let pendRs=false;
+let pendRs=false,gateInfoPre=null,spawnCoast=false;
 const DEAD_PANELS=['#trade','#jr','#gd','#bigmap','#sv','#pause','#panel'];
 function resetUi(){
  for(const id of DEAD_PANELS){const e=HG.$(id);if(e)e.hidden=true}
@@ -470,13 +488,42 @@ function standNear(cx,cz,r){
  }
  return null;
 }
+/* Sahil doğma noktaları: kıyıdaki boş kum kareleri; dünya tohumundan türetilir (aynı kod, aynı noktalar). Yatak yoksa yeniden doğma bunlar ve başlangıç arasından seçilir */
+HG.x2reg('sp',()=>[],v=>Array.isArray(v)?v.filter(q=>q&&isFinite(q.x)&&isFinite(q.z)).slice(0,16).map(q=>({x:+q.x,z:+q.z})):[]);
+function genCoast(){
+ const r=HG.mulberry32(((G.seed|0)^0x5eac0a57)>>>0||1),c=[];
+ for(let y=6;y<H-6;y+=3)for(let x=6;x<W-6;x+=3){
+  const i=y*W+x;
+  if(G.tile[i]!==T.SAND||G.obj[i]||G.hgt[i]>2)continue;
+  let wet=false;
+  for(let dy=-3;dy<=3&&!wet;dy+=3)for(let dx=-3;dx<=3;dx+=3){const t=G.tile[(y+dy)*W+x+dx];if(t<T.SAND){wet=true;break}}
+  if(!wet)continue;
+  c.push([x,y]);
+ }
+ for(let k=c.length-1;k>0;k--){const j=(r()*(k+1))|0;[c[k],c[j]]=[c[j],c[k]]}
+ const want=Math.max(6,Math.round(W*H/70000)),out=[];
+ for(const [x,y] of c){
+  if(out.length>=want)break;
+  if(out.some(q=>Math.hypot(q.x-x,q.z-y)<70))continue;
+  const p=standNear(x+.5,y+.5,2);
+  if(p)out.push({x:p.x,z:p.z});
+ }
+ return out;
+}
 function doRespawn(){
  pendRs=false;
  const x=X();
  let p=null;
  if(x.spawn&&G.obj[x.spawn.i]===O.BED)p=standNear(x.spawn.i%W+.5,((x.spawn.i/W)|0)+.5,3);
+ let coast=false;
+ if(!p){
+  if(!x.sp.length)x.sp=genCoast();
+  const pts=x.sp.slice();if(x.home)pts.push(x.home);
+  if(pts.length){const q=pts[(Math.random()*pts.length)|0];p=standNear(q.x,q.z,10);coast=!!p&&q!==x.home}
+ }
  if(!p&&x.home)p=standNear(x.home.x,x.home.z,10);
  if(!p)p={x:G.px,z:G.py};
+ spawnCoast=coast;
  G.px=p.x;G.py=p.z;G.pz=undefined;G.vz=0;G.air=false;G.pvx=G.pvy=0;G.tg=null;G.swim=false;G.head=false;G.shelterCheck=0;
  for(const a of G.animals||[]){
   const def=HG.ANIMAL[a.t];if(a.dying||a.pet)continue;
@@ -492,6 +539,7 @@ HG.onDie=()=>{
  const mode=HG.cfg.death||'bed',x=X(),cause=G.cause||'Hayatta kalamadın.';
  const tip=HG.$('#deadTip');
  if(mode==='perm'){
+  const r0=HG.$('#bResp');if(r0)r0.hidden=true;
   if(tip)tip.textContent='Kalıcı ölüm açık: kayıt silindi. Aynı adada yeniden başlayabilir veya yeni bir ada deneyebilirsiniz.';
   return false;
  }
@@ -511,11 +559,40 @@ HG.onDie=()=>{
  if(SOFT){SOFT.classList.add('on');setTimeout(()=>SOFT.classList.remove('on'),900)}
  HG.snd('ui_open');
  HG.feed(cause);
- HG.toast(mode==='bed'?(grave?'Öldün. Doğma noktasında uyandın; eşyaların cenaze çantasında (haritada işaretli).':'Öldün. Doğma noktasında uyandın.'):'Öldün. Doğma noktasında uyandın; eşyaların yanında.');
- if(G.cave){pendRs=true;HG.leaveCave();}
- else doRespawn();
+ 
+ if(G.cave){pendRs=true;pendGate=true;gateInfoPre={cause,mode,grave:!!grave};HG.leaveCave();}
+ else{doRespawn();showDeath(cause,mode,!!grave)}
  return true;
 };
+/* Ölüm ekranı: ölüm işlemleri (mezar, doğma, kayıt) yapılır; oyuncu "Yeniden Doğ" düğmesine basana kadar oyun bekler */
+let pendGate=false,gateInfo=null;
+function showDeath(cause,mode,grave){
+ pendGate=false;
+ gateInfo={cause,mode,grave};
+ for(const k in HG.inp.keys)HG.inp.keys[k]=false;HG.inp.mouseDown=false;HG.inp.touchAct=false;
+ for(const id of DEAD_PANELS){const e=HG.$(id);if(e)e.hidden=true}
+ ui.state='dead';
+ HG.$('#why').textContent=cause;
+ HG.$('#stat').textContent=HG.dayNo()+'. güne kadar dayandın.';
+ {const s=G.stats||{};HG.$('#stat2').textContent='Seviye '+G.lvl+' · Avlanan hayvan: '+(s.hunted||0)+' · Yok edilen Gölge: '+(s.shades||0)+'\nAçılan sandık: '+(s.chests||0)+' · Tamamlanan görev: '+(s.quests||0)+' · Atlatılan Kan Ayı: '+(s.blood||0)+'\nYürünen mesafe: '+Math.round(s.walked||0)+' m · Yüzülen mesafe: '+Math.round(s.swum||0)+' m'}
+ const tip=HG.$('#deadTip');
+ if(tip)tip.textContent=mode==='bed'?(grave?'Eşyaların cenaze çantasında; haritada işaretli. Yatağında, yoksa sahilde veya başlangıç noktasında yeniden doğacaksın.':'Yatağında, yoksa sahilde veya başlangıç noktasında yeniden doğacaksın.'):'Yeniden doğacaksın; eşyaların yanında kalır.';
+ const r=HG.$('#bResp');if(r)r.hidden=false;
+ HG.$('#dead').hidden=false;
+ if(document.exitPointerLock)document.exitPointerLock();
+ HG.snd('ui_open');
+}
+{
+ const r=HG.$('#bResp');
+ if(r)r.onclick=()=>{
+  if(ui.state!=='dead'||!gateInfo)return;
+  gateInfo=null;
+  HG.$('#dead').hidden=true;r.hidden=true;
+  ui.state='play';HG.snd('ui_close');
+  HG.toast(spawnCoast?'Sahilde uyandın.':'Doğma noktasında uyandın.');
+  ui.relock=true;HG.lock&&HG.lock();
+ };
+}
 /* Cenaze çantası boşaldığında kaldırılır */
 HG.x2graveCheck=i=>{
  const e=X().s[i];
@@ -533,7 +610,7 @@ HG.x2graveCheck=i=>{
   u0.call(this,dt);
   if(ui.state!=='play')return;
   try{
-   if(pendRs&&!G.cave&&!HG.busy)doRespawn();
+   if(pendRs&&!G.cave&&!HG.busy){doRespawn();if(pendGate){const i=gateInfoPre||{};showDeath(i.cause||'Hayatta kalamadın.',i.mode||'bed',!!i.grave)}}
    if(G.x2&&G.x2.invT>G.clock+10&&!pendRs)G.x2.invT=G.clock+6;
    stepStructs(dt);scanNear(dt);trackSafe(dt);
   }catch(e){if(!err){err=true;console.error('genisleme',e)}}
