@@ -16,6 +16,8 @@
 <link rel="apple-touch-icon" href="../../assets/img/apple-touch-icon.png">
 <link rel="stylesheet" href="css/stil.css">
 <link rel="stylesheet" href="css/genisleme.css">
+<link rel="stylesheet" href="css/uretim.css">
+<link rel="stylesheet" href="css/konsol.css">
 </head>
 <body>
 <div id="game">
@@ -52,15 +54,21 @@
     <div class="tb" id="tJ">Zıpla</div><div class="tb" id="tE">Ye/Al</div><div class="tb" id="tK">Günlük</div><div class="tb" id="tI">Çanta</div>
   </div>
   <div id="panel" hidden>
-    <div id="pbox">
-      <div>
+    <div id="pbox" class="m-inv">
+      <div id="ptabs" role="tablist"><button id="tInv" class="on" type="button" role="tab" data-m="inv">Envanter</button><button id="tCrf" type="button" role="tab" data-m="craft">Üretim</button></div>
+      <div id="invScr">
         <h2>Envanter</h2>
         <div id="grid"></div>
         <div id="info"></div>
         <p class="hp">Eşyaya tıklayıp başka bir kutuya tıklayarak yerini değiştirin. Sağ tık veya çift tık: kullan. İlk 8 kutu hızlı erişim çubuğudur.</p>
         <button id="close" class="ghost" type="button">Kapat (I / Esc)</button> <button id="sortInv" class="ghost" type="button">Çantayı düzenle</button>
       </div>
-      <div><h2>Üretim</h2><div id="recipes"></div></div>
+      <div id="crfScr">
+        <h2>Üretim</h2>
+        <div id="crfSt"></div>
+        <div id="recipes"></div>
+        <div class="crfb"><button id="crfX" class="ghost" type="button">Kapat (C / Esc)</button></div>
+      </div>
     </div>
   </div>
   <div id="jr" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">GÜNLÜK</h1><div class="stabs" id="jrT"></div><div id="jrB"></div><div class="btns"><button id="jrX" class="ghost" type="button">Kapat (K / Esc)</button></div></div></div>
@@ -96,6 +104,7 @@
 <script src="js/cekirdek/ayarlar.js"></script>
 <script src="js/cekirdek/tuslar.js"></script>
 <script src="js/cekirdek/hazirlik.js"></script>
+<script src="js/oyun/konsol.js"></script>
 <script src="js/veri/esyalar.js"></script>
 <script src="js/veri/notlar.js"></script>
 <script src="js/veri/rehber.js"></script>
@@ -171,6 +180,8 @@
 <script src="js/oyun/genisleme2.js"></script>
 <script src="js/oyun/genisleme3.js"></script>
 <script src="js/oyun/genisleme-arayuz.js"></script>
+<script src="js/oyun/uretim-ekrani.js"></script>
+<script src="js/oyun/koruma.js"></script>
 <script src="js/oyun/giris.js"></script>
 <script src="js/oyun/dongu.js"></script>
 </body>

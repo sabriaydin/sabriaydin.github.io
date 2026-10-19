@@ -28,7 +28,7 @@ function items(){
  return '<div class="mut">×N: bir kutuda taşınabilecek en fazla adet. Eşyaya sağ tıklayarak kullanabilir, panelin dışına sürükleyerek yere atabilirsiniz.</div>'+rows.join('');
 }
 function recipes(){
- return '<div class="mut">Üretim: {craft} veya {inv} tuşuyla açılan panelden yapılır. Bazı tarifler yakında ilgili yapı bulunmasını gerektirir.</div>'.replace(/\{(\w+)\}/g,(m,a)=>HG.bind[a]?HG.keyLabel(HG.bind[a][0]):m)
+ return '<div class="mut">Üretim: {craft} tuşuyla açılan Üretim ekranından yapılır (Envanter ekranı {inv} tuşuyla açılır). Bazı tarifler yakında ilgili yapı bulunmasını gerektirir.</div>'.replace(/\{(\w+)\}/g,(m,a)=>HG.bind[a]?HG.keyLabel(HG.bind[a][0]):m)
   +RC.map(r=>{
    const need=Object.keys(r[2]).map(k=>IT[k].n+' ×'+r[2][k]).join(', ');
    return `<div class="rc"><img src="${ICON[r[0]]||''}" alt=""><div><b>${IT[r[0]].n}${r[1]>1?' ×'+r[1]:''}</b><span>${need}${r[3]?' · Gerekli: '+STN[r[3]]+' yakını':''}</span></div></div>`;

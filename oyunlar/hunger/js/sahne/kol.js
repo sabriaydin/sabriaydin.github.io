@@ -354,6 +354,44 @@ function setTwo(on){
  if(on){rArm.rotation.order=lArm.rotation.order='YXZ'}
  else{rArm.rotation.order=lArm.rotation.order='XYZ';rArm.rotation.set(0,0,0);lArm.rotation.set(0,0,0);rArm.position.set(.4,-.31,-.115);lArm.position.set(-.4,-.37,-.115);hand.rotation.set(0,0,0);lhand.rotation.set(0,0,0)}
 }
+/* ---- Yakın engel: eller ve elde tutulan eşya duvara, ağaca, kayaya, araziye ve canlılara girmez ---- */
+const _rt=new THREE.Vector3(),_up=new THREE.Vector3(),_bk=new THREE.Vector3(),_o=new THREE.Vector3();
+const CLR_RAYS=[[0,0],[.3,-.25],[-.3,-.25],[0,-.4],[.14,.12],[-.14,.12]];     /* kamera uzayında yanal ve dikey kayma (el, kol, eşya ucu) */
+let pullK=0;
+function blockedAt(G,x,y,z,near){
+ const W=HG.W,H=HG.H,tx=Math.floor(x),tz=Math.floor(z);
+ if(tx<0||tz<0||tx>=W||tz>=H)return true;
+ const i=tz*W+tx,o=G.obj[i],gy=S.groundY(x,z);
+ if(y<gy+.03)return true;                                           /* arazi */
+ if(o&&HG.SOLID(o)&&y<gy+(HG.OBJTOP[o]||1)&&y>gy-.3)return true;    /* ağaç, kaya, maden, duvar, yapı */
+ if(G.cave&&G.tile[i]===HG.T.ROCK)return true;                      /* mağara duvarı */
+ for(const q of near){
+  const dx=x-q.x,dz=z-q.z;
+  if(dx*dx+dz*dz<q.r*q.r&&y>q.y0&&y<q.y0+q.h)return true;           /* hayvan, köylü */
+ }
+ return false;
+}
+function clearance(G,cam,front){
+ cam.matrixWorld.extractBasis(_rt,_up,_bk);_o.setFromMatrixPosition(cam.matrixWorld);
+ const near=[];
+ for(const a of G.animals||[]){
+  if(a.dying)continue;const dx=a.x-_o.x,dz=a.z-_o.z;if(dx*dx+dz*dz>9)continue;
+  const def=HG.ANIMAL[a.t];if(!def)continue;
+  near.push({x:a.x,z:a.z,r:def.r*.9+.05,h:def.h,y0:a.by!==undefined?a.by:S.groundY(a.x,a.z)});
+ }
+ for(const n of G.npcs||[]){
+  if(n.inside)continue;const dx=n.x-_o.x,dz=n.z-_o.z;if(dx*dx+dz*dz>9)continue;
+  near.push({x:n.x,z:n.z,r:.33,h:1.75,y0:S.groundY(n.x,n.z)});
+ }
+ let dmin=front;
+ for(const [lx,ly] of CLR_RAYS){
+  const bx=_o.x+_rt.x*lx+_up.x*ly,by=_o.y+_rt.y*lx+_up.y*ly,bz=_o.z+_rt.z*lx+_up.z*ly;
+  for(let d=.06;d<dmin;d+=.06){
+   if(blockedAt(G,bx-_bk.x*d,by-_bk.y*d,bz-_bk.z*d,near)){dmin=d;break}
+  }
+ }
+ return dmin;
+}
 S.onFrame((G,t,dt,info)=>{
  const play=info.mode==='play';
  if(!play&&sc.torchLight)sc.torchLight.intensity=0;
@@ -375,6 +413,14 @@ S.onFrame((G,t,dt,info)=>{
  const spk=Math.min(1.4,(G.spdNow||0)/3.4),spr=G.sprint?1:0,air=G.air?(G.vz>0?.02:-.015):0;
  root.position.set((mv?Math.cos(G.walk*5)*.012*spk:0)+ws.sx*.15,(mv?Math.abs(ph)*.015*spk:0)+ws.sy*.15+ws.dip*.05+air-spr*.02,spr*.03);
  root.rotation.set(spr*.22+ws.sy*.6,ws.sx*.7,ws.sx*.5+(mv?Math.cos(G.walk*5)*.01*spk:0));
+ /* engele yaklaşınca eller geri çekilir (en öndeki nokta engelin önünde kalır) */
+ {
+  const front=(two?.85:id?(it&&it.tool==='bow'?1.0:.95):.62)+(sc.swingT>=0?.12:0);
+  const want=Math.max(0,front-clearance(G,sc.cam,front));
+  pullK+=(want-pullK)*(1-Math.exp(-(want>pullK?24:9)*dt));
+  if(pullK<.002)pullK=0;
+  if(pullK>0){root.position.z+=pullK;root.position.y-=pullK*.1;root.rotation.x+=pullK*.2}
+ }
  const pk=1-Math.exp(-14*dt);
  if(two){
   const sp=rockSwing(dt),br=Math.sin(t*1.5)*.004;

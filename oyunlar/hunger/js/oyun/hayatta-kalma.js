@@ -28,6 +28,7 @@ function calcShelter(wx,wy){
  return true;
 }
 
+let thMsgT=0,thWarn=false;                      /* susuzluk uyarı sayaçları */
 /* ---- Çarpışma ---- */
 /* Kaya ve madenlerin üzerine çıkılabilir: ayak yüksekliği (pz) tepenin en fazla STEP altındaysa kare engel sayılmaz */
 const STEP=.42;
@@ -142,7 +143,9 @@ function moveStep(dt){
  if(G.moving){
   ix/=Math.max(m,1);iz/=Math.max(m,1);
   const vx=ix*cy+iz*sy,vy=-ix*sy+iz*cy;
-  G.sprint=(HG.cfg.sprintT?!!G.sprintOn:kd('sprint'))&&G.hun>5&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
+  G.sprint=(HG.cfg.sprintT?!!G.sprintOn:kd('sprint'))&&G.hun>5&&G.thr>0&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
+  /* susuzluk: koşmak engellenir (tuşa basılıyorsa kısa aralıklarla uyarı verilir) */
+  if(G.thr<=0&&(HG.cfg.sprintT?G.sprintOn:kd('sprint'))&&iz<=0){const nw=performance.now();if(nw>thMsgT){thMsgT=nw+6000;HG.toast('Susuzsun: koşamazsın. Su iç.')}}
   const wd0=Math.max(0,HG.sc.WY-Scene.groundY(G.px,G.py));
   let sp=(G.sprint?5.4:3.4)*(G.swim?(G.sprint?.62:.5):clamp(1-wd0*.34,.5,1))*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
   /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
@@ -228,7 +231,8 @@ function update(dt){
  if(G.swim&&G.moving)G.stam=Math.max(0,G.stam-dt*(G.sprint?9:4)*(1-.2*HG.perk('dive')));
  if(G.o2<=0){dmg+=7;G.cause='Boğularak öldün.';if(Math.random()<dt*1.2)HG.snd('hurt')}
  if(G.hun<=0){dmg+=1.2;G.cause='Açlıktan öldün.'}
- if(G.thr<=0){dmg+=1.8;G.cause='Susuzluktan öldün.'}
+ if(G.thr<=0){dmg+=.09;G.cause='Susuzluktan öldün.'}            /* susuzluk can götürür ama çok yavaş: ani ölüm olmaz */
+ if(G.thr<=0&&!thWarn){thWarn=true;HG.toast('Susuzluk başladı: koşamazsın ve canın yavaş yavaş azalır. Su bul.')}else if(G.thr>5)thWarn=false;
  if(G.warm<=0){dmg+=1.5;G.cause='Soğuktan donarak öldün.'}
  if(dmg>0)G.hp-=dmg*dt;
  else if(G.hun>35&&G.thr>35&&G.warm>35)G.hp=clamp(G.hp+.8*dt,0,100);

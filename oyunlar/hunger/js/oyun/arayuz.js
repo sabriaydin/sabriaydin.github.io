@@ -37,7 +37,7 @@ function togglePanel(force){
  if(!$('#jr').hidden&&force!==false)return;
  const p=$('#panel'),open=force!==undefined?force:p.hidden;
  p.hidden=!open;ui.picked=null;HG.snd(open?'ui_open':'ui_close');
- if(open){renderInv();renderRecipes();ui.recT=0;HG.unlock(true)}else{ui.dirty=true;HG.lock()}
+ if(open){renderInv();HG.renderRecipes();ui.recT=0;HG.unlock(true)}else{ui.dirty=true;HG.lock()}
 }
 
 /* ---- Mini harita ---- */

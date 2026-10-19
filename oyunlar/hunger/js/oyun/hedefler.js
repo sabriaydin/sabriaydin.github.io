@@ -6,7 +6,7 @@ const {G}=HG;
 const GOALS=[
  ['got_wood','El Taşını elinde tut (1. yuva), bir ağaca bak ve sol tuşla art arda vurarak odun topla. Çıplak elle ağaç kesilmez.'],
  ['got_stone','El Taşıyla yerdeki gri kayalardan taş topla.'],
- ['made_axe1','C tuşuyla üretim panelini aç ve Taş Balta üret.'],
+ ['made_axe1','C tuşuyla Üretim ekranını aç ve Taş Balta üret.'],
  ['made_pick1','Taş Kazma üret. Kömür ve bakır ancak bununla çıkarılır.'],
  ['made_torch','Meşale üret (odun ve kömür). Geceleri karanlıkta yaratıklar dolaşır; ışık onları uzak tutar.'],
  ['placed_fire','Kamp Ateşi üret ve yere bakıp yerleştir (sol tık veya F). Gece ısıtır.'],

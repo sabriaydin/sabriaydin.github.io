@@ -118,7 +118,7 @@ function stepAction(dt){
   const key='hit,'+tg.an.id;
   if(key!==A.key){saveProgress();A.key=key;A.p=0;A.tick=0;A.memKey=null}
   A.tick-=dt;
-  if(A.tick<=0){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');HG.armSwing(.4);const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z)}
+  if(A.tick<=0&&(!HG.atkGate||HG.atkGate(.55*(G.tired?1.6:1)))){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');HG.armSwing(.4);const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z)}
   return;
  }
  if(kind==='milk'||kind==='shear'){
@@ -174,6 +174,7 @@ function giveRes(id,n){
 }
 function nodeSwing(tg){
  const i=tg.y*W+tg.x,o=G.obj[i],nd=NODE[o];
+ if(HG.macroBlocked&&HG.macroBlocked())return;                 /* makro algılandıysa kesme/kazma da kısa süre durur */
  HG.noiseT=performance.now()+1500;                          /* kesme ve kazma sesi hayvanları tetikte tutar */
  const key='node,'+i+','+o;
  if(key!==A.key){saveProgress();A.key=key;A.memKey=null;A.memKind=false;A.need=1}

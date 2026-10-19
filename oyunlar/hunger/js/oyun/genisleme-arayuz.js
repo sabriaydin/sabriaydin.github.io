@@ -1,5 +1,5 @@
 /* Hunger 3D - büyük güncelleme (51) arayüzü: Depo Sandığı penceresi, Tabela düzenleyici, tarif arama ve süzgeci, çoklu üretim,
-   F1 ile Ayarlar › Kontrol, ses altyazıları, hasar sayıları, harita işaretleri ve oyun kolu desteği.
+   ses altyazıları, hasar sayıları, harita işaretleri ve oyun kolu desteği.
    Özgün dosyalara yalnızca kancalar (extOverlay, extClose, extMapMarks, extMapClick, extTabHtml) üzerinden bağlanır. */
 (()=>{
 'use strict';
@@ -143,6 +143,7 @@ HG.openStore=function(i){
  const p=$('#panel');
  if(p.hidden)HG.togglePanel(true);
  if(p.hidden)return;
+ if(HG.panelMode)HG.panelMode('inv');            /* sandık Envanter ekranında açılır */
  cur={i,cave:!!G.cave};
  HG.x2ent(i,O.CHEST);
  $('#pbox').classList.add('cst');box.hidden=false;
@@ -206,19 +207,8 @@ HG.openSign=function(i){
  setTimeout(()=>{const f=sg.querySelector('#sgIn');if(!sg.hidden)f.focus()},30);
 };
 
-/* ============================================================ F1: Ayarlar › Kontrol (tuşlar ve sabit kontroller tek sayfada) ============================================================ */
-addEventListener('keydown',e=>{
- if(e.code!=='F1')return;
- if(ui.state==='menu'||ui.state==='dead')return;
- e.preventDefault();e.stopImmediatePropagation();
- if(e.repeat||!HG.settings)return;
- if(HG.settings.isOpen)return;
- if(ui.state==='play'){
-  if(HG.extOverlay()||!$('#panel').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden||!$('#trade').hidden)return;
-  clearKeys();HG.unlock(true);
- }
- HG.settings.open(null,'Kontrol');
-},true);
+/* ============================================================ F1: geliştirici konsolu ============================================================ */
+/* F1 artık Ayarlar › Kontrol yerine geliştirici konsolunu açar (js/oyun/konsol.js). Kontroller Ayarlar menüsünde durur. */
 
 /* ============================================================ Ortak: kapatma ve üst katman ============================================================ */
 HG.extOverlay=()=>!!(sg&&!sg.hidden);

@@ -14,7 +14,7 @@ const FCAP=480,WCAP=3600,CCAP=900,PCAP=1400;   /* FCAP: aynı anda çizilen bal�
 
 function fishGeo(){
  return merge([
-  part(blob(.1,1,.03,5,2.5,.95,.5),0xffffff,0,0,0),
+  part(blob(.1,1,.03,5,.5,.95,2.5),0xffffff,0,0,0),            /* gövde Z ekseninde uzar (kuyruk -Z, baş +Z); önceden X ekseninde uzadığı için balık yan yan yüzüyordu */
   part(cone(.075,.15,4,1),0xdddddd,0,0,-.27,.22,1,1,PI/2,0,0),
   part(cone(.04,.09,3,1),0xbbbbbb,0,.1,-.02,.2,1,1.4,0,0,0),
   part(cone(.03,.07,3,1),0xcccccc,0,-.07,.06,.2,1,1,PI,0,0)
@@ -204,18 +204,29 @@ S.onFrame((G,t,dt,info)=>{
   if(n+s.n>lim)break;
   const dx=s.cx-cam.x,dz=s.cz-cam.z;if(dx*dx+dz*dz>RR*RR)continue;
   const dp=Math.hypot(s.cx-G.px,s.cz-G.py),fl=Math.max(0,1-dp/10);
-  s.ph+=dt*s.sp*(1+fl*3)*(s.sp>0?1:1);
+  /* küçük gölette kaçış hızlanması çizgisel hızı sınırlar: balıklar dar dairede hızla dönüp savrulmaz */
+  {const boost=1+fl*3,as=Math.abs(s.sp),w=s.kind==='pond'?Math.min(as*boost,Math.max(as,1.1/Math.max(.4,s.r*.7))):as*boost;s.ph+=dt*(s.sp>0?w:-w)}
   const gy=S.groundY(s.cx,s.cz),top=WY-.22,low=Math.min(top,gy+.3);
   const y0=low+(top-low)*s.df;
   for(let k=0;k<s.n;k++){
    const fc=fishCol[s.k0+k];if(!fc)continue;
-   const a=s.ph+k*(6.283/s.n)+fc[3]*.9,rr=s.r*(.55+.45*fc[4])*(1+fl*.35);
-   const x=s.cx+Math.cos(a)*rr,z=s.cz+Math.sin(a)*rr,dir=s.sp>0?1:-1;
+   const a=s.ph+k*(6.283/s.n)+fc[3]*.9;
+   let rr=s.r*(.55+.45*fc[4])*(1+fl*.35);
+   if(s.kind==='pond'||s.kind==='shal')rr=Math.min(rr,s.r);           /* su alanının doğrulanmış yarıçapını aşmaz: balık kıyıya/karaya çıkmaz */
+   const sz=s.sz*(.85+fc[5]*.3);
+   /* gölette balık, gövdesini taşıyamayacak kadar sığ yerlere girmez: yarıçap derin bölgeye doğru daraltılır */
+   const need=s.kind==='pond'?Math.min(.26*sz,s.wd*.8):0;
+   if(need>0){const dF=WY-S.groundY(s.cx+Math.cos(a)*rr,s.cz+Math.sin(a)*rr);if(dF<need)rr*=Math.max(.35,.35+.65*Math.max(0,dF)/need)}
+   const x=s.cx+Math.cos(a)*rr,z=s.cz+Math.sin(a)*rr,gyF=S.groundY(x,z);
+   const dir=s.sp>0?1:-1;
    const vx=-Math.sin(a)*dir,vz=Math.cos(a)*dir;
    const yaw=Math.atan2(vx,vz)+Math.sin(t*8+k*2)*.12;
-   const y=Math.max(S.groundY(x,z)+.15,Math.min(top,y0+Math.sin(t*.7+k+fc[5]*6)*.18*(1+fl)));
+   /* dikey: gövde dibe gömülmez, yüzeyden dışarı çıkmaz (sığ gölette ikisi çakışırsa ortalanır) */
+   const yLo=gyF+.1*sz,yHi=Math.min(top,WY-.1*sz-.03);
+   let y=y0+Math.sin(t*.7+k+fc[5]*6)*.18*(1+fl);
+   y=yLo>yHi?(yLo+yHi)/2:Math.max(yLo,Math.min(yHi,y));
    p.set(x,y,z);e.set(Math.sin(t*5+k)*.04,yaw,0);q.setFromEuler(e);
-   const sz=s.sz*(.85+fc[5]*.3);s3.set(sz,sz,sz);m4.compose(p,q,s3);
+   s3.set(sz,sz,sz);m4.compose(p,q,s3);
    fish.setMatrixAt(n,m4);cl.setRGB(fc[0],fc[1],fc[2]);fish.setColorAt(n,cl);n++;
   }
  }

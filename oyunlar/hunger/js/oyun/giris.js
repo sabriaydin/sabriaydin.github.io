@@ -52,7 +52,8 @@ function setupInput(){
   if(ui.state!=='play')return;
   const K=HG.keyIs;
   if(HG.cfg.sprintT&&K('sprint',e.code))G.sprintOn=!G.sprintOn;
-  if(K('inv',e.code)||K('craft',e.code))HG.togglePanel();
+  if(K('inv',e.code))HG.togglePanel(undefined,'inv');                 /* Envanter ve Üretim ayrı ekranlardır; açıkken diğer tuş ekranı değiştirir */
+  else if(K('craft',e.code))HG.togglePanel(undefined,'craft');
   else if(K('use',e.code))HG.useHeld('key');
   else if(K('place',e.code))HG.placeHeld();
   else if(K('map',e.code))HG.toggleMap();

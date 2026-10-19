@@ -151,8 +151,9 @@ K.bird=d=>{
 K.cricket=d=>{const f=R(4100,4600);for(let i=0;i<3;i++)Tn(d,{f,d:.025,v:.04,t:i*.055,att:.004})};
 K.owl=d=>{Tn(d,{f:390,f2:340,d:.32,v:.12,att:.05,lp:900});Tn(d,{f:380,f2:290,d:.55,v:.12,att:.05,t:.45,lp:900,vib:8,vibf:9})};
 K.pop=d=>{N(d,{ft:'bandpass',f:R(1500,4000),q:2,d:.02,v:R(.2,.45)})};
-K.heart=d=>{Tn(d,{f:62,f2:42,d:.13,v:.55,lp:160});Tn(d,{f:56,f2:38,d:.12,v:.4,t:.19,lp:150})};
-K.stomach=d=>{Tn(d,{f:105,f2:70,d:1.1,type:'sawtooth',v:.1,lp:210,lq:2,vib:25,vibf:11,att:.2});N(d,{ft:'lowpass',f:260,d:.9,v:.2,att:.2,pink:true})};
+let heartV=1;                                   /* kalp atışı şiddeti (0-1): yalnızca uzun ve belirgin tehlike anlarında yükselir */
+K.heart=d=>{const v=heartV;Tn(d,{f:78,f2:50,d:.12,v:.34*v,att:.012,lp:230});N(d,{ft:'lowpass',f:140,d:.06,v:.16*v,att:.008});Tn(d,{f:66,f2:44,d:.1,v:.24*v,att:.012,t:.27,lp:210})};
+K.stomach=d=>{Tn(d,{f:92,f2:64,d:.9,v:.05,lp:170,att:.3});N(d,{ft:'lowpass',f:240,f2:130,d:1,v:.1,att:.3,pink:true})};
 K.breath=d=>{N(d,{ft:'bandpass',f:R(900,1300),q:.7,d:.28,v:.1,att:.12,pink:true})};
 /* korku ve silah sesleri */
 K.hiss=d=>{N(d,{ft:'bandpass',f:5200,f2:2800,q:1.2,d:.6,v:.4,pink:true,att:.04});N(d,{ft:'highpass',f:7000,d:.4,v:.15})};
@@ -238,9 +239,9 @@ function snd(k,pos,x){
  if(lim&&last[k]&&now-last[k]<lim)return;
  last[k]=now;
  /* önce gerçek kayıt; çalınamazsa programla üretilen ses */
- try{if(HG.sesGercek&&HG.sesGercek.play(k,pos,x))return}catch(e){if(HG.audioDebug)console.error('gerçek ses',k,e.message)}
+ try{if(HG.sesGercek&&HG.sesGercek.play(k,pos,x)){if(HG.sndHook)HG.sndHook(k,pos,'kayıt');return}}catch(e){if(HG.audioDebug)console.error('gerçek ses',k,e.message)}
  const fn=K[k];if(!fn)return;
- try{fn(route(pos))}catch(e){if(HG.audioDebug)console.error('ses',k,e.message)}
+ try{fn(route(pos));if(HG.sndHook)HG.sndHook(k,pos,'sentetik')}catch(e){if(HG.audioDebug)console.error('ses',k,e.message)}
 }
 
 /* ---------- sürekli ortam sesleri ---------- */
@@ -380,7 +381,11 @@ function audioFrame(G,dt,mode){
  }
  /* oyuncu durumu: kalp atışı, mide, nefes */
  if(play){
-  if((G.hp<32&&G.hp>0)||fear>.35||ins>.6){const lo=G.hp<32?(32-G.hp)*2.4:0;beatT-=dt;if(beatT<=0){beatT=60/(62+lo+fear*55);snd('heart')}}
+  if(tens>0&&((G.hp<25&&G.hp>0)||fear>.5||ins>.7)){
+   /* kalp atışı: hızı en çok dakikada 96 ile sınırlı, "lub-dub" arası belirgin; şiddeti tehlikeyle birlikte artar */
+   const lo=G.hp<25?(25-G.hp)*1.2:0,bpm=clamp(64+lo+fear*26,64,96);
+   beatT-=dt;if(beatT<=0){beatT=60/bpm;heartV=tens*(.45+.55*clamp(Math.max(fear,(25-G.hp)/25,ins),0,1));snd('heart')}
+  }else beatT=0;
   stomachT-=dt;if(stomachT<=0){stomachT=R(24,46);if(G.hun<14)snd('stomach')}
   if(G.sprint&&G.moving){breathT-=dt;if(breathT<=0){breathT=.62;snd('breath')}}else breathT=0;
  }
@@ -410,5 +415,6 @@ function audioFrame(G,dt,mode){
 
 /* ses-gercek.js için iç arayüz */
 HG.SES={ac:()=>AC,route,K,tc,amb:()=>amb,mus:()=>mus,pad:()=>pad,fire:()=>fireV,bed};
+HG.audioBeds=()=>{const o={};for(const k in bed)o[k]=bed[k].g.gain.value;return o};
 HG.audioState=()=>AC?AC.state:'yok';HG.snd=snd;HG.initAudio=initAudio;HG.audioFrame=audioFrame;
 })();

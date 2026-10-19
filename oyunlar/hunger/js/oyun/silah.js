@@ -15,7 +15,7 @@ function fire(draw){
  const sp=20+34*draw;
  G.arrows.push({x:pos.x+dir.x*.6,y:pos.y+dir.y*.6-.08,z:pos.z+dir.z*.6,vx:dir.x*sp,vy:dir.y*sp,vz:dir.z*sp,life:MAXLIFE,draw,stuck:false,t:0});
  if(G.arrows.length>40)G.arrows.shift();
- bow.kick=1;HG.snd('bowfire');HG.flag('shot');
+ bow.kick=1;bow.cd=performance.now()+600;HG.snd('bowfire');HG.flag('shot');
 }
 function recover(x,y,z,chance){
  if(Math.random()<chance)HG.spawnDrop('arrow',1,{x,z,y:y+.3,vx:0,vz:0});
@@ -109,7 +109,7 @@ function updateBow(dt){
  const h=held(),isBow=!!(h&&h.it.tool==='bow'),panel=!HG.$('#panel').hidden;
  bow.kick=Math.max(0,bow.kick-dt*5);
  if(!isBow||ui.state!=='play'||panel){bow.on=false;bow.draw=0;return}
- const down=(inp.mouseDown||inp.touchAct);
+ const down=(inp.mouseDown||inp.touchAct)&&performance.now()>=(bow.cd||0)&&!(HG.macroBlocked&&HG.macroBlocked());     /* atıştan sonra kısa bekleme; makroda gerilmez */
  if(down){
   if(count('arrow')>0){
    if(!bow.on){bow.on=true;HG.snd('bowdraw')}
