@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>CSS renk yazım biçimleri, yazı tipi ve metin özellikleri, px, rem, em, % ve vw gibi birimler ve ne zaman hangisinin kullanılacağı.</p><div class="px-chips"><span>2 dk okuma</span><span>5 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Renk yazım biçimleri</a></li><li><a href="#b2">Yazı tipi özellikleri</a></li><li><a href="#b3">Metin biçimlendirme</a></li><li><a href="#b4">Birimler</a></li><li><a href="#b5">Özet</a></li></ol></nav><!--/px-->
 <p>CSS ile bir sayfanın görünümünde en çok değişen üç şey renk, yazı tipi ve boyuttur. Bu yazıda her birinin yazım biçimleri, sık kullanılan özellikleri ve doğru birim seçimi anlatılır. Örnekler <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırılarak denenebilir.</p>
-<h2>Renk yazım biçimleri</h2>
+<h2 id="b1">Renk yazım biçimleri</h2>
 <p>Aynı renk birçok biçimde yazılabilir. Hepsi aşağıdaki özelliklerde kullanılabilir: <code>color</code> (yazı rengi), <code>background-color</code> (arka plan rengi) ve <code>border-color</code> (kenarlık rengi).</p>
 <table>
 <thead><tr><th>Biçim</th><th>Örnek</th><th>Açıklama</th></tr></thead>
@@ -49,7 +51,7 @@
   border: 2px solid rgb(0 0 0 / 30%);
 }</pre>
 <blockquote>Yazı rengi ile arka plan arasındaki karşıtlık yeterli olmalıdır. WCAG ölçütüne göre normal metinde en az 4,5:1 oran gerekir. Bu oran <a href="html-arac-10-renk-kontrast-denetleyicisi.html">Renk Kontrast Denetleyicisi</a> ile ölçülebilir.</blockquote>
-<h2>Yazı tipi özellikleri</h2>
+<h2 id="b2">Yazı tipi özellikleri</h2>
 <pre>body {
   font-family: "Segoe UI", Roboto, Arial, sans-serif;
   font-size: 1rem;
@@ -71,7 +73,7 @@ h1 {
 <pre>&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&amp;display=swap"&gt;
 
 body { font-family: "Inter", sans-serif; }</pre>
-<h2>Metin biçimlendirme</h2>
+<h2 id="b3">Metin biçimlendirme</h2>
 <table>
 <thead><tr><th>Özellik</th><th>Örnek</th><th>Etki</th></tr></thead>
 <tbody>
@@ -82,7 +84,7 @@ body { font-family: "Inter", sans-serif; }</pre>
 <tr><td><code>text-shadow</code></td><td><code>1px 1px 2px #000</code></td><td>Metne gölge ekler.</td></tr>
 </tbody>
 </table>
-<h2>Birimler</h2>
+<h2 id="b4">Birimler</h2>
 <table>
 <thead><tr><th>Birim</th><th>Neye göre?</th><th>Kullanım</th></tr></thead>
 <tbody>
@@ -99,7 +101,7 @@ body { font-family: "Inter", sans-serif; }</pre>
   padding: 1.5rem;
   border: 1px solid #ccc;
 }</pre>
-<h2>Özet</h2>
+<h2 id="b5">Özet</h2>
 <ul>
 <li>Renkler için hex veya <code>hsl()</code> yaygındır; saydamlık gerekiyorsa <code>/</code> ile yazılır.</li>
 <li>Yazı tipi listesi her zaman genel bir aileyle bitmelidir.</li>

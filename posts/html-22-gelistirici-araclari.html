@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>F12 ile Elements, Console, Network, Application ve Lighthouse sekmeleri; sayfada CSS ve HTML deneme, hata ayıklama ve cihaz modunda test.</p><div class="px-chips"><span>3 dk okuma</span><span>9 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Açma yolları</a></li><li><a href="#b2">Elements: HTML ve CSS&#x27;i inceleme</a></li><li><a href="#b3">Console: betik ve hata mesajları</a></li><li><a href="#b4">Network: yüklenen dosyalar</a></li><li><a href="#b5">Application: depolanan veriler</a></li><li><a href="#b6">Sources: hata ayıklama</a></li><li><a href="#b7">Lighthouse: otomatik denetim</a></li><li><a href="#b8">Cihaz modu</a></li><li><a href="#b9">Özet</a></li></ol></nav><!--/px-->
 <p>Chrome, Edge ve Firefox gibi tarayıcılarda yerleşik olarak bulunan geliştirici araçları, bir sayfanın HTML ve CSS kodunu incelemeyi, değiştirmeyi, hataları bulmayı ve performansı ölçmeyi sağlar. Web geliştirmede en çok kullanılan araçtır; bir sayfanın neden beklendiği gibi görünmediği sorusunun cevabı genellikle burada bulunur.</p>
-<h2>Açma yolları</h2>
+<h2 id="b1">Açma yolları</h2>
 <table>
 <thead><tr><th>Yöntem</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -40,7 +42,7 @@
 <tr><td><code>Ctrl + Shift + M</code></td><td>Cihaz (mobil) modunu açar veya kapatır.</td></tr>
 </tbody>
 </table>
-<h2>Elements: HTML ve CSS'i inceleme</h2>
+<h2 id="b2">Elements: HTML ve CSS'i inceleme</h2>
 <ul>
 <li>Sol tarafta sayfanın güncel <b>DOM</b> ağacı, sağ tarafta seçilen öğeye uygulanan <b>Styles</b> bölümü görünür.</li>
 <li>Bir CSS değeri üzerine tıklanıp değiştirilebilir, onay kutusuyla kapatılıp açılabilir. Değişiklikler anında sayfada görülür; ancak <b>kalıcı değildir</b>, sayfa yenilenince kaybolur. Beğenilen değişiklikler kaynak dosyaya elle yazılmalıdır.</li>
@@ -59,14 +61,14 @@
 <tr><td>Mobilde görünüm bozuk</td><td>Cihaz modunda farklı ekran boyutları denenir.</td></tr>
 </tbody>
 </table>
-<h2>Console: betik ve hata mesajları</h2>
+<h2 id="b3">Console: betik ve hata mesajları</h2>
 <ul>
 <li>Sayfadaki JavaScript hataları ve uyarıları burada kırmızı ve sarı renkle gösterilir, yanında dosya ve satır numarası bulunur.</li>
 <li>Alt kısımdaki satıra JavaScript yazılıp <code>Enter</code> ile çalıştırılabilir. Örn. <code>document.title</code>, <code>document.querySelectorAll("img").length</code>.</li>
 <li>Kodda <code>console.log(değişken)</code> yazılarak değerler konsola yazdırılır; <code>console.table(dizi)</code> diziyi tablo olarak gösterir.</li>
 <li>Sayfa kaynağında yazım hatası veya eksik dosya genellikle burada, <b>"Failed to load resource"</b> veya <b>"Uncaught ..."</b> mesajıyla görünür.</li>
 </ul>
-<h2>Network: yüklenen dosyalar</h2>
+<h2 id="b4">Network: yüklenen dosyalar</h2>
 <ul>
 <li>Sayfa yenilendiğinde tarayıcının indirdiği tüm dosyalar (HTML, CSS, JS, görsel, yazı tipi) boyut ve süreyle listelenir.</li>
 <li><b>Durum (Status)</b> sütunu önemlidir: <code>200</code> başarılı, <code>304</code> önbellekten, <code>404</code> dosya bulunamadı (yanlış yol), <code>500</code> sunucu hatası. Kırmızı satırlar sorunlu isteklerdir.</li>
@@ -74,19 +76,19 @@
 <li>Üstteki <b>Throttling</b> menüsünden "Slow 4G" gibi yavaş bağlantılar denenebilir.</li>
 <li>Listede en büyük dosyalar sütundan sıralanarak sayfayı yavaşlatan öğeler bulunur (bkz. <a href="html-24-performans.html">Performans</a>).</li>
 </ul>
-<h2>Application: depolanan veriler</h2>
+<h2 id="b5">Application: depolanan veriler</h2>
 <p>Sayfanın tarayıcıda sakladığı <b>localStorage</b>, <b>sessionStorage</b> ve <b>çerezler</b> (Cookies) burada görülür; değerler düzenlenebilir veya silinebilir. Kaydettiği veriyi test eden uygulamalar için gereklidir (bkz. <a href="html-23-yapilacaklar-listesi.html">Yapılacaklar Listesi</a>).</p>
-<h2>Sources: hata ayıklama</h2>
+<h2 id="b6">Sources: hata ayıklama</h2>
 <ul>
 <li>Bir betik dosyası açılıp satır numarasına tıklanarak <b>kesme noktası</b> konulur. Kod o satıra geldiğinde durur; değişkenlerin o anki değerleri incelenir.</li>
 <li>Betiğe <code>debugger;</code> yazılırsa, araçlar açıkken kod o satırda otomatik durur.</li>
 <li><code>F10</code> bir sonraki satıra, <code>F11</code> fonksiyonun içine, <code>F8</code> çalışmaya devam eder.</li>
 </ul>
-<h2>Lighthouse: otomatik denetim</h2>
+<h2 id="b7">Lighthouse: otomatik denetim</h2>
 <p><b>Lighthouse</b> sekmesinde <b>Performance</b>, <b>Accessibility</b>, <b>Best Practices</b> ve <b>SEO</b> kutuları seçilip analiz başlatılır. Sonuçta 0-100 arası puan ve düzeltme önerileri listelenir. Ölçümlerin tutarlı olması için gizli pencerede ve eklentiler kapalıyken denenmesi önerilir.</p>
-<h2>Cihaz modu</h2>
+<h2 id="b8">Cihaz modu</h2>
 <p><code>Ctrl + Shift + M</code> ile açılan modda üst çubuktan hazır telefon ve tablet boyutları seçilebilir ya da genişlik elle ayarlanabilir. Dokunmatik girişi, farklı bağlantı hızını ve ekran döndürmeyi taklit eder. Gerçek cihazlarda deneme yapmanın yerini tutmaz, ancak hızlı kontrol için uygundur.</p>
-<h2>Özet</h2>
+<h2 id="b9">Özet</h2>
 <ul>
 <li><code>F12</code> ile açılır; <code>Ctrl + Shift + C</code> ile öğe seçilir.</li>
 <li><b>Elements:</b> HTML ve CSS anında denenir (kalıcı değildir). <b>Console:</b> hatalar ve komutlar. <b>Network:</b> dosyalar, durum kodları ve boyutlar.</li>

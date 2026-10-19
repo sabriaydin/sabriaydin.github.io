@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>h1-h6 başlıkları, paragraflar, satır sonu, kalın ve eğik yazı, alt/üst simge ve özel karakterlerin yazımı.</p><div class="px-chips"><span>2 dk okuma</span><span>6 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Başlıklar</a></li><li><a href="#b2">Paragraflar ve satır sonu</a></li><li><a href="#b3">Metin biçimlendirme</a></li><li><a href="#b4">Biçimi olduğu gibi göstermek: pre</a></li><li><a href="#b5">Özel karakterler</a></li><li><a href="#b6">Uygulama</a></li></ol></nav><!--/px-->
 <p>Bir web sayfasının büyük kısmı metindir. HTML'de metne yapı kazandıran temel etiketler başlıklar, paragraflar ve biçimlendirme etiketleridir.</p>
-<h2>Başlıklar</h2>
+<h2 id="b1">Başlıklar</h2>
 <p><code>&lt;h1&gt;</code> en büyük, <code>&lt;h6&gt;</code> en küçük başlıktır. Başlıklar yalnızca yazıyı büyütmek için değil, <b>sayfanın bölüm yapısını</b> belirtmek için kullanılır. Arama motorları ve ekran okuyucular bu yapıdan yararlanır.</p>
 <pre>&lt;h1&gt;Ana başlık&lt;/h1&gt;
 &lt;h2&gt;Bölüm başlığı&lt;/h2&gt;
@@ -40,7 +42,7 @@
 <li>Başlık seviyelerini atlama: <code>&lt;h2&gt;</code> altına doğrudan <code>&lt;h4&gt;</code> yazma.</li>
 <li>Başlığı sırf büyük görünsün diye seçme; boyutu sonra CSS ile ayarlarsın.</li>
 </ul>
-<h2>Paragraflar ve satır sonu</h2>
+<h2 id="b2">Paragraflar ve satır sonu</h2>
 <p>Her paragraf <code>&lt;p&gt;</code> etiketiyle yazılır. Not Defteri'nde alt alta yazdığın satırlar tarayıcıda <b>tek satır</b> olarak birleşir; HTML ardışık boşlukları ve satır sonlarını tek boşluk sayar.</p>
 <pre>&lt;p&gt;Bu birinci paragraf.&lt;/p&gt;
 &lt;p&gt;Bu ikinci paragraf.
@@ -48,7 +50,7 @@ Kodda alt satırda ama ekranda aynı satırda görünür.&lt;/p&gt;
 &lt;p&gt;Adres satırı&lt;br&gt;ikinci satır&lt;br&gt;üçüncü satır&lt;/p&gt;
 &lt;hr&gt;</pre>
 <p><code>&lt;br&gt;</code> paragrafı bölmeden satır atlatır (adres, şiir gibi durumlar için). <code>&lt;hr&gt;</code> ise yatay bir ayırıcı çizgi çizer. İkisinin de kapanış etiketi yoktur.</p>
-<h2>Metin biçimlendirme</h2>
+<h2 id="b3">Metin biçimlendirme</h2>
 <table>
 <thead><tr><th>Etiket</th><th>Anlamı</th><th>Görünüm</th></tr></thead>
 <tbody>
@@ -65,13 +67,13 @@ Kodda alt satırda ama ekranda aynı satırda görünür.&lt;/p&gt;
 &lt;p&gt;Su formülü H&lt;sub&gt;2&lt;/sub&gt;O, alan birimi m&lt;sup&gt;2&lt;/sup&gt; olarak yazılır.&lt;/p&gt;
 &lt;p&gt;Komutu çalıştırmak için &lt;code&gt;npm start&lt;/code&gt; yaz.&lt;/p&gt;</pre>
 <p><code>&lt;b&gt;</code> (kalın) ve <code>&lt;i&gt;</code> (eğik) etiketleri de vardır; ancak yalnızca görünüş verirler. Anlam taşımasını istediğin yerde <code>&lt;strong&gt;</code> ve <code>&lt;em&gt;</code> kullan.</p>
-<h2>Biçimi olduğu gibi göstermek: pre</h2>
+<h2 id="b4">Biçimi olduğu gibi göstermek: pre</h2>
 <p>Boşlukları ve satır sonlarını korumak istersen <code>&lt;pre&gt;</code> kullanırsın. Kod örnekleri için idealdir.</p>
 <pre>&lt;pre&gt;
   Satır 1
     Satır 2 (içeride)
 &lt;/pre&gt;</pre>
-<h2>Özel karakterler</h2>
+<h2 id="b5">Özel karakterler</h2>
 <p><code>&lt;</code> ve <code>&gt;</code> karakterleri etiket başlatır; sayfada bunları yazı olarak göstermek için özel kodlar kullanılır. Bu kodlara <b>karakter varlığı</b> denir ve <code>&amp;</code> ile başlayıp <code>;</code> ile biter.</p>
 <table>
 <thead><tr><th>Yazılan</th><th>Görünen</th><th>Kullanım</th></tr></thead>
@@ -85,7 +87,7 @@ Kodda alt satırda ama ekranda aynı satırda görünür.&lt;/p&gt;
 </tbody>
 </table>
 <p>Sık kullandığın karakterleri hızlıca çevirmek için <a href="html-arac-05-ozel-karakter-donusturucu.html">Özel Karakter Dönüştürücü</a> aracını kullanabilirsin.</p>
-<h2>Uygulama</h2>
+<h2 id="b6">Uygulama</h2>
 <pre>&lt;!DOCTYPE html&gt;
 &lt;html lang="tr"&gt;
 &lt;head&gt;

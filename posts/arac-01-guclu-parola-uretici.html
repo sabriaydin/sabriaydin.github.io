@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Uzunluğu ve karakter türlerini seçerek rastgele, güçlü parolalar oluştur; parola gücünü bit olarak gör ve kopyala.</p><div class="px-chips"><span>2 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Parola gücü nasıl hesaplanır?</a></li><li><a href="#b4">Güvenlik notları</a></li></ol></nav><!--/px-->
 <p>Kısa, tahmin edilebilir ve her sitede aynı olan parolalar hesapların ele geçirilmesinin en yaygın nedenidir. Bu araç, tarayıcının güvenli rastgele sayı üretecini kullanarak seçilen uzunluk ve karakter türlerine göre güçlü parolalar oluşturur.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="satir" style="grid-template-columns:1fr">
     <label for="pw-u"><span>Parola uzunluğu: <span id="pw-ud">16</span> karakter</span><input type="range" id="pw-u" min="8" max="64" value="16"></label>
@@ -86,14 +88,14 @@ $('pw-uret').onclick=olustur;
 olustur();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li><b>Uzunluğu</b> ayarla. Önemli hesaplar için en az 16 karakter önerilir.</li>
 <li>Kullanılacak <b>karakter türlerini</b> seç. Bazı siteler sembol kabul etmez; bu durumda sembol seçeneği kapatılabilir.</li>
 <li>Gerekirse <b>karıştırılabilen karakterleri çıkar</b> seçeneğini aç; parola elle yazılacaksa kolaylık sağlar.</li>
 <li><b>Kopyala</b> düğmesiyle parolayı panoya al ve hesabın parola alanına yapıştır.</li>
 </ol>
-<h2>Parola gücü nasıl hesaplanır?</h2>
+<h2 id="b3">Parola gücü nasıl hesaplanır?</h2>
 <p>Güç, parolanın tahmin edilmesi için gereken deneme sayısının bit cinsinden karşılığıdır. Her ek bit, tahmin süresini iki katına çıkarır. Değer, uzunluk ve karakter havuzunun büyüklüğüne göre hesaplanır.</p>
 <table>
 <thead><tr><th>Bit</th><th>Değerlendirme</th></tr></thead>
@@ -104,7 +106,7 @@ olustur();
 <tr><td>80 ve üzeri</td><td>Çok güçlü</td></tr>
 </tbody>
 </table>
-<h2>Güvenlik notları</h2>
+<h2 id="b4">Güvenlik notları</h2>
 <ul>
 <li>Parolalar yalnızca tarayıcında üretilir; hiçbir yere gönderilmez ve kaydedilmez.</li>
 <li>Her hesap için ayrı bir parola kullanılmalıdır. Biri sızdığında diğer hesaplar etkilenmez.</li>

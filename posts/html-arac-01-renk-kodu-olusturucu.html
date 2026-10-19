@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Renk seç, HEX, RGB ve HSL kodlarını tek tıkla kopyala; uyumlu renk önerileri al.</p><div class="px-chips"><span>2 dk okuma</span><span>4 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kodlar ne demek?</a></li><li><a href="#b4">CSS&#x27;te kullanımı</a></li></ol></nav><!--/px-->
 <p>Web sayfalarında renkler kodla yazılır. Bu araçla bir renk seçip CSS'te kullanabileceğin HEX, RGB ve HSL kodlarını anında alabilirsin. Uyumlu renk önerileri de gösterir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="renk" id="sw"><span id="swt"></span></div>
   <div class="satir">
@@ -90,14 +92,14 @@ $('palet').onclick=e=>{const b=e.target.closest('button');if(!b)return;const i=[
 yaz();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ul>
 <li>Renk kutusuna tıklayıp rengi seç, ya da HEX, RGB ve HSL alanlarından birine değer yaz. Diğerleri kendiliğinden güncellenir.</li>
 <li>Kodun yanındaki <b>Kopyala</b> düğmesi kodu panoya alır.</li>
 <li><b>Rastgele renk</b> ile ilham al. Aşağıdaki uyumlu renklere tıklayarak onları seçebilirsin.</li>
 <li>Büyük renk kutusundaki yazı, rengin üzerinde okunabilir kalacak biçimde otomatik açık veya koyu olur; kendi sayfanda metin rengini seçerken de bu mantığı izle.</li>
 </ul>
-<h2>Kodlar ne demek?</h2>
+<h2 id="b3">Kodlar ne demek?</h2>
 <table>
 <thead><tr><th>Biçim</th><th>Örnek</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -106,7 +108,7 @@ yaz();
 <tr><td>HSL</td><td><code>hsl(3, 66%, 43%)</code></td><td>Ton (0-360 derece), doygunluk ve parlaklık. Açık ve koyu tonlar üretmek için en kolayı.</td></tr>
 </tbody>
 </table>
-<h2>CSS'te kullanımı</h2>
+<h2 id="b4">CSS'te kullanımı</h2>
 <pre>h1 {
   color: #B72A25;
   background-color: hsl(3, 66%, 93%);

@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Ortam değişkenlerinin kapsamı, set ve setx farkı, PATH&#x27;e klasör ekleme, setlocal/endlocal ve komut arama sırası.</p><div class="px-chips"><span>3 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ortam değişkenlerini görüntüleme</a></li><li><a href="#b2">Sık kullanılan sistem değişkenleri</a></li><li><a href="#b3">Kapsam: üç seviye</a></li><li><a href="#b4">PATH&#x27;e güvenli klasör ekleme</a></li><li><a href="#b5">setlocal ve endlocal</a></li><li><a href="#b6">Komut arama sırası</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Ortam değişkenleri, Windows ve programların ortak kullandığı adlandırılmış değerlerdir. <code>PATH</code> değişkeni, komutların hangi klasörlerde aranacağını belirler. Batch betiklerinde bunları okumayı, geçici veya kalıcı değiştirmeyi bilmek, betiklerin farklı bilgisayarlarda çalışabilmesi için gereklidir.</p>
-<h2>Ortam değişkenlerini görüntüleme</h2>
+<h2 id="b1">Ortam değişkenlerini görüntüleme</h2>
 <pre>set                    rem tum degiskenleri listeler
 set PATH               rem adi PATH ile baslayanlari listeler
 echo %PATH%            rem PATH'in degerini yazar
@@ -39,7 +41,7 @@ where notepad          rem bir komutun/programin bulundugu yeri gosterir</pre>
 <pre>@echo off
 for %%p in ("%PATH:;=" "%") do echo %%~p
 pause</pre>
-<h2>Sık kullanılan sistem değişkenleri</h2>
+<h2 id="b2">Sık kullanılan sistem değişkenleri</h2>
 <table>
 <thead><tr><th>Değişken</th><th>Örnek değer</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -58,7 +60,7 @@ pause</pre>
 </tbody>
 </table>
 <blockquote>Betik başka kullanıcılarda da çalışacaksa <code>C:\Users\Ali</code> gibi sabit yollar yerine <code>%USERPROFILE%</code> kullanılmalıdır. <code>%ProgramFiles(x86)%</code> ifadesindeki parantez, parantezli bloklar içinde sorun çıkarabilir; bu durumda değer önce bir değişkene alınır.</blockquote>
-<h2>Kapsam: üç seviye</h2>
+<h2 id="b3">Kapsam: üç seviye</h2>
 <table>
 <thead><tr><th>Seviye</th><th>Nasıl ayarlanır?</th><th>Ne kadar sürer?</th></tr></thead>
 <tbody>
@@ -82,7 +84,7 @@ pause</pre>
 <li><code>setx</code> ile yazılan değer 1024 karakterle sınırlıdır; daha uzun değerler <b>sessizce kesilir</b>.</li>
 <li><code>setx PATH "%PATH%;C:\Araclar"</code> komutu, kullanıcı ve sistem <code>PATH</code> değerlerini birleştirip yalnızca kullanıcıya yazar, kopya ve kesilme sorunlarına yol açar. <b>PATH için <code>setx</code> kullanılmamalıdır.</b></li>
 </ul>
-<h2>PATH'e güvenli klasör ekleme</h2>
+<h2 id="b4">PATH'e güvenli klasör ekleme</h2>
 <h3>Yalnızca betik çalışırken (geçici)</h3>
 <pre>@echo off
 setlocal
@@ -93,7 +95,7 @@ endlocal</pre>
 <p>Kalıcı değişiklik için PowerShell yöntemi <code>setx</code>'in sorunlarına yol açmaz:</p>
 <pre>powershell -NoProfile -Command "$y=[Environment]::GetEnvironmentVariable('Path','User'); if ($y -notlike '*C:\Araclar*') { [Environment]::SetEnvironmentVariable('Path', ($y.TrimEnd(';') + ';C:\Araclar'), 'User') }"</pre>
 <p>Komut, klasör zaten ekliyse tekrar eklemez. Değişiklik yeni açılan pencerelerde geçerli olur. Grafik arayüzle yapmak için: <b>Başlat &gt; "ortam değişkenleri" &gt; Ortam Değişkenlerini Düzenle &gt; Path</b>.</p>
-<h2>setlocal ve endlocal</h2>
+<h2 id="b5">setlocal ve endlocal</h2>
 <p><code>setlocal</code>, betiğin yaptığı değişken değişikliklerini betik bitince (veya <code>endlocal</code> komutuyla) geri alır. Böylece betik, çağıran pencerenin değişkenlerini bozmaz.</p>
 <pre>@echo off
 setlocal
@@ -114,14 +116,14 @@ set /a ARA=6*7
 endlocal &amp; set "SONUC=%ARA%"
 exit /b</pre>
 <p><code>endlocal &amp; set "SONUC=%ARA%"</code> satırında <code>%ARA%</code> genişletmesi, <code>endlocal</code> çalışmadan <b>önce</b> yapıldığı için değer korunur.</p>
-<h2>Komut arama sırası</h2>
+<h2 id="b6">Komut arama sırası</h2>
 <p>Bir komut yazıldığında Windows şu sırayla arar: <b>yerleşik komutlar</b> (<code>dir</code>, <code>echo</code>...), <b>geçerli klasör</b>, ardından <code>PATH</code> içindeki klasörler. Her klasörde <code>PATHEXT</code> değişkenindeki uzantılar sırayla denenir (<code>.COM</code>, <code>.EXE</code>, <code>.BAT</code>, <code>.CMD</code>...).</p>
 <ul>
 <li>Betiğe <code>ping.bat</code>, <code>net.bat</code>, <code>test.bat</code> gibi mevcut komut adları verilmemelidir. Betik içinde <code>ping</code> yazıldığında kendi kendini çağırabilir.</li>
 <li>Aynı adlı komutlardan hangisinin çalışacağını <code>where komut</code> gösterir.</li>
 <li><code>PATH</code> içinde güvenilmeyen veya herkesin yazabildiği klasör bulunmamalıdır; saldırgan oraya sahte program koyabilir.</li>
 </ul>
-<h2>Özet</h2>
+<h2 id="b7">Özet</h2>
 <ul>
 <li><code>set</code> geçici, <code>setx</code> kalıcıdır; <code>setx</code> mevcut pencereyi etkilemez ve 1024 karakterle sınırlıdır.</li>
 <li><code>PATH</code> değişikliği için <code>setx</code> yerine geçici <code>set</code> veya PowerShell kullanılır.</li>

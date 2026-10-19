@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>ping, ipconfig, nslookup, tracert, netstat, arp, netsh ve getmac komutlarıyla bağlantı denetimi ve ağ bilgisi toplama.</p><div class="px-chips"><span>3 dk okuma</span><span>9 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Bağlantı denetimi: ping</a></li><li><a href="#b2">IP yapılandırması: ipconfig</a></li><li><a href="#b3">DNS sorgusu: nslookup</a></li><li><a href="#b4">Yol izleme: tracert ve pathping</a></li><li><a href="#b5">Bağlantılar ve portlar: netstat</a></li><li><a href="#b6">Diğer ağ komutları</a></li><li><a href="#b7">Ağ sorunlarını giderme dizisi</a></li><li><a href="#b8">Örnek: ağ raporu betiği</a></li><li><a href="#b9">Özet</a></li></ol></nav><!--/px-->
 <p>Ağ sorunlarının teşhisi için Windows'ta yerleşik komutlar bulunur. Bu komutlar tek başına kullanılabildiği gibi batch betiklerine eklenerek otomatik bağlantı denetimi, ağ bilgisi raporu ve sorun giderme betikleri oluşturulabilir. Komutları grafik arayüzle üretmek için <a href="arac-05-ag-komutlari-olusturucu.html">Ağ Komutları Aracı</a> kullanılabilir.</p>
-<h2>Bağlantı denetimi: ping</h2>
+<h2 id="b1">Bağlantı denetimi: ping</h2>
 <pre>ping google.com
 ping -n 1 google.com        rem tek paket
 ping -n 10 -w 2000 sunucu   rem 10 paket, 2000 ms zaman asimi
@@ -50,7 +52,7 @@ if errorlevel 1 (
 echo Internet baglantisi ve DNS calisiyor.</pre>
 <p>Önce IP adresine, sonra alan adına ping atmak, sorunun bağlantıda mı yoksa DNS'te mi olduğunu ayırt eder.</p>
 <blockquote><code>ping</code> komutu <code>Hedef ana bilgisayara ulaşılamıyor</code> yanıtında da bazen hata kodu 0 döndürebilir. Sağlam bir denetim için çıktıda <code>TTL=</code> ifadesi aranır: <code>ping -n 1 hedef | find "TTL=" &gt; nul</code>.</blockquote>
-<h2>IP yapılandırması: ipconfig</h2>
+<h2 id="b2">IP yapılandırması: ipconfig</h2>
 <pre>ipconfig                  rem ozet
 ipconfig /all             rem ayrintili (MAC, DNS, DHCP)
 ipconfig /flushdns        rem DNS onbellegini temizler
@@ -63,16 +65,16 @@ for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /c:"IPv4"') do set "IP=%
 set "IP=%IP: =%"
 echo Yerel IP: %IP%</pre>
 <p>Birden fazla bağdaştırıcı varsa döngü son adresi alır. İlk adres isteniyorsa <code>goto</code> ile döngüden çıkılabilir.</p>
-<h2>DNS sorgusu: nslookup</h2>
+<h2 id="b3">DNS sorgusu: nslookup</h2>
 <pre>nslookup example.com
 nslookup example.com 8.8.8.8     rem belirli DNS sunucusuyla
 nslookup -type=mx example.com    rem e-posta kayitlari
 nslookup -type=txt example.com   rem TXT kayitlari</pre>
-<h2>Yol izleme: tracert ve pathping</h2>
+<h2 id="b4">Yol izleme: tracert ve pathping</h2>
 <pre>tracert example.com
 tracert -d example.com           rem adlari cozumleme, daha hizli
 pathping example.com             rem her atlamada kayip orani (yaklasik 5 dakika surer)</pre>
-<h2>Bağlantılar ve portlar: netstat</h2>
+<h2 id="b5">Bağlantılar ve portlar: netstat</h2>
 <pre>netstat -an                          rem acik baglantilar ve dinleyen portlar
 netstat -ano                         rem surec numarasiyla (PID)
 netstat -ano | findstr LISTENING     rem yalnizca dinleyenler
@@ -81,7 +83,7 @@ netstat -ano | findstr :80           rem 80 numarali portu kullananlar</pre>
 <pre>netstat -ano | findstr :3000
 tasklist /fi "pid eq 12345"       rem yukaridaki sonuctaki PID yazilir</pre>
 <p>Ayrıntılı port denetimi için <a href="program-08-port-denetcisi.html">Port Denetçisi</a> uygulamasına bakılabilir.</p>
-<h2>Diğer ağ komutları</h2>
+<h2 id="b6">Diğer ağ komutları</h2>
 <table>
 <thead><tr><th>Komut</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -98,7 +100,7 @@ tasklist /fi "pid eq 12345"       rem yukaridaki sonuctaki PID yazilir</pre>
 <tr><td><code>curl -s ifconfig.me</code></td><td>Dış (genel) IP adresini gösterir</td></tr>
 </tbody>
 </table>
-<h2>Ağ sorunlarını giderme dizisi</h2>
+<h2 id="b7">Ağ sorunlarını giderme dizisi</h2>
 <p>Bağlantı sorunlarında şu sıra izlenir; her adımda başarısız olunan nokta sorunun kaynağını gösterir:</p>
 <ol>
 <li><code>ping 127.0.0.1</code>: Bilgisayarın kendi ağ yığını çalışıyor mu?</li>
@@ -107,7 +109,7 @@ tasklist /fi "pid eq 12345"       rem yukaridaki sonuctaki PID yazilir</pre>
 <li><code>ping google.com</code>: DNS çalışıyor mu?</li>
 <li>Sorun sürüyorsa: <code>ipconfig /flushdns</code>, ardından <code>ipconfig /release</code> ve <code>/renew</code>.</li>
 </ol>
-<h2>Örnek: ağ raporu betiği</h2>
+<h2 id="b8">Örnek: ağ raporu betiği</h2>
 <pre>@echo off
 setlocal
 set "RAPOR=%USERPROFILE%\Desktop\ag_raporu.txt"
@@ -132,7 +134,7 @@ netstat -an | findstr LISTENING &gt;&gt; "%RAPOR%"
 echo Rapor kaydedildi: %RAPOR%
 start "" notepad "%RAPOR%"</pre>
 <blockquote>Ağ raporu MAC adresi, IP adresleri ve açık portlar gibi bilgiler içerir. Bu dosya başkalarıyla paylaşılmadan önce hassas bilgiler gözden geçirilmelidir.</blockquote>
-<h2>Özet</h2>
+<h2 id="b9">Özet</h2>
 <ul>
 <li>Sorun giderme sırası: kendi bilgisayar, ağ geçidi, internet IP'si, alan adı.</li>
 <li><code>ipconfig</code> yapılandırmayı, <code>nslookup</code> DNS'i, <code>netstat -ano</code> bağlantı ve portları gösterir.</li>

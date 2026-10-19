@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>transition ile yumuşak geçişler, transform ile taşıma, ölçekleme ve döndürme, @keyframes ile animasyon ve prefers-reduced-motion ile erişilebilirlik.</p><div class="px-chips"><span>2 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">transition: yumuşak geçiş</a></li><li><a href="#b2">transform: taşıma, ölçekleme, döndürme</a></li><li><a href="#b3">@keyframes: animasyon</a></li><li><a href="#b4">Örnek: yüklenme göstergesi</a></li><li><a href="#b5">Erişilebilirlik: hareketi azaltma</a></li><li><a href="#b6">İyi uygulama önerileri</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Geçişler ve animasyonlar, arayüzün kullanıcı eylemlerine yumuşak tepki vermesini sağlar. Doğru kullanıldığında dikkat çekmek ve durum değişikliklerini anlaşılır kılmak için yararlıdır; aşırı kullanıldığında ise dikkat dağıtır ve bazı kullanıcılarda rahatsızlık yaratır.</p>
-<h2>transition: yumuşak geçiş</h2>
+<h2 id="b1">transition: yumuşak geçiş</h2>
 <p>Normalde <code>:hover</code> gibi bir durumda değişen değer anında değişir. <code>transition</code> bu değişimi belirli bir sürede yayar.</p>
 <pre>.dugme {
   background: #c0392b;
@@ -53,7 +55,7 @@
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }</pre>
 <p>Birden fazla özellik virgülle ayrılarak yazılabilir. <code>all</code> kullanımı kolaydır ancak istenmeyen özelliklerin de geçişe girmesine yol açabilir.</p>
-<h2>transform: taşıma, ölçekleme, döndürme</h2>
+<h2 id="b2">transform: taşıma, ölçekleme, döndürme</h2>
 <table>
 <thead><tr><th>İşlev</th><th>Etkisi</th></tr></thead>
 <tbody>
@@ -68,7 +70,7 @@
   box-shadow: 0 8px 20px rgb(0 0 0 / 25%);
 }</pre>
 <blockquote><code>transform</code> ve <code>opacity</code> özellikleri sayfa yerleşimini yeniden hesaplatmadığı için akıcı çalışır. Animasyonlarda <code>width</code>, <code>height</code>, <code>top</code> ve <code>left</code> yerine mümkün olduğunca bu ikisi kullanılmalıdır.</blockquote>
-<h2>@keyframes: animasyon</h2>
+<h2 id="b3">@keyframes: animasyon</h2>
 <p>Geçiş yalnızca iki durum (önce ve sonra) arasında çalışır. Daha karmaşık, kendiliğinden başlayan veya tekrar eden hareketler için <code>@keyframes</code> ile adımlar tanımlanır ve <code>animation</code> ile öğeye bağlanır.</p>
 <pre>@keyframes belir {
   from { opacity: 0; transform: translateY(20px); }
@@ -100,7 +102,7 @@
 <tr><td><code>animation-play-state</code></td><td><code>paused</code> ile durdurulur</td></tr>
 </tbody>
 </table>
-<h2>Örnek: yüklenme göstergesi</h2>
+<h2 id="b4">Örnek: yüklenme göstergesi</h2>
 <pre>&lt;div class="yukleniyor" role="status" aria-label="Yükleniyor"&gt;&lt;/div&gt;
 
 .yukleniyor {
@@ -114,7 +116,7 @@
 @keyframes don {
   to { transform: rotate(360deg); }
 }</pre>
-<h2>Erişilebilirlik: hareketi azaltma</h2>
+<h2 id="b5">Erişilebilirlik: hareketi azaltma</h2>
 <p>Bazı kullanıcılar için ekrandaki hareket baş dönmesi veya rahatsızlık yaratabilir. İşletim sistemindeki "hareketi azalt" tercihi CSS ile algılanabilir ve animasyonlar kapatılabilir:</p>
 <pre>@media (prefers-reduced-motion: reduce) {
   * {
@@ -122,14 +124,14 @@
     transition: none !important;
   }
 }</pre>
-<h2>İyi uygulama önerileri</h2>
+<h2 id="b6">İyi uygulama önerileri</h2>
 <ul>
 <li>Süreler kısa tutulur: arayüz geçişleri için genellikle 150-400 ms yeterlidir.</li>
 <li>Animasyon bilgi aktarmıyorsa süs için gereğinden fazla kullanılmaz.</li>
 <li>Saniyede 3 kereden fazla yanıp sönen öğelerden kaçınılır (nöbet riski).</li>
 <li>Sonsuz animasyonlar, kullanıcı durdurabilecek şekilde veya yalnızca gerektiği sürece çalıştırılır.</li>
 </ul>
-<h2>Özet</h2>
+<h2 id="b7">Özet</h2>
 <ul>
 <li><code>transition</code> iki durum arası yumuşak değişim, <code>@keyframes</code> ise çok adımlı veya tekrar eden hareket içindir.</li>
 <li><code>transform</code> ve <code>opacity</code> en akıcı çalışan özelliklerdir.</li>

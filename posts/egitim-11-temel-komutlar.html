@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>echo, cls, pause, title, color, rem, cd, pushd, ver, whoami gibi sık kullanılan komutlar ve her komutun seçeneklerini /? ile öğrenme yöntemi.</p><div class="px-chips"><span>3 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yardım almak: /? ve help</a></li><li><a href="#b2">Ekrana yazı yazma ve ekranı denetleme</a></li><li><a href="#b3">Klasörler arasında gezinme</a></li><li><a href="#b4">Bilgi veren komutlar</a></li><li><a href="#b5">Betiği sonlandırma</a></li><li><a href="#b6">Sık kullanılan komut grupları</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Batch betikleri, Komut İstemi'nde çalışan komutların bir dosyaya yazılmasından ibarettir. Bu nedenle betik yazmanın ilk adımı sık kullanılan komutları ve her birinin seçeneklerine nasıl ulaşılacağını bilmektir. Bu yazıda temel komutlar gruplanarak verilir; ayrıntılı konular (değişkenler, döngüler, dosya işlemleri) rehberin diğer yazılarında ele alınır.</p>
-<h2>Yardım almak: /? ve help</h2>
+<h2 id="b1">Yardım almak: /? ve help</h2>
 <p>Her komutun seçenekleri, komutun sonuna <code>/?</code> yazılarak öğrenilir. Bu, rehberdeki en önemli alışkanlıktır; çünkü seçenekler Windows sürümüne göre farklılık gösterebilir.</p>
 <pre>copy /?
 robocopy /?
@@ -41,7 +43,7 @@ help dir</pre>
 <li>Uzun yardım metinleri için çıktı bir dosyaya veya sayfalayıcıya yönlendirilebilir: <code>robocopy /? | more</code> veya <code>robocopy /? &gt; yardim.txt</code> (bkz. <a href="egitim-12-yonlendirme-filtreleme.html">Yönlendirme, Borular ve Filtreleme</a>).</li>
 <li>Resmî belgeler için Microsoft'un "Windows commands" sayfası kullanılabilir.</li>
 </ul>
-<h2>Ekrana yazı yazma ve ekranı denetleme</h2>
+<h2 id="b2">Ekrana yazı yazma ve ekranı denetleme</h2>
 <table>
 <thead><tr><th>Komut</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -77,7 +79,7 @@ color 0A
 echo Siyah zemin uzerine acik yesil yazi
 pause</pre>
 <blockquote>Arka plan ve yazı rengi aynı verilirse (<code>color 00</code> gibi) yazı görünmez olur; bu durumda <code>color</code> komutu parametresiz çalıştırılır.</blockquote>
-<h2>Klasörler arasında gezinme</h2>
+<h2 id="b3">Klasörler arasında gezinme</h2>
 <table>
 <thead><tr><th>Komut</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -97,7 +99,7 @@ popd
 echo Geri donuldu: %cd%
 pause</pre>
 <p>Betiğin bulunduğu klasörde çalışmak için betiğin ilk satırlarında <code>cd /d "%~dp0"</code> kullanılır (bkz. <a href="egitim-06-parametreler.html">Parametreler ve %~ Değiştiricileri</a>).</p>
-<h2>Bilgi veren komutlar</h2>
+<h2 id="b4">Bilgi veren komutlar</h2>
 <table>
 <thead><tr><th>Komut</th><th>Ne gösterir?</th></tr></thead>
 <tbody>
@@ -110,13 +112,13 @@ pause</pre>
 <tr><td><code>systeminfo</code></td><td>Ayrıntılı sistem bilgisi (çalışması birkaç saniye sürer)</td></tr>
 </tbody>
 </table>
-<h2>Betiği sonlandırma</h2>
+<h2 id="b5">Betiği sonlandırma</h2>
 <ul>
 <li><code>exit</code>: Komut penceresini kapatır. Betik Komut İstemi içinden çalıştırılmışsa pencere de kapanır.</li>
 <li><code>exit /b</code>: Yalnızca betiği (veya alt programı) sonlandırır, pencere açık kalır. Betiklerde çoğunlukla bu tercih edilir.</li>
 <li><code>exit /b 1</code>: Betiği çıkış koduyla sonlandırır (bkz. <a href="egitim-08-hata-yonetimi.html">Hata Yönetimi ve Log Tutma</a>).</li>
 </ul>
-<h2>Sık kullanılan komut grupları</h2>
+<h2 id="b6">Sık kullanılan komut grupları</h2>
 <table>
 <thead><tr><th>Amaç</th><th>Komutlar</th><th>Rehberdeki yazı</th></tr></thead>
 <tbody>
@@ -127,7 +129,7 @@ pause</pre>
 <tr><td>Ağ</td><td><code>ping</code>, <code>ipconfig</code>, <code>nslookup</code>, <code>netstat</code></td><td><a href="egitim-23-ag-komutlari.html">Ağ ve İnternet Komutları</a></td></tr>
 </tbody>
 </table>
-<h2>Özet</h2>
+<h2 id="b7">Özet</h2>
 <ul>
 <li>Bilinmeyen bir komutun seçenekleri <code>komut /?</code> ile öğrenilir.</li>
 <li>Betikler <code>@echo off</code> ile başlar, bitişte çıktıyı okumak için <code>pause</code> kullanılır.</li>

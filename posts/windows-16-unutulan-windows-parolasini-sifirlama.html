@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -29,24 +30,25 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0067c0;--b:#00a4ef">
+<!--px--><div class="px-hero"><small>Windows Rehber</small><p>Microsoft hesabı ve yerel hesap için parola sıfırlama yöntemleri.</p><div class="px-chips"><span>4 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Microsoft hesabı</a></li><li><a href="#b2">Yerel hesap</a></li><li><a href="#b3">Şifrelenmiş disk uyarısı</a></li><li><a href="#b4">Gelecekte</a></li></ol></nav><!--/px-->
 <p>Yöntem, hesabın türüne göre değişir: Microsoft hesabı mı, yerel hesap mı?</p>
-<h2>Microsoft hesabı</h2>
+<h2 id="b1">Microsoft hesabı</h2>
 <ol>
 <li>Başka bir cihazdan <a href="https://account.live.com/password/reset">account.live.com/password/reset</a> adresine git.</li>
 <li>E-posta adresini yaz ve doğrulama kodu ile yeni parola belirle.</li>
 <li>Bilgisayarda internet bağlıyken yeni parolayla gir.</li>
 </ol>
 <p>Giriş ekranındaki <b>Parolamı unuttum</b> bağlantısı da aynı işlemi başlatır.</p>
-<h2>Yerel hesap</h2>
+<h2 id="b2">Yerel hesap</h2>
 <ul>
 <li>Giriş ekranında <b>Parolamı sıfırla</b> görünüyorsa, daha önce belirlediğin güvenlik sorularını yanıtla.</li>
 <li>Güvenlik soruları yoksa ve başka bir yönetici hesabı varsa onunla girip <b>Denetim Masası &gt; Kullanıcı Hesapları &gt; Başka bir hesabı yönet</b> bölümünden parolayı değiştir.</li>
 <li>Yönetici hesabı da yoksa parola atlatma yöntemleri güvenlik riski taşır; en güvenli yol, Windows'u dosyaları koruyarak sıfırlamak veya temiz kurulum yapmaktır.</li>
 </ul>
-<h2>Şifrelenmiş disk uyarısı</h2>
+<h2 id="b3">Şifrelenmiş disk uyarısı</h2>
 <p>Disk <b>BitLocker</b> ile şifreliyse <a href="https://account.microsoft.com/devices/recoverykey">kurtarma anahtarı</a> olmadan verilere ulaşılamaz. Anahtar genellikle Microsoft hesabında saklıdır.</p>
-<h2>Gelecekte</h2>
+<h2 id="b4">Gelecekte</h2>
 <ul>
 <li>Windows Hello PIN'i veya parmak izi ekle.</li>
 <li>Parola sıfırlama diski (USB) oluştur: Başlat'ta <b>Parola sıfırlama diski oluştur</b> yaz.</li>

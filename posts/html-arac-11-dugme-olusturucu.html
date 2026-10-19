@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Renk, boyut ve köşe ayarlarıyla kendi düğme tasarımını yap, HTML ve CSS kodunu kopyala.</p><div class="px-chips"><span>2 dk okuma</span><span>2 bölüm</span><span>Adım adım</span></div></div><!--/px-->
 <p>Düğme, sitenin en çok tıklanan öğesidir. Bu araçla yazı, renk, boyut ve köşe yuvarlaklığını ayarlayıp tasarımı canlı görürsün; CSS kodu hazır olur.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="kutu" style="display:flex;align-items:center;justify-content:center;height:150px;background:#e7e4df"><button type="button" id="d-dugme" style="cursor:pointer">Düğme</button></div>
   <div class="satir">
@@ -65,7 +67,7 @@ const guncelle=()=>{
 guncelle();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Düğmenin <b>yazısını</b> ve <b>renklerini</b> seç.</li>
 <li>Kaydırıcılarla <b>boyut, iç boşluk, köşe ve kenarlık</b> ayarlarını yap.</li>

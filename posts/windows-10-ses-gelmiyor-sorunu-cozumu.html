@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -29,29 +30,30 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0067c0;--b:#00a4ef">
+<!--px--><div class="px-hero"><small>Windows Rehber</small><p>Hoparlör ve kulaklıktan ses gelmemesi durumunda kontrol edilecek ayarlar ve sürücü çözümleri.</p><div class="px-chips"><span>4 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel kontroller</a></li><li><a href="#b2">Doğru çıkış aygıtını seçme</a></li><li><a href="#b3">Sorun gidericiyi kullanma</a></li><li><a href="#b4">Sürücüyü yenileme</a></li><li><a href="#b5">Ses geliştirmeleri ve hizmet</a></li></ol></nav><!--/px-->
 <p>Ses sorunu çoğunlukla yanlış çıkış aygıtı, kapalı ses veya sürücü hatasından kaynaklanır.</p>
-<h2>Temel kontroller</h2>
+<h2 id="b1">Temel kontroller</h2>
 <ul>
 <li>Görev çubuğundaki ses simgesinde sesin kapalı olmadığını kontrol et.</li>
 <li>Hoparlör veya kulaklığın doğru yuvaya takılı olduğundan emin ol.</li>
 <li>Uygulama başına ses ayarı için ses simgesine sağ tıklayıp <b>Ses karıştırıcısını aç</b>.</li>
 </ul>
-<h2>Doğru çıkış aygıtını seçme</h2>
+<h2 id="b2">Doğru çıkış aygıtını seçme</h2>
 <ol>
 <li>Görev çubuğunda ses simgesine tıkla.</li>
 <li>Ses çubuğunun yanındaki küçük ok (veya <b>Ses çıkışı seç</b>) ile doğru hoparlör ya da kulaklığı seç.</li>
 </ol>
 <p>HDMI ile TV bağlıysa varsayılan çıkış TV'ye geçmiş olabilir.</p>
-<h2>Sorun gidericiyi kullanma</h2>
+<h2 id="b3">Sorun gidericiyi kullanma</h2>
 <p>Ses simgesine sağ tıkla &gt; <b>Ses sorunlarını gider</b>.</p>
-<h2>Sürücüyü yenileme</h2>
+<h2 id="b4">Sürücüyü yenileme</h2>
 <ol>
 <li><b>Aygıt Yöneticisi &gt; Ses, video ve oyun denetleyicileri</b></li>
 <li>Realtek veya benzeri ses aygıtına sağ tıkla &gt; <b>Sürücüyü güncelleştir</b></li>
 <li>Düzelmezse <b>Aygıtı kaldır</b> de ve yeniden başlat.</li>
 </ol>
-<h2>Ses geliştirmeleri ve hizmet</h2>
+<h2 id="b5">Ses geliştirmeleri ve hizmet</h2>
 <ul>
 <li>Ses simgesine sağ tıkla &gt; <b>Ses ayarları &gt; Diğer ses ayarları</b> &gt; aygıt &gt; <b>Özellikler &gt; Gelişmiş</b>: "Özel modu" ve geliştirmeleri kapat.</li>
 <li><code>services.msc</code> içinde <b>Windows Audio</b> hizmetinin "Çalışıyor" olduğunu kontrol et.</li>

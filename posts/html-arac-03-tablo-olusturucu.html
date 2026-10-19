@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Satır ve sütun sayısını seç, hücreleri doldur; hazır HTML tablo kodunu kopyala.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Bilmen gerekenler</a></li></ol></nav><!--/px-->
 <p>Tablo kodunu elle yazmak uzun ve hataya açıktır. Bu araçla satır ve sütun sayısını seçip hücreleri doldurursun; geçerli HTML kodunu ve nasıl göründüğünü anında alırsın.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="satir">
     <label for="sat">Satır sayısı (1-20)<input type="number" id="sat" min="1" max="20" value="3"></label>
@@ -76,14 +78,14 @@ $('cer').onchange=uret;$('cap').oninput=uret;
 ciz();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Satır ve sütun sayısını yaz. Altta o boyutta bir hücre ızgarası belirir.</li>
 <li>Hücrelere içeriklerini yaz. Kod ve önizleme yazdıkça güncellenir.</li>
 <li><b>İlk satır başlık olsun</b> seçiliyse ilk satır <code>&lt;th&gt;</code> başlık hücreleriyle yazılır.</li>
 <li><b>Kodu kopyala</b> ile tabloyu alıp kendi sayfana (<code>&lt;body&gt;</code> içine) yapıştır.</li>
 </ol>
-<h2>Bilmen gerekenler</h2>
+<h2 id="b3">Bilmen gerekenler</h2>
 <ul>
 <li>Önizleme, tabloyu hiçbir stil uygulamadan gösterir; kenarlık yoksa çizgi görmezsin. Çizgi için <b>Kenarlık ekle</b> seçeneğini aç ya da kendi CSS'ini yaz.</li>
 <li>Hücre birleştirme (<code>colspan</code>, <code>rowspan</code>) için 6. dersteki örneklere bak ve oluşturduğun koda elle ekle.</li>

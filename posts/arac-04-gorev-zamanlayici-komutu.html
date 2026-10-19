@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir programı belirli saatte, günde, haftada veya açılışta otomatik çalıştırmak için schtasks komutunu seçeneklerle oluştur.</p><div class="px-chips"><span>4 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Sıklık seçenekleri</a></li><li><a href="#b4">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>Windows Görev Zamanlayıcı, programların ve betiklerin belirli zamanlarda otomatik çalışmasını sağlar. Arayüz yerine <code>schtasks</code> komutu kullanıldığında görev tek satırla oluşturulabilir, <code>.bat</code> dosyasına eklenebilir ve başka bilgisayarlara aynı şekilde uygulanabilir. Bu araç, seçeneklere göre komutu oluşturur; çalıştırma, sorgulama ve silme komutlarını da birlikte verir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}</style>
 <div class="arac">
   <div class="satir">
@@ -166,14 +168,14 @@ $('gz-bat').onclick=()=>{hesapla();if(!sonKomut)return;
 hesapla();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Görev adını ve çalıştırılacak program veya komutu yaz. Boşluk içeren yollarda tırnak gerekmez; araç komutu gerektiği gibi sarmalar.</li>
 <li>Sıklığı seç ve saat, gün gibi ayrıntıları doldur.</li>
 <li>Komutu <b>yönetici olarak açılan</b> Komut İstemi'ne yapıştır. Aynı adlı görev varsa <code>/f</code> seçeneği onun üzerine yazar.</li>
 <li>Görev oluştuktan sonra durumunu göstermek, hemen çalıştırmak veya silmek için aşağıdaki komutlar kullanılır.</li>
 </ol>
-<h2>Sıklık seçenekleri</h2>
+<h2 id="b3">Sıklık seçenekleri</h2>
 <table>
 <thead><tr><th>Seçenek</th><th>Parametre</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -187,7 +189,7 @@ hesapla();
 <tr><td>Boşta kalınca</td><td><code>/sc ONIDLE /i 10</code></td><td>Bilgisayar belirtilen dakika boşta kaldığında çalışır.</td></tr>
 </tbody>
 </table>
-<h2>Dikkat edilecekler</h2>
+<h2 id="b4">Dikkat edilecekler</h2>
 <ul>
 <li>Tarih biçimi, Windows'un bölge ayarındaki kısa tarih biçimiyle uyumlu olmalıdır. Türkiye ayarlarında <code>gg.aa.yyyy</code> kullanılır; hata alınırsa araçtan başka biçim seçilebilir.</li>
 <li><code>/ru SYSTEM</code> ve <code>/rl HIGHEST</code> seçenekleri yönetici yetkisi gerektirir. Bu seçenekler yalnızca gerçekten ihtiyaç olduğunda kullanılmalıdır.</li>

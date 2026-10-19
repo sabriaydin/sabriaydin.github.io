@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Alan türü, etiket ve zorunluluk seçerek hazır HTML form kodu oluştur, önizle ve kopyala.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Önemli notlar</a></li></ol></nav><!--/px-->
 <p>Form; iletişim, kayıt ve anket gibi sayfalarda kullanıcıdan bilgi alır. Doğru yazılmış bir form için etiket, alan adı ve zorunluluk gibi parçaları bilmek gerekir. Bu araç alanları seçtikçe formu senin için yazar.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="satir">
     <label for="fm-t">Alan türü
@@ -85,14 +87,14 @@ $('fm-temiz').onclick=()=>{al.length=0;ciz()};
 sec();ciz();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li><b>Alan türünü</b> seç (metin, e-posta, parola vb.).</li>
 <li>Kullanıcının göreceği <b>etiketi</b> ve sunucuya gidecek <b>alan adını</b> yaz.</li>
 <li>Gerekiyorsa <b>zorunlu alan</b> kutusunu işaretle ve <b>Alanı forma ekle</b> düğmesine bas.</li>
 <li>Önizlemeyi kontrol et, kodu kopyalayıp sayfana yapıştır.</li>
 </ol>
-<h2>Önemli notlar</h2>
+<h2 id="b3">Önemli notlar</h2>
 <ul>
 <li>Her alan bir <code>&lt;label&gt;</code> ile bağlanır; böylece etikete tıklayınca alan odaklanır ve ekran okuyucular alanı doğru okur.</li>
 <li><code>required</code> yazılan alan boş bırakılırsa tarayıcı formu göndermez.</li>

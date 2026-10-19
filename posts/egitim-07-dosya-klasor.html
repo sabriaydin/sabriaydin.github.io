@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>dir, copy, xcopy, robocopy, move, del, ren, md ve rd komutlarıyla dosya ve klasörleri yönetme; güvenli silme ipuçları.</p><div class="px-chips"><span>2 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Listeleme: dir</a></li><li><a href="#b2">Klasör oluşturma ve silme: md, rd</a></li><li><a href="#b3">Kopyalama: copy, xcopy, robocopy</a></li><li><a href="#b4">Taşıma ve yeniden adlandırma: move, ren</a></li><li><a href="#b5">Silme: del</a></li><li><a href="#b6">Dosya içeriği ve özellikleri</a></li><li><a href="#b7">Boşluklu yollar</a></li></ol></nav><!--/px-->
 <p>Batch'in en çok kullanıldığı alan dosya yönetimidir. Bu derste kopyalama, taşıma, silme ve listeleme komutlarının günlük kullanımını görüyorsun. Yolda boşluk olabileceği için dosya ve klasör yollarını her zaman <b>çift tırnak</b> içinde yaz.</p>
-<h2>Listeleme: dir</h2>
+<h2 id="b1">Listeleme: dir</h2>
 <pre>dir
 dir /b
 dir /b /s *.txt
@@ -45,12 +47,12 @@ dir /b /a-d /o-d</pre>
 <tr><td><code>/o-d</code></td><td>Tarihe göre yeniden eskiye sırala (<code>/od</code> eskiden yeniye)</td></tr>
 </tbody>
 </table>
-<h2>Klasör oluşturma ve silme: md, rd</h2>
+<h2 id="b2">Klasör oluşturma ve silme: md, rd</h2>
 <pre>md "C:\Projeler\2026"
 rd "C:\Projeler\Bos"
 rd /s /q "C:\Projeler\Eski"</pre>
 <p><code>md</code>, aradaki klasörleri de otomatik oluşturur. <code>rd</code> yalnızca boş klasörü siler; <code>/s</code> içindekilerle birlikte siler, <code>/q</code> onay sormaz. Silinenler Geri Dönüşüm Kutusu'na gitmez.</p>
-<h2>Kopyalama: copy, xcopy, robocopy</h2>
+<h2 id="b3">Kopyalama: copy, xcopy, robocopy</h2>
 <pre>copy rapor.docx D:\Yedek\
 copy rapor.docx "D:\Yedek\rapor_eski.docx"
 xcopy "C:\Fotograflar" "D:\Yedek\Fotograflar" /s /e /i /y
@@ -74,13 +76,13 @@ robocopy "C:\Fotograflar" "D:\Yedek\Fotograflar" /e</pre>
 </tbody>
 </table>
 <p><code>robocopy</code> çıkış kodları farklıdır: 0 ile 7 arası başarı (dosya kopyalandı, bazıları atlandı gibi durumlar), 8 ve üzeri hatadır. Bu yüzden kontrolü <code>if %errorlevel% geq 8</code> ile yaparsın (8. ders).</p>
-<h2>Taşıma ve yeniden adlandırma: move, ren</h2>
+<h2 id="b4">Taşıma ve yeniden adlandırma: move, ren</h2>
 <pre>move rapor.docx D:\Arsiv\
 move "C:\Gecici\klasor" "D:\Arsiv\klasor"
 ren eski.txt yeni.txt
 ren *.jpeg *.jpg</pre>
 <p><code>ren</code> yalnızca adı değiştirir, dosyayı başka klasöre taşımaz; hedef adda yol yazmazsın. <code>ren *.jpeg *.jpg</code> gibi jokerle toplu uzantı değiştirebilirsin.</p>
-<h2>Silme: del</h2>
+<h2 id="b5">Silme: del</h2>
 <pre>del dosya.txt
 del /q /f *.tmp
 del /s /q "C:\Gecici\*.log"</pre>
@@ -93,7 +95,7 @@ del /s /q "C:\Gecici\*.log"</pre>
 </tbody>
 </table>
 <blockquote><code>del</code> dosyaları Geri Dönüşüm Kutusu'na göndermez. Yeni yazdığın bir silme komutunu çalıştırmadan önce aynı kalıpla <code>dir /s /b "C:\Gecici\*.log"</code> komutunu çalıştırıp silinecek dosyaların listesine bak.</blockquote>
-<h2>Dosya içeriği ve özellikleri</h2>
+<h2 id="b6">Dosya içeriği ve özellikleri</h2>
 <pre>echo Merhaba &gt; not.txt
 echo Ikinci satir &gt;&gt; not.txt
 type not.txt
@@ -101,7 +103,7 @@ findstr /i "hata" log.txt
 attrib +h gizli.txt
 attrib -h gizli.txt</pre>
 <p><code>&gt;</code> dosyayı sıfırdan yazar (varsa üzerine yazar), <code>&gt;&gt;</code> dosyanın sonuna ekler. <code>type</code> dosyayı ekrana basar, <code>findstr</code> içinde metin arar (<code>/i</code> büyük/küçük harf farkını yok sayar), <code>attrib +h</code> dosyayı gizler.</p>
-<h2>Boşluklu yollar</h2>
+<h2 id="b7">Boşluklu yollar</h2>
 <p>Aşağıdaki iki satırdan birincisi hata verir, çünkü <code>Program</code> ve <code>Files</code> ayrı parametre sayılır:</p>
 <pre>copy C:\Program Files\uygulama.ini D:\Yedek\
 copy "C:\Program Files\uygulama.ini" "D:\Yedek\"</pre>

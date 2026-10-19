@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,16 +28,17 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>errorlevel, &amp;&amp; ve || operatörleri, exit /b ile hata kodu döndürme, çıktıyı gizleme ve log dosyası tutma.</p><div class="px-chips"><span>2 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Çıkış kodu: errorlevel</a></li><li><a href="#b2">if errorlevel</a></li><li><a href="#b3">&amp;&amp; ve || operatörleri</a></li><li><a href="#b4">Çıktıyı gizleme ve yönlendirme</a></li><li><a href="#b5">Log dosyası tutmak</a></li><li><a href="#b6">robocopy çıkış kodları</a></li><li><a href="#b7">Script&#x27;ten çıkış kodu döndürmek</a></li></ol></nav><!--/px-->
 <p>Bir komut başarısız olsa da script çalışmaya devam eder. Kontrol etmezsen dosya kopyalanmamışken "Tamamlandı" yazabilir. Bu derste hataları yakalamayı ve yapılanları kayıt altına almayı öğreniyorsun.</p>
-<h2>Çıkış kodu: errorlevel</h2>
+<h2 id="b1">Çıkış kodu: errorlevel</h2>
 <p>Her komut bittiğinde bir sayı bırakır: <b>0 başarı</b>, 0 dışındaki değerler hata demektir (çoğu zaman 1). <code>%errorlevel%</code> ile okunur:</p>
 <pre>@echo off
 ping -n 1 192.168.255.254 &gt;nul
 echo Cikis kodu: %errorlevel%
 pause</pre>
 <p><code>%errorlevel%</code> bir sonraki komutta değişir. Daha sonra kullanacaksan hemen bir değişkene ata: <code>set "kod=%errorlevel%"</code>.</p>
-<h2>if errorlevel</h2>
+<h2 id="b2">if errorlevel</h2>
 <pre>@echo off
 copy "kaynak.txt" "D:\Yedek\" &gt;nul
 if errorlevel 1 (
@@ -45,12 +47,12 @@ if errorlevel 1 (
 )
 echo Kopyalandi.</pre>
 <p><code>if errorlevel 1</code>, "çıkış kodu 1 <b>veya daha büyükse</b>" demektir. Tam eşitlik için <code>if %errorlevel% equ 0</code> yazarsın.</p>
-<h2>&amp;&amp; ve || operatörleri</h2>
+<h2 id="b3">&amp;&amp; ve || operatörleri</h2>
 <p><code>komut1 &amp;&amp; komut2</code> yazarsan komut2 yalnızca komut1 başarılıysa çalışır. <code>komut1 || komut2</code> ise yalnızca komut1 başarısızsa çalışır.</p>
 <pre>md "D:\Yedek" &amp;&amp; echo Klasor olusturuldu
 copy a.txt "D:\Yedek\" &gt;nul &amp;&amp; echo Tamam || echo Hata</pre>
 <p>Dikkat: <code>A &amp;&amp; B || C</code> yapısında B başarısız olursa C de çalışır. Küçük kontroller için pratiktir; önemli işlerde <code>if errorlevel</code> daha açıktır.</p>
-<h2>Çıktıyı gizleme ve yönlendirme</h2>
+<h2 id="b4">Çıktıyı gizleme ve yönlendirme</h2>
 <table>
 <thead><tr><th>Yazım</th><th>Ne yapar</th></tr></thead>
 <tbody>
@@ -64,7 +66,7 @@ copy a.txt "D:\Yedek\" &gt;nul &amp;&amp; echo Tamam || echo Hata</pre>
 </table>
 <pre>del gecici.txt 2&gt;nul
 robocopy "C:\A" "D:\B" /e &gt;&gt; log.txt 2&gt;&amp;1</pre>
-<h2>Log dosyası tutmak</h2>
+<h2 id="b5">Log dosyası tutmak</h2>
 <p>Script'in ne yaptığını bir dosyaya yazdırırsan sorun çıktığında nedenini görebilirsin. Aşağıdaki script, her satırı tarih ve saatle log'a ekleyen küçük bir alt program kullanır:</p>
 <pre>@echo off
 set "LOG=%~dp0islem.log"
@@ -84,14 +86,14 @@ exit /b 0
 echo %~1
 exit /b</pre>
 <p><code>(echo ...) &gt;&gt; "%LOG%"</code> biçiminde parantez kullanmak, mesaj bir rakamla bittiğinde yönlendirmenin yanlış yorumlanmasını önler.</p>
-<h2>robocopy çıkış kodları</h2>
+<h2 id="b6">robocopy çıkış kodları</h2>
 <pre>robocopy "C:\Belgeler" "D:\Yedek" /e /r:2 /w:2
 if %errorlevel% geq 8 (
     echo Yedekleme hatali bitti
 ) else (
     echo Yedekleme tamam
 )</pre>
-<h2>Script'ten çıkış kodu döndürmek</h2>
+<h2 id="b7">Script'ten çıkış kodu döndürmek</h2>
 <p><code>exit /b 0</code> başarıyla, <code>exit /b 1</code> hatayla çıkış demektir. Bu script'i başka bir batch dosyası <code>call</code> ile çağırdıysa kodu <code>%errorlevel%</code> ile okuyabilir. <code>/b</code> yazmazsan komut penceresinin tamamı kapanır; script'lerde her zaman <code>exit /b</code> kullan.</p>
 <p>Sonraki derste script'lere kullanıcı dostu menüler ekleyeceğiz.</p>
 </div>

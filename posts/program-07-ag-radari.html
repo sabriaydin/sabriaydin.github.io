@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,16 +28,17 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Kendi ağındaki canlı cihazları ping taramasıyla bulan ve ARP tablosuyla IP-MAC eşleşmelerini listeleyen batch uygulaması.</p><div class="px-chips"><span>3 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
 <p>Ev veya ofis ağında kimlerin bağlı olduğunu bilmek, ağ güvenliğinin ilk adımıdır. Tanınmayan bir cihaz, komşunun kullandığı bir Wi-Fi bağlantısına veya ele geçirilmiş bir cihaza işaret edebilir. Bu uygulama, bilgisayarın bağlı olduğu yerel ağın (örneğin 192.168.1.1 - 192.168.1.254) tamamını tarar ve yanıt veren cihazları listeler.</p>
-<h2>Ne yapar?</h2>
+<h2 id="b1">Ne yapar?</h2>
 <ul>
 <li>Etkin ağ bağlantısının IP adresini bulur ve taranacak aralığı otomatik belirler.</li>
 <li>Aralıktaki 254 adrese birer ping gönderir; yanıt verenleri canlı cihaz olarak listeler.</li>
 <li>Sonuçları ARP tablosuyla birleştirip IP adresi ve fiziksel (MAC) adres eşleşmelerini gösterir.</li>
 <li>Canlı cihaz listesini geçici bir dosyaya kaydeder.</li>
 </ul>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Kod Not Defteri'ne yapıştırılır ve <code>ag_radari.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
 <li>Dosyaya çift tıklanarak çalıştırılır.</li>
@@ -104,7 +106,7 @@ echo [-] Aktif bir ag baglantisi bulunamadi.
 echo.
 pause
 exit /b 1</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b>Ağ bulma:</b> PowerShell ile varsayılan ağ geçidi olan bağlantının IPv4 adresi alınır. <code>192.168.1.23</code> adresinden ilk üç parça (<code>192.168.1</code>) ayrılarak tarama öneki oluşturulur.</li>
 <li><b>Tarama döngüsü:</b> <code>for /l %%i in (1,1,254)</code> 1'den 254'e kadar sayar. Her adrese <code>ping -n 1 -w 300</code> ile tek paket ve en fazla 300 ms bekleme uygulanır.</li>
@@ -112,7 +114,7 @@ exit /b 1</pre>
 <li><b>ARP tablosu:</b> Ping atılan cihazlar ARP tablosuna işlenir. <code>arp -a</code> çıktısı <code>findstr</code> ile yalnızca bu ağın adresleriyle sınırlanır.</li>
 <li><b>Pencere başlığı:</b> <code>title</code> komutu her adreste güncellenir; böylece ekran yüzlerce satırla dolmaz.</li>
 </ul>
-<h2>Sonuçların yorumlanması</h2>
+<h2 id="b4">Sonuçların yorumlanması</h2>
 <ul>
 <li>Her cihazın MAC adresinin ilk altı hanesi üreticiyi gösterir; adres <a href="https://maclookup.app/">maclookup.app</a> gibi hizmetlerde aranarak cihaz türü tahmin edilebilir.</li>
 <li>Bazı cihazlar (güvenlik duvarı olan bilgisayarlar, uyku modundaki telefonlar) ping yanıtlamayabilir; bu nedenle liste kesin değil, bir tahmindir.</li>

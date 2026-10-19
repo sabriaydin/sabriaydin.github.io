@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Windows açılışında otomatik çalışan kayıt defteri girişlerini, başlangıç klasörlerini, hizmetleri ve zamanlanmış görevleri tarayıp rapor oluşturan batch uygulaması.</p><div class="px-chips"><span>3 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
 <p>Kötü amaçlı yazılımlar sistem yeniden başlatıldığında da çalışmaya devam edebilmek için kendilerini otomatik başlayan yerlere eklerler. Güvenlik uzmanları bunu "kalıcılık" (persistence) olarak adlandırır ve incelemelerde ilk bakılan yerlerdir. Bu uygulama, bu yerleri tek seferde tarar ve masaüstüne bir rapor yazar.</p>
-<h2>Ne yapar?</h2>
+<h2 id="b1">Ne yapar?</h2>
 <ul>
 <li>Kayıt defterindeki <code>Run</code> ve <code>RunOnce</code> anahtarlarını (kullanıcı ve sistem düzeyinde, 32 bit uygulamalar dahil) listeler.</li>
 <li>Kullanıcıya ve tüm kullanıcılara ait <b>Başlangıç</b> klasörlerinin içeriğini listeler.</li>
@@ -37,7 +39,7 @@
 <li>Etkin durumdaki, Microsoft dışı zamanlanmış görevleri listeler.</li>
 <li>Tüm sonuçları <code>baslangic_denetimi.txt</code> adıyla masaüstüne kaydeder ve ekrana yazdırır.</li>
 </ul>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Kod Not Defteri'ne yapıştırılır ve <code>baslangic_denetimi.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
 <li>Dosyaya çift tıklanarak çalıştırılır.</li>
@@ -98,7 +100,7 @@ exit /b 0
 &gt;&gt;"%RAPOR%" echo.
 &gt;&gt;"%RAPOR%" echo ----- %~1 -----
 exit /b</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b>Rapor dosyası:</b> <code>&gt;"%RAPOR%"</code> dosyayı sıfırdan oluşturur, <code>&gt;&gt;</code> ile sonraki satırlar eklenir. Her bölüm başlığı <code>:bolum</code> alt programıyla yazılır.</li>
 <li><b>Kayıt defteri:</b> <code>for %%k in (...)</code> ile beş anahtar sırayla <code>reg query</code> komutuna verilir. Bu anahtarlar, programların oturum açılışında otomatik çalışması için en sık kullanılan yerlerdir.</li>
@@ -106,7 +108,7 @@ exit /b</pre>
 <li><b>Görev filtresi:</b> Görev yolu <code>\Microsoft\</code> ile başlayanlar ve devre dışı görevler çıkarılır; geriye kullanıcı veya üçüncü taraf yazılımlarca eklenenler kalır.</li>
 <li><b><code>2&gt;&amp;1</code>:</b> Hata mesajlarını da rapora yazar; böylece erişilemeyen bir anahtar raporda görünür.</li>
 </ul>
-<h2>Sonuçların yorumlanması</h2>
+<h2 id="b4">Sonuçların yorumlanması</h2>
 <ul>
 <li>Tanınan yazılımların (sürücü yardımcıları, bulut depolama istemcileri, güncelleyiciler) girişleri normaldir.</li>
 <li>Rastgele harflerden oluşan adlar, <code>Temp</code> klasöründen çalışan programlar veya yazım hatası içeren sistem adları (örneğin <code>svch0st</code>) şüphelidir.</li>

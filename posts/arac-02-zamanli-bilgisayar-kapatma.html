@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluştur; .bat dosyası olarak indir.</p><div class="px-chips"><span>4 dk okuma</span><span>6 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Komut nasıl çalıştırılır?</a></li><li><a href="#b3">İşlemler ve karşılıkları</a></li><li><a href="#b4">Parametrelerin anlamı</a></li><li><a href="#b5">Belirli saatte kapatma</a></li><li><a href="#b6">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>Windows, <code>shutdown</code> komutuyla bilgisayarı zamanlı olarak kapatabilir. Komutun parametreleri (<code>/s</code>, <code>/r</code>, <code>/t</code>, <code>/f</code>, <code>/c</code>, <code>/d</code>) ezberlenmeden kullanılamaz. Bu araç, seçilen işlem ve zamana göre hazır komutu üretir; iptal komutunu da birlikte verir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <style>#sk-gs,#sk-ts,#sk-ms{display:grid;gap:14px}#sk-gs[hidden],#sk-ts[hidden],#sk-ms[hidden]{display:none}</style>
 <div class="arac">
   <div class="satir">
@@ -185,7 +187,7 @@ document.querySelectorAll('[data-dk]').forEach(b=>b.onclick=()=>{
 hesapla();
 })();
 </script>
-<h2>Komut nasıl çalıştırılır?</h2>
+<h2 id="b2">Komut nasıl çalıştırılır?</h2>
 <ol>
 <li>Üretilen komutu <b>Kopyala</b> düğmesiyle kopyala.</li>
 <li><code>Win + R</code> tuşlarına basıp <code>cmd</code> yazarak Komut İstemi'ni aç. Komut doğrudan <code>Win + R</code> penceresine de yapıştırılabilir.</li>
@@ -193,7 +195,7 @@ hesapla();
 <li>Vazgeçmek için <b>iptal komutu</b> çalıştırılır (<code>shutdown /a</code>).</li>
 </ol>
 <p>Komutu her seferinde yazmamak için <b>Başlatma dosyasını indir</b> düğmesiyle <code>.bat</code> dosyası alınabilir; dosyaya çift tıklanması yeterlidir.</p>
-<h2>İşlemler ve karşılıkları</h2>
+<h2 id="b3">İşlemler ve karşılıkları</h2>
 <table>
 <thead><tr><th>İşlem</th><th>Komut</th><th>Not</th></tr></thead>
 <tbody>
@@ -206,7 +208,7 @@ hesapla();
 <tr><td>Ekranı kilitle</td><td><code>rundll32.exe user32.dll,LockWorkStation</code></td><td></td></tr>
 </tbody>
 </table>
-<h2>Parametrelerin anlamı</h2>
+<h2 id="b4">Parametrelerin anlamı</h2>
 <ul>
 <li><code>/s</code>: bilgisayarı kapatır. <code>/r</code>: yeniden başlatır. <code>/l</code>: oturumu kapatır. <code>/h</code>: hazırda bekletir.</li>
 <li><code>/t</code>: işlem başlamadan önceki bekleme süresi (saniye). En fazla 315360000 (10 yıl).</li>
@@ -215,9 +217,9 @@ hesapla();
 <li><code>/d</code>: olay günlüğüne yazılacak neden kodu. Yalnızca <code>/s</code> ve <code>/r</code> ile kullanılır.</li>
 <li><code>/a</code>: bekleyen kapatma işlemini iptal eder; yalnızca geri sayım sırasında çalışır.</li>
 </ul>
-<h2>Belirli saatte kapatma</h2>
+<h2 id="b5">Belirli saatte kapatma</h2>
 <p>Zamanlama türü <b>Belirli saatte</b> seçildiğinde araç, <code>schtasks</code> komutuyla bir zamanlanmış görev oluşturur. Görev seçilen saatte çalışır; kapatma işlemi için 30 saniyelik uyarı süresi tanınır. Görev "Bir kez" seçeneğiyle oluşturulduğunda saat bugün için geçmişse Windows hata verebilir; bu durumda "Her gün" seçeneği veya geri sayım kullanılabilir. Komut, yönetici olarak açılan Komut İstemi'nde çalıştırılmalıdır. Görevi silmek için iptal komutu kullanılır.</p>
-<h2>Dikkat edilecekler</h2>
+<h2 id="b6">Dikkat edilecekler</h2>
 <ul>
 <li>Zorla kapatma (<code>/f</code>) seçiliyken kaydedilmemiş belgeler kaybolabilir. Önemli çalışmalarda bu seçenek kapatılmalıdır.</li>
 <li>Hazırda bekletme, oturumu kapatma, uyku ve kilitleme işlemleri geri sayım için pencereye bağlıdır; Komut İstemi penceresi kapatılırsa işlem iptal olur.</li>

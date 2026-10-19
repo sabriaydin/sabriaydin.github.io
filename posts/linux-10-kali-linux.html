@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,23 +28,24 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="px-hero"><small>Linux İşletim Sistemleri</small><p>Kali Linux nedir, kimler için uygun, günlük kullanım için neden önerilmez, resmi indirme bağlantısı.</p><div class="px-chips"><span>1 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Kali Linux kimler için uygun?</a></li><li><a href="#b2">Öne çıkan özellikler</a></li><li><a href="#b3">Sistem gereksinimleri (yaklaşık)</a></li><li><a href="#b4">Resmi indirme bağlantısı</a></li><li><a href="#b5">İndirdikten sonra</a></li></ol></nav><!--/px-->
 <p>Kali Linux, Debian tabanlı ve sızma testi ile güvenlik araştırması için hazırlanmış bir dağıtımdır. İçinde yüzlerce güvenlik aracı hazır gelir.</p>
-<h2>Kali Linux kimler için uygun?</h2>
+<h2 id="b1">Kali Linux kimler için uygun?</h2>
 <p>Siber güvenlik öğrenenler ve yetkili güvenlik testi yapan uzmanlar.</p>
-<h2>Öne çıkan özellikler</h2>
+<h2 id="b2">Öne çıkan özellikler</h2>
 <ul>
 <li><b>Masaüstü ortamı</b>: Xfce (varsayılan), ayrıca GNOME ve KDE seçenekleri.</li>
 <li><b>Yalnızca izin aldığın sistemlerde</b> kullan; izinsiz test yasa dışıdır.</li>
 <li>Günlük kullanım için tasarlanmamıştır. Ana bilgisayarına değil, <b>sanal makineye</b> kurman daha güvenlidir.</li>
 <li>İndirme sayfasında doğrudan kurulum imajlarının yanında hazır <b>sanal makine</b> imajları da bulunur.</li>
 </ul>
-<h2>Sistem gereksinimleri (yaklaşık)</h2>
+<h2 id="b3">Sistem gereksinimleri (yaklaşık)</h2>
 <p>En az 2 GB RAM (4 GB önerilir) ve yaklaşık 20 GB disk alanı; sanal makinede de çalışır.</p>
-<h2>Resmi indirme bağlantısı</h2>
-<p>Kali Linux imajını yalnızca geliştiricisinin kendi sitesinden indir: <a href="https://www.kali.org/get-kali/">kali.org/get-kali</a></p>
+<h2 id="b4">Resmi indirme bağlantısı</h2>
+<p class="px-dl">Kali Linux imajını yalnızca geliştiricisinin kendi sitesinden indir: <a href="https://www.kali.org/get-kali/">kali.org/get-kali</a></p>
 <blockquote>Bağlantı, yazının hazırlandığı tarihte geçerliydi. Sayfa adresi veya sürüm numarası zamanla değişebilir; sürüm bilgilerini her zaman resmi sayfadan kontrol et. Üçüncü taraf "indirme" sitelerinden uzak dur.</blockquote>
-<h2>İndirdikten sonra</h2>
+<h2 id="b5">İndirdikten sonra</h2>
 <ol>
 <li>İndirdiğin dosya bir <b>ISO</b> imajıdır; bunu doğrudan çalıştıramazsın, USB belleğe yazman gerekir.</li>
 <li>Resmi sayfadaki <b>sağlama (checksum)</b> değeriyle dosyanı karşılaştır. Nasıl yapılacağı <a href="linux-01-linux-dagitimi-secme-ve-kurulum-usb.html">giriş yazısında</a> anlatılıyor.</li>

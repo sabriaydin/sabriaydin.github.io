@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,15 +28,16 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Windows güvenlik olay günlüğünde başarısız oturum açma denemelerini, hesap değişikliklerini ve Uzak Masaüstü girişlerini analiz eden batch uygulaması.</p><div class="px-chips"><span>4 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
 <p>Windows, oturum açma denemeleri ve hesap değişiklikleri gibi güvenlik olaylarını bir günlükte tutar. Saldırı girişimleri çoğunlukla bu günlükte iz bırakır; ancak günlük binlerce kayıt içerdiği için elle incelenmesi zordur. Bu uygulama, seçilen süre içindeki önemli olayları çıkarıp özetler.</p>
-<h2>Ne yapar?</h2>
+<h2 id="b1">Ne yapar?</h2>
 <ul>
 <li><b>Başarısız oturum açma (Olay 4625):</b> Toplam sayıyı, en çok deneme yapılan hesap adlarını ve kaynak adresleri gösterir. Parola tahmin saldırıları bu şekilde fark edilir.</li>
 <li><b>Hesap değişiklikleri (Olay 4720, 4724, 4726, 4732):</b> Yeni hesap oluşturma, parola sıfırlama, hesap silme ve yerel gruba üye ekleme kayıtlarını zaman sırasıyla listeler.</li>
 <li><b>Uzak Masaüstü girişleri (Olay 4624, tür 10):</b> RDP ile başarılı girişlerin sayısını, zamanını, hesap adını ve kaynak adresi gösterir.</li>
 </ul>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Kod Not Defteri'ne yapıştırılır ve <code>olay_gunlugu_analizi.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
 <li>Dosyaya sağ tıklanıp <b>Yönetici olarak çalıştır</b> seçilir. Yönetici yetkisi olmadan betik uyarı verip kapanır.</li>
@@ -95,7 +97,7 @@ echo       geriye gitmek icin yeterli veri olmayabilir.
 echo.
 pause
 exit /b 0</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b>Saat doğrulaması:</b> <code>echo %SAAT%| findstr /r "^[0-9][0-9]*$"</code> girilen değerin yalnızca rakam olduğunu denetler; değilse <code>||</code> ile varsayılan değer 24 atanır.</li>
 <li><b><code>Get-WinEvent -FilterHashtable</code>:</b> Olay günlüğünü kimlik numarası ve başlangıç zamanına göre filtreler; büyük günlüklerde yalnızca ilgili kayıtları okuduğu için hızlıdır.</li>
@@ -103,7 +105,7 @@ exit /b 0</pre>
 <li><b>XML ayrıştırma:</b> Hesap adı ve IP adresi gibi ayrıntılar olayın XML verisinde saklanır. <code>ToXml()</code> ile okunan veriden <code>TargetUserName</code>, <code>IpAddress</code> ve <code>LogonType</code> alanları alınır.</li>
 <li><b>Gruplama:</b> <code>Group-Object</code> aynı hesap veya adresin kaç kez göründüğünü sayar; <code>Sort-Object Count -Descending</code> en çok görünenleri başa alır.</li>
 </ul>
-<h2>Sonuçların yorumlanması</h2>
+<h2 id="b4">Sonuçların yorumlanması</h2>
 <ul>
 <li>Aynı hesap veya adresten kısa sürede yüzlerce başarısız deneme, parola tahmin saldırısı olabilir. Parolanın güçlendirilmesi ve gerekmiyorsa Uzak Masaüstü erişiminin kapatılması gerekir.</li>
 <li>Kullanıcı adı olarak <code>Administrator</code>, <code>admin</code>, <code>test</code> gibi genel adların denendiği görülüyorsa otomatik tarama araçları sisteme erişmeye çalışıyor olabilir.</li>

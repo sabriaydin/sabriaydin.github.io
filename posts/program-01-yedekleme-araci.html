@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Seçtiğin klasörü tarih damgalı olarak yedekleyen, eski yedekleri kendiliğinden temizleyen hazır batch programı.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
 <p>Bu program bir klasörü (örneğin Belgelerim) her çalıştırdığında <b>tarih ve saat damgalı yeni bir klasöre</b> kopyalar. Hata olursa seni uyarır, her işlemi bir kayıt dosyasına yazar ve yalnızca en yeni birkaç yedeği saklayıp eskilerini siler. Böylece disk dolmaz.</p>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
 <li>Aşağıdaki kodu Not Defteri'ne yapıştır ve <code>yedekle.bat</code> adıyla kaydet (Kayıt türü: <b>Tüm dosyalar</b>).</li>
 <li>Dosyayı Not Defteri ile aç, yalnızca <b>AYARLAR</b> bölümündeki üç satırı kendine göre değiştir.</li>
@@ -97,7 +99,7 @@ echo HATA: Kopyalama sirasinda sorun olustu. Hata kodu: %SONUC%
 echo Ayrinti icin su dosyaya bak: %HEDEF%\yedek_log.txt
 pause
 exit /b %SONUC%</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b2">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b>AYARLAR</b>: Yedeklenecek klasör (<code>KAYNAK</code>), yedeklerin toplanacağı yer (<code>HEDEF</code>) ve kaç yedeğin saklanacağı (<code>SAKLANACAK</code>). Başka hiçbir satıra dokunman gerekmez.</li>
 <li><b>Tarih damgası</b>: <code>%date%</code> ve <code>%time%</code> bölgesel ayara göre değiştiği için bunun yerine PowerShell'e saati sorarız. Çıktı <code>2026-10-13_21-30</code> gibi her bilgisayarda aynı biçimde gelir.</li>
@@ -105,7 +107,7 @@ exit /b %SONUC%</pre>
 <li><b>Hata kodu</b>: robocopy 0-7 arasındaki kodları "başarılı" sayar (dosya kopyalandı, değişiklik yok gibi). <b>8 ve üstü</b> gerçek hatadır; bu yüzden <code>if %SONUC% GEQ 8</code> ile kontrol edilir.</li>
 <li><b>Eski yedekleri silme</b>: <code>dir /b /ad /o-n</code> yedek klasörlerini en yeniden en eskiye sıralar. <code>skip=5</code> ilk 5 satırı atlar; geriye kalanlar (en eskiler) silinir. Klasör adları tarihle başladığı için sıralama adla yapılabilir.</li>
 </ul>
-<h2>Özelleştirme</h2>
+<h2 id="b3">Özelleştirme</h2>
 <ul>
 <li>Birden fazla klasör yedeklemek için <code>robocopy</code> satırını farklı <code>KAYNAK</code> değerleriyle tekrar yazabilirsin.</li>
 <li>Harici diske yedek alıyorsan <code>HEDEF=E:\Yedekler</code> gibi yaz. Disk takılı değilse program hata mesajı gösterir.</li>

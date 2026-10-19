@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>HTML nedir, etiket ve nitelik ne demek? Not Defteri ile ilk web sayfanı yaz ve tarayıcıda aç.</p><div class="px-chips"><span>2 dk okuma</span><span>6 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Etiket, öğe ve nitelik</a></li><li><a href="#b2">İlk sayfanı oluştur</a></li><li><a href="#b3">Satır satır açıklama</a></li><li><a href="#b4">Değişiklik yapınca ne olur?</a></li><li><a href="#b5">Yorum satırı</a></li><li><a href="#b6">Sık yapılan hatalar</a></li></ol></nav><!--/px-->
 <p>HTML (HyperText Markup Language), web sayfalarının iskeletini oluşturan işaretleme dilidir. Bir programlama dili değildir; hesap yapmaz, karar vermez. Metne "bu bir başlık", "bu bir resim", "bu bir bağlantı" diye anlam kazandırır. Tarayıcı (Chrome, Edge, Firefox) bu işaretleri okuyarak sayfayı ekrana çizer. İnternette gördüğün her sayfanın temelinde HTML vardır.</p>
-<h2>Etiket, öğe ve nitelik</h2>
+<h2 id="b1">Etiket, öğe ve nitelik</h2>
 <p>HTML, <b>etiketlerle</b> yazılır. Etiketler küçüktür (<code>&lt;</code>) ve büyüktür (<code>&gt;</code>) işaretleri arasına yazılır. Çoğu etiketin bir açılış, bir de kapanış hali vardır; kapanışta etiket adının önüne <code>/</code> konur.</p>
 <pre>&lt;p&gt;Merhaba, ben bir paragrafım.&lt;/p&gt;</pre>
 <ul>
@@ -41,7 +43,7 @@
 <p>Etiketlere ek bilgi veren <b>nitelikler</b> (attribute) de yazılabilir. Nitelikler yalnızca açılış etiketinin içinde, <code>ad="değer"</code> biçiminde bulunur:</p>
 <pre>&lt;a href="https://ornek.com"&gt;Örnek siteye git&lt;/a&gt;</pre>
 <p>Burada <code>href</code>, bağlantının nereye gideceğini söyleyen niteliktir. Bazı etiketlerin kapanışı yoktur (örneğin <code>&lt;br&gt;</code>, <code>&lt;img&gt;</code>, <code>&lt;hr&gt;</code>); bunlara boş öğe denir.</p>
-<h2>İlk sayfanı oluştur</h2>
+<h2 id="b2">İlk sayfanı oluştur</h2>
 <p>HTML yazmak için özel bir programa gerek yok. Windows'ta Not Defteri yeterlidir.</p>
 <ol>
 <li>Masaüstünde <b>Sağ tık &gt; Yeni &gt; Metin Belgesi</b> seç.</li>
@@ -62,7 +64,7 @@
   &lt;p&gt;Bu benim ilk web sayfam.&lt;/p&gt;
 &lt;/body&gt;
 &lt;/html&gt;</pre>
-<h2>Satır satır açıklama</h2>
+<h2 id="b3">Satır satır açıklama</h2>
 <ul>
 <li><code>&lt;!DOCTYPE html&gt;</code>: Tarayıcıya "bu sayfa güncel HTML ile yazıldı" der. Her sayfanın ilk satırıdır.</li>
 <li><code>&lt;html lang="tr"&gt;</code>: Tüm sayfayı kapsar. <code>lang="tr"</code> sayfa dilinin Türkçe olduğunu belirtir; ekran okuyucular ve arama motorları bunu kullanır.</li>
@@ -73,13 +75,13 @@
 <li><code>&lt;body&gt;</code>: Ekranda görünen her şey buraya yazılır.</li>
 <li><code>&lt;h1&gt;</code> ve <code>&lt;p&gt;</code>: Ana başlık ve paragraf.</li>
 </ul>
-<h2>Değişiklik yapınca ne olur?</h2>
+<h2 id="b4">Değişiklik yapınca ne olur?</h2>
 <p>Dosyayı Not Defteri'nde düzenleyip kaydet, ardından tarayıcıda <b>F5</b> tuşuna bas. Sayfa yeni haliyle yüklenir. Tarayıcıyı kapatıp açmana gerek yok.</p>
-<h2>Yorum satırı</h2>
+<h2 id="b5">Yorum satırı</h2>
 <p>Koda not eklemek istersen <code>&lt;!--</code> ile başlayıp <code>--&gt;</code> ile biten yorum yazabilirsin. Tarayıcı yorumları göstermez.</p>
 <pre>&lt;!-- Bu bir nottur, sayfada görünmez --&gt;
 &lt;p&gt;Bu görünür.&lt;/p&gt;</pre>
-<h2>Sık yapılan hatalar</h2>
+<h2 id="b6">Sık yapılan hatalar</h2>
 <ul>
 <li>Dosya adının <code>index.html.txt</code> olarak kalması</li>
 <li>Kapanış etiketini unutmak (<code>&lt;/p&gt;</code> gibi)</li>

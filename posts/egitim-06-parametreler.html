@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Scripte dışarıdan parametre gönderme, %1 ve %* kullanımı, shift ve %~dp0, %~nx1 gibi dosya yolu değiştiricileri.</p><div class="px-chips"><span>2 dk okuma</span><span>6 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel parametreler</a></li><li><a href="#b2">Parametre verilmiş mi kontrol etmek</a></li><li><a href="#b3">%~ değiştiricileri</a></li><li><a href="#b4">Scriptin kendi klasörü: %~dp0</a></li><li><a href="#b5">for döngüsünde %~ kullanımı</a></li><li><a href="#b6">9 parametreden fazlası: shift</a></li></ol></nav><!--/px-->
 <p>Bir batch dosyasına dışarıdan değer verebilirsin. Komut satırında <code>script.bat deger1 deger2</code> yazarsan bu değerler script içinde <code>%1</code>, <code>%2</code> olarak okunur. Dosyayı bir dosya üzerine <b>sürükleyip bırakırsan</b> da o dosyanın yolu <code>%1</code> olur.</p>
-<h2>Temel parametreler</h2>
+<h2 id="b1">Temel parametreler</h2>
 <table>
 <thead><tr><th>İfade</th><th>Anlamı</th></tr></thead>
 <tbody>
@@ -45,14 +47,14 @@ echo Ikinci: %2
 echo Hepsi: %*
 pause</pre>
 <p>Komut satırında <code>deneme.bat elma armut</code> yazarsan birinci <code>elma</code>, ikinci <code>armut</code> olur.</p>
-<h2>Parametre verilmiş mi kontrol etmek</h2>
+<h2 id="b2">Parametre verilmiş mi kontrol etmek</h2>
 <pre>@echo off
 if "%~1"=="" (
     echo Kullanim: yedekle.bat KAYNAK_KLASOR
     exit /b 1
 )
 echo Kaynak: %~1</pre>
-<h2>%~ değiştiricileri</h2>
+<h2 id="b3">%~ değiştiricileri</h2>
 <p>Parametrenin önüne <code>~</code> koyarsan tırnaklar kalkar. Harf ekleyerek dosya yolunun parçalarını da alabilirsin. Aşağıda <code>%1</code> olarak <code>C:\Belgeler\rapor.pdf</code> verildiğini düşün:</p>
 <table>
 <thead><tr><th>İfade</th><th>Sonuç</th></tr></thead>
@@ -75,7 +77,7 @@ echo Ad      : %~n1
 echo Uzanti  : %~x1
 echo Boyut   : %~z1 bayt
 pause</pre>
-<h2>Scriptin kendi klasörü: %~dp0</h2>
+<h2 id="b4">Scriptin kendi klasörü: %~dp0</h2>
 <p><code>%0</code> scriptin kendisidir; <code>%~dp0</code> ise scriptin bulunduğu <b>sürücü ve klasör</b> (sonunda ters bölüyle) demektir. Script'i çift tıklayarak ya da başka bir klasörden çalıştırsan bile yanındaki dosyalara ulaşmanı sağlar:</p>
 <pre>@echo off
 cd /d "%~dp0"
@@ -83,13 +85,13 @@ echo Script klasoru: %cd%
 if exist ayarlar.txt (type ayarlar.txt) else (echo ayarlar.txt bulunamadi)
 pause</pre>
 <p><code>cd /d</code> hem klasörü hem sürücüyü değiştirir; <code>/d</code> olmadan farklı sürücüye geçilmez.</p>
-<h2>for döngüsünde %~ kullanımı</h2>
+<h2 id="b5">for döngüsünde %~ kullanımı</h2>
 <pre>@echo off
 for %%f in (*.jpg) do (
     echo Dosya: %%~nxf   Boyut: %%~zf
 )
 pause</pre>
-<h2>9 parametreden fazlası: shift</h2>
+<h2 id="b6">9 parametreden fazlası: shift</h2>
 <p><code>shift</code> komutu tüm parametreleri bir kaydırır: <code>%2</code> yeni <code>%1</code> olur. Parametre sayısı belli değilse hepsini sırayla işleyebilirsin:</p>
 <pre>@echo off
 :dongu

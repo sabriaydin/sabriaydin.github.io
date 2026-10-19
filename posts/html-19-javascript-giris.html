@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>JavaScript&#x27;i sayfaya ekleme, değişkenler, fonksiyonlar, koşullar, DOM öğelerini seçme ve olay dinleme ile tıklamaya tepki veren basit uygulamalar.</p><div class="px-chips"><span>4 dk okuma</span><span>12 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">JavaScript&#x27;i sayfaya ekleme</a></li><li><a href="#b2">Değişkenler ve veri türleri</a></li><li><a href="#b3">Koşullar ve karşılaştırma</a></li><li><a href="#b4">Fonksiyonlar</a></li><li><a href="#b5">Diziler ve döngüler</a></li><li><a href="#b6">DOM: sayfa öğelerine erişme</a></li><li><a href="#b7">Olaylar: kullanıcı eylemlerine tepki verme</a></li><li><a href="#b8">Örnek 1: Sayaç</a></li><li><a href="#b9">Örnek 2: Yazılan metni anında gösterme</a></li><li><a href="#b10">Örnek 3: Form denetimi</a></li><li><a href="#b11">Sık yapılan hatalar</a></li><li><a href="#b12">Sırada ne var?</a></li></ol></nav><!--/px-->
 <p>HTML sayfanın yapısını, CSS görünümünü belirler. <b>JavaScript</b> ise sayfaya davranış kazandırır: düğmeye tıklanınca bir şeyin olması, formdaki verinin denetlenmesi, hesaplamalar, içeriğin değiştirilmesi gibi. Bu yazıda sayfaya etkileşim eklemek için gereken temel bilgiler verilir.</p>
-<h2>JavaScript'i sayfaya ekleme</h2>
+<h2 id="b1">JavaScript'i sayfaya ekleme</h2>
 <pre>&lt;!-- Dış dosya (önerilen) --&gt;
 &lt;script src="betik.js" defer&gt;&lt;/script&gt;
 
@@ -42,7 +44,7 @@
 <li>Betik dosyası <code>head</code> içine <code>defer</code> ile ya da <code>&lt;/body&gt;</code> kapanışından hemen önce eklenir.</li>
 </ul>
 <p>Yazılan kodun çıktısı ve hataları tarayıcıdaki <b>Konsol</b>da görülür (<code>F12</code> tuşu, ardından <b>Console</b> sekmesi). <code>console.log()</code> ile değerler konsola yazdırılabilir.</p>
-<h2>Değişkenler ve veri türleri</h2>
+<h2 id="b2">Değişkenler ve veri türleri</h2>
 <pre>const ad = "Ayşe";       // değişmeyecek değer
 let puan = 10;           // değişebilecek değer
 puan = puan + 5;         // 15
@@ -59,7 +61,7 @@ console.log(liste[0]);     // elma</pre>
 <li><code>var</code> eski yöntemdir; yeni kodda kullanılması önerilmez.</li>
 <li>Metinler tırnak (<code>"</code> veya <code>'</code>) içinde yazılır. Değişken içeren metinler için ters tırnakla yazılan "şablon dizeleri" de vardır (örn. Merhaba ${ad}).</li>
 </ul>
-<h2>Koşullar ve karşılaştırma</h2>
+<h2 id="b3">Koşullar ve karşılaştırma</h2>
 <pre>const yas = 20;
 
 if (yas &gt;= 18) {
@@ -75,7 +77,7 @@ if (yas &gt;= 18) {
 <tr><td><code>&amp;&amp;</code>, <code>||</code>, <code>!</code></td><td>Ve, veya, değil</td></tr>
 </tbody>
 </table>
-<h2>Fonksiyonlar</h2>
+<h2 id="b4">Fonksiyonlar</h2>
 <pre>function topla(a, b) {
   return a + b;
 }
@@ -83,7 +85,7 @@ console.log(topla(2, 3));   // 5
 
 const kare = (x) =&gt; x * x;  // ok fonksiyonu
 console.log(kare(4));       // 16</pre>
-<h2>Diziler ve döngüler</h2>
+<h2 id="b5">Diziler ve döngüler</h2>
 <pre>const sayilar = [1, 2, 3, 4];
 
 sayilar.forEach((n) =&gt; console.log(n));
@@ -94,7 +96,7 @@ const buyukler = sayilar.filter((n) =&gt; n &gt; 2); // [3, 4]
 for (let i = 0; i &lt; 3; i++) {
   console.log(i);
 }</pre>
-<h2>DOM: sayfa öğelerine erişme</h2>
+<h2 id="b6">DOM: sayfa öğelerine erişme</h2>
 <p>Tarayıcı HTML sayfasını bir ağaç yapısına (<b>DOM</b>) dönüştürür. JavaScript bu yapıdaki öğeleri seçip değiştirebilir.</p>
 <pre>const baslik = document.querySelector("h1");        // ilk h1
 const kutu = document.getElementById("kutu");       // id="kutu"
@@ -110,7 +112,7 @@ kutu.style.color = "red";              // satır içi stil</pre>
 <li>Stil değişiklikleri için doğrudan <code>style</code> yerine CSS sınıflarını <code>classList</code> ile eklemek ve kaldırmak daha düzenlidir.</li>
 </ul>
 <blockquote>Kullanıcıdan gelen metin, <code>innerHTML</code> ile sayfaya yazılmamalıdır; zararlı kod çalıştırılmasına (XSS) yol açabilir. Metin için <code>textContent</code> kullanılmalıdır.</blockquote>
-<h2>Olaylar: kullanıcı eylemlerine tepki verme</h2>
+<h2 id="b7">Olaylar: kullanıcı eylemlerine tepki verme</h2>
 <p><code>addEventListener</code> ile bir öğeye, belirli bir olay gerçekleştiğinde çalışacak fonksiyon bağlanır.</p>
 <table>
 <thead><tr><th>Olay</th><th>Ne zaman gerçekleşir?</th></tr></thead>
@@ -123,7 +125,7 @@ kutu.style.color = "red";              // satır içi stil</pre>
 <tr><td><code>DOMContentLoaded</code></td><td>Sayfa yapısı yüklendiğinde</td></tr>
 </tbody>
 </table>
-<h2>Örnek 1: Sayaç</h2>
+<h2 id="b8">Örnek 1: Sayaç</h2>
 <pre>&lt;button id="artir"&gt;Artır&lt;/button&gt;
 &lt;p&gt;Sayı: &lt;span id="sayi"&gt;0&lt;/span&gt;&lt;/p&gt;
 
@@ -136,7 +138,7 @@ kutu.style.color = "red";              // satır içi stil</pre>
     sayi.textContent = sayac;
   });
 &lt;/script&gt;</pre>
-<h2>Örnek 2: Yazılan metni anında gösterme</h2>
+<h2 id="b9">Örnek 2: Yazılan metni anında gösterme</h2>
 <pre>&lt;label for="ad"&gt;Ad:&lt;/label&gt;
 &lt;input type="text" id="ad"&gt;
 &lt;p id="selam"&gt;&lt;/p&gt;
@@ -149,7 +151,7 @@ kutu.style.color = "red";              // satır içi stil</pre>
     selam.textContent = alan.value ? "Merhaba " + alan.value : "";
   });
 &lt;/script&gt;</pre>
-<h2>Örnek 3: Form denetimi</h2>
+<h2 id="b10">Örnek 3: Form denetimi</h2>
 <pre>&lt;form id="form"&gt;
   &lt;label for="eposta"&gt;E-posta:&lt;/label&gt;
   &lt;input type="email" id="eposta"&gt;
@@ -167,14 +169,14 @@ kutu.style.color = "red";              // satır içi stil</pre>
   });
 &lt;/script&gt;</pre>
 <p>Bu örnekler <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırılarak çalıştırılabilir.</p>
-<h2>Sık yapılan hatalar</h2>
+<h2 id="b11">Sık yapılan hatalar</h2>
 <ul>
 <li>Öğe henüz yüklenmeden seçilmeye çalışılırsa <code>null</code> döner ve "Cannot read properties of null" hatası görülür. Çözüm <code>defer</code> kullanmaktır.</li>
 <li><code>id</code> veya sınıf adındaki yazım hataları. Konsoldaki hata mesajı çoğunlukla sorunun nerede olduğunu gösterir.</li>
 <li><code>=</code> (atama) ile <code>===</code> (karşılaştırma) karıştırılması.</li>
 <li>Tarayıcı geliştirici araçlarında <b>Console</b> sekmesi açıkken sayfanın hatalarının kontrol edilmemesi.</li>
 </ul>
-<h2>Sırada ne var?</h2>
+<h2 id="b12">Sırada ne var?</h2>
 <ul>
 <li><b>Web depolama</b> (<code>localStorage</code>): Bilgileri tarayıcıda saklayarak sayfa yenilendiğinde korumak.</li>
 <li><b>fetch API</b>: Başka bir kaynaktan veri çekmek.</li>

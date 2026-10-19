@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>set /a ile toplama, bölme, mod, bit işlemleri, sekizlik sayı tuzağı, ondalık sayı çözümleri ve %random% ile rastgele sayı üretme.</p><div class="px-chips"><span>4 dk okuma</span><span>10 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">set /a ile işlem yapma</a></li><li><a href="#b2">İşleçler</a></li><li><a href="#b3">Sayaç artırma ve döngüler</a></li><li><a href="#b4">Sınırlar: 32 bit tamsayı</a></li><li><a href="#b5">Sekizlik sayı tuzağı</a></li><li><a href="#b6">Ondalık sayılar</a></li><li><a href="#b7">Yüzde ve yuvarlama</a></li><li><a href="#b8">Rastgele sayı: %random%</a></li><li><a href="#b9">Örnek: basit hesap makinesi</a></li><li><a href="#b10">Özet</a></li></ol></nav><!--/px-->
 <p>Batch'te sayısal işlemler <code>set /a</code> komutuyla yapılır. Bu komutun yalnızca <b>tamsayılarla</b> çalıştığı ve bazı beklenmedik davranışları (sekizlik sayılar, taşma) bulunduğu bilinmelidir. Değişken tanımlama temelleri için <a href="egitim-02-degiskenler.html">Değişkenler ve set Komutu</a> yazısına bakılabilir.</p>
-<h2>set /a ile işlem yapma</h2>
+<h2 id="b1">set /a ile işlem yapma</h2>
 <pre>@echo off
 set /a TOPLAM=10+5
 set /a FARK=10-3
@@ -43,7 +45,7 @@ pause</pre>
 set /a B=3
 set /a C=A*B+2
 echo %C%</pre>
-<h2>İşleçler</h2>
+<h2 id="b2">İşleçler</h2>
 <table>
 <thead><tr><th>İşleç</th><th>Anlamı</th><th>Örnek</th></tr></thead>
 <tbody>
@@ -57,7 +59,7 @@ echo %C%</pre>
 </tbody>
 </table>
 <blockquote><code>&amp;</code>, <code>|</code>, <code>^</code>, <code>&lt;</code> ve <code>&gt;</code> içeren ifadeler tırnak içine alınmalıdır: <code>set /a "X=6&amp;3"</code>. Aksi halde komut yorumlayıcısı bu karakterleri kendi işleci sanır.</blockquote>
-<h2>Sayaç artırma ve döngüler</h2>
+<h2 id="b3">Sayaç artırma ve döngüler</h2>
 <pre>@echo off
 set /a SAYAC=0
 :dongu
@@ -67,7 +69,7 @@ if %SAYAC% LSS 5 goto :dongu
 echo Bitti.
 pause</pre>
 <p>Parantezli bloklar (<code>for</code>, <code>if</code>) içinde değişken değerinin güncel görünmesi için gecikmeli genişletme gerekir (bkz. <a href="egitim-10-ileri-seviye.html">İleri Seviye</a>).</p>
-<h2>Sınırlar: 32 bit tamsayı</h2>
+<h2 id="b4">Sınırlar: 32 bit tamsayı</h2>
 <ul>
 <li><code>set /a</code> işlemleri <b>32 bit işaretli tamsayı</b> ile yapılır: <code>-2147483648</code> ile <code>2147483647</code> arası.</li>
 <li>Sınır aşıldığında hata verilmez, sonuç sessizce taşar: <code>set /a X=2147483647+1</code> sonucu <code>-2147483648</code> olur.</li>
@@ -75,13 +77,13 @@ pause</pre>
 </ul>
 <pre>rem Bayt'i MB'a cevir (taşmadan once bol)
 set /a MB=BAYT/1048576</pre>
-<h2>Sekizlik sayı tuzağı</h2>
+<h2 id="b5">Sekizlik sayı tuzağı</h2>
 <p>Başında <code>0</code> bulunan sayılar <code>set /a</code> içinde <b>sekizlik</b> (octal) kabul edilir. <code>08</code> ve <code>09</code> geçersiz rakamlar içerdiği için hata verir. Bu durum özellikle <code>%time%</code> veya <code>%date%</code> içindeki saat ve dakika değerleri sayı olarak kullanıldığında sorun çıkarır:</p>
 <pre>set "DAKIKA=08"
 set /a TOPLAM=DAKIKA+5            rem HATA: gecersiz sayi
 set /a TOPLAM=1%DAKIKA% %% 100 + 5 rem DOGRU: 108 mod 100 = 8, sonuc 13</pre>
 <p>Çözümde sayının önüne <code>1</code> eklenerek <code>108</code> elde edilir, <code>%% 100</code> ile baştaki <code>1</code> atılır. <code>0x</code> ile başlayan sayılar onaltılık kabul edilir: <code>set /a X=0xFF</code> sonucu 255'tir.</p>
-<h2>Ondalık sayılar</h2>
+<h2 id="b6">Ondalık sayılar</h2>
 <p><code>set /a</code> ondalık sayıyı desteklemez. İki çözüm vardır:</p>
 <h3>1. Sayıyı 100 ile çarpıp metin olarak ayırmak</h3>
 <pre>@echo off
@@ -96,7 +98,7 @@ pause</pre>
 <pre>for /f %%s in ('powershell -NoProfile -Command "[math]::Round(7/4,2)"') do set "SONUC=%%s"
 echo %SONUC%</pre>
 <p>Bu yöntem her türlü ondalık işlemi destekler; ancak çalışması birkaç yüz milisaniye sürer.</p>
-<h2>Yüzde ve yuvarlama</h2>
+<h2 id="b7">Yüzde ve yuvarlama</h2>
 <pre>@echo off
 set /a TOPLAM=250
 set /a PARCA=65
@@ -108,7 +110,7 @@ set /a ORTALAMA=(17+5/2)/5
 echo %ORTALAMA%
 pause</pre>
 <p>Çarpma işlemi bölmeden <b>önce</b> yapılmalıdır; çünkü tamsayı bölmede küçük sonuçlar sıfıra yuvarlanır (<code>65/250*100</code> sonucu 0 olurdu).</p>
-<h2>Rastgele sayı: %random%</h2>
+<h2 id="b8">Rastgele sayı: %random%</h2>
 <p><code>%RANDOM%</code> değişkeni her okunduğunda 0 ile 32767 arasında rastgele bir tamsayı verir. İstenen aralığa kalan işlemiyle uyarlanır:</p>
 <pre>@echo off
 rem 1-6 arasi (zar)
@@ -125,7 +127,7 @@ echo %ARALIK%
 pause</pre>
 <p>Genel kural: <code>%RANDOM% %% (en_büyük - en_küçük + 1) + en_küçük</code>.</p>
 <blockquote><code>%RANDOM%</code> güvenlik amaçlı (parola, anahtar) kullanılmamalıdır; tahmin edilebilir bir üreteçtir. Parola üretmek için <a href="arac-01-guclu-parola-uretici.html">Güçlü Parola Üretici</a> aracı kullanılabilir.</blockquote>
-<h2>Örnek: basit hesap makinesi</h2>
+<h2 id="b9">Örnek: basit hesap makinesi</h2>
 <pre>@echo off
 set /p SAYI1=Birinci sayi: 
 set /p SAYI2=Ikinci sayi: 
@@ -139,7 +141,7 @@ if %SAYI2% NEQ 0 (
     echo Bolum: %BOLUM% Kalan: %KALAN%
 )
 pause</pre>
-<h2>Özet</h2>
+<h2 id="b10">Özet</h2>
 <ul>
 <li><code>set /a</code> yalnızca tamsayı ile, 32 bit sınırları içinde çalışır; bölme sonucu küçülür.</li>
 <li><code>%%</code> betikte mod işlecidir. Bit işleçleri içeren ifadeler tırnak içine alınır.</li>

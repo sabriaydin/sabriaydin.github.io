@@ -15,7 +15,7 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
 /* Yazı metinleri (yalnızca http/https üzerinde, arama ilk kullanıldığında yüklenir) */
 const full={};let fullState=0;
 const loadFull=()=>{if(fullState||!/^https?:/.test(location.protocol))return;fullState=1;
-Promise.all(P.map(p=>fetch(url(p)).then(r=>r.ok?r.text():'').then(t=>{const b=new DOMParser().parseFromString(t,'text/html').querySelector('.post .body');if(b)b.querySelectorAll('script,style').forEach(e=>e.remove());full[p.id]=fold(b?b.textContent:'')}).catch(()=>{}))).then(()=>{fullState=2;if(s.value.trim())s.oninput()})};
+Promise.all(P.map(p=>fetch(url(p)).then(r=>r.ok?r.text():'').then(t=>{const b=new DOMParser().parseFromString(t,'text/html').querySelector('.post .body');if(b)b.querySelectorAll('script,style,.px-hero,.px-toc').forEach(e=>e.remove());full[p.id]=fold(b?b.textContent:'')}).catch(()=>{}))).then(()=>{fullState=2;if(s.value.trim())s.oninput()})};
 const find=t=>{t=fold(t.trim());return t?P.filter(p=>(fold(p.title+' '+p.excerpt+' '+(C[p.cat]||''))+' '+(full[p.id]||'')).includes(t)):P};
 
 const card=(p,h='h2')=>`<a class="card tilt" href="${url(p)}"><div class="side"><span class="tag">${esc(C[p.cat]||p.cat)}</span><small><time datetime="${p.date}">${fmt(p.date)}</time><span>${p.read} dk okuma</span></small></div><div class="main"><${h} class="ct">${esc(p.title)}</${h}><p>${esc(p.excerpt)}</p></div></a>`;
@@ -109,18 +109,17 @@ cp.onclick=async()=>{const u=location.href.split('#')[0];let ok=false;
 try{await navigator.clipboard.writeText(u);ok=true}catch(e){const t=document.createElement('textarea');t.value=u;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(e2){}t.remove()}
 cp.textContent=ok?'Kopyalandı ✓':'Kopyalanamadı';setTimeout(()=>cp.textContent='Bağlantıyı kopyala',1800)};
 meta.appendChild(cp)}
-/* Şık yazı görünümü: kategori rengi, özet şeridi, içindekiler ve indirme kartı (yazı içeriği değişmez) */
-{const PAL={windows:['#0067c0','#00a4ef'],windowsos:['#1f4e8c','#3d8bd9'],html:['#e44d26','#f0a04b'],htmlaraclari:['#c0392b','#ff7e5f'],linuxos:['#e95420','#f39c12'],batch:['#1e8449','#58d68d'],batchornek:['#0e6655','#1abc9c'],sistemaraclari:['#5b3fa0','#9b6bd9'],medya:['#c2185b','#ff6f91'],ofis:['#1565c0','#42a5f5'],guvenlik:['#b71c1c','#ef5350'],gelistirici:['#283593','#7986cb'],eklentiler:['#00838f','#4dd0e1'],araclar:['#6d4c41','#bcaaa4']};
-const cat=(document.querySelector('meta[name="kategori"]')||{}).content||'',pc=PAL[cat]||['#b72a25','#ec6a63'],bd=$('.body',art);
-art.style.setProperty('--a',pc[0]);art.style.setProperty('--b',pc[1]);
-if(bd){const hs=[...bd.children].filter(e=>e.tagName==='H2');
-hs.forEach((h,k)=>{if(!h.id)h.id='b'+(k+1)});
-if(!$('.wx-hero',bd)&&!$('.px-hero',art)){const ds=(document.querySelector('meta[name="description"]')||{}).content||'';const mt0=$('.meta',art);
-const rd=mt0?(mt0.querySelector('span')||{}).textContent||'':'';
+/* Şık yazı görünümü: dosyasına işlenmemiş (yeni) yazılarda aynı görünümü çalışırken ekler */
+{const bd=$('.body',art);if(bd&&!$('.px-hero,.wx-hero,.px-toc',bd)){
+if(!document.querySelector('link[href$="yazi.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href=root+'assets/css/yazi.css';document.head.appendChild(l)}
+const PAL={windows:['#0067c0','#00a4ef'],windowsos:['#1f4e8c','#3d8bd9'],html:['#e44d26','#f0a04b'],htmlaraclari:['#c0392b','#ff7e5f'],linuxos:['#e95420','#f39c12'],batch:['#1e8449','#58d68d'],batchornek:['#0e6655','#1abc9c'],sistemaraclari:['#5b3fa0','#9b6bd9'],medya:['#c2185b','#ff6f91'],ofis:['#1565c0','#42a5f5'],guvenlik:['#b71c1c','#ef5350'],gelistirici:['#283593','#7986cb'],eklentiler:['#00838f','#4dd0e1'],araclar:['#6d4c41','#bcaaa4']};
+const cat=(document.querySelector('meta[name="kategori"]')||{}).content||'',pc=PAL[cat]||['#b72a25','#ec6a63'];
+bd.style.setProperty('--a',pc[0]);bd.style.setProperty('--b',pc[1]);
+const hs=[...bd.querySelectorAll('h2')];hs.forEach((h,k)=>{if(!h.id)h.id='b'+(k+1);if(/indir/i.test(h.textContent)){const n=h.nextElementSibling;if(n&&n.tagName==='P'&&n.querySelector('a[href^="http"]'))n.classList.add('px-dl')}});
+const ds=(document.querySelector('meta[name="description"]')||{}).content||'',mt0=$('.meta',art),rd=mt0?(mt0.querySelector('span')||{}).textContent||'':'';
 const ch=[rd,hs.length>1?hs.length+' bölüm':'',bd.querySelector(':scope>ol')?'Adım adım':''].filter(Boolean);
-const toc=hs.length>2?'<div class="px-chips px-toc">'+hs.slice(0,8).map(h=>`<a href="#${h.id}">${esc(h.textContent)}</a>`).join('')+'</div>':'';
-if(ds&&mt0)mt0.insertAdjacentHTML('afterend',`<div class="px-hero"><small>${esc(C[cat]||cat)}</small><p>${esc(ds)}</p><div class="px-chips">${ch.map(x=>`<span>${esc(x)}</span>`).join('')}</div>${toc}</div>`)}
-hs.forEach(h=>{if(/indir/i.test(h.textContent)){const n=h.nextElementSibling;if(n&&n.tagName==='P'&&n.querySelector('a[href^="http"]'))n.classList.add('px-dl')}})}}
+const toc=hs.length>2?`<nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol>${hs.map(h=>`<li><a href="#${h.id}">${esc(h.textContent)}</a></li>`).join('')}</ol></nav>`:'';
+bd.insertAdjacentHTML('afterbegin',`<div class="px-hero"><small>${esc(C[cat]||cat)}</small><p>${esc(ds)}</p><div class="px-chips">${ch.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>${toc}`)}}
 if(i>-1){
 /* Önceki / sonraki: ana sayfadaki liste sırasına göre */
 const prev=P[i-1],next=P[i+1];

@@ -65,7 +65,7 @@ for (const f of files) {
   if (problems.length) { warn(`posts/${f} listeye eklenmedi: ${problems.join('; ')}`); continue; }
 
   const b = html.match(/<div class="body">([\s\S]*?)<\/div>\s*<\/article>/);
-  const text = b ? decode(b[1].replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ')) : '';
+  const text = b ? decode(b[1].replace(/<!--px-->[\s\S]*?<!--\/px-->/g, ' ').replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ')) : '';
   const okuma = parseInt(metaTag(html, 'okuma'), 10);
   posts.push({ id, title, cat, date, time, read: okuma > 0 ? okuma : Frame.minutes(text), excerpt: desc });
 }

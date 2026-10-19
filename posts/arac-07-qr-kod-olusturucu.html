@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Web adresi, Wi-Fi bilgisi, e-posta, telefon, SMS veya kişi kartı için QR kod oluştur; PNG veya SVG olarak indir.</p><div class="px-chips"><span>3 dk okuma</span><span>3 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">İçerik türleri</a></li><li><a href="#b3">İyi bir QR kod için</a></li></ol></nav><!--/px-->
 <p>QR kodlar; web adreslerini, Wi-Fi bilgilerini ve iletişim kartlarını telefon kamerasıyla hızlıca aktarmak için kullanılır. Bu araç, kodu tarayıcıda oluşturur; girilen bilgiler hiçbir sunucuya gönderilmez. Sonuç PNG (baskı ve paylaşım) veya SVG (her boyutta net, tasarım programları için) olarak indirilebilir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}</style>
 <div class="arac">
   <label for="qr-t">İçerik türü
@@ -151,7 +153,7 @@ document.querySelectorAll('#qr-t,#qr-m,#qr-ssid,#qr-pw,#qr-enc,#qr-gizli,#qr-ea,
 ciz();
 })();
 </script>
-<h2>İçerik türleri</h2>
+<h2 id="b2">İçerik türleri</h2>
 <table>
 <thead><tr><th>Tür</th><th>Telefon kodu okuduğunda ne olur?</th></tr></thead>
 <tbody>
@@ -163,7 +165,7 @@ ciz();
 <tr><td>Kişi kartı</td><td>Ad, telefon, e-posta ve kuruluş bilgileri rehbere eklenebilir.</td></tr>
 </tbody>
 </table>
-<h2>İyi bir QR kod için</h2>
+<h2 id="b3">İyi bir QR kod için</h2>
 <ul>
 <li><b>Koyu kod, açık arka plan</b> kullanılmalıdır. Ters renkli veya düşük karşıtlıklı kodlar bazı okuyucularda çalışmaz.</li>
 <li><b>Kenar boşluğu</b> en az 4 modül bırakılmalıdır; boşluk daraldıkça okuma güçleşir.</li>

@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Flexbox özelliklerini değiştirip kutuların nasıl dizildiğini canlı gör, CSS kodunu kopyala.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Özellikler ne yapar?</a></li><li><a href="#b3">Örnek kullanım</a></li></ol></nav><!--/px-->
 <p>Flexbox, öğeleri satır ya da sütun halinde hizalamanın en pratik yoludur. Menüler, kart sıraları ve ortalama işleri için kullanılır. Özellikleri ezberlemek yerine bu oyun alanında dene; ne olduğunu görerek öğrenirsin.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="satir">
     <label for="f-d">flex-direction
@@ -68,7 +70,7 @@ const guncelle=()=>{
 guncelle();
 })();
 </script>
-<h2>Özellikler ne yapar?</h2>
+<h2 id="b2">Özellikler ne yapar?</h2>
 <table>
 <thead><tr><th>Özellik</th><th>Görevi</th></tr></thead>
 <tbody>
@@ -79,7 +81,7 @@ guncelle();
 <tr><td><code>gap</code></td><td>Öğeler arasındaki boşluğu belirler.</td></tr>
 </tbody>
 </table>
-<h2>Örnek kullanım</h2>
+<h2 id="b3">Örnek kullanım</h2>
 <pre>.kapsayici {
   display: flex;
   justify-content: space-between;

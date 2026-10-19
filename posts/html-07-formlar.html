@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>form, input türleri, label, select, textarea ve button ile kullanıcıdan veri alan formlar oluşturma.</p><div class="px-chips"><span>2 dk okuma</span><span>6 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel form</a></li><li><a href="#b2">input türleri</a></li><li><a href="#b3">Seçim kutuları</a></li><li><a href="#b4">Açılır liste ve çok satırlı metin</a></li><li><a href="#b5">Yardımcı nitelikler</a></li><li><a href="#b6">Tam örnek</a></li></ol></nav><!--/px-->
 <p>Formlar kullanıcıdan bilgi toplar: arama kutusu, üyelik, iletişim, anket... Bir form; bilgi giriş alanlarından (<code>input</code>, <code>select</code>, <code>textarea</code>) ve gönder düğmesinden oluşur.</p>
-<h2>Temel form</h2>
+<h2 id="b1">Temel form</h2>
 <pre>&lt;form action="/gonder" method="post"&gt;
   &lt;label for="ad"&gt;Adın:&lt;/label&gt;
   &lt;input type="text" id="ad" name="ad"&gt;
@@ -40,7 +42,7 @@
 <li><code>&lt;label&gt;</code>: Alanın adıdır. <code>for</code> değeri alanın <code>id</code> değeriyle aynı olursa etikete tıklayınca alan seçilir; ekran okuyucular için de gereklidir.</li>
 <li><code>name</code>: Bilgi sunucuya bu isimle gider; yazmazsan alan gönderilmez.</li>
 </ul>
-<h2>input türleri</h2>
+<h2 id="b2">input türleri</h2>
 <p><code>&lt;input&gt;</code> etiketinin <code>type</code> niteliği alanın türünü belirler. Tarayıcılar türe uygun klavye, denetim ve seçici sunar:</p>
 <table>
 <thead><tr><th>type</th><th>Ne için</th></tr></thead>
@@ -57,7 +59,7 @@
 <tr><td><code>file</code></td><td>Dosya seçici</td></tr>
 </tbody>
 </table>
-<h2>Seçim kutuları</h2>
+<h2 id="b3">Seçim kutuları</h2>
 <pre>&lt;p&gt;Hangi platformlarda oynuyorsun?&lt;/p&gt;
 &lt;label&gt;&lt;input type="checkbox" name="platform" value="pc"&gt; PC&lt;/label&gt;
 &lt;label&gt;&lt;input type="checkbox" name="platform" value="konsol"&gt; Konsol&lt;/label&gt;
@@ -66,7 +68,7 @@
 &lt;label&gt;&lt;input type="radio" name="seviye" value="yeni" checked&gt; Yeni&lt;/label&gt;
 &lt;label&gt;&lt;input type="radio" name="seviye" value="orta"&gt; Orta&lt;/label&gt;</pre>
 <p>Aynı gruptaki radyo düğmelerinin <code>name</code> değeri <b>aynı</b> olmalıdır; böylece yalnızca biri seçilebilir.</p>
-<h2>Açılır liste ve çok satırlı metin</h2>
+<h2 id="b4">Açılır liste ve çok satırlı metin</h2>
 <pre>&lt;label for="sehir"&gt;Şehir:&lt;/label&gt;
 &lt;select id="sehir" name="sehir"&gt;
   &lt;option value=""&gt;Seç&lt;/option&gt;
@@ -76,7 +78,7 @@
 
 &lt;label for="mesaj"&gt;Mesajın:&lt;/label&gt;
 &lt;textarea id="mesaj" name="mesaj" rows="4" cols="40"&gt;&lt;/textarea&gt;</pre>
-<h2>Yardımcı nitelikler</h2>
+<h2 id="b5">Yardımcı nitelikler</h2>
 <table>
 <thead><tr><th>Nitelik</th><th>Etkisi</th></tr></thead>
 <tbody>
@@ -88,7 +90,7 @@
 <tr><td><code>disabled</code></td><td>Alanı kullanılamaz yapar</td></tr>
 </tbody>
 </table>
-<h2>Tam örnek</h2>
+<h2 id="b6">Tam örnek</h2>
 <pre>&lt;form action="#" method="post"&gt;
   &lt;fieldset&gt;
     &lt;legend&gt;İletişim formu&lt;/legend&gt;

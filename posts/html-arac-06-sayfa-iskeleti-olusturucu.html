@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu al; kopyala veya indir.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Üretilen kodda neler var?</a></li></ol></nav><!--/px-->
 <p>Her yeni sayfada <code>&lt;!DOCTYPE html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;meta&gt;</code> gibi aynı satırları baştan yazmak sıkıcıdır ve hata yapmak kolaydır. Bu araç bilgilerini doldurduğun anda doğru yazılmış bir başlangıç şablonu üretir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="satir">
     <label for="baslik">Sayfa başlığı<input type="text" id="baslik" value="Sayfa Başlığı" autocomplete="off"></label>
@@ -72,13 +74,13 @@ $('indir').onclick=()=>Arac.indir($('cikti').textContent,'index.html','text/html
 uret();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Sayfa başlığını, dilini ve isteğe bağlı açıklamasını yaz.</li>
 <li>İstediğin eklemeleri işaretle. CSS veya JS dosyasını bağlarsan aynı klasörde <code>style.css</code> ve <code>script.js</code> adlı dosyaları oluşturmayı unutma.</li>
 <li>Kodu kopyala veya <b>index.html olarak indir</b>. Dosyaya çift tıklayınca tarayıcıda açılır.</li>
 </ol>
-<h2>Üretilen kodda neler var?</h2>
+<h2 id="b3">Üretilen kodda neler var?</h2>
 <ul>
 <li><code>&lt;!DOCTYPE html&gt;</code> ve <code>lang</code> niteliği: Tarayıcıya sayfanın biçimini ve dilini söyler.</li>
 <li><code>&lt;meta charset="utf-8"&gt;</code>: Türkçe karakterlerin düzgün görünmesini sağlar.</li>

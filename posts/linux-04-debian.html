@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,23 +28,24 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="px-hero"><small>Linux İşletim Sistemleri</small><p>Debian nedir, kararlı sürüm mantığı, netinst ve canlı imajlar, resmi indirme bağlantısı.</p><div class="px-chips"><span>1 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Debian kimler için uygun?</a></li><li><a href="#b2">Öne çıkan özellikler</a></li><li><a href="#b3">Sistem gereksinimleri (yaklaşık)</a></li><li><a href="#b4">Resmi indirme bağlantısı</a></li><li><a href="#b5">İndirdikten sonra</a></li></ol></nav><!--/px-->
 <p>Debian, gönüllülerin geliştirdiği, 30 yılı aşkın geçmişi olan evrensel bir işletim sistemidir. Ubuntu ve Linux Mint dahil birçok dağıtımın temelidir.</p>
-<h2>Debian kimler için uygun?</h2>
+<h2 id="b1">Debian kimler için uygun?</h2>
 <p>Kararlılığa ve uzun ömre önem verenler, sunucu kurulumları ve sistemi iyi tanımak isteyen orta seviye kullanıcılar.</p>
-<h2>Öne çıkan özellikler</h2>
+<h2 id="b2">Öne çıkan özellikler</h2>
 <ul>
 <li><b>Masaüstü ortamı</b>: GNOME, KDE Plasma, Xfce ve diğerleri (kurulum sırasında seçilir).</li>
 <li><b>Kararlı (stable)</b> sürüm çok iyi test edilir; yazılımlar yeni değil ama sağlamdır.</li>
 <li>İndirme sayfasında küçük <b>netinst</b> imajı (kurulum sırasında internetten paket çeker) ve masaüstü ortamlı <b>canlı (live)</b> imajlar bulunur.</li>
 <li>Tamamen özgür yazılım ilkesine bağlıdır; bazı kapalı sürücüler için ayrı seçenek gerekebilir.</li>
 </ul>
-<h2>Sistem gereksinimleri (yaklaşık)</h2>
+<h2 id="b3">Sistem gereksinimleri (yaklaşık)</h2>
 <p>Masaüstü ortamına göre değişir; 2 GB RAM ve 20 GB disk rahat bir başlangıçtır. Ayrıntı için kurulum kılavuzuna bak.</p>
-<h2>Resmi indirme bağlantısı</h2>
-<p>Debian imajını yalnızca geliştiricisinin kendi sitesinden indir: <a href="https://www.debian.org/distrib/">debian.org/distrib</a></p>
+<h2 id="b4">Resmi indirme bağlantısı</h2>
+<p class="px-dl">Debian imajını yalnızca geliştiricisinin kendi sitesinden indir: <a href="https://www.debian.org/distrib/">debian.org/distrib</a></p>
 <blockquote>Bağlantı, yazının hazırlandığı tarihte geçerliydi. Sayfa adresi veya sürüm numarası zamanla değişebilir; sürüm bilgilerini her zaman resmi sayfadan kontrol et. Üçüncü taraf "indirme" sitelerinden uzak dur.</blockquote>
-<h2>İndirdikten sonra</h2>
+<h2 id="b5">İndirdikten sonra</h2>
 <ol>
 <li>İndirdiğin dosya bir <b>ISO</b> imajıdır; bunu doğrudan çalıştıramazsın, USB belleğe yazman gerekir.</li>
 <li>Resmi sayfadaki <b>sağlama (checksum)</b> değeriyle dosyanı karşılaştır. Nasıl yapılacağı <a href="linux-01-linux-dagitimi-secme-ve-kurulum-usb.html">giriş yazısında</a> anlatılıyor.</li>

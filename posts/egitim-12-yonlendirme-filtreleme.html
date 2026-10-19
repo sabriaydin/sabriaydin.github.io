@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>&gt;, &gt;&gt;, &lt;, |, 2&gt;&amp;1 ve nul ile çıktıları dosyaya yönlendirme, komutları birbirine bağlama; find, findstr, sort ve more ile metin filtreleme.</p><div class="px-chips"><span>3 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Çıktıyı dosyaya yönlendirme</a></li><li><a href="#b2">Komutları art arda bağlama</a></li><li><a href="#b3">Filtreleme: find</a></li><li><a href="#b4">Gelişmiş filtreleme: findstr</a></li><li><a href="#b5">Sıralama ve sayfalama</a></li><li><a href="#b6">Pratik örnekler</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Komut çıktıları ekrana yazılmak zorunda değildir. Bir dosyaya kaydedilebilir, başka bir komuta girdi olarak verilebilir veya tamamen gizlenebilir. Filtreleme komutlarıyla birleştirildiğinde bu yöntemler, uzun çıktıların içinden gereken bilginin bulunmasını sağlar.</p>
-<h2>Çıktıyı dosyaya yönlendirme</h2>
+<h2 id="b1">Çıktıyı dosyaya yönlendirme</h2>
 <table>
 <thead><tr><th>İşleç</th><th>Anlamı</th><th>Örnek</th></tr></thead>
 <tbody>
@@ -60,7 +62,7 @@ if errorlevel 1 (echo Internet yok) else (echo Internet var)</pre>
 <p><code>echo 5&gt;dosya.txt</code> komutunda <code>5&gt;</code> ifadesi "5 numaralı akışı yönlendir" anlamına gelir; dosyaya <code>5</code> yazılmaz, boş dosya oluşur. Böyle durumlarda yönlendirme komutun başına alınır:</p>
 <pre>&gt;dosya.txt echo 5
 &gt;&gt;log.txt echo Satir 5</pre>
-<h2>Komutları art arda bağlama</h2>
+<h2 id="b2">Komutları art arda bağlama</h2>
 <table>
 <thead><tr><th>İşleç</th><th>Anlamı</th></tr></thead>
 <tbody>
@@ -72,7 +74,7 @@ if errorlevel 1 (echo Internet yok) else (echo Internet var)</pre>
 <pre>md yedek &amp;&amp; echo Klasor olusturuldu
 ping -n 1 sunucu &gt; nul || echo Sunucuya ulasilamiyor</pre>
 <p><code>&amp;</code>, <code>|</code>, <code>&lt;</code>, <code>&gt;</code> gibi karakterleri yazı olarak göstermek gerektiğinde önlerine <code>^</code> konur (bkz. <a href="egitim-10-ileri-seviye.html">İleri Seviye</a>).</p>
-<h2>Filtreleme: find</h2>
+<h2 id="b3">Filtreleme: find</h2>
 <p><code>find</code>, metin içinde basit arama yapar.</p>
 <table>
 <thead><tr><th>Seçenek</th><th>Anlamı</th></tr></thead>
@@ -87,7 +89,7 @@ ping -n 1 sunucu &gt; nul || echo Sunucuya ulasilamiyor</pre>
 <pre>tasklist | find /i "chrome"
 type log.txt | find /c /v ""     rem toplam satir sayisi
 find /i "hata" log.txt</pre>
-<h2>Gelişmiş filtreleme: findstr</h2>
+<h2 id="b4">Gelişmiş filtreleme: findstr</h2>
 <p><code>findstr</code>, düzenli ifadeleri ve birden fazla arama metnini destekler; <code>find</code> komutundan daha güçlüdür.</p>
 <table>
 <thead><tr><th>Seçenek</th><th>Anlamı</th></tr></thead>
@@ -114,7 +116,7 @@ findstr /s /i /m "parola" C:\Notlar\*.txt
 rem yalnizca rakamlardan olusan satirlar
 findstr /r "^[0-9][0-9]*$" liste.txt</pre>
 <blockquote><code>findstr</code> düzenli ifadelerinde <code>+</code>, <code>?</code> ve <code>|</code> desteklenmez. "A veya B" için <code>/c:"A" /c:"B"</code> biçimi kullanılır.</blockquote>
-<h2>Sıralama ve sayfalama</h2>
+<h2 id="b5">Sıralama ve sayfalama</h2>
 <pre>sort isimler.txt                 rem A-Z siralar
 sort /r isimler.txt              rem Z-A siralar
 dir /b | sort &gt; sirali_liste.txt
@@ -125,7 +127,7 @@ clip &lt; metin.txt                 rem icerigi panoya kopyalar</pre>
 <li><code>more</code>, çıktıyı sayfa sayfa gösterir; <code>Boşluk</code> sonraki sayfaya, <code>q</code> çıkışa götürür.</li>
 <li><code>clip</code>, girdiyi panoya kopyalar: <code>ipconfig /all | clip</code>.</li>
 </ul>
-<h2>Pratik örnekler</h2>
+<h2 id="b6">Pratik örnekler</h2>
 <pre>rem 1) Bir programin calisip calismadigini kontrol et
 tasklist | find /i "notepad.exe" &gt; nul &amp;&amp; echo Calisiyor || echo Calismiyor
 
@@ -137,7 +139,7 @@ findstr /i "hata" log.txt &gt; hatalar.txt
 
 rem 4) Dosya sayisi
 dir /b /a-d | find /c /v ""</pre>
-<h2>Özet</h2>
+<h2 id="b7">Özet</h2>
 <ul>
 <li><code>&gt;</code> üzerine yazar, <code>&gt;&gt;</code> sona ekler, <code>2&gt;&amp;1</code> hata çıktısını normal çıktıya katar, <code>nul</code> çıktıyı yok eder.</li>
 <li><code>|</code> ile komutlar birbirine bağlanır; <code>&amp;&amp;</code> başarıda, <code>||</code> hatada ikinci komutu çalıştırır.</li>

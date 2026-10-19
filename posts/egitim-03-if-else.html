@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>if ile metin, sayı, dosya ve hata kodu karşılaştırmaları; else yazımı ve sık yapılan parantez hataları.</p><div class="px-chips"><span>2 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Metin karşılaştırma</a></li><li><a href="#b2">if ve else</a></li><li><a href="#b3">Sayı karşılaştırma operatörleri</a></li><li><a href="#b4">Dosya ve klasör kontrolü</a></li><li><a href="#b5">Değişken tanımlı mı?</a></li><li><a href="#b6">Hata kodu kontrolü</a></li><li><a href="#b7">Birden fazla koşul</a></li></ol></nav><!--/px-->
 <p><code>if</code> komutu bir şart doğruysa komut çalıştırır. Menüler, dosya kontrolleri ve hata yönetimi hep <code>if</code> ile kurulur.</p>
-<h2>Metin karşılaştırma</h2>
+<h2 id="b1">Metin karşılaştırma</h2>
 <pre>@echo off
 set /p "cevap=Devam edilsin mi? (e/h): "
 if "%cevap%"=="e" echo Devam ediliyor...
@@ -37,7 +39,7 @@ if "%cevap%"=="h" echo Iptal edildi.
 pause</pre>
 <p>Değişkeni <b>çift tırnak</b> içine almak önemlidir. Kullanıcı hiçbir şey yazmazsa tırnaksız <code>if %cevap%==e</code> satırı <code>if ==e</code> olur ve hata verir. Büyük/küçük harf farkını yok saymak için <code>/i</code> ekle:</p>
 <pre>if /i "%cevap%"=="E" echo Evet</pre>
-<h2>if ve else</h2>
+<h2 id="b2">if ve else</h2>
 <p><code>else</code>, <code>if</code> bloğunun kapanış parantezinin <b>aynı satırında</b> olmalıdır:</p>
 <pre>@echo off
 set /p "yas=Yasin kac? "
@@ -54,7 +56,7 @@ pause</pre>
 else (
     echo Kucuksun.
 )</pre>
-<h2>Sayı karşılaştırma operatörleri</h2>
+<h2 id="b3">Sayı karşılaştırma operatörleri</h2>
 <p>Sayılarda <code>==</code> yerine aşağıdaki kısaltmaları kullanırsan değerler sayı olarak karşılaştırılır. <code>==</code> ise metin karşılaştırır; metin olarak "10", "9"dan küçüktür.</p>
 <table>
 <thead><tr><th>Operatör</th><th>Anlamı</th></tr></thead>
@@ -67,7 +69,7 @@ else (
 <tr><td><code>geq</code></td><td>büyük veya eşit</td></tr>
 </tbody>
 </table>
-<h2>Dosya ve klasör kontrolü</h2>
+<h2 id="b4">Dosya ve klasör kontrolü</h2>
 <pre>@echo off
 if exist "C:\Yedek" (
     echo Yedek klasoru var.
@@ -77,9 +79,9 @@ if exist "C:\Yedek" (
 )
 pause</pre>
 <p>Tersi için <code>if not exist</code> yazılır. Yolun sonuna ters bölü ekleyerek (<code>"C:\Yedek\"</code>) yalnızca klasör olup olmadığını kontrol edebilirsin.</p>
-<h2>Değişken tanımlı mı?</h2>
+<h2 id="b5">Değişken tanımlı mı?</h2>
 <pre>if defined ad (echo ad tanimli) else (echo ad tanimli degil)</pre>
-<h2>Hata kodu kontrolü</h2>
+<h2 id="b6">Hata kodu kontrolü</h2>
 <p>Çalışan her komut bir çıkış kodu bırakır. 0 başarı demektir. <code>if errorlevel 1</code> ifadesi, çıkış kodu 1 <b>veya daha büyükse</b> doğrudur. Ayrıntısı 8. derste.</p>
 <pre>@echo off
 ping -n 1 google.com &gt;nul
@@ -89,7 +91,7 @@ if errorlevel 1 (
     echo Internet var.
 )
 pause</pre>
-<h2>Birden fazla koşul</h2>
+<h2 id="b7">Birden fazla koşul</h2>
 <p>Batch'te <code>and</code> ve <code>or</code> yoktur. "Ve" için <code>if</code> satırlarını art arda yazarsın, "veya" için bir işaret değişkeni kullanırsın:</p>
 <pre>rem VE: ikisi de dogruysa
 if "%ad%"=="Sabri" if "%sehir%"=="Izmir" echo Ikisi de dogru

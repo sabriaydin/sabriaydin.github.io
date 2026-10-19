@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,16 +28,17 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>certutil ile bir dosyanın SHA256, SHA512, SHA1 veya MD5 özet değerini hesaplayıp indirme sayfasındaki değerle karşılaştıran ve sonuçları kaydeden batch uygulaması.</p><div class="px-chips"><span>3 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
 <p>İndirilen bir programın, yazılımı yayımlayan kişi tarafından hazırlanan dosyayla birebir aynı olduğundan emin olmak güvenlik açısından önemlidir. Güvenilir yazılım sitelerinin çoğu, indirme bağlantısının yanında dosyanın <b>özet (hash) değerini</b> yayımlar. Dosya yolda bozulursa veya değiştirilirse özet değeri tamamen farklı çıkar. Bu uygulama, özet değerini hesaplar ve yayımlanan değerle karşılaştırır.</p>
-<h2>Ne yapar?</h2>
+<h2 id="b1">Ne yapar?</h2>
 <ul>
 <li>Sürükle-bırak veya yol yazma ile verilen dosyanın özetini hesaplar.</li>
 <li>SHA256 (önerilen), SHA512, SHA1 ve MD5 algoritmalarını destekler.</li>
 <li>İsteğe bağlı olarak girilen beklenen değerle karşılaştırır ve <b>DOĞRULANDI</b> veya <b>UYUŞMUYOR</b> sonucunu verir.</li>
 <li>Her işlemi tarih ve saatle birlikte <code>hash_kayitlari.txt</code> dosyasına ekler.</li>
 </ul>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Kod Not Defteri'ne yapıştırılır ve <code>hash_dogrulayici.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
 <li>Dosyaya çift tıklanarak çalıştırılır.</li>
@@ -123,7 +125,7 @@ echo     kullaniliyor olabilir veya okuma izniniz yok.
 echo.
 pause
 exit /b 1</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b><code>%~1</code>:</b> Betiğe sürüklenen dosyanın yolunu verir. Yol verilmediyse <code>set /p</code> ile kullanıcıdan istenir; <code>%DOSYA:"=%</code> ifadesi yoldaki tırnak işaretlerini temizler.</li>
 <li><b><code>certutil -hashfile</code>:</b> Windows'un yerleşik komutudur ve ek yazılım gerektirmez. Çıktının ilk satırı açıklama, ikinci satırı özet değeridir; <code>skip=1</code> ilk satırı atlar.</li>
@@ -132,7 +134,7 @@ exit /b 1</pre>
 <li><b>Karşılaştırma:</b> <code>if /i</code> büyük/küçük harf farkını yok sayar; çünkü özet değerleri hem büyük hem küçük harfle yazılabilir.</li>
 <li><b>Kayıt:</b> <code>&gt;&gt;"%~dp0hash_kayitlari.txt"</code> sonuçları betiğin bulunduğu klasördeki dosyaya ekler.</li>
 </ul>
-<h2>Sonuçların yorumlanması</h2>
+<h2 id="b4">Sonuçların yorumlanması</h2>
 <ul>
 <li><b>DOĞRULANDI:</b> Dosya, yayımlanan dosyayla birebir aynıdır.</li>
 <li><b>UYUŞMUYOR:</b> Dosya indirme sırasında bozulmuş, eksik inmiş veya değiştirilmiş olabilir. Dosya silinmeli, yeniden indirilmeli ve özet değerinin <b>resmî siteden</b> alındığından emin olunmalıdır.</li>

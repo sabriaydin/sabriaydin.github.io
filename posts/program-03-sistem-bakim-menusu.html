@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Geçici dosyaları temizleyen, DNS önbelleğini sıfırlayan, disk ve sistem bilgisini gösteren menülü batch programı.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
 <p>Bu program tek pencerede numaralı bir menü sunar: geçici dosyaları temizleme, DNS önbelleğini sıfırlama, disk doluluğunu görme ve temel sistem bilgisi. Seçim yaptıktan sonra menüye geri döner, <b>Çıkış</b> diyene kadar açık kalır.</p>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
 <li>Kodu <code>bakim.bat</code> adıyla kaydet.</li>
 <li>Çift tıkla. DNS temizleme seçeneği için dosyaya <b>sağ tık &gt; Yönetici olarak çalıştır</b> demelisin; diğer seçenekler normal kullanıcıyla çalışır.</li>
@@ -107,7 +109,7 @@ goto :menu
 
 :cikis
 exit /b 0</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b2">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b>Menü döngüsü</b>: Her bölüm işini bitirince <code>goto :menu</code> ile başa döner. <code>cls</code> ekranı temizleyerek menüyü düzenli tutar.</li>
 <li><b>choice</b>: <code>/c 12345</code> yalnızca bu tuşları kabul eder, <code>/n</code> tuş listesini gizler. Sonuç <code>errorlevel</code> olarak gelir ve <b>büyükten küçüğe</b> kontrol edilir; çünkü <code>if errorlevel 3</code> "3 veya daha büyükse" demektir.</li>
@@ -115,7 +117,7 @@ exit /b 0</pre>
 <li><b>Yönetici kontrolü</b>: <code>fltmc</code> komutu yalnızca yönetici izniyle çalışır. Başarısız olursa <code>||</code> ile uyarı bölümüne atlanır.</li>
 <li><b>Disk ve RAM</b>: Bu bilgiler Windows'un kendi aracı PowerShell ile alınır. Batch tek başına GB hesabı yapamaz; bu yüzden <code>powershell -Command</code> ile kısa bir komut çağrılır.</li>
 </ul>
-<h2>Özelleştirme</h2>
+<h2 id="b3">Özelleştirme</h2>
 <ul>
 <li>Yeni bir seçenek eklemek için menüye satır yaz, <code>choice /c</code> listesine rakamı ekle (<code>123456</code>), yeni <code>if errorlevel 6</code> satırını <b>en üste</b> koy ve bölümünü yaz.</li>
 <li>Yazıcı kuyruğunu temizleme, Windows güncelleme önbelleği gibi işlemler yönetici izni gerektirir; eklersen <code>fltmc</code> kontrolünü kullan.</li>

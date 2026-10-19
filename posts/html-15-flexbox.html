@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>display: flex ile öğeleri yatay veya dikey dizme, hizalama, boşluk bırakma, satıra sarma ve esnek boyutlandırma.</p><div class="px-chips"><span>2 dk okuma</span><span>6 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel mantık</a></li><li><a href="#b2">Kapsayıcı özellikleri</a></li><li><a href="#b3">Sık kullanılan örnekler</a></li><li><a href="#b4">Öğe özellikleri</a></li><li><a href="#b5">Kart sırası örneği</a></li><li><a href="#b6">Özet</a></li></ol></nav><!--/px-->
 <p>Flexbox, öğeleri tek bir sıra (yatay veya dikey) üzerinde düzenlemek için tasarlanmış yerleşim yöntemidir. Menüler, kart sıraları, ortalama ve eşit aralıklı dizme işlerinde yaygın olarak kullanılır.</p>
-<h2>Temel mantık</h2>
+<h2 id="b1">Temel mantık</h2>
 <p>Bir öğeye <code>display: flex</code> verildiğinde o öğe <b>flex kapsayıcı</b>, doğrudan çocukları ise <b>flex öğeleri</b> olur.</p>
 <pre>&lt;div class="sira"&gt;
   &lt;div&gt;1&lt;/div&gt;
@@ -41,7 +43,7 @@
   display: flex;
 }</pre>
 <p>Çocuklar artık alt alta değil, yan yana dizilir. İki eksen vardır: <b>ana eksen</b> (öğelerin dizildiği yön, varsayılan yatay) ve <b>çapraz eksen</b> (ana eksene dik yön).</p>
-<h2>Kapsayıcı özellikleri</h2>
+<h2 id="b2">Kapsayıcı özellikleri</h2>
 <table>
 <thead><tr><th>Özellik</th><th>Değerler</th><th>Etkisi</th></tr></thead>
 <tbody>
@@ -52,7 +54,7 @@
 <tr><td><code>gap</code></td><td><code>16px</code>, <code>1rem 2rem</code></td><td>Öğeler arasında boşluk bırakır (<code>margin</code> gerekmez).</td></tr>
 </tbody>
 </table>
-<h2>Sık kullanılan örnekler</h2>
+<h2 id="b3">Sık kullanılan örnekler</h2>
 <h3>Yatay menü</h3>
 <pre>nav ul {
   display: flex;
@@ -73,7 +75,7 @@
   justify-content: space-between;
   align-items: center;
 }</pre>
-<h2>Öğe özellikleri</h2>
+<h2 id="b4">Öğe özellikleri</h2>
 <table>
 <thead><tr><th>Özellik</th><th>Etkisi</th></tr></thead>
 <tbody>
@@ -87,7 +89,7 @@
 </table>
 <pre>.yan-panel { width: 240px; }
 .icerik    { flex: 1; }          /* kalan alanı doldurur */</pre>
-<h2>Kart sırası örneği</h2>
+<h2 id="b5">Kart sırası örneği</h2>
 <pre>.kartlar {
   display: flex;
   flex-wrap: wrap;
@@ -98,7 +100,7 @@
 }</pre>
 <p>Bu yapıda pencere daraldıkça kartlar otomatik olarak alt satıra geçer; ayrıca bir <code>@media</code> kuralı gerekmez.</p>
 <blockquote><code>justify-content</code> ve <code>align-items</code> değerleri <code>flex-direction: column</code> olduğunda ters çalışır: ana eksen dikey olduğu için <code>justify-content</code> dikey hizalamayı belirler.</blockquote>
-<h2>Özet</h2>
+<h2 id="b6">Özet</h2>
 <ul>
 <li>Kapsayıcıya <code>display: flex</code> verilir; çocuklar flex öğesi olur.</li>
 <li>Ana eksen için <code>justify-content</code>, çapraz eksen için <code>align-items</code> kullanılır.</li>

@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -29,9 +30,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0067c0;--b:#00a4ef">
+<!--px--><div class="px-hero"><small>Windows Rehber</small><p>Bilgisayarın Windows 11&#x27;e uygunluğunu kontrol etme, TPM 2.0 ve Secure Boot ayarları.</p><div class="px-chips"><span>5 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel gereksinimler</a></li><li><a href="#b2">Uygunluk kontrolü</a></li><li><a href="#b3">TPM durumunu görme</a></li><li><a href="#b4">TPM ve Secure Boot&#x27;u açma</a></li><li><a href="#b5">Desteklenmeyen bilgisayar</a></li></ol></nav><!--/px-->
 <p>Windows 11, Windows 10'a göre daha sıkı donanım şartları ister. Uygun olup olmadığın birkaç adımda anlaşılır.</p>
-<h2>Temel gereksinimler</h2>
+<h2 id="b1">Temel gereksinimler</h2>
 <ul>
 <li><b>İşlemci</b>: 1 GHz üzeri, 2 veya daha fazla çekirdek, desteklenen işlemci listesinde (genelde Intel 8. nesil ve sonrası, AMD Ryzen 2000 ve sonrası).</li>
 <li><b>RAM</b>: En az 4 GB.</li>
@@ -40,21 +42,21 @@
 <li><b>TPM</b>: 2.0 sürümü.</li>
 <li><b>Ekran</b>: 9 inç üzeri, 720p.</li>
 </ul>
-<h2>Uygunluk kontrolü</h2>
+<h2 id="b2">Uygunluk kontrolü</h2>
 <ol>
 <li><b>Ayarlar &gt; Windows Update</b> sayfasında Windows 11 teklifi varsa cihaz uygundur.</li>
 <li>Microsoft'un <b>PC Sağlık Denetimi</b> uygulamasıyla ayrıntılı rapor alınır.</li>
 </ol>
-<h2>TPM durumunu görme</h2>
+<h2 id="b3">TPM durumunu görme</h2>
 <p><code>Win + R</code> ile <code>tpm.msc</code> yaz. "TPM kullanıma hazır" ve "Belirtim sürümü: 2.0" görünmelidir.</p>
-<h2>TPM ve Secure Boot'u açma</h2>
+<h2 id="b4">TPM ve Secure Boot'u açma</h2>
 <ol>
 <li>BIOS/UEFI ekranına gir (açılışta Del, F2 vb.).</li>
 <li>Intel'de <b>PTT</b>, AMD'de <b>fTPM</b> seçeneğini <b>Enabled</b> yap.</li>
 <li><b>Secure Boot</b>'u etkinleştir. Gerekirse disk <b>GPT</b> ve önyükleme modu <b>UEFI</b> olmalıdır.</li>
 </ol>
 <p>Disk MBR ise Windows 11 için GPT'ye dönüştürme gerekir: yönetici terminalinde <code>mbr2gpt /validate /allowFullOS</code> ile uygunluk, <code>mbr2gpt /convert /allowFullOS</code> ile dönüşüm yapılır. Önce yedek al.</p>
-<h2>Desteklenmeyen bilgisayar</h2>
+<h2 id="b5">Desteklenmeyen bilgisayar</h2>
 <ul>
 <li>Windows 10 desteği Ekim 2025'te sona ermiştir; güvenlik güncellemeleri için Windows 11'e geçmek veya Microsoft'un sunduğu genişletilmiş güvenlik güncellemelerine bakmak gerekir.</li>
 <li>Gereksinimleri atlatan yöntemler Microsoft tarafından desteklenmez ve güncelleme sorunları çıkarabilir.</li>

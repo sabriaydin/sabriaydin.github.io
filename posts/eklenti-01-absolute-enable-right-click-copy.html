@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,16 +28,17 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#00838f;--b:#4dd0e1">
+<!--px--><div class="px-hero"><small>Tarayıcı Eklentileri</small><p>Sağ tık ve kopyalamayı engelleyen sitelerde bu kısıtı kaldıran eklentinin Chrome, Edge ve Firefox indirme bağlantıları.</p><div class="px-chips"><span>1 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">İndirme bağlantıları</a></li><li><a href="#b3">Opera için</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Dikkat edilmesi gerekenler</a></li></ol></nav><!--/px-->
 <p>Bazı web siteleri sağ tıklamayı, metin seçmeyi ve kopyalamayı engeller. <b>Absolute Enable Right Click &amp; Copy</b>, bu kısıtlamaları kaldırıp sayfayı normal bir sayfa gibi kullanmanı sağlayan bir tarayıcı eklentisidir.</p>
-<h2>Ne işe yarar?</h2>
+<h2 id="b1">Ne işe yarar?</h2>
 <ul>
 <li>Sağ tık menüsünü yeniden açar.</li>
 <li>Metin seçmeyi ve kopyalamayı etkinleştirir.</li>
 <li>Kopyalamayı engelleyen uyarı pencerelerini devre dışı bırakır.</li>
 <li>Gerektiğinde tüm korumaları kaldıran "Absolute Mode" seçeneği sunar (Firefox sürümünün açıklamasına göre).</li>
 </ul>
-<h2>İndirme bağlantıları</h2>
+<h2 id="b2">İndirme bağlantıları</h2>
 <table>
 <thead><tr><th>Tarayıcı</th><th>Bağlantı</th><th>Not</th></tr></thead>
 <tbody>
@@ -46,16 +48,16 @@
 <tr><td>Opera</td><td>Mevcut değil</td><td>Aşağıdaki Opera bölümüne bakın</td></tr>
 </tbody>
 </table>
-<h2>Opera için</h2>
+<h2 id="b3">Opera için</h2>
 <p>Opera, Chrome Web Store eklentilerini kurabilir. Opera eklenti mağazasından <b>Install Chrome Extensions</b> eklentisini kur, sonra yukarıdaki Chrome bağlantısından eklentiyi ekle.</p>
-<h2>Kurulum</h2>
+<h2 id="b4">Kurulum</h2>
 <ol>
 <li>Tarayıcına uygun bağlantıyı aç.</li>
 <li><b>Ekle</b> veya <b>Chrome'a ekle</b> düğmesine tıkla ve izin penceresini onayla.</li>
 <li>Sağ tıkın çalışmadığı bir sayfada eklenti simgesine tıklayıp açık duruma getir.</li>
 <li>Simge görünmüyorsa tarayıcının eklentiler (yapboz) menüsünden sabitle.</li>
 </ol>
-<h2>Dikkat edilmesi gerekenler</h2>
+<h2 id="b5">Dikkat edilmesi gerekenler</h2>
 <ul>
 <li>Eklenti, çalışabilmek için <b>tüm sitelerdeki verilere erişim</b> izni ister. Yalnızca güvendiğin yayıncıdan kur.</li>
 <li>Chrome ve Edge sürümleri, eklentinin Manifest V3'e taşınmış topluluk sürümleridir; ilk sürümün yapımcısıyla aynı kişi olmayabilir. Kurulumdan sonra eklentiyi yalnızca ihtiyacın olduğunda açmak daha güvenlidir.</li>

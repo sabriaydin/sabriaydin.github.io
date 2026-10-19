@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>İki veya üç renkle doğrusal ya da dairesel renk geçişi tasarla, CSS kodunu kopyala.</p><div class="px-chips"><span>2 dk okuma</span><span>3 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Örnek kullanım</a></li></ol></nav><!--/px-->
 <p>Gradyan, iki ya da daha fazla rengin yumuşak geçişle birleşmesidir. Butonlarda, kart arka planlarında ve başlık alanlarında şık görünür. Bu araçla renkleri seçip sonucu görürsün ve CSS kodunu hazır alırsın.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <div class="arac">
   <div class="kutu" id="kutu" style="height:180px" role="img" aria-label="Gradyan önizlemesi"></div>
   <div class="satir">
@@ -69,14 +71,14 @@ $('rast').onclick=()=>{$('c1').value=rastgele();$('c2').value=rastgele();$('c3')
 guncelle();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ul>
 <li><b>Tür</b>: Doğrusal geçiş bir yönde ilerler; dairesel geçiş merkezden dışarı yayılır.</li>
 <li><b>Açı</b>: Doğrusal geçişin yönü. 0° aşağıdan yukarı, 90° soldan sağa, 180° yukarıdan aşağı demektir.</li>
 <li>İstersen <b>üçüncü renk</b> ekleyerek daha zengin geçişler yapabilirsin.</li>
 <li>Beğendiğin kodu kopyalayıp CSS dosyandaki istediğin kurala yapıştır.</li>
 </ul>
-<h2>Örnek kullanım</h2>
+<h2 id="b3">Örnek kullanım</h2>
 <pre>.baslik-alani {
   background: #b72a25;
   background: linear-gradient(135deg, #b72a25, #1e1e21);

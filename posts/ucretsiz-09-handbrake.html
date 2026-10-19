@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,18 +28,19 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#c2185b;--b:#ff6f91">
+<!--px--><div class="px-hero"><small>Medya Programları</small><p>HandBrake nedir, videolar nasıl dönüştürülür ve resmi indirme bağlantısı.</p><div class="px-chips"><span>1 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantıları</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li></ol></nav><!--/px-->
 <p><b>HandBrake</b>, video dosyalarını başka biçimlere dönüştüren ücretsiz ve açık kaynaklı bir programdır. Dosya boyutunu küçültmek veya videoyu telefon, TV gibi cihazlara uygun biçime çevirmek için kullanılır. Hesap gerektirmez ve tüm işlem bilgisayarda yapılır.</p>
-<h2>Ne işe yarar?</h2>
+<h2 id="b1">Ne işe yarar?</h2>
 <ul>
 <li>Videoyu MP4 ve MKV biçimlerine dönüştürür.</li>
 <li>Hazır cihaz ayarları (preset) sunar.</li>
 <li>Çözünürlük, kalite ve altyazı ayarları yapılabilir.</li>
 <li>Komut satırı sürümü bulunur.</li>
 </ul>
-<h2>Desteklenen platformlar</h2>
+<h2 id="b2">Desteklenen platformlar</h2>
 <p>Windows 10 ve üzeri (x64, ARM64), macOS 10.13 ve üzeri, Linux (Flatpak).</p>
-<h2>Resmi indirme bağlantıları</h2>
+<h2 id="b3">Resmi indirme bağlantıları</h2>
 <table>
 <thead><tr><th>Seçenek</th><th>Bağlantı</th></tr></thead>
 <tbody>
@@ -46,13 +48,13 @@
 <tr><td>Resmi ana sayfa</td><td><a href="https://handbrake.fr/">handbrake.fr</a></td></tr>
 </tbody>
 </table>
-<h2>Kurulum</h2>
+<h2 id="b4">Kurulum</h2>
 <ol>
 <li>İşletim sistemine uygun sürümü indirip kur.</li>
 <li><b>Open Source</b> düğmesiyle videoyu seç.</li>
 <li>Bir <b>Preset</b> seç, hedef dosya adını belirle ve <b>Start Encode</b> düğmesine bas.</li>
 </ol>
-<h2>Güvenli indirme ve notlar</h2>
+<h2 id="b5">Güvenli indirme ve notlar</h2>
 <ul>
 <li>Sayfada indirme bütünlüğünü doğrulamak için sağlama değerleri ve OpenPGP imzaları yayımlanır.</li>
 <li>Resmi kaynaklar handbrake.fr, GitHub ve Flathub'dır; resmî olmayan yansı siteleri güvenli olmayabilir.</li>

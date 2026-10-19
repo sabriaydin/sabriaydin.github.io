@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>Etiket, sınıf, kimlik, alt öğe ve nitelik seçicileri, :hover gibi sahte sınıflar, özgüllük hesabı ve CSS değişkenleri.</p><div class="px-chips"><span>3 dk okuma</span><span>8 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel seçiciler</a></li><li><a href="#b2">İlişki seçicileri</a></li><li><a href="#b3">Nitelik seçicileri</a></li><li><a href="#b4">Sahte sınıflar ve sahte öğeler</a></li><li><a href="#b5">Özgüllük: hangi kural kazanır?</a></li><li><a href="#b6">Kalıtım</a></li><li><a href="#b7">CSS değişkenleri</a></li><li><a href="#b8">Özet</a></li></ol></nav><!--/px-->
 <p>Seçici, bir CSS kuralının hangi öğelere uygulanacağını belirler. Doğru seçici kullanımı, kodun kısa ve bakımı kolay olmasını sağlar. Aynı öğeye birden fazla kural uygulandığında hangisinin geçerli olacağı ise <b>özgüllük</b> ve <b>sıra</b> kurallarıyla belirlenir.</p>
-<h2>Temel seçiciler</h2>
+<h2 id="b1">Temel seçiciler</h2>
 <table>
 <thead><tr><th>Seçici</th><th>Örnek</th><th>Hedef</th></tr></thead>
 <tbody>
@@ -45,7 +47,7 @@
 .uyari { color: #b00020; }
 .ozel  { font-weight: 700; }</pre>
 <p>Bir öğeye birden fazla sınıf boşlukla ayrılarak verilebilir. Biçimlendirme için çoğunlukla sınıf seçicisi tercih edilir; <code>id</code> seçicisi hem özgüllüğü yükselttiği hem de yeniden kullanılamadığı için stil vermede önerilmez.</p>
-<h2>İlişki seçicileri</h2>
+<h2 id="b2">İlişki seçicileri</h2>
 <table>
 <thead><tr><th>Seçici</th><th>Örnek</th><th>Açıklama</th></tr></thead>
 <tbody>
@@ -55,12 +57,12 @@
 <tr><td>Sonraki tüm kardeşler</td><td><code>h2 ~ p { }</code></td><td><code>h2</code> öğesinden sonra gelen aynı düzeydeki tüm <code>p</code> öğeleri</td></tr>
 </tbody>
 </table>
-<h2>Nitelik seçicileri</h2>
+<h2 id="b3">Nitelik seçicileri</h2>
 <pre>a[target="_blank"] { color: green; }
 input[type="email"] { border-color: blue; }
 a[href^="https"] { }   /* https ile başlayan */
 a[href$=".pdf"] { }    /* .pdf ile biten */</pre>
-<h2>Sahte sınıflar ve sahte öğeler</h2>
+<h2 id="b4">Sahte sınıflar ve sahte öğeler</h2>
 <p>Sahte sınıf (<code>:</code>) bir öğenin belirli bir durumunu hedefler. Sahte öğe (<code>::</code>) ise öğenin bir parçasını veya öğeye eklenen içeriği hedefler.</p>
 <table>
 <thead><tr><th>Seçici</th><th>Ne zaman uygulanır?</th></tr></thead>
@@ -80,7 +82,7 @@ a[href$=".pdf"] { }    /* .pdf ile biten */</pre>
 li:nth-child(even) { background: #f3f3f3; }
 .not::before { content: "Not: "; font-weight: 700; }</pre>
 <blockquote>Klavyeyle gezinenler için <code>:focus</code> biçimlendirmesi kaldırılmamalıdır. <code>outline: none</code> yazılacaksa yerine görünür başka bir odak göstergesi tanımlanmalıdır.</blockquote>
-<h2>Özgüllük: hangi kural kazanır?</h2>
+<h2 id="b5">Özgüllük: hangi kural kazanır?</h2>
 <p>Aynı öğeyi ve aynı özelliği hedefleyen birden fazla kural varsa, tarayıcı <b>özgüllüğü</b> yüksek olanı uygular. Özgüllük eşitse dosyada <b>sonra gelen</b> kural geçerli olur.</p>
 <table>
 <thead><tr><th>Seçici türü</th><th>Ağırlık</th></tr></thead>
@@ -98,9 +100,9 @@ p.vurgu      { color: blue; }    /* 11  */
 <p>Yukarıdaki kuralların hepsi aynı öğeye uygulanırsa, <code>id</code> değeri <code>ozel</code> olan öğe kırmızı, yalnızca <code>vurgu</code> sınıfı olan <code>p</code> öğesi mavi görünür.</p>
 <h3>!important</h3>
 <p>Bir değerin sonuna <code>!important</code> eklenirse normal özgüllük hesabı geçersiz kalır. Ancak bu, kodun yönetilmesini zorlaştırır; yalnızca başka çözüm yoksa kullanılmalıdır.</p>
-<h2>Kalıtım</h2>
+<h2 id="b6">Kalıtım</h2>
 <p><code>color</code>, <code>font-family</code>, <code>font-size</code> ve <code>line-height</code> gibi bazı özellikler alt öğelere otomatik olarak geçer. <code>border</code>, <code>margin</code> ve <code>padding</code> gibi özellikler geçmez. Bu nedenle yazı tipi ve renk çoğunlukla <code>body</code> için bir kez tanımlanır.</p>
-<h2>CSS değişkenleri</h2>
+<h2 id="b7">CSS değişkenleri</h2>
 <p>Tekrar eden değerler (renk, boşluk vb.) tek bir yerde tanımlanıp <code>var()</code> ile kullanılabilir. Değer değiştirildiğinde tüm sayfa güncellenir.</p>
 <pre>:root {
   --ana-renk: #c0392b;
@@ -110,7 +112,7 @@ p.vurgu      { color: blue; }    /* 11  */
   background: var(--ana-renk);
   padding: var(--bosluk);
 }</pre>
-<h2>Özet</h2>
+<h2 id="b8">Özet</h2>
 <ul>
 <li>Biçimlendirme için çoğunlukla sınıf seçicisi kullanılır.</li>
 <li>Seçici ne kadar özgülse (kimlik &gt; sınıf &gt; etiket) o kadar önceliklidir; eşitlikte sonra gelen kazanır.</li>

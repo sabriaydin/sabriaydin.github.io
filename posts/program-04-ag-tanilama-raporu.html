@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>İnternet gitmediğinde sorunun modemde mi, internet hattında mı yoksa DNS&#x27;te mi olduğunu bulan ve rapor çıkaran batch programı.</p><div class="px-chips"><span>3 dk okuma</span><span>3 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
 <p>"İnternet gitti" dediğinde sorun üç yerden biri olabilir: <b>bilgisayar-modem arası</b>, <b>modem-internet arası</b> ya da <b>alan adı çözümleme (DNS)</b>. Bu program üçünü sırayla dener, sonucu sade bir Türkçe yorumla söyler ve ayrıntılı bir rapor dosyasını masaüstüne kaydeder. Destek hattını arayacaksan bu raporu paylaşmak işini hızlandırır.</p>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
 <li>Kodu <code>ag-kontrol.bat</code> adıyla kaydet.</li>
 <li>Çift tıkla. Özet birkaç saniyede ekrana gelir; ayrıntılı rapor en fazla yarım dakikada hazırlanır.</li>
@@ -132,7 +134,7 @@ choice /c EH /n /m "Rapor simdi acilsin mi? (E/H) "
 if errorlevel 2 exit /b 0
 start "" notepad "%RAPOR%"
 exit /b 0</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b2">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b>Ping ile test</b>: <code>ping ... | find "TTL="</code> yanıt gelip gelmediğini anlar. "TTL=" ifadesi Windows'un hangi dilde olduğundan bağımsız olarak yanıtlarda yer alır. <code>-4</code> ise IPv6 yerine IPv4 kullanır; çünkü IPv6 yanıtlarında TTL yazmaz.</li>
 <li><b>&amp;&amp;</b>: Soldaki komut başarılıysa sağdaki çalışır. Yani <code>find</code> "TTL=" bulursa durum <code>VAR</code> olur, bulamazsa varsayılan <code>YOK</code> kalır.</li>
@@ -141,7 +143,7 @@ exit /b 0</pre>
 <li><b>Rapor bloğu</b>: <code>( ... ) &gt; dosya 2&gt;&amp;1</code> yapısı, parantezin içindeki tüm komutların çıktısını tek dosyaya yazar. Hata mesajları da (<code>2&gt;&amp;1</code>) dosyaya girer.</li>
 <li><b>Yorum bölümü</b>: <code>if ... if ... goto</code> art arda yazılınca "ve" anlamı taşır. Sırayla her durum kontrol edilir ve ilk uyan bölüme gidilir.</li>
 </ul>
-<h2>Özelleştirme</h2>
+<h2 id="b3">Özelleştirme</h2>
 <ul>
 <li>Farklı bir siteyi sınamak için <code>google.com</code> yerine kendi sitenin adresini yaz.</li>
 <li>Rapora Wi-Fi bilgisi eklemek için blok içine <code>netsh wlan show interfaces</code> satırı ekleyebilirsin.</li>

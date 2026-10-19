@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,18 +28,19 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#283593;--b:#7986cb">
+<!--px--><div class="px-hero"><small>Geliştirici Araçları</small><p>Git nedir, kod sürümleri nasıl takip edilir ve resmi indirme bağlantısı.</p><div class="px-chips"><span>1 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantıları</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li></ol></nav><!--/px-->
 <p><b>Git</b>, dosya değişikliklerini takip eden ücretsiz ve açık kaynaklı bir sürüm kontrol sistemidir. Yazılım projelerinde kodun geçmişini saklamak, farklı sürümlere dönmek ve ekip çalışması yapmak için kullanılır. GitHub gibi hizmetlerin temelinde de Git bulunur.</p>
-<h2>Ne işe yarar?</h2>
+<h2 id="b1">Ne işe yarar?</h2>
 <ul>
 <li>Dosya değişikliklerinin geçmişini saklar.</li>
 <li>Dallar (branch) ile paralel çalışmayı sağlar.</li>
 <li>Çevrimdışı çalışabilir.</li>
 <li>GitHub, GitLab gibi hizmetlerle birlikte kullanılır.</li>
 </ul>
-<h2>Desteklenen platformlar</h2>
+<h2 id="b2">Desteklenen platformlar</h2>
 <p>Windows, macOS ve Linux.</p>
-<h2>Resmi indirme bağlantıları</h2>
+<h2 id="b3">Resmi indirme bağlantıları</h2>
 <table>
 <thead><tr><th>Seçenek</th><th>Bağlantı</th></tr></thead>
 <tbody>
@@ -46,13 +48,13 @@
 <tr><td>Resmi ana sayfa</td><td><a href="https://git-scm.com/">git-scm.com</a></td></tr>
 </tbody>
 </table>
-<h2>Kurulum</h2>
+<h2 id="b4">Kurulum</h2>
 <ol>
 <li>İşletim sistemine uygun kurulum paketini indir.</li>
 <li>Windows kurulumunda varsayılan seçeneklerle devam et.</li>
 <li>Terminalde <code>git --version</code> komutu ile kurulumu doğrula.</li>
 </ol>
-<h2>Güvenli indirme ve notlar</h2>
+<h2 id="b5">Güvenli indirme ve notlar</h2>
 <ul>
 <li>Git, komut satırı tabanlıdır; grafik arayüz için ayrı istemciler bulunur.</li>
 <li>Linux'ta çoğu dağıtımın paket yöneticisi ile kurulur (örneğin Debian ve Ubuntu için <code>sudo apt install git</code>).</li>

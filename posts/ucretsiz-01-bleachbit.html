@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#5b3fa0;--b:#9b6bd9">
+<!--px--><div class="px-hero"><small>Sistem ve Bakım Araçları</small><p>Açık kaynaklı ve ücretsiz BleachBit nedir, nasıl kullanılır; Windows, Linux ve macOS için resmi indirme bağlantıları.</p><div class="px-chips"><span>1 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Resmi indirme bağlantıları</a></li><li><a href="#b3">Güvenli indirme</a></li><li><a href="#b4">Kullanım</a></li></ol></nav><!--/px-->
 <p><b>BleachBit</b>, gereksiz dosyaları temizleyerek disk alanı açan ve gizliliği korumaya yardımcı olan ücretsiz, açık kaynaklı (GPLv3) bir programdır. Kayıt veya lisans gerektirmez, reklam içermez ve internet bağlantısı olmadan çalışır.</p>
-<h2>Ne işe yarar?</h2>
+<h2 id="b1">Ne işe yarar?</h2>
 <ul>
 <li>Geçici dosyaları, tarayıcı önbelleğini, günlük (log) dosyalarını ve diğer gereksiz verileri temizler.</li>
 <li>Tarayıcı geçmişini, çerezleri ve uygulama izlerini siler.</li>
@@ -37,7 +39,7 @@
 <li>Silmeden önce önizleme gösterir; neyin silineceğini sen seçersin.</li>
 <li>Komut satırı ve özel temizleme kuralları (CleanerML) desteği sunar.</li>
 </ul>
-<h2>Resmi indirme bağlantıları</h2>
+<h2 id="b2">Resmi indirme bağlantıları</h2>
 <table>
 <thead><tr><th>Platform</th><th>Bağlantı</th><th>Not</th></tr></thead>
 <tbody>
@@ -49,14 +51,14 @@
 </tbody>
 </table>
 <p>Kurulum yönergeleri: <a href="https://docs.bleachbit.org/doc/install-on-windows/">Windows</a> ve <a href="https://docs.bleachbit.org/doc/install-on-linux/">Linux</a> kurulum belgeleri. Genel belgeler için <a href="https://docs.bleachbit.org/">docs.bleachbit.org</a> adresine bakılabilir.</p>
-<h2>Güvenli indirme</h2>
+<h2 id="b3">Güvenli indirme</h2>
 <ul>
 <li>Programı yalnızca <b>bleachbit.org</b> adresinden indir. Sahte kopyalar ve taklit siteler vardır.</li>
 <li>Windows kurulum dosyaları dijital olarak imzalıdır. Dosyaya sağ tıklayıp <b>Özellikler &gt; Dijital İmzalar</b> bölümünde yayıncının <b>Andrew Ziem</b> olduğunu kontrol et.</li>
 <li>Son indirme sayfasında <b>SHA256</b> sağlama değerleri yayımlanır ve bu değerler GPG ile imzalıdır.</li>
 <li>Bazı antivirüs programları, dosya silme özelliği nedeniyle yanlış alarm verebilir.</li>
 </ul>
-<h2>Kullanım</h2>
+<h2 id="b4">Kullanım</h2>
 <ol>
 <li>Programı aç ve soldaki listeden temizlemek istediğin öğeleri işaretle (tarayıcılar, sistem, uygulamalar).</li>
 <li>Önce <b>Önizleme</b> düğmesine bas ve silinecek dosyaların listesini incele.</li>

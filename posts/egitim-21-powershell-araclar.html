@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch içinden PowerShell çağırma, çıktıyı değişkene alma, curl ile indirme, tar ile arşivleme, clip, mshta ve diğer yerleşik araçlar.</p><div class="px-chips"><span>3 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">PowerShell&#x27;i batch içinden çağırma</a></li><li><a href="#b2">PowerShell çıktısını değişkene alma</a></li><li><a href="#b3">İnternetten dosya indirme: curl</a></li><li><a href="#b4">Arşivleme: tar ve PowerShell</a></li><li><a href="#b5">Diğer yerleşik araçlar</a></li><li><a href="#b6">Ne zaman hangisi?</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Batch dili basit işler için yeterlidir; ancak ondalık hesap, tarih aritmetiği, JSON işleme, web isteği ve metin dönüşümü gibi işlerde yetersiz kalır. Bu durumlarda betikten Windows'a dahil gelen diğer araçlar (özellikle PowerShell) çağrılır. Bu yazı, ek yazılım kurmadan kullanılabilecek araçları tanıtır.</p>
-<h2>PowerShell'i batch içinden çağırma</h2>
+<h2 id="b1">PowerShell'i batch içinden çağırma</h2>
 <pre>powershell -NoProfile -Command "Get-Date"
 powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Betikler\islem.ps1"</pre>
 <table>
@@ -47,7 +49,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Betikler\islem.ps1"</pre
 <li>Batch dosyasında <code>%</code> karakteri PowerShell komutunda da gerekiyorsa <code>%%</code> olarak yazılır.</li>
 <li>Uzun PowerShell kodları için ayrı bir <code>.ps1</code> dosyası yazılıp <code>-File</code> ile çalıştırılır.</li>
 </ul>
-<h2>PowerShell çıktısını değişkene alma</h2>
+<h2 id="b2">PowerShell çıktısını değişkene alma</h2>
 <pre>@echo off
 for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "(Get-CimInstance Win32_OperatingSystem).Caption"`) do set "SURUM=%%i"
 echo Surum: %SURUM%
@@ -69,7 +71,7 @@ pause</pre>
 <tr><td>Rastgele parola</td><td><code>-join ((48..57)+(65..90)+(97..122) | Get-Random -Count 16 | % {[char]$_})</code></td></tr>
 </tbody>
 </table>
-<h2>İnternetten dosya indirme: curl</h2>
+<h2 id="b3">İnternetten dosya indirme: curl</h2>
 <p>Windows 10 (1803) ve sonrasında <code>curl.exe</code> yerleşik gelir:</p>
 <pre>curl -L -o dosya.zip https://example.com/dosya.zip
 curl -s https://example.com/api/durum
@@ -80,7 +82,7 @@ curl -L -o indirilen.exe --retry 3 https://example.com/program.exe</pre>
 <li>PowerShell'deki <code>curl</code> takma adı farklı bir komuttur; <code>cmd</code> içinde <code>curl</code> zaten gerçek <code>curl.exe</code>'dir.</li>
 <li>İndirilen dosya çalıştırılmadan önce güvenilirliği doğrulanmalıdır; imza veya karma (hash) değeri kontrol edilebilir (bkz. <a href="program-09-hash-dogrulayici.html">Karma Değer Doğrulayıcı</a>).</li>
 </ul>
-<h2>Arşivleme: tar ve PowerShell</h2>
+<h2 id="b4">Arşivleme: tar ve PowerShell</h2>
 <pre>rem zip olusturma (PowerShell)
 powershell -NoProfile -Command "Compress-Archive -Path 'C:\Proje\*' -DestinationPath 'C:\Yedek\proje.zip' -Force"
 
@@ -90,7 +92,7 @@ powershell -NoProfile -Command "Expand-Archive -Path 'proje.zip' -DestinationPat
 rem tar ile (Windows 10 1803+) - zip de acabilir
 tar -a -c -f yedek.zip klasor
 tar -x -f arsiv.zip -C C:\Cikti</pre>
-<h2>Diğer yerleşik araçlar</h2>
+<h2 id="b5">Diğer yerleşik araçlar</h2>
 <table>
 <thead><tr><th>Araç</th><th>Kullanım</th></tr></thead>
 <tbody>
@@ -108,7 +110,7 @@ tar -x -f arsiv.zip -C C:\Cikti</pre>
 <pre>@echo off
 rem Mesaj kutusu gostermek icin (PowerShell)
 powershell -NoProfile -Command "Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show('Islem tamamlandi','Bilgi')" &gt; nul</pre>
-<h2>Ne zaman hangisi?</h2>
+<h2 id="b6">Ne zaman hangisi?</h2>
 <table>
 <thead><tr><th>İş</th><th>Öneri</th></tr></thead>
 <tbody>
@@ -119,7 +121,7 @@ powershell -NoProfile -Command "Add-Type -AssemblyName PresentationFramework; [S
 </tbody>
 </table>
 <blockquote>Kurumsal ortamlarda PowerShell kullanımı politikalarla kısıtlanmış olabilir. Betiği başka bir bilgisayara götürmeden önce orada çalıştığı denenmelidir.</blockquote>
-<h2>Özet</h2>
+<h2 id="b7">Özet</h2>
 <ul>
 <li>Batch'in yetersiz kaldığı işlerde <code>powershell -NoProfile -Command</code> çağrılır.</li>
 <li>Çıktı <code>for /f</code> ile değişkene alınır.</li>

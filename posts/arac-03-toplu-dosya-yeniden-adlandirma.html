@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluştur; sonucu önceden önizle.</p><div class="px-chips"><span>4 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">İşlemler</a></li><li><a href="#b4">PowerShell betiği nasıl çalıştırılır?</a></li><li><a href="#b5">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>Yüzlerce fotoğrafa aynı ön eki eklemek, sıra numarası vermek ya da uzantıyı değiştirmek elle yapıldığında uzun sürer. Bu araç, seçilen işlem için PowerShell komutunu veya toplu iş dosyasını oluşturur ve örnek dosya adları üzerinde sonucu önceden gösterir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <style>.gg{display:grid;gap:14px}.gg[hidden]{display:none}</style>
 <div class="arac">
   <div class="satir">
@@ -178,7 +180,7 @@ $('rn-indir').onclick=()=>{hesapla();if($('rn-hata').textContent)return;Arac.ind
 hesapla();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li><b>İşlemi</b> ve <b>çıktı biçimini</b> seç. PowerShell biçimi tüm işlemleri destekler; <code>.bat</code> biçimi harf büyüklüğü dönüşümünü desteklemez.</li>
 <li><b>Dosya filtresini</b> yaz (örn. <code>*.jpg</code>, <code>rapor*.docx</code>). Klasör yolu boş bırakılırsa komut, çalıştırıldığı klasörde işlem yapar.</li>
@@ -186,7 +188,7 @@ hesapla();
 <li>Komutu kopyala veya dosya olarak indir. Dosyaların bulunduğu klasörde çalıştır.</li>
 </ol>
 <p><b>Deneme modu</b> açıkken komut dosyaları değiştirmez. PowerShell çıktısında <code>-WhatIf</code> parametresi, <code>.bat</code> çıktısında ise <code>echo</code> kullanılır; yapılacak değişiklikler yalnızca ekrana yazılır. Sonuç doğru göründüğünde deneme modu kapatılıp komut yeniden oluşturulmalıdır.</p>
-<h2>İşlemler</h2>
+<h2 id="b3">İşlemler</h2>
 <table>
 <thead><tr><th>İşlem</th><th>Örnek sonuç</th></tr></thead>
 <tbody>
@@ -199,12 +201,12 @@ hesapla();
 <tr><td>Küçük / BÜYÜK harf</td><td><code>IMG.JPG</code> → <code>img.jpg</code> / <code>IMG.JPG</code></td></tr>
 </tbody>
 </table>
-<h2>PowerShell betiği nasıl çalıştırılır?</h2>
+<h2 id="b4">PowerShell betiği nasıl çalıştırılır?</h2>
 <ul>
 <li>Komut doğrudan PowerShell penceresine yapıştırılabilir.</li>
 <li>İndirilen <code>.ps1</code> dosyası çift tıklamayla çalışmaz. Dosyanın bulunduğu klasörde PowerShell açılıp <code>powershell -ExecutionPolicy Bypass -File .\yeniden-adlandir.ps1</code> komutu kullanılmalıdır.</li>
 </ul>
-<h2>Dikkat edilecekler</h2>
+<h2 id="b5">Dikkat edilecekler</h2>
 <ul>
 <li>Yeniden adlandırma geri alınamaz. Önemli dosyalarda önce deneme modu ve yedek kullanılmalıdır.</li>
 <li>Sıra numaralandırmada dosyalar ada göre sıralanır. Numara basamak sayısını aşarsa (örn. 3 basamakla 1000) numaralar bozulur; basamak sayısı yeterli seçilmelidir.</li>

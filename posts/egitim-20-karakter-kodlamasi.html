@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch dosyalarında Türkçe karakter sorunlarının nedeni, chcp ile kod sayfası değiştirme, UTF-8 ve ANSI kayıt farkı ve güvenli yöntemler.</p><div class="px-chips"><span>3 dk okuma</span><span>8 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Sorunun nedeni</a></li><li><a href="#b2">Çözüm 1: ASCII kullanmak (en güvenli)</a></li><li><a href="#b3">Çözüm 2: UTF-8 kaydetmek ve chcp 65001</a></li><li><a href="#b4">Çözüm 3: ANSI (Windows-1254) kaydetmek</a></li><li><a href="#b5">Dosya adlarında Türkçe karakter</a></li><li><a href="#b6">Büyük/küçük harf ve Türkçe i</a></li><li><a href="#b7">Sorun giderme kontrol listesi</a></li><li><a href="#b8">Özet</a></li></ol></nav><!--/px-->
 <p>Batch betiklerinde Türkçe karakterler (<code>ç ğ ı ö ş ü İ</code>) çoğunlukla bozuk görünür: <code>Ã§</code>, <code>Ä±</code>, <code>?</code>, <code>■</code> gibi karakterler çıkar. Bunun nedeni, dosyanın kaydedildiği kodlama ile komut isteminin kod sayfasının farklı olmasıdır. Bu yazı sorunu açıklar ve çözüm yollarını verir.</p>
-<h2>Sorunun nedeni</h2>
+<h2 id="b1">Sorunun nedeni</h2>
 <p>Metin dosyaları farklı kodlamalarla kaydedilebilir (ANSI/Windows-1254, UTF-8, UTF-16). Komut istemi ise bayt dizilerini seçili <b>kod sayfasına</b> göre karakter olarak gösterir. Türkçe Windows'ta varsayılan kod sayfası <code>857</code> (OEM Türkçe)'dir. Dosya bir kodlamayla kaydedilip başka bir kod sayfasıyla gösterilirse harfler bozulur.</p>
 <table>
 <thead><tr><th>Kod sayfası</th><th>Ad</th><th>Açıklama</th></tr></thead>
@@ -43,9 +45,9 @@
 <pre>chcp                 rem gecerli kod sayfasini gosterir
 chcp 65001           rem UTF-8'e gecer
 chcp 857             rem OEM Turkce'ye doner</pre>
-<h2>Çözüm 1: ASCII kullanmak (en güvenli)</h2>
+<h2 id="b2">Çözüm 1: ASCII kullanmak (en güvenli)</h2>
 <p>Betiklerin tamamı Türkçe karakter içermeyecek biçimde yazılırsa (<code>Dosya bulunamadi</code>, <code>Islem tamamlandi</code>) hiçbir kodlama sorunu oluşmaz. Rehberdeki örnekler bu nedenle ASCII ile yazılmıştır. Betiğin çalışacağı bilgisayarlar bilinmiyorsa en taşınabilir yöntemdir.</p>
-<h2>Çözüm 2: UTF-8 kaydetmek ve chcp 65001</h2>
+<h2 id="b3">Çözüm 2: UTF-8 kaydetmek ve chcp 65001</h2>
 <p>Betik UTF-8 olarak kaydedilir ve ilk satırlarda kod sayfası değiştirilir:</p>
 <pre>@echo off
 chcp 65001 &gt; nul
@@ -63,9 +65,9 @@ chcp 65001 &gt; nul
 echo Çalışma başlıyor...
 rem ... islemler ...
 chcp %ESKI% &gt; nul</pre>
-<h2>Çözüm 3: ANSI (Windows-1254) kaydetmek</h2>
+<h2 id="b4">Çözüm 3: ANSI (Windows-1254) kaydetmek</h2>
 <p>Not Defteri'nde kodlama "ANSI" seçilerek kaydedilen betiğin Türkçe karakterleri, komut isteminde <code>chcp 1254</code> ile doğru görünür. Ancak 1254 bir OEM sayfası değildir; bazı pencere ve yazı tipi kombinasyonlarında çıktı yine bozuk olabilir. Bu nedenle ASCII veya UTF-8 daha güvenilirdir.</p>
-<h2>Dosya adlarında Türkçe karakter</h2>
+<h2 id="b5">Dosya adlarında Türkçe karakter</h2>
 <ul>
 <li>Dosya adı Türkçe karakter içeriyorsa betikte kullanılan ad, betiğin kodlamasıyla eşleşmezse <code>Dosya bulunamadi</code> hatası alınır.</li>
 <li>Mümkünse betiklerde işlenen dosya ve klasör adları ASCII karakterlerle sınırlandırılır.</li>
@@ -75,14 +77,14 @@ chcp %ESKI% &gt; nul</pre>
 rem Betigin ustune surukle-birak: ad dogrudan alinir
 echo Islenen dosya: %~nx1
 pause</pre>
-<h2>Büyük/küçük harf ve Türkçe i</h2>
+<h2 id="b6">Büyük/küçük harf ve Türkçe i</h2>
 <ul>
 <li><code>if /i</code> karşılaştırması İngilizce kurallarla çalışır: <code>I</code> ile <code>i</code> eşit sayılır; <code>İ</code> ve <code>ı</code> ayrı karakterlerdir.</li>
 <li>Türkçe metin karşılaştırmasında sorun çıkmaması için kullanıcı girdisi ASCII anahtar kelimelerle (<code>e</code>/<code>h</code>, <code>1</code>/<code>2</code>) alınır; <code>choice</code> komutu bu amaçla uygundur.</li>
 </ul>
 <pre>choice /c EH /m "Devam edilsin mi"
 if errorlevel 2 (echo Iptal edildi.) else (echo Devam ediliyor.)</pre>
-<h2>Sorun giderme kontrol listesi</h2>
+<h2 id="b7">Sorun giderme kontrol listesi</h2>
 <table>
 <thead><tr><th>Belirti</th><th>Olası neden</th><th>Çözüm</th></tr></thead>
 <tbody>
@@ -93,7 +95,7 @@ if errorlevel 2 (echo Iptal edildi.) else (echo Devam ediliyor.)</pre>
 <tr><td>Kutu karakterleri</td><td>Raster yazı tipi</td><td>Pencere özelliklerinden Consolas seçin</td></tr>
 </tbody>
 </table>
-<h2>Özet</h2>
+<h2 id="b8">Özet</h2>
 <ul>
 <li>Sorun, dosya kodlaması ile komut istemi kod sayfasının uyuşmamasından doğar.</li>
 <li>En güvenli yol ASCII yazmaktır; Türkçe gerekirse BOM'suz UTF-8 ve <code>chcp 65001</code> kullanılır.</li>

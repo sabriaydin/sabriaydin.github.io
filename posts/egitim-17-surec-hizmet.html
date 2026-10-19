@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>tasklist, taskkill, start, sc ve net komutlarıyla programları başlatma, süreçleri listeleme ve sonlandırma, hizmetleri yönetme.</p><div class="px-chips"><span>3 dk okuma</span><span>6 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Program başlatma: start</a></li><li><a href="#b2">Süreçleri listeleme: tasklist</a></li><li><a href="#b3">Süreç sonlandırma: taskkill</a></li><li><a href="#b4">Hizmetler: sc ve net</a></li><li><a href="#b5">Çıkış koduna göre işlem</a></li><li><a href="#b6">Özet</a></li></ol></nav><!--/px-->
 <p>Batch betikleri yalnızca dosya işlemleri için değil, programları başlatmak, çalışan süreçleri denetlemek ve Windows hizmetlerini yönetmek için de kullanılır. Bu yazıda ilgili komutlar ve dikkat edilecek noktalar verilir.</p>
-<h2>Program başlatma: start</h2>
+<h2 id="b1">Program başlatma: start</h2>
 <pre>start notepad                          rem programi ayri pencerede baslatir, betik devam eder
 start "" "C:\Program Files\Uygulama\uygulama.exe"
 start "" https://example.com           rem varsayilan tarayicida acar
@@ -42,7 +44,7 @@ start /b komut                         rem yeni pencere acmadan arka planda cali
 <li><code>start /wait</code> olmadan betik, başlattığı programı beklemeden sonraki satıra geçer.</li>
 <li>Başka bir betiği çalıştırmak için <code>call betik.bat</code>, yeni pencerede çalıştırmak için <code>start "" betik.bat</code> kullanılır.</li>
 </ul>
-<h2>Süreçleri listeleme: tasklist</h2>
+<h2 id="b2">Süreçleri listeleme: tasklist</h2>
 <pre>tasklist                                   rem tum surecler
 tasklist /fi "imagename eq chrome.exe"     rem ada gore filtre
 tasklist /fi "memusage gt 500000"          rem 500 MB'tan fazla bellek kullananlar
@@ -58,7 +60,7 @@ if %errorlevel%==0 (
 )
 pause</pre>
 <blockquote><code>tasklist</code> eşleşme bulamazsa da hata kodu 0 döndürür; bu nedenle sonuç <code>find</code> ile süzülerek denetlenir.</blockquote>
-<h2>Süreç sonlandırma: taskkill</h2>
+<h2 id="b3">Süreç sonlandırma: taskkill</h2>
 <pre>taskkill /im notepad.exe          rem ada gore, nazikce kapatmayi dener
 taskkill /f /im notepad.exe       rem zorla sonlandirir (kaydedilmemis veri kaybolur)
 taskkill /pid 1234                rem surec numarasina gore
@@ -74,7 +76,7 @@ echo Tarayici kapatiliyor...
 taskkill /im chrome.exe &gt; nul 2&gt;&amp;1
 if errorlevel 1 (echo Chrome zaten kapali.) else (echo Kapatildi.)
 pause</pre>
-<h2>Hizmetler: sc ve net</h2>
+<h2 id="b4">Hizmetler: sc ve net</h2>
 <table>
 <thead><tr><th>Komut</th><th>Açıklama</th><th>Yönetici?</th></tr></thead>
 <tbody>
@@ -100,7 +102,7 @@ if %errorlevel%==0 (
 pause</pre>
 <p><code>sc</code> komutlarında hizmetin <b>kısa adı</b> (örneğin <code>Spooler</code>), <code>net</code> komutlarında hem kısa ad hem görünen ad kullanılabilir. Kısa ad <code>sc query</code> çıktısındaki <code>SERVICE_NAME</code> satırından öğrenilir.</p>
 <blockquote>Hizmet başlatma ve durdurma işlemleri yönetici yetkisi ister. Betiğin yönetici olarak çalıştığını denetleyen kod için <a href="egitim-24-dagitim-yonetici.html">Dağıtım ve Yönetici Yetkisi</a> yazısına bakılabilir.</blockquote>
-<h2>Çıkış koduna göre işlem</h2>
+<h2 id="b5">Çıkış koduna göre işlem</h2>
 <pre>start /wait "" kurulum.exe /sessiz
 if errorlevel 1 (
     echo Kurulum basarisiz. Cikis kodu: %errorlevel%
@@ -108,7 +110,7 @@ if errorlevel 1 (
 )
 echo Kurulum tamamlandi.</pre>
 <p>Programların çıkış kodu anlamları programa göre değişir; genellikle <code>0</code> başarıyı gösterir. Hata kodu yönetimi için <a href="egitim-08-hata-yonetimi.html">Hata Yönetimi ve Log Tutma</a> yazısına bakılabilir.</p>
-<h2>Özet</h2>
+<h2 id="b6">Özet</h2>
 <ul>
 <li><code>start</code> programı başlatır; <code>/wait</code> bitmesini bekler, yol tırnaklı ise önüne <code>""</code> konur.</li>
 <li><code>tasklist</code> listeler, <code>find</code> ile denetim yapılır; <code>taskkill /f</code> zorla sonlandırır.</li>

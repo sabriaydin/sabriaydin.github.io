@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,12 +28,13 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>viewport etiketi, esnek genişlik, duyarlı görseller, @media kuralları, mobil öncelikli yaklaşım ve clamp() ile akıcı yazı boyutu.</p><div class="px-chips"><span>3 dk okuma</span><span>8 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">1. viewport etiketi</a></li><li><a href="#b2">2. Esnek genişlikler ve görseller</a></li><li><a href="#b3">3. @media kuralları</a></li><li><a href="#b4">4. Akıcı yazı boyutu: clamp()</a></li><li><a href="#b5">5. Duyarlı görsel seçimi</a></li><li><a href="#b6">6. Dokunmatik ekranlar için notlar</a></li><li><a href="#b7">Test etme</a></li><li><a href="#b8">Özet</a></li></ol></nav><!--/px-->
 <p>Duyarlı (responsive) tasarım, bir sayfanın telefon, tablet ve bilgisayar ekranlarında ayrı sayfa hazırlamadan düzgün görünmesini sağlar. Günümüzde ziyaretlerin büyük bölümü mobil cihazlardan geldiği için sayfaların bu şekilde hazırlanması gerekir.</p>
-<h2>1. viewport etiketi</h2>
+<h2 id="b1">1. viewport etiketi</h2>
 <p>Her sayfanın <code>head</code> bölümünde aşağıdaki etiket bulunmalıdır. Bu etiket olmadan mobil tarayıcılar sayfayı masaüstü genişliğinde çizip küçülterek gösterir ve <code>@media</code> kuralları beklendiği gibi çalışmaz.</p>
 <pre>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</pre>
-<h2>2. Esnek genişlikler ve görseller</h2>
+<h2 id="b2">2. Esnek genişlikler ve görseller</h2>
 <ul>
 <li>Sabit <code>width: 960px</code> yerine <code>max-width: 960px</code> ve <code>width: 100%</code> kullanılır; böylece öğe dar ekrana sığar.</li>
 <li>Görseller kapsayıcısından taşmaması için <code>max-width: 100%; height: auto;</code> ile sınırlanır.</li>
@@ -40,7 +42,7 @@
 </ul>
 <pre>.sayfa { width: 100%; max-width: 960px; margin: 0 auto; padding: 0 1rem; }
 img    { max-width: 100%; height: auto; }</pre>
-<h2>3. @media kuralları</h2>
+<h2 id="b3">3. @media kuralları</h2>
 <p><code>@media</code>, yalnızca belirli koşul sağlandığında uygulanan kurallar tanımlar. En sık kullanılan koşul ekran genişliğidir.</p>
 <pre>.kartlar {
   display: grid;
@@ -74,31 +76,31 @@ img    { max-width: 100%; height: auto; }</pre>
 @media (prefers-color-scheme: dark) { }       /* koyu tema tercihi */
 @media (prefers-reduced-motion: reduce) { }   /* animasyonu azaltma tercihi */
 @media print { }                              /* yazdırma */</pre>
-<h2>4. Akıcı yazı boyutu: clamp()</h2>
+<h2 id="b4">4. Akıcı yazı boyutu: clamp()</h2>
 <p><code>clamp(en küçük, tercih edilen, en büyük)</code> ile yazı boyutu ekran genişliğiyle birlikte, belirlenen sınırlar içinde değişir:</p>
 <pre>h1 {
   font-size: clamp(1.75rem, 4vw + 1rem, 3rem);
 }</pre>
-<h2>5. Duyarlı görsel seçimi</h2>
+<h2 id="b5">5. Duyarlı görsel seçimi</h2>
 <p>Farklı ekranlara farklı boyutta görsel sunmak sayfa yüklenme süresini kısaltır:</p>
 <pre>&lt;img src="kucuk.jpg"
      srcset="kucuk.jpg 480w, orta.jpg 800w, buyuk.jpg 1600w"
      sizes="(min-width: 900px) 800px, 100vw"
      alt="Görsel açıklaması"&gt;</pre>
-<h2>6. Dokunmatik ekranlar için notlar</h2>
+<h2 id="b6">6. Dokunmatik ekranlar için notlar</h2>
 <ul>
 <li>Düğme ve bağlantılar parmakla rahat basılabilmesi için yaklaşık 44x44 piksel hedeflenmelidir.</li>
 <li><code>:hover</code> etkisine bağlı bilgi, dokunmatik cihazlarda görünmeyebileceği için tek başına kullanılmamalıdır.</li>
 <li>Yazı boyutu gövde metninde en az 16px (<code>1rem</code>) olmalıdır; daha küçük metinde bazı mobil tarayıcılar form alanlarına yaklaştırma uygular.</li>
 </ul>
-<h2>Test etme</h2>
+<h2 id="b7">Test etme</h2>
 <ol>
 <li>Tarayıcıda <code>F12</code> tuşuyla geliştirici araçları açılır.</li>
 <li><code>Ctrl + Shift + M</code> ile cihaz modu açılır; telefon ve tablet boyutları seçilebilir veya genişlik elle değiştirilebilir.</li>
 <li>Yatay kaydırma çubuğu çıkıyorsa taşan bir öğe vardır; çoğunlukla sabit genişlikli bir öğe nedenidir.</li>
 <li>Mümkünse sayfa gerçek bir telefonda da kontrol edilmelidir.</li>
 </ol>
-<h2>Özet</h2>
+<h2 id="b8">Özet</h2>
 <ul>
 <li><code>viewport</code> etiketi her sayfada bulunmalıdır.</li>
 <li>Sabit genişlik yerine <code>max-width</code> ve yüzde kullanılır; görsellere <code>max-width: 100%</code> verilir.</li>

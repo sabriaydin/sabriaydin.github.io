@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -29,28 +30,29 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0067c0;--b:#00a4ef">
+<!--px--><div class="px-hero"><small>Windows Rehber</small><p>Windows&#x27;ta yazıcı ekleme, çevrimdışı görünme sorunu ve ağ üzerinden yazıcı paylaşma.</p><div class="px-chips"><span>5 dk okuma</span><span>5 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yazıcı ekleme</a></li><li><a href="#b2">Üretici sürücüsü</a></li><li><a href="#b3">&quot;Çevrimdışı&quot; görünüyorsa</a></li><li><a href="#b4">Yazdırma kuyruğu hizmetini yenileme</a></li><li><a href="#b5">Yazıcı paylaşma</a></li></ol></nav><!--/px-->
 <p>Yazıcı sorunları çoğunlukla sürücü, kuyruk veya bağlantı kaynaklıdır.</p>
-<h2>Yazıcı ekleme</h2>
+<h2 id="b1">Yazıcı ekleme</h2>
 <ol>
 <li>Yazıcıyı USB ile bağla veya Wi-Fi'a ekle, aç.</li>
 <li><b>Ayarlar &gt; Bluetooth ve cihazlar &gt; Yazıcılar ve tarayıcılar &gt; Cihaz ekle</b></li>
 <li>Yazıcı listede görünmezse <b>Yazıcı burada yok</b>'u seçip IP adresiyle ekle.</li>
 </ol>
-<h2>Üretici sürücüsü</h2>
+<h2 id="b2">Üretici sürücüsü</h2>
 <p>Yazıcı marka ve model adıyla üreticinin destek sayfasından en son sürücü paketini indir. Windows'un genel sürücüsü bazı özellikleri sunmaz.</p>
-<h2>"Çevrimdışı" görünüyorsa</h2>
+<h2 id="b3">"Çevrimdışı" görünüyorsa</h2>
 <ul>
 <li>Yazıcının açık ve aynı ağda olduğunu doğrula.</li>
 <li>Yazıcı özelliklerinde <b>Yazıcıyı çevrimdışı kullan</b> seçeneğinin işaretsiz olduğuna bak.</li>
 <li>Kuyrukta takılı iş varsa <b>Yazdırma kuyruğunu aç</b> &gt; <b>Yazıcı &gt; Tüm belgeleri iptal et</b>.</li>
 </ul>
-<h2>Yazdırma kuyruğu hizmetini yenileme</h2>
+<h2 id="b4">Yazdırma kuyruğu hizmetini yenileme</h2>
 <pre>net stop spooler
 del /Q /F /S "%systemroot%\System32\spool\PRINTERS\*.*"
 net start spooler</pre>
 <p>Komutları yönetici terminalinde çalıştır.</p>
-<h2>Yazıcı paylaşma</h2>
+<h2 id="b5">Yazıcı paylaşma</h2>
 <ol>
 <li>Yazıcı bağlı bilgisayarda <b>Yazıcı özellikleri &gt; Paylaşım</b> sekmesinde <b>Bu yazıcıyı paylaş</b>'ı işaretle.</li>
 <li>Diğer bilgisayarda <b>Cihaz ekle &gt; Yazıcı burada yok &gt; Paylaşılan yazıcı seç</b> ile <code>\\BilgisayarAdı\YazıcıAdı</code> yazarak ekle.</li>

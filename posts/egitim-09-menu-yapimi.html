@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>choice ve set /p ile seçenekli menü kurma, menüye geri dönen döngü, cls, color, title ve timeout kullanımı.</p><div class="px-chips"><span>2 dk okuma</span><span>4 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">choice ile menü</a></li><li><a href="#b2">Evet/Hayır sorusu</a></li><li><a href="#b3">set /p ile menü</a></li><li><a href="#b4">Görünümü düzenleme</a></li></ol></nav><!--/px-->
 <p>Birden fazla işi yapan bir script'i kullanışlı hale getirmenin yolu menüdür. Menü için iki yöntem var: tek tuşla seçim yaptıran <code>choice</code> ve yazıp Enter'a basılan <code>set /p</code>.</p>
-<h2>choice ile menü</h2>
+<h2 id="b1">choice ile menü</h2>
 <pre>@echo off
 title Ana Menu
 
@@ -63,14 +65,14 @@ exit /b</pre>
 <li><code>if errorlevel n</code> "n veya daha büyük" demek olduğundan kontroller <b>büyükten küçüğe</b> yazılır. Küçükten başlarsan her seçim 1. satırı yakalar.</li>
 <li>Her bölüm <code>goto :menu</code> ile bitmeli; yoksa akış bir sonraki etikete düşer.</li>
 </ul>
-<h2>Evet/Hayır sorusu</h2>
+<h2 id="b2">Evet/Hayır sorusu</h2>
 <pre>choice /c EH /n /m "Devam edilsin mi? (E/H): "
 if errorlevel 2 (
     echo Iptal edildi.
     exit /b
 )
 echo Devam ediliyor...</pre>
-<h2>set /p ile menü</h2>
+<h2 id="b3">set /p ile menü</h2>
 <p>Kullanıcının bir isim veya yol yazması gereken yerlerde <code>set /p</code> kullan. Geçersiz bir giriş olursa menüye geri döner:</p>
 <pre>@echo off
 :menu
@@ -99,7 +101,7 @@ echo Bugun: %date%
 pause
 goto :menu</pre>
 <p><code>set "secim="</code> satırı, bir önceki turdaki seçimin kalmasını önler. Kullanıcı sadece Enter'a basarsa <code>set /p</code> değişkeni değiştirmez; bu satır olmasaydı eski seçim tekrar çalışırdı.</p>
-<h2>Görünümü düzenleme</h2>
+<h2 id="b4">Görünümü düzenleme</h2>
 <table>
 <thead><tr><th>Komut</th><th>Ne yapar</th></tr></thead>
 <tbody>

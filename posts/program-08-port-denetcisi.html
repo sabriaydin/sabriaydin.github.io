@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,15 +28,16 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Bilgisayarda dinleyen portları, dışarıya yapılmış aktif bağlantıları ve riskli portları program adlarıyla listeleyen menülü batch uygulaması.</p><div class="px-chips"><span>3 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
 <p>Bilgisayarda dinleyen her port, ağdan gelebilecek bir erişim noktasıdır. Hangi programın hangi portu açtığını bilmek, gereksiz hizmetleri kapatmak ve şüpheli bağlantıları fark etmek için gereklidir. Bu uygulama, Windows'un yerleşik ağ komutlarıyla üç ayrı rapor sunan bir menü içerir.</p>
-<h2>Ne yapar?</h2>
+<h2 id="b1">Ne yapar?</h2>
 <ul>
 <li><b>Dinleyen portlar:</b> Bilgisayarın bağlantı beklediği TCP portlarını, portu açan programın adıyla listeler. Portun yalnızca bu bilgisayardan mı (<code>YEREL</code>) yoksa ağdan da mı (<code>AG</code>) erişilebilir olduğunu gösterir.</li>
 <li><b>Aktif bağlantılar:</b> Bilgisayarın dışarıdaki adreslerle kurduğu bağlantıları, ilgili programla birlikte gösterir.</li>
 <li><b>Riskli portlar:</b> FTP (21), Telnet (23), RPC (135), NetBIOS (139), SMB (445), Uzak Masaüstü (3389) ve VNC (5900) portlarından ağa açık olanları uyarı olarak işaretler.</li>
 </ul>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li>Kod Not Defteri'ne yapıştırılır ve <code>port_denetcisi.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
 <li>Dosyaya çift tıklanarak çalıştırılır.</li>
@@ -104,7 +106,7 @@ echo     ve guvenlik duvari kurallarini kontrol edin.
 echo.
 pause
 goto :menu</pre>
-<h2>Kod nasıl çalışıyor?</h2>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
 <ul>
 <li><b><code>choice</code> menüsü:</b> <code>choice /c 1234</code> yalnızca bu tuşları kabul eder. <code>if errorlevel</code> kontrolleri <b>büyükten küçüğe</b> yazılmalıdır; çünkü <code>if errorlevel N</code> "N veya daha büyük" anlamına gelir.</li>
 <li><b><code>Get-NetTCPConnection</code>:</b> Bağlantı listesini PowerShell nesneleri olarak verir. <code>-State Listen</code> dinleyenleri, <code>-State Established</code> kurulmuş bağlantıları seçer.</li>
@@ -112,7 +114,7 @@ goto :menu</pre>
 <li><b>Erişim ayrımı:</b> Adres <code>127.0.0.1</code> veya <code>::1</code> ise port yalnızca yerel; <code>0.0.0.0</code> veya başka bir adres ise ağdan erişilebilirdir.</li>
 <li><b>Riskli port tablosu:</b> PowerShell sözlüğü (<code>@{...}</code>) port numaralarını açıklamalarıyla eşler; ağa açık portlar bu sözlükte aranır.</li>
 </ul>
-<h2>Sonuçların yorumlanması</h2>
+<h2 id="b4">Sonuçların yorumlanması</h2>
 <ul>
 <li><code>AG</code> olarak işaretli ve tanımadığınız bir port için program adı araştırılmalıdır. Windows hizmetleri <code>svchost</code>, <code>System</code> gibi adlarla görünür; bunlar normaldir.</li>
 <li>Uzak Masaüstü, SMB gibi hizmetler kullanılmıyorsa kapatılmalı ve güvenlik duvarında dışarıya kapalı tutulmalıdır.</li>

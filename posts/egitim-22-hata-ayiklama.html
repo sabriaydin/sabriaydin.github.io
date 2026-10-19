@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch betiklerinde hata bulma yöntemleri, echo on ile izleme, sık yapılan hatalar, betik şablonu, güvenlik ve okunabilirlik önerileri.</p><div class="px-chips"><span>4 dk okuma</span><span>7 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Hata bulma yöntemleri</a></li><li><a href="#b2">Sık yapılan hatalar</a></li><li><a href="#b3">Güvenli silme ve kopyalama alışkanlıkları</a></li><li><a href="#b4">Betik şablonu</a></li><li><a href="#b5">Okunabilirlik önerileri</a></li><li><a href="#b6">Güvenlik önerileri</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Batch dilinde hata mesajları çoğu zaman bilgi vermez; betik sessizce yanlış çalışabilir. Bu yazıda hata bulma yöntemleri, sık yapılan hatalar ve düzenli betik yazmak için öneriler verilir.</p>
-<h2>Hata bulma yöntemleri</h2>
+<h2 id="b1">Hata bulma yöntemleri</h2>
 <h3>1. Komutları görünür yapmak</h3>
 <p><code>@echo off</code> satırı geçici olarak yorum yapılır veya <code>echo on</code> ile değiştirilir. Böylece her komut, değişkenleri genişletilmiş haliyle ekrana yazılır:</p>
 <pre>rem @echo off
@@ -43,7 +45,7 @@ echo on</pre>
 <p>Betik çift tıklanarak çalıştırıldığında hata mesajı, pencere hızlıca kapandığı için okunamaz. Betik <code>cmd</code> penceresinden (<code>cmd /k betik.bat</code> veya pencerede adı yazılarak) çalıştırılırsa pencere açık kalır.</p>
 <h3>5. Çıktıyı dosyaya kaydetmek</h3>
 <pre>betik.bat &gt; cikti.txt 2&gt;&amp;1</pre>
-<h2>Sık yapılan hatalar</h2>
+<h2 id="b2">Sık yapılan hatalar</h2>
 <table>
 <thead><tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr></thead>
 <tbody>
@@ -58,7 +60,7 @@ echo on</pre>
 <tr><td>Dosya adı bozuk karakterli</td><td>Kodlama uyuşmazlığı</td><td>Bkz. <a href="egitim-20-karakter-kodlamasi.html">Türkçe Karakterler ve Kodlama</a></td></tr>
 </tbody>
 </table>
-<h2>Güvenli silme ve kopyalama alışkanlıkları</h2>
+<h2 id="b3">Güvenli silme ve kopyalama alışkanlıkları</h2>
 <ul>
 <li><b>Önce listele, sonra sil.</b> <code>del</code> veya <code>rd</code> komutundan önce aynı filtreyle <code>dir</code> veya <code>echo</code> kullanılarak etkilenecek dosyalar görülür.</li>
 <li><b>Değişken boşsa dikkat.</b> <code>rd /s /q "%HEDEF%\Eski"</code> komutunda <code>HEDEF</code> boşsa yol <code>\Eski</code> olur ve sürücü kökündeki klasör silinebilir. Silmeden önce değişkenin dolu olduğu denetlenir.</li>
@@ -76,7 +78,7 @@ dir /b "%HEDEF%\*.tmp"
 choice /c EH /m "Silinsin mi"
 if errorlevel 2 exit /b 0
 del /q "%HEDEF%\*.tmp"</pre>
-<h2>Betik şablonu</h2>
+<h2 id="b4">Betik şablonu</h2>
 <p>Aşağıdaki iskelet, rehberdeki konuların çoğunu düzenli biçimde bir araya getirir:</p>
 <pre>@echo off
 setlocal enableextensions
@@ -117,7 +119,7 @@ if not exist "%~1\" (
 )
 rem ... asil islem ...
 exit /b 0</pre>
-<h2>Okunabilirlik önerileri</h2>
+<h2 id="b5">Okunabilirlik önerileri</h2>
 <ul>
 <li>Ayarlar (yollar, adlar) betiğin başında tek yerde toplanır.</li>
 <li>Her alt programın üstüne ne yaptığını anlatan <code>rem</code> satırı yazılır.</li>
@@ -127,14 +129,14 @@ exit /b 0</pre>
 <li>Tekrarlanan kod alt programa taşınır (<code>call :ad</code>).</li>
 <li>Betik her zaman bir çıkış koduyla biter (<code>exit /b 0</code> veya <code>exit /b 1</code>).</li>
 </ul>
-<h2>Güvenlik önerileri</h2>
+<h2 id="b6">Güvenlik önerileri</h2>
 <ul>
 <li>Kullanıcıdan alınan girdi (<code>set /p</code>) doğrudan komut içinde kullanılmamalıdır. <code>&amp;</code>, <code>|</code>, <code>&gt;</code> gibi karakterler beklenmedik komut çalıştırabilir. Girdi doğrulanmalı, yalnızca beklenen karakterlere izin verilmelidir.</li>
 <li>İnternetten indirilen betikler çalıştırılmadan önce <b>Not Defteri'nde okunmalıdır</b>. Anlaşılmayan satırı olan betik çalıştırılmaz.</li>
 <li>Betiklerde parola düz metin olarak saklanmamalıdır.</li>
 <li>Yönetici yetkisi gerekmeyen betikler yönetici olarak çalıştırılmamalıdır (bkz. <a href="egitim-24-dagitim-yonetici.html">Dağıtım ve Yönetici Yetkisi</a>).</li>
 </ul>
-<h2>Özet</h2>
+<h2 id="b7">Özet</h2>
 <ul>
 <li>Hata bulmak için <code>echo on</code>, değişken yazdırma ve <code>cmd /k</code> ile çalıştırma kullanılır.</li>
 <li>Sık hatalar tırnak, boşluklu <code>set</code>, gecikmeli genişletme ve boş değişkenlerden kaynaklanır.</li>

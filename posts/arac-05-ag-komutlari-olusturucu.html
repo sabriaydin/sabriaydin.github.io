@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>ping, tracert, nslookup, ipconfig, netstat ve Wi-Fi komutlarını seçeneklerle oluştur; ağ sorun giderme paketi hazırla.</p><div class="px-chips"><span>4 dk okuma</span><span>4 bölüm</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Komut İstemi nasıl açılır?</a></li><li><a href="#b3">Komutlar ve kullanım amaçları</a></li><li><a href="#b4">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>İnternet bağlantısı sorunlarının çoğu Windows'un yerleşik ağ komutlarıyla teşhis edilebilir. Parametreler akılda tutulmadığı için komutlar çoğu zaman yanlış veya eksik yazılır. Bu araç, seçilen komut için parametreleri hazırlar, ne işe yaradığını açıklar ve yönetici yetkisi gerekip gerekmediğini belirtir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}</style>
 <div class="arac">
   <label for="ag-k">Komut
@@ -127,12 +129,12 @@ $('ag-bat').onclick=()=>{if(!sonBat)return;Arac.indir('@echo off\r\nchcp 65001 >
 kur();
 })();
 </script>
-<h2>Komut İstemi nasıl açılır?</h2>
+<h2 id="b2">Komut İstemi nasıl açılır?</h2>
 <ul>
 <li>Normal komutlar için <code>Win + R</code> tuşlarına basıp <code>cmd</code> yazmak yeterlidir.</li>
 <li>Yönetici gerektiren komutlarda Başlat menüsünde <code>cmd</code> aranır, sonuca sağ tıklanıp <b>Yönetici olarak çalıştır</b> seçilir.</li>
 </ul>
-<h2>Komutlar ve kullanım amaçları</h2>
+<h2 id="b3">Komutlar ve kullanım amaçları</h2>
 <table>
 <thead><tr><th>Komut</th><th>Ne zaman kullanılır?</th></tr></thead>
 <tbody>
@@ -145,7 +147,7 @@ kur();
 <tr><td>Sorun giderme paketi</td><td>DNS ve IP ayarlarını sıfırlayarak genel bağlantı sorunlarını gidermek için.</td></tr>
 </tbody>
 </table>
-<h2>Dikkat edilecekler</h2>
+<h2 id="b4">Dikkat edilecekler</h2>
 <ul>
 <li><code>netsh winsock reset</code> ve <code>netsh int ip reset</code> komutlarından sonra bilgisayarın yeniden başlatılması gerekir.</li>
 <li><code>ipconfig /release</code> komutu bağlantıyı geçici olarak keser. Uzak bağlantı üzerinden çalışılıyorsa kullanılmamalıdır.</li>

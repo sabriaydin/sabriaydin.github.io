@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
@@ -27,9 +28,10 @@
 <div id="hdr"></div>
 <main id="app">
 <article class="post">
-<div class="body">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Menü, giriş, koşul, döngü ve bekleme bloklarını ekleyerek hazır .bat betiği oluştur; blokların sırasını değiştir ve dosya olarak indir.</p><div class="px-chips"><span>5 dk okuma</span><span>4 bölüm</span><span>Adım adım</span></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Blok türleri</a></li><li><a href="#b4">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>Batch betikleri; menü, kullanıcıdan değer alma, koşul ve döngü gibi yapılardan oluşur. Bu yapıların söz dizimi (örn. <code>choice</code> ve <code>errorlevel</code> ilişkisi, <code>for</code> döngülerindeki <code>%%</code> kullanımı) sık hata yapılan noktalardır. Bu araçta yapı taşları blok olarak eklenir, sırası değiştirilir ve betik canlı olarak oluşur. Batch söz dizimi için <a href="../index.html?cat=batch">Batch Rehberi</a> yazıları da incelenebilir.</p>
-<h2>Aracı dene</h2>
+<h2 id="b1">Aracı dene</h2>
 <style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}.arac ol.bt-ol{margin:0;padding:0;list-style:none;display:grid;gap:8px}.arac ol.bt-ol li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border:1px solid #8f8a82;border-radius:8px;background:#f3f1ed}.arac ol.bt-ol li span{flex:1 1 220px;overflow-wrap:anywhere}.arac ol.bt-ol button{padding:6px 12px}</style>
 <div class="arac">
   <fieldset style="border:0;margin:0;padding:0;display:grid;gap:12px">
@@ -157,7 +159,7 @@ $('bt-indir').onclick=()=>Arac.indir(sat().join('\r\n')+'\r\n','betik.bat','text
 form();ciz();
 })();
 </script>
-<h2>Nasıl kullanılır?</h2>
+<h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
 <li><b>Betik ayarlarını</b> belirle. Türkçe karakter kullanılacaksa UTF-8 seçeneği açık kalmalıdır.</li>
 <li>Listeden bir <b>blok türü</b> seç, alanları doldur ve <b>Bloğu ekle</b> düğmesine bas.</li>
@@ -165,7 +167,7 @@ form();ciz();
 <li>Betik, altta canlı olarak oluşur. Kopyalanabilir veya <code>.bat</code> dosyası olarak indirilebilir.</li>
 <li>Başlangıç için <b>Örnek menü betiğini yükle</b> düğmesiyle çalışan bir menü örneği açılabilir.</li>
 </ol>
-<h2>Blok türleri</h2>
+<h2 id="b3">Blok türleri</h2>
 <table>
 <thead><tr><th>Blok</th><th>Oluşturduğu yapı</th></tr></thead>
 <tbody>
@@ -180,7 +182,7 @@ form();ciz();
 <tr><td>Yönetici denetimi</td><td>Betik yönetici olarak çalıştırılmamışsa uyarı verip durdurur.</td></tr>
 </tbody>
 </table>
-<h2>Dikkat edilecekler</h2>
+<h2 id="b4">Dikkat edilecekler</h2>
 <ul>
 <li>Etiket ve değişken adları yalnızca harf, rakam ve alt çizgi içerebilir; harfle başlamalıdır.</li>
 <li>Döngü komutlarında dosya adı <code>%%f</code>, sayaç <code>%%i</code> olarak yazılır. Betik dosyası yerine doğrudan Komut İstemi'nde denenecekse tek <code>%</code> kullanılmalıdır.</li>
