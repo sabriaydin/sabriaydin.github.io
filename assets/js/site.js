@@ -11,6 +11,7 @@ window.SITE = {
   // Listede en yeni yazı üstte görünür (sıralama yazının tarihine ve saatine göre yapılır).
   categories: {
     windows: 'Windows Rehber',
+    windowsos: 'Windows İşletim Sistemleri',
     html: 'HTML Rehberi',
     htmlaraclari: 'HTML Araçları',
     linuxos: 'Linux İşletim Sistemleri',
@@ -29,7 +30,7 @@ window.SITE = {
   // name: menüde görünen grup adı, key: adres için kısa ad, items: gruba giren kategorilerin kısa adları
   // Hiçbir gruba girmeyen kategoriler (ör. batch) menüde tek başına görünür. Grupları silersen menü düz liste olur.
   groups: [
-    { key: 'windows', name: 'Windows', items: ['windows'] },
+    { key: 'windows', name: 'Windows', items: ['windows', 'windowsos'] },
     { key: 'linux', name: 'Linux', items: ['linuxos'] },
     { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
     { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] }
