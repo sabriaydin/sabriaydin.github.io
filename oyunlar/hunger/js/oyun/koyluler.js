@@ -117,15 +117,29 @@ function updateNpcs(dt){
   if(night||n.inside){
    /* gece evine çekilir, sabah çıkar */
    const ox=hs.dX+hs.ex*1.2,oz=hs.dZ+hs.ey*1.2,inH=Math.abs(n.x-hs.x)<2&&Math.abs(n.z-hs.z)<2;
+   const dp2=(n.x-hs.dX)*(-hs.ex)+(n.z-hs.dZ)*(-hs.ey);   /* kapı düzleminden içeriye doğru derinlik (dışarıda eksi) */
    let tx,tz;
    if(night){
     if(inH){tx=hs.x-hs.ex*.3;tz=hs.z-hs.ey*.3;if(Math.hypot(tx-n.x,tz-n.z)<.35){tx=null}}
-    else if(Math.hypot(ox-n.x,oz-n.z)>.7&&!(n.stage===1)){tx=ox;tz=oz}
-    else{n.stage=1;tx=hs.x;tz=hs.z;if(Math.hypot(tx-n.x,tz-n.z)<.5){n.stage=0;tx=null}}
+    else if(Math.hypot(ox-n.x,oz-n.z)>.35&&!(n.stage===1)){tx=ox;tz=oz}
+    else{
+     /* kapı eksenine ortalanıp düz geçilir: kapı kasasına takılmamak için içeri girene kadar eksen izlenir */
+     n.stage=1;
+     if(dp2<1.2){tx=hs.dX-hs.ex*(dp2+.9);tz=hs.dZ-hs.ey*(dp2+.9)}
+     else{tx=hs.x;tz=hs.z}
+     if(Math.hypot(hs.x-n.x,hs.z-n.z)<.5){n.stage=0;tx=null}
+    }
     n.inside=inH||n.stage===1;
     n.sleep=inH&&tx==null;                /* yatağında uyuyor */
    }else{
-    if(inH){n.stage=2;tx=ox;tz=oz;if(Math.hypot(tx-n.x,tz-n.z)<.5){n.stage=0;n.inside=false;tx=null}}
+    if(inH||n.stage===2){
+     n.stage=2;
+     const lat=Math.abs((n.x-hs.dX)*Math.abs(hs.ey)+(n.z-hs.dZ)*Math.abs(hs.ex));
+     if(dp2>1.2&&lat>.12){tx=hs.dX-hs.ex*1.0;tz=hs.dZ-hs.ey*1.0}          /* önce kapı eksenine hizalan */
+     else if(dp2>-1.2){tx=hs.dX+hs.ex*1.6;tz=hs.dZ+hs.ey*1.6}              /* sonra eksen boyunca dışarı çık */
+     else{tx=ox;tz=oz}
+     if(Math.hypot(ox-n.x,oz-n.z)<.5){n.stage=0;n.inside=false;tx=null}
+    }
     else{n.inside=false;tx=null}
    }
    if(tx!=null){head=Math.atan2(tx-n.x,tz-n.z);spd=1.1}
@@ -144,7 +158,11 @@ function updateNpcs(dt){
   const d=angDiff(n.yaw,head);n.yaw+=clamp(d,-4*dt,4*dt);
   if(spd>0&&Math.abs(d)<1.2){
    const st=spd*dt,nx=n.x+Math.sin(n.yaw)*st,nz=n.z+Math.cos(n.yaw)*st;
-   if(walkableN(nx,nz)&&Math.hypot(nx-G.px,nz-G.py)>.8){n.x=nx;n.z=nz;n.walk+=st*3}else{n.moving=false;n.tm=1}
+   const fr=Math.hypot(nx-G.px,nz-G.py)>.8;
+   if(fr&&walkableN(nx,nz)){n.x=nx;n.z=nz;n.walk+=st*3}
+   else if(fr&&night&&walkableN(nx,n.z)){n.x=nx;n.walk+=st*3}            /* gece: engelde kayarak ilerle */
+   else if(fr&&night&&walkableN(n.x,nz)){n.z=nz;n.walk+=st*3}
+   else{n.moving=false;n.tm=1}
   }else spd=0;
   n.spd+=(spd-n.spd)*Math.min(1,8*dt);
   if(dp<best){best=dp;G.nearNpc=n}

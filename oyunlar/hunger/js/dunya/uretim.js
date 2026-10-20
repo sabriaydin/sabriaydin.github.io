@@ -225,7 +225,7 @@ function genWorld(seed,size){
    }
    const wx=cx+2,wy=cy+2;
    dec('well',wx+.5,wy+.5,0,true);
-   obj[cy*W+cx]=O.FIRE;obj[(cy-1)*W+cx+3]=O.BENCH;obj[(cy+2)*W+cx-3]=O.BENCH;
+   obj[cy*W+cx]=O.FIRE;obj[(cy+1)*W+cx+4]=O.BENCH;obj[(cy+2)*W+cx-3]=O.BENCH;   /* ev duvarlarının dışında: (cx+3,cy-1) evin köşe duvarını eziyordu */
    dec('sign',cx+.5,cy-9.5,0,false,{text:VN[villages.length%VN.length]});
    for(let k=0;k<22;k++){const a=rnd()*6.28,rr=3+rnd()*7.5,x=Math.round(cx+Math.cos(a)*rr),y=Math.round(cy+Math.sin(a)*rr),i=y*W+x;if(!obj[i]&&tile[i]===T.GRASS)extras.push({k:'tuft',x:x+.3+rnd()*.4,z:y+.3+rnd()*.4,ry:rnd()*6,c:(rnd()*5)|0})}
    villages.push({cx,cy,name:VN[villages.length%VN.length],npcs,houses,extras});
