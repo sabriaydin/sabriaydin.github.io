@@ -31,6 +31,7 @@ function walkableFoe(x,z){
   const i=tz*W+tx,t=G.tile[i],o=G.obj[i];
   if(t<T.SAND||t===T.POND||SOLID(o)||o===O.DOOR||o===O.DOORM||o===O.VDOOR||HG.INSA_PASS(o))return false;
  }
+ if(HG.rsFoeBlock(x,z))return false;                /* inşa: duvar ve temel kenarı */
  return true;
 }
 

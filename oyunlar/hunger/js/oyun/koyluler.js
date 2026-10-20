@@ -101,7 +101,7 @@ function walkableN(x,z){
   if(tx<1||tz<1||tx>=W-1||tz>=H-1)return false;
   const i=tz*W+tx;if(G.tile[i]<T.SAND||G.tile[i]===T.POND||(G.obj[i]&&G.obj[i]!==HG.O.DOOR&&G.obj[i]!==HG.O.DOORM&&G.obj[i]!==HG.O.VDOOR&&!HG.INSA_PASS(G.obj[i])))return false;
  }
- return true;
+ return !HG.rsFoeBlock(x,z);
 }
 const angDiff=(a,b)=>{let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
 let restockT=0,discT=0;

@@ -43,8 +43,9 @@ function solidAt(x,y,pz){
 function canStand(x,y,pz){const r=.27;return !(solidAt(Math.floor(x-r),Math.floor(y-r),pz)||solidAt(Math.floor(x+r),Math.floor(y-r),pz)||solidAt(Math.floor(x-r),Math.floor(y+r),pz)||solidAt(Math.floor(x+r),Math.floor(y+r),pz))}
 /* Ayağın altındaki zemin: arazi veya üzerine çıkılmış kaya/maden tepesi */
 function supportY(x,y,pz){
- let gy=Scene.groundY(x,y);
- if(pz===undefined)return gy;
+ if(pz===undefined)return Scene.groundY(x,y);
+ let gy=Scene.terrainY(x,y);
+ {const rs=HG.rsSupport(x,y,pz);if(rs>gy)gy=rs}      /* inşa: temel, zemin, merdiven ve duvar üstleri */
  const r=.27;
  for(let k=0;k<4;k++){
   const cx=Math.floor(x+(k&1?r:-r)),cy=Math.floor(y+(k&2?r:-r));
@@ -146,10 +147,10 @@ function moveStep(dt){
   G.sprint=(HG.cfg.sprintT?!!G.sprintOn:kd('sprint'))&&G.hun>5&&G.thr>0&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
   /* susuzluk: koşmak engellenir (tuşa basılıyorsa kısa aralıklarla uyarı verilir) */
   if(G.thr<=0&&(HG.cfg.sprintT?G.sprintOn:kd('sprint'))&&iz<=0){const nw=performance.now();if(nw>thMsgT){thMsgT=nw+6000;HG.toast('Susuzsun: koşamazsın. Su iç.')}}
-  const wd0=Math.max(0,HG.sc.WY-Scene.groundY(G.px,G.py));
+  const wd0=Math.max(0,HG.sc.WY-Scene.terrainY(G.px,G.py));
   let sp=(G.sprint?5.4:3.4)*(G.swim?(G.sprint?.62:.5):clamp(1-wd0*.34,.5,1))*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
   /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
-  const g0=G.pz!==undefined&&!G.air?G.pz:Scene.groundY(G.px,G.py),grade=(Scene.groundY(G.px+vx*.7,G.py+vy*.7)-g0)/.7;
+  const g0=G.pz!==undefined&&!G.air?G.pz:Scene.terrainY(G.px,G.py),grade0=(Scene.terrainY(G.px+vx*.7,G.py+vy*.7)-g0)/.7,grade=(!G.air&&G.pz!==undefined&&G.pz>Scene.terrainY(G.px,G.py)+.3)?0:grade0;
   if(G.onRaft)sp=HG.raftSpeed(G.sprint,m);
   else sp*=clamp(1-grade*.42,.55,1.2);
   tvx=vx*sp;tvy=vy*sp;
@@ -161,7 +162,7 @@ function moveStep(dt){
  if(G.stats){const dd=speed*dt;if(G.swim)G.stats.swum=(G.stats.swum||0)+dd;else if(G.onRaft)G.stats.sailed=(G.stats.sailed||0)+dd;else if(!G.air)G.stats.walked=(G.stats.walked||0)+dd}
  if(speed<.03&&!G.moving){G.pvx=G.pvy=0;G.spdNow=0;return}
  const reach=speed*dt,lim=Math.max(.05,reach*1.7);   /* çok dik yokuşa tırmanılamaz, zıplanır */
- const ok=(x,y)=>canStand(x,y,G.pz)&&!creatureBlock(x,y)&&(G.onRaft?HG.raftWater(x,y):(G.pz===undefined||Scene.groundY(x,y)-G.pz<=lim));
+ const ok=(x,y)=>canStand(x,y,G.pz)&&!creatureBlock(x,y)&&!HG.rsBlock(x,y,G.pz===undefined?Scene.terrainY(x,y):G.pz)&&(G.onRaft?HG.raftWater(x,y):(G.pz===undefined||Scene.terrainY(x,y)-G.pz<=lim));
  const nx=G.px+G.pvx*dt;if(ok(nx,G.py))G.px=nx;else G.pvx*=.15;
  const ny=G.py+G.pvy*dt;if(ok(G.px,ny))G.py=ny;else G.pvy*=.15;
  if(!G.air){
@@ -194,7 +195,7 @@ function update(dt){
  if(A.hitT>0)A.hitT-=dt;
  /* barınak */
  G.shelterCheck-=dt;
- if(G.shelterCheck<=0){G.shelterCheck=.4;G.sheltered=calcShelter()}
+ if(G.shelterCheck<=0){G.shelterCheck=.4;G.sheltered=calcShelter()||HG.rsSheltered()}
  /* istatistikler */
  const L=daylight(),cold=1-L;
  const eco=(1-.12*HG.perk('eco'))*(HG.diffK?HG.diffK():1);

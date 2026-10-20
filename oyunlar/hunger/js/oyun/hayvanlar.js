@@ -24,7 +24,7 @@ function walkable(x,z){
   const i=tz*W+tx,t=G.tile[i];
   if(t<T.SAND||t===T.POND||SOLIDA(G.obj[i]))return false;
  }
- return true;
+ return !HG.rsFoeBlock(x,z);
 }
 /* Hayvan katı bir karenin veya içilebilir suyun içindeyse çevresindeki en yakın yürünebilir noktaya taşınır */
 function unstick(a){

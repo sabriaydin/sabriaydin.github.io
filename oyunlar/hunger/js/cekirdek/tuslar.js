@@ -10,8 +10,7 @@ const ACTS=[
  ['inv','Envanter','KeyI','Tab'],['craft','Üretim','KeyC',''],['map','Harita','KeyM',''],['jr','Günlük','KeyK',''],
  ['guide','Rehber','KeyH',''],['mute','Sesi aç/kapat','KeyN',''],['qsave','Hızlı kaydet','F5',''],
  ['drop','Seçili eşyadan 1 adet at','KeyQ',''],['sort','Çantayı düzenle','KeyR',''],['photo','Fotoğraf modu (arayüzü gizle)','KeyP',''],
- ['itier','İnşa: kurulacak seviyeyi seç','KeyG',''],['irot','İnşa: yönü çevir','KeyV',''],['ibulk','İnşa: toplu işlem (basılı tut)','KeyB',''],
- ['iundo','İnşa: son işlemi geri al','KeyZ',''],['ipick','İnşa: pipet (bakılan parçayı seç)','KeyT',''],['igrid','İnşa: ızgarayı aç/kapat','KeyY',''],['iinfo','İnşa: bilgi paneli','KeyL','']
+ ['irot','İnşa: döndür (merdiven yönü, kapı menteşesi)','KeyR',''],['ipick','İnşa: pipet (bakılan parçayı seç)','KeyT','']
 ];
 const DEF={};for(const [k,,a,b] of ACTS)DEF[k]=[a,b];
 const bind=HG.bind={};

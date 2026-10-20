@@ -27,7 +27,8 @@ function actionFor(tg){
  /* su altı: deniz dibine bakıp midye, yosun ve inci E ile toplanır */
  if(diveAim())return {hint:'[E] Deniz dibini karıştır',name:'Deniz dibi'};
  /* İnşa Planı / Çekiç: kurma ve yükseltme ipuçları insa.js içindedir */
- if(h&&(h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaAction)return HG.insaAction(tg);
+ if(h&&(h.it.tool==='plan'||h.it.tool==='hammer'||h.it.tool==='rsdoor')&&HG.insaAction)return HG.insaAction(tg);
+ {const rd=HG.rsAimDoor&&HG.rsAimDoor();if(rd)return rd}                                  /* kapı çerçevesine bakarken E: aç/kapat */
  if(G.head&&h&&(h.it.food||h.it.heal))return {block:'Su altında kullanılamaz.',name:h.it.n};
  /* elde yiyecek/içecek varsa sol tık basılı tutulunca yenir */
  if(h&&h.it.food){
@@ -291,6 +292,7 @@ function placeHeld(){
  const h=held();
  if(h&&h.it.tool==='plan'&&HG.insaPlace)return HG.insaPlace();            /* yerleştir tuşu/dokunmatik düğme: inşa planı ve çekiç */
  if(h&&h.it.tool==='hammer'&&HG.insaHammer)return HG.insaHammer();
+ if(h&&h.it.tool==='rsdoor'&&HG.rsDoorPlace)return HG.rsDoorPlace();
  if(!h||!h.it.place)return false;
  if(!G.tg){HG.toast('Yerleştirmek için yere bakın.');return false}
  const p=placeTarget(h.k);
@@ -305,6 +307,7 @@ function onActPress(){
  if(h&&h.it.place&&tg&&!tg.an&&!G.obj[tg.y*W+tg.x])placeHeld();
  else if(h&&h.it.tool==='plan'&&HG.insaPlace)HG.insaPlace();
  else if(h&&h.it.tool==='hammer'&&HG.insaHammer)HG.insaHammer();
+ else if(h&&h.it.tool==='rsdoor'&&HG.rsDoorPlace)HG.rsDoorPlace();
 }
 
 /* ---- Eşya kullanma (yeme-içme) ---- */
@@ -343,6 +346,7 @@ function useCands(){
 function useHeld(src){
  UP=null;
  if(HG.raftUse(held()))return;                 /* sal: biner veya iner */
+ { const hh=held(); if(!(hh&&(hh.it.tool==='plan'||hh.it.tool==='hammer'))&&HG.rsUse&&HG.rsUse(src))return }      /* inşa kapısı: aç/kapat */
  for(const c of useCands())if(c[2]())return;
  if(collectNow())return;
  if(HG.useExtra&&HG.useExtra(src))return;

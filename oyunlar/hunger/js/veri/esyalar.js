@@ -50,9 +50,11 @@ const IT={
  bench:{n:'Çalışma Tezgâhı',s:10,place:O.BENCH,d:'Bakır ve demir aletler yakınında üretilir.'},
  furn:{n:'Ocak',s:10,place:O.FURN,d:'Cevher eritilir, şişe yapılır.'},
  wallw:{n:'Tahta Duvar',s:50,place:O.WALLW},walls:{n:'Taş Duvar',s:50,place:O.WALLS},
- door:{n:'Kapı',s:20,place:O.DOOR,d:'Geçilebilir, barınağı kapalı tutar.'},
- plan:{n:'İnşa Planı',s:1,tool:'plan',tier:1,d:'Elde tutulurken sol tık: seçili parçayı (duvar, pencereli duvar, kapı, geçit, çit kapısı, çit) bakılan kareye kurar. Sağ tık basılı tutulup fare hareketiyle parça seçilir; G seviye, V yön, Z geri al. Malzeme çantadan harcanır.'},
- hammer:{n:'Çekiç',s:1,tool:'hammer',tier:1,d:'Kurulu inşa parçasına sol tık: seçili seviyeye (Odun, Taş, Metal) yükseltir, Döndür seçiliyse yönünü çevirir, Yık seçiliyse söker (malzemenin yarısı, ilk 30 saniyede tamamı geri gelir). B basılıyken bağlı parçaların hepsine uygulanır. Sağ tık basılı tutulup fare hareketiyle seçim yapılır.'}
+ door:{n:'Tahta Kapı',s:20,tool:'rsdoor',d:'Kapı çerçevesine bakıp sol tıkla takılır. E ile açılır ve kapanır. Kapalıyken barınağı kapalı tutar; çekiçle Yık seçiliyken sökülür.'},
+ mdoor:{n:'Metal Kapı',s:20,tool:'rsdoor',d:'Kapı çerçevesine takılan sağlam kapı. E ile açılır ve kapanır.'},
+ adoor:{n:'Zırhlı Kapı',s:20,tool:'rsdoor',d:'Kapı çerçevesine takılan en sağlam kapı. E ile açılır ve kapanır.'},
+ plan:{n:'İnşa Planı',s:1,tool:'plan',tier:1,d:'Rust tarzı inşa: 3 m ızgarada Temel, Zemin, Duvar, Kapı Çerçevesi, Pencereli Duvar, Yarım/Alçak Duvar ve Merdiven kurar. Sağ tık basılı tutulup fareyle parça seçilir; sol tık kurar, R merdiveni çevirir, T pipet. Parçalar Çıta olarak kurulur; Çekiç ile Odun, Taş, Metal ve Zırhlı seviyeye yükseltilir. Temelden uzağa gidildikçe denge düşer.'},
+ hammer:{n:'Çekiç',s:1,tool:'hammer',tier:1,d:'Kurulu parçaya sol tık: seçili seviyeye (Odun, Taş, Metal, Zırhlı) yükseltir; Döndür merdiven yönünü veya kapı menteşesini çevirir; Yık parçayı söker (kurulumdan sonraki 10 dakika içinde tam iade, sonra %25). Desteği biten parçalar çöker. Sağ tık basılı tutulup fareyle seçim yapılır.'}
 };
 const PLACE_ITEM={};for(const k in IT)if(IT[k].place)PLACE_ITEM[IT[k].place]=k;
 HG.IT=IT;HG.PLACE_ITEM=PLACE_ITEM;

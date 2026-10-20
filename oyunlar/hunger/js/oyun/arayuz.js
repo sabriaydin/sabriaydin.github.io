@@ -118,7 +118,7 @@ function hud(){
  if(!$('#bigmap').hidden)drawBig();
  /* nişan ipucu */
  const a=HG.actionFor(G.tg);
- let tip=(!G.tg&&!(a&&(a.kind==='eat'||a.block)))?'':(a?(a.name+(a.hint?' · '+a.hint:a.block?' · '+a.block:'')):(G.obj[G.tg.y*W+G.tg.x]?HG.NAMES[G.obj[G.tg.y*W+G.tg.x]]||'':''));
+ let tip=(!G.tg&&!(a&&(a.kind==='eat'||a.block||a.always)))?'':(a?(a.name+(a.hint?' · '+a.hint:a.block?' · '+a.block:'')):(G.obj[G.tg.y*W+G.tg.x]?HG.NAMES[G.obj[G.tg.y*W+G.tg.x]]||'':''));
  {
   const uc=HG.useCands()[0];
   if(uc){

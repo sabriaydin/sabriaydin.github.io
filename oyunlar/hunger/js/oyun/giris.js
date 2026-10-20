@@ -61,8 +61,8 @@ function setupInput(){
   else if(K('guide',e.code))HG.toggleGuide();
   else if(K('qsave',e.code))HG.manualSave(true);
   else if(K('drop',e.code))HG.dropOne();
+  else if(HG.insaKey&&HG.insaKey(e.code)){}                          /* İnşa Planı / Çekiç kısayolları (R: döndür, T: pipet) */
   else if(K('sort',e.code))HG.sortInv();
-  else if(HG.insaKey&&HG.insaKey(e.code)){}                          /* İnşa Planı / Çekiç kısayolları */
   else if(K('mute',e.code)){ui.mute=!ui.mute;HG.toast(ui.mute?'Ses kapalı.':'Ses açık.')}
   else if(/^Digit[1-8]$/.test(e.code)){G.sel=+e.code.slice(5)-1;ui.dirty=true;HG.snd('ui')}
  });

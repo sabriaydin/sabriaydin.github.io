@@ -44,6 +44,7 @@ S.aim=G=>{
   let hit=false;
   if(ob){const top=gy+(OBJTOP[ob]||1);if(y<top&&y>gy-.3)hit=true}
   if(!hit&&y<=((t<=1||t===5)&&!G.head?WY:gy)+.02)hit=true;
+  if(!hit&&HG.rsSolid&&HG.rsSolid(x,y,z))hit=true;          /* inşa duvarları ve katları ışını durdurur */
   if(hit&&ah&&ah.t<=s)return hitAn(ah);
   if(hit)return {x:tx,y:tz,ob,px:prev>=0?prev%W:-1,py:prev>=0?(prev/W)|0:-1,hx:x,hy:y,hz:z,dist:s};
  }

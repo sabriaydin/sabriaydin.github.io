@@ -36,7 +36,7 @@ function updateDrops(dt){
    if(tx<0||tz<0||tx>=W||tz>=H){L.splice(k,1);continue}
    const i=tz*W+tx;
    if(SOLID(G.obj[i])){d.x-=d.vx*dt;d.z-=d.vz*dt;d.vx*=-.3;d.vz*=-.3}
-   const t=G.tile[i],wet=(t<=T.SHAL||t===T.POND),gy=wet?HG.sc.WY:Scene.groundY(d.x,d.z);
+   const t=G.tile[i],wet=(t<=T.SHAL||t===T.POND),gy=wet?HG.sc.WY:HG.rsSurf(d.x,d.z,d.y);
    if(d.y<=gy+.12&&d.vy<=0){
     d.y=gy+.12;
     if(wet){                                   /* suya düşen eşya yüzer ve akıntıyla sürüklenir */
@@ -54,7 +54,7 @@ function updateDrops(dt){
     if(!wet){d.fl=false;d.rest=false}
    }else if(!d.rest){
     /* eğimde kayma ve yuvarlanma */
-    const g0=Scene.groundY(d.x,d.z),gx=Scene.groundY(d.x+.4,d.z)-Scene.groundY(d.x-.4,d.z),gz=Scene.groundY(d.x,d.z+.4)-Scene.groundY(d.x,d.z-.4);
+    const g0=HG.rsSurf(d.x,d.z,d.y),gx=Scene.groundY(d.x+.4,d.z)-Scene.groundY(d.x-.4,d.z),gz=Scene.groundY(d.x,d.z+.4)-Scene.groundY(d.x,d.z-.4);
     d.vx-=gx*2.2*dt;d.vz-=gz*2.2*dt;
     const fr=1-Math.min(1,(d.y<=g0+.2?3:.4)*dt);d.vx*=fr;d.vz*=fr;
     if(d.y<=g0+.13&&Math.hypot(d.vx,d.vz)<.12&&Math.abs(d.vy)<.5){d.rest=true;d.vx=d.vz=d.vy=0}
