@@ -64,7 +64,7 @@ function actionFor(tg){
    if(lv<0){const xb=HG.extBare&&HG.extBare(o,i);if(xb)return xb}
    if(lv<0)return {block:nd.tool==='axe'?'Çıplak elle ağaç kesilemez. El Taşı veya balta gerekir.':nd.req>0?(nd.msg||'Bunun için kazma gerekir.'):'Çıplak elle kazılamaz. El Taşı veya kazma gerekir.',name};
    if(lv<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
-   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz')+' · verim ×'+YIELD[Math.min(3,lv)],name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
+   return {kind:'node',hint:'Sol tık: '+(nd.tool==='axe'?'kes':'kaz'),name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))};
   }
   {const xh=HG.extHint&&HG.extHint(tg,o,h,i);if(xh)return xh}
   if(pickupOk(o))return {hint:'[E] basılı tut: geri al',name};
