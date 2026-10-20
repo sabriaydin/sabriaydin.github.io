@@ -185,6 +185,7 @@ function update(dt){
  vertStep(dt);
  /* eylem */
  HG.stepUse(dt);
+ HG.updateCraft&&HG.updateCraft(dt);
  if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
  HG.updateAnimals(dt);HG.updateSea(dt);HG.updateDiscover(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
