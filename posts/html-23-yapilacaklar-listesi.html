@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Yapılacaklar Listesi Uygulaması</title>
+<meta name="description" content="HTML, CSS ve JavaScript ile görev ekleme, tamamlama ve silme özellikli, verileri localStorage ile saklayan yapılacaklar listesi uygulaması.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-08-22 08:54">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>HTML, CSS ve JavaScript ile görev ekleme, tamamlama ve silme özellikli, verileri localStorage ile saklayan yapılacaklar listesi uygulaması.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Uygulamanın özellikleri</a></li><li><a href="#b2">Tam kod</a></li><li><a href="#b3">Kodun açıklaması</a></li><li><a href="#b4">Çalışmayı kontrol etme</a></li><li><a href="#b5">Geliştirme fikirleri</a></li><li><a href="#b6">localStorage hakkında bilinmesi gerekenler</a></li></ol></nav><!--/px-->
+<p>Bu yazıda önceki bölümlerde anlatılan HTML, CSS ve JavaScript bilgileri tek bir küçük uygulamada birleştirilir: görev eklenebilen, tamamlandı olarak işaretlenebilen, silinebilen ve sayfa kapatılıp açıldığında da korunan bir <b>yapılacaklar listesi</b>. Uygulama tek bir <code>.html</code> dosyasından oluşur ve herhangi bir kurulum gerektirmez.</p>
+<h2 id="b1">Uygulamanın özellikleri</h2>
+<ul>
+<li>Forma yazılan görev listeye eklenir (<code>Enter</code> veya <b>Ekle</b> düğmesiyle).</li>
+<li>Her görevin bir onay kutusu vardır; işaretlenince üstü çizilir.</li>
+<li><b>Sil</b> düğmesi görevi kaldırır.</li>
+<li>Kalan görev sayısı gösterilir.</li>
+<li>Veriler tarayıcının <code>localStorage</code> alanında saklanır; sayfa yenilense veya kapatılsa da kaybolmaz.</li>
+<li>Etiketler, <code>aria-label</code> ve <code>aria-live</code> ile klavye ve ekran okuyucu desteği vardır.</li>
+</ul>
+<h2 id="b2">Tam kod</h2>
+<p>Aşağıdaki kod bir metin düzenleyicisine yapıştırılıp <code>yapilacaklar.html</code> adıyla kaydedilir ve tarayıcıda açılır. Alternatif olarak <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırılarak denenebilir (araç, sayfa içinde çalıştığı için <code>localStorage</code> kalıcılığı bu yöntemde çalışmayabilir).</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="tr"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;Yapılacaklar&lt;/title&gt;
+  &lt;style&gt;
+    * { box-sizing: border-box; }
+    .sr { position: absolute; left: -999px; }
+    body { font-family: system-ui, sans-serif; background: #f3f1ed; color: #222; margin: 0; }
+    main { max-width: 480px; margin: 2rem auto; padding: 0 1rem; }
+    form { display: flex; gap: 0.5rem; }
+    input[type="text"] { flex: 1; padding: 0.6rem; font-size: 1rem; }
+    button { padding: 0.6rem 1rem; font-size: 1rem; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 0; border-bottom: 1px solid #ccc; }
+    li label { flex: 1; }
+    li.bitti label { text-decoration: line-through; color: #777; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main&gt;
+    &lt;h1&gt;Yapılacaklar&lt;/h1&gt;
+    &lt;form id="form"&gt;
+      &lt;label for="yeni" class="sr"&gt;Yeni görev&lt;/label&gt;
+      &lt;input type="text" id="yeni" placeholder="Yeni görev yazın" required&gt;
+      &lt;button type="submit"&gt;Ekle&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;ul id="liste"&gt;&lt;/ul&gt;
+    &lt;p id="ozet" aria-live="polite"&gt;&lt;/p&gt;
+  &lt;/main&gt;
+
+  &lt;script&gt;
+    const form = document.getElementById("form");
+    const yeni = document.getElementById("yeni");
+    const liste = document.getElementById("liste");
+    const ozet = document.getElementById("ozet");
+
+    // Kayıtlı görevleri oku (bozuk veri varsa boş liste kullan)
+    let gorevler = [];
+    try {
+      gorevler = JSON.parse(localStorage.getItem("gorevler")) || [];
+    } catch (hata) {
+      gorevler = [];
+    }
+
+    function kaydet() {
+      localStorage.setItem("gorevler", JSON.stringify(gorevler));
+    }
+
+    function ciz() {
+      liste.textContent = "";
+      gorevler.forEach((gorev, sira) =&gt; {
+        const li = document.createElement("li");
+        if (gorev.bitti) li.className = "bitti";
+
+        const kutu = document.createElement("input");
+        kutu.type = "checkbox";
+        kutu.id = "g" + sira;
+        kutu.checked = gorev.bitti;
+        kutu.addEventListener("change", () =&gt; {
+          gorev.bitti = kutu.checked;
+          kaydet();
+          ciz();
+        });
+
+        const etiket = document.createElement("label");
+        etiket.htmlFor = kutu.id;
+        etiket.textContent = gorev.metin;
+
+        const sil = document.createElement("button");
+        sil.type = "button";
+        sil.textContent = "Sil";
+        sil.setAttribute("aria-label", gorev.metin + " görevini sil");
+        sil.addEventListener("click", () =&gt; {
+          gorevler.splice(sira, 1);
+          kaydet();
+          ciz();
+        });
+
+        li.append(kutu, etiket, sil);
+        liste.append(li);
+      });
+
+      const kalan = gorevler.filter((g) =&gt; !g.bitti).length;
+      ozet.textContent = gorevler.length
+        ? kalan + " görev kaldı (toplam " + gorevler.length + ")"
+        : "Henüz görev yok.";
+    }
+
+    form.addEventListener("submit", (olay) =&gt; {
+      olay.preventDefault();
+      const metin = yeni.value.trim();
+      if (!metin) return;
+      gorevler.push({ metin: metin, bitti: false });
+      yeni.value = "";
+      kaydet();
+      ciz();
+    });
+
+    ciz();
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+<h2 id="b3">Kodun açıklaması</h2>
+<h3>1. HTML yapısı</h3>
+<p>Sayfada üç ana parça vardır: görev yazma <b>formu</b>, görevlerin gösterildiği boş bir <b><code>ul</code></b> listesi ve kalan görev sayısını gösteren bir <b><code>p</code></b>. Liste öğeleri HTML'de yazılmaz; JavaScript tarafından üretilir. <code>label</code> öğesine <code>sr</code> (yalnızca ekran okuyucu) sınıfı verilmiştir; görünmez ancak ekran okuyucu tarafından okunur (bkz. <a href="html-20-erisilebilirlik.html">Erişilebilirlik</a>).</p>
+<h3>2. Veriyi tutma: gorevler dizisi</h3>
+<p>Tüm görevler bir <b>dizide</b> tutulur ve her görev bir nesnedir: <code>{ metin: "Ekmek al", bitti: false }</code>. Sayfa her güncellendiğinde ekran bu diziye bakılarak yeniden çizilir. Bu yaklaşım, veriyi ekrandan ayrı tutmanın en basit örneğidir: önce dizi değişir, sonra ekran dizinin durumuna göre çizilir.</p>
+<h3>3. localStorage ile kayıt</h3>
+<ul>
+<li><code>localStorage</code> yalnızca <b>metin</b> saklar. Dizi, <code>JSON.stringify()</code> ile metne çevrilerek kaydedilir.</li>
+<li>Okurken <code>JSON.parse()</code> ile tekrar diziye çevrilir.</li>
+<li>Kayıtlı veri yoksa <code>getItem</code> <code>null</code> döndürür; <code>|| []</code> ile boş dizi kullanılır.</li>
+<li><code>try ... catch</code>, kayıtlı verinin bozuk olması halinde uygulamanın çökmesini önler.</li>
+</ul>
+<h3>4. ciz() fonksiyonu</h3>
+<p><code>ciz()</code> önce listeyi temizler (<code>liste.textContent = ""</code>), sonra her görev için <code>li</code>, onay kutusu, <code>label</code> ve <b>Sil</b> düğmesini oluşturup listeye ekler. Görev metni <code>textContent</code> ile yazıldığı için kullanıcının girdiği <code>&lt;b&gt;x&lt;/b&gt;</code> gibi ifadeler HTML olarak yorumlanmaz, düz metin olarak gösterilir. Bu, XSS saldırılarına karşı temel korumadır; <code>innerHTML</code> bu nedenle kullanılmamıştır.</p>
+<h3>5. Olaylar</h3>
+<table>
+<thead><tr><th>Olay</th><th>Yapılan işlem</th></tr></thead>
+<tbody>
+<tr><td>Formun <code>submit</code> olayı</td><td><code>preventDefault()</code> ile sayfanın yeniden yüklenmesi engellenir; metin boş değilse diziye eklenir, kaydedilir ve liste yeniden çizilir.</td></tr>
+<tr><td>Onay kutusunun <code>change</code> olayı</td><td>Görevin <code>bitti</code> değeri güncellenir, kaydedilir, liste yeniden çizilir.</td></tr>
+<tr><td>Sil düğmesinin <code>click</code> olayı</td><td><code>splice(sira, 1)</code> ile görev diziden çıkarılır, kaydedilir, liste yeniden çizilir.</td></tr>
+</tbody>
+</table>
+<p>Her değişiklikten sonra aynı üç adım uygulanır: <b>diziyi değiştir → kaydet → yeniden çiz.</b> Bu düzen, uygulama büyüdüğünde de kodun anlaşılır kalmasını sağlar.</p>
+<h2 id="b4">Çalışmayı kontrol etme</h2>
+<ol>
+<li>Birkaç görev ekleyip sayfayı yenileyin: görevler yerinde kalmalıdır.</li>
+<li><code>F12</code> ile geliştirici araçlarını açıp <b>Application &gt; Local Storage</b> bölümünde <code>gorevler</code> anahtarının değerini görün (bkz. <a href="html-22-gelistirici-araclari.html">Geliştirici Araçları</a>).</li>
+<li>Görev metnine <code>&lt;b&gt;deneme&lt;/b&gt;</code> yazın: metin kalın yazı olarak değil, olduğu gibi görünmelidir.</li>
+</ol>
+<h2 id="b5">Geliştirme fikirleri</h2>
+<ul>
+<li><b>Filtreleme:</b> Tümü / Yapılacaklar / Tamamlananlar düğmeleri ekleme.</li>
+<li><b>Düzenleme:</b> Görev metnine çift tıklayınca değiştirebilme.</li>
+<li><b>Tamamlananları temizle:</b> Bitmiş görevleri tek tıkla silme (<code>gorevler.filter(g =&gt; !g.bitti)</code>).</li>
+<li><b>Son tarih ve öncelik:</b> Göreve <code>tarih</code> ve <code>oncelik</code> alanları ekleyip sıralama.</li>
+<li><b>Dışa aktarma:</b> Verileri <code>.json</code> dosyası olarak indirme.</li>
+</ul>
+<h2 id="b6">localStorage hakkında bilinmesi gerekenler</h2>
+<ul>
+<li>Veriler yalnızca o tarayıcıda ve o cihazda saklanır; başka cihazlarla eşitlenmez.</li>
+<li>Tarayıcı verileri temizlendiğinde (özellikle gizli pencerede veya "site verilerini sil" işleminde) kaybolur.</li>
+<li>Kapasite yaklaşık 5 MB ile sınırlıdır.</li>
+<li>Parola gibi hassas veriler <code>localStorage</code> içinde saklanmamalıdır; sayfadaki herhangi bir betik bu verilere erişebilir.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

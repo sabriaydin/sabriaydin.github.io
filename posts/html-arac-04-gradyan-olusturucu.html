@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS Gradyan (Renk Geçişi) Oluşturucu</title>
+<meta name="description" content="İki veya üç renkle doğrusal ya da dairesel renk geçişi tasarla, CSS kodunu kopyala.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-03-30 10:04">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>İki veya üç renkle doğrusal ya da dairesel renk geçişi tasarla, CSS kodunu kopyala.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Örnek kullanım</a></li></ol></nav><!--/px-->
+<p>Gradyan, iki ya da daha fazla rengin yumuşak geçişle birleşmesidir. Butonlarda, kart arka planlarında ve başlık alanlarında şık görünür. Bu araçla renkleri seçip sonucu görürsün ve CSS kodunu hazır alırsın.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <div class="kutu" id="kutu" style="height:180px" role="img" aria-label="Gradyan önizlemesi"></div>
+  <div class="satir">
+    <label for="tur">Tür
+      <select id="tur"><option value="linear">Doğrusal (linear)</option><option value="radial">Dairesel (radial)</option></select>
+    </label>
+    <label for="c1">Başlangıç rengi<input type="color" id="c1" value="#b72a25"></label>
+    <label for="c2">Bitiş rengi<input type="color" id="c2" value="#1e1e21"></label>
+    <label for="c3" id="c3l" hidden>Üçüncü renk<input type="color" id="c3" value="#e7e4df"></label>
+  </div>
+  <div class="satir">
+    <label for="aci" id="acil"><span>Açı: <span id="acid">135</span>°</span><input type="range" id="aci" min="0" max="360" value="135"></label>
+    <label class="onay" for="uc"><input type="checkbox" id="uc"> Üçüncü renk ekle</label>
+  </div>
+  <div class="dugmeler">
+    <button type="button" class="ikinci" id="takas">Renkleri değiştir</button>
+    <button type="button" class="ikinci" id="rast">Rastgele renkler</button>
+  </div>
+  <h3>CSS kodu</h3>
+  <pre id="cikti"></pre>
+  <div class="dugmeler"><button type="button" data-kopyala="cikti">Kodu kopyala</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const rastgele=()=>'#'+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0');
+const guncelle=()=>{const radial=$('tur').value==='radial',uc=$('uc').checked;
+  $('c3l').hidden=!uc;$('acil').hidden=radial;$('acid').textContent=$('aci').value;
+  const renkler=[$('c1').value,$('c2').value].concat(uc?[$('c3').value]:[]);
+  const g=radial?`radial-gradient(circle, ${renkler.join(', ')})`:`linear-gradient(${$('aci').value}deg, ${renkler.join(', ')})`;
+  $('kutu').style.background=g;
+  $('cikti').textContent=`background: ${renkler[0]}; /* gradyan desteklemeyen eski tarayıcılar için */\nbackground: ${g};`};
+['tur','c1','c2','c3','aci','uc'].forEach(i=>$(i).addEventListener('input',guncelle));
+$('uc').addEventListener('change',guncelle);
+$('takas').onclick=()=>{const a=$('c1').value;$('c1').value=$('c2').value;$('c2').value=a;guncelle()};
+$('rast').onclick=()=>{$('c1').value=rastgele();$('c2').value=rastgele();$('c3').value=rastgele();guncelle()};
+guncelle();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ul>
+<li><b>Tür</b>: Doğrusal geçiş bir yönde ilerler; dairesel geçiş merkezden dışarı yayılır.</li>
+<li><b>Açı</b>: Doğrusal geçişin yönü. 0° aşağıdan yukarı, 90° soldan sağa, 180° yukarıdan aşağı demektir.</li>
+<li>İstersen <b>üçüncü renk</b> ekleyerek daha zengin geçişler yapabilirsin.</li>
+<li>Beğendiğin kodu kopyalayıp CSS dosyandaki istediğin kurala yapıştır.</li>
+</ul>
+<h2 id="b3">Örnek kullanım</h2>
+<pre>.baslik-alani {
+  background: #b72a25;
+  background: linear-gradient(135deg, #b72a25, #1e1e21);
+  color: #f1eee9;
+  padding: 40px 20px;
+  text-align: center;
+}</pre>
+<p>Gradyanın üzerine yazı yazıyorsan yazının her renkte okunur kaldığından emin ol. Renk seçerken <a href="html-arac-01-renk-kodu-olusturucu.html">Renk Kodu Oluşturucu</a> aracı işini kolaylaştırır.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

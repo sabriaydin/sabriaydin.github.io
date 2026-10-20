@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Wi-Fi ve internet bağlantı sorunlarını çözme</title>
+<meta name="description" content="&quot;Bağlı ama internet yok&quot;, Wi-Fi'ın görünmemesi gibi sorunlarda sıralı çözümler.">
+<meta name="kategori" content="windows">
+<meta name="tarih" content="2026-08-04 15:09">
+
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#0067c0;--b:#00a4ef">
+<!--px--><div class="px-hero"><small>Windows Rehber</small><p>&quot;Bağlı ama internet yok&quot;, Wi-Fi&#x27;ın görünmemesi gibi sorunlarda sıralı çözümler.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Hızlı kontroller</a></li><li><a href="#b2">Sorun gidericiyi çalıştır</a></li><li><a href="#b3">Ağı sıfırlama komutları</a></li><li><a href="#b4">DNS değiştirme</a></li><li><a href="#b5">Sürücü ve ağ sıfırlama</a></li></ol></nav><!--/px-->
+<p>İnternet sorunu bilgisayardan mı, modemden mi yoksa servis sağlayıcıdan mı kaynaklandığını bulmak ilk adımdır. Telefon aynı Wi-Fi'da çalışıyorsa sorun büyük olasılıkla bilgisayardadır.</p>
+<h2 id="b1">Hızlı kontroller</h2>
+<ul>
+<li>Uçak modunun kapalı, Wi-Fi düğmesinin açık olduğundan emin ol.</li>
+<li>Modemi 30 saniye kapatıp yeniden aç.</li>
+<li>Bilgisayarı yeniden başlat.</li>
+</ul>
+<h2 id="b2">Sorun gidericiyi çalıştır</h2>
+<p><b>Ayarlar &gt; Sistem &gt; Sorun Gider &gt; Diğer sorun gidericiler &gt; İnternet Bağlantıları</b></p>
+<h2 id="b3">Ağı sıfırlama komutları</h2>
+<p>Yönetici terminalinde sırayla çalıştır:</p>
+<pre>ipconfig /release
+ipconfig /renew
+ipconfig /flushdns
+netsh winsock reset
+netsh int ip reset</pre>
+<p>Ardından bilgisayarı yeniden başlat.</p>
+<h2 id="b4">DNS değiştirme</h2>
+<ol>
+<li><b>Ayarlar &gt; Ağ ve internet &gt; Wi-Fi &gt; Donanım özellikleri</b></li>
+<li><b>DNS sunucu ataması &gt; Düzenle &gt; Elle</b></li>
+<li>IPv4'ü aç; tercih edilen DNS: <code>8.8.8.8</code>, alternatif: <code>1.1.1.1</code></li>
+</ol>
+<h2 id="b5">Sürücü ve ağ sıfırlama</h2>
+<ul>
+<li>Aygıt Yöneticisi &gt; <b>Ağ bağdaştırıcıları</b> altında Wi-Fi kartının sürücüsünü güncelle veya kaldırıp yeniden başlat.</li>
+<li><b>Ayarlar &gt; Ağ ve internet &gt; Gelişmiş ağ ayarları &gt; Ağ sıfırlama</b>, tüm ağ ayarlarını varsayılana döndürür. Kayıtlı Wi-Fi parolaları silinir.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

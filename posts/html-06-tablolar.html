@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Tablolar</title>
+<meta name="description" content="table, tr, th ve td etiketleri, thead/tbody/tfoot bölümleri, caption, colspan ve rowspan ile hücre birleştirme.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-03-25 20:12">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>table, tr, th ve td etiketleri, thead/tbody/tfoot bölümleri, caption, colspan ve rowspan ile hücre birleştirme.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Temel yapı</a></li><li><a href="#b2">Başlık, gövde ve alt bölüm</a></li><li><a href="#b3">Hücre birleştirme: colspan ve rowspan</a></li><li><a href="#b4">Küçük ekranlarda tablo</a></li><li><a href="#b5">Sık yapılan hatalar</a></li></ol></nav><!--/px-->
+<p>Tablolar, verileri satır ve sütunlarda düzenli göstermek içindir: fiyat listeleri, program çizelgeleri, karşılaştırmalar gibi. Tablo <b>sayfa düzeni kurmak için kullanılmaz</b>; sadece gerçek veri tablosu için kullanılır.</p>
+<h2 id="b1">Temel yapı</h2>
+<ul>
+<li><code>&lt;table&gt;</code>: Tablonun tamamı</li>
+<li><code>&lt;tr&gt;</code>: Bir satır (table row)</li>
+<li><code>&lt;th&gt;</code>: Başlık hücresi (kalın ve ortalı görünür)</li>
+<li><code>&lt;td&gt;</code>: Veri hücresi (table data)</li>
+</ul>
+<pre>&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th&gt;Oyun&lt;/th&gt;
+    &lt;th&gt;Tür&lt;/th&gt;
+    &lt;th&gt;Puan&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Oyun A&lt;/td&gt;
+    &lt;td&gt;Macera&lt;/td&gt;
+    &lt;td&gt;9&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Oyun B&lt;/td&gt;
+    &lt;td&gt;Strateji&lt;/td&gt;
+    &lt;td&gt;8&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+<p>Bu tablo tarayıcıda çizgisiz görünür; çizgileri CSS ile eklersin (10. derste). Şimdilik denemek için <code>&lt;table border="1"&gt;</code> yazabilirsin.</p>
+<h2 id="b2">Başlık, gövde ve alt bölüm</h2>
+<p>Büyük tablolarda satırları gruplamak okunabilirliği ve erişilebilirliği artırır:</p>
+<pre>&lt;table&gt;
+  &lt;caption&gt;Aylık gider listesi&lt;/caption&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;&lt;th scope="col"&gt;Kalem&lt;/th&gt;&lt;th scope="col"&gt;Tutar&lt;/th&gt;&lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;&lt;td&gt;İnternet&lt;/td&gt;&lt;td&gt;400 TL&lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;Elektrik&lt;/td&gt;&lt;td&gt;650 TL&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot&gt;
+    &lt;tr&gt;&lt;th scope="row"&gt;Toplam&lt;/th&gt;&lt;td&gt;1050 TL&lt;/td&gt;&lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;</pre>
+<ul>
+<li><code>&lt;caption&gt;</code>: Tablonun başlığıdır; ekran okuyucular tabloyu bununla tanıtır.</li>
+<li><code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tfoot&gt;</code>: Üst, orta ve alt bölüm.</li>
+<li><code>scope="col"</code> ve <code>scope="row"</code>: Başlığın sütun mu satır mı için olduğunu belirtir.</li>
+</ul>
+<h2 id="b3">Hücre birleştirme: colspan ve rowspan</h2>
+<pre>&lt;table border="1"&gt;
+  &lt;tr&gt;
+    &lt;th colspan="2"&gt;Kişi bilgisi&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;Ad&lt;/td&gt;
+    &lt;td&gt;Ali&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td rowspan="2"&gt;İletişim&lt;/td&gt;
+    &lt;td&gt;ali@ornek.com&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;0555 111 22 33&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+<ul>
+<li><code>colspan="2"</code>: Hücre yan yana 2 sütunu kaplar.</li>
+<li><code>rowspan="2"</code>: Hücre alt alta 2 satırı kaplar. Kapladığı alandaki diğer hücreleri <b>silmeyi</b> unutma; yoksa tablo kayar.</li>
+</ul>
+<h2 id="b4">Küçük ekranlarda tablo</h2>
+<p>Geniş tablolar telefonda taşabilir. Çözüm olarak tabloyu kaydırılabilir bir kutuya almak yaygındır:</p>
+<pre>&lt;div style="overflow-x: auto;"&gt;
+  &lt;table&gt;...&lt;/table&gt;
+&lt;/div&gt;</pre>
+<blockquote>Satır ve sütun sayısını seçip hazır tablo kodu almak için <a href="html-arac-03-tablo-olusturucu.html">HTML Tablo Oluşturucu</a> aracını dene. Kodu kopyalayıp sayfana yapıştırman yeterli.</blockquote>
+<h2 id="b5">Sık yapılan hatalar</h2>
+<ul>
+<li>Her satırdaki hücre sayısının farklı olması (tablo bozuk görünür)</li>
+<li>Tabloyu sayfa yerleşimi için kullanmak; bunun için sonraki derslerdeki yapı etiketleri var</li>
+<li>Başlık hücreleri yerine <code>&lt;td&gt;</code> kullanıp kalın yazıyı elle vermek</li>
+</ul>
+<p>Sonraki derste kullanıcıdan bilgi alan formları öğreneceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

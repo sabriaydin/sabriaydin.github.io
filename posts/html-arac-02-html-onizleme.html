@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Önizleme</title>
+<meta name="description" content="HTML ve CSS kodunu yaz, sonucu anında gör; kodu kopyala veya .html dosyası olarak indir.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-03-10 16:40">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>HTML ve CSS kodunu yaz, sonucu anında gör; kodu kopyala veya .html dosyası olarak indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">İpuçları</a></li></ol></nav><!--/px-->
+<p>Derslerdeki kodları denemek için dosya oluşturmana gerek yok. Kodu aşağıdaki kutuya yaz veya yapıştır; sonuç hemen altında görünür. Beğendiğin kodu kopyalayabilir ya da <code>.html</code> dosyası olarak indirebilirsin.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <label for="kod">HTML kodun (yazdıkça önizleme güncellenir)</label>
+  <textarea id="kod" spellcheck="false" autocomplete="off"></textarea>
+  <div class="dugmeler">
+    <button type="button" class="ikinci" id="ornek">Örnek yükle</button>
+    <button type="button" class="ikinci" id="temiz">Temizle</button>
+    <button type="button" class="ikinci" data-kopyala="kod">Kodu kopyala</button>
+    <button type="button" id="indir">.html olarak indir</button>
+  </div>
+  <h3>Önizleme</h3>
+  <iframe id="onz" class="onizle" title="HTML önizleme" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+  <p class="not">Önizleme güvenli bir kutuda çalışır; yazdığın kod bu siteye erişemez ve hiçbir yere gönderilmez. Sayfada kalıcı kayıt yoktur: kodunu kaybetmemek için kopyala veya indir.</p>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),kod=$('kod'),onz=$('onz');
+const ORNEK=`<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Deneme</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f1eee9; padding: 20px; }
+    h1 { color: #b72a25; }
+    .kart { background: #faf8f5; border-radius: 10px; padding: 16px; max-width: 360px; }
+  </style>
+</head>
+<body>
+  <h1>Merhaba!</h1>
+  <div class="kart">
+    <p>Bu kodu değiştir, önizleme anında güncellenir.</p>
+    <button onclick="alert('Tıkladın!')">Bana tıkla</button>
+  </div>
+</body>
+</html>`;
+const BAS='<!doctype html><meta charset="utf-8">';
+const guncelle=()=>{onz.srcdoc=BAS+kod.value};
+let t;kod.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(guncelle,250)});
+$('ornek').onclick=()=>{kod.value=ORNEK;guncelle()};
+$('temiz').onclick=()=>{kod.value='';guncelle();kod.focus()};
+$('indir').onclick=()=>Arac.indir(kod.value,'sayfam.html','text/html');
+kod.value=ORNEK;guncelle();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li><b>Örnek yükle</b> ile hazır bir sayfayla başla ya da kendi kodunu yapıştır.</li>
+<li>Kodu değiştir (başlığı, rengi, metni); önizleme yarım saniye içinde yenilenir.</li>
+<li>Sonucu beğendiysen <b>.html olarak indir</b> düğmesiyle dosyayı bilgisayarına kaydet; çift tıklayınca tarayıcıda açılır.</li>
+</ol>
+<h2 id="b3">İpuçları</h2>
+<ul>
+<li>HTML, CSS (<code>&lt;style&gt;</code> içinde) ve JavaScript (<code>&lt;script&gt;</code> içinde) birlikte çalışır.</li>
+<li>Başka bir sitedeki resmi denemek için <code>&lt;img src="https://..."&gt;</code> ile tam adresini kullan; bilgisayarındaki dosya yollarına bu araçtan erişilemez.</li>
+<li>Önizlemedeki bağlantılar aynı kutunun içinde açılır; bazı siteler kutu içinde görüntülenmeye izin vermez.</li>
+<li>Yeni başlıyorsan <a href="html-arac-06-sayfa-iskeleti-olusturucu.html">Sayfa İskeleti Oluşturucu</a> ile temel kodu alıp buraya yapıştır.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

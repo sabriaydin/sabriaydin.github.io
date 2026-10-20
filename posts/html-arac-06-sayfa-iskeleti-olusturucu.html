@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Sayfa İskeleti Oluşturucu</title>
+<meta name="description" content="Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu al; kopyala veya indir.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-06-06 20:32">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Araçları</small><p>Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu al; kopyala veya indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Üretilen kodda neler var?</a></li></ol></nav><!--/px-->
+<p>Her yeni sayfada <code>&lt;!DOCTYPE html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;meta&gt;</code> gibi aynı satırları baştan yazmak sıkıcıdır ve hata yapmak kolaydır. Bu araç bilgilerini doldurduğun anda doğru yazılmış bir başlangıç şablonu üretir.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <div class="satir">
+    <label for="baslik">Sayfa başlığı<input type="text" id="baslik" value="Sayfa Başlığı" autocomplete="off"></label>
+    <label for="dil">Sayfa dili
+      <select id="dil"><option value="tr">Türkçe (tr)</option><option value="en">İngilizce (en)</option><option value="de">Almanca (de)</option></select>
+    </label>
+  </div>
+  <label for="acik">Sayfa açıklaması (isteğe bağlı, arama sonuçlarında görünür)<input type="text" id="acik" autocomplete="off"></label>
+  <div class="satir">
+    <label class="onay" for="vp"><input type="checkbox" id="vp" checked> Mobil uyumluluk (viewport)</label>
+    <label class="onay" for="css"><input type="checkbox" id="css" checked> style.css dosyasını bağla</label>
+    <label class="onay" for="js"><input type="checkbox" id="js"> script.js dosyasını bağla</label>
+    <label class="onay" for="yap"><input type="checkbox" id="yap" checked> header, main ve footer yapısı ekle</label>
+  </div>
+  <h3>HTML kodu</h3>
+  <pre id="cikti"></pre>
+  <div class="dugmeler">
+    <button type="button" data-kopyala="cikti">Kodu kopyala</button>
+    <button type="button" class="ikinci" id="indir">index.html olarak indir</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const uret=()=>{const b=esc($('baslik').value.trim()||'Sayfa Başlığı'),a=esc($('acik').value.trim()),yil=new Date().getFullYear();
+  let k='<!DOCTYPE html>\n<html lang="'+$('dil').value+'">\n<head>\n  <meta charset="utf-8">\n';
+  if($('vp').checked)k+='  <meta name="viewport" content="width=device-width, initial-scale=1">\n';
+  if(a)k+='  <meta name="description" content="'+a+'">\n';
+  k+='  <title>'+b+'</title>\n';
+  if($('css').checked)k+='  <link rel="stylesheet" href="style.css">\n';
+  k+='</head>\n<body>\n';
+  if($('yap').checked)k+='  <header>\n    <h1>'+b+'</h1>\n    <nav>\n      <ul>\n        <li><a href="index.html">Ana Sayfa</a></li>\n        <li><a href="hakkimda.html">Hakkımda</a></li>\n      </ul>\n    </nav>\n  </header>\n\n  <main>\n    <p>İçerik buraya gelecek.</p>\n  </main>\n\n  <footer>\n    <p>&copy; '+yil+' '+b+'</p>\n  </footer>\n';
+  else k+='  <h1>'+b+'</h1>\n  <p>İçerik buraya gelecek.</p>\n';
+  if($('js').checked)k+='\n  <script src="script.js"><\/script>\n';
+  k+='</body>\n</html>\n';
+  $('cikti').textContent=k};
+['baslik','dil','acik','vp','css','js','yap'].forEach(i=>$(i).addEventListener('input',uret));
+$('indir').onclick=()=>Arac.indir($('cikti').textContent,'index.html','text/html');
+uret();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li>Sayfa başlığını, dilini ve isteğe bağlı açıklamasını yaz.</li>
+<li>İstediğin eklemeleri işaretle. CSS veya JS dosyasını bağlarsan aynı klasörde <code>style.css</code> ve <code>script.js</code> adlı dosyaları oluşturmayı unutma.</li>
+<li>Kodu kopyala veya <b>index.html olarak indir</b>. Dosyaya çift tıklayınca tarayıcıda açılır.</li>
+</ol>
+<h2 id="b3">Üretilen kodda neler var?</h2>
+<ul>
+<li><code>&lt;!DOCTYPE html&gt;</code> ve <code>lang</code> niteliği: Tarayıcıya sayfanın biçimini ve dilini söyler.</li>
+<li><code>&lt;meta charset="utf-8"&gt;</code>: Türkçe karakterlerin düzgün görünmesini sağlar.</li>
+<li><code>viewport</code>: Sayfanın telefonlarda doğru ölçekte görünmesini sağlar.</li>
+<li><code>&lt;title&gt;</code> ve açıklama: Sekme başlığı ve arama motorlarındaki özet metni.</li>
+<li><code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>: 8. derste anlatılan anlamsal bölümler.</li>
+</ul>
+<p>Çıkan kodu denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırabilir, bu etiketlerin ne işe yaradığını <a href="html-01-html-nedir.html">HTML Rehberi</a> dersinden okuyabilirsin.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QR Kod Oluşturucu</title>
+<meta name="description" content="Web adresi, Wi-Fi bilgisi, e-posta, telefon, SMS veya kişi kartı için QR kod oluştur; PNG veya SVG olarak indir.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-09-22 20:11">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Web adresi, Wi-Fi bilgisi, e-posta, telefon, SMS veya kişi kartı için QR kod oluştur; PNG veya SVG olarak indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">İçerik türleri</a></li><li><a href="#b3">İyi bir QR kod için</a></li></ol></nav><!--/px-->
+<p>QR kodlar; web adreslerini, Wi-Fi bilgilerini ve iletişim kartlarını telefon kamerasıyla hızlıca aktarmak için kullanılır. Bu araç, kodu tarayıcıda oluşturur; girilen bilgiler hiçbir sunucuya gönderilmez. Sonuç PNG (baskı ve paylaşım) veya SVG (her boyutta net, tasarım programları için) olarak indirilebilir.</p>
+<h2 id="b1">Aracı dene</h2>
+<style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}</style>
+<div class="arac">
+  <label for="qr-t">İçerik türü
+    <select id="qr-t">
+      <option value="metin">Metin veya web adresi</option>
+      <option value="wifi">Wi-Fi ağı</option>
+      <option value="eposta">E-posta</option>
+      <option value="tel">Telefon numarası</option>
+      <option value="sms">SMS</option>
+      <option value="vcard">Kişi kartı (vCard)</option>
+    </select>
+  </label>
+  <div class="gg" id="qr-metin">
+    <label for="qr-m">Metin veya adres<textarea id="qr-m" rows="3" style="min-height:80px">https://example.com</textarea></label>
+  </div>
+  <div class="gg" id="qr-wifi" hidden>
+    <div class="satir">
+      <label for="qr-ssid">Ağ adı (SSID)<input type="text" id="qr-ssid" autocomplete="off"></label>
+      <label for="qr-pw">Parola<input type="text" id="qr-pw" autocomplete="off"></label>
+    </div>
+    <div class="satir">
+      <label for="qr-enc">Şifreleme
+        <select id="qr-enc"><option value="WPA">WPA/WPA2/WPA3</option><option value="WEP">WEP</option><option value="nopass">Şifresiz</option></select>
+      </label>
+    </div>
+    <label class="onay" for="qr-gizli"><input type="checkbox" id="qr-gizli"> Gizli ağ</label>
+  </div>
+  <div class="gg" id="qr-eposta" hidden>
+    <label for="qr-ea">Alıcı e-posta adresi<input type="text" id="qr-ea" autocomplete="off"></label>
+    <label for="qr-ek">Konu<input type="text" id="qr-ek" autocomplete="off"></label>
+    <label for="qr-ei">İleti<textarea id="qr-ei" rows="2" style="min-height:70px"></textarea></label>
+  </div>
+  <div class="gg" id="qr-tel" hidden>
+    <label for="qr-tn">Telefon numarası (örn. +905551112233)<input type="text" id="qr-tn" autocomplete="off"></label>
+  </div>
+  <div class="gg" id="qr-sms" hidden>
+    <label for="qr-sn">Telefon numarası<input type="text" id="qr-sn" autocomplete="off"></label>
+    <label for="qr-si">İleti<textarea id="qr-si" rows="2" style="min-height:70px"></textarea></label>
+  </div>
+  <div class="gg" id="qr-vcard" hidden>
+    <div class="satir">
+      <label for="qr-vad">Ad<input type="text" id="qr-vad" autocomplete="off"></label>
+      <label for="qr-vsoy">Soyad<input type="text" id="qr-vsoy" autocomplete="off"></label>
+    </div>
+    <div class="satir">
+      <label for="qr-vtel">Telefon<input type="text" id="qr-vtel" autocomplete="off"></label>
+      <label for="qr-vmail">E-posta<input type="text" id="qr-vmail" autocomplete="off"></label>
+    </div>
+    <div class="satir">
+      <label for="qr-vkur">Kuruluş<input type="text" id="qr-vkur" autocomplete="off"></label>
+      <label for="qr-vweb">Web sitesi<input type="text" id="qr-vweb" autocomplete="off"></label>
+    </div>
+  </div>
+  <div class="satir">
+    <label for="qr-ecl">Hata düzeltme düzeyi
+      <select id="qr-ecl"><option value="L">Düşük (L), en küçük kod</option><option value="M" selected>Orta (M)</option><option value="Q">Yüksek (Q)</option><option value="H">En yüksek (H)</option></select>
+    </label>
+    <label for="qr-px">Boyut (piksel)<input type="number" id="qr-px" min="128" max="2048" step="16" value="384"></label>
+    <label for="qr-mar">Kenar boşluğu (modül)<input type="number" id="qr-mar" min="0" max="16" value="4"></label>
+  </div>
+  <div class="satir">
+    <label for="qr-on">Kod rengi<input type="color" id="qr-on" value="#000000"></label>
+    <label for="qr-arka">Arka plan rengi<input type="color" id="qr-arka" value="#ffffff"></label>
+  </div>
+  <p class="not" id="qr-hata" role="alert"></p>
+  <div style="display:flex;justify-content:center"><canvas id="qr-cv" role="img" aria-label="Oluşturulan QR kod" style="max-width:100%;height:auto;image-rendering:pixelated;border:1px solid #8f8a82"></canvas></div>
+  <div class="dugmeler">
+    <button type="button" id="qr-png">PNG olarak indir</button>
+    <button type="button" class="ikinci" id="qr-svg">SVG olarak indir</button>
+  </div>
+</div>
+<script src="../assets/js/qrcode.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+qrcode.stringToBytes=qrcode.stringToBytesFuncs['UTF-8'];
+const TURLER=['metin','wifi','eposta','tel','sms','vcard'];
+const wesc=s=>s.replace(/([\;,:"])/g,'\\$1');
+const vesc=s=>s.replace(/([\;,])/g,'\\$1').replace(/\r?\n/g,'\\n');
+const veri=()=>{
+  const t=$('qr-t').value,v=id=>$(id).value.trim();
+  switch(t){
+    case 'metin':return $('qr-m').value.trim();
+    case 'wifi':{if(!v('qr-ssid'))return '';const e=$('qr-enc').value;
+      return 'WIFI:T:'+e+';S:'+wesc(v('qr-ssid'))+';'+(e==='nopass'?'':'P:'+wesc($('qr-pw').value)+';')+($('qr-gizli').checked?'H:true;':'')+';'}
+    case 'eposta':{if(!v('qr-ea'))return '';const P=[];if(v('qr-ek'))P.push('subject='+encodeURIComponent(v('qr-ek')));if(v('qr-ei'))P.push('body='+encodeURIComponent(v('qr-ei')));
+      return 'mailto:'+v('qr-ea')+(P.length?'?'+P.join('&'):'')}
+    case 'tel':return v('qr-tn')?'tel:'+v('qr-tn').replace(/\s/g,''):'';
+    case 'sms':return v('qr-sn')?'SMSTO:'+v('qr-sn').replace(/\s/g,'')+':'+$('qr-si').value.trim():'';
+    default:{if(!v('qr-vad')&&!v('qr-vsoy'))return '';
+      const L=['BEGIN:VCARD','VERSION:3.0','N:'+vesc(v('qr-vsoy'))+';'+vesc(v('qr-vad'))+';;;','FN:'+vesc((v('qr-vad')+' '+v('qr-vsoy')).trim())];
+      if(v('qr-vkur'))L.push('ORG:'+vesc(v('qr-vkur')));if(v('qr-vtel'))L.push('TEL:'+v('qr-vtel'));
+      if(v('qr-vmail'))L.push('EMAIL:'+v('qr-vmail'));if(v('qr-vweb'))L.push('URL:'+v('qr-vweb'));
+      L.push('END:VCARD');return L.join('\n')}}};
+const lum=h=>{const c=[1,3,5].map(i=>{const x=parseInt(h.substr(i,2),16)/255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]};
+let qr=null,m=4;
+const ciz=()=>{
+  TURLER.forEach(x=>$('qr-'+x).hidden=x!==$('qr-t').value);
+  const cv=$('qr-cv'),ctx=cv.getContext('2d'),h=$('qr-hata');h.textContent='';qr=null;
+  const d=veri();
+  if(!d){h.textContent='QR kod oluşturmak için gerekli alanlar doldurulmalıdır.';cv.width=cv.height=1;ctx.clearRect(0,0,1,1);return}
+  try{const q=qrcode(0,$('qr-ecl').value);q.addData(d,'Byte');q.make();qr=q}
+  catch(e){h.textContent='İçerik bu hata düzeltme düzeyi için çok uzun. Metin kısaltılmalı veya düzey düşürülmelidir.';cv.width=cv.height=1;return}
+  const n=qr.getModuleCount(),px=Math.min(2048,Math.max(128,Math.floor(+$('qr-px').value)||384));
+  m=Math.min(16,Math.max(0,Math.floor(+$('qr-mar').value)));if(isNaN(m))m=4;
+  const c=Math.max(1,Math.floor(px/(n+2*m))),W=c*(n+2*m);
+  cv.width=cv.height=W;
+  ctx.fillStyle=$('qr-arka').value;ctx.fillRect(0,0,W,W);ctx.fillStyle=$('qr-on').value;
+  for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(qr.isDark(r,k))ctx.fillRect((k+m)*c,(r+m)*c,c,c);
+  const a=lum($('qr-on').value),b=lum($('qr-arka').value),oran=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);
+  if(a>=b)h.textContent='Uyarı: kod rengi arka plandan açıksa birçok tarayıcı kodu okuyamaz. Koyu kod, açık arka plan önerilir.';
+  else if(oran<4)h.textContent='Uyarı: renk karşıtlığı düşük; kod okunamayabilir.'};
+const svg=()=>{const n=qr.getModuleCount(),W=n+2*m;let p='';
+  for(let r=0;r<n;r++){let k=0;while(k<n){if(qr.isDark(r,k)){let s=k;while(k<n&&qr.isDark(r,k))k++;p+='M'+(s+m)+' '+(r+m)+'h'+(k-s)+'v1h-'+(k-s)+'z'}else k++}}
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+W+'" shape-rendering="crispEdges"><rect width="'+W+'" height="'+W+'" fill="'+$('qr-arka').value+'"/><path fill="'+$('qr-on').value+'" d="'+p+'"/></svg>'};
+$('qr-png').onclick=()=>{ciz();if(!qr)return;$('qr-cv').toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='qr-kod.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)})};
+$('qr-svg').onclick=()=>{ciz();if(qr)Arac.indir(svg(),'qr-kod.svg','image/svg+xml')};
+document.querySelectorAll('#qr-t,#qr-m,#qr-ssid,#qr-pw,#qr-enc,#qr-gizli,#qr-ea,#qr-ek,#qr-ei,#qr-tn,#qr-sn,#qr-si,#qr-vad,#qr-vsoy,#qr-vtel,#qr-vmail,#qr-vkur,#qr-vweb,#qr-ecl,#qr-px,#qr-mar,#qr-on,#qr-arka').forEach(e=>e.addEventListener('input',ciz));
+ciz();
+})();
+</script>
+<h2 id="b2">İçerik türleri</h2>
+<table>
+<thead><tr><th>Tür</th><th>Telefon kodu okuduğunda ne olur?</th></tr></thead>
+<tbody>
+<tr><td>Metin veya web adresi</td><td>Metin gösterilir; adres ise tarayıcıda açma önerilir.</td></tr>
+<tr><td>Wi-Fi ağı</td><td>Telefon, ağa bağlanmayı önerir. Parola elle girilmez.</td></tr>
+<tr><td>E-posta</td><td>Alıcı, konu ve ileti dolu olarak yeni e-posta ekranı açılır.</td></tr>
+<tr><td>Telefon numarası</td><td>Numara arama ekranına aktarılır.</td></tr>
+<tr><td>SMS</td><td>Numara ve ileti dolu olarak mesaj ekranı açılır.</td></tr>
+<tr><td>Kişi kartı</td><td>Ad, telefon, e-posta ve kuruluş bilgileri rehbere eklenebilir.</td></tr>
+</tbody>
+</table>
+<h2 id="b3">İyi bir QR kod için</h2>
+<ul>
+<li><b>Koyu kod, açık arka plan</b> kullanılmalıdır. Ters renkli veya düşük karşıtlıklı kodlar bazı okuyucularda çalışmaz.</li>
+<li><b>Kenar boşluğu</b> en az 4 modül bırakılmalıdır; boşluk daraldıkça okuma güçleşir.</li>
+<li>Hata düzeltme düzeyi yükseldikçe kod büyür ve daha yoğun görünür. Kod yıpranma riski taşıyan yüzeylere basılacaksa Q veya H seçilmelidir.</li>
+<li>Baskıda kodun kenarı en az 2 cm olmalıdır. Basılacak kod için SVG biçimi tercih edilmelidir.</li>
+<li>Kod yayına alınmadan önce en az iki farklı telefonla okutularak denenmelidir.</li>
+</ul>
+<p>Kod üretimi, MIT lisanslı <a href="https://github.com/kazuhikoarase/qrcode-generator">qrcode-generator</a> kütüphanesiyle yapılır.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

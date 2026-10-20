@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zamanlı Bilgisayar Kapatma Komutu Oluşturucu</title>
+<meta name="description" content="Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluştur; .bat dosyası olarak indir.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-04-20 15:09">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluştur; .bat dosyası olarak indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Komut nasıl çalıştırılır?</a></li><li><a href="#b3">İşlemler ve karşılıkları</a></li><li><a href="#b4">Parametrelerin anlamı</a></li><li><a href="#b5">Belirli saatte kapatma</a></li><li><a href="#b6">Dikkat edilecekler</a></li></ol></nav><!--/px-->
+<p>Windows, <code>shutdown</code> komutuyla bilgisayarı zamanlı olarak kapatabilir. Komutun parametreleri (<code>/s</code>, <code>/r</code>, <code>/t</code>, <code>/f</code>, <code>/c</code>, <code>/d</code>) ezberlenmeden kullanılamaz. Bu araç, seçilen işlem ve zamana göre hazır komutu üretir; iptal komutunu da birlikte verir.</p>
+<h2 id="b1">Aracı dene</h2>
+<style>#sk-gs,#sk-ts,#sk-ms{display:grid;gap:14px}#sk-gs[hidden],#sk-ts[hidden],#sk-ms[hidden]{display:none}</style>
+<div class="arac">
+  <div class="satir">
+    <label for="sk-i">İşlem
+      <select id="sk-i">
+        <option value="s">Bilgisayarı kapat</option>
+        <option value="hb">Hızlı kapat (karma kapatma)</option>
+        <option value="r">Yeniden başlat</option>
+        <option value="l">Oturumu kapat</option>
+        <option value="h">Hazırda beklet</option>
+        <option value="u">Uyku moduna al</option>
+        <option value="k">Ekranı kilitle</option>
+      </select>
+    </label>
+    <label for="sk-m">Zamanlama türü
+      <select id="sk-m">
+        <option value="g">Geri sayım (süre sonra)</option>
+        <option value="t">Belirli saatte (zamanlanmış görev)</option>
+      </select>
+    </label>
+  </div>
+  <div id="sk-gs">
+    <div class="dugmeler" role="group" aria-label="Hazır süreler">
+      <button type="button" class="ikinci" data-dk="0">Hemen</button>
+      <button type="button" class="ikinci" data-dk="15">15 dk</button>
+      <button type="button" class="ikinci" data-dk="30">30 dk</button>
+      <button type="button" class="ikinci" data-dk="60">1 saat</button>
+      <button type="button" class="ikinci" data-dk="120">2 saat</button>
+    </div>
+    <div class="satir">
+      <label for="sk-sa">Saat<input type="number" id="sk-sa" min="0" max="999" value="0"></label>
+      <label for="sk-dk">Dakika<input type="number" id="sk-dk" min="0" max="59999" value="30"></label>
+      <label for="sk-sn">Saniye<input type="number" id="sk-sn" min="0" max="59999" value="0"></label>
+    </div>
+  </div>
+  <div id="sk-ts" hidden>
+    <div class="satir">
+      <label for="sk-saat">Saat (24 saat biçimi)<input type="time" id="sk-saat" value="23:30"></label>
+      <label for="sk-gun">Sıklık
+        <select id="sk-gun">
+          <option value="once">Bir kez</option>
+          <option value="daily">Her gün</option>
+        </select>
+      </label>
+    </div>
+  </div>
+  <fieldset style="border:0;margin:0;padding:0;display:grid;gap:10px">
+    <legend style="font-weight:600;padding:0;margin-bottom:6px">Seçenekler</legend>
+    <label class="onay" for="sk-f"><input type="checkbox" id="sk-f" checked> Açık programları zorla kapat (/f)</label>
+    <label class="onay" for="sk-uy"><input type="checkbox" id="sk-uy"> Kullanıcıya mesaj göster</label>
+  </fieldset>
+  <div id="sk-ms" hidden>
+    <div class="satir" style="grid-template-columns:1fr">
+      <label for="sk-msj">Mesaj (en fazla 512 karakter)<input type="text" id="sk-msj" maxlength="512" value="Bilgisayar kısa süre içinde kapatılacak. Lütfen çalışmanızı kaydedin."></label>
+    </div>
+  </div>
+  <div class="satir" style="grid-template-columns:1fr">
+    <label for="sk-neden">Neden kodu (olay günlüğü için, yalnızca kapat ve yeniden başlat işlemlerinde)
+      <select id="sk-neden">
+        <option value="">Belirtme</option>
+        <option value="P:4:1">Planlı: Uygulama bakımı</option>
+        <option value="P:2:3">Planlı: İşletim sistemi güvenlik güncellemesi</option>
+        <option value="P:0:0">Planlı: Diğer</option>
+        <option value="U:0:0">Plansız: Diğer</option>
+      </select>
+    </label>
+  </div>
+  <p class="not" id="sk-hata" role="alert"></p>
+  <p style="margin:0;font-weight:700" id="sk-ozet" role="status" aria-live="polite"></p>
+  <h3 style="margin:6px 0 0">Başlatma komutu</h3>
+  <div class="kod"><code id="sk-cmd"></code><button type="button" class="ikinci" data-kopyala="sk-cmd">Kopyala</button></div>
+  <h3 style="margin:6px 0 0">İptal komutu</h3>
+  <div class="kod"><code id="sk-iptal"></code><button type="button" class="ikinci" data-kopyala="sk-iptal">Kopyala</button></div>
+  <div class="dugmeler">
+    <button type="button" id="sk-bat">Başlatma dosyasını indir (.bat)</button>
+    <button type="button" class="ikinci" id="sk-ibat">İptal dosyasını indir (.bat)</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const MAX=315360000;
+const pad=n=>String(n).padStart(2,'0');
+const sure=s=>{const sa=Math.floor(s/3600),dk=Math.floor(s%3600/60),sn=s%60,p=[];
+  if(sa)p.push(sa+' saat');if(dk)p.push(dk+' dakika');if(sn||!p.length)p.push(sn+' saniye');return p.join(' ')};
+const ad={s:'kapatılacak',hb:'hızlı kapatılacak',r:'yeniden başlatılacak',l:'oturumu kapatılacak',h:'hazırda bekletilecek',u:'uyku moduna alınacak',k:'kilitlenecek'};
+/* Komutu üretir; bat=true ise toplu iş dosyası için % işareti ikiye katlanır */
+const kur=bat=>{
+  const i=$('sk-i').value,zt=$('sk-m').value,f=$('sk-f').checked,uy=$('sk-uy').checked,n=$('sk-neden').value;
+  let msj=$('sk-msj').value.replace(/"/g,"'").replace(/[\r\n]+/g,' ').trim();
+  if(bat)msj=msj.replace(/%/g,'%%');
+  const ex=[];
+  if(f&&['s','hb','r','l','h'].includes(i))ex.push('/f');
+  const dolu=()=>uy&&msj?' /c "'+msj+'"':'';
+  const dn=n&&['s','hb','r'].includes(i)?' /d '+n:'';
+  let ana;
+  if(i==='s'||i==='hb'||i==='r'){
+    ana=(i==='r'?'/r':'/s')+(i==='hb'?' /hybrid':'')+(ex.length?' '+ex.join(' '):'')+dn;
+  }else if(i==='l'){ana='/l'+(f?' /f':'')}
+  else if(i==='h'){ana='/h'+(f?' /f':'')}
+  else if(i==='u'){ana='rundll32.exe powrprof.dll,SetSuspendState 0,1,0'}
+  else {ana='rundll32.exe user32.dll,LockWorkStation'}
+  return {i,zt,ana,msj:dolu()};
+};
+const hesapla=()=>{
+  $('sk-hata').textContent='';
+  const i=$('sk-i').value,zt=$('sk-m').value;
+  $('sk-gs').hidden=zt!=='g';$('sk-ts').hidden=zt!=='t';
+  $('sk-ms').hidden=!$('sk-uy').checked;
+  $('sk-neden').disabled=!['s','hb','r'].includes(i);
+  $('sk-f').disabled=['u','k'].includes(i);
+  const doğrudan=['s','hb','r'].includes(i);
+  const res=(bat)=>{
+    const k=kur(bat);let cmd,iptal='shutdown /a',ozet;
+    if(zt==='g'){
+      const s=Math.max(0,(+$('sk-sa').value||0)*3600+(+$('sk-dk').value||0)*60+(+$('sk-sn').value||0));
+      if(s>MAX){return {hata:'Süre en fazla 315360000 saniye (10 yıl) olabilir.'}}
+      if(doğrudan){cmd='shutdown '+k.ana+k.msj+' /t '+s}
+      else if(k.i==='u'||k.i==='k'||k.i==='l'||k.i==='h'){
+        const is=k.i==='l'?'shutdown '+k.ana:k.i==='h'?'shutdown '+k.ana:k.ana;
+        cmd=s>0?'timeout /t '+s+' /nobreak && '+is:is}
+      if(!doğrudan)iptal='Pencereyi kapatın veya Ctrl + C tuşlarına basın';
+      ozet=s===0?'İşlem hemen uygulanacak.':'Bilgisayar '+sure(s)+' sonra '+ad[k.i]+'.';
+    }else{
+      const t=$('sk-saat').value;
+      if(!t)return {hata:'Bir saat seçilmelidir.'};
+      const sc=$('sk-gun').value;
+      let tr=k.i==='u'?'rundll32.exe powrprof.dll,SetSuspendState 0,1,0':k.i==='k'?'rundll32.exe user32.dll,LockWorkStation':'shutdown '+k.ana;
+      if(doğrudan)tr='shutdown '+k.ana+k.msj+' /t 30';
+      const trq=tr.replace(/"/g,'\\"');
+      cmd='schtasks /create /tn "ZamanliKapatma" /tr "'+trq+'" /sc '+sc+' /st '+t+' /f';
+      iptal='schtasks /delete /tn "ZamanliKapatma" /f';
+      ozet=(sc==='daily'?'Her gün ':'Bir kez, ')+t+' saatinde bilgisayar '+ad[k.i]+(doğrudan?' (30 saniyelik uyarıyla)':'')+'.';
+    }
+    return {cmd,iptal,ozet};
+  };
+  const r=res(false);
+  if(r.hata){$('sk-hata').textContent=r.hata;$('sk-cmd').textContent='';$('sk-iptal').textContent='';$('sk-ozet').textContent='';return}
+  $('sk-cmd').textContent=r.cmd;$('sk-iptal').textContent=r.iptal;$('sk-ozet').textContent=r.ozet;
+};
+const dosya=(satirlar,ad)=>Arac.indir('@echo off\r\nchcp 65001 >nul\r\n'+satirlar+'\r\npause\r\n',ad,'text/plain;charset=utf-8');
+$('sk-bat').onclick=()=>{
+  hesapla();if($('sk-hata').textContent)return;
+  const c=$('sk-cmd').textContent;
+  dosya($('sk-uy').checked?c.replace(/(?<!%)%(?!%)/g,'%%'):c,'zamanli-kapatma.bat')};
+$('sk-ibat').onclick=()=>{
+  hesapla();if($('sk-hata').textContent)return;
+  const c=$('sk-iptal').textContent;
+  dosya(c.startsWith('shutdown')||c.startsWith('schtasks')?c:'echo Bu işlem komut penceresi kapatılarak iptal edilir.','iptal.bat')};
+document.querySelectorAll('[data-dk]').forEach(b=>b.onclick=()=>{
+  const d=+b.dataset.dk;$('sk-sa').value=Math.floor(d/60);$('sk-dk').value=d%60;$('sk-sn').value=0;hesapla()});
+['sk-i','sk-m','sk-sa','sk-dk','sk-sn','sk-saat','sk-gun','sk-f','sk-uy','sk-msj','sk-neden'].forEach(i=>$(i).addEventListener('input',hesapla));
+hesapla();
+})();
+</script>
+<h2 id="b2">Komut nasıl çalıştırılır?</h2>
+<ol>
+<li>Üretilen komutu <b>Kopyala</b> düğmesiyle kopyala.</li>
+<li><code>Win + R</code> tuşlarına basıp <code>cmd</code> yazarak Komut İstemi'ni aç. Komut doğrudan <code>Win + R</code> penceresine de yapıştırılabilir.</li>
+<li>Komutu yapıştırıp <code>Enter</code> tuşuna bas. Kapatma geri sayımı başlar ve Windows bir bildirim gösterir.</li>
+<li>Vazgeçmek için <b>iptal komutu</b> çalıştırılır (<code>shutdown /a</code>).</li>
+</ol>
+<p>Komutu her seferinde yazmamak için <b>Başlatma dosyasını indir</b> düğmesiyle <code>.bat</code> dosyası alınabilir; dosyaya çift tıklanması yeterlidir.</p>
+<h2 id="b3">İşlemler ve karşılıkları</h2>
+<table>
+<thead><tr><th>İşlem</th><th>Komut</th><th>Not</th></tr></thead>
+<tbody>
+<tr><td>Kapat</td><td><code>shutdown /s /t 1800</code></td><td>Süre saniye cinsindendir (1800 = 30 dakika).</td></tr>
+<tr><td>Hızlı kapat</td><td><code>shutdown /s /hybrid /t 1800</code></td><td>Bir sonraki açılışı hızlandıran karma kapatma uygulanır.</td></tr>
+<tr><td>Yeniden başlat</td><td><code>shutdown /r /t 1800</code></td><td></td></tr>
+<tr><td>Oturumu kapat</td><td><code>shutdown /l</code></td><td><code>/t</code> parametresini desteklemez; araç, bekleme için <code>timeout</code> komutunu kullanır.</td></tr>
+<tr><td>Hazırda beklet</td><td><code>shutdown /h</code></td><td><code>/t</code> parametresini desteklemez; bilgisayarda hazırda bekletme etkin olmalıdır.</td></tr>
+<tr><td>Uyku</td><td><code>rundll32.exe powrprof.dll,SetSuspendState 0,1,0</code></td><td>Hazırda bekletme etkinse bilgisayar uyku yerine hazırda bekletmeye geçebilir.</td></tr>
+<tr><td>Ekranı kilitle</td><td><code>rundll32.exe user32.dll,LockWorkStation</code></td><td></td></tr>
+</tbody>
+</table>
+<h2 id="b4">Parametrelerin anlamı</h2>
+<ul>
+<li><code>/s</code>: bilgisayarı kapatır. <code>/r</code>: yeniden başlatır. <code>/l</code>: oturumu kapatır. <code>/h</code>: hazırda bekletir.</li>
+<li><code>/t</code>: işlem başlamadan önceki bekleme süresi (saniye). En fazla 315360000 (10 yıl).</li>
+<li><code>/f</code>: açık programları uyarı vermeden kapatır. Kaydedilmemiş çalışmanın kaybolmasına neden olabilir.</li>
+<li><code>/c "mesaj"</code>: kullanıcıya gösterilen açıklama. En fazla 512 karakterdir.</li>
+<li><code>/d</code>: olay günlüğüne yazılacak neden kodu. Yalnızca <code>/s</code> ve <code>/r</code> ile kullanılır.</li>
+<li><code>/a</code>: bekleyen kapatma işlemini iptal eder; yalnızca geri sayım sırasında çalışır.</li>
+</ul>
+<h2 id="b5">Belirli saatte kapatma</h2>
+<p>Zamanlama türü <b>Belirli saatte</b> seçildiğinde araç, <code>schtasks</code> komutuyla bir zamanlanmış görev oluşturur. Görev seçilen saatte çalışır; kapatma işlemi için 30 saniyelik uyarı süresi tanınır. Görev "Bir kez" seçeneğiyle oluşturulduğunda saat bugün için geçmişse Windows hata verebilir; bu durumda "Her gün" seçeneği veya geri sayım kullanılabilir. Komut, yönetici olarak açılan Komut İstemi'nde çalıştırılmalıdır. Görevi silmek için iptal komutu kullanılır.</p>
+<h2 id="b6">Dikkat edilecekler</h2>
+<ul>
+<li>Zorla kapatma (<code>/f</code>) seçiliyken kaydedilmemiş belgeler kaybolabilir. Önemli çalışmalarda bu seçenek kapatılmalıdır.</li>
+<li>Hazırda bekletme, oturumu kapatma, uyku ve kilitleme işlemleri geri sayım için pencereye bağlıdır; Komut İstemi penceresi kapatılırsa işlem iptal olur.</li>
+<li>İndirilen <code>.bat</code> dosyası yalnızca ilgili komutu içerir; Windows SmartScreen uyarısı gösterirse içeriği not defteriyle inceleyip çalıştırmak yeterlidir.</li>
+<li>Araç komutu yalnızca üretir; hiçbir veri sunucuya gönderilmez.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

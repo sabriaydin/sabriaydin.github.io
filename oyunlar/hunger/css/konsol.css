@@ -1,0 +1,40 @@
+/* Hunger 3D - geliştirici konsolu (F1) */
+#kns{position:absolute;inset:0;z-index:95;display:grid;place-items:center;background:rgba(5,5,6,.82);padding:12px}
+#kns[hidden]{display:none}
+#kns .kn-box{width:min(1100px,100%);max-height:100%;height:min(720px,100%);display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+#kns .kn-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+#kns h1{margin:0;font-size:16px;letter-spacing:.1em}
+#kns h1 kbd{font:11px/1 system-ui,sans-serif;color:var(--mut);background:#0d0d0e;border:1px solid var(--line);border-radius:4px;padding:2px 6px;margin-left:6px;letter-spacing:0}
+#kns .kn-btns{display:flex;flex-wrap:wrap;gap:6px}
+#kns .kn-btns button{font:inherit;font-size:12px;padding:4px 10px}
+#kns .kn-btns button.on{background:var(--red2);border-color:var(--red);color:var(--tx)}
+#kns .kn-st{font:12px/1.5 ui-monospace,Consolas,monospace;color:#9be08a;background:#0d0d0e;border:1px solid var(--line);border-radius:6px;padding:6px 10px;overflow-wrap:anywhere}
+#kns .kn-flt{display:grid;gap:6px}
+#kns #knQ{font:inherit;font-size:13px;color:var(--tx);background:#0d0d0e;border:1px solid var(--line);border-radius:6px;padding:6px 10px;width:100%;box-sizing:border-box}
+#kns .kn-ch{display:flex;flex-wrap:wrap;gap:5px}
+#kns .kn-c{font:inherit;font-size:12px;padding:2px 9px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--tx);cursor:pointer}
+#kns .kn-c i{font-style:normal;color:var(--mut);margin-left:2px}
+#kns .kn-c.off{opacity:.45;text-decoration:line-through}
+#kns .kn-all{color:var(--mut)}
+#kns .kn-l{overflow:auto;background:#0b0b0c;border:1px solid var(--line);border-radius:6px;font:12px/1.5 ui-monospace,Consolas,monospace;padding:4px 0;outline:none}
+#kns .kr{display:grid;grid-template-columns:54px 78px minmax(0,1fr) auto;gap:0 8px;padding:1px 10px;align-items:baseline}
+#kns .kr:hover{background:rgba(255,255,255,.04)}
+#kns .kr time{color:var(--mut)}
+#kns .kr b{font-weight:600;color:#8ab4e8}
+#kns .kr .km{white-space:pre-wrap;overflow-wrap:anywhere}
+#kns .kr .kx{font-style:normal;color:#d0a02f;min-width:28px;text-align:right}
+#kns .kr.c-hata b,#kns .kr.l-hata .km{color:#ff7b72}
+#kns .kr.l-uyari .km{color:#e0a073}
+#kns .kr.c-ses b{color:#c9a0ff}
+#kns .kr.c-hasar b{color:#ff9b8f}
+#kns .kr.c-saldiri b,#kns .kr.c-hayvan b{color:#f0b46c}
+#kns .kr.c-envanter b,#kns .kr.c-uretim b{color:#9ad39a}
+#kns .kr.c-durum b{color:#7fd6d0}
+#kns .kr.c-koruma b{color:#ff7b72}
+#kns .kr.c-girdi b,#kns .kr.c-bildirim b{color:var(--mut)}
+#kns .kn-ft{font-size:11px;color:var(--mut)}
+@media (max-width:640px){
+ #kns{padding:6px}
+ #kns .kn-box{padding:8px 8px;height:100%}
+ #kns .kr{grid-template-columns:44px 64px minmax(0,1fr) auto}
+}

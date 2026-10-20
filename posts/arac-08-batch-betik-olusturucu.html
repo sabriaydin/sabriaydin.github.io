@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch (.bat) Betik Oluşturucu</title>
+<meta name="description" content="Menü, giriş, koşul, döngü ve bekleme bloklarını ekleyerek hazır .bat betiği oluştur; blokların sırasını değiştir ve dosya olarak indir.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-09-28 18:20">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Menü, giriş, koşul, döngü ve bekleme bloklarını ekleyerek hazır .bat betiği oluştur; blokların sırasını değiştir ve dosya olarak indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Blok türleri</a></li><li><a href="#b4">Dikkat edilecekler</a></li></ol></nav><!--/px-->
+<p>Batch betikleri; menü, kullanıcıdan değer alma, koşul ve döngü gibi yapılardan oluşur. Bu yapıların söz dizimi (örn. <code>choice</code> ve <code>errorlevel</code> ilişkisi, <code>for</code> döngülerindeki <code>%%</code> kullanımı) sık hata yapılan noktalardır. Bu araçta yapı taşları blok olarak eklenir, sırası değiştirilir ve betik canlı olarak oluşur. Batch söz dizimi için <a href="../index.html?cat=batch">Batch Rehberi</a> yazıları da incelenebilir.</p>
+<h2 id="b1">Aracı dene</h2>
+<style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}.arac ol.bt-ol{margin:0;padding:0;list-style:none;display:grid;gap:8px}.arac ol.bt-ol li{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 10px;border:1px solid #8f8a82;border-radius:8px;background:#f3f1ed}.arac ol.bt-ol li span{flex:1 1 220px;overflow-wrap:anywhere}.arac ol.bt-ol button{padding:6px 12px}</style>
+<div class="arac">
+  <fieldset style="border:0;margin:0;padding:0;display:grid;gap:12px">
+    <legend style="font-weight:600;padding:0;margin-bottom:6px">Betik ayarları</legend>
+    <div class="satir">
+      <label for="bt-baslik">Pencere başlığı<input type="text" id="bt-baslik" value="Benim Betiğim" autocomplete="off"></label>
+      <label for="bt-renk">Renk
+        <select id="bt-renk"><option value="">Varsayılan</option><option value="0A">Siyah üzerine yeşil</option><option value="0F">Siyah üzerine beyaz</option><option value="1F">Mavi üzerine beyaz</option><option value="70">Beyaz üzerine siyah</option></select>
+      </label>
+    </div>
+    <label class="onay" for="bt-yanki"><input type="checkbox" id="bt-yanki" checked> Komut yankısını kapat (@echo off)</label>
+    <label class="onay" for="bt-utf"><input type="checkbox" id="bt-utf" checked> Türkçe karakter desteği (UTF-8)</label>
+    <label class="onay" for="bt-gec"><input type="checkbox" id="bt-gec"> Gecikmeli değişken genişletmeyi etkinleştir (enabledelayedexpansion)</label>
+  </fieldset>
+  <fieldset style="border:0;margin:0;padding:0;display:grid;gap:12px">
+    <legend style="font-weight:600;padding:0;margin-bottom:6px">Blok ekle</legend>
+    <label for="bt-tur">Blok türü <select id="bt-tur"></select></label>
+    <div class="gg" id="bt-alan"></div>
+    <p class="not" id="bt-hata" role="alert"></p>
+    <div class="dugmeler">
+      <button type="button" id="bt-ekle">Bloğu ekle</button>
+      <button type="button" class="ikinci" id="bt-ornek">Örnek menü betiğini yükle</button>
+      <button type="button" class="ikinci" id="bt-temiz">Tüm blokları sil</button>
+    </div>
+  </fieldset>
+  <h3 style="margin:6px 0 0">Bloklar</h3>
+  <ol class="bt-ol" id="bt-liste" aria-live="polite"></ol>
+  <h3 style="margin:6px 0 0">Oluşan betik</h3>
+  <pre id="bt-cikti"></pre>
+  <div class="dugmeler">
+    <button type="button" data-kopyala="bt-cikti">Betiği kopyala</button>
+    <button type="button" class="ikinci" id="bt-indir">.bat olarak indir</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const AD=/^[A-Za-z_][A-Za-z0-9_]*$/;
+const dur=(s,ad)=>{if(!AD.test(s))throw ad+' yalnızca harf, rakam ve alt çizgi içermeli ve harfle başlamalıdır.';return s};
+const tm=s=>s.replace(/"/g,'').replace(/%/g,'%%');
+const ec=s=>s.replace(/%/g,'%%').replace(/\^/g,'^^').replace(/[&|<>()]/g,'^$&');
+const sy=(x,mn,mx,ad)=>{const n=Math.floor(+x);if(!(n>=mn&&n<=mx))throw ad+' '+mn+' ile '+mx+' arasında olmalıdır.';return n};
+const F=(id,e,v,t)=>({id,e,v,t:t||'text'});
+const TUR={
+ echo:{ad:'Mesaj yazdır',f:[F('m','Mesaj','Merhaba!')],kur:v=>[v.m?'echo '+ec(v.m):'echo.'],oz:v=>v.m},
+ giris:{ad:'Kullanıcıdan değer al',f:[F('d','Değişken adı','ad'),F('s','Soru','Adınız: ')],kur:v=>['set /p "'+dur(v.d,'Değişken adı')+'='+tm(v.s)+'"'],oz:v=>v.d+' ← '+v.s},
+ menu:{ad:'Seçenek menüsü',f:[F('b','Menü başlığı','ANA MENÜ'),F('o','Seçenekler (her satır: metin|git-etiketi, en fazla 9)','Birinci işlem|islem1\nİkinci işlem|islem2\nÇıkış|cikis','area')],
+  kur:v=>{const o=v.o.split(/\r?\n/).map(x=>x.trim()).filter(Boolean).map(x=>{const[a,b]=x.split('|');if(!b)throw 'Her seçenek "metin|etiket" biçiminde olmalıdır.';return[a.trim(),dur(b.trim(),'Etiket')]});
+    if(!o.length||o.length>9)throw 'Menüde 1 ile 9 arasında seçenek olmalıdır.';
+    const L=['cls','echo ========== '+ec(v.b)+' ==========','echo.'];o.forEach((x,i)=>L.push('echo   '+(i+1)+'. '+ec(x[0])));
+    L.push('echo.','choice /c '+o.map((x,i)=>i+1).join('')+' /n /m "Seçiminiz (1-'+o.length+'): "');
+    for(let i=o.length;i>=1;i--)L.push('if errorlevel '+i+' goto '+o[i-1][1]);return L},oz:v=>v.b+' ('+v.o.split(/\r?\n/).filter(x=>x.trim()).length+' seçenek)'},
+ etiket:{ad:'Etiket',f:[F('e','Etiket adı','islem1')],kur:v=>[':'+dur(v.e,'Etiket adı')],oz:v=>':'+v.e},
+ git:{ad:'Etikete git (goto)',f:[F('e','Etiket adı','baslangic')],kur:v=>['goto '+dur(v.e,'Etiket adı')],oz:v=>'goto '+v.e},
+ varmi:{ad:'Dosya/klasör varsa etikete git',f:[F('y','Dosya veya klasör yolu','C:\\Yedek'),F('e','Varsa gidilecek etiket','var'),F('d','Yoksa gidilecek etiket (boş olabilir)','')],
+  kur:v=>{const L=['if exist "'+tm(v.y)+'" goto '+dur(v.e,'Etiket adı')];if(v.d.trim())L.push('goto '+dur(v.d.trim(),'Etiket adı'));return L},oz:v=>v.y+' → '+v.e},
+ kosul:{ad:'Değişken koşulu',f:[F('d','Değişken adı','ad'),{id:'op',e:'İşleç',t:'select',o:['==','!=','EQU','NEQ','LSS','LEQ','GTR','GEQ'],v:'=='},F('w','Karşılaştırılacak değer','Ali'),F('e','Koşul doğruysa gidilecek etiket','eslesti')],
+  kur:v=>{const d=dur(v.d,'Değişken adı'),w=tm(v.w),e=dur(v.e,'Etiket adı');
+    if(v.op==='==')return ['if "%'+d+'%"=="'+w+'" goto '+e];if(v.op==='!=')return ['if not "%'+d+'%"=="'+w+'" goto '+e];
+    sy(v.w,-2147483647,2147483647,'Sayısal değer');return ['if %'+d+'% '+v.op+' '+w+' goto '+e]},oz:v=>v.d+' '+v.op+' '+v.w+' → '+v.e},
+ dongud:{ad:'Dosya döngüsü',f:[F('k','Dosya kalıbı','*.txt'),F('c','Her dosya için komut (dosya adı: %%f)','echo %%f')],kur:v=>['for %%f in ('+tm(v.k).replace(/%%/g,'%')+') do '+v.c],oz:v=>v.k+' → '+v.c},
+ dongus:{ad:'Sayaç döngüsü',f:[F('a','Başlangıç',1,'number'),F('s','Adım',1,'number'),F('b','Bitiş',10,'number'),F('c','Her adım için komut (sayı: %%i)','echo %%i')],
+  kur:v=>['for /l %%i in ('+sy(v.a,-99999,99999,'Başlangıç')+','+sy(v.s,-99999,99999,'Adım')+','+sy(v.b,-99999,99999,'Bitiş')+') do '+v.c],oz:v=>v.a+','+v.s+','+v.b+' → '+v.c},
+ komut:{ad:'Komut çalıştır',f:[F('k','Komut','ipconfig /flushdns')],kur:v=>{if(!v.k.trim())throw 'Komut boş olamaz.';return [v.k.trim()]},oz:v=>v.k},
+ bekle:{ad:'Bekle',f:[F('s','Süre (saniye)',5,'number'),{id:'q',e:'Geri sayımı gizle',t:'check',v:true}],kur:v=>['timeout /t '+sy(v.s,1,99999,'Süre')+' /nobreak'+(v.q?' >nul':'')],oz:v=>v.s+' saniye'},
+ yonetici:{ad:'Yönetici denetimi',f:[],kur:()=>['net session >nul 2>&1','if %errorlevel% neq 0 (','  echo Bu betik yönetici olarak çalıştırılmalıdır.','  pause','  exit /b 1',')'],oz:()=>'Yönetici değilse betik durdurulur'},
+ temizle:{ad:'Ekranı temizle',f:[],kur:()=>['cls'],oz:()=>'cls'},
+ duraklat:{ad:'Duraklat (tuşa basılmasını bekle)',f:[],kur:()=>['pause'],oz:()=>'pause'},
+ cik:{ad:'Betiği bitir',f:[F('k','Çıkış kodu',0,'number')],kur:v=>['exit /b '+sy(v.k,0,255,'Çıkış kodu')],oz:v=>'exit /b '+v.k}
+};
+let B=[];
+const tur=$('bt-tur'),alan=$('bt-alan');
+Object.entries(TUR).forEach(([k,t])=>{const o=document.createElement('option');o.value=k;o.textContent=t.ad;tur.append(o)});
+const form=()=>{
+  alan.textContent='';
+  TUR[tur.value].f.forEach(a=>{
+    const l=document.createElement('label');l.htmlFor='bt-f-'+a.id;
+    if(a.t==='check'){l.className='onay';const i=document.createElement('input');i.type='checkbox';i.id='bt-f-'+a.id;i.checked=!!a.v;l.append(i,' '+a.e)}
+    else{l.append(a.e);let i;
+      if(a.t==='select'){i=document.createElement('select');a.o.forEach(x=>{const o=document.createElement('option');o.value=o.textContent=x;i.append(o)});i.value=a.v}
+      else if(a.t==='area'){i=document.createElement('textarea');i.rows=4;i.style.minHeight='100px';i.value=a.v}
+      else{i=document.createElement('input');i.type=a.t;i.value=a.v;if(a.t!=='number')i.autocomplete='off'}
+      i.id='bt-f-'+a.id;l.append(i)}
+    alan.append(l)});
+  $('bt-hata').textContent=''};
+const oku=k=>{const v={};TUR[k].f.forEach(a=>{const e=$('bt-f-'+a.id);v[a.id]=a.t==='check'?e.checked:e.value});return v};
+const sat=()=>{
+  const L=[];
+  if($('bt-yanki').checked)L.push('@echo off');
+  if($('bt-utf').checked)L.push('chcp 65001 >nul');
+  if($('bt-baslik').value.trim())L.push('title '+ec($('bt-baslik').value.trim()));
+  if($('bt-renk').value)L.push('color '+$('bt-renk').value);
+  if($('bt-gec').checked)L.push('setlocal enabledelayedexpansion');
+  if(L.length)L.push('');
+  B.forEach(b=>{try{L.push(...TUR[b.k].kur(b.v))}catch(e){L.push('rem HATA: '+e)}});
+  return L};
+const ciz=()=>{
+  const ol=$('bt-liste');ol.textContent='';
+  if(!B.length){const li=document.createElement('li');li.textContent='Henüz blok eklenmedi.';ol.append(li)}
+  B.forEach((b,i)=>{
+    const li=document.createElement('li'),s=document.createElement('span');
+    s.textContent=(i+1)+'. '+TUR[b.k].ad+': '+TUR[b.k].oz(b.v);li.append(s);
+    [['Yukarı',-1,i===0],['Aşağı',1,i===B.length-1]].forEach(([ad,y,dis])=>{
+      const x=document.createElement('button');x.type='button';x.className='ikinci';x.textContent=ad;x.disabled=dis;x.setAttribute('aria-label',(i+1)+'. bloğu '+ad.toLowerCase()+' taşı');
+      x.onclick=()=>{[B[i],B[i+y]]=[B[i+y],B[i]];ciz()};li.append(x)});
+    const d=document.createElement('button');d.type='button';d.className='ikinci';d.textContent='Sil';d.setAttribute('aria-label',(i+1)+'. bloğu sil');
+    d.onclick=()=>{B.splice(i,1);ciz()};li.append(d);ol.append(li)});
+  $('bt-cikti').textContent=sat().join('\n')};
+$('bt-ekle').onclick=()=>{
+  const k=tur.value,v=oku(k);
+  try{TUR[k].kur(v)}catch(e){$('bt-hata').textContent=String(e);return}
+  $('bt-hata').textContent='';B.push({k,v});ciz()};
+$('bt-temiz').onclick=()=>{B=[];ciz()};
+$('bt-ornek').onclick=()=>{
+  const m=(k,v)=>({k,v});
+  B=[m('etiket',{e:'baslangic'}),
+   m('menu',{b:'ANA MENÜ',o:'Windows sürümünü göster|surum\nGeçici klasörü aç|temp\nÇıkış|cikis'}),
+   m('etiket',{e:'surum'}),m('komut',{k:'ver'}),m('duraklat',{}),m('git',{e:'baslangic'}),
+   m('etiket',{e:'temp'}),m('komut',{k:'start "" "%TEMP%"'}),m('git',{e:'baslangic'}),
+   m('etiket',{e:'cikis'}),m('echo',{m:'Hoşça kalın!'}),m('bekle',{s:2,q:true}),m('cik',{k:0})];
+  ciz()};
+['bt-baslik','bt-renk','bt-yanki','bt-utf','bt-gec'].forEach(i=>$(i).addEventListener('input',ciz));
+tur.addEventListener('input',form);
+$('bt-indir').onclick=()=>Arac.indir(sat().join('\r\n')+'\r\n','betik.bat','text/plain;charset=utf-8');
+form();ciz();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li><b>Betik ayarlarını</b> belirle. Türkçe karakter kullanılacaksa UTF-8 seçeneği açık kalmalıdır.</li>
+<li>Listeden bir <b>blok türü</b> seç, alanları doldur ve <b>Bloğu ekle</b> düğmesine bas.</li>
+<li>Blokların sırasını <b>Yukarı / Aşağı</b> düğmeleriyle değiştir; gerekmeyen bloğu <b>Sil</b> ile kaldır.</li>
+<li>Betik, altta canlı olarak oluşur. Kopyalanabilir veya <code>.bat</code> dosyası olarak indirilebilir.</li>
+<li>Başlangıç için <b>Örnek menü betiğini yükle</b> düğmesiyle çalışan bir menü örneği açılabilir.</li>
+</ol>
+<h2 id="b3">Blok türleri</h2>
+<table>
+<thead><tr><th>Blok</th><th>Oluşturduğu yapı</th></tr></thead>
+<tbody>
+<tr><td>Mesaj yazdır</td><td><code>echo</code> komutu. <code>&amp; | &lt; &gt; ^ %</code> gibi özel karakterler otomatik düzeltilir.</td></tr>
+<tr><td>Kullanıcıdan değer al</td><td><code>set /p "ad=Soru"</code>: girilen değer <code>%ad%</code> olarak kullanılır.</td></tr>
+<tr><td>Seçenek menüsü</td><td><code>choice</code> ve <code>if errorlevel ... goto ...</code> yapısı; her seçenek bir etikete gider.</td></tr>
+<tr><td>Etiket / Etikete git</td><td><code>:etiket</code> ve <code>goto etiket</code>; betikte atlama noktaları oluşturur.</td></tr>
+<tr><td>Dosya/klasör varsa</td><td><code>if exist "yol" goto etiket</code></td></tr>
+<tr><td>Değişken koşulu</td><td><code>if "%d%"=="değer" goto etiket</code> veya sayısal karşılaştırma (<code>EQU</code>, <code>LSS</code>, <code>GTR</code> vb.)</td></tr>
+<tr><td>Dosya / sayaç döngüsü</td><td><code>for %%f in (*.txt) do ...</code> ve <code>for /l %%i in (1,1,10) do ...</code></td></tr>
+<tr><td>Bekle</td><td><code>timeout /t N /nobreak</code></td></tr>
+<tr><td>Yönetici denetimi</td><td>Betik yönetici olarak çalıştırılmamışsa uyarı verip durdurur.</td></tr>
+</tbody>
+</table>
+<h2 id="b4">Dikkat edilecekler</h2>
+<ul>
+<li>Etiket ve değişken adları yalnızca harf, rakam ve alt çizgi içerebilir; harfle başlamalıdır.</li>
+<li>Döngü komutlarında dosya adı <code>%%f</code>, sayaç <code>%%i</code> olarak yazılır. Betik dosyası yerine doğrudan Komut İstemi'nde denenecekse tek <code>%</code> kullanılmalıdır.</li>
+<li>Gecikmeli değişken genişletme, döngü içinde değeri değişen değişkenler için gerekir. Bu durumda değişkenler <code>!ad!</code> biçiminde yazılır.</li>
+<li>Oluşan betik çalıştırılmadan önce, özellikle dosya silen veya taşıyan komutlar içeriyorsa, deneme klasöründe test edilmelidir.</li>
+<li>Araç yalnızca metin üretir; hiçbir veri sunucuya gönderilmez ve komutlar çalıştırılmaz.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
