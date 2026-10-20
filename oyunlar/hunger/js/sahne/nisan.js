@@ -51,14 +51,28 @@ S.aim=G=>{
  return null;
 };
 
+let ghostEdge,grid,gridKey='';
 S.onInit(()=>{
  ghost=new THREE.Mesh(new THREE.BoxGeometry(.96,1.2,.96),new THREE.MeshBasicMaterial({color:0x7be07b,transparent:true,opacity:.35,depthWrite:false}));ghost.visible=false;sc.scene.add(ghost);
+ /* kenar çizgisi: gölgenin biçimi uzaktan da okunur */
+ ghostEdge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.96,1.2,.96)),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));ghost.add(ghostEdge);
+ /* inşa kılavuz ızgarası: hedef çevresinde 7×7 kare */
+ const n=7,pts=[];
+ for(let i=0;i<=n;i++){pts.push(i-n/2,0,-n/2,i-n/2,0,n/2,-n/2,0,i-n/2,n/2,0,i-n/2)}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+ grid=new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.16,depthWrite:false,depthTest:false}));grid.visible=false;grid.renderOrder=12;grid.frustumCulled=false;sc.scene.add(grid);
 });
 S.onFrame((G,t,dt,info)=>{
  const tg=info.target,pl=info.place;
  if(info.mode==='play'&&pl){
-  const gy=S.groundY(pl.x+.5,pl.y+.5),h=pl.h||1.2;
-  ghost.visible=true;ghost.scale.y=h/1.2;ghost.position.set(pl.x+.5,gy+h/2,pl.y+.5);ghost.material.color.setHex(pl.ok?(pl.hammer?0x7bb8e0:0x7be07b):pl.warn?0xe0c050:0xe07b73);
- }else ghost.visible=false;
+  const gy=S.groundY(pl.x+.5,pl.y+.5),h=pl.h||1.2,ty=pl.thin?.34:.96,sx=pl.thin&&pl.rot===1?ty:.96,sz=pl.thin&&pl.rot!==1?ty:.96;
+  ghost.visible=true;ghost.scale.set(sx/.96,h/1.2,sz/.96);ghost.position.set(pl.x+.5,gy+h/2,pl.y+.5);
+  const col=pl.ok?(pl.hammer?0x7bb8e0:0x7be07b):pl.warn?0xe0c050:0xe07b73;
+  ghost.material.color.setHex(col);ghostEdge.material.color.setHex(col);
+  ghost.material.opacity=.3+Math.sin(t*5)*.06;
+  if(pl.grid){
+   grid.visible=true;grid.position.set(Math.floor(pl.x)+.5,gy+.04,Math.floor(pl.y)+.5);
+  }else grid.visible=false;
+ }else{ghost.visible=false;if(grid)grid.visible=false}
 });
 })();

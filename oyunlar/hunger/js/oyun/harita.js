@@ -39,6 +39,9 @@ function surfaceBase(im){
   else if(o===O.CHEST||o===O.SIGN||o===O.APIARY||o===O.FTRAP){r=170;g=120;bl=70}
   else if(o===O.HIVEW){r=214;g=170;bl=60}
   else if(o===O.BED||o===O.RACK||o===O.BARREL||o===O.SNARE||o===O.BENCH||o===O.FURN||o===O.WALLW||o===O.WALLS||o===O.DOOR||o===O.WALLT||o===O.WALLM||o===O.DOORM||o===O.FENCE){r=170;g=120;bl=70}
+  else if(o===O.WINW||o===O.ARCHW||o===O.GATE){r=190;g=136;bl=78}
+  else if(o===O.WINS||o===O.ARCHS||o===O.FENCES){r=150;g=152;bl=160}
+  else if(o===O.WINM||o===O.GATEM||o===O.FENCEM){r=118;g=134;bl=158}
   if(t>T.SHAL&&t!==T.POND){r*=sh;g*=sh;bl*=sh}
   /* kıyı köpüğü */
   if(G.shore&&G.shore[i]){r+=(235-r)*.35;g+=(240-g)*.35;bl+=(245-bl)*.35}

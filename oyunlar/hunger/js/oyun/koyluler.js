@@ -99,7 +99,7 @@ function walkableN(x,z){
  for(const [dx,dz] of [[0,0],[r,0],[-r,0],[0,r],[0,-r]]){
   const tx=Math.floor(x+dx),tz=Math.floor(z+dz);
   if(tx<1||tz<1||tx>=W-1||tz>=H-1)return false;
-  const i=tz*W+tx;if(G.tile[i]<T.SAND||G.tile[i]===T.POND||(G.obj[i]&&G.obj[i]!==HG.O.DOOR&&G.obj[i]!==HG.O.DOORM&&G.obj[i]!==HG.O.VDOOR))return false;
+  const i=tz*W+tx;if(G.tile[i]<T.SAND||G.tile[i]===T.POND||(G.obj[i]&&G.obj[i]!==HG.O.DOOR&&G.obj[i]!==HG.O.DOORM&&G.obj[i]!==HG.O.VDOOR&&!HG.INSA_PASS(G.obj[i])))return false;
  }
  return true;
 }

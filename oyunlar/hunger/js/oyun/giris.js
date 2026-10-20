@@ -62,6 +62,7 @@ function setupInput(){
   else if(K('qsave',e.code))HG.manualSave(true);
   else if(K('drop',e.code))HG.dropOne();
   else if(K('sort',e.code))HG.sortInv();
+  else if(HG.insaKey&&HG.insaKey(e.code)){}                          /* İnşa Planı / Çekiç kısayolları */
   else if(K('mute',e.code)){ui.mute=!ui.mute;HG.toast(ui.mute?'Ses kapalı.':'Ses açık.')}
   else if(/^Digit[1-8]$/.test(e.code)){G.sel=+e.code.slice(5)-1;ui.dirty=true;HG.snd('ui')}
  });
@@ -93,7 +94,7 @@ function setupInput(){
  const up=e=>{if(e.button===0||e.type==='pointercancel')inp.mouseDown=false;if((e.button===2||e.type==='pointercancel')&&HG.radialClose)HG.radialClose(e.type!=='pointercancel');endLook(e)};
  cvs.addEventListener('pointerup',up);cvs.addEventListener('pointercancel',up);
  cvs.addEventListener('contextmenu',e=>e.preventDefault());
- cvs.addEventListener('wheel',e=>{if(ui.state!=='play')return;e.preventDefault();G.sel=(G.sel+(e.deltaY>0?1:HOT-1))%HOT;ui.dirty=true;HG.snd('ui')},{passive:false});
+ cvs.addEventListener('wheel',e=>{if(ui.state!=='play')return;e.preventDefault();if((e.ctrlKey||e.shiftKey)&&HG.insaWheel&&HG.insaWheel((e.deltaY||e.deltaX)>0?1:-1,e.shiftKey&&!e.ctrlKey))return;G.sel=(G.sel+(e.deltaY>0?1:HOT-1))%HOT;ui.dirty=true;HG.snd('ui')},{passive:false});
 
  /* dokunmatik bakış: ekranın boş yerinde sürükleme */
  let lid=null,lx=0,ly=0;

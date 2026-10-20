@@ -6,7 +6,7 @@ const {W,H,T,O,SOLID,G,ui,inp,look,A,Scene,clamp,flag,daylight,dayNo}=HG;
 /* ---- Barınak: oyuncunun bulunduğu alan duvarlarla kapalı mı? ---- */
 /* Ağaç, palmiye ve çalılar duvar sayılmaz: yalnızca yapı, kaya ve kapı gibi kapatıcı nesneler alanı sınırlar.
    Hesap ayrılmış bir dizi üzerinde yapılır (her çağrıda yeni bellek ayrılmaz). */
-const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE,O.SHROOM,O.SNARE,O.PLOT,O.SIGN,O.FTRAP,O.HIVEW,O.APIARY]);      /* alçak çit de alanı kapatmaz */
+const OPENOBJ=new Set([O.TREE,O.PALM,O.PALM0,O.BUSH,O.BUSH0,O.FENCE,O.SHROOM,O.SNARE,O.PLOT,O.SIGN,O.FTRAP,O.HIVEW,O.APIARY,O.GATE,O.GATEM,O.FENCES,O.FENCEM]);      /* alçak çit de alanı kapatmaz */
 let SEEN=null,STAMP=0;const QUE=new Int32Array(64);
 function calcShelter(wx,wy){
  const at=wx!==undefined;                /* konum verilirse o karenin çatı altında olup olmadığı sorulur (yapılar için) */
@@ -185,7 +185,7 @@ function update(dt){
  vertStep(dt);
  /* eylem */
  HG.stepUse(dt);
- HG.updateCraft&&HG.updateCraft(dt);
+ HG.updateCraft&&HG.updateCraft(dt);HG.updateInsa&&HG.updateInsa(dt);
  if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
  HG.updateAnimals(dt);HG.updateSea(dt);HG.updateDiscover(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);

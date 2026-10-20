@@ -15,7 +15,7 @@ function makeAnimals(list){
  }));
 }
 /* Yabani hayvanlar kapıyı açamaz: kapılı barınak ve ağıl onları dışarıda tutar (gölgelerle aynı kural) */
-const SOLIDA=o=>SOLID(o)||o===O.DOOR||o===O.DOORM||o===O.VDOOR;
+const SOLIDA=o=>SOLID(o)||o===O.DOOR||o===O.DOORM||o===O.VDOOR||HG.INSA_PASS(o);
 function walkable(x,z){
  const r=.35,pts=[[0,0],[r,0],[-r,0],[0,r],[0,-r]];
  for(const [dx,dz] of pts){

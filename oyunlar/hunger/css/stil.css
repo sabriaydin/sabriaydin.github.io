@@ -304,3 +304,13 @@ button.ghost:hover:not(:disabled){background:var(--panel2)}
 #cqbar .cqi img{width:28px;height:28px;image-rendering:pixelated}
 #cqbar .cqi i{position:absolute;left:0;bottom:0;height:4px;background:var(--red)}
 #cqbar .cqi span{position:absolute;right:2px;bottom:1px;font-size:11px;font-weight:700;text-shadow:0 0 3px #000}
+/* inşa sistemi (58. güncelleme) */
+#radial .rs.no u{color:#e07b73}
+#insainfo{position:absolute;left:12px;top:130px;width:300px;z-index:22;pointer-events:none;background:rgba(13,13,14,.86);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.35}
+#insainfo[hidden]{display:none}
+#insainfo>b{display:block;font-size:14px;margin-bottom:3px}
+#insainfo .ii{color:var(--mut);margin:3px 0}
+#insainfo .ir{display:flex;justify-content:space-between;gap:8px}
+#insainfo .ir i{font-style:normal;color:var(--mut);text-align:right}
+#insainfo .ik{margin-top:6px;padding-top:5px;border-top:1px solid var(--line);color:var(--mut);font-size:11px}
+#insainfo kbd{font-family:inherit;background:rgba(255,255,255,.1);border-radius:3px;padding:0 4px}

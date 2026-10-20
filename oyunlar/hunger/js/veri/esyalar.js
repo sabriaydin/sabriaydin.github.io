@@ -51,8 +51,8 @@ const IT={
  furn:{n:'Ocak',s:10,place:O.FURN,d:'Cevher eritilir, şişe yapılır.'},
  wallw:{n:'Tahta Duvar',s:50,place:O.WALLW},walls:{n:'Taş Duvar',s:50,place:O.WALLS},
  door:{n:'Kapı',s:20,place:O.DOOR,d:'Geçilebilir, barınağı kapalı tutar.'},
- plan:{n:'İnşa Planı',s:1,tool:'plan',tier:1,d:'Elde tutulurken sol tık: seçili parçayı (duvar, kapı, çit) bakılan kareye kurar. Sağ tık basılı tutulup fare hareketiyle parça seçilir. Malzeme çantadan harcanır.'},
- hammer:{n:'Çekiç',s:1,tool:'hammer',tier:1,d:'Kurulu duvar ve kapıya sol tık: seçili seviyeye (Odun, Taş, Metal) yükseltir veya Yık seçiliyse söker (malzemenin yarısı geri gelir). Sağ tık basılı tutulup fare hareketiyle seçim yapılır.'}
+ plan:{n:'İnşa Planı',s:1,tool:'plan',tier:1,d:'Elde tutulurken sol tık: seçili parçayı (duvar, pencereli duvar, kapı, geçit, çit kapısı, çit) bakılan kareye kurar. Sağ tık basılı tutulup fare hareketiyle parça seçilir; G seviye, V yön, Z geri al. Malzeme çantadan harcanır.'},
+ hammer:{n:'Çekiç',s:1,tool:'hammer',tier:1,d:'Kurulu inşa parçasına sol tık: seçili seviyeye (Odun, Taş, Metal) yükseltir, Döndür seçiliyse yönünü çevirir, Yık seçiliyse söker (malzemenin yarısı, ilk 30 saniyede tamamı geri gelir). B basılıyken bağlı parçaların hepsine uygulanır. Sağ tık basılı tutulup fare hareketiyle seçim yapılır.'}
 };
 const PLACE_ITEM={};for(const k in IT)if(IT[k].place)PLACE_ITEM[IT[k].place]=k;
 HG.IT=IT;HG.PLACE_ITEM=PLACE_ITEM;
