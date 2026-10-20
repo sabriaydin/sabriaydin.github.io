@@ -173,9 +173,9 @@ function setupInput(){
  $('#panel').addEventListener('pointerdown',e=>{if(e.target===$('#panel'))HG.togglePanel(false)});
 
  /* menü düğmeleri */
- $('#bNew').onclick=()=>{HG.initAudio();HG.startGame(false)};
+ $('#bNew').onclick=()=>{HG.initAudio();if(HG.worldDialog)HG.worldDialog.open();else HG.startGame(false)};     /* Yeni Oyun: önce Dünya Oluştur penceresi (js/oyun/menu.js) */
  $('#bCont').onclick=()=>{HG.initAudio();HG.startGame(true)};
- $('#bAgain').onclick=()=>HG.startGame(false);
+ {const bd=$('#bDeadMenu');if(bd)bd.onclick=()=>location.reload()}                  /* ölüm ekranı: Ana menüye dön */
  $('#bRes').onclick=()=>resume(false);
  $('#bMenu').onclick=()=>{HG.save();location.reload()};
 

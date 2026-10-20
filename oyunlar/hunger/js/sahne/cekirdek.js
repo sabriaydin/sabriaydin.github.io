@@ -99,10 +99,14 @@ S.render=(G,now,dt,info)=>{
   const tf=(C().fov+(G.sprint?8:0)-(HG.bow?HG.bow.draw*24:0))*(1-(sc.zoomK||0)*.72);sc.fov+=(tf-sc.fov)*(1-Math.exp(-6*dt));
   if(Math.abs(cam.fov-sc.fov)>.05){cam.fov=sc.fov;cam.updateProjectionMatrix()}
  }else{
-  const ay=info.clock*.05,r=62;orbit.set(W/2+Math.sin(ay)*r,34,H/2+Math.cos(ay)*r);
+  /* ana menü: sinematik uçuş. Yarıçap, yükseklik ve bakış noktası yavaşça değişir; hafif el kamerası sallanması ve görüş alanı nefesi eklenir */
+  const mc=info.clock,ay=mc*.045,r=56+16*Math.sin(mc*.071)+6*Math.sin(mc*.17),hh=27+10*Math.sin(mc*.053+1.2)+4*Math.sin(mc*.131);
+  orbit.set(W/2+Math.sin(ay)*r,hh,H/2+Math.cos(ay)*r);
   cam.position.lerp(orbit,sc.camInit?1-Math.exp(-3*dt):1);sc.camInit=true;
-  tgt.set(W/2,0,H/2);cam.lookAt(tgt);
-  if(cam.fov!==60){cam.fov=60;cam.updateProjectionMatrix()}
+  tgt.set(W/2+Math.sin(mc*.037)*16,1.5+Math.sin(mc*.061)*2,H/2+Math.cos(mc*.029)*16);cam.lookAt(tgt);
+  cam.rotation.z+=Math.sin(mc*.45)*.012+Math.sin(mc*1.3)*.003;cam.rotation.x+=Math.sin(mc*.9+2)*.0035;
+  const mf=60+5*Math.sin(mc*.11);
+  if(Math.abs(cam.fov-mf)>.02){cam.fov=mf;cam.updateProjectionMatrix()}
  }
  cam.updateMatrixWorld();
  for(const f of frameFns)f(G,t,dt,info);

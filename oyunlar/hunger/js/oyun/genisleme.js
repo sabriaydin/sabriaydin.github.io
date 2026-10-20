@@ -540,7 +540,7 @@ HG.onDie=()=>{
  const tip=HG.$('#deadTip');
  if(mode==='perm'){
   const r0=HG.$('#bResp');if(r0)r0.hidden=true;
-  if(tip)tip.textContent='Kalıcı ölüm açık: kayıt silindi. Aynı adada yeniden başlayabilir veya yeni bir ada deneyebilirsiniz.';
+  if(tip)tip.textContent='Kalıcı ölüm açık: kayıt silindi. Ana menüye dönüp yeni bir dünya oluşturabilirsiniz.';
   return false;
  }
  stat('deaths');

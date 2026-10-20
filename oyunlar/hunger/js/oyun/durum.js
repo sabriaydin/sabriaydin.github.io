@@ -51,25 +51,29 @@ function listSlots(){
 }
 function readSlot(id){const s=readJSON(id==='auto'?SAVE:SLOTKEY(id));return validSave(s)?s:null}
 function saveExists(){return listSlots().length>0}
+/* Otomatik kayıt: yalnızca "Oyunu Kaydet › Otomatik kayıt" ile bir tarayıcı yuvasına bağlanmış oyun, bu yuvaya her 20 saniyede yazılır */
 function save(){
- if(!G.obj||ui.state==='dead'||ui.state==='menu')return false;
- try{localStorage.setItem(SAVE,JSON.stringify(snapshot('Otomatik kayıt')));G.saveFail=false;return true}
- catch(e){if(!G.saveFail&&ui.state==='play'){G.saveFail=true;HG.toast('Otomatik kayıt yapılamadı: tarayıcı depolama alanı dolu olabilir.')}return false}
+ if(!G.obj||ui.state==='dead'||ui.state==='menu'||!G.slot)return false;
+ const idx=slotIndex(),e=idx.find(x=>x.id===G.slot);
+ if(!e){G.slot=null;return false}
+ try{
+  const sn=snapshot(e.name);e.ts=sn.meta.ts;e.day=sn.meta.day;e.lvl=sn.meta.lvl;e.th=sn.meta.th||'';
+  localStorage.setItem(SLOTKEY(e.id),JSON.stringify(sn));writeIndex(idx);G.saveFail=false;return true;
+ }catch(x){if(!G.saveFail&&ui.state==='play'){G.saveFail=true;HG.toast('Otomatik kayıt yapılamadı: tarayıcı depolama alanı dolu olabilir.')}return false}
 }
-/* Elle kaydet: oyun bir yuvadan başlatıldıysa orayı günceller, yoksa yeni yuva açar */
+/* Tarayıcıya kaydet: oyun bir yuvaya bağlıysa orayı günceller, değilse yeni yuva açıp oyunu ona bağlar (bundan sonra otomatik kayıt oraya yazar) */
 function manualSave(quick){
  if(!G.obj||ui.state==='dead'||ui.state==='menu')return false;
  let idx=slotIndex(),e=G.slot&&idx.find(x=>x.id===G.slot);
  if(!e){
-  if(idx.length>=MAXSLOT){HG.toast('Kayıt sınırına ulaşıldı ('+MAXSLOT+'). Ana menüdeki Kayıtlar bölümünden silin.');return false}
-  const id=Date.now().toString(36);let n=1;while(idx.some(x=>x.name==='Kayıt '+n))n++;
-  e={id,name:'Kayıt '+n};idx.push(e);G.slot=id;
+  if(idx.length>=MAXSLOT){HG.toast('Kayıt sınırına ulaşıldı ('+MAXSLOT+'). Kayıtlı Oyunlar listesinden silin.');return false}
+  const id=Date.now().toString(36);const base=(G.worldName||'Kayıt').slice(0,34);let n=G.worldName?1:1,nm=G.worldName?base:base+' 1';while(idx.some(x=>x.name===nm)){n++;nm=base+' '+n}
+  e={id,name:nm};idx.push(e);G.slot=id;
  }
  const sn=snapshot(e.name);e.ts=sn.meta.ts;e.day=sn.meta.day;e.lvl=sn.meta.lvl;e.th=sn.meta.th||'';
  try{localStorage.setItem(SLOTKEY(e.id),JSON.stringify(sn))}catch(x){HG.toast('Kayıt yapılamadı: tarayıcı depolama alanı dolu.');return false}
  if(!writeIndex(idx)){HG.toast('Kayıt yapılamadı.');return false}
- save();
- HG.toast((quick?'Hızlı kayıt: ':'Oyun kaydedildi: ')+e.name);try{HG.snd('ui')}catch(x){}
+ HG.toast((quick?'Hızlı kayıt: ':'Oyun kaydedildi: ')+e.name+' (her 20 saniyede otomatik güncellenir)');try{HG.snd('ui')}catch(x){}
  return true;
 }
 function fname(sn,name){return 'hunger-'+String(name||sn.meta.name||'kayit').toLowerCase().replace(/[^a-z0-9ğüşıöç]+/gi,'-').replace(/^-|-$/g,'')+'-gun'+sn.meta.day+'.json'}
@@ -84,7 +88,7 @@ function downloadData(sn,name){
 function downloadCurrent(){
  if(!G.obj||ui.state==='dead'||ui.state==='menu')return false;
  const idx=slotIndex(),e=G.slot&&idx.find(x=>x.id===G.slot);
- const ok=downloadData(snapshot(e?e.name:'Kayıt'),e?e.name:'Kayıt');
+ const nm=e?e.name:(G.worldName||'Kayıt'),ok=downloadData(snapshot(nm),nm);
  if(ok)HG.toast('Kayıt dosyası indirildi.');return ok;
 }
 function downloadSlot(id){const s=readSlot(id);if(!s){HG.toast('Kayıt okunamadı.');return false}const e=listSlots().find(x=>x.id===id);return downloadData(s,e?e.name:'kayit')}
@@ -182,6 +186,7 @@ async function startGame(load,slotId){
  }else{
   ldSet(.1,'Ada üretiliyor');await nap();
   {const sd=HG.pendingSeed;HG.pendingSeed=null;newState(Number.isInteger(sd)?sd:(Math.random()*2147483647)|0)}   /* dünya kodu girildiyse aynı ada üretilir */
+  if(HG.applyNewWorld)HG.applyNewWorld();                /* Dünya Oluştur penceresindeki seçenekler (js/oyun/menu.js) */
   look.yaw=0;look.pitch=-.1;
  }
  HG.extStart&&HG.extStart();

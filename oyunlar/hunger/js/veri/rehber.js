@@ -28,7 +28,7 @@ GUIDE.play=[
  ['Köyler ve ticaret','Haritada dağınık köyler bulunur. Her köylü yalnızca mesleğiyle ilgili eşyaların alım satımını yapar. Stoklar sınırlıdır; biten ürün bir süre sonra yenilenir. Köylülere ok atmayın: vurulan köylü bir süre küser ve konuşmaz. Köylüler geceleri evlerinde uyur. Gece köy fenerleri güvenli bir alan sağlar. Bulduğunuz köyler haritaya işlenir.'],
  ['Çanta','{drop} seçili eşyadan bir adet atar. {sort} (veya çanta panelindeki düğme) çantayı birleştirip eşya türüne göre sıralar; hızlı erişim çubuğuna dokunmaz.'],
  ['Gelişim','Eylemler deneyim kazandırır. Seviye atlayınca yetenek puanı verilir ({jr}: Günlük). Başarımlar ayrıca deneyim sağlar.'],
- ['Kayıt','Oyun her 20 saniyede ve sekme gizlendiğinde otomatik kaydedilir. Duraklatma menüsünden elle kayıt alabilir, kayıt dosyasını bilgisayara indirebilirsiniz. {qsave} hızlı kayıt yapar. Ana menüde Kayıtlar bölümünden kayıtları yönetebilir ve dosyadan kayıt yükleyebilirsiniz.']
+ ['Kayıt','Duraklatma menüsündeki Oyunu Kaydet size iki seçenek sunar: Otomatik kayıt oyunu tarayıcıda saklar ve bundan sonra her 20 saniyede güncelleyerek sürdürür; Manuel kayıt ise kayıt dosyasını bilgisayarınıza indirir. {qsave} hızlı kayıt yapar. Kayıtlı Oyunlar (ana menü ve duraklatma menüsü) kayıtları listeler; oradan kayıt yükleyebilir, silebilir veya dosyadan kayıt yükleyebilirsiniz.']
 ];
 GUIDE.story=[
  ['Kuzey Araştırma Seferi','Adanın hiçbir haritada yeri yoktur. Kuzey Araştırma Seferi\'nin gemisi gece yarısı kayalıklara oturdu; altı kişi kıyıya çıkabildi. Telsiz sustu, yardım gelmedi.'],

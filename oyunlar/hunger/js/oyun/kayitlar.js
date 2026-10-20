@@ -1,10 +1,10 @@
-/* Hunger 3D - kayıtlar penceresi (ana menü ve duraklatma menüsü), elle kaydetme ve dosya aktarma düğmeleri */
+/* Hunger 3D - Kayıtlı Oyunlar penceresi (ana menü ve duraklatma menüsü: liste, yükleme, silme, dosyadan yükleme) ve Oyunu Kaydet penceresi (otomatik: tarayıcı, manuel: dosya) */
 (()=>{
 'use strict';
 const {ui}=HG;
 const $=HG.$;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let msg='',startAfterImport=false;
+let msg='';
 const fmt=ts=>{try{return ts?new Date(ts).toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'}):'—'}catch(e){return '—'}};
 /* "3 dk önce" biçiminde göreli süre */
 function ago(ts){
@@ -61,13 +61,13 @@ function render(){
  const slots=HG.listSlots(),max=HG.MAXSLOT||10,manual=slots.filter(s=>!s.auto).length;
  $('#svC').textContent=manual+'/'+max+' kayıt · '+mb(usedBytes());
  const S=$('#svS');
- S.textContent=msg||(slots.length?'Bir kaydı yükleyebilir, adını değiştirebilir, bilgisayara indirebilir veya silebilirsiniz.':'Henüz kayıt yok. Oyunda Duraklat › Oyunu kaydet ile kayıt alınır. Otomatik kayıt her 20 saniyede güncellenir.');
+ S.textContent=msg||(slots.length?'Bir kaydı yükleyebilir, adını değiştirebilir, bilgisayara indirebilir veya silebilirsiniz.':'Henüz kayıtlı oyun yok. Oyunda Duraklat › Oyunu Kaydet ile kayıt alınır; kayıt dosyası varsa Dosyadan yükle ile açılır.');
  S.classList.toggle('on',!!msg);
  L.innerHTML=slots.map((s,i)=>{
   const th=typeof s.th==='string'&&s.th.indexOf('data:image/jpeg')===0?`<img alt="" src="${s.th}">`:'<span class="svn">HUNGER</span>';
   return `<div class="sl${s.auto?' auto':''}" data-id="${esc(s.id)}"><div class="sth">${th}<em>Gün ${s.day}</em></div>`+
-   `<div class="sn"><b>${esc(s.name)}</b>${s.auto?'<i class="tg">OTOMATİK</i>':''}${i===0?'<i class="tg son">EN SON</i>':''}`+
-   `<small>Seviye ${s.lvl} · ${esc(fmt(s.ts))} · ${esc(ago(s.ts))}</small>${s.auto?'<small>Oyun sırasında her 20 saniyede güncellenir.</small>':''}</div>`+
+   `<div class="sn"><b>${esc(s.name)}</b>${s.auto?'<i class="tg">ESKİ OTOMATİK</i>':''}${HG.G&&HG.G.slot===s.id&&ui.state!=='menu'?'<i class="tg son">AÇIK OYUN</i>':''}${i===0?'<i class="tg son">EN SON</i>':''}`+
+   `<small>Seviye ${s.lvl} · ${esc(fmt(s.ts))} · ${esc(ago(s.ts))}</small>${s.auto?'<small>Önceki sürümden kalan otomatik kayıt.</small>':''}</div>`+
    `<div class="sa"><button type="button" class="pri" data-a="load">Yükle</button>${s.auto?'':'<button type="button" class="ghost" data-a="ren">Ad değiştir</button>'}<button type="button" class="ghost" data-a="dl">İndir</button><button type="button" class="ghost dg" data-a="del">Sil</button></div></div>`;
  }).join('');
 }
@@ -75,22 +75,20 @@ function open(m){
  msg=m||'';$('#sv').hidden=false;render();try{HG.snd('ui_open')}catch(e){}
 }
 function close(){$('#sv').hidden=true;msg='';refreshCont();try{HG.snd('ui_close')}catch(e){}}
-function startFrom(id){close();HG.initAudio();HG.startGame(true,id)}
+function startFrom(id){close();HG.initAudio();if(ui.state==='pause')HG.save();HG.startGame(true,id)}
 async function onFile(f){
  if(!f)return;
  let text='';try{text=await f.text()}catch(e){open('Dosya okunamadı.');return}
  const r=HG.importText(text,f.name);
  if(r.err){open(r.err);return}
- if(startAfterImport)startFrom(r.id);
- else{open('Kayıt içe aktarıldı: '+r.name)}
+ startFrom(r.id);
 }
 function setup(){
  if(!$('#sv'))return;
  const fi=$('#fileIn');
  fi.addEventListener('change',()=>{const f=fi.files&&fi.files[0];fi.value='';onFile(f)});
- $('#bSaves').onclick=()=>{HG.initAudio();open()};
- $('#bLoadF').onclick=()=>{HG.initAudio();startAfterImport=true;fi.click()};
- $('#svF').onclick=()=>{startAfterImport=false;fi.click()};
+ for(const id of ['#bSaved','#bSaved2']){const b=$(id);if(b)b.onclick=()=>{HG.initAudio();open()}}
+ $('#svF').onclick=()=>fi.click();
  $('#svX').onclick=close;
  $('#sv').addEventListener('pointerdown',e=>{if(e.target===$('#sv'))close()});
  $('#svL').addEventListener('click',e=>{
@@ -116,10 +114,21 @@ function setup(){
    e.stopImmediatePropagation();e.preventDefault();close();
   }
  },true);
- /* duraklatma menüsü: kayıt al, dosya olarak indir, kayıtları yönet */
- $('#bSave').onclick=()=>HG.manualSave(false);
- $('#bDown').onclick=()=>HG.downloadCurrent();
- const b2=$('#bSaves2');if(b2)b2.onclick=()=>{HG.initAudio();open()};
+ /* Oyunu Kaydet: Otomatik kayıt (tarayıcı) veya Manuel kayıt (dosya indirme) */
+ const sd=$('#sd');
+ const sdOpen=()=>{
+  const slot=HG.G&&HG.G.slot&&HG.listSlots().find(x=>x.id===HG.G.slot);
+  $('#sdS').textContent=slot?'Bu oyun şu an "'+slot.name+'" kaydına otomatik kaydediliyor. Kayıt türünü seçin.':'Kayıt türünü seçin.';
+  $('#sdAuto b').textContent=slot?'Otomatik kaydı şimdi güncelle':'Otomatik kayıt';
+  sd.hidden=false;try{HG.snd('ui_open')}catch(e){}
+ };
+ const sdClose=()=>{sd.hidden=true;try{HG.snd('ui_close')}catch(e){}};
+ const bs=$('#bSaveGame');if(bs)bs.onclick=sdOpen;
+ $('#sdX').onclick=sdClose;
+ sd.addEventListener('pointerdown',e=>{if(e.target===sd)sdClose()});
+ $('#sdAuto').onclick=()=>{if(HG.manualSave(false))sdClose()};
+ $('#sdMan').onclick=()=>{if(HG.downloadCurrent())sdClose()};
+ addEventListener('keydown',e=>{if(e.code==='Escape'&&!sd.hidden){e.stopImmediatePropagation();e.preventDefault();sdClose()}},true);
  refreshCont();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();

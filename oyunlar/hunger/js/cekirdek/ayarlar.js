@@ -142,6 +142,6 @@ function build(){
  addEventListener('keydown',e=>{if(e.code==='Escape'&&!box.hidden&&!(HG.keyCapturing&&HG.keyCapturing())){e.stopImmediatePropagation();e.preventDefault();close()}},true);
  apply();
 }
-HG.settings={open,close,apply,DEF,get isOpen(){return !!box&&!box.hidden}};
+HG.settings={open,close,apply,persist,DEF,get isOpen(){return !!box&&!box.hidden}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build);else build();
 })();

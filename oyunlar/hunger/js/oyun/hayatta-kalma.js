@@ -249,7 +249,7 @@ function die(){
  /* açık pencereler kapatılır; yay, eylem ve yüzme durumu sıfırlanır */
  for(const id of ['#trade','#jr','#gd','#bigmap','#sv','#pause'])HG.$(id)&&(HG.$(id).hidden=true);
  G.trading=null;ui.sleeping=false;try{HG.settings&&HG.settings.close();HG.stopAction();HG.bow.on=false;HG.bow.draw=0;HG.$('#fade').classList.remove('on')}catch(e){}
- try{localStorage.removeItem(HG.SAVE)}catch(e){}
+ try{localStorage.removeItem(HG.SAVE);if(G.slot)HG.deleteSlot(G.slot)}catch(e){}       /* kalıcı ölüm: eski otomatik kayıt ve oyunun bağlı olduğu tarayıcı kaydı silinir */
  HG.$('#why').textContent=G.cause||'Hayatta kalamadın.';
  HG.$('#stat').textContent=dayNo()+'. güne kadar dayandın.';
  {const s=G.stats||{};HG.$('#stat2').textContent='Seviye '+G.lvl+' · Avlanan hayvan: '+(s.hunted||0)+' · Yok edilen Gölge: '+(s.shades||0)+'\nAçılan sandık: '+(s.chests||0)+' · Tamamlanan görev: '+(s.quests||0)+' · Atlatılan Kan Ayı: '+(s.blood||0)+'\nYürünen mesafe: '+Math.round(s.walked||0)+' m · Yüzülen mesafe: '+Math.round(s.swum||0)+' m'}
