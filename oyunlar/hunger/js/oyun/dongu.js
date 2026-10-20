@@ -20,15 +20,17 @@ function frame(now){
  const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;
  if(HG.cfg.fps){fa+=raw;fn++;if(fa>=.5){fpsEl.textContent=Math.round(fn/fa)+' FPS';fa=0;fn=0}if(fpsEl.hidden)fpsEl.hidden=false}else if(!fpsEl.hidden)fpsEl.hidden=true;
  if(HG.busy){requestAnimationFrame(frame);return}   /* yükleme sürerken sahne çizilmez */
- if(ui.state==='pause'){skip=!skip;if(skip){requestAnimationFrame(frame);return}}   /* duraklatmada çizim hızı yarıya iner */
+ if(ui.state==='pause'&&!(HG.coopActive&&HG.coopActive())){skip=!skip;if(skip){requestAnimationFrame(frame);return}}   /* duraklatmada çizim hızı yarıya iner */
  if(ui.state==='play'){
   flushObjects();
   G.tg=Scene.aim(G);
   if($('#bigmap').hidden&&!ui.sleeping)HG.update(dt);
+  else if(HG.coopIdle)HG.coopIdle(dt);
   if(ui.dirty)HG.renderInv();
   if(!$('#panel').hidden){recT-=dt;if(recT<=0){recT=.5;HG.renderRecipes()}}
   HG.hud();
- }else if(ui.state==='menu'){ui.menuClock+=dt;G.clock+=dt*5;flushObjects()}
+ }else if(HG.coopActive&&HG.coopActive()&&(ui.state==='pause'||ui.state==='dead')){HG.coopIdle(dt);flushObjects()}   /* co-op: duraklatmada ve ölümde dünya akmaya devam eder */
+ else if(ui.state==='menu'){ui.menuClock+=dt;G.clock+=dt*5;flushObjects()}
  const play=ui.state!=='menu',h=play?held():null;
  let place=null;
  if(ui.state==='play'&&h&&h.it.place&&G.tg){const p=HG.placeTarget(h.k);if(p)place={x:p.x,y:p.y,ok:true};else{const t=G.tg;place={x:t.x,y:t.y,ok:false}}}

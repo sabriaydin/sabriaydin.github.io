@@ -82,6 +82,7 @@ const pct=(a,b)=>Math.max(0,Math.min(100,Math.round(a/b*100)));
 function burst(i,c,n){Scene.burst(i%W+.5,Scene.groundY(i%W+.5,((i/W)|0)+.5)+.5,((i/W)|0)+.5,c,n)}
 
 function stepStructs(dt){
+ if((HG.netGuest&&HG.netGuest()))return;                              /* co-op: yapı üretimini yalnızca ev sahibi yürütür */
  const x=X(),rain=sc.rain||0;
  for(const k in x.s){
   const e=x.s[k],i=+k;
@@ -332,6 +333,7 @@ HG.extStart=()=>{
 /* ---------- Tavuklar: yumurta ve ara sıra ötme ---------- */
 let eggT=0;
 function chickens(dt){
+ if((HG.netGuest&&HG.netGuest()))return;
  eggT-=dt;if(eggT>0)return;
  const step=1-eggT;eggT=1;
  for(const a of G.animals||[]){

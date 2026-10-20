@@ -48,7 +48,7 @@ function seasonStep(dt){
  acc+=dt;
  if(acc>=1){
   const f=acc;acc=0;
-  if(s.crop!==1&&G.ext&&G.ext.s)for(const k in G.ext.s){const e=G.ext.s[k];if(e.o===O.PLOT&&e.g>=0&&e.g<300)e.g=clamp(e.g+f*(s.crop-1),0,300)}
+  if(s.crop!==1&&G.ext&&G.ext.s&&!(HG.netGuest&&HG.netGuest()))for(const k in G.ext.s){const e=G.ext.s[k];if(e.o===O.PLOT&&e.g>=0&&e.g<300)e.g=clamp(e.g+f*(s.crop-1),0,300)}
  }
  /* kar yoğunluğu (sahne okur) */
  const want=s.id===3&&HG.cfg.snow!==false&&!G.sheltered?1:0;

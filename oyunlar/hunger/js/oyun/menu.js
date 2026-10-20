@@ -3,7 +3,7 @@
 (()=>{
 'use strict';
 const {G,ui,$}=HG;
-HG.VERSION='1.82';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
+HG.VERSION='1.83';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
 const PREF='hunger-dunya';
 
 /* ============================================================ Dünya Oluştur ============================================================ */

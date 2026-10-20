@@ -162,7 +162,7 @@ HG.x2seeds.push(()=>{
 });
 let bearT=60,hibT=0;
 function bearStep(dt){
- if(G.cave)return;
+ if(G.cave||(HG.netGuest&&HG.netGuest()))return;
  bearT-=dt;
  if(bearT<=0){
   bearT=90;
@@ -261,7 +261,7 @@ HG.x2starts.push(()=>{
  if(x.trader)addTrader();
 });
 function traderStep(dt){
- if(G.cave||!G.npcs)return;
+ if(G.cave||!G.npcs||(HG.netGuest&&HG.netGuest()))return;
  const x=X();
  if(x.trader){
   if(!tNpc||!G.npcs.includes(tNpc)){tNpc=G.npcs.find(n=>n.trader)||null;if(!tNpc)addTrader()}

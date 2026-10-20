@@ -143,6 +143,7 @@ async function startGame(load,slotId){
  let s=null;
  let slotUsed=null;
  if(load){const ls=listSlots();const pick=slotId?ls.find(x=>x.id===slotId):ls[0];if(pick){s=readSlot(pick.id);slotUsed=pick.id}}
+ if(HG.netSnap){s=HG.netSnap;HG.netSnap=null;slotUsed=null}           /* co-op: konuk, ev sahibinin gönderdiği dünya verisiyle başlar (js/oyun/ag.js) */
  if(s&&s.v===7){
   /* eski (384) kayıt: ada, büyük haritanın ortasına yerleştirilir ve tüm konumlar kaydırılır */
   const N=HG.W,oldSz=s.ws?0:384,emb=s.ws?(s.emb||0):384,off=oldSz?(N-oldSz)>>1:0;
@@ -190,6 +191,7 @@ async function startGame(load,slotId){
   look.yaw=0;look.pitch=-.1;
  }
  HG.extStart&&HG.extStart();
+ if(HG.netBoot)HG.netBoot(s);                         /* co-op konuğu: kişisel durum sıfırlanır (js/oyun/ag-dunya.js) */
  ldSet(.35,'Harita çiziliyor');await nap();
  HG.buildMini();
  await Scene.buildAsync(G,p=>ldSet(.4+p*.45,'Sahne kuruluyor'));
@@ -209,5 +211,5 @@ async function startGame(load,slotId){
  HG.lock();
  save();
 }
-Object.assign(HG,{newState,saveExists,save,manualSave,startGame,ldOpen,ldSet,ldClose,listSlots,readSlot,downloadCurrent,downloadSlot,importText,renameSlot,deleteSlot,MAXSLOT});
+Object.assign(HG,{snapshotRaw,encObj,decObj,newState,saveExists,save,manualSave,startGame,ldOpen,ldSet,ldClose,listSlots,readSlot,downloadCurrent,downloadSlot,importText,renameSlot,deleteSlot,MAXSLOT});
 })();

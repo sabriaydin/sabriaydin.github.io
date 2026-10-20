@@ -120,7 +120,7 @@ function fishRoll(i){
  return [['fish',pond?RI(1,3):1]];
 }
 function stepStructs(dt){
- if(G.cave)return;
+ if(G.cave||(HG.netGuest&&HG.netGuest()))return;                 /* co-op: yapı üretimini yalnızca ev sahibi yürütür */
  const x=X(),rain=sc.rain||0,L=HG.daylight();
  for(const k in x.s){
   const e=x.s[k],i=+k;

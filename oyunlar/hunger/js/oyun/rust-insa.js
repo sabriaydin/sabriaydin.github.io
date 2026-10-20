@@ -784,8 +784,22 @@ document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockEleme
 addEventListener('blur',()=>radialClose(false));
 
 /* ---------- Her kare ---------- */
+/* Temel üzerine kendiliğinden çıkan doğa nesneleri (yeniden büyüyen kaya, ağaç, çalı, mantar) temizlenir */
+const NATURE=new Set([O.TREE,O.PALM,O.PALM0,O.ROCK,O.COAL,O.COPPER,O.IRON,O.BUSH,O.BUSH0,O.SHROOM]);
+const rsCovered=(tx,tz)=>FT.size>0&&FT.has(Math.floor(tx/CS)*KEY+Math.floor(tz/CS));
+let cleanT=0;
+function cleanFound(){
+ for(const p of P){
+  if(p.t!==F)continue;
+  for(let a=0;a<CS;a++)for(let b=0;b<CS;b++){
+   const k=(p.j*CS+b)*W+p.i*CS+a;
+   if(NATURE.has(G.obj[k])){if(G.dmg)delete G.dmg[k];HG.setObj(k,0)}
+  }
+ }
+}
 function updateInsa(dt){
  sync();
+ cleanT-=dt;if(cleanT<=0){cleanT=2;if(P.length)cleanFound()}
  if(ui.state!=='play'){RS.ghost=null;return}
  const h=held();
  RS.ghost=h&&(h.it.tool==='plan'||h.it.tool==='hammer'||h.it.tool==='rsdoor')?ghostNow():null;
@@ -796,8 +810,31 @@ function insaReset(){
 }
 function insaGhost(){return null}     /* eski kare gölgesi kapalı; yeni gölge rust-insa-sahne.js içindedir */
 
+/* ---------- Co-op eşitleme arayüzü (js/oyun/ag-dunya.js): parçalar anahtarla tanınır, yalnızca değişenler gönderilir ---------- */
+const pkey=p=>isCell(p.t)?'c'+p.l+','+p.i+','+p.j:isEdge(p.t)?'e'+p.l+','+p.d+','+p.i+','+p.j:'s'+p.l+','+p.i+','+p.j;
+const prec=p=>[p.t,p.tr,p.l,p.i,p.j,p.d,Math.round(p.y*100)/100,Math.round(p.tm),p.dt,p.dop,p.fl];
+const findKey=k=>{const a=k.slice(1).split(',').map(Number);return k[0]==='c'?cellAt(a[0],a[1],a[2]):k[0]==='e'?edgeAt(a[0],a[1],a[2],a[3]):stairAt(a[0],a[1],a[2])};
+RS.net={
+ dump(){sync();const m=new Map();for(const p of P)m.set(pkey(p),prec(p));return m},
+ apply(ups,dels){
+  sync();let ch=false;
+  for(const k of dels||[]){const p=findKey(k);if(p){effect(p,5);P.splice(P.indexOf(p),1);ch=true;index()}}
+  for(const r of ups||[]){
+   if(!Array.isArray(r)||r.length<9)continue;
+   const [t,tr,l,i,j,d,y,tm,dt,dop,fl]=r;
+   const k=t<=FL?'c'+l+','+i+','+j:t<=LW?'e'+l+','+d+','+i+','+j:'s'+l+','+i+','+j;
+   const p=findKey(k);
+   if(p){p.t=t;p.tr=tr;p.d=d;p.y=y;p.tm=tm;p.dt=dt;p.dop=dop?1:0;p.fl=fl?1:0;p.ver++}
+   else{P.push(mk(r));index()}
+   ch=true;
+  }
+  if(ch){index();recalc();rebuildHash()}
+  return ch;
+ }
+};
+
 Object.assign(HG,{
- RS,rsBlock,rsSupport,rsSurf,rsSolid,rsFoeBlock,rsSheltered,rsUse,rsAimDoor,rsDoorPlace,
+ RS,rsCovered,rsBlock,rsSupport,rsSurf,rsSolid,rsFoeBlock,rsSheltered,rsUse,rsAimDoor,rsDoorPlace,
  insaReset,insaPlace,insaHammer,insaCycle,insaAction:()=>{const r=insaAction();if(r)r.always=true;return r},insaGhost,radialOpen,radialClose,radialOn,radialMove,insaWheel,insaKey,updateInsa,
  insaRotOf:()=>undefined,
  RSD:{TNAME,TIER,TCOL,BASE,MUL,costOf,shape,origin,F,FL,WL,DW,WN,HF,LW,ST,CS,LH,stairH,PLAN_ORDER,SPR,DOORS,

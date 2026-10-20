@@ -192,7 +192,7 @@ function updateSea(dt){
  /* uzaktaki canlılar silinir */
  for(let k=L.length-1;k>=0;k--){
   const a=L[k];if(!a.dyn||a.dying)continue;
-  if((a.x-px)**2+(a.z-pz)**2>115*115)L.splice(k,1);
+  if((a.x-px)**2+(a.z-pz)**2>115*115&&!(HG.coopOther&&HG.coopOther(a,115)))L.splice(k,1);
  }
  let nd=0;for(const a of L)if(a.dyn&&!a.dying)nd++;
  if(nd>=22)return;

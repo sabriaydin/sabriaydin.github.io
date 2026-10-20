@@ -214,6 +214,7 @@ function updateFoes(dt){
  for(const a of G.animals){
   const def=ANIMAL[a.t];if(!def.foe||a.dying)continue;
   if(a.fake){fakes++;continue}
+  if(HG.coopFoe&&HG.coopFoe(a))continue;            /* co-op: başka bir oyuncuya yakın gölge bu oyuncunun sayımına girmez */
   real++;
   const d=Math.hypot(a.x-G.px,a.z-G.py);
   if(d<near){near=d;seenNear=!!a.seen}

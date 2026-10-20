@@ -177,10 +177,11 @@ function updateAnimals(dt){
  const L=G.animals;if(!L)return;
  HG.updateFoes(dt);
  const wolves=[];for(const w of L)if(w.t==='wolf'&&!w.dying)wolves.push(w);
- const DT=dt,play=HG.ui.state==='play',dark=HG.daylight()<.55,FRM=++frame,nk=noiseK();
+ const DT=dt,play=HG.ui.state==='play'||!!(HG.coopPlay&&HG.coopPlay()),dark=HG.daylight()<.55,FRM=++frame,nk=noiseK();
  packTick(wolves,dt);
  for(let k=L.length-1;k>=0;k--){
   const a=L[k],def=ANIMAL[a.t];
+  if(HG.coopEnter)HG.coopEnter(a);                   /* co-op: bu canlının hedefi olan oyuncu geçici olarak G.px/G.py olur */
   /* uzaktaki hayvanlar seyrek güncellenir (oyuncu görmez): birikmiş süre tek adımda işlenir */
   if(!a.dying&&!def.foe&&!a.charge&&!a.kx&&!a.kz){
    const fx=G.px-a.x,fz=G.py-a.z;
@@ -288,6 +289,7 @@ function updateAnimals(dt){
   a.atkT=Math.max(0,(a.atkT||0)-dt);
   a.spd+=(spd-a.spd)*Math.min(1,8*dt);
  }
+ if(HG.coopExit)HG.coopExit();
  /* iç içe geçme engeli: canlılar birbirinden en az yarıçapları toplamı kadar uzak durur (ızgara ile yalnızca komşular denetlenir) */
  {
   for(const b of GRID.values())b.length=0;
@@ -320,7 +322,7 @@ function updateAnimals(dt){
    if((cnt[t]||0)>=ANIMAL[t].want*SCL*.8)continue;
    for(let g=0;g<40;g++){
     const x=2+((rnd()*(W-4))|0),y=2+((rnd()*(H-4))|0),i=y*W+x;
-    if(G.tile[i]!==T.GRASS||G.obj[i]||Math.hypot(x-G.px,y-G.py)<50||G.hgt[i]>3)continue;
+    if(G.tile[i]!==T.GRASS||G.obj[i]||Math.hypot(x-G.px,y-G.py)<50||G.hgt[i]>3||(HG.coopOther&&HG.coopOther({x,z:y},50)))continue;
     if((G.villages||[]).some(v=>Math.hypot(v.cx-x,v.cy-y)<16))continue;
     if(L.some(q=>!q.dying&&(q.t===t?Math.hypot(q.x-x,q.z-y)<(ANIMAL[t].sp||16)*.6:Math.hypot(q.x-x,q.z-y)<4)))continue;
     const f=fbm(x/12,y/12,G.seed+33);
