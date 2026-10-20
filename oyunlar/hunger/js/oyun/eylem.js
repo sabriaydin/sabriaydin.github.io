@@ -63,6 +63,7 @@ function actionFor(tg){
    if(nd.collect&&nd.chop&&gatherLv('axe')>=0){const lv2=gatherLv('axe');return {kind:'node',hint:'Sol tık: kes · [E] hindistan cevizi topla',name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))}}
    if(nd.collect)return {hint:'[E] '+(o===O.PALM?'Hindistan cevizi topla':o===O.SHROOM?'Mantar topla':'Meyve topla'),name};
    const lv=nd.tool?gatherLv(nd.tool):0;
+   if(lv<0&&h&&(h.it.tool==='axe'||h.it.tool==='pick'))return {block:nd.tool==='axe'?'Kazma ağaç kesemez. Balta gerekir.':'Balta kaya ve maden kazamaz. Kazma gerekir.',name};
    if(lv<0){const xb=HG.extBare&&HG.extBare(o,i);if(xb)return xb}
    if(lv<0)return {block:nd.tool==='axe'?'Çıplak elle ağaç kesilemez. El Taşı veya balta gerekir.':nd.req>0?(nd.msg||'Bunun için kazma gerekir.'):'Çıplak elle kazılamaz. El Taşı veya kazma gerekir.',name};
    if(lv<nd.req)return {block:nd.msg||'Daha iyi bir alet gerekir.',name};
