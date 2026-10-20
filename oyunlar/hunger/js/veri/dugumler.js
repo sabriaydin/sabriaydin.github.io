@@ -17,7 +17,9 @@ NODE[O.IRON]={hp:200,tool:'pick',req:2,id:'iron_ore',tot:8,sec:['stone',5],bonus
 /* toplanabilirler: E tuşu ile anında toplanır */
 NODE[O.SHROOM]={collect:true,give:()=>['mushroom',1+(Math.random()*2|0)],rm:O.NONE,regrow:[O.SHROOM,420]};
 NODE[O.BUSH]={collect:true,give:()=>['berries',2+(Math.random()*2|0)],rm:O.BUSH0,regrow:[O.BUSH,110]};
-NODE[O.PALM]={collect:true,give:()=>['coconut',1],rm:O.PALM0,regrow:[O.PALM,160]};
+const PALM_CHOP={hp:90,tool:'axe',req:0,id:'wood',tot:12,bonus:2,rm:O.NONE,regrow:[O.PALM,480]};      /* palmiye balta ile kesilir */
+NODE[O.PALM]={collect:true,give:()=>['coconut',1],rm:O.PALM0,regrow:[O.PALM,160],chop:PALM_CHOP};
+NODE[O.PALM0]=PALM_CHOP;
 const SOLID=o=>o!==O.NONE&&o!==O.DOOR&&o!==O.DOORM&&o!==O.ARCHW&&o!==O.ARCHS&&o!==O.GATE&&o!==O.GATEM&&o!==O.VDOOR&&o!==O.BUSH&&o!==O.BUSH0&&o!==O.SNARE&&o!==O.PLOT&&o!==O.SHROOM;     /* çalılar, mantar, tuzak ve tarla yürünerek geçilir */
 /* Nişan ışını için nesnelerin yaklaşık yükseklikleri */
 const OBJTOP={[O.TREE]:6,[O.PALM]:5,[O.PALM0]:5,[O.ROCK]:.9,[O.COAL]:.95,[O.COPPER]:.95,[O.IRON]:.95,[O.BUSH]:.8,[O.BUSH0]:.8,[O.FIRE]:.5,[O.BENCH]:1,[O.FURN]:1.6,[O.WALLW]:1.3,[O.WALLS]:1.3,[O.DOOR]:1.3,[O.WALLT]:1.3,[O.WALLM]:1.3,[O.DOORM]:1.3,[O.FENCE]:.85,[O.WINW]:1.3,[O.WINS]:1.3,[O.WINM]:1.3,[O.ARCHW]:1.5,[O.ARCHS]:1.5,[O.GATE]:.95,[O.GATEM]:.95,[O.FENCES]:.85,[O.FENCEM]:.95,[O.VWALL]:3,[O.VDEC]:1.3,[O.VDOOR]:.8,[O.BED]:.55,[O.RACK]:1.5,[O.BARREL]:1.1,[O.TORCHP]:2,[O.SNARE]:.15,[O.PLOT]:.12,[O.SHROOM]:.25};

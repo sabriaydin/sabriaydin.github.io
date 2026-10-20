@@ -7,7 +7,7 @@ HG.VERSION='1.82';                               /* her güncellemede artırıl�
 const PREF='hunger-dunya';
 
 /* ============================================================ Dünya Oluştur ============================================================ */
-const START=[0,.2,.42];                          /* oyun saati başlangıcı (gün oranı): sabah, öğle, akşam */
+const START=[0,.296,.593];                          /* oyun saati başlangıcı (gün oranı): sabah, öğle, akşam */
 const KIT=[['axe1',1],['pick1',1],['bandage',3],['cfish',3],['wbottle',1]];
 let wd=null,F={};
 function pref(){try{const p=JSON.parse(localStorage.getItem(PREF)||'null');return p&&typeof p==='object'?p:{}}catch(e){return {}}}

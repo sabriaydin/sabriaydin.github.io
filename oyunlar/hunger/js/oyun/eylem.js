@@ -58,8 +58,9 @@ function actionFor(tg){
  }
  const i=tg.y*W+tg.x,o=G.obj[i],tl=G.tile[i];
  if(o){
-  const name=NAMES[o]||'Nesne',nd=NODE[o];
+  const name=NAMES[o]||'Nesne';let nd=NODE[o];
   if(nd){
+   if(nd.collect&&nd.chop&&gatherLv('axe')>=0){const lv2=gatherLv('axe');return {kind:'node',hint:'Sol tık: kes · [E] hindistan cevizi topla',name:name+' · %'+Math.max(1,Math.round(100*(1-((G.dmg&&G.dmg[i])||0))))}}
    if(nd.collect)return {hint:'[E] '+(o===O.PALM?'Hindistan cevizi topla':o===O.SHROOM?'Mantar topla':'Meyve topla'),name};
    const lv=nd.tool?gatherLv(nd.tool):0;
    if(lv<0){const xb=HG.extBare&&HG.extBare(o,i);if(xb)return xb}
@@ -174,7 +175,7 @@ function giveRes(id,n){
  HG.spawnDrop(id,n);
 }
 function nodeSwing(tg){
- const i=tg.y*W+tg.x,o=G.obj[i],nd=NODE[o];
+ const i=tg.y*W+tg.x,o=G.obj[i],nd=NODE[o].chop||NODE[o];
  if(HG.macroBlocked&&HG.macroBlocked())return;                 /* makro algılandıysa kesme/kazma da kısa süre durur */
  HG.noiseT=performance.now()+1500;                          /* kesme ve kazma sesi hayvanları tetikte tutar */
  const key='node,'+i+','+o;
@@ -184,8 +185,8 @@ function nodeSwing(tg){
  const lv=gatherLv(nd.tool);
  A.nextSwing=G.clock+SWING*(G.tired?1.6:1);
  A.hitI=i;A.hitT=.18;HG.armSwing(.36);
- const big=o!==O.TREE;
- HG.snd(o===O.TREE?'hit':o===O.ROCK?'rock':'ore',null,o);
+ const isT=o===O.TREE||o===O.PALM||o===O.PALM0,big=!isT;
+ HG.snd(isT?'hit':o===O.ROCK?'rock':'ore',null,o);
  const hx=tg.hx!==undefined?tg.hx:tg.x+.5,hy=tg.hy!==undefined?tg.hy:1,hz=tg.hz!==undefined?tg.hz:tg.y+.5;
  Scene.burst(hx,hy,hz,o===O.TREE?0x4a9440:o===O.COAL?0x222226:o===O.COPPER?0xc8743a:o===O.IRON?0xc2a287:0x9a9a9a,big?7:4);
  /* verim: düğümün tamamından çıkacak kaynak (tot × alet çarpanı), bu vuruşun götürdüğü can oranı kadarı verilir */
@@ -207,7 +208,7 @@ function nodeSwing(tg){
  delete G.yac[i];
  HG.xpGain&&HG.xpGain(1.5);
  delete G.dmg[i];
- if(o===O.TREE){Scene.fell(tg.x,tg.y,o,G.px,G.py);HG.snd('creak',{x:tg.x+.5,z:tg.y+.5,y:3})}
+ if(o===O.TREE||o===O.PALM||o===O.PALM0){Scene.fell(tg.x,tg.y,o,G.px,G.py);HG.snd('creak',{x:tg.x+.5,z:tg.y+.5,y:3})}
  else{Scene.crumble(tg.x+.5,tg.y+.5,o);HG.snd('crumble',{x:tg.x+.5,z:tg.y+.5})}
  setObj(i,nd.rm);G.shelterCheck=0;
  if(nd.regrow)G.timers.push({i,at:G.clock+nd.regrow[1]*(.8+Math.random()*.4),to:nd.regrow[0],from:nd.rm});
