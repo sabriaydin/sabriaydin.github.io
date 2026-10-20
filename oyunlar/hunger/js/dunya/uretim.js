@@ -199,7 +199,7 @@ function genWorld(seed,size){
     houses.push({x:hx,z:hz,prof,stone,ex,ey,dX,dZ,ry:Math.atan2(ex,ey)});
     npcs.push({prof,name:names[h],f:FEM.has(names[h]),h,x:dX+ex*2,z:dZ+ey*2,ix:hx,iz:hz,yaw:Math.atan2(-ex,-ey)});
     /* kapı yanında fener direği */
-    dec('lamp',Math.floor(dX+ex*1.2+sxv*1.6),Math.floor(dZ+ey*1.2+szv*1.6),0,true);
+    dec('lamp',Math.floor(dX+ex*1.2+sxv*1.6)+.5,Math.floor(dZ+ey*1.2+szv*1.6)+.5,0,true);   /* direk karenin ortasında durur: köşede olursa kare boş görünür ama engel olurdu */
     /* arka avlu: meslek malzemeleri */
     const bx=-ex,bz=-ey,yX=hx+bx*4.2,yZ=hz+bz*4.2;
     const P=(u,v)=>[Math.floor(yX+bx*u+sxv*v)+.5,Math.floor(yZ+bz*u+szv*v)+.5];
