@@ -105,6 +105,11 @@ function walkableN(x,z){
 }
 const angDiff=(a,b)=>{let d=b-a;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d};
 let restockT=0,discT=0;
+/* evdeki yatağın dünya konumu: yatak, ev modelinde yerel (1.15, -.8) noktasındadır (sahne/koy-yapilari.js); köylü baş ucu kapının tersine gelecek biçimde yatar */
+function bedOf(hs){
+ const c=Math.cos(hs.ry),s=Math.sin(hs.ry);
+ return {x:hs.x+1.15*c-.8*s,z:hs.z-1.15*s-.8*c};
+}
 function updateNpcs(dt){
  const L=G.npcs;if(!L)return;
  G.nearNpc=null;let best=3.4;
@@ -120,7 +125,7 @@ function updateNpcs(dt){
    const dp2=(n.x-hs.dX)*(-hs.ex)+(n.z-hs.dZ)*(-hs.ey);   /* kapı düzleminden içeriye doğru derinlik (dışarıda eksi) */
    let tx,tz;
    if(night){
-    if(inH){tx=hs.x-hs.ex*.3;tz=hs.z-hs.ey*.3;if(Math.hypot(tx-n.x,tz-n.z)<.35){tx=null}}
+    if(inH){const bp=bedOf(hs);tx=bp.x;tz=bp.z;if(Math.hypot(tx-n.x,tz-n.z)<.25){tx=null;n.x=bp.x;n.z=bp.z}}
     else if(Math.hypot(ox-n.x,oz-n.z)>.35&&!(n.stage===1)){tx=ox;tz=oz}
     else{
      /* kapı eksenine ortalanıp düz geçilir: kapı kasasına takılmamak için içeri girene kadar eksen izlenir */

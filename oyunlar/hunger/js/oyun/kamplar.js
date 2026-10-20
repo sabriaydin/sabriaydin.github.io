@@ -45,23 +45,38 @@ function updateCamps(dt){
   if(!c.open&&d<best){best=d;G.nearCamp=c}
  }
 }
+const CN=24;
+/* Sandık: ganimet ilk açılışta sandığın kendi 24 kutuluk deposuna konur (G.x2.cc); çantaya otomatik gelmez, oyuncu istediğini alır */
 function openChest(){
  const c=G.nearCamp;if(!c||c.open||ui.state!=='play')return false;
- c.open=true;G.nearCamp=null;
- const loot=roll(c.tier,c.kind),msg=[];
- for(const [id,n] of loot){
-  const left=add(id,n);if(left>0)HG.spawnDrop(id,left);
-  msg.push(n+' '+IT[id].n);
+ const X=HG.X2(),cc=X.cc||(X.cc={}),key=String(c.id);
+ let e=cc[key];
+ if(!e){
+  const loot=roll(c.tier,c.kind);e={it:Array(CN).fill(null)};
+  for(const [id,n0] of loot){
+   let n=n0;const mx=IT[id].s;
+   for(let k=0;k<CN&&n>0;k++){const s=e.it[k];if(s&&s.id===id&&s.n<mx){const m=Math.min(mx-s.n,n);s.n+=m;n-=m}}
+   for(let k=0;k<CN&&n>0;k++){if(!e.it[k]){const m=Math.min(mx,n);e.it[k]={id,n:m};n-=m}}
+  }
+  cc[key]=e;
+  G.stats.chests++;HG.flag('chest');if(c.vault)HG.flag('vault');if(LOOT_SEA[c.kind])HG.flag(c.kind+'_open');HG.xpGain(14+c.tier*8);
+  /* kayıt */
+  const N=HG.NOTES||[];
+  if(N.length&&c.note!==undefined&&!G.notes.includes(c.note)){
+   G.notes.push(c.note);HG.xpGain(8);
+   setTimeout(()=>{if(ui.state==='play')HG.toggleJournal(true,'not',c.note)},900);
+  }
  }
- HG.snd('chest');HG.feed('Sandık: '+msg.join(', '));
- G.stats.chests++;HG.flag('chest');if(c.vault)HG.flag('vault');if(LOOT_SEA[c.kind])HG.flag(c.kind+'_open');HG.xpGain(14+c.tier*8);
- /* kayıt */
- const N=HG.NOTES||[];
- if(N.length&&c.note!==undefined&&!G.notes.includes(c.note)){
-  G.notes.push(c.note);HG.xpGain(8);
-  setTimeout(()=>{if(ui.state==='play')HG.toggleJournal(true,'not',c.note)},900);
- }
- return true;
+ HG.snd('chest');
+ if(HG.openCampStore&&HG.openCampStore(c,e))return true;
+ /* arayüz yoksa eski davranış: her şey çantaya */
+ for(const q of e.it)if(q){const left=add(q.id,q.n);if(left>0)HG.spawnDrop(q.id,left)}
+ c.open=true;G.nearCamp=null;delete cc[key];return true;
 }
-Object.assign(HG,{updateCamps,openChest});
+/* kamp sandığı penceresi kapanınca: boşsa sandık tükenmiş sayılır (kayıtta açık olarak saklanır) */
+function campChestClosed(c){
+ const X=HG.X2(),cc=X.cc||{},key=String(c.id),e=cc[key];
+ if(e&&!e.it.some(Boolean)){c.open=true;delete cc[key];if(G.nearCamp===c)G.nearCamp=null;HG.feed('Sandık boşaltıldı.')}
+}
+Object.assign(HG,{updateCamps,openChest,campChestClosed});
 })();

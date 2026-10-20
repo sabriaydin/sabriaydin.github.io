@@ -84,7 +84,12 @@ function houseGeo(h){
  const fl=part(box(4.0,.1,4.0),0x9a6a3c,0,.05,0);fl.cf=plankCf;P.push(fl);
  P.push(part(box(1.5,.02,1.1),BLANK[h.prof],0,.12,.5));
  /* yatak */
- P.push(part(box(1.0,.32,1.9),WOOD,1.15,.28,-.85),part(box(.9,.16,1.7),BLANK[h.prof],1.15,.5,-.8),Bp(.2,0xeee8dc,1.15,.62,-1.5,1.3,.55,.9,{d:1}));
+ /* konum: yerel (1.15, -.85); uzun kenar z ekseninde, baş ucu -z yönünde (köylü yatakta bu yönde yatar: oyun/koyluler.js bedOf) */
+ P.push(part(box(1.0,.1,1.9),WOOD,1.15,.3,-.85),
+  ...[[-1,-1],[1,-1],[-1,1],[1,1]].map(([a,b])=>part(box(.1,.3,.1),TIMB,1.15+a*.45,.15,-.85+b*.9)),
+  part(box(1.0,.7,.1),WOOD,1.15,.6,-1.82),part(box(1.0,.36,.08),WOOD,1.15,.43,.08),
+  part(box(.88,.16,1.7),0xe9e2d2,1.15,.43,-.85),part(box(.92,.07,1.05),BLANK[h.prof],1.15,.55,-.5),
+  Bp(.2,0xf4efe4,1.15,.6,-1.5,1.4,.5,.9,{d:1}));
  /* masa, sandalye, raf, sandık */
  P.push(part(box(1.0,.07,.8),WOODL,-1.1,.82,-1.0),...[[-.42,-.32],[.42,-.32],[-.42,.32],[.42,.32]].map(([a,b])=>part(box(.07,.8,.07),WOOD,-1.1+a,.4,-1.0+b)),
   part(box(.4,.07,.4),WOOD,-1.1,.5,-.2),part(box(.4,.45,.07),WOOD,-1.1,.8,-.04));

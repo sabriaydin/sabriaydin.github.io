@@ -13,7 +13,7 @@ const J=(k,d)=>{try{HG.journal&&HG.journal.push('x2',Object.assign({k},d))}catch
 
 /* ============================================================ Depo Sandığı ============================================================ */
 let cur=null,box=null,cg=null;                                /* cur: {i, cave} açık sandık */
-const ent=()=>cur?HG.x2ent(cur.i,O.CHEST):null;
+const ent=()=>cur?(cur.camp?cur.e:HG.x2ent(cur.i,O.CHEST)):null;      /* cur.camp: terk edilmiş kamp sandığı (içerik G.x2.cc) */
 function fit(id){const mx=IT[id].s;let r=0;for(const s of G.inv){if(!s)r+=mx;else if(s.id===id)r+=mx-s.n}return r}
 function ensureBox(){
  if(box)return box;
@@ -59,16 +59,18 @@ function ensureBox(){
 function changed(){
  ui.dirty=true;HG.snd('ui');
  if(cur){
-  J('chest',{i:cur.i});
-  if(G.obj[cur.i]===O.CHEST&&ent().gr)HG.x2graveCheck(cur.i);
-  if(G.obj[cur.i]!==O.CHEST){HG.togglePanel(false);return}
+  if(!cur.camp){
+   J('chest',{i:cur.i});
+   if(G.obj[cur.i]===O.CHEST&&ent().gr)HG.x2graveCheck(cur.i);
+   if(G.obj[cur.i]!==O.CHEST){HG.togglePanel(false);return}
+  }
  }
  renderChest();
 }
 function renderChest(){
  if(!cur||!box)return;
  const e=ent(),n=HG.x2chestCount(e);
- box.querySelector('#cT').textContent=(e.gr?'Cenaze Çantası':'Depo Sandığı')+' · '+n+'/'+CN;
+ box.querySelector('#cT').textContent=(cur.camp?'Terk Edilmiş Sandık':e.gr?'Cenaze Çantası':'Depo Sandığı')+' · '+n+'/'+CN;
  let h='';
  for(let k=0;k<CN;k++){
   const s=e.it[k],it=s?IT[s.id]:null;
@@ -76,7 +78,7 @@ function renderChest(){
  }
  cg.innerHTML=h;
  box.querySelector('#cTake').disabled=!n;
- box.querySelector('#cPick').hidden=!!e.gr;
+ box.querySelector('#cPick').hidden=!!e.gr||!!cur.camp;
  box.querySelector('#cinfo').innerHTML=e.gr?'Eşyalarının tamamı burada. Boşaltınca çanta kaybolur.':'';
 }
 function takeSlot(k){
@@ -133,6 +135,7 @@ function onChestClick(ev){
  if(takeSlot(k))changed();
 }
 function closeChestUi(){
+ if(cur&&cur.camp)HG.campChestClosed&&HG.campChestClosed(cur.camp);        /* boşaltılan kamp sandığı tükenmiş sayılır */
  cur=null;
  const pb=$('#pbox');if(pb)pb.classList.remove('cst');
  if(box)box.hidden=true;
@@ -149,6 +152,28 @@ HG.openStore=function(i){
  $('#pbox').classList.add('cst');box.hidden=false;
  renderChest();ui.dirty=true;
 };
+/* Terk edilmiş kamp sandığı: içerik ilk açılışta çıkar, çantaya otomatik gelmez; oyuncu istediğini alır */
+HG.openCampStore=function(c,e){
+ if(ui.state!=='play')return false;
+ if(!ensureBox())return false;
+ const p=$('#panel');
+ if(p.hidden)HG.togglePanel(true);
+ if(p.hidden)return false;
+ if(HG.panelMode)HG.panelMode('inv');
+ cur={camp:c,e};
+ $('#pbox').classList.add('cst');box.hidden=false;
+ renderChest();ui.dirty=true;return true;
+};
+HG.x2reg('cc',()=>({}),v=>{
+ const out={};
+ if(v&&typeof v==='object')for(const k in v){
+  const q=v[k];if(!q||!Array.isArray(q.it))continue;
+  const it=Array(CN).fill(null);
+  for(let n=0;n<CN;n++){const t=q.it[n];if(t&&IT[t.id]&&t.n>0)it[n]={id:t.id,n:Math.min(IT[t.id].s,t.n|0)}}
+  out[k]={it};
+ }
+ return out;
+});
 {
  const t0=HG.togglePanel;
  HG.togglePanel=function(){

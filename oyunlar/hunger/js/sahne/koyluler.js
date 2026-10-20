@@ -89,7 +89,9 @@ S.onFrame((G,t,dt,info)=>{
   o.g.position.set(n.x,gy,n.z);o.g.rotation.order='YXZ';o.g.rotation.y=n.yaw;
   if(n.sleep){
    /* uyuyan köylü: sırtüstü yatar, yavaş nefes alır */
-   o.g.rotation.x=-Math.PI/2;o.g.position.set(n.x+Math.sin(n.yaw)*.85,gy+.2+Math.sin(t*1.1+n.id)*.008,n.z+Math.cos(n.yaw)*.85);
+   const hr=n.house&&n.house.ry!==undefined?n.house.ry:n.yaw,gh=n.house?S.groundY(n.house.x,n.house.z):gy;
+   /* yatağın üstünde, baş ucu yastığa doğru yatar */
+   o.g.rotation.y=hr;o.g.rotation.x=-Math.PI/2;o.g.position.set(n.x+Math.sin(hr)*.85,gh+.72+Math.sin(t*1.1+n.id)*.008,n.z+Math.cos(hr)*.85);
    o.legL.rotation.set(0,0,0);o.legR.rotation.set(0,0,0);o.armL.rotation.set(0,0,.05);o.armR.rotation.set(0,0,-.05);o.torso.rotation.set(0,0,0);o.torso.scale.y=1+Math.sin(t*1.1+n.id)*.012;
    continue;
   }
