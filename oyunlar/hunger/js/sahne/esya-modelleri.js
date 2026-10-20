@@ -1,0 +1,193 @@
+/* Hunger 3D - sahne: yerde duran eşyaların ayrıntılı 3B modelleri (et, deri, yün, kemik, şişe, külçe, balık ve diğerleri) */
+(()=>{
+'use strict';
+const S=HG.Scene,sc=HG.sc,{IT}=HG;
+const {blob,rbox,merge,part,cyl,cone,alongPart,fb3,box,stone,stonePart,toolParts}=sc.g;
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const PI=Math.PI;
+const geos={};
+let mat=null;
+/* Modeller yere yatık, tabanı y=0'da, yaklaşık .2-.6 m boyutlarındadır */
+const noise=(x,y,z,s)=>fb3(x*9+s,y*9,z*9,s|0);
+const tint=(hex,k)=>{const c=new THREE.Color(hex);return c.multiplyScalar(k)};
+function boneOf(from,dir,len,r){
+ const d=dir.clone().normalize(),e1=from.clone().addScaledVector(d,len),c=0xe9e1cc;
+ return [alongPart(cyl(r*.8,r,len,8,1),c,from,d,len),part(blob(r*1.5,1,.05,3),c,from.x,from.y,from.z),part(blob(r*1.5,1,.05,4),c,e1.x,e1.y,e1.z),
+  part(blob(r*1.3,1,.05,5),c,from.x+0.0,from.y,from.z+r*1.1),part(blob(r*1.3,1,.05,6),c,e1.x,e1.y,e1.z+r*1.1)];
+}
+const B={};sc.dropB=B;
+B.meat=()=>{
+ const m=part(blob(.14,2,.14,11,1.25,.8,1),0xb83a3e,0,.1,0);
+ m.cf=(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,4);if(v>.6)c.setHex(0xe8c2b8);else if(ny<-.3)c.setHex(0x8a2a30)};
+ return [m,part(blob(.1,1,.1,12,1.2,.3,.9),0xf0dcc0,.01,.2,.01),...boneOf(V(.1,.1,0),V(1,.08,0),.17,.022)];
+};
+B.cmeat=()=>{
+ const m=part(blob(.13,2,.14,13,1.25,.8,1),0x8a5128,0,.1,0);
+ m.cf=(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,6);if(v>.55)c.setHex(0x4a2813);else if(v<.3)c.setHex(0xa8703f);};
+ return [m,part(blob(.09,1,.1,14,1.2,.3,.9),0xc79256,.01,.19,.01),...boneOf(V(.09,.1,0),V(1,.08,0),.16,.021)];
+};
+B.leather=()=>{
+ const a=part(blob(.2,2,.1,21,1.5,.1,1.1),0x7c4f2c,0,.03,0);
+ a.cf=(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,8);c.multiplyScalar(.85+v*.35);if(Math.hypot(x*.8,z)>.3)c.lerp(new THREE.Color(0xa87a4c),.5)};
+ const b=part(blob(.15,2,.1,22,1.4,.12,.9),0x8a5c36,.07,.075,.02,1,1,1,0,.5,.05);
+ b.cf=a.cf;
+ return [a,b,alongPart(cyl(.026,.03,.34,8),0x6e4526,V(-.2,.07,-.13),V(.7,0,.5),.3),part(blob(.04,1,.1,23),0x6e4526,-.2,.07,-.13)];
+};
+B.wool=()=>{
+ const ps=[],w=0xf2efe6;
+ [[0,.1,0,.12],[.1,.08,.05,.09],[-.09,.08,.06,.1],[.02,.09,-.1,.09],[.0,.19,.01,.08],[-.1,.07,-.07,.07],[.11,.07,-.06,.07]].forEach((q,i)=>{
+  const p=part(blob(q[3],2,.22,30+i),w,q[0],q[1],q[2]);p.cf=(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,9);c.multiplyScalar(.9+v*.16);if(ny<-.2)c.multiplyScalar(.85)};ps.push(p);
+ });
+ return ps;
+};
+B.bone=()=>[...boneOf(V(-.16,.04,0),V(1,0,0),.32,.028),...boneOf(V(-.1,.035,.1),V(.8,0,-.5),.2,.02)];
+const bottle=(body,neck)=>()=>[
+ part(cyl(.07,.075,.2,14),body,0,.1,0),part(cyl(.05,.07,.06,14),body,0,.22,0),part(cyl(.03,.035,.1,12),neck,0,.3,0),part(cyl(.036,.034,.04,10),0x9a6a3c,0,.37,0),
+ part(cyl(.072,.072,.05,14),0xe8e4da,0,.12,0)
+];
+B.bottle=bottle(0xbfe6f0,0xcfe8ee);
+B.wbottle=()=>{const l=bottle(0x5fb0e0,0xcfe8ee)();l[4]=part(cyl(.072,.072,.05,14),0x2f8fcf,0,.12,0);return l};
+B.milk=()=>{const l=bottle(0xf4f1e8,0xe6e2d6)();l[4]=part(cyl(.072,.072,.05,14),0xc9423a,0,.12,0);return l};
+B.wood=()=>{
+ const log=(r,len,x,y,z,ry,col,seed)=>{
+  const ax=[Math.cos(ry),0,-Math.sin(ry)];
+  const p=part(cyl(r,r*1.04,len,10,3),col,x,y,z,1,1,1,0,ry,PI/2);
+  p.cf=(X,Y,Z,nx,ny,nz,c)=>{
+   const d=Math.abs(nx*ax[0]+nz*ax[2]);
+   if(d>.85){const rr=Math.hypot(Y-y,(X-x)*ax[2]-(Z-z)*ax[0]);const ring=Math.sin(rr*(190)+noise(X,Y,Z,seed)*2);c.setHex(0xd9b078);c.multiplyScalar(.82+.14*ring+(rr<r*.18?-.08:0))}   /* kesit yüzü: yıllık halkalar */
+   else{const v=noise(X*2,Y,Z*2,10);c.multiplyScalar(.7+v*.6)}
+  };
+  return p;
+ };
+ return [log(.075,.5,0,.08,0,0,0x6b4423,3),log(.065,.44,.02,.07,.15,.35,0x73492a,5),log(.06,.4,.03,.2,.07,-.2,0x66401f,7),part(cone(.025,.12,5),0x5a381b,.1,.16,-.06,1,1,1,0,0,-1.2)];
+};
+const rockCf=(base,vein)=>(x,y,z,nx,ny,nz,c)=>{const v=noise(x,y,z,12);c.multiplyScalar(.82+v*.4);if(vein!==undefined&&Math.abs(fb3(x*7,y*7,z*7,5)-.5)<.07)c.setHex(vein)};
+/* kırık taş parçası: tabanı y=0'da */
+const lump=(sx,sy,sz,seed,o,col,x,z,ry,cf)=>{
+ const st=stone(sx,sy,sz,seed,o),dy=sy*(o.flat||0);
+ if(!cf)return stonePart(st,col,x,dy,z,ry||0);
+ const p=part(st.geo,col,x,dy,z,1,1,1,0,ry||0,0,.08);p.cf=cf;return p;
+};
+B.stone=()=>[lump(.12,.078,.095,41,{cuts:5,detail:2,amp:.2,flat:.7},0x8d8a85,0,0,.4),lump(.05,.034,.042,43,{cuts:3,detail:1,amp:.18,flat:.6},0x7d7a76,.16,.09,0),lump(.035,.025,.03,45,{cuts:2,detail:1,amp:.18,flat:.6},0x96928c,-.12,.11,1)];
+B.coal=()=>{
+ const cf=(X,Y,Z,nx,ny,nz,c)=>{const n=noise(X,Y,Z,14);if(n>.68)c.setHex(0x40404c);c.multiplyScalar(.85+noise(X,Y,Z,15)*.4);if(ny>.5)c.multiplyScalar(1.15)};
+ return [lump(.1,.075,.085,51,{cuts:6,detail:2,amp:.2,flat:.72},0x1b1b20,0,0,.2,cf),lump(.07,.05,.06,52,{cuts:5,detail:1,amp:.2,flat:.7},0x1b1b20,.13,.07,1,cf),lump(.06,.045,.055,53,{cuts:5,detail:1,amp:.2,flat:.7},0x1b1b20,-.1,.09,2,cf),lump(.045,.035,.04,54,{cuts:4,detail:1,amp:.2,flat:.7},0x1b1b20,.02,-.12,0,cf)];
+};
+B.sand=()=>{const p=part(blob(.2,2,.08,61,1,.38,1),0xdac68c,0,.04,0);p.cf=(x,y,z,nx,ny,nz,c)=>{c.multiplyScalar(.9+noise(x,y,z,15)*.22)};return [p]};
+const ore=(c,cr)=>()=>{
+ const cf=(x,y,z,nx,ny,nz,col)=>{const v=noise(x,y,z,16);col.multiplyScalar(.85+v*.3);if(noise(x,y,z,17)>.6){const t=new THREE.Color(c);col.lerp(t,.85)}};
+ const ps=[lump(.14,.095,.11,71,{cuts:5,detail:2,amp:.22,flat:.7},0x5f5e66,0,0,.3,cf),lump(.08,.055,.07,72,{cuts:4,detail:1,amp:.2,flat:.7},0x56555c,.15,.09,1,cf)];
+ for(const [x,z,rz] of [[.02,.02,.3],[-.05,.04,-.4],[.08,-.04,.5]])ps.push(part(cone(.012,.07,5,1),cr,x,.11+z,z,1,1,1,rz,x*20,rz));
+ return ps;
+};
+B.copper_ore=ore(0xd37a3c,0x2f8a62);B.iron_ore=ore(0xb98862,0x92402a);
+const ingot=c=>()=>{
+ const mk=(x,y,z,ry)=>{const p=part(rbox(.3,.075,.13,.3,3),c,x,y,z,1,1,1,0,ry,0);p.cf=(X,Y,Z,nx,ny,nz,col)=>{if(ny>.7)col.multiplyScalar(1.18)};return p};
+ return [mk(0,.04,0,0),mk(.02,.115,.0,.5)];
+};
+B.copper_ingot=ingot(0xd9854a);B.iron_ingot=ingot(0xbcc2c8);
+B.berries=()=>{
+ const ps=[alongPart(cyl(.008,.01,.3,5),0x5a4a2a,V(-.15,.02,0),V(1,.25,.2),.3),part(blob(.05,1,.1,81,1.6,.15,.8),0x3f7a35,-.04,.08,.05,1,1,1,0,.4,0),part(blob(.05,1,.1,82,1.6,.15,.8),0x4a8a3c,.06,.1,-.04,1,1,1,0,-.5,0)];
+ [[0,.05,0],[.06,.05,.03],[-.05,.05,.04],[.03,.05,-.06],[-.04,.05,-.04],[.02,.1,.01],[.09,.05,-.04],[-.09,.06,.0]].forEach((q,i)=>{
+  ps.push(part(blob(.035,1,.05,83+i),i%3?0xc42d3a:0x9a1c34,q[0],q[1],q[2]));
+ });
+ return ps;
+};
+B.coconut=()=>{
+ const p=part(blob(.12,2,.06,91),0x5b3a1c,0,.12,0);p.cf=(x,y,z,nx,ny,nz,c)=>{c.multiplyScalar(.8+noise(x,y,z,18)*.5)};
+ return [p,part(blob(.016,1,0,92),0x1a0f08,.04,.22,.07),part(blob(.016,1,0,93),0x1a0f08,-.02,.23,.08),part(blob(.016,1,0,94),0x1a0f08,.01,.2,.1)];
+};
+const fish=(back,belly,fin,cooked)=>()=>{
+ const b=part(blob(.1,2,.04,101,2.7,.85,.55),back,0,.075,0);
+ b.cf=(x,y,z,nx,ny,nz,c)=>{if(ny<-.15)c.setHex(belly);else if(cooked){if(noise(x,y,z,19)>.58)c.multiplyScalar(.6)}else{c.multiplyScalar(.85+Math.abs(Math.sin(x*38))*.22)}};
+ return [b,alongPart(cone(.08,.16,4,1),fin,V(-.26,.075,0),V(-1,0,0),.16,1,.22),part(cone(.045,.09,3,1),fin,-.02,.16,0,1,1,.2),
+  part(cone(.03,.06,3,1),fin,.07,.025,.05,1,1,.25,0,0,PI),part(blob(.015,1,0,102),cooked?0xd8d0c0:0x0a0a0a,.2,.095,.045),part(blob(.015,1,0,103),cooked?0xd8d0c0:0x0a0a0a,.2,.095,-.045)];
+};
+B.fish=fish(0x6fa0c0,0xd8e2e8,0x5a8aa8,false);
+B.cfish=fish(0xb07a35,0xd9b070,0x8a5a22,true);
+B.sardine=fish(0x6f8ea8,0xcfdde8,0x4f6c84,false);
+B.bass=fish(0x5e7a62,0xaebfae,0x3e5a46,false);
+B.tuna=fish(0x243e66,0x8fb0cc,0x1b2f50,false);
+B.rock=()=>[lump(.17,.088,.1,41,{taper:.55,cuts:6,flat:.8,detail:3,amp:.26},0x6a655e,0,0,0)];
+const crabOf=(body,leg)=>()=>{
+ const ps=[part(blob(.1,2,.06,111,1.25,.5,1),body,0,.07,0),part(blob(.04,1,.05,112),body,.0,.12,.07),part(blob(.04,1,.05,113),body,.0,.12,-.07)];
+ for(const sx of [-1,1]){
+  ps.push(part(blob(.055,1,.1,114+sx,1.3,.6,.9),body,sx*.02,.09,sx*.15));
+  for(const k of [-1,0,1])ps.push(alongPart(cyl(.008,.01,.1,4),leg,V(k*.045,.07,sx*.1),V(k*.3,-.5,sx),.1));
+ }
+ return ps;
+};
+B.crab=crabOf(0xc24a2a,0xa83a22);B.ccrab=crabOf(0xb8381a,0x8f2a14);
+B.coral=()=>{
+ const ps=[part(blob(.08,2,.05,121,1.3,.4,1.1),0x9a8a7a,0,.03,0)];
+ for(let i=0;i<5;i++){const a=i/5*PI*2,r=.03+(i%2)*.025,h=.14+(i%3)*.05;ps.push(part(cone(.022,h,5,1),i%2?0xe86a8a:0xf08aa6,Math.cos(a)*r,.05+h*.5,Math.sin(a)*r,1,1,1,Math.sin(a)*.3,0,-Math.cos(a)*.3))}
+ return ps;
+};
+B.raft=()=>[0,1,2].map(i=>part(cyl(.05,.05,.5,8),i%2?0x8a5a30:0x6b4423,(i-1)*.1,.05,0,1,1,1,PI/2,0,0)).concat([part(box(.5,.03,.04),0x4a3220,0,.1,.12),part(box(.5,.03,.04),0x4a3220,0,.1,-.12)]);
+B.mask=()=>[part(box(.22,.1,.05),0x16232c,0,.07,0),part(blob(.045,1,.05,131),0x7fd0e8,-.06,.07,.03),part(blob(.045,1,.05,132),0x7fd0e8,.06,.07,.03),part(box(.3,.02,.02),0x2a2a30,0,.07,-.04)];
+B.coin=()=>[0,1,2,3].map(i=>part(cyl(.06,.06,.012,14),i%2?0xd9985a:0xc27a3c,(i%2)*.02,.008+i*.013,(i%2?.01:0)))
+ .concat([part(cyl(.055,.055,.012,14),0xefc07c,.14,.01,.05,1,1,1,0,.4,0),part(cyl(.055,.055,.012,14),0xd9985a,.12,.024,.07,1,1,1,.1,.2,0)]);
+B.gold=()=>[part(box(.2,.07,.1),0xd9a82a,0,.04,0,1,1,1,0,.2,0),part(box(.18,.06,.09),0xf0c850,.02,.105,.01,1,1,1,0,-.1,0),part(box(.16,.05,.08),0xc4921c,-.01,.15,-.01,1,1,1,0,.3,0)];
+B.gem=()=>[part(cone(.09,.12,5,1),0xe8485c,0,.18,0,1,1,1,PI,0,0),part(cone(.09,.12,5,1),0xb01c2e,0,.06,0),part(cyl(.092,.092,.03,5),0xff7a8a,0,.12,0)];
+B.bag=()=>[part(cyl(.1,.1,.4,12),0x4a6a8a,0,.1,0,1,1,1,0,0,PI/2),part(cyl(.1,.1,.02,12),0x7a9aba,.2,.1,0,1,1,1,0,0,PI/2),part(cyl(.1,.1,.02,12),0x7a9aba,-.2,.1,0,1,1,1,0,0,PI/2),
+ part(cyl(.104,.104,.03,12),0xd9c07a,.07,.1,0,1,1,1,0,0,PI/2),part(cyl(.104,.104,.03,12),0xd9c07a,-.07,.1,0,1,1,1,0,0,PI/2)];
+B.arrow=()=>[alongPart(cyl(.008,.008,.52,5),0xa87440,V(-.26,.012,0),V(1,0,0),.52),alongPart(cone(.022,.07,4,1),0xc3c9d0,V(.26,.012,0),V(1,0,0),.07),
+ part(box(.07,.002,.035),0xd9463c,-.23,.014,.0),part(box(.07,.035,.002),0xd9463c,-.23,.014,0)];
+B.torch=()=>[alongPart(cyl(.025,.032,.7,6),0x6b4423,V(-.35,.03,0),V(1,0,0),.7),alongPart(cyl(.05,.04,.16,7),0x2b2018,V(.28,.04,0),V(1,0,0),.16),part(blob(.04,1,.15,111),0x15100c,.45,.04,0)];
+B.bandage=()=>[part(cyl(.055,.055,.12,14),0xe8e4da,0,.055,0,1,1,1,0,0,PI/2),part(cyl(.058,.058,.03,14),0xd9463c,0,.055,0,1,1,1,0,0,PI/2),part(cyl(.04,.04,.125,10),0xc9c4b8,0,.055,0,1,1,1,0,0,PI/2),part(box(.18,.003,.07),0xe8e4da,.14,.003,.02,1,1,1,0,.3,0)];
+B.spear=()=>[alongPart(cyl(.016,.02,1,6),0x8a5a30,V(-.5,.02,0),V(1,0,0),1),alongPart(cone(.032,.2,4,1),0xe9e1cc,V(.5,.02,0),V(1,0,0),.2,1,.4),alongPart(cyl(.02,.02,.06,6),0x4a3a22,V(.42,.02,0),V(1,0,0),.06)];
+B.shears=()=>[alongPart(cyl(.012,.014,.22,5),0xbcc2c8,V(-.02,.015,0),V(1,0,.25),.22),alongPart(cyl(.012,.014,.22,5),0xbcc2c8,V(-.02,.015,0),V(1,0,-.25),.22),
+ part(new THREE.TorusGeometry(.035,.009,6,12),0x8a5a30,-.07,.02,.045,1,1,1,PI/2,0,0),part(new THREE.TorusGeometry(.035,.009,6,12),0x8a5a30,-.07,.02,-.045,1,1,1,PI/2,0,0),part(cyl(.006,.006,.02,5),0x555560,0,.02,0)];
+B.coat=()=>{
+ const a=part(rbox(.4,.07,.32,.35,3),0x7a4d28,0,.04,0);a.cf=(x,y,z,nx,ny,nz,c)=>{c.multiplyScalar(.85+noise(x,y,z,20)*.3)};
+ return [a,part(rbox(.14,.06,.3,.35,2),0x6b4423,.26,.045,.04,1,1,1,0,.5,0),part(rbox(.14,.06,.3,.35,2),0x6b4423,-.26,.045,.04,1,1,1,0,-.5,0),part(blob(.1,1,.1,121,1.3,.3,.9),0xe8e4da,0,.09,-.12),part(cyl(.012,.012,.03,6),0x2b2018,0,.085,.06)];
+};
+const toolHead={1:0x8d8d92,2:0xc8743a,3:0xc3c9d0};
+B.axe=it=>[alongPart(cyl(.022,.028,.8,6),0x8a5a30,V(-.4,.03,0),V(1,0,0),.8),part(box(.2,.07,.07),toolHead[it.tier]||0x8d8d92,.34,.05,.0),part(box(.04,.07,.07),0x555560,.26,.05,0)];
+B.pick=it=>[alongPart(cyl(.022,.028,.8,6),0x8a5a30,V(-.4,.03,0),V(1,0,0),.8),part(box(.07,.07,.62),toolHead[it.tier]||0x8d8d92,.36,.05,0),
+ alongPart(cone(.04,.14,4,1),toolHead[it.tier]||0x8d8d92,V(.36,.05,.31),V(0,0,1),.14),alongPart(cone(.04,.14,4,1),toolHead[it.tier]||0x8d8d92,V(.36,.05,-.31),V(0,0,-1),.14)];
+B.rod=()=>[alongPart(cyl(.012,.02,1.1,5),0x8a5a30,V(-.5,.03,0),V(1,0,.05),1.1),part(cyl(.025,.025,.04,8),0x555560,-.3,.045,0,1,1,1,PI/2,0,0),alongPart(cyl(.003,.003,.4,3),0xdddddd,V(.55,.03,.05),V(.4,0,1),.4)];
+B.bow=()=>{
+ const ps=[],N=8,H=.5;
+ for(let i=-N;i<N;i++){const y0=i/N*H,y1=(i+1)/N*H;const z0=-.14*(1-(y0/H)**2),z1=-.14*(1-(y1/H)**2);
+  const a=V(z0,.03,y0),b=V(z1,.03,y1),d=b.clone().sub(a);ps.push(alongPart(cyl(.014,.017,d.length()+.004,5),0x8a5a30,a,d,d.length()+.004))}
+ ps.push(part(box(.06,.04,.18),0x3a2a1a,-.14,.03,0));
+ ps.push(alongPart(cyl(.003,.003,H*2,3),0xe8e4da,V(0,.03,-H),V(0,0,1),H*2));
+ return ps;
+};
+/* yerleştirilebilir yapılar: küçültülmüş modeller */
+B.fire=()=>[
+ ...[0,1,2,3,4].map(i=>{const a=i*PI*.4;return part(cyl(.04,.045,.3,6),0x6b4423,Math.cos(a)*.08,.06,Math.sin(a)*.08,1,1,1,0,-a,PI/2)}),
+ ...[0,1,2,3,4,5,6].map(i=>{const a=i*PI*2/7;return part(blob(.05,1,.2,131+i),0x7d7d83,Math.cos(a)*.2,.04,Math.sin(a)*.2)}),
+ part(blob(.07,1,.2,140),0x1a1a1f,0,.03,0)
+];
+B.bench=()=>[part(rbox(.4,.05,.26,.2,2),0xa47544,0,.24,0),...[[-.16,-.09],[.16,-.09],[-.16,.09],[.16,.09]].map(q=>part(cyl(.025,.03,.22,5),0x7a4f29,q[0],.11,q[1])),part(box(.1,.02,.06),0x8d8d92,.1,.28,0)];
+B.furn=()=>{const a=part(rbox(.32,.34,.32,.15,3),0x77777f,0,.17,0);a.cf=rockCf();return [a,part(box(.14,.1,.02),0x15100c,0,.12,.16),part(cyl(.04,.05,.12,6),0x66666e,0,.4,0)]};
+B.wallw=()=>[0,1,2,3].map(i=>part(box(.34,.07,.05),i%2?0xa67848:0xb08050,0,.04+i*.075,0));
+B.walls=()=>{const a=part(rbox(.34,.3,.1,.2,3),0x8c8c94,0,.15,0);a.cf=rockCf();return [a]};
+B.door=()=>[part(box(.26,.38,.04),0x6b4a29,0,.19,0),part(box(.26,.03,.045),0x4a3220,0,.1,0),part(box(.26,.03,.045),0x4a3220,0,.3,0),part(blob(.018,1,0,150),0xbcc2c8,.09,.2,.03)];
+/* İnşa Planı (yatık pano) ve Çekiç */
+B.plan=()=>[part(box(.32,.022,.42),0x3b2714,0,.011,0),part(box(.28,.026,.38),0x2f5f8f,0,.014,0),part(box(.2,.03,.012),0xe8f2ff,0,.02,.02),part(box(.012,.03,.1),0xe8f2ff,-.1,.02,-.03),part(box(.012,.03,.1),0xe8f2ff,.1,.02,-.03),part(box(.13,.03,.012),0xe8f2ff,-.05,.02,-.1,1,1,1,0,.62,0),part(box(.13,.03,.012),0xe8f2ff,.05,.02,-.1,1,1,1,0,-.62,0)];
+B.hammer=()=>[part(cyl(.022,.028,.5,7),0x74502e,0,.03,0,1,1,1,0,0,PI/2),part(box(.1,.1,.17),0x6d737a,.25,.05,0),part(box(.105,.03,.175),0x9aa0a8,.25,.1,0),part(box(.105,.1,.04),0x8d939a,.25,.05,.105),part(box(.105,.1,.04),0x8d939a,.25,.05,-.105),part(box(.06,.11,.115),0x3a3d42,.25,.05,0)];
+/* modelleri üret: kimliğe göre */
+/* aletler: ortak alet parçalarından üretilir (sap yatay, baş +X ucunda) */
+function toolGeo(it){
+ const tp=toolParts(it.tool,it.tier||1),g=merge([...tp.wood,...tp.head,...tp.cord],{jit:.03});
+ g.applyMatrix4(new THREE.Matrix4().makeRotationZ(-PI/2));g.computeBoundingBox();
+ const b=g.boundingBox;g.translate(-(b.min.x+b.max.x)/2,-b.min.y,0);return g;
+}
+function build(id){
+ const it=IT[id];let fn=B[id];
+ if(it&&(it.tool==='axe'||it.tool==='pick'||it.tool==='rod'))return toolGeo(it);
+ if(!fn&&it){if(it.tool&&B[it.tool])fn=()=>B[it.tool](it)}
+ if(!fn)fn=()=>[part(blob(.1,2,.1,160),0xcccccc,0,.1,0)];
+ const list=fn(it);
+ return merge(list,{jit:.07});
+}
+sc.dropModel=id=>{
+ if(!mat)mat=sc.mat({roughness:.78});
+ if(!geos[id])geos[id]=build(id);
+ const g=new THREE.Group(),m=new THREE.Mesh(geos[id],mat);m.castShadow=true;m.receiveShadow=true;g.add(m);
+ return g;
+};
+})();
