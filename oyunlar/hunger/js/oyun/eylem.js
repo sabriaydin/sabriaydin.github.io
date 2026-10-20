@@ -325,10 +325,17 @@ function faceCos(x,z){const dx=x-G.px,dz=z-G.py,d=Math.hypot(dx,dz);return d<.9?
 function useCands(){
  const c=[],dr=G.nearDrop,cp=G.nearCamp,cv=G.nearCave,np=G.nearNpc;
  if(dr&&G.drops&&G.drops.includes(dr)){const f=faceCos(dr.x,dr.z);if(f>.55||Math.hypot(dr.x-G.px,dr.z-G.py)<1.3)c.push([Math.max(f,.9),'drop',HG.pickupNearest])}
- if(cp&&!cp.open){const f=faceCos(cp.x+.5,cp.y+.5);if(f>.6)c.push([f,'chest',HG.openChest])}
- if(cv){const q=cv.exit&&G.cave?G.cave.lv.exit:cv,f=faceCos(q.x+.5,q.y+.5);if(f>.6)c.push([f,'cave',HG.useCave])}
- if(np){const f=faceCos(np.x,np.z);if(f>.75)c.push([f,'npc',HG.talkNpc])}
+ if(cp&&!cp.open){const f=faceCos(cp.x+.5,cp.y+.5);if(f>.85)c.push([f,'chest',HG.openChest])}
+ if(cv){const q=cv.exit&&G.cave?G.cave.lv.exit:cv,f=faceCos(q.x+.5,q.y+.5);if(f>.85)c.push([f,'cave',HG.useCave])}
+ if(np){const f=faceCos(np.x,np.z);if(f>.9)c.push([f,'npc',HG.talkNpc])}
  c.sort((a,b)=>b[0]-a[0]);
+ /* tek odak: nişanın değdiği nesne etkileşim adayından yakınsa odak o nesnedir, aday listelenmez */
+ if(c.length&&G.tg){
+  const tg=G.tg,hx=tg.hx!==undefined?tg.hx:tg.x+.5,hz=tg.hz!==undefined?tg.hz:tg.y+.5,hd=Math.hypot(hx-G.px,hz-G.py),k=c[0][1];
+  const o=k==='drop'?G.nearDrop:k==='chest'?G.nearCamp:k==='npc'?G.nearNpc:null;
+  const ox=!o?null:k==='npc'||k==='drop'?[o.x,o.z]:[o.x+.5,o.y+.5];
+  if(ox&&Math.hypot(ox[0]-G.px,ox[1]-G.py)>hd+.5&&k!=='drop')return [];
+ }
  return c;
 }
 /* E (src='key'), sağ tık (src='mouse') veya dokunmatik düğme (src='touch'). Sıra: sal, yakındaki etkileşimler, meyve toplama,

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux Rehber 6: Kullanıcı, grup ve sudo yönetimi</title>
+<meta name="description" content="Kullanıcı ve grup ekleme/silme, parola işlemleri, sudo yetkisi, sudoers dosyası ve ilgili sistem dosyaları.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-20 11:00">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> id</p><p class="o">uid=1000(ayse) gid=1000(ayse) groups=1000(ayse),27(sudo)</p><p><b>$</b> sudo whoami</p><p class="o">root</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Kullanıcı türleri</a></li><li><a href="#b2">İlgili sistem dosyaları</a></li><li><a href="#b3">Kullanıcı ekleme ve silme</a></li><li><a href="#b4">Kullanıcıyı değiştirme: usermod</a></li><li><a href="#b5">Grup yönetimi</a></li><li><a href="#b6">Parola işlemleri</a></li><li><a href="#b7">sudo: geçici yönetici yetkisi</a></li><li><a href="#b8">sudoers dosyasını düzenleme</a></li><li><a href="#b9">Kullanıcı değiştirme</a></li><li><a href="#b10">Güvenlik önerileri</a></li><li><a href="#b11">Özet</a></li></ol></nav><!--/px-->
+<p>Linux’ta her işlem bir kullanıcı kimliğiyle çalışır. Günlük işler normal kullanıcıyla, sistem yönetimi ise gerektiğinde geçici olarak yönetici (root) yetkisiyle yapılır. Bu yazıda kullanıcı hesapları, gruplar ve <code>sudo</code> mekanizması anlatılmaktadır.</p>
+<h2 id="b1">Kullanıcı türleri</h2>
+<table><thead><tr><th>Tür</th><th>UID</th><th>Açıklama</th></tr></thead><tbody><tr><td>root</td><td>0</td><td>Sınırsız yetkili yönetici; doğrudan oturum açmak önerilmez</td></tr><tr><td>Sistem kullanıcıları</td><td>1–999</td><td>Hizmetlerin (web sunucusu, veri tabanı) kullandığı hesaplar; oturum açılmaz</td></tr><tr><td>Normal kullanıcılar</td><td>1000+</td><td>İnsan kullanıcılar; kendi ev dizinleri vardır</td></tr></tbody></table><pre>id                # kendi kimliğim
+id ayse           # başka kullanıcı
+who               # oturum açmış kullanıcılar
+last | head       # son girişler
+groups            # üyesi olduğum gruplar</pre>
+<h2 id="b2">İlgili sistem dosyaları</h2>
+<table><thead><tr><th>Dosya</th><th>İçerik</th></tr></thead><tbody><tr><td><code>/etc/passwd</code></td><td>Kullanıcı listesi (ad, UID, GID, ev dizini, kabuk); parolalar burada tutulmaz</td></tr><tr><td><code>/etc/shadow</code></td><td>Şifrelenmiş parolalar; yalnızca root okuyabilir</td></tr><tr><td><code>/etc/group</code></td><td>Gruplar ve üyeleri</td></tr><tr><td><code>/etc/sudoers</code></td><td>sudo yetkileri</td></tr></tbody></table><pre>cat /etc/passwd | head -n 3
+getent passwd ayse          # tek kullanıcı
+getent group sudo</pre>
+<h2 id="b3">Kullanıcı ekleme ve silme</h2>
+<p>Debian ailesinde <code>adduser</code> soru soran, kolay bir araçtır. <code>useradd</code> ise tüm dağıtımlarda bulunan alt düzey komuttur.</p><pre>sudo adduser mehmet                       # etkileşimli (Debian/Ubuntu)
+sudo useradd -m -s /bin/bash mehmet       # -m ev dizini, -s kabuk
+sudo passwd mehmet                        # parola belirle
+sudo userdel mehmet                       # sil (ev dizini kalır)
+sudo userdel -r mehmet                    # ev dizini ile birlikte sil</pre><p>Silme işlemi geri alınamaz; önemli veriler önceden yedeklenmelidir.</p>
+<h2 id="b4">Kullanıcıyı değiştirme: usermod</h2>
+<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>sudo usermod -aG sudo mehmet</code></td><td>Kullanıcıyı gruba ekler (<code>-a</code> unutulursa diğer gruplardan çıkar!)</td></tr><tr><td><code>sudo usermod -s /bin/zsh mehmet</code></td><td>Kabuğu değiştirir</td></tr><tr><td><code>sudo usermod -L mehmet</code></td><td>Hesabı kilitler</td></tr><tr><td><code>sudo usermod -U mehmet</code></td><td>Kilidi açar</td></tr><tr><td><code>sudo usermod -l yeniad eskiad</code></td><td>Kullanıcı adını değiştirir</td></tr><tr><td><code>chsh -s /bin/zsh</code></td><td>Kendi varsayılan kabuğunu değiştirir</td></tr></tbody></table>
+<h2 id="b5">Grup yönetimi</h2>
+<pre>sudo groupadd proje                # grup oluştur
+sudo usermod -aG proje ayse         # üye ekle
+sudo gpasswd -d ayse proje          # üyelikten çıkar
+sudo groupdel proje                 # grubu sil
+getent group proje                  # üyeleri göster
+newgrp proje                        # oturumu yeniden açmadan grubu etkinleştir</pre><p>Grup üyeliği değişikliği, kullanıcı oturumu kapatıp yeniden açana kadar geçerli olmaz.</p>
+<h2 id="b6">Parola işlemleri</h2>
+<pre>passwd                   # kendi parolanı değiştir
+sudo passwd mehmet       # başkasının parolası
+sudo passwd -l mehmet    # parolayı kilitle
+sudo chage -l mehmet     # parola süresi bilgisi
+sudo chage -M 90 mehmet  # 90 günde bir değiştirme zorunluluğu</pre><p>Parola yazarken ekranda hiçbir şey görünmez; bu normaldir.</p>
+<h2 id="b7">sudo: geçici yönetici yetkisi</h2>
+<p><code>sudo</code>, tek bir komutu root yetkisiyle çalıştırır. Kullanıcı kendi parolasını girer; ayrıca işlem günlüğe kaydedilir. Bu nedenle sürekli root hesabıyla çalışmaktan daha güvenlidir.</p><pre>sudo apt update           # tek komut
+sudo -i                   # root kabuğu aç (dikkatli kullanılmalı)
+sudo -u mehmet komut      # başka kullanıcı olarak çalıştır
+sudo -l                   # hangi komutlara yetkim var?
+sudo !!                   # son komutu sudo ile tekrarla</pre><table><thead><tr><th>Dağıtım ailesi</th><th>Yönetici grubu</th></tr></thead><tbody><tr><td>Debian / Ubuntu</td><td><code>sudo</code></td></tr><tr><td>Fedora / RHEL / Arch</td><td><code>wheel</code></td></tr></tbody></table>
+<h2 id="b8">sudoers dosyasını düzenleme</h2>
+<p>Yetkiler <code>/etc/sudoers</code> dosyasında tanımlanır. Bu dosya hatalıysa sudo çalışmaz; bu yüzden doğrudan değil, <code>visudo</code> ile düzenlenir. Sözdizimi denetlenir.</p><pre>sudo visudo
+
+# Örnek satırlar
+%sudo   ALL=(ALL:ALL) ALL                     # sudo grubundakiler her şeyi yapabilir
+mehmet ALL=(ALL) /usr/bin/apt                 # yalnızca apt
+ayse   ALL=(ALL) NOPASSWD: /sbin/reboot       # parola sormadan yeniden başlat</pre><p>Ayrı yapılandırmalar için <code>/etc/sudoers.d/</code> altına dosya eklenebilir (<code>sudo visudo -f /etc/sudoers.d/mehmet</code>).</p>
+<h2 id="b9">Kullanıcı değiştirme</h2>
+<pre>su - mehmet            # mehmet olarak oturum (parolasını sorar)
+su -                   # root (root parolası gerekir)
+exit                   # önceki kullanıcıya dön</pre>
+<h2 id="b10">Güvenlik önerileri</h2>
+<ul><li>Günlük çalışma için normal kullanıcı kullanın; yönetici işlemlerinde <code>sudo</code> tercih edin.</li><li>Kullanılmayan hesapları kilitleyin veya silin.</li><li>Güçlü, benzersiz parolalar kullanın; sunucularda SSH anahtarı tercih edin.</li><li><code>NOPASSWD</code> kuralını yalnızca gerekli ve sınırlı komutlar için verin.</li><li>Kimin sudo yetkisi olduğunu düzenli kontrol edin: <code>getent group sudo</code></li></ul>
+<h2 id="b11">Özet</h2>
+<ul><li>Kullanıcılar <code>/etc/passwd</code>, gruplar <code>/etc/group</code> dosyasında tutulur.</li><li><code>adduser/useradd</code>, <code>usermod</code>, <code>userdel</code> hesap yönetimini sağlar.</li><li><code>usermod -aG</code> ile gruba eklerken <code>-a</code> unutulmamalıdır.</li><li><code>sudo</code> yetkisi sudo veya wheel grubuyla verilir; ayarlar <code>visudo</code> ile düzenlenir.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

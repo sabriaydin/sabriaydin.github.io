@@ -124,7 +124,7 @@ function hud(){
   if(uc){
    const k=uc[1],nn=G.nearNpc,nd=G.nearDrop;
    const t=k==='npc'?'[E] '+nn.name+' ('+HG.PROF[nn.prof].n+') ile konuş':k==='chest'?'[E] Sandığı aç':k==='cave'?(G.nearCave.exit?'[E] Mağaradan çık':'[E] Mağaraya gir (karanlık, tehlikeli)'):'[E] '+IT[nd.id].n+(nd.n>1?' ×'+nd.n:'')+' al';
-   tip=(tip?tip+' · ':'')+t;
+   tip=t;                     /* tek odak: yakındaki etkileşim öncelikliyse yalnızca o gösterilir */
   }
  }
  /* fare kilidi yoksa (oyun doğrudan başladığında tarayıcı kilide izin vermeyebilir) ekrana tıklama ipucu gösterilir */

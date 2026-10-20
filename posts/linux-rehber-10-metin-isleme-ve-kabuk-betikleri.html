@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux Rehber 10: Metin işleme ve kabuk betikleri (grep, sed, awk, bash)</title>
+<meta name="description" content="Boru ve yönlendirme, grep, sed, awk, sort, cut gibi metin araçları; bash betiği yazma: değişken, koşul, döngü ve fonksiyon.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-20 11:40">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> grep -c "hata" uygulama.log</p><p class="o">17</p><p><b>$</b> ./yedekle.sh</p><p class="o">Yedek tamamlandı</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yönlendirme ve boru</a></li><li><a href="#b2">grep: metin arama</a></li><li><a href="#b3">Düzenli ifadeler (regex)</a></li><li><a href="#b4">cut, sort, uniq, wc, tr</a></li><li><a href="#b5">sed: akış düzenleyici</a></li><li><a href="#b6">awk: sütun işleme</a></li><li><a href="#b7">Betik yazmaya giriş</a></li><li><a href="#b8">Değişken, parametre ve girdi</a></li><li><a href="#b9">Koşullar</a></li><li><a href="#b10">Döngüler</a></li><li><a href="#b11">Fonksiyonlar ve hata denetimi</a></li><li><a href="#b12">Betik yazarken iyi uygulamalar</a></li><li><a href="#b13">Serinin özeti</a></li><li><a href="#b14">Özet</a></li></ol></nav><!--/px-->
+<p>Linux’un en güçlü yönlerinden biri, küçük komutların birbirine bağlanarak karmaşık işleri yapabilmesidir. Çıktılar metin olduğu için bu araçlarla süzülebilir, dönüştürülebilir ve kabuk betiklerine dönüştürülerek otomatikleştirilebilir. Bu, serinin son yazısıdır.</p>
+<h2 id="b1">Yönlendirme ve boru</h2>
+<table><thead><tr><th>İşaret</th><th>Anlamı</th><th>Örnek</th></tr></thead><tbody><tr><td><code>&gt;</code></td><td>Çıktıyı dosyaya yazar (üzerine yazar)</td><td><code>ls &gt; liste.txt</code></td></tr><tr><td><code>&gt;&gt;</code></td><td>Dosyanın sonuna ekler</td><td><code>date &gt;&gt; gunluk.txt</code></td></tr><tr><td><code>&lt;</code></td><td>Girdiyi dosyadan alır</td><td><code>sort &lt; liste.txt</code></td></tr><tr><td><code>2&gt;</code></td><td>Hata çıktısını yönlendirir</td><td><code>komut 2&gt; hata.txt</code></td></tr><tr><td><code>&amp;&gt;</code></td><td>Çıktı ve hatayı birlikte yönlendirir</td><td><code>komut &amp;&gt; hepsi.txt</code></td></tr><tr><td><code>|</code></td><td>Çıktıyı sonraki komuta girdi yapar</td><td><code>ps aux | grep ssh</code></td></tr><tr><td><code>2&gt;/dev/null</code></td><td>Hata iletilerini yok sayar</td><td><code>find / -name x 2&gt;/dev/null</code></td></tr></tbody></table><pre>ls -l /etc | wc -l              # kaç öğe var?
+cat liste.txt | sort | uniq -c   # sırala ve say
+komut | tee cikti.txt            # hem ekrana hem dosyaya yaz</pre>
+<h2 id="b2">grep: metin arama</h2>
+<table><thead><tr><th>Seçenek</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>-i</code></td><td>Büyük/küçük harf ayrımı yok</td></tr><tr><td><code>-n</code></td><td>Satır numarası</td></tr><tr><td><code>-v</code></td><td>Eşleşmeyenleri göster</td></tr><tr><td><code>-r</code></td><td>Dizinlerde özyinelemeli ara</td></tr><tr><td><code>-c</code></td><td>Eşleşen satır sayısı</td></tr><tr><td><code>-E</code></td><td>Genişletilmiş düzenli ifade</td></tr><tr><td><code>-A 2 / -B 2</code></td><td>Eşleşmeden sonraki / önceki 2 satır</td></tr></tbody></table><pre>grep "hata" uygulama.log
+grep -rin "password" /etc 2&gt;/dev/null
+grep -E "^(GET|POST)" erisim.log
+dmesg | grep -i usb</pre>
+<h2 id="b3">Düzenli ifadeler (regex)</h2>
+<table><thead><tr><th>Desen</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>^metin</code></td><td>Satır başı</td></tr><tr><td><code>metin$</code></td><td>Satır sonu</td></tr><tr><td><code>.</code></td><td>Herhangi bir karakter</td></tr><tr><td><code>*</code></td><td>Öncekinin 0 veya daha fazla tekrarı</td></tr><tr><td><code>+</code></td><td>1 veya daha fazla (<code>-E</code> ile)</td></tr><tr><td><code>[0-9]</code></td><td>Rakam</td></tr><tr><td><code>a|b</code></td><td>a veya b (<code>-E</code> ile)</td></tr></tbody></table><pre>grep -E "^[0-9]{1,3}(\.[0-9]{1,3}){3}" ip-listesi.txt   # IP ile başlayan satırlar</pre>
+<h2 id="b4">cut, sort, uniq, wc, tr</h2>
+<pre>cut -d: -f1 /etc/passwd            # ":" ayırıcıyla 1. alan (kullanıcı adları)
+sort dosya.txt                      # alfabetik
+sort -n sayilar.txt                 # sayısal
+sort -u dosya.txt                   # tekrarsız
+uniq -c                             # ardışık tekrarları say
+wc -l dosya.txt                     # satır sayısı
+tr a-z A-Z &lt; dosya.txt              # küçükten büyüğe
+head -n 5 dosya &amp;&amp; tail -n 5 dosya</pre><p>Örnek: En çok istek yapan ilk 5 IP adresi:</p><pre>awk '{print $1}' erisim.log | sort | uniq -c | sort -nr | head -n 5</pre>
+<h2 id="b5">sed: akış düzenleyici</h2>
+<pre>sed 's/eski/yeni/' dosya.txt          # her satırda ilk eşleşmeyi değiştir
+sed 's/eski/yeni/g' dosya.txt         # tümünü değiştir
+sed -i 's/eski/yeni/g' dosya.txt      # dosyanın kendisinde değiştir (önce yedek alın)
+sed -i.bak 's/a/b/g' dosya.txt        # yedek (.bak) bırakarak
+sed '/^#/d' ayar.conf                 # yorum satırlarını sil
+sed -n '5,10p' dosya.txt              # 5-10. satırları yazdır</pre>
+<h2 id="b6">awk: sütun işleme</h2>
+<p><code>awk</code>, satırları alanlara bölerek işler. <code>$1</code> ilk alan, <code>$0</code> tüm satırdır.</p><pre>awk '{print $1, $3}' dosya.txt              # 1. ve 3. sütun
+awk -F: '{print $1}' /etc/passwd          # ayırıcı ":"
+awk '$3 &gt; 100' veri.txt                  # 3. sütun 100’den büyük satırlar
+awk '{toplam += $2} END {print toplam}' v.txt   # 2. sütunun toplamı
+awk 'NR&gt;1' dosya.csv                      # başlık satırını atla</pre>
+<h2 id="b7">Betik yazmaya giriş</h2>
+<p>Betik, komutların bir dosyaya yazılmış hâlidir. İlk satır (<i>shebang</i>) hangi yorumlayıcının kullanılacağını belirtir.</p><pre>#!/bin/bash
+# yedekle.sh - ev dizinindeki belgeleri yedekler
+
+KAYNAK="$HOME/belgeler"
+HEDEF="$HOME/yedekler"
+TARIH=$(date +%Y-%m-%d)
+
+mkdir -p "$HEDEF"
+tar -czf "$HEDEF/belgeler-$TARIH.tar.gz" "$KAYNAK"
+echo "Yedek tamamlandı: belgeler-$TARIH.tar.gz"</pre><pre>chmod +x yedekle.sh
+./yedekle.sh</pre>
+<h2 id="b8">Değişken, parametre ve girdi</h2>
+<pre>#!/bin/bash
+ad="Ayşe"                  # atama: eşittirin iki yanında boşluk olmaz
+echo "Merhaba, $ad"
+simdi=$(date +%H:%M)       # komut çıktısını değişkene al
+echo "Saat: $simdi"
+
+echo "Betik adı: $0"
+echo "İlk parametre: $1"
+echo "Parametre sayısı: $#"
+echo "Hepsi: $@"
+
+read -p "Adınız nedir? " isim
+echo "Hoş geldin, $isim"</pre><table><thead><tr><th>Özel değişken</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>$0</code></td><td>Betiğin adı</td></tr><tr><td><code>$1 … $9</code></td><td>Parametreler</td></tr><tr><td><code>$#</code></td><td>Parametre sayısı</td></tr><tr><td><code>$@</code></td><td>Tüm parametreler</td></tr><tr><td><code>$?</code></td><td>Son komutun çıkış kodu (0 = başarılı)</td></tr></tbody></table>
+<h2 id="b9">Koşullar</h2>
+<pre>#!/bin/bash
+if [ -f "$1" ]; then
+    echo "$1 bir dosya"
+elif [ -d "$1" ]; then
+    echo "$1 bir dizin"
+else
+    echo "$1 bulunamadı"
+    exit 1
+fi</pre><table><thead><tr><th>Test</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>-f dosya</code></td><td>Dosya var mı?</td></tr><tr><td><code>-d dizin</code></td><td>Dizin var mı?</td></tr><tr><td><code>-z "$x"</code></td><td>Metin boş mu?</td></tr><tr><td><code>"$a" = "$b"</code></td><td>Metinler eşit mi?</td></tr><tr><td><code>$a -eq $b</code></td><td>Sayılar eşit mi? (<code>-ne -lt -gt -le -ge</code>)</td></tr></tbody></table>
+<h2 id="b10">Döngüler</h2>
+<pre># for döngüsü
+for dosya in *.txt; do
+    echo "İşleniyor: $dosya"
+done
+
+for i in {1..5}; do echo "Sayı: $i"; done
+
+# while döngüsü: dosyayı satır satır oku
+while read -r satir; do
+    echo "Satır: $satir"
+done &lt; liste.txt
+
+# sayaç
+n=1
+while [ $n -le 3 ]; do
+    echo $n
+    n=$((n+1))
+done</pre>
+<h2 id="b11">Fonksiyonlar ve hata denetimi</h2>
+<pre>#!/bin/bash
+set -euo pipefail          # hata olursa dur, tanımsız değişkeni hata say
+
+log() {
+    echo "[$(date +%T)] $1"
+}
+
+topla() {
+    echo $(( $1 + $2 ))
+}
+
+log "Başlıyor"
+sonuc=$(topla 4 5)
+log "Sonuç: $sonuc"
+
+command -v rsync &gt;/dev/null || { echo "rsync kurulu değil"; exit 1; }</pre>
+<h2 id="b12">Betik yazarken iyi uygulamalar</h2>
+<ul><li>Değişkenleri her zaman tırnak içinde kullanın: <code>"$dosya"</code> (boşluklu adlarda hatayı önler).</li><li>Betiğin başına <code>#!/bin/bash</code> ve gerekirse <code>set -euo pipefail</code> ekleyin.</li><li>Silme komutlarını çalıştırmadan önce <code>echo</code> ile ekrana yazdırarak deneyin.</li><li>Betikleri <code>shellcheck betik.sh</code> ile denetleyin (paket yöneticisinden kurulur).</li><li>Hata ayıklamak için <code>bash -x betik.sh</code> her adımı gösterir.</li><li>Sıkça kullanılan betikleri <code>~/bin</code> dizinine koyup <code>PATH</code>’e ekleyin.</li></ul>
+<h2 id="b13">Serinin özeti</h2>
+<ul><li><b>1</b> Linux, çekirdek ve dağıtımlar</li><li><b>2</b> Terminal ve kabuk</li><li><b>3</b> Dosya sistemi hiyerarşisi</li><li><b>4</b> Dosya ve dizin komutları</li><li><b>5</b> İzinler ve sahiplik</li><li><b>6</b> Kullanıcı, grup ve sudo</li><li><b>7</b> Paket yönetimi</li><li><b>8</b> Süreç ve servis yönetimi</li><li><b>9</b> Ağ ve SSH</li><li><b>10</b> Metin işleme ve kabuk betikleri</li></ul><p>Bu temel konular tamamlandığında; Docker, Git, web sunucusu (nginx), güvenlik duvarı ve yedekleme gibi daha ileri konulara geçmek kolaylaşır.</p>
+<h2 id="b14">Özet</h2>
+<ul><li>Boru (<code>|</code>) ve yönlendirme küçük komutları birleştirir.</li><li><code>grep</code> arar, <code>sed</code> değiştirir, <code>awk</code> sütunları işler.</li><li>Betikler <code>#!/bin/bash</code> ile başlar, <code>chmod +x</code> ile çalıştırılır.</li><li>Değişken, koşul, döngü ve fonksiyon otomasyonun temelidir.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

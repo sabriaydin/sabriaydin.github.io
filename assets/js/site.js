@@ -14,6 +14,7 @@ window.SITE = {
     windowsos: 'Windows İşletim Sistemleri',
     html: 'HTML Rehberi',
     htmlaraclari: 'HTML Araçları',
+    linux: 'Linux Rehber',
     linuxos: 'Linux İşletim Sistemleri',
     batch: 'Batch Rehberi',
     batchornek: 'Batch Uygulamaları',
@@ -31,7 +32,7 @@ window.SITE = {
   // Hiçbir gruba girmeyen kategoriler (ör. batch) menüde tek başına görünür. Grupları silersen menü düz liste olur.
   groups: [
     { key: 'windows', name: 'Windows', items: ['windows', 'windowsos'] },
-    { key: 'linux', name: 'Linux', items: ['linuxos'] },
+    { key: 'linux', name: 'Linux', items: ['linux', 'linuxos'] },
     { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
     { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] }
   ],
