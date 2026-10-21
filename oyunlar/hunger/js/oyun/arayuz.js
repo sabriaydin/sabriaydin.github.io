@@ -10,10 +10,12 @@ function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('on');clea
 function feed(m){const f=$('#feed'),d=document.createElement('div');d.textContent=m;f.appendChild(d);setTimeout(()=>d.remove(),2800);while(f.children.length>5)f.firstChild.remove()}
 
 /* ---- Envanter kutuları ---- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const slotHtml=(i,hot)=>{
  const s=G.inv[i],it=s?IT[s.id]:null;
  const dp=it&&HG.durPct&&HG.cfg.wear!==false?HG.durPct(s):-1;       /* alet dayanıklılığı yüzdesi (-1: dayanıklılığı olmayan eşya) */
- return `<div class="slot${ui.dragFrom===i?' dim':''}${i===G.sel&&i<HOT?' sel':''}${ui.picked===i?' pick':''}" data-i="${i}"${it?` title="${it.n}${dp>=0?' · dayanıklılık %'+dp:''}"`:''}>${hot?`<span class="k">${i+1}</span>`:''}${it?`<img src="${ICON[s.id]}" alt="${it.n}">${s.n>1?`<span class="n">${s.n}</span>`:''}`:''}${dp>=0&&dp<100&&HG.cfg.durbar!==false?`<i class="dur${dp<=20?' lo':dp<=50?' md':''}" style="width:${Math.max(6,dp*.84)}%"></i>`:''}</div>`;
+ const mat=!!(it&&HG.matOnly&&HG.matOnly(s.id));                    /* yalnızca üretim malzemesi: elde tutulmaz */
+ return `<div class="slot${ui.dragFrom===i?' dim':''}${i===G.sel&&i<HOT?' sel':''}${ui.picked===i?' pick':''}${mat?' mat':''}" data-i="${i}"${it?` title="${it.n}${mat?' · üretim malzemesi (elde tutulmaz)':''}${dp>=0?' · dayanıklılık %'+dp:''}"`:''}>${hot?`<span class="k">${i+1}</span>`:''}${it?`<img src="${ICON[s.id]}" alt="${it.n}">${s.n>1?`<span class="n">${s.n}</span>`:''}`:''}${dp>=0&&dp<100&&HG.cfg.durbar!==false?`<i class="dur${dp<=20?' lo':dp<=50?' md':''}" style="width:${Math.max(6,dp*.84)}%"></i>`:''}</div>`;
 };
 function renderInv(){
  let h='';for(let i=0;i<HOT;i++)h+=slotHtml(i,true);
@@ -58,7 +60,30 @@ function drawBig(){HG.mapBig()}
 /* ---- HUD ---- */
 const hc={};
 const DIRS=['K','KD','D','GD','G','GB','B','KB'];       /* kuzey, kuzeydoğu, doğu ... */
-function setBar(id,v){const k=Math.round(v);if(hc[id]===k)return;hc[id]=k;const e=$(id);e.querySelector('b').style.width=k+'%';e.classList.toggle('low',v<25)}
+function setBar(id,v){
+ const k=Math.round(clamp(v,0,100));if(hc[id]===k)return;hc[id]=k;
+ const e=$(id);e.querySelector('b').style.width=k+'%';
+ const u=e.querySelector('u');if(u)u.textContent='%'+k;             /* sayısal değer: çubuğun sağında */
+ e.classList.toggle('low',k<25);e.classList.toggle('crit',k<12);e.classList.toggle('full',k>=100);
+}
+/* Eylem ipucu: "[E] ..." biçimindeki tuş adı küçük bir tuş kutusu olarak çizilir */
+function setTip(t){
+ const e=$('#tip');
+ if(!t){if(!e.hidden){e.hidden=true;e.textContent=''}return}
+ const m=/^\[([^\]]+)\]\s*([\s\S]*)$/.exec(t);
+ e.innerHTML=m?'<kbd>'+esc(m[1])+'</kbd>'+esc(m[2]):esc(t);
+ e.hidden=false;
+}
+/* Seçilen eşyanın adı: hızlı erişim çubuğunun üstünde kısa süre görünür */
+let hotT=0;
+function showHotName(){
+ const e=$('#hotn');if(!e)return;
+ const s=G.inv[G.sel],it=s?IT[s.id]:null;
+ if(!it||ui.state!=='play'){e.classList.remove('on');return}
+ const mat=!!(HG.matOnly&&HG.matOnly(s.id));
+ e.innerHTML=esc(it.n)+(s.n>1?' <small>×'+s.n+'</small>':'')+(mat?' <small>üretim malzemesi</small>':'');
+ e.classList.add('on');clearTimeout(hotT);hotT=setTimeout(()=>e.classList.remove('on'),1700);
+}
 /* Pusula çubuğu (ekranın üst ortası): bakılan yöne göre kayar; işaret konulduysa yönü gösterir */
 let cmpKey='';
 function drawCompass(){
@@ -130,7 +155,10 @@ function hud(){
  }
  /* fare kilidi yoksa (oyun doğrudan başladığında tarayıcı kilide izin vermeyebilir) ekrana tıklama ipucu gösterilir */
  if(!tip&&!ui.locked&&!ui.touch&&$('#panel').hidden&&$('#trade').hidden&&$('#bigmap').hidden&&$('#jr').hidden&&$('#gd').hidden)tip='Fareyle bakmak için ekrana tıklayın';
- if(hc.tip!==tip){hc.tip=tip;const t=$('#tip');t.textContent=tip;t.hidden=!tip}
+ if(hc.tip!==tip){hc.tip=tip;setTip(tip)}
+ /* hızlı erişim kutusu değişince eşya adı gösterilir */
+ {const sid=G.inv[G.sel]?G.inv[G.sel].id:'';
+  if(hc.sel!==G.sel||hc.sid!==sid){const first=hc.sel===undefined;hc.sel=G.sel;hc.sid=sid;if(!first)showHotName()}}
  const cr=!!(a&&a.kind&&G.tg);if(hc.cr!==cr){hc.cr=cr;$('#cross').classList.toggle('on',cr)}
  /* hedef sağlık çubuğu ve vurulan bölge yazısı */
  {

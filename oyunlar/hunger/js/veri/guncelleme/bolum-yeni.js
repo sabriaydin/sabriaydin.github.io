@@ -2,7 +2,21 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:47,d:"21.10.2026",t:"Ayarlar menüsü yenilendi",l:[
+{n:48,d:"21.10.2026",t:"Oyun içi arayüz yenilendi",l:[
+ "Gizlilik göstergesi ekranın ortasından alınıp mini haritanın altına taşındı; artık nişanın önünü kapatmıyor.",
+ "Gizlilik göstergesi yalnızca çömelirken veya yakındaki bir hayvan tetikteyken görünüyor; yanından geçilen sakin hayvanlarda kendiliğinden açılıp kapanma sorunu giderildi.",
+ "Yalnızca üretim ve ticaret malzemesi olan eşyalar (odun, taş, kömür, cevher, külçe, deri, yün, sikke ve benzerleri) artık elde tutulmuyor; seçilince eller boş kalıyor ve çıplak elle vuruluyor.",
+ "Malzeme eşyaların kutusuna küçük bir işaret eklendi; üzerine gelince \"üretim malzemesi\" yazıyor.",
+ "Seçilen eşyanın adı hızlı erişim çubuğunun üstünde kısa süre gösteriliyor.",
+ "Durum çubuklarına sayısal değer eklendi (örneğin %72).",
+ "Dolu olan durum çubukları soluklaşıyor, azalanlar kırmızıya dönüyor ve kritik seviyede yanıp sönüyor.",
+ "Nişan noktası sadeleştirildi; bakılan şeyle bir işlem yapılabiliyorsa çevresinde halka beliriyor.",
+ "Eylem ipucundaki tuş adı (E gibi) tuş kutusu olarak gösteriliyor.",
+ "Hızlı erişim çubuğu, durum paneli, saat, mini harita, hedef bildirimi, bildirimler ve üretim sırası ortak bir görünüme getirildi; seçili kutu belirginleştirildi.",
+ "Çanta ve üretim penceresi ile kaydırma çubukları yenilendi; tarif satırları üzerine gelince vurgulanıyor.",
+ "Eşya seçilmeden boş duran açıklama kutusu gizleniyor."
+]},
+{n:47,d:"20.10.2026",t:"Ayarlar menüsü yenilendi",l:[
  "Kalite düzeyi artık çözünürlük ölçeği, gölgeler, parlama, çim, yer sisi, parçacık ve çizim mesafesi ayarlarını birlikte değiştiriyor; seçim yapınca bu ayarlar ekranda da güncelleniyor.",
  "Kalite düzeyinin altına o düzeyde neyin açık, neyin kapalı olduğunu anlatan açıklama eklendi.",
  "Kalite düzeyinin altına anlık kare hızı, çizim ölçeği ve piksel oranı eklendi.",
@@ -15,7 +29,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Çözünürlük ölçeğinin en etkili başarım ayarı olduğu belirtildi.",
  "Oyun sekmesine, dünya kurallarının Dünya Oluştur penceresinden seçildiğini belirten açıklama eklendi."
 ]},
-{n:46,d:"20.10.2026",t:"Günlük düzeltmesi",l:[
+{n:46,d:"19.10.2026",t:"Günlük düzeltmesi",l:[
  "Kamp sandıklarında bulunan Sefer Defteri kayıtlarının Günlük penceresinde yanlış metinlerle görünmesi sorunu giderildi."
 ]},
 {n:45,d:"18.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[

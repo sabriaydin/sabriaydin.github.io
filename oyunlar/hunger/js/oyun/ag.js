@@ -381,7 +381,7 @@ function flagsNow(){
  if(HG.A&&HG.A.hitT>0)f|=FL.AT;if(G.crouch)f|=FL.CR;
  return f;
 }
-function heldId(){const s=G.inv&&G.inv[G.sel];return s?s.id:''}
+function heldId(){const s=G.inv&&G.inv[G.sel];return s&&!(HG.matOnly&&HG.matOnly(s.id))?s.id:''}
 let posT=0,pingT=0,clkT=0,seq=0;
 let lastSig='',lastTx=0;
 function sendPos(){

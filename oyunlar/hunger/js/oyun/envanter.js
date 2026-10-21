@@ -33,8 +33,12 @@ function sortInv(){
  for(let i=HOT;i<SLOTS;i++)G.inv[i]=out[i-HOT]||null;
  ui.picked=null;ui.dirty=true;HG.snd('ui');HG.toast('Çanta düzenlendi.');
 }
-const held=()=>{const s=G.inv[G.sel];return s?{k:s.id,it:IT[s.id],s}:null};
+/* Elde bir işi olan eşyalar: kullanılır, giyilir veya okunur. Bunların dışındaki bayraksız eşyalar
+   (odun, taş, cevher, külçe, deri, yün, sikke...) yalnızca üretim ve ticaret malzemesidir: elde tutulmaz. */
+const HOLDABLE=new Set(['bottle','arrow','seed','msg','tmap','puppy','mask','coat','furcoat','cloak','boots']);
+const matOnly=id=>{const it=IT[id];if(!it||HOLDABLE.has(id))return false;return !(it.tool||it.food||it.place||it.heal||it.armor)};
+const held=()=>{const s=G.inv[G.sel];if(!s||matOnly(s.id))return null;return {k:s.id,it:IT[s.id],s}};
 const setObj=(i,v)=>{const was=G.obj[i];G.obj[i]=v;(G.oc||(G.oc=[])).push(i);if(HG.journal)HG.journal.cell(i,v,was)};   /* değişen kareler biriktirilir; sahne yalnızca bunları günceller */
 const flag=f=>{if(!G.flags[f])G.flags[f]=1};
-Object.assign(HG,{count,canAdd,add,take,gain,held,setObj,flag,sortInv});
+Object.assign(HG,{count,canAdd,add,take,gain,held,matOnly,setObj,flag,sortInv});
 })();

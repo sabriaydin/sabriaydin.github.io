@@ -26,6 +26,8 @@ el.innerHTML='<i></i><span></span>';
 const host=$('#game');if(host)host.appendChild(el);
 const span=el.querySelector('span');
 let state='',showT=0;
+const on=()=>{el.hidden=false;el.classList.add('on')};
+const off=()=>{el.classList.remove('on');state='';showT=0};
 
 function stealth(){
  const L=G.animals;if(!L)return null;
@@ -41,18 +43,18 @@ function stealth(){
  }
  return near?best:null;
 }
+/* Gösterim kuralı: hayvan tetikteyse veya kovalıyorsa her zaman gösterilir; sakin bir hayvan
+   yakındayken yalnızca çömelirken gösterilir. Böylece yürürken yanından geçilen her hayvanda
+   gösterge kendiliğinden açılıp kapanmaz. Kaybolurken yumuşak söner. */
 function tick(dt){
- if(ui.state!=='play'||ui.sleeping||HG.busy){if(!el.hidden)el.hidden=true;return}
+ if(ui.state!=='play'||ui.sleeping||HG.busy){off();return}
  const s=stealth();
- if(s===null){showT=Math.max(0,showT-dt);if(showT<=0&&!el.hidden)el.hidden=true;return}
- const name=s===2?'Fark edildin':s===1?'Tetikte':'Gizli';
- const cls=s===2?'seen':s===1?'warn':'hid';
- showT=1.6;
- if(state!==name){
-  state=name;span.textContent=name+(G.crouch&&s===0?' · çömelme işe yarıyor':'');
-  el.className=cls;
- }
- if(el.hidden)el.hidden=false;
+ const want=s===null?-1:(s>=1?s:(G.crouch?0:-1));
+ if(want<0){showT=Math.max(0,showT-dt);if(showT<=0)off();return}
+ showT=1.4;
+ const txt=want===2?'Fark edildin':want===1?'Tetikte':'Gizli · ses çıkarmıyorsun';
+ if(state!==txt){state=txt;span.textContent=txt;el.className=want===2?'seen':want===1?'warn':'hid'}
+ on();
 }
 
 /* ---------- Çömelme ipucu: ilk kez tetikte bir hayvana yaklaşınca bir kez gösterilir ---------- */

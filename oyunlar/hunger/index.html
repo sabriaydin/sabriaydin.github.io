@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="css/menu.css">
 <link rel="stylesheet" href="css/ag.css">
 <link rel="stylesheet" href="css/iyilestirme.css">
+<link rel="stylesheet" href="css/arayuz.css">
 </head>
 <body>
 <div id="game">
@@ -28,13 +29,13 @@
   <div class="vig" id="vr"></div><div class="vig" id="vc"></div><div class="vig" id="vh"></div><div class="vig" id="vs"></div><div class="vig" id="uw"></div>
   <div id="dmg"><i></i></div>
   <div id="hud" hidden>
-    <div class="bar" id="bHp"><span>Sağlık</span><i><b></b></i></div>
-    <div class="bar" id="bHun"><span>Açlık</span><i><b></b></i></div>
-    <div class="bar" id="bThr"><span>Susuzluk</span><i><b></b></i></div>
-    <div class="bar" id="bWar"><span>Sıcaklık</span><i><b></b></i></div>
-    <div class="bar" id="bSta"><span>Dayanıklılık</span><i><b></b></i></div>
-    <div class="bar" id="bSan"><span>Akıl</span><i><b></b></i></div>
-    <div class="bar" id="bO2" hidden><span>Nefes</span><i><b></b></i></div>
+    <div class="bar" id="bHp"><span>Sağlık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bHun"><span>Açlık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bThr"><span>Susuzluk</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bWar"><span>Sıcaklık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bSta"><span>Dayanıklılık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bSan"><span>Akıl</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bO2" hidden><span>Nefes</span><i><b></b></i><u></u></div>
     <div id="sts"></div>
     <div id="shel"></div>
   </div>
@@ -51,6 +52,7 @@
   <div id="feed"></div>
   <div id="toast" role="status" aria-live="polite"></div>
   <div id="hot" hidden></div>
+  <div id="hotn"></div>
   <div id="touch" hidden>
     <div id="joy"><i></i></div>
     <div class="tb" id="tA">Vur</div><div class="tb" id="tB">Koy</div>

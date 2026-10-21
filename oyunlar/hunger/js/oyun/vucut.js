@@ -93,7 +93,13 @@ function updateBody(dt){
 /* ---- HUD ---- */
 let lastT=performance.now();
 const cache={};
-function bar(id,v){const k=Math.round(v);if(cache[id]===k)return;cache[id]=k;const e=$(id);if(!e)return;e.querySelector('b').style.width=k+'%';e.classList.toggle('low',v<25)}
+function bar(id,v){
+ const k=Math.round(clamp(v,0,100));if(cache[id]===k)return;cache[id]=k;
+ const e=$(id);if(!e)return;
+ e.querySelector('b').style.width=k+'%';
+ const u=e.querySelector('u');if(u)u.textContent='%'+k;              /* sayısal değer (arayüz güncellemesi) */
+ e.classList.toggle('low',k<25);e.classList.toggle('crit',k<12);e.classList.toggle('full',k>=100);
+}
 function bodyHud(){
  const now=performance.now(),dt=Math.min(.1,(now-lastT)/1000);lastT=now;
  bar('#bSta',G.stam);bar('#bSan',G.san);

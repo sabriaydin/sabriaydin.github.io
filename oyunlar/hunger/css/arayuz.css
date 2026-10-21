@@ -1,0 +1,163 @@
+/* Hunger 3D - oyun içi arayüz yenilemesi (güncelleme 48).
+   Durum çubukları, hızlı erişim çubuğu, nişan, ipucu, hedef bilgisi, saat, mini harita ve bildirimler
+   ortak bir görünüme getirildi. Bu dosya stil.css'teki kuralların üzerine yazar; özgün dosya korunur.
+   Ortak değerler: cam panel zemini, 10-12 px köşe yarıçapı, ince çizgi ve kırmızı vurgu. */
+:root{
+ --ui-bg:linear-gradient(180deg,rgba(18,18,21,.84),rgba(9,9,11,.9));
+ --ui-line:#30303a;
+ --ui-sh:0 6px 22px rgba(0,0,0,.45);
+}
+
+/* ---------- durum çubukları ---------- */
+#hud{
+ width:212px;padding:10px 11px 9px;gap:5px;
+ background:var(--ui-bg);border:1px solid var(--ui-line);border-radius:12px;box-shadow:var(--ui-sh);
+ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+.bar{grid-template-columns:62px 1fr 30px;gap:8px;font-size:11.5px;color:#9c988f;transition:opacity .25s,color .25s}
+.bar i{height:8px;border-radius:5px;background:#08080a;border:1px solid #26262c;box-shadow:inset 0 1px 2px rgba(0,0,0,.9)}
+.bar b{border-radius:5px;background-image:linear-gradient(180deg,rgba(255,255,255,.24),rgba(255,255,255,0) 55%,rgba(0,0,0,.22));transition:width .25s}
+.bar u{text-decoration:none;text-align:right;font-size:10.5px;color:#7d7a74;font-variant-numeric:tabular-nums}
+.bar.full{opacity:.58}
+.bar.low{color:#f0a79e}
+.bar.low u{color:#f0a79e}
+.bar.low i{border-color:#7a2a24;animation:none;box-shadow:inset 0 1px 2px rgba(0,0,0,.9),0 0 8px rgba(217,70,60,.35)}
+.bar.crit i{animation:barPulse 1s ease-in-out infinite}
+@keyframes barPulse{50%{box-shadow:inset 0 1px 2px rgba(0,0,0,.9),0 0 14px rgba(217,70,60,.75)}}
+#bO2{color:#9fd8f2}
+#sts,#shel{font-size:11px;line-height:1.35;min-height:0}
+#sts:not(:empty),#shel:not(:empty){margin-top:1px}
+
+/* ---------- hızlı erişim çubuğu ---------- */
+#hot{
+ gap:5px;padding:7px;border-radius:13px;
+ background:var(--ui-bg);border:1px solid var(--ui-line);box-shadow:var(--ui-sh);
+ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+.slot{border-radius:9px;background:linear-gradient(180deg,#24242b,#191920);border:1px solid #33333d;transition:border-color .12s,box-shadow .12s,transform .12s}
+.slot .k{left:5px;top:2px;font-size:9.5px;color:#6e6b66;font-variant-numeric:tabular-nums}
+.slot .n{right:4px;bottom:2px;font-size:11.5px;font-weight:700;color:#f2efe9}
+#hot .slot.sel{border-color:var(--red);background:linear-gradient(180deg,#32232a,#201a1e);box-shadow:0 0 0 1px rgba(217,70,60,.45),0 8px 20px rgba(217,70,60,.2);transform:translateY(-3px)}
+#hot .slot.sel .k{color:#e8b4ae}
+/* yalnızca üretim malzemesi olan eşyalar: sol altta küçük işaret, eller boş kalır */
+.slot.mat img{opacity:.85}
+.slot.mat::after{content:"";position:absolute;left:5px;bottom:5px;width:5px;height:5px;border-radius:1px;background:#6f7682;box-shadow:0 0 0 1px rgba(0,0,0,.6)}
+.slot.mat .dur+::after{display:none}
+/* seçilen eşyanın adı: çubuğun üstünde kısa süre görünür */
+#hotn{
+ position:absolute;left:50%;bottom:76px;transform:translateX(-50%) translateY(4px);
+ padding:3px 12px;border-radius:999px;font-size:12.5px;white-space:nowrap;pointer-events:none;
+ background:rgba(9,9,11,.82);border:1px solid var(--ui-line);color:#efece6;
+ opacity:0;transition:opacity .18s,transform .18s;
+}
+#hotn.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#hotn small{color:#8d8a84;margin-left:7px;font-size:11px}
+
+/* ---------- nişan ---------- */
+#cross{width:3px;height:3px;margin:-1.5px 0 0 -1.5px;background:rgba(240,238,233,.92);box-shadow:0 0 0 1px rgba(0,0,0,.75)}
+#cross::before{
+ content:"";position:absolute;left:50%;top:50%;width:17px;height:17px;margin:-8.5px 0 0 -8.5px;
+ border:1.5px solid rgba(240,238,233,.75);border-radius:50%;
+ opacity:0;transform:scale(.55);transition:opacity .14s,transform .14s;
+}
+#cross.on::before{opacity:.95;transform:scale(1)}
+
+/* ---------- eylem ipucu ---------- */
+#tip{
+ bottom:94px;padding:5px 13px;border-radius:999px;font-size:12.5px;
+ background:rgba(9,9,11,.8);border:1px solid var(--ui-line);box-shadow:var(--ui-sh);color:#e9e6e0;
+}
+#tip kbd{
+ display:inline-block;font:700 11px ui-monospace,Consolas,monospace;color:#f2efe9;
+ background:#000;border:1px solid #4a4a54;border-bottom-width:2px;border-radius:4px;padding:1px 6px;margin-right:7px;
+}
+
+/* ---------- hedef bilgisi ---------- */
+#tgt{width:168px;gap:3px 8px;font-size:12px}
+#tgt b{letter-spacing:.01em}
+#tgt i{height:6px;border-radius:4px;background:rgba(0,0,0,.72);border:1px solid rgba(0,0,0,.9);box-shadow:0 0 0 1px rgba(255,255,255,.07)}
+#tgt u{border-radius:4px;background-image:linear-gradient(180deg,rgba(255,255,255,.22),rgba(0,0,0,.18))}
+#tgt span{font-variant-numeric:tabular-nums;color:#d8d4cc}
+
+/* ---------- saat ve mevsim ---------- */
+#clock{
+ padding:6px 15px;border-radius:999px;font-size:12.5px;
+ background:var(--ui-bg);border:1px solid var(--ui-line);box-shadow:var(--ui-sh);
+ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+}
+
+/* ---------- mini harita ---------- */
+#mini{
+ width:138px;height:138px;border:1px solid var(--ui-line);border-radius:10px;
+ box-shadow:var(--ui-sh),inset 0 0 0 1px rgba(0,0,0,.8);
+}
+
+/* ---------- hedef bildirimi ---------- */
+#goal{
+ padding:7px 15px;border-radius:8px;border-left:3px solid var(--red);
+ background:rgba(9,9,11,.78);border-top:1px solid var(--ui-line);border-right:1px solid var(--ui-line);border-bottom:1px solid var(--ui-line);
+ box-shadow:var(--ui-sh);font-size:12.5px;
+}
+#goal small{margin-top:1px}
+
+/* ---------- bildirimler ---------- */
+#toast{
+ padding:9px 18px;border-radius:999px;font-size:13.5px;
+ background:rgba(9,9,11,.9);border:1px solid #4a2a27;box-shadow:var(--ui-sh);
+}
+#feed div{
+ padding:4px 11px;border-radius:0 6px 6px 0;font-size:12.5px;
+ background:rgba(9,9,11,.82);border-left:3px solid var(--red);box-shadow:0 3px 12px rgba(0,0,0,.4);
+}
+
+/* ---------- ilerleme çubuğu ---------- */
+#prog{width:92px;height:7px;margin-left:-46px;border-radius:4px;border:1px solid rgba(0,0,0,.9);box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+#prog i{border-radius:4px;background-image:linear-gradient(180deg,rgba(255,255,255,.25),rgba(0,0,0,.2));transition:width .08s}
+
+/* ---------- gizlilik göstergesi ---------- */
+/* Ekranın ortasından alınıp mini haritanın altına taşındı; yalnızca çömelirken veya bir hayvan
+   tetikteyken görünür ve kaybolurken yumuşak söner (js/oyun/oynanis.js). */
+#stealth{
+ left:auto;right:12px;top:160px;bottom:auto;transform:none;
+ padding:4px 12px;border-radius:999px;font-size:12px;
+ background:rgba(9,9,11,.82);border:1px solid var(--ui-line);box-shadow:var(--ui-sh);
+ opacity:0;transition:opacity .25s;pointer-events:none;
+}
+#stealth.on{opacity:1}
+#stealth i{width:8px;height:8px}
+#game.no-mini #stealth{top:12px}
+
+/* ---------- çanta, üretim ve diğer pencereler ---------- */
+#pbox,#trade .card,#jr .card{border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,.6)}
+#pbox{border-color:var(--ui-line)}
+#ptabs button{border-radius:8px}
+#info{padding:10px 12px;background:rgba(0,0,0,.25);border:1px solid var(--ui-line);border-radius:9px}
+#info:empty{display:none}
+.rc{border-radius:9px;border-color:#2e2e36;transition:border-color .12s,background .12s}
+.rc:hover{border-color:#44444f;background:#26262d}
+#grid .slot:hover{border-color:#4d4d5a}
+#cqhud{right:12px;bottom:66px;border-radius:10px;background:var(--ui-bg);border-color:var(--ui-line);box-shadow:var(--ui-sh)}
+#cqhud .cqp{border-radius:4px}
+#cqhud .cqp i{border-radius:4px}
+#fps{left:12px;top:12px;padding:3px 9px;border-radius:999px;background:rgba(9,9,11,.8);border-color:var(--ui-line);box-shadow:var(--ui-sh)}
+/* pencere kaydırma çubukları */
+#pbox::-webkit-scrollbar,#invScr::-webkit-scrollbar,#recipes::-webkit-scrollbar,#set .card::-webkit-scrollbar{width:10px}
+#pbox::-webkit-scrollbar-thumb,#invScr::-webkit-scrollbar-thumb,#recipes::-webkit-scrollbar-thumb,#set .card::-webkit-scrollbar-thumb{background:#33333d;border-radius:6px;border:2px solid transparent;background-clip:content-box}
+#pbox::-webkit-scrollbar-track,#invScr::-webkit-scrollbar-track,#recipes::-webkit-scrollbar-track,#set .card::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- küçük ekran ---------- */
+@media (max-width:760px){
+ #hud{width:158px;padding:8px 9px}
+ .bar{grid-template-columns:44px 1fr 26px;gap:6px;font-size:10.5px}
+ #mini{width:96px;height:96px}
+ #hotn{bottom:66px;font-size:11.5px}
+ #tip{bottom:88px;font-size:12px}
+ #stealth{top:118px;right:10px;font-size:11px}
+}
+@media (pointer:coarse){
+ #stealth{top:118px;bottom:auto}
+}
+@media (prefers-reduced-motion:reduce){
+ .bar.crit i{animation:none}
+ #hot .slot.sel{transform:none}
+}
