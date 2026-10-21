@@ -114,7 +114,7 @@ function render(){
   const b=document.createElement('button');b.type='button';b.textContent=t[0];b.className='ghost'+(i===tab?' on':'');
   b.onclick=()=>{tab=i;render()};tabs.appendChild(b);
  });
- for(const r of TABS[tab][1])body.appendChild(row(r));
+ for(const r of TABS[tab][1])if(r[0]!=='wear')body.appendChild(row(r));      /* alet aşınması dünya kuralıdır: Dünya Oluştur penceresinde seçilir */
  if(TABS[tab][0]==='Kontrol'&&HG.keyUI)HG.keyUI(body);
 }
 function open(from,tabName){
@@ -138,7 +138,7 @@ function build(){
  box.innerHTML='<div class="card sc"><h1 style="font-size:30px;letter-spacing:.14em">AYARLAR</h1><div class="stabs"></div><div class="sbody"></div><div class="sfoot"><button type="button" class="ghost" id="sReset">Varsayılana dön</button><button type="button" id="sClose">Kapat</button></div></div>';
  g.appendChild(box);
  box.querySelector('#sClose').onclick=close;
- box.querySelector('#sReset').onclick=()=>{Object.assign(cfg,DEF);for(const k of ['q','shadow','res','grass'])apply(k);apply();persist();render()};
+ box.querySelector('#sReset').onclick=()=>{const wr=cfg.wear;Object.assign(cfg,DEF);cfg.wear=wr;for(const k of ['q','shadow','res','grass'])apply(k);apply();persist();render()};
  box.addEventListener('pointerdown',e=>{if(e.target===box)close()});
  document.querySelectorAll('.bSet').forEach(b=>b.onclick=()=>{HG.initAudio&&HG.initAudio();open()});
  /* Esc yalnızca ayar penceresini kapatır */

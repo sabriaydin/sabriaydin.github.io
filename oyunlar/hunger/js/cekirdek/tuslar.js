@@ -9,7 +9,7 @@ const ACTS=[
  ['use','Topla / al / kullan / konuş','KeyE',''],['place','Yapıyı yerleştir','KeyF',''],
  ['inv','Envanter','KeyI','Tab'],['craft','Üretim','KeyC',''],['map','Harita','KeyM',''],['jr','Günlük','KeyK',''],
  ['guide','Rehber','KeyH',''],['mute','Sesi aç/kapat','KeyN',''],['qsave','Hızlı kaydet','F5',''],
- ['drop','Seçili eşyadan 1 adet at','KeyQ',''],['sort','Çantayı düzenle','KeyR',''],['photo','Fotoğraf modu (arayüzü gizle)','KeyP',''],
+ ['drop','Seçili eşyadan 1 adet at','KeyG',''],['sort','Çantayı düzenle','KeyR',''],['photo','Fotoğraf modu (arayüzü gizle)','KeyP',''],
  ['irot','İnşa: döndür (merdiven yönü, kapı menteşesi)','KeyR',''],['ipick','İnşa: pipet (bakılan parçayı seç)','KeyT','']
 ];
 const DEF={};for(const [k,,a,b] of ACTS)DEF[k]=[a,b];
@@ -20,6 +20,7 @@ try{
  const s=JSON.parse(localStorage.getItem(KEY)||'null');
  if(s&&typeof s==='object')for(const k in DEF)if(Array.isArray(s[k])&&s[k].length===2&&s[k].every(x=>typeof x==='string'))bind[k]=s[k].slice();
 }catch(e){}
+if(bind.drop&&bind.drop[0]==='KeyQ'&&!bind.drop[1])bind.drop=DEF.drop.slice();       /* eski varsayılan Q, G ile değiştirildi */
 const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(bind))}catch(e){}};
 /* sorgular */
 const keyDown=a=>{const b=bind[a],k=HG.inp.keys;return !!((b[0]&&k[b[0]])||(b[1]&&k[b[1]]))};

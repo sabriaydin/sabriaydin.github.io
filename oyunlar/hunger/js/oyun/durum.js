@@ -37,7 +37,7 @@ function decObj(s,n){
 function snapshot(name){return HG.withSurface(()=>snapshotRaw(name))}
 function snapshotRaw(name){
  const d=HG.dayNo();
- return {game:'hunger-3d',v:7,hv:2,thin:G.thin?1:0,rules:{diff:String(HG.cfg.diff),death:HG.cfg.death,season:HG.cfg.season!==false,peace:!!HG.cfg.peace},ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
+ return {game:'hunger-3d',v:7,hv:2,thin:G.thin?1:0,rules:{diff:String(HG.cfg.diff),death:HG.cfg.death,season:HG.cfg.season!==false,wear:HG.cfg.wear!==false,peace:!!HG.cfg.peace},ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
 }
 const validSave=s=>!!(s&&typeof s==='object'&&s.v===7&&typeof s.seed==='number'&&typeof s.px==='number'&&typeof s.py==='number'&&(typeof s.obj==='string'||typeof s.objr==='string')&&Array.isArray(s.inv));
 function readJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
@@ -174,6 +174,7 @@ async function startGame(load,slotId){
    if(['0','1','2'].includes(String(r.diff)))c.diff=String(r.diff);
    if(['bed','free','perm'].includes(r.death))c.death=r.death;
    if(typeof r.season==='boolean')c.season=r.season;
+   if(typeof r.wear==='boolean')c.wear=r.wear;
    if(typeof r.peace==='boolean')c.peace=r.peace;
   }
   /* yarım kalmış düğüm hasarı (kısmen kesilmiş ağaç, kırılmış kaya/maden) */

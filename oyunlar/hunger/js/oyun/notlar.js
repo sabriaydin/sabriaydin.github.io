@@ -7,7 +7,7 @@ const nt=$('#nt'),list=$('#ntL');
 function build(){
  if(!list||list.childElementCount)return;
  const L=HG.NOTES||[];
- list.innerHTML=L.map((e,i)=>`<details${i===0?' open':''}><summary><b>${e.n?'Güncelleme '+e.n:'Başlangıç'}</b><span>${esc(e.t)}</span></summary><p>${esc(e.x)}</p></details>`).join('');
+ list.innerHTML=L.map((e,i)=>`<details${i===0?' open':''}><summary><b>${e.n?'Güncelleme '+e.n:'Başlangıç'}</b><span>${esc(e.t)}</span></summary><ul>${e.l.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></details>`).join('');
 }
 function open(){build();nt.hidden=false;const f=list.querySelector('summary');if(f)f.focus({preventScroll:true})}
 function close(){nt.hidden=true;const b=$('#bNotes');if(b)b.focus({preventScroll:true})}

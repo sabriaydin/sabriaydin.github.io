@@ -3,7 +3,7 @@
 (()=>{
 'use strict';
 const {G,ui,$}=HG;
-HG.VERSION='1.87';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
+HG.VERSION='1.88';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
 const PREF='hunger-dunya';
 
 /* ============================================================ Dünya Oluştur ============================================================ */
@@ -14,7 +14,7 @@ function pref(){try{const p=JSON.parse(localStorage.getItem(PREF)||'null');retur
 function fill(){
  const c=HG.cfg,p=pref();
  F.name.value='';F.code.value='';F.code.classList.remove('bad');
- F.diff.value=String(c.diff);F.death.value=String(c.death);F.season.checked=!!c.season;F.peace.checked=!!c.peace;
+ F.diff.value=String(c.diff);F.death.value=String(c.death);F.season.checked=!!c.season;F.wear.checked=c.wear!==false;F.peace.checked=!!c.peace;
  F.time.value=String(p.time!==undefined?p.time:0);F.anim.value=String(p.anim!==undefined?p.anim:1);F.res.value=String(p.res!==undefined?p.res:1);F.kit.value=String(p.kit!==undefined?p.kit:0);
  if(!F.time.value)F.time.value='0';if(!F.anim.value)F.anim.value='1';if(!F.res.value)F.res.value='1';if(!F.kit.value)F.kit.value='0';        /* kayıtlı tercih listede yoksa varsayılan */
  refresh();codeMsg();
@@ -41,7 +41,7 @@ function refresh(){
  set('wdResH',HINT.res[F.res.value]||'');
  set('wdKitH',F.kit.value==='1'?'Verilenler: '+kitText()+'. El Taşı her zaman yanınızdadır.':'Yalnızca El Taşı verilir; odun ve taş toplayıp aletleri kendiniz üretirsiniz.');
  const d=$('#wdDeathH');if(d)d.classList.toggle('err',F.death.value==='perm');
- if(F.sum)F.sum.textContent='Özet: '+[short(F.diff)+' zorluk',short(F.death),short(F.time)+' başlangıç','Hayvan: '+short(F.anim),'Kaynak: '+short(F.res),short(F.kit),'Mevsimler '+(F.season.checked?'açık':'kapalı'),'Barış modu '+(F.peace.checked?'açık':'kapalı')].join(' · ');
+ if(F.sum)F.sum.textContent='Özet: '+[short(F.diff)+' zorluk',short(F.death),short(F.time)+' başlangıç','Hayvan: '+short(F.anim),'Kaynak: '+short(F.res),short(F.kit),'Mevsimler '+(F.season.checked?'açık':'kapalı'),'Alet aşınması '+(F.wear.checked?'açık':'kapalı'),'Barış modu '+(F.peace.checked?'açık':'kapalı')].join(' · ');
 }
 const CODE_DEF='Aynı kod aynı adayı (kıyı, göl, köy) kurar; kaynak ve hayvan sayısı aşağıdaki seçeneklere göre değişir.';
 const CODE_MAX=(2147483647).toString(36).toUpperCase();         /* ZIK0ZJ: dünya tohumunun üst sınırı */
@@ -73,8 +73,8 @@ function create(){
   if(seed===null){HG.toast(cs.msg||'Dünya kodu geçersiz.');F.code.focus();return}
  }
  const c=HG.cfg;
- c.diff=F.diff.value;c.death=F.death.value;c.season=F.season.checked;c.peace=F.peace.checked;
- if(HG.settings){for(const k of ['diff','death','season','peace'])HG.settings.apply(k);HG.settings.persist()}
+ c.diff=F.diff.value;c.death=F.death.value;c.season=F.season.checked;c.wear=F.wear.checked;c.peace=F.peace.checked;
+ if(HG.settings){for(const k of ['diff','death','season','wear','peace'])HG.settings.apply(k);HG.settings.persist()}
  const w={name:F.name.value.replace(/\s+/g,' ').trim().slice(0,30),time:+F.time.value,anim:+F.anim.value,kit:+F.kit.value,res:+F.res.value||1};
  try{localStorage.setItem(PREF,JSON.stringify({time:w.time,anim:w.anim,kit:w.kit,res:w.res}))}catch(e){}
  HG.pendingSeed=seed;HG.pendingWorld=w;
@@ -94,15 +94,15 @@ HG.worldDialog={open,close};
 
 function setupWorld(){
  wd=$('#wd');if(!wd)return;
- const ids={name:'wdName',code:'wdCode',diff:'wdDiff',death:'wdDeath',time:'wdTime',anim:'wdAnim',res:'wdRes',kit:'wdKit',season:'wdSeason',peace:'wdPeace',sum:'wdSum'};
+ const ids={name:'wdName',code:'wdCode',diff:'wdDiff',death:'wdDeath',time:'wdTime',anim:'wdAnim',res:'wdRes',kit:'wdKit',season:'wdSeason',wear:'wdWear',peace:'wdPeace',sum:'wdSum'};
  for(const k in ids)F[k]=$('#'+ids[k]);
  F.code.addEventListener('input',()=>{const v=F.code.value.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,6);F.code.value=v.length>3?v.slice(0,3)+'-'+v.slice(3):v;codeMsg()});
  $('#wdRnd').onclick=()=>{F.code.value=HG.worldCode((Math.random()*2147483647)|0);codeMsg()};
- for(const k of ['diff','death','time','anim','res','kit','season','peace']){F[k].addEventListener('change',refresh);F[k].addEventListener('input',refresh)}
+ for(const k of ['diff','death','time','anim','res','kit','season','wear','peace']){F[k].addEventListener('change',refresh);F[k].addEventListener('input',refresh)}
  /* Varsayılan: ad ve kod korunur, diğer seçenekler başlangıç değerlerine döner */
  $('#wdDef').onclick=()=>{
   const D=(HG.settings&&HG.settings.DEF)||{};
-  F.diff.value=String(D.diff!==undefined?D.diff:'1');F.death.value=String(D.death||'bed');F.season.checked=D.season!==false;F.peace.checked=!!D.peace;
+  F.diff.value=String(D.diff!==undefined?D.diff:'1');F.death.value=String(D.death||'bed');F.season.checked=D.season!==false;F.wear.checked=D.wear!==false;F.peace.checked=!!D.peace;
   F.time.value='0';F.anim.value='1';F.res.value='1';F.kit.value='0';
   refresh();try{HG.snd('ui')}catch(e){}
  };

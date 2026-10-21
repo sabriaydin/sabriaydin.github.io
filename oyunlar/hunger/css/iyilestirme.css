@@ -41,12 +41,13 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 #ntL summary b{white-space:nowrap}
 #ntL summary span{color:var(--mut)}
 #ntL summary:hover,#ntL summary:focus-visible{background:#2c2c32;outline:none}
-#ntL details p{margin:0;padding:2px 14px 14px 34px;color:#c8c8d0;font-size:13.5px;line-height:1.6}
+#ntL details ul{margin:0;padding:2px 16px 14px 36px;color:#c8c8d0;font-size:13.5px;line-height:1.6}
+#ntL details li{margin:3px 0}
 #nt .btns{max-width:260px}
 @media (max-width:520px){#ntL summary{flex-wrap:wrap;gap:2px 8px}}
 
 /* ---- Güncelleme 67: Duraklatma menüsü (sol sütun, büyük başlık, düz satır düğmeleri) ---- */
-#pause{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(5,5,6,.92) 0,rgba(5,5,6,.78) 34%,rgba(5,5,6,.25) 70%,rgba(5,5,6,.1) 100%)}
+#pause{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(4,4,5,.97) 0,rgba(4,4,5,.9) 36%,rgba(4,4,5,.6) 70%,rgba(4,4,5,.42) 100%)}
 #pause .card.pm{width:min(380px,100%);min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px;
  background:none;border:0;border-left:4px solid var(--red);border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
 #pause .pmh{margin-bottom:18px}
@@ -68,4 +69,23 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
  #pause .card.pm{margin-left:0;min-height:0;width:min(380px,100%);padding:20px 18px;border-left:0;border-top:3px solid var(--red);background:var(--panel);border-radius:10px}
  #pause .pm h1{font-size:28px}
  #pause .pm .btns button{padding:10px 12px;font-size:16px}
+}
+
+/* ---- Güncelleme 69: Ana menü, duraklatma menüsüyle aynı yapıda (sol sütun, düz satır düğmeleri) ---- */
+#menu{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(4,4,5,.96) 0,rgba(4,4,5,.88) 36%,rgba(4,4,5,.45) 70%,rgba(4,4,5,.25) 100%)}
+#menu .card{width:min(430px,100%);min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;
+ background:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border:0;border-left:4px solid var(--red);border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
+#menu .card h1{font-size:56px;letter-spacing:.14em;text-indent:0}
+#menu .card>p{margin:10px 0 22px;font-size:14px;line-height:1.55;max-width:340px}
+#menu .btns{max-width:none;margin:0 0 14px;gap:2px}
+#menu .btns button,#menu .btns button.ghost,#menu .btns button.wide{display:flex;align-items:center;text-align:left;width:100%;padding:12px 16px;font-size:17px;font-weight:500;
+ background:transparent;border:0;border-left:3px solid transparent;border-radius:0;color:#d6d6dc;letter-spacing:.04em;box-shadow:none;transition:padding .12s,background .12s}
+#menu .btns button:hover:not(:disabled),#menu .btns button:focus-visible{transform:none;box-shadow:none;background:rgba(255,255,255,.08);border-left-color:var(--red);color:#fff;outline:none;padding-left:22px}
+#menu .btns #bNew,#menu .btns #bCont{font-weight:700;font-size:19px;color:#fff;background:rgba(217,70,60,.22)}
+#menu .back{align-self:flex-start;margin-top:6px;font-size:13px}
+@media (max-width:640px){
+ #menu{place-items:center;background:rgba(4,4,5,.8)}
+ #menu .card{margin-left:0;min-height:0;width:min(400px,100%);padding:22px 18px;border-left:0;border-top:3px solid var(--red);background:rgba(18,18,21,.82);border-radius:10px}
+ #menu .card h1{font-size:44px}
+ #menu .btns button,#menu .btns button.ghost,#menu .btns button.wide{padding:10px 12px;font-size:16px}
 }
