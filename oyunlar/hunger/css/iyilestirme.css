@@ -40,6 +40,7 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 #ntL details[open]>summary::before{transform:rotate(90deg)}
 #ntL summary b{white-space:nowrap}
 #ntL summary span{color:var(--mut)}
+#ntL summary time{margin-left:auto;color:var(--mut);font-size:12px;white-space:nowrap}
 #ntL summary:hover,#ntL summary:focus-visible{background:#2c2c32;outline:none}
 #ntL details ul{margin:0;padding:2px 16px 14px 36px;color:#c8c8d0;font-size:13.5px;line-height:1.6}
 #ntL details li{margin:3px 0}
