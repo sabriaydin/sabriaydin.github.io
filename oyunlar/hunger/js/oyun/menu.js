@@ -133,7 +133,7 @@ function setupFx(){
  function size(){
   w=cv.clientWidth|0;h=cv.clientHeight|0;if(!w||!h)return;
   const k=.5;cv.width=Math.round(w*k);cv.height=Math.round(h*k);
-  const n=Math.max(40,Math.min(110,Math.round(w*h/14000)));
+  const n=Math.max(26,Math.min(64,Math.round(w*h/24000)));      /* arka plan manzarası eklendiğinden parçacıklar seyreltildi (güncelleme 49) */
   while(P.length<n)P.push(spawn(true));P.length=n;
   while(M.length<7)M.push({x:rnd(-.2,1.2),y:rnd(.45,1),s:rnd(.35,.8),v:rnd(.004,.012)*(Math.random()<.5?-1:1),a:rnd(.5,1)});
  }
@@ -157,8 +157,8 @@ function setupFx(){
     p.y+=p.vy*dt;p.ph+=p.f*dt;p.x+=Math.sin(p.ph)*p.sw*dt+(p.e?.004:0)*dt;
     if(p.y<-.05||p.x>1.05||p.x<-.05){Object.assign(p,spawn(false));continue}
     const fl=p.e?.55+.45*Math.sin(p.ph*3.1+p.life*9):.35+.65*Math.max(0,Math.sin(p.ph*1.7));
-    const fade=Math.min(1,Math.max(0,p.y*3)) ,sz=p.r*(p.e?3.4:4.2)*(W/900+.6);
-    g.globalAlpha=Math.max(0,fl*fade)*(p.e?.9:.8);
+    const fade=Math.min(1,Math.max(0,p.y*3)) ,sz=p.r*(p.e?2.6:3.2)*(W/900+.6);
+    g.globalAlpha=Math.max(0,fl*fade)*(p.e?.72:.55);
     g.drawImage(p.e?spE:spF,p.x*W-sz/2,p.y*H-sz/2,sz,sz);
    }
    g.globalAlpha=1;g.globalCompositeOperation='source-over';

@@ -19,7 +19,7 @@ const TABS=[
   ['adapt','Uyarlanabilir çözünürlük','toggle',true,'Kare hızı düşerse çizim çözünürlüğü kendiliğinden biraz düşer, rahatlayınca geri yükselir. Üst sınır yukarıdaki Çözünürlük ölçeğidir.'],
   ['fpsTarget','Hedef kare hızı','select','55',[['45','45 FPS'],['55','55 FPS'],['60','60 FPS']],'Uyarlanabilir çözünürlüğün korumaya çalıştığı değer.'],
   ['fps','FPS göstergesi','toggle',false],
-  ['mfx','Menü arka plan efekti','toggle',true,'Ana menüdeki kıvılcım ve sis animasyonu. Kapatmak zayıf cihazlarda pil ve başarım kazandırır.']]],
+  ['mfx','Menü arka plan efekti','toggle',true,'Ana menüdeki manzara, kıvılcım ve sis animasyonu. Kapatınca manzara hareketsiz kalır; zayıf cihazlarda pil ve başarım kazandırır.']]],
  ['Ses',[
   ['master','Ana ses','range',80,0,100,5,'%','Gerçek ses kayıtları Creative Commons lisanslıdır: Wildfire Games (0 A.D.) ve diğer sahipler. Ayrıntı: ses/KREDI.txt'],
   ['sfx','Efekt sesleri','range',100,0,100,5,'%','Adım, darbe, eşya ve hayvan sesleri.'],

@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const {W,T,G,ui,inp,A,Scene,$,tod,daylight,held}=HG;
-let last=performance.now(),recT=0,skip=false;
+let last=performance.now(),recT=0,skip=false,menuBg=null;
 /* Nesne değişimleri: önce artımlı senkron denenir, olmazsa tam senkron yapılır */
 function flushObjects(){
  if(G.objDirty){Scene.sync(G);G.objDirty=false;if(G.oc)G.oc.length=0}
@@ -36,7 +36,9 @@ function frame(now){
  if(ui.state==='play'&&h&&h.it.place&&G.tg){const p=HG.placeTarget(h.k);if(p)place={x:p.x,y:p.y,ok:true};else{const t=G.tg;place={x:t.x,y:t.y,ok:false}}}
  else if(ui.state==='play'&&h&&(h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaGhost)place=HG.insaGhost(h.k);
  HG.audioFrame(G,dt,ui.state);
- Scene.render(G,now,dt,{mode:play?'play':'menu',L:daylight(),tod:tod(),act:!!((inp.mouseDown||inp.touchAct)&&A.key),held:h?h.k:null,target:ui.state==='play'?G.tg:null,place,hitI:A.hitI,hitT:A.hitT,clock:ui.menuClock});
+ /* Ana menüde 3B dünya çizilmez: yerine hafif 2B manzara gösterilir (js/oyun/menu-arka.js) */
+ if(menuBg!==!play){menuBg=!play;$('#game').classList.toggle('menu2d',menuBg)}
+ if(play)Scene.render(G,now,dt,{mode:'play',L:daylight(),tod:tod(),act:!!((inp.mouseDown||inp.touchAct)&&A.key),held:h?h.k:null,target:ui.state==='play'?G.tg:null,place,hitI:A.hitI,hitT:A.hitT,clock:ui.menuClock});
  requestAnimationFrame(frame);
 }
 const nap=()=>new Promise(r=>setTimeout(r,20));

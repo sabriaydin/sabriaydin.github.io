@@ -172,6 +172,7 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .sqi,.spf{grid-column:1/-1;color:var(--mut);font-size:11px;margin-top:2px}
 .spf{color:#8fb98f}
 #game.photo #hud,#game.photo #hot,#game.photo #comp,#game.photo #clock,#game.photo #goal,#game.photo #mini,#game.photo #cross,#game.photo #tgt,#game.photo #tip,#game.photo #prog,#game.photo #feed,#game.photo #zn,#game.photo #hitm,#game.photo #touch{display:none!important}
+#game.menu2d canvas#c{visibility:hidden}
 #game.no-compass #comp,#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip,#game.no-cross #cross{display:none!important}
 #hud{transform:scale(var(--ui,1));transform-origin:left bottom}
 #hot{transform:translateX(-50%) scale(var(--ui,1));transform-origin:center bottom}
