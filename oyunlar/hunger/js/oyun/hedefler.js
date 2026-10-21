@@ -49,10 +49,13 @@ const GOALS=[
  ['pet','Gezgin Tüccardan Köpek Yavrusu al. Köpek seni takip eder ve saldırganlara karşı korur.'],
  ['bear','Bir ayıyı alt et (Demir Kılıç veya yay ile). Kürkünden Kürk Palto üretilir; kışın soğuğa karşı en iyi giysidir.']
 ];
+/* Barış modunda Gölge ve ayı bulunmadığından bu iki hedef listeden çıkarılır (aksi halde hedef zinciri takılır) */
+const PEACE_SKIP=['shade_killed','bear'];
 function goalText(){
- let done=0;for(const g of GOALS)if(G.flags[g[0]])done++;
- const g=GOALS.find(x=>!G.flags[x[0]]);
- return g?`<b>Hedef ${done+1}/${GOALS.length}:</b> ${g[1]}`:'Tüm hedefler tamamlandı. Hayatta kalmaya devam et.';
+ const list=HG.cfg.peace?GOALS.filter(x=>!PEACE_SKIP.includes(x[0])):GOALS;
+ let done=0;for(const g of list)if(G.flags[g[0]])done++;
+ const g=list.find(x=>!G.flags[x[0]]);
+ return g?`<b>Hedef ${done+1}/${list.length}:</b> ${g[1]}`:'Tüm hedefler tamamlandı. Hayatta kalmaya devam et.';
 }
 HG.GOALS=GOALS;HG.goalText=goalText;
 })();

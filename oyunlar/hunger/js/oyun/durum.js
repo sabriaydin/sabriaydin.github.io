@@ -37,7 +37,7 @@ function decObj(s,n){
 function snapshot(name){return HG.withSurface(()=>snapshotRaw(name))}
 function snapshotRaw(name){
  const d=HG.dayNo();
- return {game:'hunger-3d',v:7,hv:2,thin:G.thin?1:0,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
+ return {game:'hunger-3d',v:7,hv:2,thin:G.thin?1:0,rules:{diff:String(HG.cfg.diff),death:HG.cfg.death,season:HG.cfg.season!==false,peace:!!HG.cfg.peace},ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
 }
 const validSave=s=>!!(s&&typeof s==='object'&&s.v===7&&typeof s.seed==='number'&&typeof s.px==='number'&&typeof s.py==='number'&&(typeof s.obj==='string'||typeof s.objr==='string')&&Array.isArray(s.inv));
 function readJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
@@ -144,7 +144,8 @@ async function startGame(load,slotId){
  let s=null;
  let slotUsed=null;
  if(load){const ls=listSlots();const pick=slotId?ls.find(x=>x.id===slotId):ls[0];if(pick){s=readSlot(pick.id);slotUsed=pick.id}}
- if(HG.netSnap){s=HG.netSnap;HG.netSnap=null;slotUsed=null}           /* co-op: konuk, ev sahibinin gönderdiği dünya verisiyle başlar (js/oyun/ag.js) */
+ let guestSnap=false;
+ if(HG.netSnap){s=HG.netSnap;HG.netSnap=null;slotUsed=null;guestSnap=true}           /* co-op: konuk, ev sahibinin gönderdiği dünya verisiyle başlar (js/oyun/ag.js) */
  if(s&&s.v===7){
   /* eski (384) kayıt: ada, büyük haritanın ortasına yerleştirilir ve tüm konumlar kaydırılır */
   const N=HG.W,oldSz=s.ws?0:384,emb=s.ws?(s.emb||0):384,off=oldSz?(N-oldSz)>>1:0;
@@ -166,6 +167,15 @@ async function startGame(load,slotId){
   }
   if(Array.isArray(s.timers))G.timers=s.timers.filter(t=>t&&t.i>=0&&t.i<(oldSz?oldSz*oldSz:N*N)).map(t=>{t.i=mapI(t.i);return t});
   if(!s.thin&&HG.migrateBalance)HG.migrateBalance();        /* denge öncesi kayıt: kaynaklar ve hayvanlar bir kez seyreltilir */
+  /* dünya kuralları (Dünya Oluştur: zorluk, ölüm, mevsimler, barış) kayıtla birlikte saklanır; eski kayıtlarda yoktur ve geçerli ayarlar korunur.
+     Co-op konuğu ev sahibinin kurallarını ag.js üzerinden alır. */
+  if(s.rules&&typeof s.rules==='object'&&!guestSnap){
+   const r=s.rules,c=HG.cfg;
+   if(['0','1','2'].includes(String(r.diff)))c.diff=String(r.diff);
+   if(['bed','free','perm'].includes(r.death))c.death=r.death;
+   if(typeof r.season==='boolean')c.season=r.season;
+   if(typeof r.peace==='boolean')c.peace=r.peace;
+  }
   /* yarım kalmış düğüm hasarı (kısmen kesilmiş ağaç, kırılmış kaya/maden) */
   G.dmg={};G.yac={};if(s.dmg&&typeof s.dmg==='object')for(const k in s.dmg){const f=+s.dmg[k],i=mapI(+k);if(i>=0&&i<(oldSz?oldSz*oldSz:N*N)&&f>0&&f<1&&G.obj[mapI(+k)])G.dmg[i]=f}
   HG.npcLoad(s.npcs);HG.progLoad(s.prog);

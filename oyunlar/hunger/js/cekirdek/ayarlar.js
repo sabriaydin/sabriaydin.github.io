@@ -46,7 +46,7 @@ const TABS=[
   ['season','Mevsimler','toggle',true,'Kapalıyken mevsim etkisi olmaz (her zaman nötr).'],
   ['snow','Kış karı (görsel)','toggle',true,'Kışın yağan kar ve beyazlaşan zemin; kapatmak başarımı artırır.'],
   ['wetsys','Islaklık ve ateş','toggle',true,'Islanınca soğuk daha çabuk işler; uzun süre ıslak kalmak ateşe yol açar.'],
-  ['peace','Barış modu','toggle',false,'Açıkken hayvanlar ve yaratıklar hasar vermez (inşa ve keşif için).']]],
+  ['peace','Barış modu','toggle',false,'Açıkken Gölge, kurt, ayı, köpek balığı ve denizanası bulunmaz; diğer hayvanlar saldırmaz (inşa ve keşif için). Arı sokması geçerlidir; yanan meşale korur.']]],
  ['Erişilebilirlik',[
   ['cap','Ses altyazıları','toggle',false,'Önemli sesleri (hayvan, gök gürültüsü, saldırı) ekranda kısa yazıyla gösterir.'],
   ['dmgnum','Hasar sayıları','toggle',true,'Vurulan hayvanın üzerinde verilen hasarı gösterir.'],

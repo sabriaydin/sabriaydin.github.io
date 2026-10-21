@@ -15,7 +15,7 @@ const FETCH={
 };
 const VAL={sardine:2,bass:3,tuna:5,crab:3,coral:5,wood:1,leather:2.5,berries:1,meat:2,bone:1.5,fish:2,coconut:2,sand:1,coal:2,iron_ore:7,copper_ore:4,wool:2,milk:3,stone:1};
 const EXTRA=[['bandage',2],['torch',2],['arrow',8],['cmeat',2]];
-function gen(n){
+function gen0(n){
  const vs=G.villages||[],r=rnd();
  let q;
  if(r<.5){
@@ -35,6 +35,13 @@ function gen(n){
  q.st=0;q.p=0;q.next=0;
  return q;
 }
+/* Barış modu: tehlikeli canlı (Gölge, kurt, köpek balığı) avı istenmez */
+const hostileQ=q=>!!q&&(q.t==='shade'||(q.t==='hunt'&&!!HG.hostileAnimal&&HG.hostileAnimal(q.a)));
+function gen(n){
+ let q=gen0(n);
+ if(HG.cfg.peace)for(let i=0;i<30&&hostileQ(q);i++)q=gen0(n);
+ return q;
+}
 const title=q=>q.t==='fetch'?`${q.n} ${IT[q.item].n} getir`:q.t==='hunt'?`${q.n} ${ANIMAL[q.a].n} avla`:q.t==='shade'?`${q.n} Gölge yok et`:`${G.villages[q.j].name} köyünü bul`;
 const have=q=>q.t==='fetch'?Math.min(q.n,count(q.item)):q.t==='visit'?(G.flags['v'+q.j]?1:0):Math.min(q.n,q.p);
 const prog=q=>q.st===2?'Tamamlandı':`${have(q)}/${q.n}`;
@@ -42,7 +49,7 @@ const done=q=>have(q)>=q.n;
 function getQ(n){
  if(!G.quests)G.quests={};
  let q=G.quests[n.id];
- if(!q||(q.st===2&&G.clock>=q.next)){q=G.quests[n.id]=gen(n)}
+ if(!q||(q.st===2&&G.clock>=q.next)||(HG.cfg.peace&&q.st<2&&hostileQ(q))){q=G.quests[n.id]=gen(n)}
  return q;
 }
 function give(id,k){const left=add(id,k);if(left>0)HG.spawnDrop(id,left)}

@@ -85,17 +85,18 @@
   <div id="wd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">DÜNYA OLUŞTUR</h1>
     <div class="wform">
       <label>Dünya adı<input id="wdName" type="text" maxlength="30" placeholder="İsteğe bağlı" autocomplete="off" spellcheck="false"></label>
-      <label>Dünya kodu<span class="wr"><input id="wdCode" type="text" maxlength="7" placeholder="Boşsa rastgele" autocomplete="off" spellcheck="false"><button id="wdRnd" class="ghost" type="button">Rastgele</button></span><small>Aynı kod her zaman aynı adayı kurar.</small></label>
-      <label>Zorluk<select id="wdDiff"><option value="0">Kolay</option><option value="1">Normal</option><option value="2">Zor</option></select><small>Açlık, susuzluk ve hasar hızı.</small></label>
-      <label>Ölünce<select id="wdDeath"><option value="bed">Cenaze çantası (eşyalar düşer)</option><option value="free">Eşyalar kalsın</option><option value="perm">Kalıcı ölüm</option></select></label>
-      <label>Başlangıç zamanı<select id="wdTime"><option value="0">Sabah</option><option value="1">Öğle</option><option value="2">Akşam</option></select></label>
-      <label>Hayvan yoğunluğu<select id="wdAnim"><option value="1">Normal</option><option value="0">Seyrek</option></select></label>
-      <label>Kaynak yoğunluğu<select id="wdRes"><option value="1.45">Az (zor)</option><option value="1">Normal</option><option value="0.4">Bol (kolay)</option></select><small>Ağaç, kaya ve maden sayısı.</small></label>
-      <label>Başlangıç eşyaları<select id="wdKit"><option value="0">Yalnızca El Taşı</option><option value="1">Temel set (balta, kazma, bandaj, yiyecek, su)</option></select></label>
-      <label class="chk"><input id="wdSeason" type="checkbox"><span>Mevsimler</span></label>
-      <label class="chk"><input id="wdPeace" type="checkbox"><span>Barış modu (hayvanlar hasar vermez)</span></label>
+      <label>Dünya kodu<span class="wr"><input id="wdCode" type="text" maxlength="7" placeholder="Boşsa rastgele" autocomplete="off" spellcheck="false"><button id="wdRnd" class="ghost" type="button">Rastgele</button></span><small id="wdCodeMsg">Aynı kod aynı adayı (kıyı, göl, köy) kurar; kaynak ve hayvan sayısı aşağıdaki seçeneklere göre değişir.</small></label>
+      <label>Zorluk<select id="wdDiff"><option value="0">Kolay</option><option value="1">Normal</option><option value="2">Zor</option></select><small id="wdDiffH">Açlık, susuzluk ve hasar hızı.</small></label>
+      <label>Ölünce<select id="wdDeath"><option value="bed">Cenaze çantası (eşyalar düşer)</option><option value="free">Eşyalar kalsın</option><option value="perm">Kalıcı ölüm</option></select><small id="wdDeathH"></small></label>
+      <label>Başlangıç zamanı<select id="wdTime"><option value="0">Sabah</option><option value="1">Öğle</option><option value="2">Akşam</option></select><small id="wdTimeH"></small></label>
+      <label>Hayvan yoğunluğu<select id="wdAnim"><option value="1">Normal</option><option value="0">Seyrek</option></select><small id="wdAnimH"></small></label>
+      <label>Kaynak yoğunluğu<select id="wdRes"><option value="1.45">Az (zor)</option><option value="1">Normal</option><option value="0.4">Bol (kolay)</option></select><small id="wdResH">Ağaç, kaya ve maden sayısı.</small></label>
+      <label>Başlangıç eşyaları<select id="wdKit"><option value="0">Yalnızca El Taşı</option><option value="1">Temel set (balta, kazma, bandaj, yiyecek, su)</option></select><small id="wdKitH"></small></label>
+      <label class="chk"><input id="wdSeason" type="checkbox"><span>Mevsimler<small id="wdSeasonH">Her 6 günde bir mevsim değişir; kışın soğuk artar, ekinler durur.</small></span></label>
+      <label class="chk"><input id="wdPeace" type="checkbox"><span>Barış modu<small id="wdPeaceH">Gölge, kurt, ayı, köpek balığı ve denizanası bulunmaz; diğer hayvanlar saldırmaz. Arı sokması geçerlidir (yanan meşale korur).</small></span></label>
     </div>
-    <div class="btns"><button id="wdGo" type="button">Dünyayı oluştur</button><button id="wdX" class="ghost" type="button">Geri (Esc)</button></div></div></div>
+    <p id="wdSum"></p>
+    <div class="btns"><button id="wdGo" type="button">Dünyayı oluştur</button><button id="wdDef" class="ghost" type="button">Varsayılan</button><button id="wdX" class="ghost" type="button">Geri (Esc)</button></div></div></div>
   <input type="file" id="fileIn" accept=".json,application/json" hidden>
   <div id="fade"></div>
   <div id="bigmap" hidden><div class="bmbox"><div class="bmw"><canvas id="bm"></canvas><canvas id="bmc" width="56" height="62"></canvas></div><div id="bmcap"></div></div></div>
@@ -219,6 +220,7 @@
 <script src="js/oyun/ag-varlik.js"></script>
 <script src="js/oyun/ag-arayuz.js"></script>
 <script src="js/oyun/ag-ekstra.js"></script>
+<script src="js/oyun/baris.js"></script>
 <script src="js/oyun/menu.js"></script>
 <script src="js/oyun/giris.js"></script>
 <script src="js/oyun/dongu.js"></script>

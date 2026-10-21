@@ -199,7 +199,7 @@ function updateSea(dt){
  const ang=rnd()*6.283;
  /* köpek balığı: açık denizde */
  G.sharkCd=(G.sharkCd||0)-1.6;
- if(G.sharkCd<=0&&near('shark')<3){
+ if(G.sharkCd<=0&&near('shark')<3&&!HG.cfg.peace){                         /* Barış modu: köpek balığı ve denizanası çıkmaz */
   const d=32+rnd()*30,x=px+Math.cos(ang)*d,z=pz+Math.sin(ang)*d,i=tileIdx(x,z);
   const coast=rnd()<COASTAL_P&&!L.some(q=>q.coastal&&!q.dying);              /* çok nadir: kıyıya yakın yüzeyde gezinen tek köpek balığı */
   const lo=coast?SHARK_COAST:SHARK_MIN,hi=coast?SHARK_MIN-6:999;
@@ -209,7 +209,7 @@ function updateSea(dt){
   }
  }
  /* denizanası: kıyıya yakın sularda */
- if(near('jelly',px,pz,70)<5&&rnd()<.6){
+ if(!HG.cfg.peace&&near('jelly',px,pz,70)<5&&rnd()<.6){
   const d=24+rnd()*34,x=px+Math.cos(ang+2)*d,z=pz+Math.sin(ang+2)*d,i=tileIdx(x,z);
   if(i>=0&&(G.tile[i]===T.DEEP||G.tile[i]===T.SHAL)&&G.sdist&&G.sdist[i]>=2&&G.sdist[i]<=45&&HG.swimmable.jelly(x,z)&&near('jelly',x,z,12)<1)spawn('jelly',x,z);
  }

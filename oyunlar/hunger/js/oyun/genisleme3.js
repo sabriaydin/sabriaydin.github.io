@@ -162,7 +162,7 @@ HG.x2seeds.push(()=>{
 });
 let bearT=60,hibT=0;
 function bearStep(dt){
- if(G.cave||(HG.netGuest&&HG.netGuest()))return;
+ if(G.cave||HG.cfg.peace||(HG.netGuest&&HG.netGuest()))return;          /* Barış modu: ayı yeniden doğmaz */
  bearT-=dt;
  if(bearT<=0){
   bearT=90;

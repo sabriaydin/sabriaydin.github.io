@@ -250,7 +250,7 @@ function updateAnimals(dt){
    if(def.prey&&!(performance.now()-(a.alT||0)<6000)){a.alT=performance.now();alarm(a,sx,sz)}      /* sürü de aynı yönden kaçar */
   }else if(fr&&def.prey&&play&&dp<fr*1.5&&(a.alertT||0)<6){
    a.alertT=(a.alertT||0)+dt;a.alerted=true;head=Math.atan2(dx,dz);spd=0;                         /* tetikte: donar, oyuncuya bakar; yaklaşılırsa kaçar */
-  }else if(def.aggr&&dp<def.aggr&&play&&(!def.night||dark)&&!(a.giveT>0)){a.charge=def.chase||7;a.cd=Math.max(a.cd,.7);if(a.t==='wolf')callPack(a)}
+  }else if(def.aggr&&dp<def.aggr&&play&&!HG.cfg.peace&&(!def.night||dark)&&!(a.giveT>0)){a.charge=def.chase||7;a.cd=Math.max(a.cd,.7);if(a.t==='wolf')callPack(a)}
   else if(def.pred&&(()=>{const r=huntStep(a,def,dt,L);if(!r)return false;head=r.head;spd=r.spd;return true})()){}
   else{
    a.tm-=dt;
@@ -320,6 +320,7 @@ function updateAnimals(dt){
   const cnt={};for(const a of L)if(!a.dying)cnt[a.t]=(cnt[a.t]||0)+1;
   for(const t in ANIMAL){
    if((cnt[t]||0)>=ANIMAL[t].want*SCL*HG.BAL.animFrac)continue;
+   if(HG.cfg.peace&&HG.hostileAnimal&&HG.hostileAnimal(t))continue;            /* Barış modu: kurt gibi tehlikeli canlılar yeniden doğmaz */
    for(let g=0;g<40;g++){
     const x=2+((rnd()*(W-4))|0),y=2+((rnd()*(H-4))|0),i=y*W+x;
     if(G.tile[i]!==T.GRASS||G.obj[i]||Math.hypot(x-G.px,y-G.py)<50||G.hgt[i]>3||(HG.coopOther&&HG.coopOther({x,z:y},50)))continue;
