@@ -54,8 +54,8 @@ dlg.addEventListener('pointerdown',e=>{if(e.target===dlg)closeDlg()});
 {
  const bar=$('#menu .btns');
  if(bar){
-  const b=mk('button','bCoop','ghost',"Co-op'a Katıl");b.type='button';
-  bar.appendChild(b);                       /* Kayıtlı Oyunlar / Ayarlar çifti bozulmasın: Co-op düğmesi altta tam genişlikte */
+  const b=mk('button','bCoop','ghost',"Oyuna Katıl");b.type='button';
+  const nb=$('#bNew');if(nb&&nb.parentNode===bar)nb.after(b);else bar.appendChild(b);   /* Yeni Oyun düğmesinin hemen altında */
   b.addEventListener('click',()=>{HG.initAudio&&HG.initAudio();openDlg()});
  }
 }
@@ -63,7 +63,7 @@ dlg.addEventListener('pointerdown',e=>{if(e.target===dlg)closeDlg()});
 /* ============================================================ Duraklatma menüsü ============================================================ */
 const pcard=$('#pause .card');
 const ppanel=mk('div','cpPause');
-if(pcard){const btns=pcard.querySelector('.btns');pcard.insertBefore(ppanel,btns)}
+if(pcard){const host=$('#pmCoop');if(host)host.appendChild(ppanel);else pcard.insertBefore(ppanel,pcard.querySelector('.btns'))}
 function playersHtml(){
  const L=[];
  L.push(`<li><b>${esc(net.name)}</b> <span>${net.role==='host'?'ev sahibi · siz':'siz'}</span></li>`);
@@ -81,7 +81,7 @@ function renderPause(){
  if(!live){
   if(net.st==='connecting'){ppanel.innerHTML=`<p class="cps">${esc(net.msg)}</p>`;return}
   const err=net.st==='error'?`<p class="cps bad">${esc(net.msg)}</p>`:'';
-  ppanel.innerHTML=err+`<button id="cpHost" class="ghost" type="button">Co-op oyun aç (2 oyuncu)</button><small class="cph">Dünyanızı bir arkadaşınızla paylaşın: kod üretilir, arkadaşınız ana menüden «Co-op'a Katıl» ile girer.</small>`;
+  ppanel.innerHTML=err+`<button id="cpHost" class="ghost" type="button">Co-op oyun aç (2 oyuncu)</button><small class="cph">Dünyanızı bir arkadaşınızla paylaşın: kod üretilir, arkadaşınız ana menüden «Oyuna Katıl» ile girer.</small>`;
   return;
  }
  if(net.role==='host'){

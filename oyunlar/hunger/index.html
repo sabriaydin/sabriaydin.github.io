@@ -101,6 +101,7 @@
   <div id="fade"></div>
   <div id="bigmap" hidden><div class="bmbox"><div class="bmw"><canvas id="bm"></canvas><canvas id="bmc" width="56" height="62"></canvas></div><div id="bmcap"></div></div></div>
   <div id="trade" hidden><div class="card"><h1 id="trT" style="font-size:26px;letter-spacing:.1em"></h1><p id="trS"></p><div id="trL"></div><div class="btns"><button id="trX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="nt" hidden><div class="card"><h1>GÜNCELLEMELER</h1><p>Oyuna bugüne kadar eklenen tüm değişiklikler. Ayrıntı için bir satıra tıklayın.</p><div id="ntL"></div><div class="btns"><button id="ntX" class="ghost" type="button">Kapat</button></div></div></div>
   <div id="menu">
     <canvas id="mfx" aria-hidden="true"></canvas>
     <div class="mbar t"></div><div class="mbar b"></div>
@@ -112,12 +113,13 @@
         <button id="bNew" class="wide" type="button">Yeni Oyun</button>
         <button id="bSaved" class="ghost" type="button">Kayıtlı Oyunlar</button>
         <button class="ghost bSet" type="button">Ayarlar</button>
+        <button id="bNotes" class="ghost" type="button">Güncelleme Notları</button>
       </div>
       <a class="back" href="../../index.html">← Bloga dön</a>
     </div>
     <div id="menuBy">Bir Sabri Aydın oyunu.</div><div id="menuVer"></div>
   </div>
-  <div id="pause" hidden><div class="card"><h1 style="font-size:34px">DURAKLATILDI</h1><p id="wcodeP" class="wcp"></p><div class="btns"><button id="bRes" type="button">Devam</button><button id="bSaveGame" class="ghost" type="button">Oyunu Kaydet</button><button id="bSaved2" class="ghost" type="button">Kayıtlı Oyunlar</button><button class="ghost bGuide" type="button">Rehber</button><button class="ghost bSet" type="button">Ayarlar</button><button id="bMenu" class="ghost" type="button">Ana menü</button></div></div></div>
+  <div id="pause" hidden><div class="card pm"><div class="pmh"><h1>DURAKLATILDI</h1><p id="wcodeP" class="wcp"></p></div><div class="btns"><button id="bRes" class="pmp" type="button">Devam<kbd>Esc</kbd></button><button id="bSaveGame" type="button">Oyunu Kaydet</button><button id="bSaved2" type="button">Kayıtlı Oyunlar</button><button class="bGuide" type="button">Rehber</button><button class="bSet" type="button">Ayarlar</button></div><div id="pmCoop"></div><div class="btns pmx"><button id="bMenu" class="pmd" type="button">Ana Menüye Dön</button></div></div></div>
   <div id="dead" hidden><div class="card"><h1 style="font-size:36px">HAYATTA KALAMADIN</h1><p id="why"></p><p id="stat"></p><p id="stat2"></p><p id="deadTip" class="mut"></p><div class="btns"><button id="bResp" type="button" hidden>Yeniden Doğ</button><button id="bDeadMenu" class="ghost" type="button">Ana menüye dön</button></div></div></div>
 </div>
 <script src="../ortak/three.min.js"></script>
@@ -221,6 +223,8 @@
 <script src="js/oyun/ag-arayuz.js"></script>
 <script src="js/oyun/ag-ekstra.js"></script>
 <script src="js/oyun/baris.js"></script>
+<script src="js/veri/notlar.js"></script>
+<script src="js/oyun/notlar.js"></script>
 <script src="js/oyun/menu.js"></script>
 <script src="js/oyun/giris.js"></script>
 <script src="js/oyun/dongu.js"></script>

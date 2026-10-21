@@ -25,3 +25,47 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 .wform label{align-content:start}
 #wd .btns{position:sticky;bottom:-26px;margin-bottom:-26px;padding:10px 0 28px;background:var(--panel);box-shadow:0 -8px 8px var(--panel)}
 @media (max-width:640px){#wd .btns{position:static;margin-bottom:0;box-shadow:none;background:none;padding:6px 0 0}}
+
+/* ---- Güncelleme 67: Güncelleme Notları penceresi ---- */
+#nt{position:absolute;inset:0;z-index:55;display:grid;place-items:center;background:rgba(5,5,6,.82);padding:12px;overflow:auto}
+#nt[hidden]{display:none}
+#nt .card{width:min(680px,100%);max-height:calc(100vh - 24px);display:flex;flex-direction:column}
+#nt .card h1{font-size:30px}
+#ntL{overflow:auto;text-align:left;margin:4px 0 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+#ntL details{border-bottom:1px solid var(--line)}
+#ntL details:last-child{border-bottom:0}
+#ntL summary{cursor:pointer;padding:11px 14px;display:flex;gap:12px;align-items:baseline;list-style:none;font-size:14px}
+#ntL summary::-webkit-details-marker{display:none}
+#ntL summary::before{content:"▸";color:var(--red);transition:transform .15s}
+#ntL details[open]>summary::before{transform:rotate(90deg)}
+#ntL summary b{white-space:nowrap}
+#ntL summary span{color:var(--mut)}
+#ntL summary:hover,#ntL summary:focus-visible{background:#2c2c32;outline:none}
+#ntL details p{margin:0;padding:2px 14px 14px 34px;color:#c8c8d0;font-size:13.5px;line-height:1.6}
+#nt .btns{max-width:260px}
+@media (max-width:520px){#ntL summary{flex-wrap:wrap;gap:2px 8px}}
+
+/* ---- Güncelleme 67: Duraklatma menüsü (sol sütun, büyük başlık, düz satır düğmeleri) ---- */
+#pause{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(5,5,6,.92) 0,rgba(5,5,6,.78) 34%,rgba(5,5,6,.25) 70%,rgba(5,5,6,.1) 100%)}
+#pause .card.pm{width:min(380px,100%);min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px;
+ background:none;border:0;border-left:4px solid var(--red);border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
+#pause .pmh{margin-bottom:18px}
+#pause .pm h1{font-size:38px;letter-spacing:.14em;text-indent:0;margin:0}
+#pause .pm .wcp{margin:6px 0 0;font-size:12px;color:var(--mut)}
+#pause .pm .btns{max-width:none;margin:0;gap:2px}
+#pause .pm .btns button{display:flex;justify-content:space-between;align-items:center;text-align:left;width:100%;padding:12px 16px;font-size:17px;
+ background:transparent;border:0;border-left:3px solid transparent;border-radius:0;color:#d6d6dc;letter-spacing:.04em}
+#pause .pm .btns button:hover:not(:disabled),#pause .pm .btns button:focus-visible{background:rgba(255,255,255,.08);border-left-color:var(--red);color:#fff;outline:none;padding-left:22px}
+#pause .pm .btns button{transition:padding .12s,background .12s}
+#pause .pm .btns .pmp{font-weight:700;font-size:19px;color:#fff;background:rgba(217,70,60,.22)}
+#pause .pm kbd{font:600 11px/1 inherit;font-family:inherit;color:var(--mut);border:1px solid var(--line);border-radius:4px;padding:3px 6px}
+#pause .pm .pmx{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+#pause .pm .pmd{color:#e08a84}
+#pmCoop{margin:10px 0 0;padding:12px 0 0;border-top:1px solid var(--line)}
+#pmCoop #cpPause{margin:0;max-width:none;text-align:left}
+@media (max-width:640px){
+ #pause{place-items:center;background:rgba(5,5,6,.86)}
+ #pause .card.pm{margin-left:0;min-height:0;width:min(380px,100%);padding:20px 18px;border-left:0;border-top:3px solid var(--red);background:var(--panel);border-radius:10px}
+ #pause .pm h1{font-size:28px}
+ #pause .pm .btns button{padding:10px 12px;font-size:16px}
+}

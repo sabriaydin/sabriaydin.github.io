@@ -7,7 +7,7 @@ const $=HG.$;
 const visible=el=>!!el&&!el.hidden&&getComputedStyle(el).display!=='none'&&getComputedStyle(el).visibility!=='hidden';
 
 /* ---------- Ana menü: yukarı/aşağı ok ile düğmeler arasında gezinme, açılışta ilk düğmeye odak ---------- */
-const OVER=['#wd','#sv','#sd','#coop','#cplost','#set','#gd','#sg'];
+const OVER=['#nt','#wd','#sv','#sd','#coop','#cplost','#set','#gd','#sg'];
 const overlayOpen=()=>OVER.some(s=>{const e=$(s);return e&&!e.hidden});
 function menuBtns(){return [...document.querySelectorAll('#menu .btns button')].filter(b=>!b.hidden&&getComputedStyle(b).display!=='none')}
 function focusFirst(){
