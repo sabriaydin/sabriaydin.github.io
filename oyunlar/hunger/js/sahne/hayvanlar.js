@@ -4,25 +4,29 @@
 const {ANIMAL}=HG;
 const S=HG.Scene,sc=HG.sc;
 const objs=new Map();
-let mat=null,matF=null;
+let mat=null,matF=null,matB=null;
 const VIEW=120;                                  /* bu mesafeden uzak hayvanlar çizilmez */
 const clamp=HG.clamp,q=new THREE.Quaternion(),qp=new THREE.Quaternion(),qz=new THREE.Quaternion(),ax=new THREE.Vector3(1,0,0),AY=new THREE.Vector3(0,1,0),AZ=new THREE.Vector3(0,0,1),alive=new Set();   /* kare başına yeni nesne ayrılmaz */
 
 function make(a){
  const M=sc.ANIM[a.t],def=ANIMAL[a.t];
  if(!M||def.sea)return null;                 /* yüzen deniz canlılarını sahne/deniz.js çizer */
- if(!mat)mat=sc.mat({roughness:.85});
+ /* Post ve tüy dokusu: birinci kişi kollarındaki üç yönlü doku düzeni (güncelleme 52).
+    Kıl yönü ve kabartma modelin kendi eksenine göre çizilir; eski düz boyama yerine gerçek yüzey ayrıntısı verir. */
+ if(!mat)mat=sc.vmMat?sc.vmMat({t:'pFur',s:10,a:.0022,c:.3,r:.88}):sc.mat({roughness:.85});
+ if(!matB&&sc.vmMat)matB=sc.vmMat({t:'pFeather',s:13,a:.0026,c:.32,r:.72});
+ const amat=(a.t==='chicken'&&matB)?matB:mat;
  const g=new THREE.Group(),o={g,legs:[],a};
  if(def.foe&&!matF)matF=sc.mat({roughness:.55});
- o.body=new THREE.Mesh(M.body,def.foe?matF:mat);o.body.castShadow=true;o.body.receiveShadow=true;g.add(o.body);
- if(M.bodyS){o.bodyS=new THREE.Mesh(M.bodyS,mat);o.bodyS.castShadow=true;o.bodyS.receiveShadow=true;g.add(o.bodyS);o.bodyS.visible=false}
+ o.body=new THREE.Mesh(M.body,def.foe?matF:amat);o.body.castShadow=true;o.body.receiveShadow=true;g.add(o.body);
+ if(M.bodyS){o.bodyS=new THREE.Mesh(M.bodyS,amat);o.bodyS.castShadow=true;o.bodyS.receiveShadow=true;g.add(o.bodyS);o.bodyS.visible=false}
  M.legs.forEach((p,i)=>{
-  const l=new THREE.Mesh(M.leg,mat);l.position.set(p[0],p[1],p[2]);l.castShadow=true;g.add(l);o.legs.push(l);
+  const l=new THREE.Mesh(M.leg,amat);l.position.set(p[0],p[1],p[2]);l.castShadow=true;g.add(l);o.legs.push(l);
  });
  /* ayrı hareket eden parçalar: baş, kuyruk (hayvanlar için grupta; gölgede kollar gövdede) */
  for(const role of ['head','tail','armL','armR']){
   if(!M[role])continue;
-  const m=new THREE.Mesh(M[role],def.foe?matF:mat),pv=M[role+'P']||[0,0,0];
+  const m=new THREE.Mesh(M[role],def.foe?matF:amat),pv=M[role+'P']||[0,0,0];
   m.position.set(pv[0],pv[1],pv[2]);m.castShadow=true;m.receiveShadow=true;
   (def.foe?o.body:g).add(m);o[role]=m;
  }

@@ -112,16 +112,21 @@ function bodyHud(){
  {const o2=$('#bO2');if(o2){const sh=G.o2!==undefined&&G.o2<99.5;if(o2.hidden===sh)o2.hidden=!sh;if(sh)bar('#bO2',G.o2)}}
  const dm=$('#dmg');if(dm){dm.style.opacity=body.dirT>0?Math.min(1,body.dirT):0;dm.style.transform='rotate('+(-body.dirA*57.2958)+'deg)'}
  const hm=$('#hitm');if(hm){hm.style.opacity=body.hit;hm.classList.toggle('kill',body.hitKill)}
- let s='';
- if(G.bleed>0)s+='Kanama · ';
- if(G.tired)s+='Bitkin · ';
- if(G.crouch)s+='Çömeliyor · ';
- if(G.swim)s+='Yüzüyor · ';else if(G.onRaft)s+='Salda · ';
- if(G.torchLit)s+='Meşale '+Math.max(0,Math.round(G.torchFuel/360*100))+'% · ';
- if(G.cheat)s+='⚠ İşaretli dünya · ';
- if(G.san<30)s+='Akıl dağılıyor · ';
- else if(G.san<55)s+='Huzursuz · ';
- if(hc.s!==s){hc.s=s;const e=$('#sts');if(e)e.textContent=s.replace(/ · $/,'')}
+ /* Durum rozetleri: her durum ayrı kutucuk olarak ana panelin üstünde gösterilir */
+ const st=[];
+ if(G.bleed>0)st.push(['kan','Kanama']);
+ if(G.tired)st.push(['bit','Bitkin']);
+ if(G.crouch)st.push(['com','Çömeliyor']);
+ if(G.swim)st.push(['su','Yüzüyor']);else if(G.onRaft)st.push(['su','Salda']);
+ if(G.torchLit)st.push(['mes','Meşale %'+Math.max(0,Math.round(G.torchFuel/360*100))]);
+ if(G.san<30)st.push(['akl','Akıl dağılıyor']);
+ else if(G.san<55)st.push(['akl','Huzursuz']);
+ if(G.cheat)st.push(['uya',HG.cfg&&HG.cfg.cmd?'Komutlu dünya':'İşaretli dünya']);
+ const s=st.map(x=>x[0]+':'+x[1]).join('|');
+ if(hc.s!==s){
+  hc.s=s;const e=$('#sts');
+  if(e)e.innerHTML=st.map(x=>'<span class="st s-'+x[0]+'">'+x[1].replace(/[&<>]/g,'')+'</span>').join('');
+ }
 }
 const hc={};
 Object.assign(HG,{lightLevel,hurt,addSan,hitMarker,swing,useStam,useMedical,updateBody,bodyHud});

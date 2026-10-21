@@ -8,7 +8,7 @@
 const {ui,$}=HG;
 const G=HG.G;
 const MAX=3000,SHOW=800;
-const CATS=[['sistem','Sistem'],['hata','Hata'],['konsol','Konsol'],['durum','Durum'],['ses','Ses'],['hasar','Hasar'],['saldiri','Saldırı'],['hayvan','Hayvan'],['envanter','Envanter'],['uretim','Üretim'],['dunya','Dünya'],['girdi','Girdi'],['bildirim','Bildirim'],['koruma','Koruma']];
+const CATS=[['sistem','Sistem'],['hata','Hata'],['konsol','Konsol'],['durum','Durum'],['ses','Ses'],['hasar','Hasar'],['saldiri','Saldırı'],['hayvan','Hayvan'],['envanter','Envanter'],['uretim','Üretim'],['dunya','Dünya'],['girdi','Girdi'],['bildirim','Bildirim'],['koruma','Koruma'],['komut','Komut']];
 const CN=Object.fromEntries(CATS);
 const KEY='hunger-konsol';
 const t0=performance.now();
@@ -168,7 +168,8 @@ function build(){
   '<div class="kn-flt"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara">'+
    '<div class="kn-ch" id="knCh"></div></div>'+
   '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
-  '<div class="kn-ft">Yalnızca kayıt tutar; oyunu değiştirmez. En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı).</div></div>';
+  '<div class="kn-cmd" id="knCmd"></div>'+
+  '<div class="kn-ft">En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı). Komut satırı için dünya kuralı "Konsol komutları" açık olmalıdır.</div></div>';
  ($('#game')||document.body).appendChild(root);
  listEl=root.querySelector('#knL');statEl=root.querySelector('#knSt');qEl=root.querySelector('#knQ');chipsEl=root.querySelector('#knCh');
  frzEl=root.querySelector('#knFrz');autoEl=root.querySelector('#knAut');
@@ -196,7 +197,9 @@ function build(){
  root.querySelector('#knX').onclick=()=>setOpen(false);
  root.addEventListener('pointerdown',e=>{if(e.target===root)setOpen(false)});
  root.addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
+ if(HG.konsolBuilt)HG.konsolBuilt(root);                 /* komut satırı ve geliştirici paneli (js/oyun/komut.js) */
 }
+HG.konsolBox=()=>root;
 const clearKeys=()=>{const inp=HG.inp;if(!inp)return;for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false};
 function setOpen(v){
  v=!!v;if(v===open)return;

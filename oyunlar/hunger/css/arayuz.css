@@ -28,6 +28,27 @@
 #sts,#shel{font-size:11px;line-height:1.35;min-height:0}
 #sts:not(:empty),#shel:not(:empty){margin-top:1px}
 
+/* ---------- durum rozetleri (ana panelin üstünde ayrı kutu) ---------- */
+#hudw{position:absolute;left:12px;bottom:12px;display:grid;gap:6px;justify-items:start;transform:scale(var(--ui,1));transform-origin:left bottom}
+#hud{position:static;transform:none;left:auto;bottom:auto}
+#stat{display:flex;flex-wrap:wrap;gap:5px;width:212px}
+#stat:empty{display:none}
+#sts,#shel,#x2s{display:contents}
+.st{
+ padding:3px 10px;border-radius:999px;font-size:11.5px;line-height:1.4;white-space:nowrap;
+ background:rgba(9,9,11,.86);border:1px solid var(--ui-line);color:#d9d6d0;box-shadow:var(--ui-sh);
+}
+.s-kan{color:#ff8e84;border-color:#5e2a26}
+.s-bit{color:#e8c05a;border-color:#5a4a1e}
+.s-com{color:#a9b4c2}
+.s-su{color:#7fc1ea;border-color:#27455c}
+.s-mes{color:#ffb061;border-color:#5c3d1c}
+.s-akl{color:#c39ae8;border-color:#44305c}
+.s-uya{color:#ff8e84;border-color:#5e2a26}
+.s-shl{color:#8ccfb9;border-color:#27493f}
+#x2s span{padding:3px 10px;border-radius:999px;font-size:11.5px;line-height:1.4;background:rgba(9,9,11,.86);border:1px solid var(--ui-line);box-shadow:var(--ui-sh)}
+@media (pointer:coarse){#hudw{top:12px;bottom:auto;transform-origin:left top}}
+
 /* ---------- hızlı erişim çubuğu ---------- */
 #hot{
  gap:5px;padding:7px;border-radius:13px;
@@ -148,6 +169,8 @@
 /* ---------- küçük ekran ---------- */
 @media (max-width:760px){
  #hud{width:158px;padding:8px 9px}
+ #stat{width:158px}
+ .st,#x2s span{font-size:10.5px;padding:2px 8px}
  .bar{grid-template-columns:44px 1fr 26px;gap:6px;font-size:10.5px}
  #mini{width:96px;height:96px}
  #hotn{bottom:66px;font-size:11.5px}
@@ -161,3 +184,41 @@
  .bar.crit i{animation:none}
  #hot .slot.sel{transform:none}
 }
+
+/* ---------- pencereler ve yükleme ekranı (güncelleme 50) ----------
+   Ana menü ve duraklatma menüsündeki cam panel görünümü tüm pencerelere uygulanır. */
+#set,#nt,#sd,#wd,#sv,#gd,#jr,#trade,#dead,#pause,#bigmap{
+ background:radial-gradient(ellipse at 50% 42%,rgba(5,5,6,.72) 0%,rgba(4,4,5,.9) 60%,rgba(2,2,3,.96) 100%);
+ -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+}
+#set .card,#nt .card,#sd .card,#wd .card,#sv .card,#gd .card,#jr .card,#trade .card,#dead .card{
+ background:rgba(18,18,21,.86);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--red);
+ border-radius:14px;box-shadow:0 26px 70px rgba(0,0,0,.6);
+ -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+}
+#set .card h1,#nt .card h1,#sd .card h1,#wd .card h1,#sv .card h1,#gd .card h1,#jr .card h1,#trade .card h1{
+ color:#f2efe9;text-shadow:0 2px 14px rgba(0,0,0,.6);
+}
+#pbox{background:rgba(18,18,21,.9);border-color:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+#kns .kn-box{background:rgba(18,18,21,.92);border:1px solid rgba(255,255,255,.08);border-top:3px solid var(--red);border-radius:14px;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.card .btns button{border-radius:8px}
+/* dünya oluşturma ve ayarlar: satır ayrımı yumuşatıldı */
+#wd .chk,#sd .opt{border-radius:10px}
+#set .sr{border-bottom-color:rgba(255,255,255,.06)}
+
+/* yükleme ekranı */
+#load{background:radial-gradient(ellipse at 50% 38%,#20100f 0%,#0a0608 55%,#040405 100%)}
+#load .lbox{
+ width:min(480px,92vw);padding:30px 28px 26px;border-radius:16px;
+ background:rgba(16,16,19,.72);border:1px solid rgba(255,255,255,.07);border-top:3px solid var(--red);
+ box-shadow:0 30px 80px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+#load h1{font-size:50px;animation:ldGlow 3.6s ease-in-out infinite}
+@keyframes ldGlow{0%,100%{text-shadow:0 0 18px rgba(255,255,255,.08)}50%{text-shadow:0 0 30px rgba(255,255,255,.22)}}
+#loadT{margin:22px 0 12px;color:#cfcbc4}
+#load .lbar{height:6px;border-radius:4px;background:#17171b;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+#loadBar{background:linear-gradient(90deg,#8d1a16,#e85a3c);box-shadow:0 0 14px rgba(232,90,60,.6);border-radius:4px}
+#load .lrow{font-variant-numeric:tabular-nums}
+#loadPct{color:#e0ded8}
+#loadTip{margin-top:26px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07)}
+@media (max-height:460px){#load .lbox{padding:18px 18px 16px}#load h1{font-size:32px}#loadTip{margin-top:12px;padding-top:10px}}

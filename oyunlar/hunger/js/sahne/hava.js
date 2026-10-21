@@ -45,7 +45,8 @@ S.onFrame((G,t,dt,info)=>{
  const c=G.clock,play=info.mode==='play';
  const raw=Math.sin(c/310)*.55+Math.sin(c/131+1.7)*.35+Math.sin(c/53+.4)*.1;
  const gate=smooth(40,150,c);
- const tOver=smooth(.2,.65,raw)*gate,tRain=smooth(.5,.85,raw)*gate;
+ const F=HG.wxForce;                                        /* konsol komutu: hava durumu zorlaması [bulut,yağmur] */
+ const tOver=F?F[0]:smooth(.2,.65,raw)*gate,tRain=F?F[1]:smooth(.5,.85,raw)*gate;
  const k=1-Math.exp(-dt/7);
  sc.over+=(tOver-sc.over)*k;sc.rain+=(tRain-sc.rain)*k;
  /* şimşek */

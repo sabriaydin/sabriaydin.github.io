@@ -127,14 +127,24 @@ function drawCompass(){
   g.font='600 14px system-ui,Segoe UI,sans-serif';g.fillStyle='#ffd23f';g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=3;g.fillText(wd>=1000?(wd/1000).toFixed(1)+' km':Math.round(wd)+' m',Math.max(34,Math.min(CW-34,x)),CH-52);
  }
 }
+/* Durum rozetleri kutusu: ana durum panelinin üstünde ayrı bir kutuda toplanır (ilk karede kurulur) */
+function buildStatBox(){
+ const hud=$('#hud');if(!hud||$('#hudw'))return;
+ const w=document.createElement('div');w.id='hudw';
+ hud.parentNode.insertBefore(w,hud);
+ const st=document.createElement('div');st.id='stat';
+ w.appendChild(st);w.appendChild(hud);
+ for(const id of ['#x2s','#sts','#shel']){const e=$(id);if(e)st.appendChild(e)}
+}
 function hud(){
+ if(!hc.sb){hc.sb=1;buildStatBox()}
  setBar('#bHp',G.hp);setBar('#bHun',G.hun);setBar('#bThr',G.thr);setBar('#bWar',G.warm);
  const hh=Math.floor(tod()*24),mm=Math.floor((tod()*24-hh)*60),L=daylight();
  const ck=`${G.cave?'⛏ Mağara ·':G.blood?'🌑':L>.45?'☀':'☾'} Gün ${dayNo()} · ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')} · Sv ${G.lvl||1}${G.pts?' ★'+G.pts:''}${G.blood?' · KAN AYI':''}`;
  if(hc.ck!==ck){hc.ck=ck;$('#clock').textContent=ck}
  drawCompass();
  const sh=G.swim?'Su derinliği: '+Math.max(0,HG.sc.WY-HG.Scene.groundY(G.px,G.py)).toFixed(1)+' m':G.onRaft?'Sal dayanıklılığı: %'+Math.max(0,Math.round(G.raftHp))+' · Su derinliği: '+Math.max(0,HG.sc.WY-HG.Scene.groundY(G.px,G.py)).toFixed(1)+' m':G.sheltered?'Barınakta: soğuk azalır':G.nearFire?'Ateşin yanında: ısınıyorsun':'';
- if(hc.sh!==sh){hc.sh=sh;$('#shel').textContent=sh}
+ if(hc.sh!==sh){hc.sh=sh;$('#shel').innerHTML=sh?'<span class="st s-shl">'+esc(sh)+'</span>':''}
  const gt=goalText();if(hc.gt!==gt){hc.gt=gt;$('#goal').innerHTML=gt}
  HG.bodyHud();
  $('#vr').style.opacity=clamp((35-G.hp)/35,0,.85);

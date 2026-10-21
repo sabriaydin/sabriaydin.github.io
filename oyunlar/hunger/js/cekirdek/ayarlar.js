@@ -30,9 +30,11 @@ const TABS=[
   ['sens','Fare / dokunma hassasiyeti','range',100,20,300,5,'%'],
   ['invY','Dikey bakışı ters çevir','toggle',false],
   ['crouchT','Çömelmeyi aç/kapat','toggle',false,'Açıkken çömelme tuşu basılı tutulmaz; bir kez basmak çömeltir, yeniden basmak doğrultur.'],
-  ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.']]],
+  ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.'],
+  ['kbLock','Tam ekranda oyna','toggle',true,'Oyuna girince tam ekrana geçilir ve tarayıcı kısayolları oyuna yönlendirilir: Ctrl+W sekmeyi kapatmaz, Ctrl+R sayfayı yenilemez. Esc ile tam ekrandan çıkılır.']]],
  ['Oyun',[
   ['diff','Zorluk','select','1',[['0','Kolay'],['1','Normal'],['2','Zor']],'Açlık, susuzluk ve alınan hasar hızını değiştirir. Kolay: %25 daha az, Zor: %30 daha fazla.'],
+  ['cmd','Konsol komutları','toggle',false,'Dünya kuralıdır: Dünya Oluştur penceresinden seçilir.'],
   ['wear','Alet aşınması','toggle',true,'Açıkken taş, bakır ve demir aletler kullandıkça aşınır ve kırılır; Çalışma Tezgâhında onarılır. Kapatmak oyunu kolaylaştırır.'],
   ['durbar','Dayanıklılık çubukları','toggle',true,'Eşya kutularında alet dayanıklılığını gösteren ince çubuk.'],
   ['hud','Durum çubukları','toggle',true],
@@ -209,7 +211,7 @@ function render(){
   const b=document.createElement('button');b.type='button';b.textContent=t[0];b.className='ghost'+(i===tab&&!find?' on':'');
   b.onclick=()=>{tab=i;find='';const s=box.querySelector('#sFind');if(s)s.value='';render()};tabs.appendChild(b);
  });
- const skip=r=>r[0]==='wear';      /* alet aşınması dünya kuralıdır: Dünya Oluştur penceresinde seçilir */
+ const skip=r=>r[0]==='wear'||r[0]==='cmd';      /* dünya kuralları: Dünya Oluştur penceresinde seçilir */
  if(find){
   /* Arama: tüm sekmelerdeki eşleşen satırlar sekme adıyla birlikte listelenir */
   const f=norm(find);let n=0;
@@ -235,7 +237,7 @@ function render(){
 /* Varsayılana dönüş: yalnızca bir sekme veya tümü */
 function reset(all){
  const keys=all?Object.keys(DEF):TABS[tab][1].map(r=>r[0]);
- for(const k of keys)if(k!=='wear')cfg[k]=DEF[k];      /* alet aşınması dünya kuralıdır: korunur */
+ for(const k of keys)if(k!=='wear'&&k!=='cmd')cfg[k]=DEF[k];      /* dünya kuralları korunur */
  if(all)cfg.qt=DEF.qt;
  for(const k of ['q','shadow','res','grass'])apply(k);
  apply();persist();render();

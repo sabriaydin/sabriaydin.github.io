@@ -6,10 +6,34 @@ const cvs=$('#c');
 
 /* ---- Fare kilidi (FPS bakışı) ---- */
 const overlayOpen=()=>!$('#panel').hidden||!$('#trade').hidden||!$('#bigmap').hidden||!$('#jr').hidden||!$('#gd').hidden||!!(HG.extOverlay&&HG.extOverlay());
+/* Oyun üstünde açılabilen tüm pencereler: bunlardan biri Esc ile kapanırken duraklatma menüsü açılmamalıdır */
+const WINS=['#panel','#trade','#bigmap','#jr','#gd','#set','#nt','#sv','#sd','#wd','#kns','#dlg','#cd'];
+function anyWindow(){
+ if(HG.extOverlay&&HG.extOverlay())return true;
+ for(const s of WINS){const e=$(s);if(e&&!e.hidden&&getComputedStyle(e).display!=='none')return true}
+ return false;
+}
+HG.anyWindow=anyWindow;
+/* Tarayıcı kısayolları oyunun arasına girmesin: Ctrl+W sekmeyi kapatır, Ctrl+R sayfayı yeniler,
+   Ctrl+1..9 sekme değiştirir. Tam ekranda Klavye Kilidi bu tuşları oyuna yönlendirir; Esc kilitlenmez,
+   böylece tam ekrandan çıkış her zaman çalışır. Ayarlar › Kontrol › "Tam ekranda oyna" ile kapatılabilir. */
+const KBKEYS=['KeyW','KeyT','KeyN','KeyR','KeyQ','KeyP','KeyS','KeyD','KeyF','KeyJ','KeyL','KeyO','KeyU','KeyH','Tab','Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7','Digit8','Digit9'];
+let kbT=0;
+function kbGuard(){
+ if(!HG.cfg||HG.cfg.kbLock===false||ui.touch)return;
+ const kb=navigator.keyboard;if(!kb||!kb.lock)return;
+ const go=()=>{try{const p=kb.lock(KBKEYS);if(p&&p.catch)p.catch(()=>{})}catch(e){}};
+ if(document.fullscreenElement){go();return}
+ const el=$('#game');if(!el||!el.requestFullscreen)return;
+ const now=performance.now();if(now-kbT<1500)return;kbT=now;        /* reddedilen istek üst üste denenmez */
+ try{const p=el.requestFullscreen();if(p&&p.then)p.then(go,()=>{});else go()}catch(e){}
+}
+HG.kbGuard=kbGuard;
 function lock(){
  if(ui.touch||ui.state!=='play'||overlayOpen())return;
  /* Esc basılıyken kilit istenirse tarayıcının Esc işlemi kilidi hemen bozar ve oyun duraklar: tuş bırakılınca alınır */
  if(inp.keys.Escape){ui.relock=true;return}
+ kbGuard();
  try{const p=cvs.requestPointerLock&&cvs.requestPointerLock();if(p&&p.catch)p.catch(()=>{})}catch(e){}
 }
 function unlock(forPanel){ui.panelUnlock=!!forPanel;if(document.exitPointerLock&&document.pointerLockElement)document.exitPointerLock()}
@@ -46,7 +70,12 @@ function setupInput(){
   if(e.code==='Escape'){
    if(ui.state==='dead')return;
    if(ui.state==='play'&&overlayOpen()){closeOverlay();ui.relock=true;return}
-   if(ui.state==='play')pause();else if(ui.state==='pause')resume(true);
+   /* Bu Esc bir pencereyi kapatıyorsa duraklatma menüsü açılmaz (karar bir kare sonra verilir) */
+   const wasOpen=anyWindow();
+   setTimeout(()=>{
+    if(wasOpen||anyWindow())return;
+    if(ui.state==='play')pause();else if(ui.state==='pause')resume(true);
+   },0);
    return;
   }
   if(ui.state!=='play')return;

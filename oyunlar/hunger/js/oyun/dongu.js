@@ -16,11 +16,21 @@ function flushObjects(){
 /* FPS göstergesi (ayardan açılır) */
 const fpsEl=document.createElement('div');fpsEl.id='fps';fpsEl.hidden=true;$('#game').appendChild(fpsEl);
 let fa=0,fn=0;
+let errN=0;
+/* Kare içinde bir hata olursa döngü kırılır ve ekran boş (mavi) kalırdı: hata yakalanır,
+   konsola yazılır ve çizim sürdürülür. */
 function frame(now){
+ try{step(now)}catch(e){
+  if(++errN<30){try{HG.log&&HG.log('hata','Kare hatası: '+(e&&e.message||e),'hata');console.error(e)}catch(x){}}
+  if(errN===1&&HG.toast)try{HG.toast('Bir hata oluştu; oyun sürüyor. Ayrıntı: F1 konsolu.')}catch(x){}
+ }
+ requestAnimationFrame(frame);
+}
+function step(now){
  const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;
  if(HG.cfg.fps){fa+=raw;fn++;if(fa>=.5){fpsEl.textContent=Math.round(fn/fa)+' FPS';fa=0;fn=0}if(fpsEl.hidden)fpsEl.hidden=false}else if(!fpsEl.hidden)fpsEl.hidden=true;
- if(HG.busy){requestAnimationFrame(frame);return}   /* yükleme sürerken sahne çizilmez */
- if(ui.state==='pause'&&!(HG.coopActive&&HG.coopActive())){skip=!skip;if(skip){requestAnimationFrame(frame);return}}   /* duraklatmada çizim hızı yarıya iner */
+ if(HG.busy)return;   /* yükleme sürerken sahne çizilmez */
+ if(ui.state==='pause'&&!(HG.coopActive&&HG.coopActive())){skip=!skip;if(skip)return}   /* duraklatmada çizim hızı yarıya iner */
  if(ui.state==='play'){
   flushObjects();
   G.tg=Scene.aim(G);
@@ -39,7 +49,6 @@ function frame(now){
  /* Ana menüde 3B dünya çizilmez: yerine hafif 2B manzara gösterilir (js/oyun/menu-arka.js) */
  if(menuBg!==!play){menuBg=!play;$('#game').classList.toggle('menu2d',menuBg)}
  if(play)Scene.render(G,now,dt,{mode:'play',L:daylight(),tod:tod(),act:!!((inp.mouseDown||inp.touchAct)&&A.key),held:h?h.k:null,target:ui.state==='play'?G.tg:null,place,hitI:A.hitI,hitT:A.hitT,clock:ui.menuClock});
- requestAnimationFrame(frame);
 }
 const nap=()=>new Promise(r=>setTimeout(r,20));
 async function init(){

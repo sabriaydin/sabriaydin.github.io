@@ -186,6 +186,26 @@ function canvasTex(size,fill,enc){
   const l=.5+(h-.5)*.45;
   return [l*1.02,l*.99,l*.96,h];                      /* büyük ölçekli lekelenme yok: parçalar farklı yerel eksenlerde olduğundan eklemlerde basamak oluşturur */
  });
+ /* tüy: yönlü ince teller ve öbekler (hayvan postu). Şerit sayısı tam sayı olduğundan doku dikişsizdir. */
+ tex.pFur=mk((u,v)=>{
+  const N=44,j=pw(u,v,8,8,901)-.5,ph=(u+j*.055)*N*6.2832;
+  const s1=Math.sin(ph)*.5+.5,s2=Math.sin(ph*2.37+j*4)*.5+.5;
+  const clump=pw(u,v,12,12,907),fine=pw(u,v,64,64,911);
+  const h=clamp01(.34+Math.pow(s1,2.1)*.34+Math.pow(s2,3)*.13+clump*.12+fine*.1);
+  const l=.5+(h-.5)*.95;
+  return [l,l*.995,l*.97,h];
+ });
+ /* tüy (kuş): üst üste binen küçük kanatçıklar ve orta sap */
+ tex.pFeather=mk((u,v)=>{
+  const NU=11,NV=15,fv=v*NV,iv=Math.floor(fv),b=fv-iv,off=(iv&1)?.5:0;
+  const fu=u*NU+off,iu=Math.floor(fu),a2=fu-iu;
+  const dx=(a2-.5)*2,dy=(b-.5)*2,d=Math.sqrt(dx*dx+dy*dy*.55);
+  const edge=1-clamp01((d-.5)/.5);
+  const quill=Math.max(0,1-Math.abs(dx)*9)*edge;
+  const h=clamp01(.3+edge*.44+quill*.18+(pw(u,v,80,80,941)-.5)*.12);
+  const l=.5+(h-.5)*.85;
+  return [l*1.01,l,l*.97,h];
+ });
  /* kumaş: bir üstten bir alttan geçen iplikler (bez dokuma), iplik kalınlığı değişimi */
  tex.pCloth=mk((u,v)=>{
   const N=40,fu=u*N,fv=v*N,iu=Math.floor(fu),iv=Math.floor(fv),a=fu-iu,b=fv-iv,chk=(iu+iv)&1;

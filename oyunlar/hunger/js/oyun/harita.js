@@ -134,7 +134,11 @@ function markers(g,tx,ty,k,sz){
   if(!G.flags['v'+i]||!seen(v.cx,v.cy))return;
   const x=tx(v.cx),y=ty(v.cy),s=Math.max(4,sz*1.1);
   g.fillStyle='#f0b040';g.strokeStyle='#000';g.lineWidth=2;g.beginPath();g.rect(x-s,y-s,s*2,s*2);g.stroke();g.fill();
-  if(sz>5){g.fillStyle='#fff';g.font=LF(sz);g.textAlign='center';g.strokeText(v.name,x,y-s-4);g.fillText(v.name,x,y-s-4)}
+  if(sz>5){
+   g.fillStyle='#fff';g.font=LF(sz);g.textAlign='center';g.strokeText(v.name,x,y-s-4);g.fillText(v.name,x,y-s-4);
+   /* köy türü: hangi köyde ne bulunacağı haritadan görülür */
+   if(v.typeName&&sz>7){g.font=LF(sz*.8);g.fillStyle='#ffd9a0';g.strokeText(v.typeName,x,y+s+11);g.fillText(v.typeName,x,y+s+11)}
+  }
  });
  /* kamplar ve sandık odası */
  const SEAC={wreck:['#e0884a','Enkaz'],castaway:['#7ad07a','Kazazede'],lighthouse:['#ffffff','Fener']};

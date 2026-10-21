@@ -208,7 +208,7 @@ net.on('hello',(m,P)=>{
  HG.toast(P.name+' bağlanıyor…');
  sendSnapshot(P);
 });
-const rulesNow=()=>({diff:HG.cfg.diff,death:HG.cfg.death,season:HG.cfg.season,wear:HG.cfg.wear,peace:HG.cfg.peace});
+const rulesNow=()=>({diff:HG.cfg.diff,death:HG.cfg.death,season:HG.cfg.season,wear:HG.cfg.wear,cmd:HG.cfg.cmd,peace:HG.cfg.peace});
 async function sendSnapshot(P){
  try{
   const s=HG.snapshotRaw('Co-op');
@@ -310,10 +310,10 @@ net.on('welcome',(m,P)=>{
 });
 net.applyRules=r=>{
  if(!r)return;
- net.myRules=net.myRules||{diff:HG.cfg.diff,death:HG.cfg.death,season:HG.cfg.season,wear:HG.cfg.wear,peace:HG.cfg.peace};
+ net.myRules=net.myRules||{diff:HG.cfg.diff,death:HG.cfg.death,season:HG.cfg.season,wear:HG.cfg.wear,cmd:HG.cfg.cmd,peace:HG.cfg.peace};
  if(r.diff!==undefined)HG.cfg.diff=r.diff;
  HG.cfg.death=r.death==='perm'?'bed':r.death;                /* konuk, kendi tarayıcı kaydını silmesin diye kalıcı ölüm uygulanmaz */
- HG.cfg.season=r.season;HG.cfg.peace=r.peace;if(typeof r.wear==='boolean')HG.cfg.wear=r.wear;
+ HG.cfg.season=r.season;HG.cfg.peace=r.peace;if(typeof r.wear==='boolean')HG.cfg.wear=r.wear;if(typeof r.cmd==='boolean')HG.cfg.cmd=r.cmd;
 };
 net.on('snap',async(m,P)=>{
  if(HG.coop.mode!=='guest'||P!==net.hostP)return;

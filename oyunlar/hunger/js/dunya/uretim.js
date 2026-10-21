@@ -1,7 +1,7 @@
 /* Hunger 3D - harita üretimi (ada, göller, nesneler) */
 (()=>{
 'use strict';
-const {T,O,mulberry32,hash,fbm,clamp,smooth,ANIMAL}=HG;
+const {T,O,mulberry32,hash,fbm,vnoise,clamp,smooth,ANIMAL}=HG;
 /* size: yalnızca eski (384) kayıtları yeniden kurmak için; verilmezse güncel harita boyutu kullanılır.
    Eski boyutta üretim, eski sürümle birebir aynı dünyayı verir (kayıtlı nesne dizisi uyuşsun diye). */
 /* Tatlı su gölleri: içlerinde ve çevrelerinde (2 kare) ağaç, palmiye ve meyve çalısı bulunmaz. Rastgele sayı kullanmaz; üretimin sonunda ve kayıt yüklenince uygulanır. */
@@ -30,7 +30,38 @@ function genWorld(seed,size){
  /* her tohum farklı ada biçimi: eksen oranı, dönüş, kayma ve kıyı bükülmesi */
  const rot=sp()*6.283,cr=Math.cos(rot),sr=Math.sin(rot),axr=.8+sp()*.4,ayr=.8+sp()*.4,ox=(sp()-.5)*.14,oy=(sp()-.5)*.14,wp=.18+sp()*.3;
  const tile=new Uint8Array(W*H),obj=new Uint8Array(W*H),hgt=new Float32Array(W*H);
- const dMain=(x,y)=>{const u=((x+.5)/W-.5-ox)*2/LAND,v=((y+.5)/H-.5-oy)*2/LAND,ru=(u*cr+v*sr)/axr,rv=(-u*sr+v*cr)/ayr;return Math.max(0,Math.sqrt(ru*ru+rv*rv)+(fbm(x/46,y/46,seed+3)-.5)*wp)};
+ /* Gürültü alanları: her karede yeniden hesaplamak yerine seyrek ızgarada bir kez hesaplanır ve
+    aradaki değerler karıştırılarak bulunur. Harita dört kat büyüdüğü hâlde üretim süresi artmaz. */
+ const field=(step,fn)=>{
+  const gw=Math.ceil(W/step)+2,gh=Math.ceil(H/step)+2,a=new Float32Array(gw*gh);
+  for(let j=0;j<gh;j++)for(let i=0;i<gw;i++)a[j*gw+i]=fn(i*step,j*step);
+  return (x,y)=>{
+   const fx=x/step,fy=y/step,ix=fx|0,iy=fy|0,tx=fx-ix,ty=fy-iy,o=iy*gw+ix;
+   const a0=a[o],a1=a[o+1],a2=a[o+gw],a3=a[o+gw+1];
+   return (a0+(a1-a0)*tx)+((a2+(a3-a2)*tx)-(a0+(a1-a0)*tx))*ty;
+  };
+ };
+ /* Alan sekizlikleri: ızgara adımının altındaki ayrıntı zaten görünmediğinden az sekizlik yeter.
+    (Eski harita bu alanları kullanmaz; kayıt uyumu için orada özgün fbm çağrıları korunur.) */
+ const fbmN=(x,y,s,n)=>{let t=0,a=.5,f=1,m=0;for(let i=0;i<n;i++){t+=a*vnoise(x*f,y*f,s+i*17);m+=a;f*=2;a*=.5}return t/m};
+ const NUL=()=>.5;
+ const mk=(st,sc,sd,oc)=>LEG?NUL:field(st,(x,y)=>fbmN(x/sc,y/sc,sd,oc));
+ const F_warp=mk(8,46,seed+3,2);
+ const F_base=mk(4,26,seed,2);
+ const F_isle=mk(4,9,seed+777,2);
+ const F_mount=mk(4,22,seed+5,2);
+ const F_det=mk(3,5,seed+8,1);
+ const F_rock=mk(4,9,seed+99,2);
+ const F_pond=mk(4,7,seed+7,2);
+ const F_for=mk(4,12,seed+33,2);
+ const F_ore=mk(3,6,seed+55,1);
+ /* sırtlı dağ dizileri, tepeler, nem ve sıcaklık (biyomlar) */
+ const F_rdg=LEG?NUL:field(5,(x,y)=>{const n=fbmN(x/34,y/34,seed+21,3);return 1-Math.abs(2*n-1)});
+ const F_rdg2=LEG?NUL:field(4,(x,y)=>{const n=fbmN(x/15,y/15,seed+23,2);return 1-Math.abs(2*n-1)});
+ const F_hill=mk(5,30,seed+27,2);
+ const F_moist=mk(6,38,seed+31,2);
+ const F_warm=mk(8,52,seed+37,2);
+ const dMain=(x,y)=>{const u=((x+.5)/W-.5-ox)*2/LAND,v=((y+.5)/H-.5-oy)*2/LAND,ru=(u*cr+v*sr)/axr,rv=(-u*sr+v*cr)/ayr;return Math.max(0,Math.sqrt(ru*ru+rv*rv)+((LEG?fbm(x/46,y/46,seed+3):F_warp(x,y))-.5)*wp)};
  /* açık deniz adacıkları: ana adadan uzak, birbirinden ayrık küçük kara parçaları */
  const islets=[],reefs=[];
  if(!LEG){
@@ -52,7 +83,7 @@ function genWorld(seed,size){
  }
  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
   const d=dMain(x,y);
-  const n=fbm(x/26,y/26,seed),isle=Math.max(0,fbm(x/9,y/9,seed+777)-.66)*2.4*smooth(.62,.9,d)*(1-smooth(.96,1.05,d));
+  const n=LEG?fbm(x/26,y/26,seed):F_base(x,y),isle=Math.max(0,(LEG?fbm(x/9,y/9,seed+777):F_isle(x,y))-.66)*2.4*smooth(.62,.9,d)*(1-smooth(.96,1.05,d));
   let e=(1-Math.pow(d,1.7))+(n-.5)*.75+isle,onIslet=false;
   if((islets.length||reefs.length)&&e<.3){
    for(const q of islets){
@@ -69,8 +100,8 @@ function genWorld(seed,size){
   let t,hh=0;
   if(e<.1){t=T.DEEP;hh=-Math.min(3.4,(.1-e)*13)}   /* açıklara doğru derinleşir */
   else if(e<.2)t=T.SHAL;else if(e<.28)t=T.SAND;
-  else{
-   /* yükseklik: dağlık bölgeler (kıyıya yaklaştıkça alçalır) */
+  else if(LEG){
+   /* eski harita (kayıt uyumu): önceki yükseklik üretimi olduğu gibi korunur */
    const m=clamp((fbm(x/22,y/22,seed+5)-.46)/.3,0,1);
    hh=Math.pow(m,1.3)*6.5*clamp((e-.32)/.25,0,1)+fbm(x/5,y/5,seed+8)*.5*clamp((e-.3)/.2,0,1);
    if(onIslet)hh*=.2;
@@ -78,6 +109,23 @@ function genWorld(seed,size){
    if(onIslet){if(hh>.9)t=T.ROCK}
    else if(hh>3.2||e>.9||(e>.5&&fbm(x/9,y/9,seed+99)>.76))t=T.ROCK;
    else if(e>.4&&e<.6&&hh<.7&&fbm(x/7,y/7,seed+7)>.74)t=T.POND;
+  }else{
+   /* Yeni harita: sırtlı dağ dizileri, aralarında vadiler, kıyıya doğru alçalan tepeler.
+      rg: sırt gürültüsü (1 = sırt çizgisi), mMask: dağlık bölge, shelf: kıyıdan içeri geçiş. */
+   const shelf=clamp((e-.3)/.26,0,1);
+   const mMask=clamp((F_mount(x,y)-.47)/.2,0,1);
+   const rg=F_rdg(x,y),rg2=F_rdg2(x,y);
+   const hills=F_hill(x,y);
+   const ridge=Math.pow(rg,2.1)*.78+Math.pow(rg2,2.6)*.22;
+   hh=shelf*(hills*1.15+(.1+.9*mMask)*(ridge*7.6+Math.pow(ridge,3.2)*4.2))+F_det(x,y)*.5*shelf;
+   if(onIslet)hh*=.18;
+   const moist=F_moist(x,y);
+   t=T.GRASS;
+   if(onIslet){if(hh>.9)t=T.ROCK}
+   else if(hh>3.9||e>.93||(hh>2.3&&F_rock(x,y)>.8))t=T.ROCK;                  /* yayla ve kayalık yamaçlar */
+   else if(hh<.8&&moist>.56&&F_pond(x,y)>.645&&e>.34)t=T.POND;                /* bataklık gözleri */
+   hgt[y*W+x]=hh;tile[y*W+x]=t;
+   continue;
   }
   tile[y*W+x]=t;hgt[y*W+x]=hh;
  }
@@ -101,16 +149,82 @@ function genWorld(seed,size){
   const X=pcx+x,Y=pcy+y;if(X<1||Y<1||X>=W-1||Y>=H-1)continue;
   if((x*x)/16+(y*y)/9<=1&&tile[Y*W+X]>=T.SAND&&tile[Y*W+X]!==T.POND){tile[Y*W+X]=T.POND;hgt[Y*W+X]=0}
  }
+ /* ---- dereler: dağ eteklerinden denize inen vadiler; alçak kesimlerinde tatlı su akar ----
+    Su yüzeyi tüm haritada tek düzeydedir, bu yüzden yüksekte kalan kesim kuru dere yatağı olarak
+    oyulur; deniz seviyesine yaklaşan kesim göl karesine (içilebilir tatlı su) çevrilir. */
+ const rivers=[];
+ if(!LEG){
+  const rr=mulberry32(seed^0x7a17e2),want=Math.max(4,Math.round(W*H/65536*.75));
+  const inb=(x,y)=>x>2&&y>2&&x<W-3&&y<H-3;
+  for(let n=0,tr=0;n<want&&tr<6000;tr++){
+   const x0=8+((rr()*(W-16))|0),y0=8+((rr()*(H-16))|0),i0=y0*W+x0;
+   if(hgt[i0]<3.4||tile[i0]<=T.SAND)continue;
+   if(rivers.some(r=>Math.hypot(r.x-x0,r.y-y0)<W*.055))continue;
+   const path=[];let x=x0,y=y0,px=0,py=0,ok=false,up=0;
+   for(let st=0;st<4000;st++){
+    path.push(y*W+x);
+    let bx=0,by=0,bh=1e9;const jit=(rr()-.5)*.12;
+    for(let j=-1;j<=1;j++)for(let k=-1;k<=1;k++){
+     if(!j&&!k)continue;
+     const X=x+k,Y=y+j;if(!inb(X,Y))continue;
+     const q=Y*W+X;
+     let h=tile[q]<=T.SHAL?-99:hgt[q];
+     if(k===px&&j===py)h-=.14;                       /* yön sürekliliği: keskin dönüş azalır */
+     h+=jit*(k*.31+j*.17);                           /* hafif kıvrım */
+     if(h<bh){bh=h;bx=k;by=j}
+    }
+    if(!bx&&!by)break;
+    px=bx;py=by;x+=bx;y+=by;
+    const q=y*W+x;
+    if(tile[q]<=T.SHAL){path.push(q);ok=true;break}  /* denize ulaştı */
+    if(hgt[q]>hgt[path[path.length-1]]+.5){if(++up>70)break}  /* sığ çukurlar aşılır, derin çukurda durur */
+   }
+   if(!ok||path.length<30)continue;
+   for(let st=0;st<path.length;st++){
+    const i=path[st],cx=i%W,cy=(i/W)|0,p=st/path.length;
+    const wd=1+Math.round(p*1.6);                    /* denize yaklaştıkça genişler */
+    const deep=.9+p*.8;
+    for(let j=-wd-1;j<=wd+1;j++)for(let k=-wd-1;k<=wd+1;k++){
+     const X=cx+k,Y=cy+j;if(!inb(X,Y))continue;
+     const q=Y*W+X,dd=Math.hypot(j,k);
+     if(tile[q]<=T.SHAL)continue;
+     const cut=deep*Math.max(0,1-dd/(wd+1.2));
+     if(cut<=0)continue;
+     hgt[q]=hgt[q]-cut;
+     if(dd<=wd&&hgt[q]<.55){tile[q]=T.POND;hgt[q]=Math.min(hgt[q],0);obj[q]=O.NONE}
+     else if(tile[q]===T.ROCK&&hgt[q]<1.2)tile[q]=T.GRASS;
+    }
+   }
+   rivers.push({x:x0,y:y0,n:path.length});n++;
+  }
+ }
  /* nesneler */
  for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++){
   const i=y*W+x,t=tile[i],r=rnd();
   if(t===T.GRASS){
-   const f=fbm(x/12,y/12,seed+33);
-   if(f>.6){if(r<.17)obj[i]=O.TREE;else if(r<.185)obj[i]=O.BUSH}
-   else if(r<.018)obj[i]=O.TREE;else if(r<.0200)obj[i]=O.ROCK;else if(r<.0350)obj[i]=O.BUSH;
+   const f=LEG?fbm(x/12,y/12,seed+33):F_for(x,y);
+   if(LEG){
+    if(f>.6){if(r<.17)obj[i]=O.TREE;else if(r<.185)obj[i]=O.BUSH}
+    else if(r<.018)obj[i]=O.TREE;else if(r<.0200)obj[i]=O.ROCK;else if(r<.0350)obj[i]=O.BUSH;
+   }else{
+    /* Biyomlar: nem ve sıcaklığa göre orman, çayır, kurak ova ve bataklık kenarı.
+       Bitki örtüsünün sıklığı bölgeden bölgeye belirgin biçimde değişir. */
+    const moist=F_moist(x,y),warm=F_warm(x,y),h=hgt[i];
+    if(moist>.56&&f>.5){                                   /* çam ormanı: sık ağaç */
+     if(r<.19)obj[i]=O.TREE;else if(r<.215)obj[i]=O.BUSH;else if(r<.219)obj[i]=O.ROCK;
+    }else if(moist>.66&&h<.8){                             /* bataklık kenarı: çalılık */
+     if(r<.012)obj[i]=O.TREE;else if(r<.075)obj[i]=O.BUSH;
+    }else if(moist<.38){                                   /* kurak ova: seyrek, taşlık */
+     if(r<.004)obj[i]=O.TREE;else if(r<.026)obj[i]=O.ROCK;else if(r<.034)obj[i]=O.BUSH;
+     if(!obj[i]&&warm>.62&&r<.038)obj[i]=O.PALM;           /* sıcak kesimde tek tük palmiye */
+    }else{                                                 /* çayır: açık alan, öbekli ağaç */
+     if(f>.62){if(r<.075)obj[i]=O.TREE;else if(r<.115)obj[i]=O.BUSH}
+     else if(r<.013)obj[i]=O.TREE;else if(r<.019)obj[i]=O.ROCK;else if(r<.045)obj[i]=O.BUSH;
+    }
+   }
   }else if(t===T.SAND){if(r<.014)obj[i]=O.PALM}
   else if(t===T.ROCK){
-   const o=fbm(x/6,y/6,seed+55);
+   const o=LEG?fbm(x/6,y/6,seed+55):F_ore(x,y);
    if(o>.64&&r<.02){const q=rnd(),h=hgt[i];if(q<.72)obj[i]=O.COAL;else if(q<.93){if(h>1.6)obj[i]=O.COPPER}else if(h>3.4)obj[i]=O.IRON}
    else if(r<.008)obj[i]=O.ROCK;
   }
@@ -156,18 +270,43 @@ function genWorld(seed,size){
   NN=['Ayşe','Mehmet','Fatma','Hasan','Zeynep','Ali','Elif','Hüseyin','Emine','Yusuf','Hatice','Osman','Selim','Meryem','Kemal','Nur'],
   FEM=new Set(['Ayşe','Fatma','Zeynep','Elif','Emine','Hatice','Meryem','Nur']),
   PR=['farmer','hunter','fisher','smith','healer','woodcut','miner'];
+ /* Köy türleri: her köy farklı meslek karışımı ve farklı bir ayrıcalık taşır.
+    Köy sayısı azdır; bu yüzden hangi köye gidileceği oyuncu için bir karar hâline gelir. */
+ const VTYPE=[
+  {k:'ciftlik',n:'Çiftlik köyü',pr:['farmer','farmer','healer','woodcut'],p:'Tahıl, ekmek ve şifalı ot'},
+  {k:'maden',n:'Maden köyü',pr:['miner','smith','smith','hunter'],p:'Cevher, külçe ve alet'},
+  {k:'avci',n:'Avcı köyü',pr:['hunter','hunter','woodcut','healer'],p:'Et, deri ve kürk'},
+  {k:'balikci',n:'Balıkçı kasabası',pr:['fisher','fisher','smith','healer'],p:'İskele, kayık ve balık',coast:true},
+  {k:'zanaat',n:'Zanaat köyü',pr:['smith','woodcut','farmer','healer'],p:'Alet onarımı ve karma ticaret'}
+ ];
  {
-  const want=Math.max(3,Math.round(2.6*SC));let tries=0;
+  const want=LEG?Math.max(3,Math.round(2.6*SC)):Math.max(2,Math.round(.33*SC));
+  const MIND=LEG?62:Math.max(90,Math.round(W*.115));      /* yeni haritada köyler birbirinden uzaktır */
+  let tries=0,nCoast=0,ti=(rnd()*VTYPE.length)|0;
   const shuf=a=>{for(let i=a.length-1;i>0;i--){const j=(rnd()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-  while(villages.length<want&&tries++<4000){
+  const maxTry=LEG?4000:7000;
+  while(villages.length<want&&tries++<maxTry){
    const cx=20+((rnd()*(W-40))|0),cy=20+((rnd()*(H-40))|0);
    if(Math.hypot(cx-sx,cy-sy)<48)continue;
-   let ok=true;for(const v of villages)if(Math.hypot(v.cx-cx,v.cy-cy)<62){ok=false;break}
+   let ok=true;for(const v of villages)if(Math.hypot(v.cx-cx,v.cy-cy)<MIND){ok=false;break}
    if(!ok)continue;
+   /* kıyı yoklaması: yakında deniz varsa burası balıkçı kasabası olabilir (kumsal kareleri kabul edilir).
+      İlk denemeler yalnızca kıyı adaylarını kabul eder: her haritada kasaba kurulabilsin. */
+   let wd=null;
+   if(!LEG&&nCoast<2){
+    let bd=1e9;
+    for(let j=-17;j<=17;j++)for(let k=-17;k<=17;k++){
+     const X=cx+k,Y=cy+j;if(X<3||Y<3||X>=W-3||Y>=H-3)continue;
+     if(tile[Y*W+X]>T.SHAL)continue;
+     const d2=j*j+k*k;if(d2<bd){bd=d2;wd={x:k,y:j}}
+    }
+    if(bd>17*17)wd=null;
+   }
+   if(!LEG&&nCoast<2&&tries<Math.round(maxTry*.45)&&!wd)continue;
    let hmin=9,hmax=-9,hs=0,hn=0;
    for(let j=-10;j<=10&&ok;j++)for(let k=-10;k<=10;k++){
     const i=(cy+j)*W+cx+k,t=tile[i];
-    if(t!==T.GRASS){ok=false;break}
+    if(t!==T.GRASS&&!(wd&&t===T.SAND)){ok=false;break}
     const h=hgt[i];hmin=Math.min(hmin,h);hmax=Math.max(hmax,h);hs+=h;hn++;
    }
    if(!ok||hmax-hmin>2.4)continue;
@@ -175,9 +314,20 @@ function genWorld(seed,size){
    for(let j=-14;j<=14;j++)for(let k=-14;k<=14;k++){
     const x=cx+k,y=cy+j;if(x<1||y<1||x>=W-1||y>=H-1)continue;
     const i=y*W+x,dd=Math.max(Math.abs(j),Math.abs(k)),f=clamp((dd-11)/3,0,1),w=1-f*f*(3-2*f);
-    if(tile[i]===T.GRASS||tile[i]===T.ROCK){hgt[i]=hgt[i]*(1-w)+h0*w;if(dd<=12){obj[i]=O.NONE;if(tile[i]===T.ROCK)tile[i]=T.GRASS}}
+    if(tile[i]===T.GRASS||tile[i]===T.ROCK||tile[i]===T.SAND){hgt[i]=hgt[i]*(1-w)+h0*w;if(dd<=12){obj[i]=O.NONE;if(tile[i]===T.ROCK)tile[i]=T.GRASS}}
    }
-   const spots=shuf([[-6,-5],[3,-5],[-6,3],[3,3]]),nh=3+((rnd()*2)|0),profs=shuf(PR.slice()).slice(0,nh),npcs=[],houses=[],extras=[];
+   /* tür seçimi: sırayla dolaşılır; balıkçı kasabası yalnızca kıyıda ve en çok iki tane olur */
+   let vt=null;const wdir=wd;
+   if(LEG)vt={k:'',n:'',pr:shuf(PR.slice()),p:''};
+   else if(wd){vt=VTYPE.find(c=>c.coast);nCoast++}
+   else{
+    for(let a=0;a<VTYPE.length&&!vt;a++){
+     const c=VTYPE[(ti+a)%VTYPE.length];
+     if(c.coast)continue;
+     vt=c;ti=(ti+a+1)%VTYPE.length;
+    }
+   }
+   const spots=shuf([[-6,-5],[3,-5],[-6,3],[3,3]]),nh=LEG?3+((rnd()*2)|0):4,profs=(LEG?vt.pr:vt.pr.slice()).slice(0,nh),npcs=[],houses=[],extras=[];
    const names=shuf(NN.slice());
    const dec=(k,x,y,ry,solid,extra)=>{
     const tx=Math.floor(x),ty=Math.floor(y);
@@ -226,9 +376,45 @@ function genWorld(seed,size){
    const wx=cx+2,wy=cy+2;
    dec('well',wx+.5,wy+.5,0,true);
    obj[cy*W+cx]=O.FIRE;obj[(cy+1)*W+cx+4]=O.BENCH;obj[(cy+2)*W+cx-3]=O.BENCH;   /* ev duvarlarının dışında: (cx+3,cy-1) evin köşe duvarını eziyordu */
-   dec('sign',cx+.5,cy-9.5,0,false,{text:VN[villages.length%VN.length]});
+   dec('sign',cx+.5,cy-9.5,0,false,{text:VN[villages.length%VN.length]+(vt.n?' · '+vt.n:'')});
+   /* türe özgü ek yapılar ve iskele */
+   if(!LEG){
+    const put=(ox2,oy2,v)=>{const X=cx+ox2,Y=cy+oy2;if(X>1&&Y>1&&X<W-2&&Y<H-2&&!obj[Y*W+X]&&tile[Y*W+X]===T.GRASS)obj[Y*W+X]=v};
+    if(vt.k==='ciftlik'){for(let j=-2;j<=2;j++)for(let k=-2;k<=2;k++)dec('crop',cx+8.5+k,cy+8.5+j,0,false);dec('hay',cx+11.5,cy+6.5,0,true)}
+    else if(vt.k==='maden'){dec('cart',cx-8.5,cy+8.5,0,true);dec('rocks',cx-6.5,cy+8.5,0,true);put(-7,6,O.FURN);put(-5,6,O.BENCH)}
+    else if(vt.k==='avci'){dec('rack',cx+8.5,cy-8.5,0,true,{pelts:1});dec('dummy',cx+6.5,cy-8.5,0,true)}
+    else if(vt.k==='zanaat'){put(4,-6,O.BENCH);put(6,-6,O.FURN);dec('logs',cx+8.5,cy-6.5,0,true)}
+    else if(vt.k==='balikci'&&wdir){
+     /* İskele: köyden denize uzanan üç kare genişliğinde taş-kum dil; üzerinde fıçı ve sandıklar,
+        ucunda bağlı kayıklar ve geceleri yanan bir fener. */
+     const L=Math.hypot(wdir.x,wdir.y)||1,ux=wdir.x/L,uy=wdir.y/L;
+     let st=5,X=cx,Y=cy;
+     while(st<32){X=Math.round(cx+ux*st);Y=Math.round(cy+uy*st);if(X<3||Y<3||X>=W-3||Y>=H-3)break;if(tile[Y*W+X]<=T.SHAL)break;st++}
+     let last=null,n0=0;
+     for(;n0<17;n0++,st++){
+      X=Math.round(cx+ux*st);Y=Math.round(cy+uy*st);
+      if(X<3||Y<3||X>=W-3||Y>=H-3)break;
+      if(tile[Y*W+X]>T.SHAL&&n0>3)break;                 /* karaya geri çıktı */
+      for(let j=-1;j<=1;j++)for(let k=-1;k<=1;k++){
+       const X2=X+k,Y2=Y+j,q=Y2*W+X2;
+       if(X2<2||Y2<2||X2>=W-2||Y2>=H-2)continue;
+       if(tile[q]>T.SHAL)continue;
+       tile[q]=T.SAND;hgt[q]=0;obj[q]=O.NONE;
+      }
+      if(n0===4)dec('barrel',X+1.5,Y+.5,0,true);
+      if(n0===8)dec('crate',X-1.5,Y+.5,0,true);
+      last={x:X,y:Y};
+     }
+     if(last&&n0>5){
+      dec('boat',last.x+1.5,last.y+.5,1.57,true);
+      dec('boat',last.x-1.5,last.y+.5,1.57,true);
+      dec('lamp',last.x+.5,last.y+.5,0,true);
+      dec('rack',last.x+.5,last.y-1.5,0,true,{fish:1});
+     }
+    }
+   }
    for(let k=0;k<22;k++){const a=rnd()*6.28,rr=3+rnd()*7.5,x=Math.round(cx+Math.cos(a)*rr),y=Math.round(cy+Math.sin(a)*rr),i=y*W+x;if(!obj[i]&&tile[i]===T.GRASS)extras.push({k:'tuft',x:x+.3+rnd()*.4,z:y+.3+rnd()*.4,ry:rnd()*6,c:(rnd()*5)|0})}
-   villages.push({cx,cy,name:VN[villages.length%VN.length],npcs,houses,extras});
+   villages.push({cx,cy,name:VN[villages.length%VN.length],type:vt.k||'',typeName:vt.n||'',perk:vt.p||'',npcs,houses,extras});
   }
  }
  /* terk edilmiş kamplar: ada geneline dağılmış sandıklı yerler (uzak kamplar daha değerli) */
@@ -350,7 +536,7 @@ function genWorld(seed,size){
    if(tile[i]!==T.GRASS||obj[i]||used.has(i))continue;
    if(Math.hypot(x-sx,y-sy)<14||hgt[i]>3)continue;
    if(villages.some(v=>Math.hypot(v.cx-x,v.cy-y)<16))continue;
-   const f=fbm(x/12,y/12,seed+33);
+   const f=LEG?fbm(x/12,y/12,seed+33):F_for(x,y);
    if((type==='deer'||type==='boar'||type==='wolf')&&f<.5)continue;
    if((type==='sheep'||type==='cow')&&f>.55)continue;
    /* bölgesellik: aynı tür başka bir kümeye yakın olamaz; farklı türler ise birbirine denk gelebilir */
@@ -364,7 +550,7 @@ function genWorld(seed,size){
   }
  }
  pondClean(tile,obj,W);
- return {tile,obj,hgt,shore,animals,villages,camps,caves,sx:sx+.5,sy:sy+.5,islets,reefs,size:W,entSC:SC};
+ return {tile,obj,hgt,shore,animals,villages,camps,caves,sx:sx+.5,sy:sy+.5,islets,reefs,rivers,size:W,entSC:SC};
 }
 /* Eski (384) dünyayı güncel büyük haritanın ortasına yerleştirir; çevresi açık denizdir. off: kaydırma (kare). */
 function embedLegacy(w,size,seed){
