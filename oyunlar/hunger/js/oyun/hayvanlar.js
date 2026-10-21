@@ -316,10 +316,10 @@ function updateAnimals(dt){
  /* yeniden doğma: haritadaki sayı hedefin altına düşerse uzak bir otlakta yeni hayvan çıkar */
  G.animTimer=(G.animTimer||0)-dt;
  if(G.animTimer<=0){
-  G.animTimer=22;const SCL=G.entSC||W*H/65536;
+  G.animTimer=HG.BAL.animEvery;const SCL=G.entSC||W*H/65536;
   const cnt={};for(const a of L)if(!a.dying)cnt[a.t]=(cnt[a.t]||0)+1;
   for(const t in ANIMAL){
-   if((cnt[t]||0)>=ANIMAL[t].want*SCL*.8)continue;
+   if((cnt[t]||0)>=ANIMAL[t].want*SCL*HG.BAL.animFrac)continue;
    for(let g=0;g<40;g++){
     const x=2+((rnd()*(W-4))|0),y=2+((rnd()*(H-4))|0),i=y*W+x;
     if(G.tile[i]!==T.GRASS||G.obj[i]||Math.hypot(x-G.px,y-G.py)<50||G.hgt[i]>3||(HG.coopOther&&HG.coopOther({x,z:y},50)))continue;

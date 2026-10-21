@@ -8,9 +8,10 @@ const $=HG.$;
 function newState(seed,emb){
  /* emb: eski (384) kayıtlar için ada, güncel büyük haritanın ortasına yerleştirilir */
  const w=emb?HG.embedLegacy(genWorld(seed,emb),emb,seed):genWorld(seed);
+ if(HG.thinWorld)HG.thinWorld(w.obj,w.sx,w.sy,HG.pendingWorld&&HG.pendingWorld.res);                /* doğal kaynakların bir kısmı kaldırılır (js/veri/denge.js); rastgele sayı kullanılmaz */
  for(const k in G)delete G[k];
  Object.assign(G,{seed,tile:w.tile,obj:w.obj,hgt:w.hgt,drops:[],animals:HG.makeAnimals(w.animals),pz:undefined,vz:0,air:false,shore:w.shore,px:w.sx,py:w.sy,fx:0,fy:-1,objDirty:true,tg:null,
-  hp:100,hun:92,thr:92,warm:100,stam:100,san:100,bleed:0,torchFuel:360,torchLit:false,tired:false,arrows:[],clock:0,inv:Array(SLOTS).fill(null),sel:0,flags:{},timers:[],
+  hp:100,hun:HG.BAL.startStat,thr:HG.BAL.startStat,warm:100,stam:100,san:100,bleed:0,torchFuel:360,torchLit:false,tired:false,arrows:[],clock:0,thin:1,sp0:{x:w.sx,y:w.sy},inv:Array(SLOTS).fill(null),sel:0,flags:{},timers:[],
   villages:w.villages,camps:w.camps||[],caves:w.caves||[],explore:new Uint8Array(Math.ceil(HG.W/4)*Math.ceil(HG.H/4)),cave:null,emb:emb||0,islets:w.islets||[],reefs:w.reefs||[],onRaft:false,raftHp:100,mask:false,seaT:0,sharkCd:0,entSC:w.entSC,sdist:HG.seaDistField(w.tile,HG.W),npcs:HG.makeNpcs(w.villages),sheltered:false,shelterCheck:0,shelterT:0,moving:false,walk:0,nearFire:false,cause:'',saveT:0,sprint:false});
  G.inv[0]={id:'rock',n:1};                      /* başlangıçta elde El Taşı bulunur: çıplak elle ağaç kesilemez, kazılamaz */
  HG.progInit();
@@ -36,7 +37,7 @@ function decObj(s,n){
 function snapshot(name){return HG.withSurface(()=>snapshotRaw(name))}
 function snapshotRaw(name){
  const d=HG.dayNo();
- return {game:'hunger-3d',v:7,hv:2,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
+ return {game:'hunger-3d',v:7,hv:2,thin:G.thin?1:0,ws:HG.W,emb:G.emb||0,rf:G.onRaft?1:0,meta:{name:name||'',ts:Date.now(),day:d,lvl:G.lvl||1,th:HG.saveThumb?HG.saveThumb():''},prog:HG.progSave(),camps:(G.camps||[]).map(c=>c.open?1:0),cav:(G.caves||[]).map(c=>c.vault?1:0),wp:G.wp||null,exp:encExp(G.explore),timers:G.timers,dmg:Object.fromEntries(Object.entries(G.dmg||{}).map(([k,v])=>[k,+v.toFixed(3)])),npcs:HG.npcSave(),seed:G.seed,px:G.px,py:G.py,yaw:look.yaw,hp:G.hp,hun:G.hun,thr:G.thr,warm:G.warm,stam:+G.stam.toFixed(1),san:+G.san.toFixed(1),bleed:+(G.bleed||0).toFixed(1),o2:+(G.o2===undefined?100:G.o2).toFixed(1),torchFuel:+G.torchFuel.toFixed(1),clock:G.clock,inv:G.inv,sel:G.sel,flags:G.flags,drops:G.drops,animals:G.animals.filter(a=>!a.gone&&!HG.ANIMAL[a.t].foe&&!HG.ANIMAL[a.t].dyn).map(a=>({t:a.t,x:+a.x.toFixed(2),z:+a.z.toFixed(2),hp:a.hp,yaw:+a.yaw.toFixed(2),sheared:a.sheared?1:0,dead:a.dying&&!a.gone?1:0})),objr:encObj(G.obj)};
 }
 const validSave=s=>!!(s&&typeof s==='object'&&s.v===7&&typeof s.seed==='number'&&typeof s.px==='number'&&typeof s.py==='number'&&(typeof s.obj==='string'||typeof s.objr==='string')&&Array.isArray(s.inv));
 function readJSON(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
@@ -120,7 +121,7 @@ function deleteSlot(id){
 }
 
 /* ---- yüklenme ekranı ---- */
-const TIPS=['Ateş yakmak için odun ve kıvılcım gerekir; geceleri ateş en güvenli dostundur.','Kurtlar gece sürü hâlinde dolaşır. Işıktan ve ateşten çekinirler.','Köylülerle ticaret yaparak altın kazanabilir, görev tamamlayarak ödül alabilirsin.','Kamplardaki sandıklarda hem değerli eşya hem de adanın geçmişini anlatan notlar bulunur.','Her 5. gece Kan Ayı doğar: düşmanlar çoğalır ve gökyüzü kızıllaşır.','Uyku tulumu veya yatakla geceyi atlatabilirsin; yalnızca güvenli bir barınakta uyu.','Yüksekten düşmek can götürür; uçurumlardan atlamadan önce yüksekliği ölç.','Suya düşen eşyalar bir süre yüzer, sonra derin suda batar.','Gelişim ekranında (K) kazandığın puanları yeteneklere harcayabilirsin.','Rüzgâr yönü ve yağmur oka da etki eder; uzak hedeflerde hafifçe yukarı nişan al.','Deniz dibine bakıp sol tuşu basılı tutarak midye, yosun ve nadiren inci toplanır; balıkçı bunları satın alır.','Derin suda nefes çubuğu azalır; yüzeye çıkmayı geciktirmeyin.','Çanta düzenleme tuşu, kutuları birleştirip eşya türüne göre sıralar.','Köylüler geceleri evlerinde uyur; ticaret için sabahı beklemek gerekir.','Ağaç ve çalılar barınak sayılmaz; duvar ve kapıyla kapatılmış bir alan gerekir.','Sal ile açık denize çıkabilirsin; köpek balıkları yüzenlere saldırır, salda daha güvendesin.','Batık gemilerin sandığı dipte durur. Dalış Maskesi nefesi uzatır.','Deniz fenerlerinin ışığı geceleri çok uzaktan görünür ve yön gösterir.','Başlangıçtaki El Taşı ağaç ve kaya için yeterlidir; balta ve kazma çok daha hızlıdır.','İnşa Planı ile duvar, kapı ve çit kurulur; Çekiçle Odun, Taş veya Metal seviyesine yükseltilir.'];
+const TIPS=['Kaynaklar sınırlıdır ve yavaş yeniden büyür: ağaç ve taşı israf etme, yeni bölgeleri keşfet.','Taş, bakır ve demir aletler kullandıkça aşınır. Çalışma Tezgâhına bakıp E ile onar.','Cevher eritmek için kömür gerekir: bakır külçe 2 cevher + 1 kömür, demir külçe 2 cevher + 2 kömür ister.','Ateş yakmak için odun ve kıvılcım gerekir; geceleri ateş en güvenli dostundur.','Kurtlar gece sürü hâlinde dolaşır. Işıktan ve ateşten çekinirler.','Köylülerle ticaret yaparak altın kazanabilir, görev tamamlayarak ödül alabilirsin.','Kamplardaki sandıklarda hem değerli eşya hem de adanın geçmişini anlatan notlar bulunur.','Her 5. gece Kan Ayı doğar: düşmanlar çoğalır ve gökyüzü kızıllaşır.','Uyku tulumu veya yatakla geceyi atlatabilirsin; yalnızca güvenli bir barınakta uyu.','Yüksekten düşmek can götürür; uçurumlardan atlamadan önce yüksekliği ölç.','Suya düşen eşyalar bir süre yüzer, sonra derin suda batar.','Gelişim ekranında (K) kazandığın puanları yeteneklere harcayabilirsin.','Rüzgâr yönü ve yağmur oka da etki eder; uzak hedeflerde hafifçe yukarı nişan al.','Deniz dibine bakıp sol tuşu basılı tutarak midye, yosun ve nadiren inci toplanır; balıkçı bunları satın alır.','Derin suda nefes çubuğu azalır; yüzeye çıkmayı geciktirmeyin.','Çanta düzenleme tuşu, kutuları birleştirip eşya türüne göre sıralar.','Köylüler geceleri evlerinde uyur; ticaret için sabahı beklemek gerekir.','Ağaç ve çalılar barınak sayılmaz; duvar ve kapıyla kapatılmış bir alan gerekir.','Sal ile açık denize çıkabilirsin; köpek balıkları yüzenlere saldırır, salda daha güvendesin.','Batık gemilerin sandığı dipte durur. Dalış Maskesi nefesi uzatır.','Deniz fenerlerinin ışığı geceleri çok uzaktan görünür ve yön gösterir.','Başlangıçtaki El Taşı ağaç ve kaya için yeterlidir; balta ve kazma çok daha hızlıdır.','İnşa Planı ile duvar, kapı ve çit kurulur; Çekiçle Odun, Taş veya Metal seviyesine yükseltilir.'];
 let tipI=0,tipT=0,closeT=0;
 function ldOpen(title){
  const e=$('#load');if(!e)return;clearTimeout(closeT);e.hidden=false;e.classList.remove('out');
@@ -155,7 +156,7 @@ async function startGame(load,slotId){
   HG.pondClean(G.tile,G.obj,N);                     /* gölet içi ve kenarındaki ağaç/çalı temizlenir */
   Object.assign(G,{px:s.px+off,py:s.py+off,hp:s.hp,hun:s.hun,thr:s.thr,warm:s.warm,clock:s.clock,inv:s.inv,sel:s.sel||0,flags:s.flags||{},
    o2:s.o2===undefined?100:s.o2,stam:s.stam===undefined?100:s.stam,san:s.san===undefined?100:s.san,bleed:s.bleed||0,torchFuel:s.torchFuel===undefined?360:s.torchFuel});
-  G.drops=(Array.isArray(s.drops)?s.drops:[]).filter(d=>d&&HG.IT[d.id]&&d.n>0).map(d=>({id:d.id,n:d.n,x:d.x+off,y:d.y,z:d.z+off,vx:0,vz:0,vy:0,age:5,rest:false}));
+  G.drops=(Array.isArray(s.drops)?s.drops:[]).filter(d=>d&&HG.IT[d.id]&&d.n>0).map(d=>Object.assign({id:d.id,n:d.n,x:d.x+off,y:d.y,z:d.z+off,vx:0,vz:0,vy:0,age:5,rest:false},d.d>0&&HG.BAL.dur[d.id]?{d:Math.round(d.d)}:{}));
   if(Array.isArray(s.animals)){
    /* eski kayıtlarda can küçük sayılardı: yüzdeye çevrilir */
    const OLD={sheep:8,cow:14,rabbit:3,deer:9,wolf:14,boar:12};
@@ -164,6 +165,7 @@ async function startGame(load,slotId){
    G.animals=HG.makeAnimals(s.animals);
   }
   if(Array.isArray(s.timers))G.timers=s.timers.filter(t=>t&&t.i>=0&&t.i<(oldSz?oldSz*oldSz:N*N)).map(t=>{t.i=mapI(t.i);return t});
+  if(!s.thin&&HG.migrateBalance)HG.migrateBalance();        /* denge öncesi kayıt: kaynaklar ve hayvanlar bir kez seyreltilir */
   /* yarım kalmış düğüm hasarı (kısmen kesilmiş ağaç, kırılmış kaya/maden) */
   G.dmg={};G.yac={};if(s.dmg&&typeof s.dmg==='object')for(const k in s.dmg){const f=+s.dmg[k],i=mapI(+k);if(i>=0&&i<(oldSz?oldSz*oldSz:N*N)&&f>0&&f<1&&G.obj[mapI(+k)])G.dmg[i]=f}
   HG.npcLoad(s.npcs);HG.progLoad(s.prog);
@@ -179,7 +181,7 @@ async function startGame(load,slotId){
   G.slot=slotUsed&&slotUsed!=='auto'?slotUsed:null;
   if(!Array.isArray(G.inv)||G.inv.length!==SLOTS)G.inv=Array(SLOTS).fill(null);
   /* bozuk veya eski sürümden kalma kayıt: tanımsız eşya ve geçersiz sayılar temizlenir (aksi halde elde tutulan eşya hata verir) */
-  G.inv=G.inv.map(x=>x&&typeof x==='object'&&HG.IT[x.id]&&x.n>0?{id:x.id,n:Math.floor(x.n)}:null);
+  G.inv=G.inv.map(x=>x&&typeof x==='object'&&HG.IT[x.id]&&x.n>0?Object.assign({id:x.id,n:Math.floor(x.n)},x.d>0&&HG.BAL.dur[x.id]?{d:Math.min(HG.BAL.dur[x.id],Math.round(x.d))}:{}):null);       /* d: alet dayanıklılığı */
   for(const [k,d] of [['hp',100],['hun',92],['thr',92],['warm',100],['clock',0],['px',0],['py',0]])if(!isFinite(G[k]))G[k]=d;
   G.sel=Math.max(0,Math.min(HG.HOT-1,G.sel|0));
   /* eski kayıt: hiç alet yoksa El Taşı verilir */
@@ -207,6 +209,7 @@ async function startGame(load,slotId){
  for(const id of ['#hud','#clock','#comp','#goal','#mini','#hot','#cross'])$(id).hidden=false;
  if(ui.touch)$('#touch').hidden=false;
  if(!load)HG.toast('Adaya vardın. El Taşı elinde hazır: bir ağaca bakıp sol tuşla art arda vurarak odun topla.');
+ else if(G.thinInfo){HG.toast('Kayıt yeni denge ayarlarına geçirildi: kaynakların ve hayvanların bir kısmı kaldırıldı.');G.thinInfo=null}
  HG.busy=false;ldClose();
  HG.lock();
  save();

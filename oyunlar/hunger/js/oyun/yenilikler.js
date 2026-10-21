@@ -297,7 +297,7 @@ HG.diffK=()=>dif().k;
 /* ---------- Başlangıç: mantarlar ve (eski kayıtlarda) tavuklar bir kez yerleştirilir ---------- */
 function seedMush(){
  const r=HG.mulberry32(((G.seed|0)^0x5f3a9c1)>>>0);
- const target=Math.round(W*H/5200);
+ const target=Math.round(W*H/5200*HG.BAL.shroomK);
  let c=0,g=0;
  while(c<target&&g++<target*70){
   const x=3+((r()*(W-6))|0),y=3+((r()*(H-6))|0),i=y*W+x;

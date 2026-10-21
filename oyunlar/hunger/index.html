@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="css/konsol.css">
 <link rel="stylesheet" href="css/menu.css">
 <link rel="stylesheet" href="css/ag.css">
+<link rel="stylesheet" href="css/iyilestirme.css">
 </head>
 <body>
 <div id="game">
@@ -89,6 +90,7 @@
       <label>Ölünce<select id="wdDeath"><option value="bed">Cenaze çantası (eşyalar düşer)</option><option value="free">Eşyalar kalsın</option><option value="perm">Kalıcı ölüm</option></select></label>
       <label>Başlangıç zamanı<select id="wdTime"><option value="0">Sabah</option><option value="1">Öğle</option><option value="2">Akşam</option></select></label>
       <label>Hayvan yoğunluğu<select id="wdAnim"><option value="1">Normal</option><option value="0">Seyrek</option></select></label>
+      <label>Kaynak yoğunluğu<select id="wdRes"><option value="1.45">Az (zor)</option><option value="1">Normal</option><option value="0.4">Bol (kolay)</option></select><small>Ağaç, kaya ve maden sayısı.</small></label>
       <label>Başlangıç eşyaları<select id="wdKit"><option value="0">Yalnızca El Taşı</option><option value="1">Temel set (balta, kazma, bandaj, yiyecek, su)</option></select></label>
       <label class="chk"><input id="wdSeason" type="checkbox"><span>Mevsimler</span></label>
       <label class="chk"><input id="wdPeace" type="checkbox"><span>Barış modu (hayvanlar hasar vermez)</span></label>
@@ -133,6 +135,7 @@
 <script src="js/veri/hayvanlar.js"></script>
 <script src="js/veri/yenilikler.js"></script>
 <script src="js/veri/genisleme.js"></script>
+<script src="js/veri/denge.js"></script>
 <script src="js/dunya/uretim.js"></script>
 <script src="js/dunya/magara.js"></script>
 <script src="js/gorsel/simgeler.js"></script>
@@ -209,10 +212,13 @@
 <script src="js/oyun/uretim-ekrani.js"></script>
 <script src="js/oyun/uretim-sure.js"></script>
 <script src="js/oyun/koruma.js"></script>
+<script src="js/oyun/zorluk.js"></script>
+<script src="js/oyun/iyilestirme.js"></script>
 <script src="js/oyun/ag.js"></script>
 <script src="js/oyun/ag-dunya.js"></script>
 <script src="js/oyun/ag-varlik.js"></script>
 <script src="js/oyun/ag-arayuz.js"></script>
+<script src="js/oyun/ag-ekstra.js"></script>
 <script src="js/oyun/menu.js"></script>
 <script src="js/oyun/giris.js"></script>
 <script src="js/oyun/dongu.js"></script>

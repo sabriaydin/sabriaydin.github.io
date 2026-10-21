@@ -3,19 +3,19 @@
 (()=>{
 'use strict';
 const {G,ui,$}=HG;
-HG.VERSION='1.83';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
+HG.VERSION='1.84';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
 const PREF='hunger-dunya';
 
 /* ============================================================ Dünya Oluştur ============================================================ */
 const START=[0,.296,.593];                          /* oyun saati başlangıcı (gün oranı): sabah, öğle, akşam */
-const KIT=[['axe1',1],['pick1',1],['bandage',3],['cfish',3],['wbottle',1]];
+const KIT=[['axe1',1],['pick1',1],['bandage',2],['cfish',2],['wbottle',1]];
 let wd=null,F={};
 function pref(){try{const p=JSON.parse(localStorage.getItem(PREF)||'null');return p&&typeof p==='object'?p:{}}catch(e){return {}}}
 function fill(){
  const c=HG.cfg,p=pref();
  F.name.value='';F.code.value='';F.code.classList.remove('bad');
  F.diff.value=String(c.diff);F.death.value=String(c.death);F.season.checked=!!c.season;F.peace.checked=!!c.peace;
- F.time.value=String(p.time!==undefined?p.time:0);F.anim.value=String(p.anim!==undefined?p.anim:1);F.kit.value=String(p.kit!==undefined?p.kit:0);
+ F.time.value=String(p.time!==undefined?p.time:0);F.anim.value=String(p.anim!==undefined?p.anim:1);F.res.value=String(p.res!==undefined?p.res:1);F.kit.value=String(p.kit!==undefined?p.kit:0);
 }
 function open(){
  if(!wd)return;
@@ -32,8 +32,8 @@ function create(){
  const c=HG.cfg;
  c.diff=F.diff.value;c.death=F.death.value;c.season=F.season.checked;c.peace=F.peace.checked;
  if(HG.settings){for(const k of ['diff','death','season','peace'])HG.settings.apply(k);HG.settings.persist()}
- const w={name:F.name.value.replace(/\s+/g,' ').trim().slice(0,30),time:+F.time.value,anim:+F.anim.value,kit:+F.kit.value};
- try{localStorage.setItem(PREF,JSON.stringify({time:w.time,anim:w.anim,kit:w.kit}))}catch(e){}
+ const w={name:F.name.value.replace(/\s+/g,' ').trim().slice(0,30),time:+F.time.value,anim:+F.anim.value,kit:+F.kit.value,res:+F.res.value||1};
+ try{localStorage.setItem(PREF,JSON.stringify({time:w.time,anim:w.anim,kit:w.kit,res:w.res}))}catch(e){}
  HG.pendingSeed=seed;HG.pendingWorld=w;
  wd.hidden=true;
  HG.initAudio();HG.startGame(false);
@@ -51,7 +51,7 @@ HG.worldDialog={open,close};
 
 function setupWorld(){
  wd=$('#wd');if(!wd)return;
- const ids={name:'wdName',code:'wdCode',diff:'wdDiff',death:'wdDeath',time:'wdTime',anim:'wdAnim',kit:'wdKit',season:'wdSeason',peace:'wdPeace'};
+ const ids={name:'wdName',code:'wdCode',diff:'wdDiff',death:'wdDeath',time:'wdTime',anim:'wdAnim',res:'wdRes',kit:'wdKit',season:'wdSeason',peace:'wdPeace'};
  for(const k in ids)F[k]=$('#'+ids[k]);
  F.code.addEventListener('input',()=>{F.code.classList.remove('bad');const v=F.code.value.toUpperCase().replace(/[^0-9A-Z]/g,'').slice(0,6);F.code.value=v.length>3?v.slice(0,3)+'-'+v.slice(3):v});
  $('#wdRnd').onclick=()=>{F.code.value=HG.worldCode((Math.random()*2147483647)|0);F.code.classList.remove('bad')};
@@ -92,6 +92,7 @@ function setupFx(){
  }
  function frame(now){
   if(menu.hidden||getComputedStyle(menu).display==='none')return;
+  if(HG.cfg.mfx===false){g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);last=now;requestAnimationFrame(frame);return}      /* ayar: menü efekti kapalı */
   const dt=Math.min(.06,(now-last)/1000);last=now;
   if(!w||cv.clientWidth!==w||cv.clientHeight!==h)size();
   if(w){

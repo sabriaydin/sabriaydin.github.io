@@ -70,7 +70,8 @@ function playersHtml(){
  for(const r of HG.remote){
   if(!r.P||!r.P.ready)continue;
   const ping=net.lat?Math.round(net.lat)+' ms':'—';
-  L.push(`<li><b>${esc(r.name)}</b> <span>${net.role==='guest'?'ev sahibi · ':''}${r.alive?Math.max(0,r.hp|0)+'% can':'düştü'} · ${ping}</span></li>`);
+  const kb=net.role==='host'?` <button type="button" class="ghost cpKick" data-p="${esc(r.P.id)}" title="Oyuncuyu bu oyundan çıkar">Çıkar</button>`:'';
+  L.push(`<li><b>${esc(r.name)}</b> <span>${net.role==='guest'?'ev sahibi · ':''}${r.alive?Math.max(0,r.hp|0)+'% can':'düştü'} · ${ping}${kb}</span></li>`);
  }
  return '<ul class="cpl">'+L.join('')+'</ul>';
 }
@@ -85,14 +86,16 @@ function renderPause(){
  }
  if(net.role==='host'){
   const code=net.code?net.fmtCode(net.code):'…';
-  ppanel.innerHTML=`<div class="cpbox"><div class="cpk">Bağlantı kodu</div><button id="cpCopy" class="cpcode" type="button" title="Kopyalamak için tıklayın">${esc(code)}</button><small class="cph">Kodu arkadaşınıza iletin; kopyalamak için tıklayın. Bu sayfa açık kaldığı sürece kod geçerlidir.</small></div>${playersHtml()}<small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpEnd" class="ghost" type="button">Co-op'u kapat</button>`;
+  ppanel.innerHTML=`<div class="cpbox"><div class="cpk">Bağlantı kodu</div><button id="cpCopy" class="cpcode" type="button" title="Kopyalamak için tıklayın">${esc(code)}</button><small class="cph">Kodu arkadaşınıza iletin; kopyalamak için tıklayın. Bu sayfa açık kaldığı sürece kod geçerlidir.</small><button id="cpLink" class="ghost" type="button" title="Tıklayınca kod kendiliğinden dolan davet bağlantısını kopyalar">Davet bağlantısını kopyala</button></div>${playersHtml()}<small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpEnd" class="ghost" type="button">Co-op'u kapat</button>`;
  }else{
   ppanel.innerHTML=`${playersHtml()}<small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpLeave" class="ghost" type="button">Co-op'tan ayrıl</button>`;
  }
 }
 ppanel.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
- if(b.id==='cpHost'){net.setName(net.name);if(net.host())renderPause()}
+ if(b.id==='cpLink'&&net.code)copy(location.origin+location.pathname+'?coop='+net.code,'Davet bağlantısı kopyalandı.');
+ else if(b.classList.contains('cpKick')){const P=net.peers.find(q=>q.id===b.dataset.p);if(P&&net.kick(P)){HG.toast(P.name+' oyundan çıkarılıyor.');setTimeout(renderPause,500)}}
+ else if(b.id==='cpHost'){net.setName(net.name);if(net.host())renderPause()}
  else if(b.id==='cpCopy')copy(net.fmtCode(net.code),'Bağlantı kodu kopyalandı: '+net.fmtCode(net.code));
  else if(b.id==='cpEnd'){net.leave();renderPause()}
  else if(b.id==='cpLeave'){net.leave()}
@@ -115,13 +118,15 @@ net.onStatus((st,msg)=>{
 HG.on('coop',()=>{if($('#pause')&&!$('#pause').hidden)renderPause();updHud()});
 
 /* ============================================================ Oyun içi: oyuncu durumu ve sohbet ============================================================ */
+const DIRS=['K','KD','D','GD','G','GB','B','KB'];          /* arkadaşın yönü (kuzey, kuzeydoğu, ...) */
 const hud=mk('div','cphud');hud.hidden=true;root.appendChild(hud);
 function updHud(){
  if(!HG.coopLive()||ui.state==='menu'){hud.hidden=true;return}
  const L=[];
  for(const r of HG.remote){
   if(!r.P||!r.P.ready)continue;
-  L.push(`<div class="cpp"><i class="${r.alive?'on':'off'}"></i><b>${esc(r.name)}</b><span>${r.alive?Math.max(0,r.hp|0)+'%':'düştü'}${net.lat?' · '+Math.round(net.lat)+' ms':''}</span></div>`);
+  const dx=r.x-G.px,dz=r.z-G.py,dist=Math.round(Math.hypot(dx,dz)),dir=DIRS[Math.round((((Math.atan2(dx,-dz)*180/Math.PI)+360)%360)/45)%8];
+  L.push(`<div class="cpp"><i class="${r.alive?'on':'off'}"></i><b>${esc(r.name)}</b><span>${r.alive?Math.max(0,r.hp|0)+'%':'düştü'} · ${dist} m ${dir}${net.lat?' · '+Math.round(net.lat)+' ms':''}</span></div>`);
  }
  if(net.role==='host'&&!L.length)L.push(`<div class="cpp"><i class="wait"></i><b>Kod: ${esc(net.fmtCode(net.code)||'…')}</b><span>oyuncu bekleniyor</span></div>`);
  if(net.role==='guest'&&net.hostP&&performance.now()-net.hostP.last>3500)L.push('<div class="cpp warn">Bağlantı zayıf…</div>');
@@ -183,8 +188,9 @@ const lost=mk('div','cplost',null,`<div class="card"><h1 style="font-size:26px;l
  <div class="btns"><button id="cpSolo" type="button">Bu dünyada tek başıma devam et</button><button id="cpMenu" class="ghost" type="button">Ana menüye dön</button></div>
  <small class="cph">Tek başına devam ederseniz dünyanın o anki kopyası yerelde çalışır; sonradan «Oyunu Kaydet» ile saklayabilirsiniz.</small></div>`);
 lost.hidden=true;root.appendChild(lost);
-HG.on('coop-lost',()=>{
+HG.on('coop-lost',e=>{
  closeChat(false);
+ const w=lost.querySelector('#cplW');if(w)w.textContent=e&&e.why==='kick'?'Ev sahibi sizi bu oyundan çıkardı.':'Ev sahibi ile bağlantı kesildi.';
  lost.hidden=false;HG.unlock&&HG.unlock(true);
  for(const k in HG.inp.keys)HG.inp.keys[k]=false;HG.inp.mouseDown=false;
 });
@@ -206,6 +212,21 @@ lost.querySelector('#cpSolo').addEventListener('click',()=>{
 addEventListener('keydown',e=>{
  if(e.code==='Escape'&&!dlg.hidden&&ui.state==='menu'){e.preventDefault();closeDlg()}
 },true);
+
+/* Davet bağlantısı (?coop=KOD): ana menü hazır olunca katılma penceresi kod dolu açılır */
+{
+ let m=null;try{m=/[?&]coop=([0-9A-Za-z-]{6,7})/.exec(location.search)}catch(e){}
+ const c=m?net.normCode(m[1]):'';
+ if(c.length===6){
+  let tries=0;
+  const go=()=>{
+   if(ui.state!=='menu'||HG.busy){if(tries++<40)setTimeout(go,500);return}
+   openDlg();codeIn.value=c.slice(0,3)+'-'+c.slice(3);
+   try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}
+  };
+  setTimeout(go,600);
+ }
+}
 
 /* Ana menüye dönüşte (sayfa yeniden yüklenir) hiçbir ek işlem gerekmez: beforeunload ayrıldığını bildirir. */
 HG.coopUI={openJoin:openDlg,renderPause,openChat};

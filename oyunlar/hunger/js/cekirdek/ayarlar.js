@@ -16,7 +16,8 @@ const TABS=[
   ['bright','Parlaklık','range',100,60,140,5,'%'],
   ['dist','Çizim mesafesi','range',100,50,130,5,'%','Düşürmek uzaktaki ağaç ve kayaları daha erken gizler; başarımı artırır.'],
   ['fov','Görüş açısı (FOV)','range',75,60,110,1,'°'],
-  ['fps','FPS göstergesi','toggle',false]]],
+  ['fps','FPS göstergesi','toggle',false],
+  ['mfx','Menü arka plan efekti','toggle',true,'Ana menüdeki kıvılcım ve sis animasyonu. Kapatmak zayıf cihazlarda pil ve başarım kazandırır.']]],
  ['Ses',[
   ['master','Ana ses','range',80,0,100,5,'%','Gerçek ses kayıtları Creative Commons lisanslıdır: Wildfire Games (0 A.D.) ve diğer sahipler. Ayrıntı: ses/KREDI.txt'],
   ['sfx','Efekt sesleri','range',100,0,100,5,'%','Adım, darbe, eşya ve hayvan sesleri.'],
@@ -29,6 +30,8 @@ const TABS=[
   ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.']]],
  ['Oyun',[
   ['diff','Zorluk','select','1',[['0','Kolay'],['1','Normal'],['2','Zor']],'Açlık, susuzluk ve alınan hasar hızını değiştirir. Kolay: %25 daha az, Zor: %30 daha fazla.'],
+  ['wear','Alet aşınması','toggle',true,'Açıkken taş, bakır ve demir aletler kullandıkça aşınır ve kırılır; Çalışma Tezgâhında onarılır. Kapatmak oyunu kolaylaştırır.'],
+  ['durbar','Dayanıklılık çubukları','toggle',true,'Eşya kutularında alet dayanıklılığını gösteren ince çubuk.'],
   ['hud','Durum çubukları','toggle',true],
   ['mini','Mini harita','toggle',true],
   ['clock','Saat','toggle',true],

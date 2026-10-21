@@ -15,7 +15,7 @@ function duration(r){
  let d=Math.min(11,Math.max(1.5,1+u*.18));
  if(r[3]==='fire')d=Math.max(1.5,Math.min(d*.7,3));          /* pişirme */
  else if(r[3]==='furn')d=Math.max(2.5,Math.min(d,4));         /* ergitme, cam */
- return Math.round(d*10)/10;
+ return Math.round(Math.min(14,d*HG.BAL.craftK)*10)/10;        /* denge: tüm üretim süreleri uzatıldı */
 }
 HG.craftTime=duration;
 const Q=()=>{const x=HG.X2?HG.X2():(G.x2||(G.x2={}));return x.cq||(x.cq=[])};

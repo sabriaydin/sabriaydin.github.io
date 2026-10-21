@@ -109,7 +109,11 @@ const ACH=[
  ['year','Bir Yıl','25. güne ulaş (bir mevsim turu).',40,()=>HG.dayNo()>=25],
  ['apple','Elma Mevsimi','Beş elma topla.',10,()=>S('apples')>=5],
  ['sword3','Demir Kılıç','Demir Kılıç üret.',20,()=>F('made_sword3')],
- ['second','İkinci Şans','Öl ve doğma noktasında yeniden uyan.',10,()=>S('deaths')>=1]
+ ['second','İkinci Şans','Öl ve doğma noktasında yeniden uyan.',10,()=>S('deaths')>=1],
+ /* güncelleme 64: denge ve co-op */
+ ['repair','Tamirci','Çalışma Tezgâhında bir aleti onar.',10,()=>F('repaired')],
+ ['broke','Sert Kullanım','Bir aleti kırılana kadar kullan.',6,()=>F('toolbroke')],
+ ['coop','Ortak Çaba','Bir arkadaşınla co-op oyna.',14,()=>F('coopplay')]
 ];
 HG.ACH=ACH.map(a=>[a[0],a[1],a[2],a[3]]);
 const prevI=HG.progInit,prevS=HG.progSave,prevL=HG.progLoad;

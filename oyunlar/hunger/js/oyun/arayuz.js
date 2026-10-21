@@ -12,7 +12,8 @@ function feed(m){const f=$('#feed'),d=document.createElement('div');d.textConten
 /* ---- Envanter kutuları ---- */
 const slotHtml=(i,hot)=>{
  const s=G.inv[i],it=s?IT[s.id]:null;
- return `<div class="slot${ui.dragFrom===i?' dim':''}${i===G.sel&&i<HOT?' sel':''}${ui.picked===i?' pick':''}" data-i="${i}"${it?` title="${it.n}"`:''}>${hot?`<span class="k">${i+1}</span>`:''}${it?`<img src="${ICON[s.id]}" alt="${it.n}">${s.n>1?`<span class="n">${s.n}</span>`:''}`:''}</div>`;
+ const dp=it&&HG.durPct&&HG.cfg.wear!==false?HG.durPct(s):-1;       /* alet dayanıklılığı yüzdesi (-1: dayanıklılığı olmayan eşya) */
+ return `<div class="slot${ui.dragFrom===i?' dim':''}${i===G.sel&&i<HOT?' sel':''}${ui.picked===i?' pick':''}" data-i="${i}"${it?` title="${it.n}${dp>=0?' · dayanıklılık %'+dp:''}"`:''}>${hot?`<span class="k">${i+1}</span>`:''}${it?`<img src="${ICON[s.id]}" alt="${it.n}">${s.n>1?`<span class="n">${s.n}</span>`:''}`:''}${dp>=0&&dp<100&&HG.cfg.durbar!==false?`<i class="dur${dp<=20?' lo':dp<=50?' md':''}" style="width:${Math.max(6,dp*.84)}%"></i>`:''}</div>`;
 };
 function renderInv(){
  let h='';for(let i=0;i<HOT;i++)h+=slotHtml(i,true);

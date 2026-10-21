@@ -16,7 +16,7 @@ const net=HG.net={
  role:'solo',st:'idle',msg:'',code:'',peer:null,peers:[],hostP:null,lat:0,
  name:'',wid:'',seq0:0,rules:null,
  cfg:{server:null,ice:null},                       /* server: PeerJS aracı sunucusu ({host,port,path,secure}); boşsa genel PeerJS bulutu */
- initFns:[],ticks:[],stl:[],baselines:[],
+ initFns:[],ticks:[],stl:[],baselines:[],banned:new Set(),pwp:null,
  PROTO,MAXG
 };
 HG.coop.mode='solo';HG.coop.host=true;
@@ -201,7 +201,9 @@ net.on('hello',(m,P)=>{
  if(net.role!=='host'||P.joined)return;
  if(m.v!==PROTO||(m.ver||'')!==(HG.VERSION||'')){deny(P,'Sürüm uyuşmuyor (ev sahibi '+(HG.VERSION||'?')+', siz '+(m.ver||'?')+'): iki oyuncu da aynı oyun sürümünü kullanmalı. Sayfayı yenileyin (Ctrl+F5).');return}
  if(HG.busy||G.cave||!(ui.state==='play'||ui.state==='pause')){deny(P,'Ev sahibi şu an katılımı kabul edemiyor (yükleniyor veya mağarada). Birkaç saniye sonra yeniden deneyin.');return}
+ if(m.pid&&net.banned.has(String(m.pid))){deny(P,'Ev sahibi sizi bu oyundan çıkardı.');return}
  P.joined=true;P.name=String(m.name||'Oyuncu').replace(/[<>&"]/g,'').slice(0,16)||'Oyuncu';P.pid=String(m.pid||'').slice(0,12);P.state='snap';P.last=now();
+ {const taken=new Set([net.name].concat(net.peers.filter(q=>q!==P&&q.joined).map(q=>q.name)));let nm=P.name,k=2;while(taken.has(nm))nm=P.name.slice(0,13)+' '+k++;P.name=nm}      /* aynı ad: sonuna sayı eklenir */
  tx(P.conn,{t:'welcome',v:PROTO,host:net.name,wid:worldId(),rules:rulesNow(),ver:HG.VERSION||''});
  HG.toast(P.name+' bağlanıyor…');
  sendSnapshot(P);
@@ -245,6 +247,15 @@ function dropPeer(P,why){
  }
 }
 net.on('bye',(m,P)=>dropPeer(P,'ayrıldı'));
+/* Ev sahibi bir oyuncuyu çıkarır; çıkarılan bu oturumda aynı kimlikle yeniden katılamaz */
+net.kick=P=>{
+ if(net.role!=='host'||!P||!P.joined)return false;
+ if(P.pid)net.banned.add(P.pid);
+ tx(P.conn,{t:'kick'});chatLine('',P.name+' oyundan çıkarıldı.',true);
+ setTimeout(()=>dropPeer(P,'çıkarıldı'),300);
+ return true;
+};
+net.on('kick',(m,P)=>{if(HG.coop.mode!=='guest'||P!==net.hostP)return;hostLost('kick')});
 net.on('deny',(m)=>{
  if(net.role!=='solo'&&HG.coop.mode!=='guest')return;
  resetGuest();
@@ -355,6 +366,7 @@ function shutdown(soft){
  HG.emit('coop',{mode:'solo'});
 }
 net.shutdown=shutdown;
+net.dropPeer=dropPeer;
 
 /* ============================================================ Ortak: ping, konum, saat, sohbet ============================================================ */
 net.on('ping',(m,P)=>tx(P.conn,{t:'pong',ts:m.ts}));
@@ -371,12 +383,17 @@ function flagsNow(){
 }
 function heldId(){const s=G.inv&&G.inv[G.sel];return s?s.id:''}
 let posT=0,pingT=0,clkT=0,seq=0;
+let lastSig='',lastTx=0;
 function sendPos(){
- seq++;
- net.send({t:'p',q:seq,x:r2(G.px),z:r2(G.py),y:G.pz===undefined?null:r2(G.pz),yw:r3(look.yaw),pt:r3(look.pitch),f:flagsNow(),h:heldId(),hp:Math.max(0,Math.round(G.hp)),w:r2(G.walk||0),s:r2(G.spdNow||0)});
+ const m={t:'p',q:0,x:r2(G.px),z:r2(G.py),y:G.pz===undefined?null:r2(G.pz),yw:r3(look.yaw),pt:r3(look.pitch),f:flagsNow(),h:heldId(),hp:Math.max(0,Math.round(G.hp)),w:r2(G.walk||0),s:r2(G.spdNow||0)};
+ const sig=m.x+'|'+m.z+'|'+m.y+'|'+m.yw+'|'+m.pt+'|'+m.f+'|'+m.h+'|'+m.hp+'|'+m.w+'|'+m.s;
+ if(sig===lastSig&&now()-lastTx<600)return;          /* durağan oyuncu: yarım saniyede bir konum yeter (ağ trafiği azalır) */
+ lastSig=sig;lastTx=now();m.q=++seq;
+ net.send(m);
 }
 net.on('p',(m,P)=>{
  const r=P.rec;if(!r)return;
+ if(!(m.x>=0&&m.x<HG.W&&m.z>=0&&m.z<HG.H&&isFinite(m.yw)&&isFinite(m.pt)))return;          /* bozuk veya harita dışı konum paketi yok sayılır */
  if(m.q<=(P.pq||0)&&m.q>(P.pq||0)-50)return;
  P.pq=m.q;
  r.x=m.x;r.z=m.z;r.y=m.y;r.yaw=m.yw;r.pitch=m.pt;r.fl=m.f|0;r.h=m.h||'';r.hp=m.hp;r.walk=m.w;r.spd=m.s;
@@ -398,16 +415,31 @@ function chatLine(name,text,sys){
  HG.emit('chat',e);
 }
 net.chatLine=chatLine;
+const outQ=[];
+function chatCmd(t){
+ const c=t.split(' ')[0].toLowerCase();
+ if(c==='/yardim'||c==='/yardım'){chatLine('','Komutlar: /konum (konumunuzu gönderir) · /ping (gecikmeyi gösterir) · /yardim',true);return null}
+ if(c==='/ping'){chatLine('','Gecikme: '+(net.lat?Math.round(net.lat)+' ms':'ölçülmedi'),true);return null}
+ if(c==='/konum')return 'Konumum: '+Math.round(G.px)+', '+Math.round(G.py);
+ chatLine('','Bilinmeyen komut. /yardim yazın.',true);return null;
+}
 net.chat=function(text){
- text=String(text||'').replace(/\s+/g,' ').trim().slice(0,200);
+ text=String(text||'').replace(/[\u0000-\u001f\u007f]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
  if(!text||!HG.coopLive())return false;
+ if(text[0]==='/'){text=chatCmd(text);if(!text)return true}
+ {const t=now();while(outQ.length&&t-outQ[0]>4000)outQ.shift();if(outQ.length>=5){HG.toast('Çok hızlı yazıyorsunuz; biraz bekleyin.');return false}outQ.push(t)}
  chatLine(net.name,text,false);
  net.send({t:'chat',x:text});
  return true;
 };
 net.on('chat',(m,P)=>{
- const n=P.name||'Oyuncu';
- chatLine(n,m.x,false);
+ const t=now();P.cq=(P.cq||[]).filter(q=>t-q<5000);
+ if(P.cq.length>=6||typeof m.x!=='string')return;          /* sohbet taşkınlığı ve bozuk ileti engellenir */
+ P.cq.push(t);
+ const x=m.x.replace(/[\u0000-\u001f\u007f]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
+ if(!x)return;
+ chatLine(P.name||'Oyuncu',x,false);
+ try{HG.snd('ui')}catch(e){}
 });
 
 /* ============================================================ Kare güncellemesi ============================================================ */

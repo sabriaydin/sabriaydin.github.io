@@ -42,3 +42,6 @@
 #cpIn[hidden]{display:none}
 #bCoop{grid-column:1/-1}
 @media (max-width:640px){#cpchat{left:12px;bottom:150px;width:calc(100vw - 24px)}#cphud{top:36px}}
+/* güncelleme 64: davet bağlantısı ve oyuncu çıkarma düğmeleri */
+#cpLink{display:block;width:100%;margin-top:8px;padding:6px 10px;font-size:14px}
+.cpKick{padding:1px 8px;font-size:12px;margin-left:8px}

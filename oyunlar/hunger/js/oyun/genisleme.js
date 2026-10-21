@@ -32,7 +32,7 @@ function cleanEnt(v){
  const o=v.o;
  if(o===O.CHEST){
   const it=Array(CHEST_N).fill(null);
-  if(Array.isArray(v.it))for(let k=0;k<CHEST_N;k++){const q=v.it[k];if(q&&IT[q.id]&&q.n>0)it[k]={id:q.id,n:Math.min(IT[q.id].s,q.n|0)}}
+  if(Array.isArray(v.it))for(let k=0;k<CHEST_N;k++){const q=v.it[k];if(q&&IT[q.id]&&q.n>0)it[k]=Object.assign({id:q.id,n:Math.min(IT[q.id].s,q.n|0)},q.d>0&&HG.BAL.dur[q.id]?{d:Math.round(q.d)}:{})}
   return {o,it,gr:v.gr?1:0,t:num(v.t,0)};
  }
  if(o===O.SIGN)return {o,tx:typeof v.tx==='string'?v.tx.slice(0,48):''};
@@ -448,7 +448,7 @@ function findLand(sf,cx,cz,maxR){
  return null;
 }
 function makeGrave(){
- const items=G.inv.map(s=>s?{id:s.id,n:s.n}:null);
+ const items=G.inv.map(s=>s?(s.d!==undefined?{id:s.id,n:s.n,d:s.d}:{id:s.id,n:s.n}):null);          /* d: alet dayanıklılığı */
  if(!items.some(Boolean))return null;
  const sf=G.cave?G.cave.surf:G,x=X();
  let cx,cz;

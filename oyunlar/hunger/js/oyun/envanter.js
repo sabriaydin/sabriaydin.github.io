@@ -26,10 +26,10 @@ function gain(id,n,q){
 /* Çantayı düzenle: hızlı erişim çubuğu dışındaki kutular birleştirilir ve eşya sırasına göre dizilir */
 function sortInv(){
  if(ui.state!=='play'||!G.inv)return;
- const HOT=HG.HOT,tot={};
- for(let i=HOT;i<SLOTS;i++){const s=G.inv[i];if(s)tot[s.id]=(tot[s.id]||0)+s.n}
+ const HOT=HG.HOT,tot={},keep=[];
+ for(let i=HOT;i<SLOTS;i++){const s=G.inv[i];if(s){if(s.d!==undefined)keep.push(s);else tot[s.id]=(tot[s.id]||0)+s.n}}      /* dayanıklılığı olan aletler olduğu gibi korunur */
  const out=[];
- for(const id of Object.keys(IT)){let n=tot[id]||0;const mx=IT[id].s;while(n>0){const k=Math.min(mx,n);out.push({id,n:k});n-=k}}
+ for(const id of Object.keys(IT)){for(const s of keep)if(s.id===id)out.push(s);let n=tot[id]||0;const mx=IT[id].s;while(n>0){const k=Math.min(mx,n);out.push({id,n:k});n-=k}}
  for(let i=HOT;i<SLOTS;i++)G.inv[i]=out[i-HOT]||null;
  ui.picked=null;ui.dirty=true;HG.snd('ui');HG.toast('Çanta düzenlendi.');
 }

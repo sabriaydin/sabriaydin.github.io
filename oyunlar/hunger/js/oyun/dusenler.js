@@ -16,13 +16,13 @@ function spawnDrop(id,n,pos){
 /* Envanterdeki bir kutunun tamamını yere at */
 function dropSlot(i){
  const s=G.inv[i];if(!s)return;
- spawnDrop(s.id,s.n);G.inv[i]=null;HG.ui.dirty=true;
+ {const dd=spawnDrop(s.id,s.n);if(s.d!==undefined)dd.d=s.d}G.inv[i]=null;HG.ui.dirty=true;
  HG.feed('Atıldı: '+s.n+' '+IT[s.id].n);
 }
 /* Seçili hızlı erişim kutusundan 1 adet at */
 function dropOne(){
  const s=G.inv[G.sel];if(!s||HG.ui.state!=='play')return;
- spawnDrop(s.id,1);s.n--;if(s.n<=0)G.inv[G.sel]=null;
+ {const dd=spawnDrop(s.id,1);if(s.d!==undefined)dd.d=s.d}s.n--;if(s.n<=0)G.inv[G.sel]=null;
  HG.ui.dirty=true;HG.snd('ui');HG.feed('Atıldı: 1 '+IT[s.id].n);
 }
 function updateDrops(dt){
@@ -72,7 +72,8 @@ function updateDrops(dt){
 /* E tuşu: yakındaki yerdeki eşyayı al (yer yoksa kısmen) */
 function pickupNearest(){
  const d=G.nearDrop;if(!d||!G.drops.includes(d))return false;
- const left=add(d.id,d.n);
+ const prev=new Set(G.inv.filter(Boolean)),left=add(d.id,d.n);
+ if(d.d!==undefined)for(const q of G.inv)if(q&&!prev.has(q)&&q.id===d.id)q.d=d.d;           /* alet dayanıklılığı yerden alınınca korunur */
  if(left>=d.n){HG.toast('Envanter dolu.');return true}
  flag('got_'+d.id);HG.feed('+'+(d.n-left)+' '+IT[d.id].n);HG.snd('get');HG.extGot&&HG.extGot(d.id,d.n-left);
  if(left<=0)G.drops.splice(G.drops.indexOf(d),1);else d.n=left;

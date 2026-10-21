@@ -13,7 +13,7 @@ const GOALS=[
  ['made_bow','Yay ve ok üret. Sol tuşu basılı tutup gerin, bırakınca ok atılır.'],
  ['drank','Mavi tatlı su gölüne bakıp sol tuşla su iç. Deniz suyu içilmez.'],
  ['made_bench','Çalışma Tezgâhı üret ve yerleştir.'],
- ['made_plan','İnşa Planı (10 odun) ve Çekiç (12 odun, 8 taş) üret. Rust tarzı inşa: plan kurar, çekiç yükseltir ve yıkar.'],
+ ['made_plan','İnşa Planı (14 odun) ve Çekiç (14 odun, 10 taş) üret. Rust tarzı inşa: plan kurar, çekiç yükseltir ve yıkar.'],
  ['built','İnşa Planı eldeyken sol tıkla duvar ve kapı kur; sağ tık basılı tutarak parça seç. Çekiçle duvarı Odun, Taş veya Metal seviyesine yükselt.'],
  ['shelter','Duvar ve kapıyla tamamen kapalı bir barınak yap, geceyi içinde geçir.'],
  ['made_copper_ingot','Ocak yap; bakır cevherini kömürle eriterek külçe üret.'],

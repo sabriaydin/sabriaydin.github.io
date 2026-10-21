@@ -121,7 +121,7 @@ function stepAction(dt){
   const key='hit,'+tg.an.id;
   if(key!==A.key){saveProgress();A.key=key;A.p=0;A.tick=0;A.memKey=null}
   A.tick-=dt;
-  if(A.tick<=0&&(!HG.atkGate||HG.atkGate(.55*(G.tired?1.6:1)))){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');HG.armSwing(.4);const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z)}
+  if(A.tick<=0&&(!HG.atkGate||HG.atkGate(.55*(G.tired?1.6:1)))){A.tick=.55*(G.tired?1.6:1);const sw=HG.swing();HG.snd('pick');HG.armSwing(.4);const z=HG.hitAnimal(tg.an,HG.weaponDamage()*sw,tg.hx!==undefined?{x:tg.hx,y:tg.hy,z:tg.hz}:null);HG.hitMarker(tg.an.hp<=0,z);if(HG.wear)HG.wear(1)}
   return;
  }
  if(kind==='milk'||kind==='shear'){
@@ -131,9 +131,9 @@ function stepAction(dt){
   if(A.p<A.need)return;
   A.p=0;
   if(kind==='milk'){
-   if(count('bottle')){take('bottle',1);add('milk',1);HG.snd('drink');HG.feed('+1 '+HG.IT.milk.n);HG.snd('milk');tg.an.milkAt=G.clock+150;flag('milked')}
+   if(count('bottle')){take('bottle',1);add('milk',1);HG.snd('drink');HG.feed('+1 '+HG.IT.milk.n);HG.snd('milk');tg.an.milkAt=G.clock+HG.BAL.milk;flag('milked')}
   }else{
-   if(gain('wool',2+(Math.random()*2|0))){HG.snd('shear');tg.an.sheared=true;tg.an.shearAt=G.clock+240}
+   if(gain('wool',2+(Math.random()*2|0))){HG.snd('shear');tg.an.sheared=true;tg.an.shearAt=G.clock+HG.BAL.shear}
   }
   A.key='';
   return;
@@ -184,6 +184,7 @@ function nodeSwing(tg){
  A.p=(G.dmg&&G.dmg[i])||0;                              /* ilerleme çubuğu: düğümün hasar oranı */
  if(G.clock<(A.nextSwing||0))return;                    /* tıklama hızlandırması yoktur: vuruş aralığı sabittir */
  const lv=gatherLv(nd.tool);
+ if(lv>0&&HG.wear)HG.wear(1);                          /* taş, bakır ve demir aletler her vuruşta aşınır (js/oyun/zorluk.js) */
  A.nextSwing=G.clock+SWING*(G.tired?1.6:1);
  A.hitI=i;A.hitT=.18;HG.armSwing(.36);
  const isT=o===O.TREE||o===O.PALM||o===O.PALM0,big=!isT;

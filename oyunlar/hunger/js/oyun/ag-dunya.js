@@ -192,10 +192,12 @@ net.on('rsfull',(m)=>{
 const dropU=new Map();
 let dn=0;
 const dpre=()=>isHost()?'h':'g';
-const packDrop=d=>({u:d.u,id:d.id,n:d.n,x:r2(d.x),y:r2(d.y),z:r2(d.z),vx:r2(d.vx||0),vy:r2(d.vy||0),vz:r2(d.vz||0),r:d.rest?1:0,f:d.fl?1:0});
+const packDrop=d=>({u:d.u,id:d.id,n:d.n,x:r2(d.x),y:r2(d.y),z:r2(d.z),vx:r2(d.vx||0),vy:r2(d.vy||0),vz:r2(d.vz||0),r:d.rest?1:0,f:d.fl?1:0,d:d.d});
 function mkDrop(q){
  if(!HG.IT[q.id]||!(q.n>0))return null;
- return {id:q.id,n:q.n,x:q.x,z:q.z,y:q.y,vx:q.vx||0,vz:q.vz||0,vy:q.vy||0,age:q.r?5:0,rest:!!q.r,fl:!!q.f,u:q.u};
+ const d={id:q.id,n:q.n,x:q.x,z:q.z,y:q.y,vx:q.vx||0,vz:q.vz||0,vy:q.vy||0,age:q.r?5:0,rest:!!q.r,fl:!!q.f,u:q.u};
+ if(q.d>0&&HG.BAL.dur[q.id])d.d=Math.round(q.d);
+ return d;
 }
 function pollDrops(){
  const L=G.drops||[],add=[],upd=[],del=[],seen=new Set();
@@ -242,7 +244,7 @@ net.on('pk',(m,P)=>{
  const L=G.drops||[],i=L.findIndex(d=>d.u===m.u);
  if(i<0){net.sendTo(P,{t:'pkno',u:m.u});return}
  const d=L[i];L.splice(i,1);
- net.sendTo(P,{t:'pkok',u:m.u,id:d.id,n:d.n});
+ net.sendTo(P,{t:'pkok',u:m.u,id:d.id,n:d.n,d:d.d});
 });
 net.on('pkno',(m)=>{
  const L=G.drops||[],i=L.findIndex(d=>d.u===m.u);
@@ -254,7 +256,7 @@ net.on('pkok',(m)=>{
  if(i>=0)L.splice(i,1);
  dropU.delete(m.u);G.nearDrop=null;
  if(!HG.IT[m.id])return;
- const left=HG.add(m.id,m.n);
+ const left=HG.addD(m.id,m.n,m.d>0&&HG.BAL.dur[m.id]?Math.round(m.d):undefined);
  if(left<m.n){
   HG.flag('got_'+m.id);HG.feed('+'+(m.n-left)+' '+HG.IT[m.id].n);HG.snd('get');
   if(HG.extGot)HG.extGot(m.id,m.n-left);

@@ -199,8 +199,8 @@ function update(dt){
  /* istatistikler */
  const L=daylight(),cold=1-L;
  const eco=(1-.12*HG.perk('eco'))*(HG.diffK?HG.diffK():1);
- G.hun=clamp(G.hun-dt*.17*eco*(G.sprint?1.8:1),0,100);
- G.thr=clamp(G.thr-dt*.25*eco*(G.sprint?1.8:1),0,100);
+ G.hun=clamp(G.hun-dt*.17*HG.BAL.hunK*eco*(G.sprint?1.8:1),0,100);
+ G.thr=clamp(G.thr-dt*.25*HG.BAL.thrK*eco*(G.sprint?1.8:1),0,100);
  /* en yakın ateş: saniyede 4 kez aranır */
  G.fireT=(G.fireT||0)-dt;
  if(G.fireT<=0||G.fd===undefined){
@@ -240,7 +240,7 @@ function update(dt){
  else if(G.hun>35&&G.thr>35&&G.warm>35)G.hp=clamp(G.hp+.8*dt,0,100);
  if(G.hp<=0){die();return}
  /* meyve ve hindistan cevizinin yeniden büyümesi */
- for(let k=G.timers.length-1;k>=0;k--){const t=G.timers[k];if(G.clock>=t.at){const tx=t.i%W,tz=(t.i/W)|0;if((t.to===O.TREE||t.to===O.BUSH||t.to===O.PALM)&&HG.pondNear(G.tile,W,t.i)){G.timers.splice(k,1);continue}if(Math.hypot(G.px-tx-.5,G.py-tz-.5)<2.2||occupied(tx,tz)){t.at=G.clock+12;continue}if(G.obj[t.i]===t.from&&!G.drops.some(d=>Math.hypot(d.x-tx-.5,d.z-tz-.5)<.9))HG.setObj(t.i,t.to);G.timers.splice(k,1)}}
+ for(let k=G.timers.length-1;k>=0;k--){const t=G.timers[k];if(G.clock>=t.at){const tx=t.i%W,tz=(t.i/W)|0;if(HG.rsCovered(tx,tz)){G.timers.splice(k,1);continue}if((t.to===O.TREE||t.to===O.BUSH||t.to===O.PALM)&&HG.pondNear(G.tile,W,t.i)){G.timers.splice(k,1);continue}if(Math.hypot(G.px-tx-.5,G.py-tz-.5)<2.2||occupied(tx,tz)){t.at=G.clock+12;continue}if(G.obj[t.i]===t.from&&!G.drops.some(d=>Math.hypot(d.x-tx-.5,d.z-tz-.5)<.9))HG.setObj(t.i,t.to);G.timers.splice(k,1)}}
  if(dayNo()>=7)flag('day7');
  /* otomatik kayıt */
  G.saveT+=dt;if(G.saveT>20){G.saveT=0;HG.save()}

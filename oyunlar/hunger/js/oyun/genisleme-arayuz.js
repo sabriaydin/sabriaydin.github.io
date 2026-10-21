@@ -85,7 +85,7 @@ function takeSlot(k){
  const e=ent(),s=e&&e.it[k];if(!s)return 0;
  const m=Math.min(s.n,fit(s.id));
  if(m<=0){HG.toast('Envanter dolu.');return 0}
- add(s.id,m);s.n-=m;if(s.n<=0)e.it[k]=null;
+ HG.addD(s.id,m,s.d);s.n-=m;if(s.n<=0)e.it[k]=null;
  return m;
 }
 function takeAll(){
@@ -95,15 +95,15 @@ function takeAll(){
  if(left&&any)HG.toast('Envanter doldu: bazı eşyalar sandıkta kaldı.');
  if(any)changed();
 }
-function putStack(e,id,n){
+function putStack(e,id,n,d){
  const mx=IT[id].s;
  for(let k=0;k<CN&&n>0;k++){const s=e.it[k];if(s&&s.id===id&&s.n<mx){const m=Math.min(mx-s.n,n);s.n+=m;n-=m}}
- for(let k=0;k<CN&&n>0;k++){if(!e.it[k]){const m=Math.min(mx,n);e.it[k]={id,n:m};n-=m}}
+ for(let k=0;k<CN&&n>0;k++){if(!e.it[k]){const m=Math.min(mx,n);e.it[k]=d!==undefined?{id,n:m,d}:{id,n:m};n-=m}}
  return n;
 }
 function putInv(i,quiet){
  const s=G.inv[i];if(!s||!cur)return 0;
- const e=ent(),rem=putStack(e,s.id,s.n),m=s.n-rem;
+ const e=ent(),rem=putStack(e,s.id,s.n,s.d),m=s.n-rem;
  if(m<=0){if(!quiet)HG.toast('Sandık dolu.');return 0}
  s.n=rem;if(s.n<=0)G.inv[i]=null;
  if(!quiet)changed();
@@ -169,7 +169,7 @@ HG.x2reg('cc',()=>({}),v=>{
  if(v&&typeof v==='object')for(const k in v){
   const q=v[k];if(!q||!Array.isArray(q.it))continue;
   const it=Array(CN).fill(null);
-  for(let n=0;n<CN;n++){const t=q.it[n];if(t&&IT[t.id]&&t.n>0)it[n]={id:t.id,n:Math.min(IT[t.id].s,t.n|0)}}
+  for(let n=0;n<CN;n++){const t=q.it[n];if(t&&IT[t.id]&&t.n>0)it[n]=Object.assign({id:t.id,n:Math.min(IT[t.id].s,t.n|0)},t.d>0&&HG.BAL.dur[t.id]?{d:Math.round(t.d)}:{})}
   out[k]={it};
  }
  return out;
