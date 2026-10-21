@@ -1,6 +1,11 @@
 /* Hunger 3D - güncelleme notları (Ana menü › Güncelleme Notları). Yeni güncelleme: dizinin başına yeni bir kayıt ekleyin. */
 HG.NOTES=[
 {
+"n": 68,
+"t": "Yeni oyuncu modeli ve Co-op ayrıntıları",
+"x": "Co-op'ta diğer oyuncunun modeli baştan yapıldı: eklemli gövde (bel, boyun, omuz-dirsek-bilek, kalça-diz-ayak bileği), yüzlü baş (göz, kaş, burun, kulak, ağız), dört farklı saç modeli, deri/kumaş/deri-kayış dokulu malzemeler (birinci kişi kollarıyla aynı), sırt çantası ve uyku tulumu, kemer ve kese. Hareketler: gerçek yürüme-koşma döngüsü (diz yalnız ileri savrulurken bükülür, kollar bacakların tersine), zıplama ve düşüş duruşu, nefes alma, göz kırpma, bakış yönüne göre baş eğimi, yüzme kulaçları, yay germe, alet vuruşu, uyku ve ölüm. Co-op ince ayrıntıları: oyuncunun elinde tuttuğu eşya (alet, meşale, yay, malzeme) diğer oyuncuda görünür, adım sesleri duyulur (sal üstünde farklı), ad etiketinde can çubuğu gösterilir. Oyuncunun başındaki beyaz disk kaldırıldı."
+},
+{
 "n": 67,
 "t": "Menüler ve Güncelleme Notları",
 "x": "Ana menüde \"Co-op'a Katıl\" düğmesi \"Oyuna Katıl\" adını aldı ve Yeni Oyun'un hemen altına taşındı. Duraklatma menüsü gerçek oyunlardaki gibi yeniden düzenlendi: sol tarafta büyük başlık, dünya adı ve kodu, dikey düğme listesi, ok tuşlarıyla gezinme, Esc ile devam. Ana menüye Güncelleme Notları düğmesi eklendi; tüm güncellemeler açılır liste olarak okunabilir."

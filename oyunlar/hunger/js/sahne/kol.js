@@ -37,6 +37,7 @@ function vmMat(o){
  };
  return m;
 }
+sc.vmMat=vmMat;   /* uzak oyuncu modeli de aynı deri/kumaş malzemelerini kullanır (güncelleme 68) */
 const MSKIN=()=>vmMat({t:'pSkin',s:7,a:.0005,c:.2,r:.6,sss:1}),MNAIL=()=>{const k='nail';if(VMT[k])return VMT[k];const m=new THREE.MeshLambertMaterial({vertexColors:true});sc.mats.push(m);return VMT[k]=m},MCLOTH=()=>vmMat({t:'pCloth',s:6,a:.0018,c:.5,r:.96,sss:.1});
 const MROCK=()=>vmMat({t:'pRock',s:3.4,a:.006,c:.7,r:.93}),MWOOD=()=>vmMat({t:'pBark',s:4.5,a:.003,c:.5,r:.8}),MMETAL=()=>vmMat({r:.38,m:.75});
 
