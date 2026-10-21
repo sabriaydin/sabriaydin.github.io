@@ -2,7 +2,7 @@
    Her kayıt: {n: güncelleme numarası, d: tarih (gg.aa.yyyy), t: başlık, l: [değişiklik maddeleri]}. Maddeler "…eklendi / …giderildi / …değiştirildi" biçiminde yazılır.
    Yalnızca oyun içinde görülen değişiklikler yazılır; site ve dosya düzeniyle ilgili değişiklikler yazılmaz. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:1,d:"07.08.2026",t:"İlk sürüm",l:[
+{n:1,d:"07.08.2024",t:"İlk sürüm",l:[
  "Hunger'ın ilk oynanabilir sürümü yayımlandı.",
  "Issız bir adada ağaç kesme, maden çıkarma ve balık tutma eklendi.",
  "Gündüz-gece döngüsü ile açlık, susuzluk ve sıcaklık göstergeleri eklendi.",
@@ -10,18 +10,18 @@ HG.UPD=(HG.UPD||[]).concat([
  "Taş, bakır ve demir seviyesinde balta ve kazma üretimi eklendi.",
  "Mini harita, hızlı erişim çubuğu, kayıt sistemi ve dokunmatik kontroller eklendi."
 ]},
-{n:2,d:"09.08.2026",t:"Dağlık bölgeler ve zıplama",l:[
+{n:2,d:"15.08.2024",t:"Dağlık bölgeler ve zıplama",l:[
  "Haritaya dağlık bölgeler eklendi; yükseklik kıyıya yaklaştıkça azalıyor, başlangıç noktasının çevresi düz bırakıldı.",
  "Zıplama ve uçurumdan düşme eklendi; çok dik yokuşlara yürüyerek çıkılamıyor, zıplamak gerekiyor.",
  "Harita yapısı değiştiği için önceki sürümlere ait kayıtlar geçersiz hale geldi."
 ]},
-{n:3,d:"11.08.2026",t:"Eşya taşıma ve atma",l:[
+{n:3,d:"22.08.2024",t:"Eşya taşıma ve atma",l:[
  "Yere atılan eşyalar eklendi: envanterden sürüklenen eşya panelin dışına bırakılınca yere düşüyor.",
  "Envanter kutuları arasında sürükle-bırak ile eşya taşıma eklendi.",
  "Elde yiyecek veya içecek varken sol tuşa basılı tutarak yeme-içme eklendi.",
  "Bildirim yazılarının görünümü yenilendi."
 ]},
-{n:4,d:"12.08.2026",t:"Grafik güncellemesi",l:[
+{n:4,d:"10.09.2024",t:"Grafik güncellemesi",l:[
  "Arazi yumuşak yüzeyli hale getirildi; renkler yüksekliğe ve eğime göre değişiyor (kaya, kar).",
  "Çimen tutamları ve çiçekler eklendi; rüzgârda sallanıyorlar.",
  "Gökyüzü kubbesi, güneş, ay ve bulutlar eklendi.",
@@ -29,7 +29,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Dört kademeli grafik kalitesi eklendi; kare hızı düşünce kalite kendiliğinden azalıyor (Otomatik mod).",
  "Yerdeki eşyaların E tuşuyla alınması eklendi."
 ]},
-{n:5,d:"13.08.2026",t:"Hayvanlar ve toplama",l:[
+{n:5,d:"02.10.2024",t:"Hayvanlar ve toplama",l:[
  "Koyun, inek, geyik, yaban domuzu ve tavşan eklendi; modelleri ve hareket animasyonları hazırlandı.",
  "Hayvanlardan çiğ et, deri, yün, kemik ve süt elde edilmesi eklendi; Pişmiş Et, Süt Şişesi, Makas, Mızrak ve Deri Mont üretimi eklendi.",
  "Deri Mont çantadayken soğuğun etkisini yarıya indiriyor; çiğ yiyecek yemenin sağlığa zarar vermesi eklendi.",
@@ -38,16 +38,16 @@ HG.UPD=(HG.UPD||[]).concat([
  "Uzaktaki arazi sadeleştirilerek çizildi, böylece performans artırıldı.",
  "Mini harita oyuncuyu ortalayan, yakınlaştırılmış bir görünüme geçirildi."
 ]},
-{n:6,d:"14.08.2026",t:"Denge düzeltmesi",l:[
+{n:6,d:"06.10.2024",t:"Denge düzeltmesi",l:[
  "Adadaki kaya, maden ve çalı sayısı azaltıldı."
 ]},
-{n:7,d:"15.08.2026",t:"Ses, hava durumu ve görüntü efektleri",l:[
+{n:7,d:"14.10.2024",t:"Ses, hava durumu ve görüntü efektleri",l:[
  "Ses motoru baştan yazıldı: konuma duyarlı 3B ses, yankı, ortam sesleri, hava, hayvan ve ayak sesleri ile müzik eklendi.",
  "Hava durumu eklendi: bulut, yağmur ve şimşek. Kapalı ve yağmurlu havada gökyüzü grileşiyor.",
  "Ateş böcekleri, polen ve toz parçacıkları eklendi.",
  "Parlama (bloom), güneş ışınları, renk derecelendirme ve vinyet efektleri eklendi."
 ]},
-{n:8,d:"17.08.2026",t:"Savaş ve korku",l:[
+{n:8,d:"26.10.2024",t:"Savaş ve korku",l:[
  "Kurt ve Gölge yaratıkları eklendi.",
  "Yay ve ok eklendi; ok uçuşu ve isabet hesabı hazırlandı, atılan oklar geri toplanabiliyor.",
  "Meşale ve bandaj eklendi.",
@@ -55,12 +55,12 @@ HG.UPD=(HG.UPD||[]).concat([
  "Hasar alınca ekran geri bildirimi ve korku atmosferi (gerilim sesleri, fısıltılar) eklendi.",
  "Birinci şahıs kollara yay ve meşale animasyonları eklendi."
 ]},
-{n:9,d:"18.08.2026",t:"Ayarlar menüsü ve ayrıntılı modeller",l:[
+{n:9,d:"04.11.2024",t:"Ayarlar menüsü ve ayrıntılı modeller",l:[
  "Ayarlar menüsü eklendi (grafik, ses, kontrol ve oyun seçenekleri).",
  "Hayvan modelleri baştan yapıldı: tüy dokusu, gözler, eklemli bacaklar, boynuz ve yeleler eklendi.",
  "Yere atılan eşyalar ayrıntılı modellerle gösteriliyor; yığınlar birkaç kopya olarak görünüyor, havadayken dönerek düşüyorlar."
 ]},
-{n:10,d:"22.08.2026",t:"Köyler ve tam ekran harita",l:[
+{n:10,d:"16.11.2024",t:"Köyler ve tam ekran harita",l:[
  "Köyler ve köylüler eklendi; evler, ateşler ve köylüler düz çimenlik alanlara yerleştiriliyor.",
  "Köylülerle takas dükkânı eklendi.",
  "Tam ekran harita (M) eklendi.",
@@ -68,7 +68,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Hayvan hareketleri yenilendi: yürüyüş, tırıs, dört nala, tavşan sıçraması, otlama ve tetikte baş kaldırma eklendi.",
  "Saldıran hayvanların oyuncunun içine girmesi sorunu giderildi."
 ]},
-{n:11,d:"31.08.2026",t:"Köy yaşamı ve ticaret",l:[
+{n:11,d:"02.12.2024",t:"Köy yaşamı ve ticaret",l:[
  "Köylere avlular, kuyu, fener direkleri ve mesleğe özgü avlu eşyaları eklendi.",
  "Köylüler geceleri evlerine çekilip sabah çıkıyor; geceleri dükkân kapalı kalıyor.",
  "Sikke ekonomisi ve eşya satışı eklendi.",
@@ -76,7 +76,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Köy bulunduğunda bildirim gösterilmesi eklendi.",
  "Köylü görünümleri çeşitlendirildi (yaka, kemer, bot, etek, uzun saç, sakal)."
 ]},
-{n:12,d:"03.09.2026",t:"Görevler, gelişim ve terk edilmiş kamplar",l:[
+{n:12,d:"09.12.2024",t:"Görevler, gelişim ve terk edilmiş kamplar",l:[
  "Deneyim, seviye ve yetenek sistemi ile Günlük penceresi (K) eklendi.",
  "Köylü görevleri eklendi: eşya getirme, avlanma, Gölge avı ve köy bulma.",
  "Terk edilmiş kamplar ve sandıkları eklendi; kamplarda adanın hikâyesini anlatan Sefer Defteri kayıtları bulunuyor.",

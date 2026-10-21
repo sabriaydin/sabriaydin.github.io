@@ -5,7 +5,7 @@ HG.UPD=(HG.UPD||[]).concat([
 {n:46,d:"21.10.2026",t:"Günlük düzeltmesi",l:[
  "Kamp sandıklarında bulunan Sefer Defteri kayıtlarının Günlük penceresinde yanlış metinlerle görünmesi sorunu giderildi."
 ]},
-{n:45,d:"20.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
+{n:45,d:"18.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
  "Çömelme eklendi (Ctrl veya Z). Çömelince ayak sesi kesiliyor, hayvanlar oyuncuyu çok daha geç fark ediyor ve yay daha az sallanıyor.",
  "Ekranın ortasına gizlilik göstergesi eklendi: Gizli, Tetikte, Fark edildin.",
  "Zıplama hissi iyileştirildi: kenardan ayrıldıktan sonra kısa süre zıplanabiliyor, havadayken basılan zıplama tuşu yere inince çalışıyor.",
@@ -28,13 +28,13 @@ HG.UPD=(HG.UPD||[]).concat([
  "Co-op: ev sahibi, katılan oyuncunun konum, hasar ve eşya alma paketlerini doğruluyor; ışınlanma geri alınıyor, ısrar eden oyuncu oyundan çıkarılıyor.",
  "Co-op: diğer oyuncunun çömelmesi karşı tarafta da görünüyor."
 ]},
-{n:44,d:"19.10.2026",t:"Dünya kuralları ve menüler",l:[
+{n:44,d:"27.08.2026",t:"Dünya kuralları ve menüler",l:[
  "Alet aşınması Ayarlar'dan kaldırıldı ve Dünya Oluştur penceresine taşındı. Her dünyanın kuralı olarak saklanıyor; Co-op'ta ev sahibinin kuralı geçerli oluyor.",
  "Seçili eşyadan 1 adet atma tuşu Q yerine G olarak değiştirildi (Ayarlar › Kontrol'den değiştirilebilir).",
  "Ana menü, duraklatma menüsüyle aynı tasarıma geçirildi.",
  "Menü arka planları yazılar daha rahat okunsun diye koyulaştırıldı."
 ]},
-{n:43,d:"18.10.2026",t:"Yeni oyuncu modeli (Co-op)",l:[
+{n:43,d:"16.08.2026",t:"Yeni oyuncu modeli (Co-op)",l:[
  "Co-op'taki diğer oyuncunun modeli baştan yapıldı: eklemli gövde, yüz (göz, kaş, burun, kulak, ağız), dört farklı saç modeli, deri ve kumaş dokuları eklendi.",
  "Sırt çantası, uyku tulumu, kemer ve kese eklendi.",
  "Yürüme ve koşma, zıplama, düşme, nefes alma, göz kırpma, yüzme, yay germe, alet vuruşu, uyku ve ölüm hareketleri eklendi.",
@@ -42,7 +42,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Diğer oyuncunun adım sesleri eklendi; ad etiketinde can çubuğu gösteriliyor.",
  "Oyuncunun başının üzerindeki beyaz disk kaldırıldı."
 ]},
-{n:42,d:"17.10.2026",t:"Menüler ve Güncelleme Notları",l:[
+{n:42,d:"01.08.2026",t:"Menüler ve Güncelleme Notları",l:[
  "Ana menüdeki \"Co-op'a Katıl\" düğmesinin adı \"Oyuna Katıl\" olarak değiştirildi ve Yeni Oyun'un altına taşındı.",
  "Duraklatma menüsü gerçek oyunlardaki gibi yeniden tasarlandı: sol sütun, büyük başlık ve düz satır düğmeleri eklendi; Co-op bölümü ayrıldı, Ana Menüye Dön en alta alındı.",
  "Duraklatma menüsünde ok tuşlarıyla gezinme ve Esc ile devam etme eklendi.",
