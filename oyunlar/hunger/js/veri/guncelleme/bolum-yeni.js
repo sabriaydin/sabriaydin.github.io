@@ -1,14 +1,14 @@
-/* Hunger 3D - güncelleme notları: 67 ve sonrası (Ana menü › Güncelleme Notları).
+/* Hunger 3D - güncelleme notları: son güncellemeler (Ana menü › Güncelleme Notları).
    Yeni güncelleme eklemek için dizinin içine {n: numara, t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:71,t:"Güncelleme notları yenilendi",l:[
+{n:46,t:"Güncelleme notları yenilendi",l:[
  "Güncelleme notları sayfalara ayrıldı; her sayfada 10 güncelleme gösteriliyor ve Önceki / Sonraki düğmeleriyle gezilebiliyor.",
- "24'ten 70'e kadar tüm güncellemeler tek tek eklendi.",
+ "1'den 45'e kadar tüm güncellemeler tek tek eklendi.",
  "Tüm notlar \"…eklendi\", \"…giderildi\" gibi açık cümlelerle yeniden yazıldı.",
  "Kamp sandıklarında bulunan Sefer Defteri kayıtlarının Günlük penceresinde güncelleme notları olarak görünmesi sorunu giderildi."
 ]},
-{n:70,t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
+{n:45,t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
  "Çömelme eklendi (Ctrl veya Z). Çömelince ayak sesi kesiliyor, hayvanlar oyuncuyu çok daha geç fark ediyor ve yay daha az sallanıyor.",
  "Ekranın ortasına gizlilik göstergesi eklendi: Gizli, Tetikte, Fark edildin.",
  "Zıplama hissi iyileştirildi: kenardan ayrıldıktan sonra kısa süre zıplanabiliyor, havadayken basılan zıplama tuşu yere inince çalışıyor.",
@@ -31,14 +31,14 @@ HG.UPD=(HG.UPD||[]).concat([
  "Co-op: ev sahibi, katılan oyuncunun konum, hasar ve eşya alma paketlerini doğruluyor; ışınlanma geri alınıyor, ısrar eden oyuncu oyundan çıkarılıyor.",
  "Co-op: diğer oyuncunun çömelmesi karşı tarafta da görünüyor."
 ]},
-{n:69,t:"Dünya kuralları ve menüler",l:[
+{n:44,t:"Dünya kuralları ve menüler",l:[
  "Alet aşınması Ayarlar'dan kaldırıldı ve Dünya Oluştur penceresine taşındı. Her dünyanın kuralı olarak saklanıyor; Co-op'ta ev sahibinin kuralı geçerli oluyor.",
  "Seçili eşyadan 1 adet atma tuşu Q yerine G olarak değiştirildi (Ayarlar › Kontrol'den değiştirilebilir).",
  "Ana menü, duraklatma menüsüyle aynı tasarıma geçirildi.",
  "Menü arka planları yazılar daha rahat okunsun diye koyulaştırıldı.",
  "Güncelleme notları sadeleştirilerek madde madde yeniden yazıldı."
 ]},
-{n:68,t:"Yeni oyuncu modeli (Co-op)",l:[
+{n:43,t:"Yeni oyuncu modeli (Co-op)",l:[
  "Co-op'taki diğer oyuncunun modeli baştan yapıldı: eklemli gövde, yüz (göz, kaş, burun, kulak, ağız), dört farklı saç modeli, deri ve kumaş dokuları eklendi.",
  "Sırt çantası, uyku tulumu, kemer ve kese eklendi.",
  "Yürüme ve koşma, zıplama, düşme, nefes alma, göz kırpma, yüzme, yay germe, alet vuruşu, uyku ve ölüm hareketleri eklendi.",
@@ -46,7 +46,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Diğer oyuncunun adım sesleri eklendi; ad etiketinde can çubuğu gösteriliyor.",
  "Oyuncunun başının üzerindeki beyaz disk kaldırıldı."
 ]},
-{n:67,t:"Menüler ve Güncelleme Notları",l:[
+{n:42,t:"Menüler ve Güncelleme Notları",l:[
  "Ana menüdeki \"Co-op'a Katıl\" düğmesinin adı \"Oyuna Katıl\" olarak değiştirildi ve Yeni Oyun'un altına taşındı.",
  "Duraklatma menüsü gerçek oyunlardaki gibi yeniden tasarlandı: sol sütun, büyük başlık ve düz satır düğmeleri eklendi; Co-op bölümü ayrıldı, Ana Menüye Dön en alta alındı.",
  "Duraklatma menüsünde ok tuşlarıyla gezinme ve Esc ile devam etme eklendi.",

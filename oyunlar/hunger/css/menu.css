@@ -15,7 +15,7 @@
 #menu .btns button{transition:transform .15s,background .15s,border-color .15s,box-shadow .15s}
 #menu .btns button:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.45)}
 #menu .btns button:active:not(:disabled){transform:none}
-#menuBy,#menuVer{position:fixed;bottom:calc(min(9vh,78px) + 8px);z-index:3;font-size:12px;color:#8d8d94;letter-spacing:.04em;pointer-events:none;text-shadow:0 1px 3px #000}
+#menuBy,#menuVer{position:fixed;bottom:calc(min(9vh,78px) + 8px);z-index:3;font-size:13px;color:#bcbcc4;letter-spacing:.04em;pointer-events:none;text-shadow:0 1px 3px #000}
 #menuBy{left:16px}#menuVer{right:16px}
 @media (prefers-reduced-motion:reduce){#menu .card h1,#menu .card h1 span{animation:none}#menu .mbar{animation-duration:.01s}}
 
@@ -45,7 +45,7 @@ button.opt small{font-size:12px;font-weight:400;color:var(--mut);line-height:1.4
 .wform .wr button{padding:6px 12px;white-space:nowrap}
 .wform .chk{display:flex;align-items:center;gap:8px;color:var(--tx)}
 .wform .chk input{width:16px;height:16px;accent-color:var(--red)}
-@media (max-width:640px){#menuBy,#menuVer{font-size:11px}.wform{grid-template-columns:1fr}}
+@media (max-width:640px){#menuBy,#menuVer{font-size:12px}.wform{grid-template-columns:1fr}}
 #wd .btns{display:flex;gap:8px;max-width:none;justify-content:center}
 #wd .btns button{flex:1 1 0;max-width:250px}
 .wform select{text-overflow:ellipsis}

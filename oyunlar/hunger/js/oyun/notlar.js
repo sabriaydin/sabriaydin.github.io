@@ -11,7 +11,7 @@ const data=()=>(HG.UPD||[]).slice().sort((a,b)=>b.n-a.n);     /* en yeni güncel
 const pageCount=()=>Math.max(1,Math.ceil(data().length/PER));
 function renderList(){
  const L=data(),part=L.slice(page*PER,page*PER+PER);
- list.innerHTML=part.map((e,i)=>`<details${i===0?' open':''}><summary><b>Güncelleme ${e.n}</b><span>${esc(e.t)}</span></summary><ul>${e.l.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></details>`).join('');
+ list.innerHTML=part.map((e,i)=>`<details><summary><b>Güncelleme ${e.n}</b><span>${esc(e.t)}</span></summary><ul>${e.l.map(x=>'<li>'+esc(x)+'</li>').join('')}</ul></details>`).join('');
  list.scrollTop=0;
  if(pgr){
   const first=part.length?part[0].n:0,last=part.length?part[part.length-1].n:0;
