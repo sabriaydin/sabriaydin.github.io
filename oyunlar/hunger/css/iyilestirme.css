@@ -43,8 +43,13 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 #ntL summary:hover,#ntL summary:focus-visible{background:#2c2c32;outline:none}
 #ntL details ul{margin:0;padding:2px 16px 14px 36px;color:#c8c8d0;font-size:13.5px;line-height:1.6}
 #ntL details li{margin:3px 0}
+#ntP{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 8px;margin:0 0 8px}
+#ntP .pn{display:flex;gap:4px}
+#ntP button{padding:5px 10px;font-size:13px;min-width:32px}
+#ntP button[aria-current]{background:var(--red2);border-color:var(--red);color:var(--tx)}
+#ntP .pi{flex-basis:100%;text-align:center;color:var(--mut);font-size:12.5px}
 #nt .btns{max-width:260px}
-@media (max-width:520px){#ntL summary{flex-wrap:wrap;gap:2px 8px}}
+@media (max-width:520px){#ntL summary{flex-wrap:wrap;gap:2px 8px}#ntP button{padding:5px 8px}}
 
 /* ---- Güncelleme 67: Duraklatma menüsü (sol sütun, büyük başlık, düz satır düğmeleri) ---- */
 #pause{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(4,4,5,.97) 0,rgba(4,4,5,.9) 36%,rgba(4,4,5,.6) 70%,rgba(4,4,5,.42) 100%)}
