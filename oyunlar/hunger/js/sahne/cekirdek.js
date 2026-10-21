@@ -31,12 +31,14 @@ S.init=canvas=>{
  initFns.forEach(f=>f());
  sc.qMode=(HG.cfg&&String(HG.cfg.q))||'auto';
  R.toneMappingExposure=C().bright/100;
- S.setQuality(sc.qMode==='auto'?3:+sc.qMode);
+ S.setQuality(S.tierOf());
  S.resize();
 };
 /* Kalite kademeleri: 3 Yüksek, 2 Orta, 1 Düşük, 0 En düşük */
 const C=()=>HG.cfg||{res:100,shadow:true,grass:100,fov:75,sens:100,shake:100,invY:false,bright:100};
 const QS={3:{pr:2,sh:2048,grass:1},2:{pr:1.5,sh:1024,grass:.5},1:{pr:1,sh:0,grass:.25},0:{pr:.75,sh:0,grass:0}};
+/* Kalite kipinden gerçek kademe: 'auto' en yüksekten başlar, 'ozel' kullanıcının son kademesini (cfg.qt) kullanır */
+S.tierOf=()=>{const m=String(sc.qMode);if(m==='auto')return 3;if(m==='ozel')return clamp((HG.cfg&&+HG.cfg.qt)||3,0,3);return clamp(+m||0,0,3)};
 S.setQuality=q=>{
  q=clamp(q,0,3);sc.quality=q;const o=QS[q],R=sc.R;
  R.setPixelRatio(Math.min(window.devicePixelRatio||1,o.pr)*C().res/100);
@@ -50,7 +52,7 @@ S.setQuality=q=>{
  if(sc.cam)S.resize();
  sc.scene.traverse(m=>{if(m.material){const ms=Array.isArray(m.material)?m.material:[m.material];ms.forEach(x=>x.needsUpdate=true)}});
 };
-const QN={auto:'Otomatik',3:'Yüksek',2:'Orta',1:'Düşük',0:'En düşük'};
+const QN={auto:'Otomatik',3:'Yüksek',2:'Orta',1:'Düşük',0:'En düşük',ozel:'Özel'};
 S.qualityLabel=()=>QN[sc.qMode];
 S.applyCfg=key=>{
  const o=QS[sc.quality];
@@ -60,7 +62,7 @@ S.applyCfg=key=>{
 S.cycleQuality=()=>{
  const order=['auto','3','2','1'];sc.qMode=order[(order.indexOf(String(sc.qMode))+1)%order.length];
  try{localStorage.setItem('hunger-kalite',sc.qMode)}catch(e){}
- S.setQuality(sc.qMode==='auto'?3:+sc.qMode);sc.fpsAcc=0;sc.fpsN=0;if(HG.cfg){HG.cfg.q=String(sc.qMode);const e=document.getElementById('s_q');if(e)e.value=HG.cfg.q}return S.qualityLabel();
+ S.setQuality(S.tierOf());sc.fpsAcc=0;sc.fpsN=0;if(HG.cfg){HG.cfg.q=String(sc.qMode);const e=document.getElementById('s_q');if(e)e.value=HG.cfg.q}return S.qualityLabel();
 };
 S.build=G=>{buildFns.forEach(f=>f(G));S.sync(G);sc.camInit=false};
 /* Aşamalı kurulum: her adımdan sonra arayüze nefes aldırır, ilerlemeyi bildirir */
@@ -116,7 +118,11 @@ S.render=(G,now,dt,info)=>{
   sc.fpsAcc+=dt;sc.fpsN++;
   if(sc.fpsAcc>=3){
    const avg=sc.fpsAcc/sc.fpsN;sc.fpsAcc=0;sc.fpsN=0;
-   if(avg>.036&&sc.quality>0)S.setQuality(sc.quality-1);
+   if(avg>.036&&sc.quality>0){
+    S.setQuality(sc.quality-1);
+    /* kademe inince ayarlardaki grafik seçenekleri de o kademenin ön ayarına çekilir */
+    if(HG.settings&&HG.settings.autoTier)HG.settings.autoTier(sc.quality);
+   }
   }
  }
 };

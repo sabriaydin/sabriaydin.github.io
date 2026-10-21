@@ -2,7 +2,20 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:46,d:"21.10.2026",t:"Günlük düzeltmesi",l:[
+{n:47,d:"21.10.2026",t:"Ayarlar menüsü yenilendi",l:[
+ "Kalite düzeyi artık çözünürlük ölçeği, gölgeler, parlama, çim, yer sisi, parçacık ve çizim mesafesi ayarlarını birlikte değiştiriyor; seçim yapınca bu ayarlar ekranda da güncelleniyor.",
+ "Kalite düzeyinin altına o düzeyde neyin açık, neyin kapalı olduğunu anlatan açıklama eklendi.",
+ "Kalite düzeyinin altına anlık kare hızı, çizim ölçeği ve piksel oranı eklendi.",
+ "Grafik ayarlarından biri elle değiştirilince kalite düzeyi \"Özel\" oluyor; düzey artık yanlış bilgi göstermiyor.",
+ "Otomatik kalite kendiliğinden düştüğünde grafik ayarları da o düzeye çekiliyor.",
+ "O anda etkisi olmayan ayarlar soluk ve kapalı gösteriliyor; nedeni satırın altında yazıyor (örneğin düşük kalitede gölge ve parlama, ana ses kapalıyken diğer ses ayarları).",
+ "Ayar arama kutusu eklendi: yazılan kelime tüm sekmelerde aranıyor.",
+ "\"Görünümü göster\" düğmesi eklendi: basılı tutarken ayar penceresi gizleniyor ve yapılan değişiklik sahnede görülüyor.",
+ "Varsayılana dönüş ikiye ayrıldı: yalnızca açık sekme veya tüm ayarlar.",
+ "Çözünürlük ölçeğinin en etkili başarım ayarı olduğu belirtildi.",
+ "Oyun sekmesine, dünya kurallarının Dünya Oluştur penceresinden seçildiğini belirten açıklama eklendi."
+]},
+{n:46,d:"20.10.2026",t:"Günlük düzeltmesi",l:[
  "Kamp sandıklarında bulunan Sefer Defteri kayıtlarının Günlük penceresinde yanlış metinlerle görünmesi sorunu giderildi."
 ]},
 {n:45,d:"18.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
