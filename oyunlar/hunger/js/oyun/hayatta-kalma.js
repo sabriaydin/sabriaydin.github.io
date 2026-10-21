@@ -106,7 +106,8 @@ function vertStep(dt){
   return;
  }
  if(G.swim){G.swim=false;G.head=false;G.vz=0;G.divT=0}
- if(!G.air&&(HG.keyDown('jump')||inp.touchJump)&&ui.state==='play'&&G.stam>=9){G.vz=JUMP;G.air=true;HG.useStam(9);HG.snd('jump')}
+ /* zıplama: zeminden ayrıldıktan sonra kısa bir hak (G.coyote) ve havada basılan tuşun tamponlanması (G.jumpBuf) js/oyun/fizik.js içinde yönetilir */
+ if((!G.air||(G.coyote||0)>0)&&(HG.keyDown('jump')||inp.touchJump||(G.jumpBuf||0)>0)&&ui.state==='play'&&G.stam>=9){G.vz=JUMP;G.air=true;G.coyote=0;G.jumpBuf=0;if(G.crouch&&HG.setCrouch)HG.setCrouch(false);HG.useStam(9);HG.snd('jump')}
  if(G.air){
   G.vz-=GRAV*dt;G.pz+=G.vz*dt;
   if(G.pz<=gy&&G.vz<=0){
@@ -144,13 +145,14 @@ function moveStep(dt){
  if(G.moving){
   ix/=Math.max(m,1);iz/=Math.max(m,1);
   const vx=ix*cy+iz*sy,vy=-ix*sy+iz*cy;
-  G.sprint=(HG.cfg.sprintT?!!G.sprintOn:kd('sprint'))&&G.hun>5&&G.thr>0&&iz<=0&&!G.tired&&!(HG.bow&&HG.bow.on);
+  G.sprint=(HG.cfg.sprintT?!!G.sprintOn:kd('sprint'))&&G.hun>5&&G.thr>0&&iz<=0&&!G.tired&&!G.crouch&&!(HG.bow&&HG.bow.on);
   /* susuzluk: koşmak engellenir (tuşa basılıyorsa kısa aralıklarla uyarı verilir) */
   if(G.thr<=0&&(HG.cfg.sprintT?G.sprintOn:kd('sprint'))&&iz<=0){const nw=performance.now();if(nw>thMsgT){thMsgT=nw+6000;HG.toast('Susuzsun: koşamazsın. Su iç.')}}
   const wd0=Math.max(0,HG.sc.WY-Scene.terrainY(G.px,G.py));
   let sp=(G.sprint?5.4:3.4)*(G.swim?(G.sprint?.62:.5):clamp(1-wd0*.34,.5,1))*(HG.bow&&HG.bow.on?.55:1)*(G.tired?.8:1)*Math.min(1,m);
   /* eğim: yokuş yukarı yavaşlar, aşağı hızlanır */
   const g0=G.pz!==undefined&&!G.air?G.pz:Scene.terrainY(G.px,G.py),grade0=(Scene.terrainY(G.px+vx*.7,G.py+vy*.7)-g0)/.7,grade=(!G.air&&G.pz!==undefined&&G.pz>Scene.terrainY(G.px,G.py)+.3)?0:grade0;
+  if(G.crouch&&!G.swim&&!G.onRaft)sp*=.45;                 /* çömelme: yavaş ve sessiz */
   if(G.onRaft)sp=HG.raftSpeed(G.sprint,m);
   else sp*=clamp(1-grade*.42,.55,1.2);
   tvx=vx*sp;tvy=vy*sp;
@@ -168,7 +170,7 @@ function moveStep(dt){
  if(!G.air){
   const w0=G.walk;G.walk+=dt*(speed/3.4);
   if(G.onRaft&&speed>.4){let d=Math.atan2(G.pvx,G.pvy)-(G.raftYaw||0);while(d>Math.PI)d-=6.2832;while(d<-Math.PI)d+=6.2832;G.raftYaw=(G.raftYaw||0)+d*Math.min(1,1.6*dt)}
-  if(speed>.6&&Math.floor(G.walk*1.6)!==Math.floor(w0*1.6))HG.snd(G.onRaft?'step_raft':tl<=T.SHAL||tl===T.POND||G.swim?'step_water':tl===T.SAND?'step_sand':tl===T.ROCK?'step_rock':'step')
+  if(speed>.6&&!G.crouch&&Math.floor(G.walk*1.6)!==Math.floor(w0*1.6))HG.snd(G.onRaft?'step_raft':tl<=T.SHAL||tl===T.POND||G.swim?'step_water':tl===T.SAND?'step_sand':tl===T.ROCK?'step_rock':'step')
  }
 }
 

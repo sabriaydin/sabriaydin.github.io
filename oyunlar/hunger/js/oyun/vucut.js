@@ -109,8 +109,10 @@ function bodyHud(){
  let s='';
  if(G.bleed>0)s+='Kanama · ';
  if(G.tired)s+='Bitkin · ';
+ if(G.crouch)s+='Çömeliyor · ';
  if(G.swim)s+='Yüzüyor · ';else if(G.onRaft)s+='Salda · ';
  if(G.torchLit)s+='Meşale '+Math.max(0,Math.round(G.torchFuel/360*100))+'% · ';
+ if(G.cheat)s+='⚠ İşaretli dünya · ';
  if(G.san<30)s+='Akıl dağılıyor · ';
  else if(G.san<55)s+='Huzursuz · ';
  if(hc.s!==s){hc.s=s;const e=$('#sts');if(e)e.textContent=s.replace(/ · $/,'')}

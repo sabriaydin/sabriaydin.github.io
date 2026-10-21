@@ -10,7 +10,7 @@ const dir=new THREE.Vector3(),pos=new THREE.Vector3();
 function fire(draw){
  take('arrow',1);HG.ui.dirty=true;
  sc.cam.getWorldDirection(dir);sc.cam.getWorldPosition(pos);
- const spread=(1-draw)*.06+.004;
+ const spread=((1-draw)*.06+.004)*(HG.aimSteady?HG.aimSteady():1);        /* çömelerek nişan alınca yayılma azalır (js/oyun/fizik.js) */
  dir.x+=(Math.random()-.5)*spread;dir.y+=(Math.random()-.5)*spread;dir.z+=(Math.random()-.5)*spread;dir.normalize();
  const sp=20+34*draw;
  G.arrows.push({x:pos.x+dir.x*.6,y:pos.y+dir.y*.6-.08,z:pos.z+dir.z*.6,vx:dir.x*sp,vy:dir.y*sp,vz:dir.z*sp,life:MAXLIFE,draw,stuck:false,t:0});

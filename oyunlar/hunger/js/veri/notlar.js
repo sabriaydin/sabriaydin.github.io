@@ -1,6 +1,32 @@
 /* Hunger 3D - güncelleme notları (Ana menü › Güncelleme Notları). Yalnızca oyuncuyu ilgilendiren değişiklikler, kısa maddeler halinde.
    Yeni güncelleme: dizinin başına {n:numara, t:'başlık', l:['madde', ...]} ekleyin. */
 HG.NOTES=[
+{
+ "n": 70,
+ "t": "Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",
+ "l": [
+  "Çömelme eklendi (Ctrl veya Z): ayak sesiniz kesilir, hayvanlar sizi çok daha geç fark eder, yay daha az sallanır",
+  "Ekran ortasına gizlilik göstergesi eklendi: Gizli, Tetikte, Fark edildin",
+  "Zıplama hissi düzeltildi: kenardan ayrıldıktan sonra kısa bir zıplama hakkı ve havada basılan tuşun yere inince çalışması",
+  "Çok dik yamaçlarda artık kayılır; kayarken dayanıklılık azalır",
+  "Darbe alınca vuran yönün tersine itilirsiniz; ağır darbe hafifçe havalandırır",
+  "Yüksekten suya atlayınca derine batılır; serbest düşüşte görüş açısı açılır, çömelince daralır",
+  "Kurt sürüsü artık tek sıradan gelmiyor, oyuncunun çevresine yayılıp kuşatıyor",
+  "Gece yırtıcıları kamp ateşinin aydınlattığı alana girmiyor",
+  "Uzun kovalamacada yırtıcılar yorulup vazgeçiyor",
+  "Yaralanan hayvan kaçarken kan izi bırakıyor; iz sürülebiliyor",
+  "Yağmur ve rüzgâr oyuncunun sesini örtüyor; gece sürü hayvanları dolaşmayıp dinleniyor",
+  "Elde tutulan 26 eşya artık gerçek modelle görünüyor: odun, kömür, kum, cevher, külçe, sikke, çanta, dört balık türü, yengeç, mercan, dalış maskesi, şişeler ve yerleştirilen yapıların küçük önizlemeleri",
+  "Uyarlanabilir çözünürlük eklendi: kare hızı düşünce çizim çözünürlüğü kendiliğinden biraz iner, rahatlayınca geri çıkar (Ayarlar › Grafik)",
+  "Gölge haritası artık her karede değil, gerektiğinde yenileniyor",
+  "Q tuşu önceki eşyaya döndürüyor",
+  "Hile koruması: can, dayanıklılık, yığın sınırı, hız ve zeminle bağ sürekli denetleniyor; bozukluk düzeltiliyor",
+  "Kayıtlara imza yazılıyor; dışarıdan düzenlenen kayıt yüklenince dünya işaretleniyor ve yeni başarım açılmıyor",
+  "Hasar tavanı eklendi: hiçbir vuruş silah tablosunun üstüne çıkamıyor",
+  "Co-op: ev sahibi artık konuğun konum, hasar ve eşya alma paketlerini doğruluyor; ışınlanma geri alınıyor, ısrar eden oyuncu çıkarılıyor",
+  "Co-op: diğer oyuncunun çömelmesi karşı tarafta da görünüyor"
+ ]
+},
  {
   "n": 69,
   "t": "Dünya kuralları ve menüler",

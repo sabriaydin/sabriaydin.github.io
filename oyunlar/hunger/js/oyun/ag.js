@@ -372,13 +372,13 @@ net.dropPeer=dropPeer;
 net.on('ping',(m,P)=>tx(P.conn,{t:'pong',ts:m.ts}));
 net.on('pong',(m)=>{let d=now()-m.ts;if(d>=0&&d<10000){d=Math.min(d,1500);net.lat=net.lat?net.lat*.7+d*.3:d}});
 
-const FL={MV:1,SP:2,SW:4,RF:8,SH:16,TL:32,SL:64,DD:128,BW:256,HD:512,AT:1024};
+const FL={MV:1,SP:2,SW:4,RF:8,SH:16,TL:32,SL:64,DD:128,BW:256,HD:512,AT:1024,CR:2048};
 net.FL=FL;
 function flagsNow(){
  let f=0;
  if(G.moving)f|=FL.MV;if(G.sprint)f|=FL.SP;if(G.swim)f|=FL.SW;if(G.onRaft)f|=FL.RF;if(G.sheltered)f|=FL.SH;if(G.torchLit)f|=FL.TL;
  if(ui.sleeping)f|=FL.SL;if(ui.state==='dead')f|=FL.DD;if(HG.bow&&HG.bow.on)f|=FL.BW;if(G.head)f|=FL.HD;
- if(HG.A&&HG.A.hitT>0)f|=FL.AT;
+ if(HG.A&&HG.A.hitT>0)f|=FL.AT;if(G.crouch)f|=FL.CR;
  return f;
 }
 function heldId(){const s=G.inv&&G.inv[G.sel];return s?s.id:''}

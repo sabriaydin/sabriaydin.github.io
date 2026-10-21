@@ -178,7 +178,7 @@ S.onFrame((G,t,dt,info)=>{
   r.rpt=(r.rpt===undefined?r.pitch:r.rpt)+((r.pitch||0)-(r.rpt===undefined?r.pitch:r.rpt))*k;
   const d2=(r.rx-cam.x)**2+(r.rz-cam.z)**2;
   if(d2>140*140){o.g.visible=false;continue}
-  const fl=r.fl|0,sleeping=!!(fl&FL.SL),dead=!!(fl&FL.DD),swim=!!(fl&FL.SW),raft=!!(fl&FL.RF),sprint=!!(fl&FL.SP);
+  const fl=r.fl|0,sleeping=!!(fl&FL.SL),dead=!!(fl&FL.DD),swim=!!(fl&FL.SW),raft=!!(fl&FL.RF),sprint=!!(fl&FL.SP),crouch=!!(fl&(FL.CR||2048));
   const gy=S.groundY(r.rx,r.rz);
   let y=r.y==null||swim?gy:r.y;
   if(swim)y=Math.max(gy,sc.WY-.9);
@@ -253,6 +253,15 @@ S.onFrame((G,t,dt,info)=>{
     o.shL.rotation.x=lerp(o.shL.rotation.x,-.5,a);o.shR.rotation.x=lerp(o.shR.rotation.x,-.5,a);
     o.shL.rotation.z=lerp(o.shL.rotation.z,.7,a);o.shR.rotation.z=lerp(o.shR.rotation.z,-.7,a);
    }
+   if(crouch){
+    /* çömelme: kalça ve dizler bükülür, gövde alçalır ve hafifçe öne eğilir */
+    const c=o.crk=(o.crk===undefined?0:o.crk)+((1)-(o.crk===undefined?0:o.crk))*Math.min(1,10*dt);
+    o.body.position.y-=.42*c;
+    o.hip.rotation.x=lerp(o.hip.rotation.x,.42,c);o.torso.rotation.x=lerp(o.torso.rotation.x,.2,c);
+    o.thL.rotation.x=lerp(o.thL.rotation.x,-.95+Math.sin(o.ph)*amp*.5,c);o.thR.rotation.x=lerp(o.thR.rotation.x,-.95-Math.sin(o.ph)*amp*.5,c);
+    o.knL.rotation.x=lerp(o.knL.rotation.x,1.5,c);o.knR.rotation.x=lerp(o.knR.rotation.x,1.5,c);
+    o.shL.rotation.z=lerp(o.shL.rotation.z,.16,c);o.shR.rotation.z=lerp(o.shR.rotation.z,-.16,c);
+   }else if(o.crk)o.crk=Math.max(0,o.crk-dt*10);
    if(raft){o.thL.rotation.x=.05;o.thR.rotation.x=-.05;o.knL.rotation.x=o.knR.rotation.x=.05;o.body.position.y=Math.sin(t*1.4+o.seed)*.02}
    /* elde tutulan eşya ve eylemler */
    if(fl&FL.BW){

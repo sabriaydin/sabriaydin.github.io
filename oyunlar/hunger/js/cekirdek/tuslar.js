@@ -6,10 +6,11 @@ const KEY='hunger-tuslar';
 const ACTS=[
  ['fwd','İleri','KeyW','ArrowUp'],['back','Geri','KeyS','ArrowDown'],['left','Sola','KeyA','ArrowLeft'],['right','Sağa','KeyD','ArrowRight'],
  ['sprint','Koş','ShiftLeft','ShiftRight'],['jump','Zıpla / yüzerken yüzeye çık','Space',''],['dive','Suya dal (yüzerken)','KeyX',''],
+ ['crouch','Çömel (sessiz yürü)','ControlLeft','KeyZ'],
  ['use','Topla / al / kullan / konuş','KeyE',''],['place','Yapıyı yerleştir','KeyF',''],
  ['inv','Envanter','KeyI','Tab'],['craft','Üretim','KeyC',''],['map','Harita','KeyM',''],['jr','Günlük','KeyK',''],
  ['guide','Rehber','KeyH',''],['mute','Sesi aç/kapat','KeyN',''],['qsave','Hızlı kaydet','F5',''],
- ['drop','Seçili eşyadan 1 adet at','KeyG',''],['sort','Çantayı düzenle','KeyR',''],['photo','Fotoğraf modu (arayüzü gizle)','KeyP',''],
+ ['drop','Seçili eşyadan 1 adet at','KeyG',''],['lastslot','Önceki eşyaya dön','KeyQ',''],['sort','Çantayı düzenle','KeyR',''],['photo','Fotoğraf modu (arayüzü gizle)','KeyP',''],
  ['irot','İnşa: döndür (merdiven yönü, kapı menteşesi)','KeyR',''],['ipick','İnşa: pipet (bakılan parçayı seç)','KeyT','']
 ];
 const DEF={};for(const [k,,a,b] of ACTS)DEF[k]=[a,b];

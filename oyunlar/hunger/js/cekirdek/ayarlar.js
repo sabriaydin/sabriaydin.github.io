@@ -16,6 +16,8 @@ const TABS=[
   ['bright','Parlaklık','range',100,60,140,5,'%'],
   ['dist','Çizim mesafesi','range',100,50,130,5,'%','Düşürmek uzaktaki ağaç ve kayaları daha erken gizler; başarımı artırır.'],
   ['fov','Görüş açısı (FOV)','range',75,60,110,1,'°'],
+  ['adapt','Uyarlanabilir çözünürlük','toggle',true,'Kare hızı düşerse çizim çözünürlüğü kendiliğinden biraz düşer, rahatlayınca geri yükselir. Üst sınır yukarıdaki Çözünürlük ölçeğidir.'],
+  ['fpsTarget','Hedef kare hızı','select','55',[['45','45 FPS'],['55','55 FPS'],['60','60 FPS']],'Uyarlanabilir çözünürlüğün korumaya çalıştığı değer.'],
   ['fps','FPS göstergesi','toggle',false],
   ['mfx','Menü arka plan efekti','toggle',true,'Ana menüdeki kıvılcım ve sis animasyonu. Kapatmak zayıf cihazlarda pil ve başarım kazandırır.']]],
  ['Ses',[
@@ -27,6 +29,7 @@ const TABS=[
  ['Kontrol',[
   ['sens','Fare / dokunma hassasiyeti','range',100,20,300,5,'%'],
   ['invY','Dikey bakışı ters çevir','toggle',false],
+  ['crouchT','Çömelmeyi aç/kapat','toggle',false,'Açıkken çömelme tuşu basılı tutulmaz; bir kez basmak çömeltir, yeniden basmak doğrultur.'],
   ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.']]],
  ['Oyun',[
   ['diff','Zorluk','select','1',[['0','Kolay'],['1','Normal'],['2','Zor']],'Açlık, susuzluk ve alınan hasar hızını değiştirir. Kolay: %25 daha az, Zor: %30 daha fazla.'],

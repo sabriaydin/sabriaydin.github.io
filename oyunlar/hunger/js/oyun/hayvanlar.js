@@ -64,7 +64,8 @@ function steer(a,def,head,spd){
  return head;
 }
 /* Oyuncunun yaydığı gürültü: koşu ve alet/silah sesi hayvanların fark etme mesafesini büyütür, durmak küçültür */
-function noiseK(){return (G.sprint&&G.moving?1.4:G.moving?1:.7)+((HG.noiseT||0)>performance.now()?.6:0)}
+/* Çömelen oyuncu çok daha geç fark edilir; HG.noiseMul yağmur/rüzgâr maskelemesi için js/oyun/zeka.js tarafından ayarlanır */
+function noiseK(){const b=G.crouch?(G.moving?.42:.3):(G.sprint&&G.moving?1.4:G.moving?1:.7);return (b+((HG.noiseT||0)>performance.now()?.6:0))*(HG.noiseMul||1)}
 /* Sürü hayvanları (aynı türden olanlar bir arada gezer) */
 const HERD={sheep:1,cow:1,deer:1,chicken:1};
 function herdCenter(a){

@@ -93,10 +93,10 @@ S.render=(G,now,dt,info)=>{
   const bob=gnd?Math.sin(G.walk*10)*.04*spk*(G.sprint?1.25:1):0,sway=gnd?Math.cos(G.walk*5)*.018*spk:0;
   const tp=(G.air?(G.vz>0?.012:-.02):0);cd.pch+=(tp-cd.pch)*(1-Math.exp(-6*dt));
   const gy=G.pz!==undefined?G.pz:S.groundY(G.px,G.py);
-  cam.position.set(G.px+Math.cos(look.yaw)*sway,gy+EYE+bob+cd.dip*.14+br,G.py-Math.sin(look.yaw)*sway);
+  cam.position.set(G.px+Math.cos(look.yaw)*sway,gy+(HG.eyeH===undefined?EYE:HG.eyeH)+bob+cd.dip*.14+br,G.py-Math.sin(look.yaw)*sway);
   cam.rotation.set(look.pitch+cd.pch-(gnd?Math.abs(Math.sin(G.walk*10))*.004*spk:0)-cd.dip*.1,look.yaw,cd.roll+(gnd?Math.sin(G.walk*5)*.0035*spk:0));
   if(sc.shake>.002){const s=sc.shake*C().shake/100;cam.rotation.x+=(Math.random()-.5)*s*.05;cam.rotation.y+=(Math.random()-.5)*s*.05;cam.rotation.z+=(Math.random()-.5)*s*.04;sc.shake*=Math.exp(-dt*6)}
-  const tf=(C().fov+(G.sprint?8:0)-(HG.bow?HG.bow.draw*24:0))*(1-(sc.zoomK||0)*.72);sc.fov+=(tf-sc.fov)*(1-Math.exp(-6*dt));
+  const tf=(C().fov+(G.sprint?8:0)+(HG.fovAdd||0)-(HG.bow?HG.bow.draw*24:0))*(1-(sc.zoomK||0)*.72);   /* HG.fovAdd: çömelme ve serbest düşüş (js/oyun/fizik.js) */sc.fov+=(tf-sc.fov)*(1-Math.exp(-6*dt));
   if(Math.abs(cam.fov-sc.fov)>.05){cam.fov=sc.fov;cam.updateProjectionMatrix()}
  }else{
   /* ana menü: sinematik uçuş. Yarıçap, yükseklik ve bakış noktası yavaşça değişir; hafif el kamerası sallanması ve görüş alanı nefesi eklenir */

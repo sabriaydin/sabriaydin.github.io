@@ -69,6 +69,7 @@ GUIDE.ores=[
  ['İpucu','Dağlarda yüksek kesimlere çıkmadan önce yiyecek, su ve meşale alın. Yüksekten düşmek hasar verir; yokuşta yavaşlarsınız, tırmanılamayacak kadar dik yerlerde zıplayarak ilerleyin.']
 ];
 GUIDE.tips=[
+ ['Gizli avlanma','Çömelince (<b>Ctrl</b> veya <b>Z</b>) ayak sesiniz kesilir, hızınız yarıya iner ve hayvanlar sizi çok daha geç fark eder. Ekranın ortasındaki küçük gösterge durumu söyler: <b>Gizli</b> (fark edilmediniz), <b>Tetikte</b> (bir hayvan size bakıyor) ve <b>Fark edildin</b>. Çömelerek beklerken yay daha az sallanır, ok daha isabetli gider. Yağmur ve rüzgâr da sesinizi örter.'],
  ['İnşa Planı ve Çekiç','Rust tarzı inşa: 3 m ızgarada Temel, Zemin, Duvar, Kapı Çerçevesi, Pencereli Duvar, Yarım/Alçak Duvar, Merdiven. Plan eldeyken sol tık kurar, sağ tık basılı tutulup fareyle parça seçilir. Çekiç: Odun, Taş, Metal, Zırhlı seviyeye yükseltir; Döndür merdiven yönünü veya kapı menteşesini çevirir; Yık söker. {irot} döndür, {ipick} pipet, {use} kapıyı açar veya kapatır. Ayrıntı için Oyun sekmesindeki İnşa bölümüne bakın.'],
  ['El Taşı','Oyun başında 1. yuvada bulunur. Çıplak elle ağaç kesilmez, taş ve maden kazılmaz; El Taşı ağaç ve yumuşak kaya için yeterlidir ama balta ve kazmalardan yavaştır ve daha az eşya verir. Vuruşlar el animasyonuyla görünür.'],
  ['Meşale','Eliniz boşken kullanın: elde yanan meşale aydınlatır, kurtları ve Gölgeleri uzak tutar. Yaklaşık 6 dakika yanar; yağmurda daha çabuk tükenir. Odun ve kömürle üretilir.'],
