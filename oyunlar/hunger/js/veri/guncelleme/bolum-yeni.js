@@ -2,7 +2,15 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:52,d:"21.10.2026",t:"Köylü ve hayvan görünümleri yenilendi",l:[
+{n:53,d:"21.10.2026",t:"Arazi ve yüzey dokuları yenilendi",l:[
+ "Kum dokusu baştan yapıldı: düzenli dalga deseni yerine rüzgârla oluşmuş düzensiz kum dalgacıkları, çok ince kum tanesi, yer yer çakıl ve kabuk kırıkları eklendi.",
+ "Ağaç kabuğu dokusu baştan yapıldı: boyuna uzanan derin çatlaklar, lifli kabuk levhaları ve üzerinde liken lekeleri eklendi.",
+ "Çimen dokusuna öbeklenme eklendi: çimen artık her yerde aynı sıklıkta değil; seyrek ve sık kesimler ile sararmış kuru yamalar oluşuyor.",
+ "Çimen yaprağı sayısı artırıldı ve yaprak boyları öbek sıklığına göre değişir hâle getirildi.",
+ "Hayvan postu dokusu geliştirildi: tüyler artık eşit aralıklı değil, farklı uzunlukta ve kesintili tutamlar hâlinde görünüyor.",
+ "Kuş tüyü dokusu baştan yapıldı: yuvarlak kabarcıklar yerine boyuna uzun ve ucu sivri tüyler, orta sap ile tüy telleri eklendi."
+]},
+{n:52,d:"20.10.2026",t:"Köylü ve hayvan görünümleri yenilendi",l:[
  "Köylü modelleri baştan yapıldı: gövde, bel, boyun, omuz, dirsek, bilek, kalça ve diz ayrı ayrı hareket ediyor.",
  "Köylülerin yüzü ayrıntılandı: göz, kaş, burun, kulak ve ağız eklendi; göz kırpıyorlar.",
  "Saç ve sakal çeşitleri eklendi; kadın köylülerde uzun saç ve etek var.",
@@ -15,7 +23,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Tavuklara ayrı tüy dokusu eklendi.",
  "Köylülerin giysi, deri ve ten dokuları birinci kişi kollarıyla aynı kaliteye getirildi."
 ]},
-{n:51,d:"20.10.2026",t:"Ada iki kat büyüdü: dağlar, dereler, biyomlar ve köy türleri",l:[
+{n:51,d:"19.10.2026",t:"Ada iki kat büyüdü: dağlar, dereler, biyomlar ve köy türleri",l:[
  "Harita iki kat büyüdü: ada dört kat daha geniş bir alana yayıldı, keşfedilecek yer çok arttı.",
  "Arazi yeniden üretiliyor: ortada sırtlı dağ dizileri, aralarında vadiler, eteklerinde tepeler ve ovalar var; en yüksek noktalar 12 metreye çıkıyor.",
  "Dağlardan denize inen dereler eklendi. Derelerin alçak kesiminde su akıyor ve bu su içilebiliyor; yukarısı kuru dere yatağı olarak kalıyor.",
@@ -28,7 +36,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Dünya üretimi hızlandırıldı: harita dört kat büyümesine rağmen yeni oyun eskisinden daha hızlı kuruluyor.",
  "Eski kayıtlar korunuyor: önceki ada yeni haritanın ortasına yerleştiriliyor, arazi ve kurduğunuz yapılar olduğu gibi kalıyor."
 ]},
-{n:50,d:"19.10.2026",t:"Konsol komutları, düzeltmeler ve pencere görünümü",l:[
+{n:50,d:"18.10.2026",t:"Konsol komutları, düzeltmeler ve pencere görünümü",l:[
  "Bir pencere Esc ile kapatılınca hemen ardından duraklatma menüsünün açılması sorunu giderildi.",
  "Ekranın mavi kalması sorunu giderildi: bir karede hata olsa bile çizim duruyordu; artık hata konsola yazılıyor ve oyun sürüyor.",
  "Ayarlar › Kontrol'e \"Tam ekranda oyna\" seçeneği eklendi: oyuna girince tam ekrana geçilir ve tarayıcı kısayolları oyuna yönlendirilir; böylece çömelerek yürürken (Ctrl+W) sekme kapanmıyor. Esc ile tam ekrandan çıkılır.",
@@ -40,14 +48,14 @@ HG.UPD=(HG.UPD||[]).concat([
  "Konsola gizli bir komutla açılan geliştirici modu eklendi: canlı bilgi paneli (konum, kare hızı, canlı sayısı, hava, dünya kodu), hızlı düğmeler ve ek komutlar.",
  "Yükleme ekranı yenilendi; ayarlar, güncelleme notları, dünya oluşturma, kayıtlar, rehber ve ticaret pencereleri ana menüyle aynı görünüme getirildi."
 ]},
-{n:49,d:"18.10.2026",t:"Ana menü arka planı",l:[
+{n:49,d:"17.10.2026",t:"Ana menü arka planı",l:[
  "Ana menüdeki 3B dünya uçuşu kaldırıldı; yerine oyunu anımsatan hafif bir manzara çizildi: gün batımında ada silüeti, deniz, çam ve palmiye gölgeleri, kıyıda yanan kamp ateşi ve ağaçların arasında ara sıra beliren Gölge gözleri.",
  "Menü artık 3B sahneyi çizmiyor; menüde kare hızı yükü neredeyse tamamen kalktı, zayıf cihazlarda ve dizüstünde ısınma ile pil tüketimi azaldı.",
  "Menüdeki kıvılcım ve ateş böcekleri manzaraya göre seyreltildi.",
  "Ayarlar › Grafik › Menü arka plan efekti kapatılınca manzara hareketsiz tek kare olarak duruyor.",
  "Oyundan menüye dönüldüğünde menü efektlerinin durması sorunu giderildi."
 ]},
-{n:48,d:"17.10.2026",t:"Oyun içi arayüz yenilendi",l:[
+{n:48,d:"16.10.2026",t:"Oyun içi arayüz yenilendi",l:[
  "Gizlilik göstergesi ekranın ortasından alınıp mini haritanın altına taşındı; artık nişanın önünü kapatmıyor.",
  "Gizlilik göstergesi yalnızca çömelirken veya yakındaki bir hayvan tetikteyken görünüyor; yanından geçilen sakin hayvanlarda kendiliğinden açılıp kapanma sorunu giderildi.",
  "Yalnızca üretim ve ticaret malzemesi olan eşyalar (odun, taş, kömür, cevher, külçe, deri, yün, sikke ve benzerleri) artık elde tutulmuyor; seçilince eller boş kalıyor ve çıplak elle vuruluyor.",
@@ -61,7 +69,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Çanta ve üretim penceresi ile kaydırma çubukları yenilendi; tarif satırları üzerine gelince vurgulanıyor.",
  "Eşya seçilmeden boş duran açıklama kutusu gizleniyor."
 ]},
-{n:47,d:"16.10.2026",t:"Ayarlar menüsü yenilendi",l:[
+{n:47,d:"15.10.2026",t:"Ayarlar menüsü yenilendi",l:[
  "Kalite düzeyi artık çözünürlük ölçeği, gölgeler, parlama, çim, yer sisi, parçacık ve çizim mesafesi ayarlarını birlikte değiştiriyor; seçim yapınca bu ayarlar ekranda da güncelleniyor.",
  "Kalite düzeyinin altına o düzeyde neyin açık, neyin kapalı olduğunu anlatan açıklama eklendi.",
  "Kalite düzeyinin altına anlık kare hızı, çizim ölçeği ve piksel oranı eklendi.",
@@ -74,7 +82,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Çözünürlük ölçeğinin en etkili başarım ayarı olduğu belirtildi.",
  "Oyun sekmesine, dünya kurallarının Dünya Oluştur penceresinden seçildiğini belirten açıklama eklendi."
 ]},
-{n:46,d:"15.10.2026",t:"Günlük düzeltmesi",l:[
+{n:46,d:"14.10.2026",t:"Günlük düzeltmesi",l:[
  "Kamp sandıklarında bulunan Sefer Defteri kayıtlarının Günlük penceresinde yanlış metinlerle görünmesi sorunu giderildi."
 ]},
 {n:45,d:"13.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[

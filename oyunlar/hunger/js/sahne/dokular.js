@@ -89,10 +89,14 @@ function canvasTex(size,fill,enc){
    const u=x/N,v=y/N,cl=fb(u,v,9,9,3,121),dry=fb(u,v,5,5,2,131),i=y*N+x,l=.3+.1*cl;
    R[i]=l*(1.05+.18*dry);G[i]=l*(1.08-.1*dry);B[i]=l*.62;Hh[i]=.2+.1*cl;
   }
-  const nb=2600;
+  const nb=4200;
   for(let k=0;k<nb;k++){
-   const bx=hash(k,1,701)*N,by=hash(k,2,701)*N,len=12+hash(k,3,701)*30,ang=(hash(k,4,701)-.5)*.9,cur=(hash(k,5,701)-.5)*.9,wd=.9+hash(k,6,701)*1.5,
-    tone=hash(k,7,701),dryk=hash(k,8,701)>.88?1:0,lum=.9+hash(k,9,701)*.3;
+   const bx=hash(k,1,701)*N,by=hash(k,2,701)*N;
+   /* öbeklenme: yoğunluk alanı düşük olan yerlerde çimen seyrekleşir, kuru bölgelerde sararır */
+   const dens=fb(bx/N,by/N,4,4,2,705),dryf=fb(bx/N,by/N,5,5,2,131);
+   if(hash(k,10,701)>.25+dens*1.1)continue;
+   const len=(12+hash(k,3,701)*30)*(.72+dens*.5),ang=(hash(k,4,701)-.5)*.9,cur=(hash(k,5,701)-.5)*.9,wd=.9+hash(k,6,701)*1.5,
+    tone=hash(k,7,701),dryk=hash(k,8,701)>(dryf>.6?.45:.93)?1:0,lum=.9+hash(k,9,701)*.3;
    const steps=Math.ceil(len*1.4);
    for(let s2=0;s2<=steps;s2++){
     const t=s2/steps,d=t*len,dx=Math.sin(ang+cur*t)*d,dy=-Math.cos(ang+cur*t*.6)*d,w=wd*(1-t*t*.85)*.55+.28;
@@ -110,16 +114,18 @@ function canvasTex(size,fill,enc){
  })();
  /* ağaç kabuğu: derin dikey çatlak ağı, aralarında pullu levhalar, kısa yatay çatlaklar, hafif liken lekeleri */
  tex.pBark=pbr(SZ,(u,v)=>{
-  const wu=u+(fb(u,v,6,3,2,501)-.5)*.045,wv=v+(fb(u,v,4,4,2,503)-.5)*.1;
-  const r1=Math.abs(fb(wu,wv,12,3,4,201)-.5)*2,fur=1-smooth01(r1,0,.13);
-  const r2=Math.abs(fb(wu+.31,wv,22,3,3,205)-.5)*2,fur2=(1-smooth01(r2,0,.1))*.55;
-  const plate=fb(wu,wv,44,12,3,211),fib=fb(u,v,120,5,2,213);
-  const cross=(1-smooth01(Math.abs(fb(wu,wv,26,46,2,221)-.5)*2,0,.09))*(1-fur);
-  const f=Math.min(1,fur+fur2*(1-fur));
-  const h=clamp(.82-f*.55-cross*.22+plate*.22+fib*.12,0,1);
-  const li=smooth01(fb(u,v,5,5,3,231),.66,.84)*.7;
-  const l=.5+(h-.74)*1.05-(f>.5?.05:0);
-  return [l*(1.07-.12*li),l*(1+.03*li),l*(.86-.04*li),h];
+  /* Dikey süren derin çatlak ağı (yatayda sık, dikeyde sürekli), aralarında lifli levhalar ve
+     yer yer yatay kopmalar; üstüne ince liken lekesi. */
+  const wu=u+(fb(u,v,3,10,2,501)-.5)*.028;
+  const c1=Math.abs(fb(wu,v,15,2,3,201)-.5)*2,cr1=1-smooth01(c1,0,.055);
+  const c2=Math.abs(fb(wu+.37,v,29,3,3,205)-.5)*2,cr2=(1-smooth01(c2,0,.04))*.55;
+  const fib=fb(u,v,150,9,2,213),fib2=fb(u,v,64,5,2,215);
+  const brk=smooth01(fb(u,v,9,55,2,221),.62,.8);                  /* yatay kopmalar */
+  const cr=Math.min(1,cr1+cr2*(1-cr1));
+  const h=clamp(.78-cr*.4-brk*.14+fib*.17+fib2*.11,0,1);
+  const li=smooth01(fb(u,v,5,5,3,231),.7,.86)*.6;
+  const l=.5+(h-.72)*1.02;
+  return [l*(1.08-.13*li),l*(1+.02*li),l*(.84-.03*li),h];
  },.5);
  /* kaya: yontulmuş yüzeyler, katmanlı tabakalar, hücresel çatlaklar, çukurcuklar ve tanecik; nötr gri, hafif sıcak-soğuk lekeler */
  {
@@ -135,11 +141,17 @@ function canvasTex(size,fill,enc){
    return [l*(1+.05*(tint-.5)*2+.07*rust),l*(1-.01*(tint-.5)*2-.03*rust),l*(1-.06*(tint-.5)*2-.09*rust),h];
   },.5);
  }
-  /* kum: dalgacıklar ve ince tane */
+  /* kum: iki ayrı dalgacık düzeni (bölgeden bölgeye değişir), çok ince tane ve seyrek çakıl */
  tex.pSand=pbr(SZ,(u,v)=>{
-  const wave=Math.sin((v*14+fb(u,v,5,5,3,401)*3.2)*Math.PI*2)*.5+.5,grain=fb(u,v,220,220,2,411),pat=fb(u,v,7,7,3,421);
-  const h=clamp(.45+wave*.25+grain*.25+pat*.2,0,1),l=.5+(h-.5)*.55+(pat-.5)*.1;
-  return [l*1.04,l,l*.93,h];
+  const wx=fb(u,v,4,4,3,401),wy=fb(u,v,6,6,3,403);
+  const r1=Math.sin(((v*9+u*2.6)+wx*2.6)*Math.PI*2)*.5+.5;
+  const r2=Math.sin(((v*22+u*6)+wy*3.4)*Math.PI*2)*.5+.5;
+  const band=smooth01(fb(u,v,6,6,2,405),.32,.72);                 /* dalgacıkların silindiği düz kesimler */
+  const grain=fb(u,v,300,300,1,411),grain2=fb(u,v,110,110,2,413);
+  const peb=smooth01(fb(u,v,55,55,1,415),.91,.975);               /* seyrek çakıl ve kabuk kırıkları */
+  const h=clamp(.5+(Math.pow(r1,1.7)*.17+Math.pow(r2,2.4)*.07)*band+(grain-.5)*.17+(grain2-.5)*.08+peb*.14,0,1);
+  const l=.5+(h-.5)*.4+peb*.045;
+  return [l*1.05,l,l*.9,h];
  });
 }
 /* toprak: kuru çatlaklar, çakıl taşları, yaprak çöpü (ormanlık ve çıplak yamalar) */
@@ -188,23 +200,31 @@ function canvasTex(size,fill,enc){
  });
  /* tüy: yönlü ince teller ve öbekler (hayvan postu). Şerit sayısı tam sayı olduğundan doku dikişsizdir. */
  tex.pFur=mk((u,v)=>{
-  const N=44,j=pw(u,v,8,8,901)-.5,ph=(u+j*.055)*N*6.2832;
-  const s1=Math.sin(ph)*.5+.5,s2=Math.sin(ph*2.37+j*4)*.5+.5;
-  const clump=pw(u,v,12,12,907),fine=pw(u,v,64,64,911);
-  const h=clamp01(.34+Math.pow(s1,2.1)*.34+Math.pow(s2,3)*.13+clump*.12+fine*.1);
+  const j=pw(u,v,6,6,901)-.5,j2=pw(u,v,18,18,903)-.5;
+  const ph=(u+j*.075+j2*.022)*44*6.2832;
+  const s1=Math.sin(ph)*.5+.5;
+  const len=pw(u,v,10,10,905),brk=pw(u+v*.4,v,30,30,907);        /* tel uzunluğu ve kesintiler */
+  const strand=Math.pow(s1,2)*(.42+.58*len)*(brk>.38?1:.42);
+  const clump=pw(u,v,7,7,909),fine=pw(u,v,90,90,911);
+  const h=clamp01(.3+strand*.42+clump*.14+fine*.1);
   const l=.5+(h-.5)*.95;
   return [l,l*.995,l*.97,h];
  });
  /* tüy (kuş): üst üste binen küçük kanatçıklar ve orta sap */
  tex.pFeather=mk((u,v)=>{
-  const NU=11,NV=15,fv=v*NV,iv=Math.floor(fv),b=fv-iv,off=(iv&1)?.5:0;
+  /* Boyuna uzun, ucu sivri tüyler: üst sırada kalan tüyün gölgesi, orta sap ve eğik tüy telleri. */
+  const NU=10,NV=8,fv=v*NV,iv=Math.floor(fv),b=fv-iv,off=(iv&1)?.5:0;
   const fu=u*NU+off,iu=Math.floor(fu),a2=fu-iu;
-  const dx=(a2-.5)*2,dy=(b-.5)*2,d=Math.sqrt(dx*dx+dy*dy*.55);
-  const edge=1-clamp01((d-.5)/.5);
-  const quill=Math.max(0,1-Math.abs(dx)*9)*edge;
-  const h=clamp01(.3+edge*.44+quill*.18+(pw(u,v,80,80,941)-.5)*.12);
-  const l=.5+(h-.5)*.85;
-  return [l*1.01,l,l*.97,h];
+  const dx=(a2-.5)*2,dy=b;
+  const w=1.12*Math.pow(Math.sin(Math.PI*Math.pow(dy,.55)),.55)+.1;   /* tüyler birbirine değecek genişlikte */
+  const t=Math.abs(dx)/w,inside=t<1?1:0;
+  const body=(1-clamp01((t-.5)/.5))*inside;
+  const sd=clamp01(dy/.22),shade=sd*sd*(3-2*sd);                   /* üstteki tüyün bıraktığı gölge */
+  const quill=Math.max(0,1-Math.abs(dx)*14)*inside*(1-dy*.3);
+  const barb=(Math.sin((Math.abs(dx)*13-dy*5)*Math.PI)*.5+.5)*body*.2;
+  const h=clamp01(.42+body*.3*shade+quill*.1+barb*.8+(pw(u,v,70,70,941)-.5)*.06);
+  const l=.5+(h-.5)*.6;
+  return [l*1.01,l,l*.96,h];
  });
  /* kumaş: bir üstten bir alttan geçen iplikler (bez dokuma), iplik kalınlığı değişimi */
  tex.pCloth=mk((u,v)=>{
