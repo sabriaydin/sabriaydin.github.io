@@ -42,7 +42,8 @@ function devOpen(v){
   DEV.fly=false;DEV.spd=1;DEV.tscale=1;DEV.frozen=false;DEV.wire=false;DEV.fog=true;DEV.light=0;
   HG.godMode=false;watch.length=0;
   applyFog();applyWire();applyLight();
- }else if(HG.konsolResize)try{HG.konsolResize()}catch(e){}
+ }
+ if(HG.konsolTabs)try{HG.konsolTabs(devOn)}catch(e){}
  panel();
  if(devOn)say('Geliştirici modu açıldı. Panel, anahtarlar ve ek komutlar etkin ("yardim" ile listeye bakın). Bu modda dünya kuralı aranmaz.','ok');
  else say('Geliştirici modu kapatıldı; tüm geliştirici ayarları geri alındı.','ok');
@@ -465,9 +466,10 @@ HG.komut={run,get dev(){return devOn}};
 }
 
 /* ============================================================ arayüz ============================================================ */
-/* Geliştirici paneli: üstte canlı ölçüm kutucukları, altında anahtarlar, kaydırıcılar,
-   kısayol düğmeleri ve bilgi satırları. Tüm denetimler komut satırının aynısını çalıştırır,
-   böylece panelden yapılan her değişiklik kayda da düşer. */
+/* Geliştirici paneli kendi sekmesinde açılır ve beş bölümden oluşur:
+   Oyuncu · Dünya · Sahne · Eşya · İzleme. Panelin üstünde canlı ölçüm kutucukları durur.
+   Bütün denetimler komut satırının aynısını çalıştırır; böylece panelden yapılan her değişiklik
+   kayıt listesine de düşer ve komutla da yapılabilir. */
 const SWITCH=[
  ['god','Ölümsüzlük',()=>!!HG.godMode,v=>run('olumsuz '+(v?'ac':'kapat'))],
  ['fly','Uçuş',()=>DEV.fly,v=>run('ucus '+(v?'ac':'kapat'))],
@@ -475,22 +477,31 @@ const SWITCH=[
  ['fog','Sis',()=>DEV.fog,v=>run('sis '+(v?'ac':'kapat'))],
  ['wire','Tel kafes',()=>DEV.wire,v=>run('cizgi '+(v?'ac':'kapat'))]
 ];
+const pct=v=>Math.round(v)+'';
 const SLIDER=[
- ['saat','Saat',0,24,.5,()=>HG.tod()*24,v=>{setHour(v);mark('saat')},v=>{const h=Math.floor(v),m=Math.round((v-h)*60);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}],
- ['tim','Zaman akışı',0,16,.5,()=>DEV.tscale,v=>{DEV.tscale=v;DEV.frozen=v<=0},v=>'×'+v.toFixed(1)],
- ['spd','Hız',.2,6,.2,()=>DEV.spd,v=>{DEV.spd=v},v=>'×'+v.toFixed(1)],
- ['lgt','Ek ışık',0,3,.1,()=>DEV.light,v=>{DEV.light=v;applyLight()},v=>v.toFixed(1)]
+ ['hp','Can',0,100,1,()=>G.hp||0,v=>{G.hp=v;ui.dirty=true;mark('can')},pct,'oyuncu'],
+ ['hun','Açlık',0,100,1,()=>G.hun||0,v=>{G.hun=v;ui.dirty=true;mark('açlık')},pct,'oyuncu'],
+ ['thr','Susuzluk',0,100,1,()=>G.thr||0,v=>{G.thr=v;ui.dirty=true;mark('susuzluk')},pct,'oyuncu'],
+ ['stam','Dayanıklılık',0,100,1,()=>G.stam||0,v=>{G.stam=v;mark('dayanıklılık')},pct,'oyuncu'],
+ ['san','Akıl',0,100,1,()=>G.san||0,v=>{G.san=v;mark('akıl')},pct,'oyuncu'],
+ ['spd','Hız çarpanı',.2,6,.2,()=>DEV.spd,v=>{DEV.spd=v},v=>'×'+v.toFixed(1),'oyuncu'],
+ ['saat','Saat',0,24,.5,()=>HG.tod()*24,v=>{setHour(v);mark('saat')},v=>{const h=Math.floor(v),m=Math.round((v-h)*60);return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')},'dunya'],
+ ['tim','Zaman akışı',0,16,.5,()=>DEV.tscale,v=>{DEV.tscale=v;DEV.frozen=v<=0},v=>'×'+v.toFixed(1),'dunya'],
+ ['lgt','Ek ışık',0,3,.1,()=>DEV.light,v=>{DEV.light=v;applyLight()},v=>v.toFixed(1),'sahne']
 ];
-const QUICK=[
- ['Sabah','saat 8'],['Öğlen','saat 13'],['Akşam','saat 20'],['Gece','saat 1'],
- ['Açık hava','hava acik'],['Yağmur','hava yagmur'],['Fırtına','hava firtina'],['Otomatik hava','hava otomatik'],
- ['Haritayı aç','harita'],['Doğma noktası','isinlan dogma'],['En yakın köy','isinlan koy'],['En yakın kamp','isinlan kamp'],
- ['Köy listesi','koyler'],['Mağara listesi','magara'],['Yakındakiler','yakin 40'],
- ['Dünya bilgisi','dunya'],['Ölçüm','olcum'],['Canı doldur','can 100'],['Doyur','aclik 100'],['Susuzluğu gider','susuzluk 100'],
- ['Oyunu kaydet','kaydet'],['Çantayı boşalt','bos'],['Konum','konum']
+const QGRP=[
+ ['dunya','Hava',[['Açık','hava acik'],['Bulutlu','hava bulutlu'],['Yağmur','hava yagmur'],['Fırtına','hava firtina'],['Otomatik','hava otomatik']]],
+ ['dunya','Saat',[['Sabah','saat 8'],['Öğlen','saat 13'],['Akşam','saat 20'],['Gece','saat 1']]],
+ ['dunya','Harita ve konum',[['Haritayı aç','harita'],['Doğma noktası','isinlan dogma'],['En yakın köy','isinlan koy'],['En yakın kamp','isinlan kamp'],['Konum','konum'],['Dünya bilgisi','dunya']]],
+ ['oyuncu','Hızlı işlem',[['Canı doldur','can 100'],['Doyur','aclik 100'],['Susuzluğu gider','susuzluk 100'],['+100 sikke','sikke 100'],['+500 deneyim','xp 500'],['Çantayı boşalt','bos'],['Oyunu kaydet','kaydet']]],
+ ['sahne','Kalite',[['En düşük','kalite 0'],['Düşük','kalite 1'],['Orta','kalite 2'],['Yüksek','kalite 3']]],
+ ['sahne','Canlılar',[['Yakındakiler','yakin 40'],['Hayvanları temizle','temizhayvan 60'],['Tavşan ×3','hayvan rabbit 3'],['Geyik ×2','hayvan deer 2'],['Kurt ×2','hayvan wolf 2'],['İnek ×2','hayvan cow 2']]]
 ];
-let tileEl=null,togEl=null,sldEl=null,gridEl=null,wEl=null;
+let tileEl=null,togEl=null,gridEl=null,perfEl=null,itemQ=null,itemL=null,watchI=null,watchL=null,goEl={};
 const esc=v=>String(v).replace(/[&<>]/g,'');
+const el=(t,c,x)=>{const d=document.createElement(t);if(c)d.className=c;if(x!==undefined)d.textContent=x;return d};
+
+/* ---- ölçüm kutucukları ---- */
 function tiles(){
  if(!tileEl)return;
  const p=HG.perf||{},sc=HG.sc,inf=sc&&sc.R?sc.R.info:null;
@@ -498,106 +509,217 @@ function tiles(){
  const L=[
   ['FPS',p.fps||0,(p.ms||0).toFixed(1)+' ms',(p.fps||0)<30?'bad':(p.fps||0)<50?'warn':'ok'],
   ['Çizim',inf?inf.render.calls:'-',inf?(inf.render.triangles/1000).toFixed(0)+'k üçgen':''],
-  ['Doku',inf?inf.memory.textures:'-',inf?inf.memory.geometries+' geo':''],
-  ['Bellek',mem?mem.toFixed(0)+' MB':'-',mem?'JS yığını':''],
-  ['Hayvan',(G.animals||[]).filter(a=>!a.gone).length,'canlı'],
-  ['Köylü',(G.npcs||[]).length,'yerleşik'],
-  ['Yer eşyası',(G.drops||[]).length,'düşmüş'],
-  ['Ölçek','%'+Math.round((p.scale||1)*100),(sc?sc.quality:'-')+' kalite']
+  ['Bellek',mem?mem.toFixed(0)+' MB':'-','JS yığını'],
+  ['Konum',Math.round(G.px)+','+Math.round(G.py),(G.pz===undefined?'':G.pz.toFixed(1)+' m')+(G.cave?' · mağara':'')],
+  ['Saat',saatStr(),'gün '+(HG.dayNo?HG.dayNo():'-')],
+  ['Seviye',G.lvl||1,(G.pts||0)+' puan · '+Math.floor(G.xp||0)+' xp'],
+  ['Canlı',(G.animals||[]).filter(a=>!a.gone).length,(G.npcs||[]).length+' köylü'],
+  ['Durum',(HG.godMode?'ölümsüz':DEV.fly?'uçuş':DEV.frozen?'zaman durdu':'normal'),(G.cheat?'işaretli':'temiz'),(HG.godMode||DEV.fly||DEV.frozen)?'warn':'']
  ];
  while(tileEl.childElementCount>L.length)tileEl.lastChild.remove();
  while(tileEl.childElementCount<L.length){
-  const d=document.createElement('div');d.className='kc-t';
-  d.append(document.createElement('em'),document.createElement('b'),document.createElement('small'));
-  tileEl.appendChild(d);
+  const d=el('div','kc-t');d.append(el('em'),el('b'),el('small'));tileEl.appendChild(d);
  }
  L.forEach((q,i)=>{const d=tileEl.children[i];
   d.className='kc-t'+(q[3]?' '+q[3]:'');
   d.children[0].textContent=q[0];d.children[1].textContent=esc(q[1]);d.children[2].textContent=q[2]||'';
  });
 }
+/* ---- eşya arama ---- */
+function itemSearch(){
+ if(!itemL)return;
+ const q=(itemQ&&itemQ.value||'').toLocaleLowerCase('tr');
+ const L=Object.keys(HG.IT).filter(k=>!q||k.toLocaleLowerCase('tr').includes(q)||HG.IT[k].n.toLocaleLowerCase('tr').includes(q)).slice(0,60);
+ itemL.textContent='';
+ if(!L.length){itemL.append(el('div','kc-empty','Eşleşen eşya yok.'));return}
+ for(const k of L){
+  const b=el('button','kc-it');b.type='button';b.dataset.id=k;
+  b.append(el('span','',HG.IT[k].n),el('em','',k));
+  itemL.appendChild(b);
+ }
+}
+/* ---- ışınlanma seçicileri ---- */
+function fillGo(){
+ const mk=(sel,list,fmt)=>{
+  if(!sel)return;const v=sel.value;sel.textContent='';
+  list.forEach((o,i)=>{const op=el('option','',fmt(o,i));op.value=String(i);sel.appendChild(op)});
+  if(!list.length)sel.appendChild(el('option','','yok'));
+  if(v&&sel.querySelector('option[value="'+v+'"]'))sel.value=v;
+ };
+ mk(goEl.koy,G.villages||[],(v,i)=>(v.name||'Köy')+' · '+(v.typeName||'-')+' · '+Math.round(Math.hypot(v.cx-G.px,v.cy-G.py))+' m');
+ mk(goEl.magara,G.caves||[],(c,i)=>(c.kindName||'Mağara')+' · '+['kolay','orta','zor'][c.tier||0]+' · '+Math.round(Math.hypot(c.x-G.px,c.y-G.py))+' m');
+}
+/* ---- izleme listesi ---- */
+function watchRender(){
+ if(!watchL)return;
+ watchL.textContent='';
+ if(!watch.length){watchL.append(el('div','kc-empty','Henüz izlenen değer yok. Örnek: G.stam'));return}
+ for(const q of watch){
+  const d=el('div','kc-w');
+  d.append(el('span','',q),el('b','',String(readPath(q)===undefined?'-':readPath(q))));
+  const x=el('button','kc-x','×');x.type='button';x.dataset.w=q;x.title='Kaldır';
+  d.appendChild(x);watchL.appendChild(d);
+ }
+}
+/* ---- performans sekmesi ---- */
+const fpsHist=new Array(120).fill(0);let fpsI=0;
+function perfDraw(full){
+ if(!perfEl)return;
+ const p=HG.perf||{},sc=HG.sc,inf=sc&&sc.R?sc.R.info:null;
+ fpsHist[fpsI=(fpsI+1)%120]=p.fps||0;
+ const cv=perfEl.querySelector('canvas');
+ if(cv&&cv.clientWidth){
+  /* tuval genişliği ekrana göre ayarlanır: çizgi bulanık görünmez */
+  const dpr=Math.min(2,devicePixelRatio||1),cw=Math.round(cv.clientWidth*dpr),ch=Math.round(150*dpr);
+  if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch}
+  const g=cv.getContext('2d'),W=cv.width,H=cv.height;
+  g.setTransform(1,0,0,1,0,0);
+  g.clearRect(0,0,W,H);
+  g.strokeStyle='rgba(255,255,255,.07)';g.lineWidth=1;
+  for(const y of [30,60,120]){const yy=H-Math.min(1,y/144)*H;g.beginPath();g.moveTo(0,yy);g.lineTo(W,yy);g.stroke();
+   g.fillStyle='rgba(255,255,255,.22)';g.font=Math.round(9*Math.min(2,devicePixelRatio||1))+'px ui-monospace,monospace';g.fillText(String(y),2,yy-2)}
+  g.beginPath();
+  for(let i=0;i<120;i++){
+   const v=fpsHist[(fpsI+1+i)%120],x=i/119*W,y=H-Math.min(1,v/144)*H;
+   i?g.lineTo(x,y):g.moveTo(x,y);
+  }
+  g.strokeStyle=(p.fps||0)<30?'#ff7b72':(p.fps||0)<50?'#e8b45c':'#6fd38a';g.lineWidth=1.6*Math.min(2,devicePixelRatio||1);g.stroke();
+  g.lineTo(W,H);g.lineTo(0,H);g.closePath();
+  g.fillStyle=(p.fps||0)<30?'rgba(255,123,114,.12)':(p.fps||0)<50?'rgba(232,180,92,.12)':'rgba(111,211,138,.12)';g.fill();
+ }
+ const tb=perfEl.querySelector('.kc-grid');
+ if(tb){
+  const rows=[
+   ['Kare hızı',(p.fps||0)+' FPS · '+(p.ms||0).toFixed(2)+' ms'],
+   ['Çözünürlük ölçeği','%'+Math.round((p.scale||1)*100)+' · '+innerWidth+'×'+innerHeight],
+   ['Kalite',(sc?sc.quality:'-')+' · piksel '+(sc&&sc.R?(Math.round(sc.R.getPixelRatio()*100)/100):'-')],
+   ['Gölge tazeleme',(p.shadowHz||0)+' Hz · atlanan kare '+(p.drops||0)],
+   ['Çizim çağrısı',inf?inf.render.calls:'-'],
+   ['Üçgen',inf?inf.render.triangles.toLocaleString('tr-TR'):'-'],
+   ['Geometri / doku',inf?(inf.memory.geometries+' / '+inf.memory.textures):'-'],
+   ['Gölgelendirici',inf&&inf.programs?inf.programs.length:'-'],
+   ['JS belleği',performance.memory?((performance.memory.usedJSHeapSize/1048576).toFixed(1)+' / '+(performance.memory.jsHeapSizeLimit/1048576).toFixed(0)+' MB'):'tarayıcı vermiyor'],
+   ['Sahne nesnesi',sc&&sc.scene?sc.scene.children.length+' kök · '+(G.animals||[]).length+' hayvan · '+(G.npcs||[]).length+' köylü':'-'],
+   ['Dünya',(HG.worldCode?HG.worldCode():G.seed)+' · '+HG.W+'×'+HG.H+' · '+(G.drops||[]).length+' yer eşyası']
+  ];
+  while(tb.childElementCount>rows.length)tb.lastChild.remove();
+  while(tb.childElementCount<rows.length){const d=el('div');d.append(el('span'),el('b'));tb.appendChild(d)}
+  rows.forEach((r,i)=>{const d=tb.children[i];d.firstChild.textContent=r[0];d.lastChild.textContent=esc(r[1])});
+ }
+}
+HG.konsolPerf=perfDraw;
+
+/* ---- panelin canlı güncellenmesi ---- */
 function panel(){
+ perfDraw();
  if(!panEl||panEl.hidden)return;
  tiles();
- /* anahtarların durumu */
- if(togEl)for(const b of togEl.children){const sw=SWITCH.find(x=>x[0]===b.dataset.t);if(sw)b.classList.toggle('on',!!sw[2]())}
- /* kaydırıcılar (sürüklenirken dokunulmaz) */
- if(sldEl)for(const r of sldEl.children){
+ if(togEl)for(const b of togEl.querySelectorAll('button[data-t]')){const sw=SWITCH.find(x=>x[0]===b.dataset.t);if(sw)b.classList.toggle('on',!!sw[2]())}
+ if(panEl)for(const r of panEl.querySelectorAll('label[data-s]')){
   const sl=SLIDER.find(x=>x[0]===r.dataset.s);if(!sl)continue;
   const inp=r.querySelector('input');
   if(document.activeElement!==inp&&!inp.dataset.drag){const v=sl[5]();inp.value=v;r.lastChild.textContent=sl[7](+v)}
  }
- /* bilgi satırları */
- const p=HG.perf||{},sc=HG.sc;
- const rows=[
-  ['Durum',ui.state+(G.cave?' · mağara':'')],
-  ['Konum',Math.round(G.px)+', '+Math.round(G.py)+(G.pz===undefined?'':' · '+G.pz.toFixed(1)+' m')],
-  ['Bakış',(HG.look?((HG.look.yaw*57.3)|0)+'° / '+((HG.look.pitch*57.3)|0)+'°':'-')],
-  ['Saat',saatStr()+' · gün '+(HG.dayNo?HG.dayNo():'-')],
-  ['Hava','bulut %'+Math.round((sc?sc.over:0)*100)+' · yağmur %'+Math.round((sc?sc.rain:0)*100)+(HG.wxForce?' (zorlanmış)':'')],
-  ['Dünya',(HG.worldCode?HG.worldCode():G.seed)+' · '+HG.W+'×'+HG.H],
-  ['Seviye',(G.lvl||1)+' · '+Math.floor(G.xp||0)+' xp · '+(G.pts||0)+' puan'],
-  ['Durumlar',(HG.godMode?'ölümsüz · ':'')+(DEV.fly?'uçuş · ':'')+(DEV.frozen?'zaman durdu · ':'')+(G.cheat?'işaretli · ':'')+(on()?'komutlar açık':'komutlar kapalı')]
- ];
- for(const q of watch)rows.push(['◆ '+q,readPath(q)===undefined?'-':readPath(q)]);
  if(gridEl){
+  const sc=HG.sc;
+  const rows=[
+   ['Durum',ui.state+(G.cave?' · mağara':'')],
+   ['Bakış',(HG.look?((HG.look.yaw*57.3)|0)+'° / '+((HG.look.pitch*57.3)|0)+'°':'-')],
+   ['Hava','bulut %'+Math.round((sc?sc.over:0)*100)+' · yağmur %'+Math.round((sc?sc.rain:0)*100)+(HG.wxForce?' (zorlanmış)':'')],
+   ['Dünya',(HG.worldCode?HG.worldCode():G.seed)+' · '+HG.W+'×'+HG.H],
+   ['Kurallar',(on()?'komutlar açık':'komutlar kapalı')+(G.cheat?' · işaretli':'')]
+  ];
   while(gridEl.childElementCount>rows.length)gridEl.lastChild.remove();
-  while(gridEl.childElementCount<rows.length){
-   const d=document.createElement('div');d.append(document.createElement('span'),document.createElement('b'));gridEl.appendChild(d);
-  }
+  while(gridEl.childElementCount<rows.length){const d=el('div');d.append(el('span'),el('b'));gridEl.appendChild(d)}
   rows.forEach((r,i)=>{const d=gridEl.children[i];d.firstChild.textContent=r[0];d.lastChild.textContent=esc(r[1])});
  }
+ watchRender();
+ fillGo();
 }
+/* ---- kurulum ---- */
+const sldHtml=g=>SLIDER.filter(x=>x[8]===g).map(x=>'<label class="kc-r" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+
+ '<input type="range" min="'+x[2]+'" max="'+x[3]+'" step="'+x[4]+'" aria-label="'+x[1]+'"><b></b></label>').join('');
+const qHtml=g=>QGRP.filter(x=>x[0]===g).map(x=>'<div class="kc-qg"><em>'+x[1]+'</em><div class="kc-q">'+
+ x[2].map(q=>'<button type="button" data-c="'+q[1]+'">'+q[0]+'</button>').join('')+'</div></div>').join('');
 HG.konsolBuilt=root=>{
  box=root.querySelector('#knCmd');if(!box)return;
- box.innerHTML=
-  '<div class="kc-out" id="kcOut"></div>'+
-  '<div class="kc-split" id="kcSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek komut çıktısı ile geliştirici paneli alanlarını boyutlandırın"><i></i></div>'+
-  '<div class="kc-pan" id="kcPan" hidden>'+
-   '<div class="kc-h">GELİŞTİRİCİ PANELİ</div>'+
-   '<div class="kc-tiles"></div>'+
-   '<div class="kc-cols">'+
-    '<div class="kc-col">'+
-     '<div class="kc-sec">Anahtarlar</div>'+
-     '<div class="kc-tog">'+SWITCH.map(x=>'<button type="button" class="kc-sw" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'+
-     '<div class="kc-sec">Ayarlar</div>'+
-     '<div class="kc-sld">'+SLIDER.map(x=>'<label class="kc-r" data-s="'+x[0]+'"><span>'+x[1]+'</span>'+
-       '<input type="range" min="'+x[2]+'" max="'+x[3]+'" step="'+x[4]+'" aria-label="'+x[1]+'"><b></b></label>').join('')+'</div>'+
-    '</div>'+
-    '<div class="kc-col">'+
-     '<div class="kc-sec">Kısayollar</div>'+
-     '<div class="kc-q">'+QUICK.map(q=>'<button type="button" data-c="'+q[1]+'">'+q[0]+'</button>').join('')+'</div>'+
-    '</div>'+
-    '<div class="kc-col">'+
-     '<div class="kc-sec">Bilgi · <kbd>izle G.stam</kbd> ile değer ekleyin</div>'+
-     '<div class="kc-grid"></div>'+
-    '</div>'+
+ /* komut satırı: her sekmede altta sabit durur */
+ box.innerHTML='<div class="kc-in"><span>&gt;</span><input id="kcIn" type="text" placeholder="Komut yazın (yardim · Tab tamamlar · ↑↓ geçmiş)" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Komut satırı"></div>';
+ inpEl=box.querySelector('#kcIn');
+ outEl=root.querySelector('#kcOut');
+ panEl=root.querySelector('#kcPan');
+ perfEl=root.querySelector('#knPerf');
+ /* performans sekmesi */
+ perfEl.innerHTML='<div class="kc-h">KARE HIZI (son 120 ölçüm)</div>'+
+  '<canvas class="kc-gr" width="900" height="150"></canvas>'+
+  '<div class="kc-h">AYRINTILAR</div><div class="kc-grid"></div>';
+ /* geliştirici paneli */
+ panEl.innerHTML=
+  '<div class="kc-tiles"></div>'+
+  '<div class="kc-cols">'+
+   '<div class="kc-card" data-g="oyuncu"><div class="kc-h">OYUNCU</div>'+
+    '<div class="kc-tog">'+SWITCH.slice(0,2).map(x=>'<button type="button" class="kc-sw" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'+
+    '<div class="kc-sld">'+sldHtml('oyuncu')+'</div>'+qHtml('oyuncu')+
    '</div>'+
-  '</div>'+
-  '<div class="kc-in"><span>&gt;</span><input id="kcIn" type="text" placeholder="Komut yazın (yardim · Tab tamamlar · ↑↓ geçmiş)" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Komut satırı"></div>';
- outEl=box.querySelector('#kcOut');panEl=box.querySelector('#kcPan');inpEl=box.querySelector('#kcIn');
- tileEl=panEl.querySelector('.kc-tiles');togEl=panEl.querySelector('.kc-tog');
- sldEl=panEl.querySelector('.kc-sld');gridEl=panEl.querySelector('.kc-grid');
- panEl.querySelector('.kc-q').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-c]');if(b)run(b.dataset.c);
+   '<div class="kc-card" data-g="dunya"><div class="kc-h">DÜNYA</div>'+
+    '<div class="kc-tog">'+SWITCH.slice(2,3).map(x=>'<button type="button" class="kc-sw" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'+
+    '<div class="kc-sld">'+sldHtml('dunya')+'</div>'+
+    '<div class="kc-go"><label><span>Köy</span><select id="kcKoy"></select><button type="button" data-go="koy">Git</button></label>'+
+     '<label><span>Mağara</span><select id="kcMag"></select><button type="button" data-go="magara">Git</button></label></div>'+
+    qHtml('dunya')+
+   '</div>'+
+   '<div class="kc-card" data-g="sahne"><div class="kc-h">SAHNE</div>'+
+    '<div class="kc-tog">'+SWITCH.slice(3).map(x=>'<button type="button" class="kc-sw" data-t="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'+
+    '<div class="kc-sld">'+sldHtml('sahne')+'</div>'+qHtml('sahne')+
+    '<div class="kc-h" style="margin-top:12px">BİLGİ</div><div class="kc-grid"></div>'+
+   '</div>'+
+   '<div class="kc-card" data-g="esya"><div class="kc-h">EŞYA VER</div>'+
+    '<div class="kc-row"><input id="kcIq" type="text" placeholder="Eşya ara…" autocomplete="off" spellcheck="false" aria-label="Eşya ara">'+
+     '<input id="kcIn2" type="number" min="1" max="999" value="1" aria-label="Adet"></div>'+
+    '<div class="kc-list" id="kcIl"></div>'+
+   '</div>'+
+   '<div class="kc-card" data-g="izle"><div class="kc-h">İZLEME</div>'+
+    '<div class="kc-row"><input id="kcWq" type="text" placeholder="G.stam · HG.perf.fps · sc.rain" autocomplete="off" spellcheck="false" aria-label="İzlenecek değer">'+
+     '<button type="button" id="kcWa">Ekle</button></div>'+
+    '<div class="kc-list" id="kcWl"></div>'+
+   '</div>'+
+  '</div>';
+ tileEl=panEl.querySelector('.kc-tiles');togEl=panEl;gridEl=panEl.querySelector('.kc-card[data-g="sahne"] .kc-grid');
+ itemQ=panEl.querySelector('#kcIq');itemL=panEl.querySelector('#kcIl');
+ watchI=panEl.querySelector('#kcWq');watchL=panEl.querySelector('#kcWl');
+ goEl.koy=panEl.querySelector('#kcKoy');goEl.magara=panEl.querySelector('#kcMag');
+ /* olaylar */
+ panEl.addEventListener('click',e=>{
+  const q=e.target.closest('button[data-c]');if(q)return run(q.dataset.c);
+  const t=e.target.closest('button[data-t]');
+  if(t){const sw=SWITCH.find(x=>x[0]===t.dataset.t);if(sw){sw[3](!sw[2]());panel()}return}
+  const g=e.target.closest('button[data-go]');
+  if(g){const sel=goEl[g.dataset.go];if(sel&&sel.value!==''&&sel.value!=null)run((g.dataset.go==='koy'?'koyler ':'magara ')+sel.value);return}
+  const it=e.target.closest('button[data-id]');
+  if(it){const n=Math.max(1,Math.min(999,parseInt(panEl.querySelector('#kcIn2').value,10)||1));run('esya '+it.dataset.id+' '+n);return}
+  const w=e.target.closest('button[data-w]');
+  if(w){const i=watch.indexOf(w.dataset.w);if(i>=0)watch.splice(i,1);watchRender();return}
+  if(e.target.id==='kcWa'){const v=(watchI.value||'').trim();if(v){run('izle '+v);watchI.value='';watchRender()}return}
  });
- togEl.addEventListener('click',e=>{
-  const b=e.target.closest('button[data-t]');if(!b)return;
-  const sw=SWITCH.find(x=>x[0]===b.dataset.t);if(!sw)return;
-  sw[3](!sw[2]());panel();
- });
- sldEl.addEventListener('input',e=>{
+ panEl.addEventListener('input',e=>{
+  if(e.target===itemQ)return itemSearch();
   const r=e.target.closest('label[data-s]');if(!r)return;
   const sl=SLIDER.find(x=>x[0]===r.dataset.s);if(!sl)return;
   e.target.dataset.drag='1';
   const v=parseFloat(e.target.value);sl[6](v);r.lastChild.textContent=sl[7](v);
  });
- sldEl.addEventListener('change',e=>{
+ panEl.addEventListener('change',e=>{
   const r=e.target.closest('label[data-s]');if(!r)return;
   delete e.target.dataset.drag;
   const sl=SLIDER.find(x=>x[0]===r.dataset.s);
   if(sl)HG.log&&HG.log('komut',sl[1]+' → '+sl[7](parseFloat(e.target.value)));
  });
+ /* panel içindeki yazı alanları oyuna tuş göndermez */
+ for(const i of panEl.querySelectorAll('input')){
+  i.addEventListener('keydown',e=>{if(e.code!=='Escape'&&e.code!=='F1')e.stopPropagation()});
+  i.addEventListener('keyup',e=>{if(e.code!=='Escape'&&e.code!=='F1')e.stopPropagation()});
+  i.addEventListener('keypress',e=>{if(e.key==='Enter'&&i===watchI){const v=(watchI.value||'').trim();if(v){run('izle '+v);watchI.value='';watchRender()}}});
+ }
  inpEl.addEventListener('keydown',e=>{
   e.stopPropagation();
   if(e.code==='Enter'||e.code==='NumpadEnter'){
@@ -617,6 +739,8 @@ HG.konsolBuilt=root=>{
   }
  });
  inpEl.addEventListener('keyup',e=>e.stopPropagation());
+ panEl.hidden=!devOn;
+ itemSearch();watchRender();
  echo(on()?'Komutlar açık. "yardim" yazarak listeyi görebilirsiniz.':'Bu dünyada konsol komutları kapalı (Dünya Oluştur penceresinden açılır). Geliştirici modu bu kuraldan bağımsızdır.');
  clearInterval(panT);panT=setInterval(panel,400);
 };

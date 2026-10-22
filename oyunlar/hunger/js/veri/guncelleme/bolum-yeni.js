@@ -3,6 +3,17 @@
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
 {n:55,d:"22.10.2026",t:"Geliştirici konsolu yenilendi",l:[
+ "Geliştirici konsolu sekmeli yapıya geçirildi: Kayıtlar, Konsol, Geliştirici ve Performans sekmeleri eklendi; her görünüm kendi sekmesinde tam yükseklikte açılıyor.",
+ "Komut yazma alanı tüm sekmelerde altta sabit duruyor.",
+ "Geliştirici sekmesi yalnızca geliştirici modu açıkken görünüyor ve mod açıldığında kendiliğinden seçiliyor.",
+ "Başka bir sekmedeyken gelen yeni kayıt sayısı Kayıtlar sekmesinin rozetinde gösteriliyor.",
+ "Geliştirici paneli beş karta ayrıldı: Oyuncu, Dünya, Sahne, Eşya Ver ve İzleme.",
+ "Oyuncu kartına can, açlık, susuzluk, dayanıklılık ve akıl kaydırıcıları eklendi; değerler canlı olarak uygulanıyor.",
+ "Dünya kartına köy ve mağara seçicileri eklendi: listeden seçip Git düğmesiyle o konuma ışınlanılıyor. Liste adı, türü ve uzaklığı gösteriyor.",
+ "Eşya Ver kartı eklendi: eşya aranıp adet belirlenerek tek tıkla çantaya ekleniyor.",
+ "İzleme kartı eklendi: izlenen değerler listede canlı görünüyor ve tek tıkla kaldırılabiliyor.",
+ "Sahne kartına kalite düğmeleri ve canlı ekleme/temizleme kısayolları eklendi.",
+ "Performans sekmesi eklendi: son 120 ölçümün kare hızı grafiği ile çizim çağrısı, üçgen, doku, gölgelendirici, bellek ve sahne nesnesi ayrıntıları gösteriliyor.",
  "Geliştirici konsolu baştan tasarlandı: koyu cam yüzey, yuvarlatılmış paneller, kategori renkleri ve okunaklı tek aralıklı yazı tipi kullanıldı.",
  "Üstteki durum satırı ayrı ayrı kutucuklara bölündü; can, açlık, susuzluk, dayanıklılık ve kare hızı değerine göre yeşil, sarı veya kırmızı görünüyor.",
  "Kayıt listesi yeniden düzenlendi: kategori adı renkli bir etiket oldu, satırlar şeritli ve vurgulu hâle getirildi, komut satırları kırmızı kenarla ayrıldı.",

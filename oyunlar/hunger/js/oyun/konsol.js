@@ -13,7 +13,10 @@ const CN=Object.fromEntries(CATS);
 const KEY='hunger-konsol';
 const t0=performance.now();
 const buf=[],byKey=new Map(),counts={};
-let seq=0,off=new Set();
+let seq=0,off=new Set(),tab='log',newLog=0,viewEl=null,tabsEl=null;
+const TABS=[['log','Kayıtlar'],['cmd','Konsol'],['dev','Geliştirici'],['perf','Performans']];
+const TKEY='hunger-konsol-sekme';
+try{const v=localStorage.getItem(TKEY);if(v&&TABS.some(t=>t[0]===v)&&v!=='dev')tab=v}catch(e){}
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.off))off=new Set(s.off.filter(k=>CN[k]))}catch(e){}
 
 /* ============================================================ Kayıt çekirdeği ============================================================ */
@@ -77,9 +80,16 @@ function upRow(e){
 function chips(){
  for(const [k] of CATS){const c=chipEl[k];if(c){c.firstChild.textContent=CN[k]+' ';c.lastChild.textContent=counts[k]||0;c.classList.toggle('off',off.has(k))}}
 }
+/* Kayıtlar sekmesi açık değilken yeni kayıt sayısı sekme rozetinde gösterilir. */
+function tabBadge(){
+ if(!tabsEl)return;
+ const b=[...tabsEl.children].find(x=>x.dataset.v==='log');
+ if(b&&b.lastChild)b.lastChild.textContent=newLog>0?(newLog>99?'99+':String(newLog)):'';
+}
 function flush(){
  tm=0;
  if(!open||frozen||!listEl)return;
+ if(tab!=='log'){newLog+=fresh.length;tabBadge();chips();return}
  const near=listEl.scrollHeight-listEl.scrollTop-listEl.clientHeight<48;
  const fr=document.createDocumentFragment();
  for(const e of fresh.splice(0)){if(!e.gone&&pass(e))fr.appendChild(mkRow(e))}
@@ -176,23 +186,38 @@ function build(){
  root=document.createElement('div');root.id='kns';root.hidden=true;
  root.setAttribute('role','dialog');root.setAttribute('aria-label','Geliştirici konsolu');
  root.innerHTML='<div class="kn-box">'+
-  '<div class="kn-top"><h1>GELİŞTİRİCİ KONSOLU <kbd>F1</kbd></h1><div class="kn-btns">'+
-   '<button type="button" id="knFrz" aria-pressed="false">Akışı dondur</button>'+
-   '<button type="button" id="knAut" aria-pressed="true" class="on">Otomatik kaydır</button>'+
-   '<button type="button" id="knClr">Temizle</button>'+
-   '<button type="button" id="knCpy">Kopyala</button>'+
-   '<button type="button" id="knSav">Dosyaya kaydet</button>'+
-   '<button type="button" id="knX" class="ghost">Kapat</button></div></div>'+
+  '<div class="kn-top">'+
+   '<h1>GELİŞTİRİCİ KONSOLU <kbd>F1</kbd></h1>'+
+   '<div class="kn-btns">'+
+    '<button type="button" id="knFrz" aria-pressed="false">Akışı dondur</button>'+
+    '<button type="button" id="knAut" aria-pressed="true" class="on">Otomatik kaydır</button>'+
+    '<button type="button" id="knClr">Temizle</button>'+
+    '<button type="button" id="knCpy">Kopyala</button>'+
+    '<button type="button" id="knSav">Dosyaya kaydet</button>'+
+    '<button type="button" id="knX">Kapat</button>'+
+   '</div>'+
+  '</div>'+
   '<div class="kn-st" id="knSt"></div>'+
-  '<div class="kn-flt"><div class="kn-qw"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara"></div>'+
-   '<div class="kn-ch" id="knCh"></div></div>'+
-  '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
-  '<div class="kn-split" id="knSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek kayıt ve komut alanlarını boyutlandırın"><i></i></div>'+
+  '<div class="kn-tabs" id="knTabs" role="tablist">'+
+   TABS.map(t=>'<button type="button" class="kn-tb" data-v="'+t[0]+'" role="tab" aria-selected="false">'+
+     '<span>'+t[1]+'</span><i></i></button>').join('')+
+  '</div>'+
+  '<div class="kn-view" id="knView">'+
+   '<section class="kn-v" data-v="log">'+
+    '<div class="kn-flt"><div class="kn-qw"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara"></div>'+
+     '<div class="kn-ch" id="knCh"></div></div>'+
+    '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
+   '</section>'+
+   '<section class="kn-v" data-v="cmd"><div class="kc-out" id="kcOut"></div></section>'+
+   '<section class="kn-v" data-v="dev"><div class="kc-pan" id="kcPan"></div></section>'+
+   '<section class="kn-v" data-v="perf"><div class="kn-perf" id="knPerf"></div></section>'+
+  '</div>'+
   '<div class="kn-cmd" id="knCmd"></div>'+
   '<div class="kn-ft">En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı). Komut satırı için dünya kuralı "Konsol komutları" açık olmalıdır; geliştirici modu bu kuraldan bağımsız çalışır ve parola ister.</div></div>';
  ($('#game')||document.body).appendChild(root);
  listEl=root.querySelector('#knL');statEl=root.querySelector('#knSt');qEl=root.querySelector('#knQ');chipsEl=root.querySelector('#knCh');
  frzEl=root.querySelector('#knFrz');autoEl=root.querySelector('#knAut');
+ viewEl=root.querySelector('#knView');tabsEl=root.querySelector('#knTabs');
  for(const [k,n] of CATS){
   const b=document.createElement('button');b.type='button';b.className='kn-c c-'+k;b.dataset.k=k;
   b.append(document.createTextNode(n+' '),document.createElement('i'));
@@ -215,61 +240,36 @@ function build(){
  root.querySelector('#knCpy').onclick=copyText;
  root.querySelector('#knSav').onclick=saveFile;
  root.querySelector('#knX').onclick=()=>setOpen(false);
+ tabsEl.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)setTab(b.dataset.v)});
  root.addEventListener('pointerdown',e=>{if(e.target===root)setOpen(false)});
  root.addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
- if(HG.konsolBuilt)HG.konsolBuilt(root);                 /* komut satırı ve geliştirici paneli (js/oyun/komut.js) */
- setupSplit(root);
+ if(HG.konsolBuilt)HG.konsolBuilt(root);                 /* komut satırı, geliştirici paneli ve performans sekmesi (js/oyun/komut.js) */
+ const db=[...tabsEl.children].find(x=>x.dataset.v==='dev');if(db)db.hidden=!(HG.komut&&HG.komut.dev);
+ setTab(tab);
 }
-/* Boyutlandırma çubukları (iki tane):
-   knSplit  — kayıt listesi ile komut alanı arasında; komut alanının toplam yüksekliğini değiştirir.
-   kcSplit  — komut çıktısı ile geliştirici paneli arasında; panelin yüksekliğini değiştirir.
-   Komut yazma alanı (kc-in) her iki durumda da sabit yükseklikte kalır.
-   Seçilen yükseklikler tarayıcıda saklanır. */
-function dragBar(sp,key,getH,setH){
- if(!sp)return;
- let drag=null;
- sp.addEventListener('pointerdown',e=>{
-  drag={y:e.clientY,h:getH()};sp.classList.add('on');
-  try{sp.setPointerCapture(e.pointerId)}catch(_){}
-  e.preventDefault();
- });
- sp.addEventListener('pointermove',e=>{if(drag)setH(drag.h+(drag.y-e.clientY))});
- const end=()=>{if(!drag)return;drag=null;sp.classList.remove('on');
-  try{localStorage.setItem(typeof key==='function'?key():key,String(Math.round(getH())))}catch(e){}};
- sp.addEventListener('pointerup',end);sp.addEventListener('pointercancel',end);
- sp.addEventListener('keydown',e=>{const d=e.key==='ArrowUp'?24:e.key==='ArrowDown'?-24:0;
-  if(d){setH(getH()+d);e.preventDefault()}});
- sp.tabIndex=0;
+/* ---- sekmeler: her görünüm kendi sekmesinde tam yükseklikte açılır ---- */
+function setTab(v){
+ if(!viewEl)return;
+ if(v==='dev'&&!(HG.komut&&HG.komut.dev))v='cmd';
+ tab=v;
+ for(const s of viewEl.children)s.classList.toggle('on',s.dataset.v===v);
+ for(const b of tabsEl.children){
+  const on=b.dataset.v===v;b.classList.toggle('on',on);b.setAttribute('aria-selected',String(on));
+  if(on&&b.lastChild)b.lastChild.textContent='';
+ }
+ if(v==='log'){newLog=0;tabBadge();flush();if(auto&&listEl)listEl.scrollTop=listEl.scrollHeight}
+ if(v==='perf'&&HG.konsolPerf)try{HG.konsolPerf(true)}catch(e){}
+ try{localStorage.setItem(TKEY,v)}catch(e){}
 }
-const savedH=k=>{try{return parseInt(localStorage.getItem(k)||'',10)||0}catch(e){return 0}};
-function setupSplit(root){
- const box=root.querySelector('.kn-box'),cmd=root.querySelector('#knCmd');
- if(!box||!cmd)return;
- const has=cmd.childElementCount>0;box.classList.toggle('has-cmd',has);
- if(!has)return;
- const pan=root.querySelector('#kcPan'),inp=root.querySelector('.kc-in');
- /* Konsol kurulurken henüz görünmediğinden ölçüler sıfır gelebilir: o durumda pencere boyu
-    ve saklanan değerler kullanılır, konsol açılınca gerçek ölçülerle yeniden uygulanır. */
- const boxH=()=>box.clientHeight||Math.round(innerHeight*.86);
- const cmdH=()=>{const h=cmd.getBoundingClientRect().height;return h>1?h:(parseInt(box.style.getPropertyValue('--kncmd'),10)||300)};
- const panH=()=>{const h=pan?pan.getBoundingClientRect().height:0;return h>1?h:(parseInt(cmd.style.getPropertyValue('--kcpan'),10)||210)};
- /* 1) kayıt listesi / komut alanı */
- const MIN=120,setCmd=h=>{const mx=Math.max(MIN,boxH()-220);box.style.setProperty('--kncmd',Math.round(Math.min(mx,Math.max(MIN,h)))+'px')};
- /* 2) komut çıktısı / geliştirici paneli (komut yazma alanı sabit kalır) */
- const PMIN=90,setPan=h=>{
-  const inH=(inp&&inp.getBoundingClientRect().height)||34;
-  const mx=Math.max(PMIN,cmdH()-inH-70);
-  cmd.style.setProperty('--kcpan',Math.round(Math.min(mx,Math.max(PMIN,h)))+'px');
- };
-/* Geliştirici modu açıkken komut alanı daha yüksek açılır (panel sığsın), kapalıyken kayıt
-    listesine yer kalır. İki durum ayrı ayrı hatırlanır. */
- const devNow=()=>cmd.classList.contains('dev');
- const kCmd=()=>devNow()?'hunger-kncmd-dev':'hunger-kncmd';
- const apply=()=>{setCmd(savedH(kCmd())||(devNow()?500:230));setPan(savedH('hunger-kcpan')||310)};
- apply();HG.konsolResize=apply;
- dragBar(root.querySelector('#knSplit'),kCmd,cmdH,h=>{setCmd(h);setPan(panH())});
- dragBar(root.querySelector('#kcSplit'),'hunger-kcpan',panH,setPan);
-}
+/* geliştirici modu açılıp kapandığında sekme çubuğu güncellenir (komut.js çağırır) */
+HG.konsolTabs=dev=>{
+ if(!tabsEl)return;
+ const b=[...tabsEl.children].find(x=>x.dataset.v==='dev');
+ if(b)b.hidden=!dev;
+ if(dev)setTab('dev');else if(tab==='dev')setTab('cmd');
+};
+HG.konsolTab=setTab;
+
 HG.konsolBox=()=>root;
 const clearKeys=()=>{const inp=HG.inp;if(!inp)return;for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false};
 function setOpen(v){
