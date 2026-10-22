@@ -1,9 +1,0 @@
-surum: 1.0.0
-tarih: 2026-09-30
-baslik: İlk sürüm
-
-Parola Defteri yayında.
-
-- Ana parola ve güvenlik sorusu ile iki adımlı giriş
-- AES-GCM ile şifreli kayıtlar, tamamen çevrimdışı çalışma
-- Yedekleme, içe aktarma ve kalıcı silme
