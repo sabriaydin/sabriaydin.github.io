@@ -60,7 +60,7 @@ async function swap(title,fn,spawn){
 function enter(c){
  if(G.cave||!c||c.exit)return false;
  return swap('Mağaraya giriliyor',()=>{
-  const lv=HG.genCave(c.seed,c.tier),sv={};
+  const lv=HG.genCave(c.seed,c.tier,c.kind),sv={};
   for(const k of SURF)sv[k]=G[k];
   sv.px=G.px;sv.py=G.py;sv.yaw=look.yaw;sv.pitch=look.pitch;
   const fr=frontOf(c);

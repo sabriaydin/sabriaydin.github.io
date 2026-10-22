@@ -83,7 +83,16 @@ const tgt=new THREE.Vector3(),orbit=new THREE.Vector3();
 S.render=(G,now,dt,info)=>{
  const t=now*.001,play=info.mode==='play',cam=sc.cam;
  /* kamera */
- if(play){
+ const dc=HG.deathCam;
+ if(play&&dc){
+  /* ölüm kamerası: oyuncu yeniden doğmuş olsa da görüntü ölüm yerinde kalır; kamera yavaşça
+     yere iner ve yana devrilir. */
+  dc.t=Math.min(1,dc.t+dt*1.1);
+  const e=1-Math.pow(1-dc.t,3),gy=S.groundY(dc.px,dc.pz);
+  cam.position.set(dc.px,dc.py+(gy+.34-dc.py)*e,dc.pz);
+  cam.rotation.set(dc.rx+(-.24-dc.rx)*e,dc.ry,1.02*e);
+  if(Math.abs(cam.fov-62)>.05){cam.fov=62;sc.fov=62;cam.updateProjectionMatrix()}
+ }else if(play){
   /* kamera dinamiği: hıza bağlı adım sallanması, iniş çökmesi, yan hareket eğimi, nefes alma */
   const cd=sc.cd||(sc.cd={dip:0,dv:0,roll:0,lastN:0,pch:0}),sp=G.spdNow||0,spk=Math.min(1.4,sp/3.4);
   if((G.landN||0)!==cd.lastN){cd.lastN=G.landN||0;cd.dv=-(G.landImp||0)*2.6}

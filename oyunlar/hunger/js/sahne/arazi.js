@@ -23,7 +23,7 @@ function groundY(x,z){
 const COL={
  grassA:new THREE.Color(0x4d8a38),grassB:new THREE.Color(0x6d9a3c),grassC:new THREE.Color(0x3d7a35),
  sand:new THREE.Color(0xd9c68e),sandW:new THREE.Color(0xb8a574),rock:new THREE.Color(0x7a766f),rockD:new THREE.Color(0x5e5b57),
- shal:new THREE.Color(0xc9bc86),deep:new THREE.Color(0x2b4a5c),pond:new THREE.Color(0x5e6f4e),snow:new THREE.Color(0xe9eef2)
+ shal:new THREE.Color(0x87a98f),deep:new THREE.Color(0x2b4a5c),pond:new THREE.Color(0x5e6f4e),snow:new THREE.Color(0xe9eef2)
 };
 const cc=new THREE.Color(),c1=new THREE.Color(),c2=new THREE.Color();
 function tileColor(i,x,z,out){
@@ -45,7 +45,7 @@ function blendColor(x,z,h,sl,out){
  if(h>-.05){
   const rk=smooth(.55,1.05,sl);
   if(rk>0)out.lerp(COL.rock,rk*.85);
-  if(h>4.4){const sn=smooth(5.2,6.2,h+fbm(x/3,z/3,49)*.8)*(1-smooth(.9,1.5,sl));if(sn>0)out.lerp(COL.snow,sn)}
+  if(h>15){const sn=smooth(17,21.5,h+fbm(x/3,z/3,49)*1.6)*(1-smooth(1.1,1.8,sl));if(sn>0)out.lerp(COL.snow,sn)}
  }
  return out;
 }
@@ -92,7 +92,9 @@ function waterChunk(cx,cz,n){
  for(let j=z0*NF;j<=z1*NF;j++)for(let i=x0*NF;i<=x1*NF;i++)mn=Math.min(mn,hAt(i,j));
  if(mn>WY+.03)return null;
  const wp=[],wc=[],wi=[],wu=[],map=new Map();
- const dcol=(d,out)=>{const t=clamp(d/1.1,0,1),foam=1-smooth(0,.16,d);c1.setRGB(.30,.78,.74);c2.setRGB(.05,.24,.44);c1.lerp(c2,Math.pow(t,.6));const f=foam*.9;out.push(c1.r+(1-c1.r)*f,c1.g+(1-c1.g)*f,c1.b+(1-c1.b)*f,clamp(.38+t*.55+f*.3,0,.95))};
+ /* Köpük yalnızca suyun bittiği ince şeritte belirir: eskiden sığ suyun tamamı beyazlaşıyor ve
+    kumdan ayırt edilemiyordu. */
+ const dcol=(d,out)=>{const t=clamp(d/1.1,0,1),foam=1-smooth(0,.06,d);c1.setRGB(.24,.74,.72);c2.setRGB(.05,.24,.44);c1.lerp(c2,Math.pow(t,.6));const f=foam*.45;out.push(c1.r+(1-c1.r)*f,c1.g+(1-c1.g)*f,c1.b+(1-c1.b)*f,clamp(.52+t*.42+f*.2,0,.95))};
  if(mn<WY-.7&&false){}
  /* tüm parça derin sudaysa tek büyük dörtgen */
  let mx=-1e9;for(let j=z0*NF;j<=z1*NF;j+=2)for(let i=x0*NF;i<=x1*NF;i+=2)mx=Math.max(mx,hAt(i,j));

@@ -440,9 +440,15 @@ S.onInit(()=>{
    :st===1?[[.18,.44,.18,.1,3,.2,.4,-.3],[-.16,.4,.26,.08,5,-.2,.9,.4],[.36,.2,-.18,.07,9,.3,1.4,-.5]]
    :[[.04,.3,.02,.08,3,.1,.2,.1]];
   nug.forEach(n=>ps.push(nugget(k,n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7])));
+  /* damarı belli eden yassı cevher yüzeyleri: koni yerine kayaya yapışık basık parçalar */
+  if(st===0)for(const [x,y,z,r,sd,rx,rz] of [[.26,.44,.08,.13,21,.35,-.3],[-.2,.4,.22,.115,23,-.3,.25],[.04,.56,-.16,.12,25,.15,.1],[-.3,.26,-.2,.1,27,.2,.4]]){
+   const q=part(facet(r,sd,.3,1.25,.42,1.25,0),SHARD[k],x,y,z,1,1,1,rx,x*2.4,rz,.1);q.cf=oreCf[k];ps.push(q);
+  }
   /* kristal/kırık parça demetleri: cevher türüne göre renkli, ucu parlak */
   const SH=SHARD[k],sl=st===0?SHARDS:st===1?SHARDS.slice(0,3):SHARDS.slice(0,1);
-  for(const [x,y,z,h,r,rx,rz] of (k==='coal'||k==='copper'?[]:sl)){      /* kömür ve bakırda sivri kristal yok: yalnızca yuvarlak parçalar */
+  /* Sivri koni kristaller kaldırıldı: cevher damarı artık kayanın içine gömülü, yassı ve
+     yuvarlak cevher yüzeyleriyle gösterilir (demir damarındaki üçgen çıkıntılar buradan geliyordu). */
+  for(const [x,y,z,h,r,rx,rz] of []){
    const q=part(cone(r,h,k==='coal'?4:6,1),SH,x,y+h*.42,z,1,1,1,rx,x*3,rz,.1);
    q.cf=(px,py,pz,nx,ny,nz,c)=>{const t=Math.max(0,Math.min(1,(py-y)/h));c.r*=.62+.6*t;c.g*=.62+.6*t;c.b*=.62+.6*t};
    ps.push(q);

@@ -95,27 +95,32 @@ function drawCompass(){
  const cv=el.firstElementChild,g=cv.getContext('2d'),CW=cv.width,CH=cv.height,SPAN=110,ppd=CW/SPAN;
  g.clearRect(0,0,CW,CH);
  g.textAlign='center';g.textBaseline='alphabetic';
- const gr=g.createLinearGradient(0,0,CW,0);gr.addColorStop(0,'rgba(231,228,223,0)');gr.addColorStop(.18,'rgba(231,228,223,.55)');gr.addColorStop(.82,'rgba(231,228,223,.55)');gr.addColorStop(1,'rgba(231,228,223,0)');
+ /* koyu zemin şeridi: pusula parlak gökyüzünün önünde de okunur */
+ const bg=g.createLinearGradient(0,0,CW,0);
+ bg.addColorStop(0,'rgba(8,8,10,0)');bg.addColorStop(.12,'rgba(8,8,10,.6)');bg.addColorStop(.88,'rgba(8,8,10,.6)');bg.addColorStop(1,'rgba(8,8,10,0)');
+ g.fillStyle=bg;g.fillRect(0,CH-46,CW,44);
+ const gr=g.createLinearGradient(0,0,CW,0);gr.addColorStop(0,'rgba(231,228,223,0)');gr.addColorStop(.18,'rgba(231,228,223,.75)');gr.addColorStop(.82,'rgba(231,228,223,.75)');gr.addColorStop(1,'rgba(231,228,223,0)');
  g.fillStyle=gr;g.fillRect(0,CH-14,CW,2);
  const d0=Math.floor((hd-SPAN/2)/5)*5;
  for(let d=d0;d<=hd+SPAN/2+5;d+=5){
-  const a=Math.max(0,1-Math.pow(Math.abs(d-hd)/(SPAN/2),2));if(a<=.03)continue;
+  /* ortadaki geniş bölüm tam parlaklıkta, yalnız uçlar söner: eski karesel sönüm yazıları okunmaz yapıyordu */
+  const t=Math.abs(d-hd)/(SPAN/2),a=t>=1?0:1-Math.pow(Math.max(0,(t-.6)/.4),1.5);if(a<=.03)continue;
   const x=CW/2+(d-hd)*ppd,dn=((d%360)+360)%360;
   g.globalAlpha=a;g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=4;
   if(dn%45===0){
    const card=dn%90===0;
-   g.font=(card?'700 26px':'600 19px')+' system-ui,Segoe UI,sans-serif';
-   g.fillStyle=dn===0?'#ff5a4e':'#f2efe9';g.fillText(DIRS[dn/45],x,CH-26);
-   g.fillStyle='#e7e4df';g.fillRect(x-1.5,CH-24,3,10);
+   g.font=(card?'800 30px':'700 22px')+' system-ui,Segoe UI,sans-serif';
+   g.fillStyle=dn===0?'#ff6a5e':'#ffffff';g.fillText(DIRS[dn/45],x,CH-26);
+   g.fillStyle='#ffffff';g.fillRect(x-1.5,CH-24,3,11);
   }else if(dn%15===0){
-   g.font='500 15px system-ui,Segoe UI,sans-serif';g.fillStyle='#cfcac2';g.fillText(String(dn),x,CH-26);
-   g.fillStyle='#cfcac2';g.fillRect(x-1,CH-22,2,8);
-  }else{g.fillStyle='#a8a39b';g.fillRect(x-.8,CH-19,1.6,5)}
+   g.font='600 17px system-ui,Segoe UI,sans-serif';g.fillStyle='#e4e0d8';g.fillText(String(dn),x,CH-26);
+   g.fillStyle='#e4e0d8';g.fillRect(x-1,CH-22,2,8);
+  }else{g.fillStyle='#bdb8b0';g.fillRect(x-.9,CH-19,1.8,5)}
  }
  g.globalAlpha=1;g.shadowBlur=0;
  /* merkez imleci */
  g.fillStyle='#d9463c';g.beginPath();g.moveTo(CW/2,CH-12);g.lineTo(CW/2-7,CH-1);g.lineTo(CW/2+7,CH-1);g.closePath();g.fill();
- g.font='700 15px system-ui,Segoe UI,sans-serif';g.fillStyle='rgba(231,228,223,.85)';g.shadowColor='rgba(0,0,0,.9)';g.shadowBlur=4;g.fillText(Math.round(hd)+'°',CW/2,16);
+ g.font='700 18px system-ui,Segoe UI,sans-serif';g.fillStyle='rgba(255,255,255,.95)';g.shadowColor='rgba(0,0,0,.95)';g.shadowBlur=5;g.fillText(Math.round(hd)+'°',CW/2,18);
  /* işaret noktası */
  if(wb!==null){
   const df=((wb-hd+540)%360)-180,inside=Math.abs(df)<=SPAN/2-4,x=inside?CW/2+df*ppd:(df<0?18:CW-18);

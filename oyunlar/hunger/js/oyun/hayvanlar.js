@@ -16,13 +16,15 @@ function makeAnimals(list){
 }
 /* Yabani hayvanlar kapıyı açamaz: kapılı barınak ve ağıl onları dışarıda tutar (gölgelerle aynı kural) */
 const SOLIDA=o=>SOLID(o)||o===O.DOOR||o===O.DOORM||o===O.VDOOR||HG.INSA_PASS(o);
+/* Kara hayvanları sığ sudan (SHAL) geçebilir: kıyıdaki hayvanlar eskiden su kenarında kapana
+   kısılıyordu. Derin su ve tatlı su göleti yine geçilmez. */
 function walkable(x,z){
  const r=.35,pts=[[0,0],[r,0],[-r,0],[0,r],[0,-r]];
  for(const [dx,dz] of pts){
   const tx=Math.floor(x+dx),tz=Math.floor(z+dz);
   if(tx<1||tz<1||tx>=W-1||tz>=H-1)return false;
   const i=tz*W+tx,t=G.tile[i];
-  if(t<T.SAND||t===T.POND||SOLIDA(G.obj[i]))return false;
+  if(t<T.SHAL||t===T.POND||SOLIDA(G.obj[i]))return false;
  }
  return !HG.rsFoeBlock(x,z);
 }
@@ -31,7 +33,7 @@ function unstick(a){
  if(ANIMAL[a.t].sea)return;
  const i=Math.floor(a.z)*W+Math.floor(a.x);
  if(i<0||i>=W*H)return;
- if(!(SOLIDA(G.obj[i])||G.tile[i]<T.SAND||G.tile[i]===T.POND))return;
+ if(!(SOLIDA(G.obj[i])||G.tile[i]<T.SHAL||G.tile[i]===T.POND))return;
  for(let r=1;r<=8;r++)for(let k=0;k<12;k++){
   const an=k/12*6.2832+r,x=a.x+Math.cos(an)*r,z=a.z+Math.sin(an)*r;
   if(walkable(x,z)){a.x=x;a.z=z;a.moving=false;a.tm=1;return}
@@ -56,10 +58,14 @@ function near(a,r){
 function steer(a,def,head,spd){
  const L=def.r+.9+Math.min(2.2,spd*.35),s=a.stS||1;
  const ok=h=>{const sn=Math.sin(h),cs=Math.cos(h);return walkable(a.x+sn*L,a.z+cs*L)&&walkable(a.x+sn*L*.5,a.z+cs*L*.5)};
- if(ok(head))return head;
+ if(ok(head)){
+  /* yol açıldıktan sonra sapma hemen bırakılmaz: aksi hâlde her karede açılıp kapanıp hayvanı titretiyordu */
+  if(a.stO&&a.stT>0&&ok(head+a.stO))return head+a.stO;
+  a.stO=0;return head;
+ }
  for(const o of [.5,1,1.5,2.1]){
-  if(ok(head+o*s)){a.stS=s;return head+o*s}
-  if(ok(head-o*s)){a.stS=-s;return head-o*s}
+  if(ok(head+o*s)){a.stS=s;a.stO=o*s;a.stT=.45;return head+o*s}
+  if(ok(head-o*s)){a.stS=-s;a.stO=-o*s;a.stT=.45;return head-o*s}
  }
  return head;
 }
@@ -121,10 +127,13 @@ const WIND={boar:.8,bear:1.1},DASH={boar:1.5,bear:1.25};
 function chargeMove(a,def,dt,dp,dx,dz){
  const base=Math.atan2(dx,dz),cs=def.cspd||Math.min(def.run,4.9),close=dp<def.r+.75;
  if(a.t==='wolf'){
-  if(a.retreatT>0){a.retreatT-=dt;return {head:base+Math.PI+(a.id%2?.6:-.6),spd:def.run*.8}}          /* vurup çekilir */
+  if(a.retreatT>0){a.retreatT-=dt;return {head:base+Math.PI+(a.id%2?.6:-.6),spd:def.run*.6}}          /* vurup kısa süre çekilir */
   if(a.pk>1&&leadId!==a.id){                                                                          /* sıra bekleyen kurt oyuncuyu çevreler */
-   const side=a.id%2?1:-1,want=6.5,off=Math.PI/2-clamp((dp-want)*.25,-.7,.7);
-   return {head:base+side*off,spd:dp<want+4?def.run*.55:cs*1.1};
+   /* Oyuncu üzerine yürüdüğünde çevreleyen kurt geri kaçmaz, karşılık verir: eskiden mesafesini
+      korumak için sürekli geri çekiliyor ve kaçıyormuş gibi görünüyordu. */
+   if(dp<3.6)return {head:base+(a.id%2?.35:-.35),spd:cs};
+   const side=a.id%2?1:-1,want=4.6,off=Math.PI/2-clamp((dp-want)*.32,-.45,.9);
+   return {head:base+side*off,spd:dp<want+4?def.run*.6:cs*1.1};
   }
   const flank=a.pk>1?(a.id%2?1:-1)*.55*clamp((dp-3)/9,0,1):0;                                         /* lider yandan yaklaşır */
   return {head:base+flank,spd:close?0:cs};
@@ -238,7 +247,7 @@ function updateAnimals(dt){
    const cm=chargeMove(a,def,dt,dp,dx,dz);head=cm.head;spd=cm.spd;                    /* kovalama hızı oyuncunun koşusundan düşüktür */
    if(dp<def.r+1.0&&a.cd<=0&&play){
     a.cd=def.cd||1.2;a.atkT=.45;a.struck=true;HG.snd('atk_'+(def.snd||a.t),{x:a.x,z:a.z});HG.hurt(def.dmg,def.n+' saldırısında öldün.',{x:a.x,z:a.z},def.bleed||.35);HG.toast(def.n+' saldırdı!');
-    if(a.t==='wolf'){a.retreatT=1.1+rnd()*.8;if(leadId===a.id)leadT=0}                  /* kurt vurur ve çekilir */
+    if(a.t==='wolf'){a.retreatT=.55+rnd()*.4;if(leadId===a.id)leadT=0}                  /* kurt vurur ve kısa süre çekilir */
     else if(WIND[a.t]){a.cph=2;a.ct=1.4}                                                /* domuz/ayı toparlanır */
     /* büyük baş hayvanlar yalnızca birkaç kez karşılık verir, sonra kaçar */
     if(a.retal!==undefined&&--a.retal<=0){a.retal=undefined;a.charge=0;a.panic=10}
@@ -248,6 +257,13 @@ function updateAnimals(dt){
    if(a.panic>0){a.panic-=dt;if(a.panic<=0)a.scare=null}
    const sx=a.scare?a.scare.x:G.px,sz=a.scare?a.scare.z:G.py;
    head=Math.atan2(a.x-sx,a.z-sz)+zig(a);spd=def.run;
+   /* Kumsal hayvanları (yengeç) kaçarken denize yönelir: deniz uzaklık alanının eğimi izlenir,
+      böylece kıyıya en yakın taraftan suya girerler. */
+   if(def.beach&&G.sdist){
+    const sd=(x,z)=>{const tx=Math.floor(x),tz=Math.floor(z);return tx<0||tz<0||tx>=W||tz>=H?99:G.sdist[tz*W+tx]};
+    const gx=sd(a.x+1.5,a.z)-sd(a.x-1.5,a.z),gz=sd(a.x,a.z+1.5)-sd(a.x,a.z-1.5);
+    if(gx||gz){const toSea=Math.atan2(-gx,-gz),d=angDiff(head,toSea);head+=clamp(d,-1.25,1.25)}
+   }
    if(def.prey&&!(performance.now()-(a.alT||0)<6000)){a.alT=performance.now();alarm(a,sx,sz)}      /* sürü de aynı yönden kaçar */
   }else if(fr&&def.prey&&play&&dp<fr*1.5&&(a.alertT||0)<6){
    a.alertT=(a.alertT||0)+dt;a.alerted=true;head=Math.atan2(dx,dz);spd=0;                         /* tetikte: donar, oyuncuya bakar; yaklaşılırsa kaçar */
@@ -276,8 +292,13 @@ function updateAnimals(dt){
   if(spd>0&&!def.foe&&!def.sea&&!def.pet&&a.cph!==1)head=steer(a,def,head,spd);
   /* engelden kaçınma */
   if(a.avoidT>0){a.avoidT-=dt;head+=a.avoid}
+  if(a.stT>0)a.stT-=dt;
   if(spd>0){
-   const d=angDiff(a.yaw,head),turn=(spd>def.walk*1.5?7:3.5)*dt;
+   /* Hedef yön yumuşatılır ve dönüş hızı sınırlanır: engelden kaçınma yönü her karede
+      değiştiğinde hayvanlar sağa sola titriyordu. */
+   const dh=angDiff(a.hd===undefined?head:a.hd,head);
+   a.hd=(a.hd===undefined?head:a.hd)+dh*(1-Math.exp(-7*dt));
+   const d=angDiff(a.yaw,a.hd),turn=(spd>def.walk*1.5?3.4:2.0)*dt;
    a.yaw+=clamp(d,-turn,turn);
    const step=spd*dt*(Math.abs(d)>1.4?.2:1),nx=a.x+Math.sin(a.yaw)*step,nz=a.z+Math.cos(a.yaw)*step;
    const wk0=def.foe?HG.walkableFoe:def.sea?HG.swimmable[def.sea]:walkable,pm=def.foe?1.0:def.r+.45,d0=Math.hypot(a.x-G.px,a.z-G.py);
@@ -285,7 +306,7 @@ function updateAnimals(dt){
    if(wk(nx,nz)){a.x=nx;a.z=nz}
    else if(wk(nx,a.z))a.x=nx;else if(wk(a.x,nz))a.z=nz;
    else{a.avoid=(rnd()<.5?-1:1)*(1.1+rnd()*.6);a.avoidT=.7;if(!a.panic&&!a.charge){a.moving=false;a.tm=.6}}
-   a.walk+=step*3.2;
+   a.walk+=step*3.2/((1+spd*.16)*Math.max(.9,def.h*.8));   /* adım uzunluğu hız ve boyla büyür: dörtnalda bacaklar artık fırıl fırıl dönmüyor */
   }
   a.atkT=Math.max(0,(a.atkT||0)-dt);
   a.spd+=(spd-a.spd)*Math.min(1,8*dt);

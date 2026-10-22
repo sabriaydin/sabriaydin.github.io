@@ -13,9 +13,11 @@ S.fell=(tx,tz,o,fromX,fromZ)=>{
  const geo=sc.MODEL[key];if(!geo)return;
  const t=sc.tintFor(key,hh,h2,h3);
  /* ayakta duran ağaçla aynı malzeme türü: yüzey dokuları ve yaprak kesimi (pbr+leaf) korunur, yoksa devrilirken görünüm değişir */
- const isP=key==='palm'||key==='palm0',mat=sc.mat({pbr:true,leaf:true,nocut:isP,side:isP?THREE.DoubleSide:THREE.FrontSide});
+ /* Devrilen ağaç her iki yüzünden de çizilir: tek yüzle çizildiğinde gövdenin altından bakınca
+    ağaç kayboluyordu (arka yüzler ayıklanıyordu). */
+ const isP=key==='palm'||key==='palm0',mat=sc.mat({pbr:true,leaf:true,nocut:isP,side:THREE.DoubleSide});
  mat.color.setRGB(t.r,t.g,t.b);
- const mesh=new THREE.Mesh(geo,mat);mesh.castShadow=true;mesh.receiveShadow=true;
+ const mesh=new THREE.Mesh(geo,mat);mesh.castShadow=true;mesh.receiveShadow=true;mesh.frustumCulled=false;
  const sc2=(o===O.TREE?.8+h2*.4:.9+h2*.3),x=tx+.5+(hh-.5)*.2,z=tz+.5+(h2-.5)*.2,gy=S.groundY(x,z)-.04;
  mesh.position.set(x,gy,z);mesh.scale.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
  let dx=x-fromX,dz=z-fromZ;const l=Math.hypot(dx,dz)||1;dx/=l;dz/=l;

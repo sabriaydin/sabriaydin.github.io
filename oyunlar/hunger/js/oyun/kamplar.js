@@ -64,7 +64,10 @@ function openChest(){
   const N=HG.NOTES||[];
   if(N.length&&c.note!==undefined&&!G.notes.includes(c.note)){
    G.notes.push(c.note);HG.xpGain(8);
-   setTimeout(()=>{if(ui.state==='play')HG.toggleJournal(true,'not',c.note)},900);
+   /* Günlük penceresi kendiliğinden açılmaz (oyunun akışını kesiyordu): yalnızca bildirim düşer,
+      kayıt Günlük › Kayıtlar sekmesinde "Yeni" işaretiyle bekler. */
+   HG.noteNew&&HG.noteNew(c.note);
+   HG.toast('Yeni bir kayıt bulundu · Günlük (K) › Kayıtlar');
   }
  }
  HG.snd('chest');

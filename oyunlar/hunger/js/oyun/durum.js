@@ -14,6 +14,8 @@ function newState(seed,emb){
   hp:100,hun:HG.BAL.startStat,thr:HG.BAL.startStat,warm:100,stam:100,san:100,bleed:0,torchFuel:360,torchLit:false,tired:false,arrows:[],clock:0,thin:1,sp0:{x:w.sx,y:w.sy},inv:Array(SLOTS).fill(null),sel:0,flags:{},timers:[],
   villages:w.villages,camps:w.camps||[],caves:w.caves||[],explore:new Uint8Array(Math.ceil(HG.W/4)*Math.ceil(HG.H/4)),cave:null,emb:emb||0,islets:w.islets||[],reefs:w.reefs||[],onRaft:false,raftHp:100,mask:false,seaT:0,sharkCd:0,entSC:w.entSC,sdist:HG.seaDistField(w.tile,HG.W),npcs:HG.makeNpcs(w.villages),sheltered:false,shelterCheck:0,shelterT:0,moving:false,walk:0,nearFire:false,cause:'',saveT:0,sprint:false});
  G.inv[0]={id:'rock',n:1};                      /* başlangıçta elde El Taşı bulunur: çıplak elle ağaç kesilemez, kazılamaz */
+ G.inv[1]={id:'torch',n:1};                     /* ilk gece için bir meşale */
+ G.inv[2]={id:'wbottle',n:1};                   /* ilk susuzluk için bir su şişesi */
  HG.progInit();
  return G;
 }

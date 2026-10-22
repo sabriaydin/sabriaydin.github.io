@@ -74,13 +74,13 @@ function actionFor(tg){
   return null;
  }
  if(tl===T.POND){
-  if(h&&h.k==='rod')return {kind:'fish',need:3,hint:'Basılı tut: balık tut',name:'Tatlı su'};
-  if(h&&h.k==='bottle')return {kind:'fill',need:.8,hint:'Basılı tut: şişeyi doldur',name:'Tatlı su'};
+  if(h&&h.k==='rod')return {kind:'fish',need:3,hint:'[E] basılı tut: balık tut',name:'Tatlı su'};
+  if(h&&h.k==='bottle')return {kind:'fill',need:.8,hint:'[E] basılı tut: şişeyi doldur',name:'Tatlı su'};
   if(G.thr>=99.5)return {block:'Susuzluk yok.',name:'Tatlı su'};
-  return {kind:'drink',need:1.1,hint:'Basılı tut: su iç',name:'Tatlı su'};
+  return {kind:'drink',need:1.1,hint:'[E] basılı tut: su iç',name:'Tatlı su'};
  }
  if(tl<=T.SHAL){
-  if(h&&h.k==='rod')return {kind:'fish',need:3,hint:'Basılı tut: balık tut',name:'Deniz'};
+  if(h&&h.k==='rod')return {kind:'fish',need:3,hint:'[E] basılı tut: balık tut',name:'Deniz'};
   return {block:'Deniz suyu tuzludur, içilemez.',name:'Deniz (tuzlu su)'};
  }
  if(tl===T.SAND)return {hint:'[E] Kum kaz',name:'Kum'};
@@ -268,6 +268,14 @@ function pickupAim(){
  const tg=G.tg;if(!tg||tg.an||G.head)return -1;
  const i=tg.y*W+tg.x;return pickupOk(G.obj[i])?i:-1;
 }
+/* Su başındaki eylemler (su içme, şişe doldurma, balık tutma) etkileşim tuşuyla da yapılır:
+   etkileşim tuşu E olduğu hâlde bunların yalnızca sol tıkla yapılması tutarsızdı. Sol tık da çalışır. */
+const USE_HOLD={drink:1,fill:1,fish:1};
+function useHoldAct(){
+ if(ui.state!=='play'||!HG.keyDown||!HG.keyDown('use'))return false;
+ const a=actionFor(G.tg);
+ return !!(a&&a.kind&&USE_HOLD[a.kind]);
+}
 function stepUse(dt){
  if(!UP){HG.useProg=null;return}
  if(ui.state!=='play'||!HG.keyDown('use')||pickupAim()!==UP.i){UP=null;HG.useProg=null;return}
@@ -369,5 +377,5 @@ function useHeld(src){
  }
  if(digNow())return;
 }
-Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,stepUse,nodeCenter,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
+Object.assign(HG,{YIELD,useCands,actionFor,stepAction,stopAction,stepUse,useHoldAct,nodeCenter,validPlace,placeTarget,placeHeld,onActPress,useHeld,eatHeld});
 })();

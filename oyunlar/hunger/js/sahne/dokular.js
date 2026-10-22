@@ -116,13 +116,15 @@ function canvasTex(size,fill,enc){
  tex.pBark=pbr(SZ,(u,v)=>{
   /* Dikey süren derin çatlak ağı (yatayda sık, dikeyde sürekli), aralarında lifli levhalar ve
      yer yer yatay kopmalar; üstüne ince liken lekesi. */
-  const wu=u+(fb(u,v,3,10,2,501)-.5)*.028;
-  const c1=Math.abs(fb(wu,v,15,2,3,201)-.5)*2,cr1=1-smooth01(c1,0,.055);
-  const c2=Math.abs(fb(wu+.37,v,29,3,3,205)-.5)*2,cr2=(1-smooth01(c2,0,.04))*.55;
-  const fib=fb(u,v,150,9,2,213),fib2=fb(u,v,64,5,2,215);
-  const brk=smooth01(fb(u,v,9,55,2,221),.62,.8);                  /* yatay kopmalar */
+  const wu=u+(fb(u,v,3,10,2,501)-.5)*.03;
+  const c1=Math.abs(fb(wu,v,11,2,3,201)-.5)*2,cr1=1-smooth01(c1,0,.075);
+  const c2=Math.abs(fb(wu+.37,v,20,3,2,205)-.5)*2,cr2=(1-smooth01(c2,0,.05))*.45;
+  /* Lif gürültüsü belirgin biçimde seyreltildi: yüksek frekanslı benekler kabuğu karıncalı ve
+     göz yorucu gösteriyordu. Artık geniş, yumuşak kabuk levhaları görünür. */
+  const fib=fb(u,v,46,7,2,213),fib2=fb(u,v,18,4,2,215);
+  const brk=smooth01(fb(u,v,7,26,2,221),.68,.86);                 /* yatay kopmalar */
   const cr=Math.min(1,cr1+cr2*(1-cr1));
-  const h=clamp(.78-cr*.4-brk*.14+fib*.17+fib2*.11,0,1);
+  const h=clamp(.78-cr*.34-brk*.1+fib*.12+fib2*.1,0,1);
   const li=smooth01(fb(u,v,5,5,3,231),.7,.86)*.6;
   const l=.5+(h-.72)*1.02;
   return [l*(1.08-.13*li),l*(1+.02*li),l*(.84-.03*li),h];

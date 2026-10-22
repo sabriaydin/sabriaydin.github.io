@@ -55,7 +55,7 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 /* ---- Güncelleme 67: Duraklatma menüsü (sol sütun, büyük başlık, düz satır düğmeleri) ---- */
 #pause{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(4,4,5,.97) 0,rgba(4,4,5,.9) 36%,rgba(4,4,5,.6) 70%,rgba(4,4,5,.42) 100%)}
 #pause .card.pm{width:min(380px,100%);min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:4px;
- background:none;border:0;border-left:4px solid var(--red);border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
+ background:none;border:0;border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
 #pause .pmh{margin-bottom:18px}
 #pause .pm h1{font-size:38px;letter-spacing:.14em;text-indent:0;margin:0}
 #pause .pm .wcp{margin:6px 0 0;font-size:12px;color:var(--mut)}
@@ -80,7 +80,7 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 /* ---- Güncelleme 69: Ana menü, duraklatma menüsüyle aynı yapıda (sol sütun, düz satır düğmeleri) ---- */
 #menu{place-items:center start;padding:0;background:linear-gradient(90deg,rgba(4,4,5,.96) 0,rgba(4,4,5,.88) 36%,rgba(4,4,5,.45) 70%,rgba(4,4,5,.25) 100%)}
 #menu .card{width:min(430px,100%);min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;
- background:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border:0;border-left:4px solid var(--red);border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
+ background:none;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border:0;border-radius:0;text-align:left;padding:28px 34px;margin-left:clamp(0px,6vw,90px)}
 #menu .card h1{font-size:56px;letter-spacing:.14em;text-indent:0}
 #menu .card>p{margin:10px 0 22px;font-size:14px;line-height:1.55;max-width:340px}
 #menu .btns{max-width:none;margin:0 0 14px;gap:2px}
@@ -88,6 +88,10 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
  background:transparent;border:0;border-left:3px solid transparent;border-radius:0;color:#d6d6dc;letter-spacing:.04em;box-shadow:none;transition:padding .12s,background .12s}
 #menu .btns button:hover:not(:disabled),#menu .btns button:focus-visible{transform:none;box-shadow:none;background:rgba(255,255,255,.08);border-left-color:var(--red);color:#fff;outline:none;padding-left:22px}
 #menu .btns #bNew,#menu .btns #bCont{font-weight:700;font-size:19px;color:#fff;background:rgba(217,70,60,.22)}
+/* Devam Et: başlık ile kayıt özeti alt alta durur. Satır düğmeleri flex olduğundan özet yazısı
+   başlığın hemen yanına yapışıyordu. */
+#menu .btns #bCont{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.2;padding-top:10px;padding-bottom:10px}
+#menu .btns #bCont small{display:block;margin:0;font-size:12.5px;font-weight:400;letter-spacing:.02em;opacity:.78}
 #menu .back{align-self:flex-start;margin-top:6px;font-size:13px}
 @media (max-width:640px){
  #menu{place-items:center;background:rgba(4,4,5,.8)}

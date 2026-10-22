@@ -139,11 +139,15 @@ function syncObjects(G){
  const q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s3=new THREE.Vector3(),m=new THREE.Matrix4();
  /* doğa nesnesi örneği: hideAll=true ise gizli olarak ayrılır (yeniden büyüme için hazır bekler) */
  const putInst=(i,x,z,o,hideAll)=>{
-  const gy=S.groundY(x+.5,z+.5),hh=hash(x,z,21),h2=hash(x,z,22),h3=hash(x,z,23);
+  const hh=hash(x,z,21),h2=hash(x,z,22),h3=hash(x,z,23);
+  /* Eğimli zeminde nesnenin tabanı havada kalmasın: karenin dört kenarındaki en alçak nokta
+     esas alınır, böylece yamaçtaki kaya ve ağaçlar zemine oturur. */
+  const g0=S.groundY(x+.5,z+.5);
+  const gy=Math.min(g0,S.groundY(x+.03,z+.5),S.groundY(x+.97,z+.5),S.groundY(x+.5,z+.03),S.groundY(x+.5,z+.97));
   const key=o===O.TREE?(hh<.5?'treeA':'treeB'):KEYOF[o];
   if(!key)return false;
   const sc2=(o===O.TREE?.8+h2*.4:o===O.PALM||o===O.PALM0?.9+h2*.3:.9+h2*.3);
-  p.set(x+.5+(hh-.5)*.2,gy-.04,z+.5+(h2-.5)*.2);e.set((h3-.5)*.05,hh*6.28,(h2-.5)*.05);q.setFromEuler(e);s3.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
+  p.set(x+.5+(hh-.5)*.2,gy-.06-Math.min(.5,(g0-gy)*.6),z+.5+(h2-.5)*.2);e.set((h3-.5)*.05,hh*6.28,(h2-.5)*.05);q.setFromEuler(e);s3.set(sc2,sc2*(o===O.TREE?1:.95),sc2);
   m.compose(p,q,s3);
   const mk=(k,hide)=>{
    const ch=chunks.get(chunkKey(k,x,z));if(!ch)return null;
@@ -258,7 +262,11 @@ S.onFrame((G,t,dt,info)=>{
  if(info.hitI>=0&&info.hitT>0&&G.obj[info.hitI]&&!staged.has(info.hitI)){        /* yok edilen nesne (G.obj boş) yeniden gösterilmez */
   const r=inst.get(info.hitI);
   if(r){
-   const amt=Math.sin(t*90)*.07*(info.hitT/.18)*(r.key==='treeA'||r.key==='treeB'?.35:1);
+   /* Ağaçlar vuruşta sallanmaz: kökünden titreyen ağaç gerçekçi durmuyordu. Küçük nesnelerde
+      (kaya, çalı) sarsıntı kalır ama daha yavaş ve küçüktür. */
+   const isTree=r.key==='treeA'||r.key==='treeB'||r.key==='palm'||r.key==='palm0';
+   if(isTree){wobIdx=-1;return}
+   const amt=Math.sin(t*46)*.045*(info.hitT/.18);
    r.mat.decompose(wv,wq,ws);
    const q2=wq.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(amt,0,amt*.8)));
    wm.compose(wv,q2,ws);r.mesh.setMatrixAt(r.idx,wm);if(r.lo)r.lo.setMatrixAt(r.idx,wm);r.mesh.instanceMatrix.needsUpdate=true;if(r.lo)r.lo.instanceMatrix.needsUpdate=true;wobIdx=info.hitI;

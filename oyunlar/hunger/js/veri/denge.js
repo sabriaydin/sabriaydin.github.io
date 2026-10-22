@@ -16,7 +16,9 @@ const BAL=HG.BAL={
  animEvery:75,animFrac:.55,        /* hayvan yeniden doğma: denetim aralığı (sn) · hedefin bu oranının altına inince yenisi çıkar (eskiden 22 sn · %80) */
  milk:240,shear:360,               /* süt ve yün bekleme süresi (sn) (eskiden 150 · 240) */
  craftK:1.25,                      /* üretim süresi çarpanı */
- hunK:1.12,thrK:1.1,               /* açlık ve susuzluk hızı çarpanı */
+ hunK:.38,thrK:.36,                /* açlık ve susuzluk hızı çarpanı: bir oyun günü 1620 sn olduğundan eski değerlerle
+                                     susuzluk yarım günden kısa sürede tükeniyordu. Yeni değerlerle açlık yaklaşık bir,
+                                     susuzluk yaklaşık dörtte üç oyun günü dayanır. */
  shroomK:.6,                       /* yeni dünyada mantar sayısı çarpanı */
  yield:[.5,1,1.4,2],               /* alet kademesine göre verim (El Taşı, Taş, Bakır, Demir); eskiden .6 · 1 · 1.6 · 2.4 */
  startStat:86,                     /* yeni oyunda başlangıç açlık ve susuzluk (eskiden 92) */

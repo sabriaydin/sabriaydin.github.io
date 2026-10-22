@@ -571,6 +571,11 @@ function showDeath(cause,mode,grave){
  gateInfo={cause,mode,grave};
  for(const k in HG.inp.keys)HG.inp.keys[k]=false;HG.inp.mouseDown=false;HG.inp.touchAct=false;
  for(const id of DEAD_PANELS){const e=HG.$(id);if(e)e.hidden=true}
+ /* Ölüm görüntüsü: arka planda ayakta duran sağlıklı bir oyuncu görünmesin. Ölüm anındaki kamera
+    saklanır, yere devrilmiş gibi alçaltılıp yana yatırılır; eller ve göstergeler gizlenir. */
+ {const c=HG.sc&&HG.sc.cam;
+  if(c)HG.deathCam={px:c.position.x,py:c.position.y,pz:c.position.z,rx:c.rotation.x,ry:c.rotation.y,t:0};
+  const gm=HG.$('#game');if(gm)gm.classList.add('dead');}
  ui.state='dead';
  HG.$('#why').textContent=cause;
  HG.$('#stat').textContent=HG.dayNo()+'. güne kadar dayandın.';
@@ -588,6 +593,7 @@ function showDeath(cause,mode,grave){
   if(ui.state!=='dead'||!gateInfo)return;
   gateInfo=null;
   HG.$('#dead').hidden=true;r.hidden=true;
+  HG.deathCam=null;{const gm=HG.$('#game');if(gm)gm.classList.remove('dead')}
   ui.state='play';HG.snd('ui_close');
   HG.toast(spawnCoast?'Sahilde uyandın.':'Doğma noktasında uyandın.');
   ui.relock=true;HG.lock&&HG.lock();

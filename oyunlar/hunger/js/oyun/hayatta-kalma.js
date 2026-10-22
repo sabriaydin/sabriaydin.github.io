@@ -189,7 +189,7 @@ function update(dt){
  /* eylem */
  HG.stepUse(dt);
  HG.updateCraft&&HG.updateCraft(dt);HG.updateInsa&&HG.updateInsa(dt);
- if(inp.mouseDown||inp.touchAct)HG.stepAction(dt);else HG.stopAction()
+ if(inp.mouseDown||inp.touchAct||HG.useHoldAct())HG.stepAction(dt);else HG.stopAction()
  HG.updateDrops(dt);
  HG.updateAnimals(dt);HG.updateSea(dt);HG.updateDiscover(dt);HG.updateNpcs(dt);HG.updateCamps(dt);HG.updateCaves(dt);HG.mapExplore(dt);HG.updateEvents(dt);
  HG.updateWeapons(dt);

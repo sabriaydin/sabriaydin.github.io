@@ -29,6 +29,18 @@ function kbGuard(){
  try{const p=el.requestFullscreen();if(p&&p.then)p.then(go,()=>{});else go()}catch(e){}
 }
 HG.kbGuard=kbGuard;
+/* Klavye kilidi kopabilir (sekme odağı değişir, F11 ile açılan tarayıcı tam ekranından çıkılır):
+   odak geri geldiğinde ve tam ekran durumu değiştiğinde yeniden istenir. */
+addEventListener('focus',()=>{if(ui.state==='play')kbGuard()});
+document.addEventListener('fullscreenchange',()=>{if(ui.state==='play')kbGuard()});
+/* Son güvenlik ağı: Klavye Kilidi F11 ile açılan tarayıcı tam ekranında ve kilidi desteklemeyen
+   tarayıcılarda çalışmaz. Oyun sürerken sekme kapatılmak istenirse tarayıcı onay sorar, böylece
+   Ctrl+W yanlışlıkla basıldığında oyun kapanmaz. */
+addEventListener('beforeunload',e=>{
+ if(HG.cfg&&HG.cfg.kbLock===false)return;
+ if(ui.state!=='play'&&ui.state!=='pause')return;
+ e.preventDefault();e.returnValue='';
+});
 function lock(){
  if(ui.touch||ui.state!=='play'||overlayOpen())return;
  /* Esc basılıyken kilit istenirse tarayıcının Esc işlemi kilidi hemen bozar ve oyun duraklar: tuş bırakılınca alınır */

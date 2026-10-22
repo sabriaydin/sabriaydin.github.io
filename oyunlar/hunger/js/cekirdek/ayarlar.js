@@ -31,7 +31,7 @@ const TABS=[
   ['invY','Dikey bakışı ters çevir','toggle',false],
   ['crouchT','Çömelmeyi aç/kapat','toggle',false,'Açıkken çömelme tuşu basılı tutulmaz; bir kez basmak çömeltir, yeniden basmak doğrultur.'],
   ['sprintT','Koşmayı aç/kapat','toggle',false,'Açıkken koş tuşu basılı tutulmaz; bir kez basmak koşuyu açar, durunca kapanır.'],
-  ['kbLock','Tam ekranda oyna','toggle',true,'Oyuna girince tam ekrana geçilir ve tarayıcı kısayolları oyuna yönlendirilir: Ctrl+W sekmeyi kapatmaz, Ctrl+R sayfayı yenilemez. Esc ile tam ekrandan çıkılır.']]],
+  ['kbLock','Tam ekranda oyna','toggle',true,'Oyuna girince tam ekrana geçilir ve tarayıcı kısayolları oyuna yönlendirilir: Ctrl+W sekmeyi kapatmaz, Ctrl+R sayfayı yenilemez. Kilit çalışmazsa (F11 tam ekranı, desteklemeyen tarayıcı) sekme kapatılırken onay sorulur. Esc ile tam ekrandan çıkılır.']]],
  ['Oyun',[
   ['diff','Zorluk','select','1',[['0','Kolay'],['1','Normal'],['2','Zor']],'Açlık, susuzluk ve alınan hasar hızını değiştirir. Kolay: %25 daha az, Zor: %30 daha fazla.'],
   ['cmd','Konsol komutları','toggle',false,'Dünya kuralıdır: Dünya Oluştur penceresinden seçilir.'],

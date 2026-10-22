@@ -1,6 +1,9 @@
 /* Hunger 3D - sahne: hayvanların çizimi ve canlandırması (yürüme, kaçma, vurulma, ölme) */
 (()=>{
 'use strict';
+/* Tür bazlı görsel ölçek: modeller arası boy oranlarını gerçeğe yaklaştırır.
+   Yaban domuzu ineğe göre fazla iriydi (gerçekte cidago yüksekliği ineğin ~%60'ı kadardır). */
+const TSC={boar:.72};
 const {ANIMAL}=HG;
 const S=HG.Scene,sc=HG.sc;
 const objs=new Map();
@@ -74,7 +77,7 @@ S.onFrame((G,t,dt,info)=>{
   q.setFromAxisAngle(AY,a.yaw);qp.setFromAxisAngle(ax,o.pitch+(o.extraPitch||0));
   qz.setFromAxisAngle(AZ,rz);
   o.g.quaternion.copy(q).multiply(qp).multiply(qz);
-  const s=1-hit*.05;o.g.scale.set(s,Math.max(.05,sy)*(1+hit*.04),s);
+  const s=(1-hit*.05)*(TSC[a.t]||1);o.g.scale.set(s,Math.max(.05,sy)*(1+hit*.04)*(TSC[a.t]||1),s);
   /* gövde: kırkılmış koyun */
   if(o.bodyS){o.body.visible=!a.sheared;o.bodyS.visible=!!a.sheared}
   /* ---- hareket: yürüyüş, tırıs, dört nala, tavşan sıçraması, baş ve kuyruk ---- */
@@ -87,7 +90,7 @@ S.onFrame((G,t,dt,info)=>{
    if(a.dying){l.rotation.x=(o.dyingTw||0)*(i%2?1:-1)+(a.dying>.3&&!def.foe?.3*(i<2?1:-1):0);return}
    if(a.cph===0&&a.t==='boar'&&i<2){l.rotation.x=-.8*Math.max(0,Math.sin(t*13+i*3));return}      /* yaban domuzu atılmadan önce toprağı eşer */
    if(a.t==='rabbit'){l.rotation.x=(i<2?-1:1)*Math.sin(a.walk*1.6)*.9*mvk;return}
-   if(run){l.rotation.x=Math.sin(ph+(i<2?0:2.3))*amp*1.15;return}
+   if(run){l.rotation.x=Math.sin(ph+(i<2?0:2.3))*amp*1.0;return}
    l.rotation.x=Math.sin(ph)*amp*((i===0||i===3)?1:-1);
   });
   /* gövde eğimi: dört nalda ve sıçramada öne arkaya sallanır */

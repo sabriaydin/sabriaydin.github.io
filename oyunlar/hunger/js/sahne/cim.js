@@ -112,10 +112,10 @@ function genCell(G,ci){
    const y=S.groundY(c.x,c.z);
    if(y<lim)continue;                                              /* su altında kalan veya su çizgisindeki noktalar */
    const sl=Math.abs(S.groundY(c.x+.3,c.z)-y)+Math.abs(S.groundY(c.x,c.z+.3)-y);
-   if(sl>.55)continue;
+   if(sl>.42)continue;                                             /* dik yamaçta sap dikilmez */
    if(S.groundY(c.x+.45,c.z)<lim||S.groundY(c.x-.45,c.z)<lim||S.groundY(c.x,c.z+.45)<lim||S.groundY(c.x,c.z-.45)<lim)continue;   /* su kenarında sapların ucu suya girmesin */
    const sc2=isG?.7+c.r*.7:.8+c.r*.6;
-   p.set(c.x,y-.02,c.z);e.set(0,c.r2*6.28,0);q.setFromEuler(e);s3.set(sc2,isG?sc2*(.8+c.r2*.6):sc2,sc2);m4.compose(p,q,s3);
+   p.set(c.x,y-.02-Math.min(.4,sl*.55),c.z);                       /* eğimde ve uzak arazi ayrıntısında sapın dibi gömülür: havada duran çimen kalmaz */e.set(0,c.r2*6.28,0);q.setFromEuler(e);s3.set(sc2,isG?sc2*(.8+c.r2*.6):sc2,sc2);m4.compose(p,q,s3);
    if(isG){S.colorAt(c.x,c.z,cl);const v=.9+c.r*.35;items.push({c,me:m4.elements.slice(),rgb:[cl.r*v,cl.g*v,cl.b*v]})}
    else{cl.setHex(FCOL[c.c]);items.push({c,me:m4.elements.slice(),rgb:[cl.r,cl.g,cl.b]})}
   }

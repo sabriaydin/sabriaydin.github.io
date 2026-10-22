@@ -396,7 +396,7 @@ function clearance(G,cam,front){
 S.onFrame((G,t,dt,info)=>{
  const play=info.mode==='play';
  if(!play&&sc.torchLight)sc.torchLight.intensity=0;
- root.visible=play&&(!!info.held||sc.swingT>=0);if(!play)return;
+ root.visible=play&&!HG.deathCam&&(!!info.held||sc.swingT>=0);if(!play||HG.deathCam)return;   /* ölüm ekranında eller görünmez */
  const id=info.held,it=id?IT[id]:null,two=!!(it&&it.tool==='rock');
  if(id!==heldId){
   heldId=id;while(slot.children.length)slot.remove(slot.children[0]);while(twoH.children.length)twoH.remove(twoH.children[0]);
@@ -423,9 +423,16 @@ S.onFrame((G,t,dt,info)=>{
   if(pullK>0){root.position.z+=pullK;root.position.y-=pullK*.1;root.rotation.x+=pullK*.2}
  }
  const pk=1-Math.exp(-14*dt);
+ /* Koşu duruşu: koşarken eller öne uzanmaz, tutulan eşya gövdeye çekilip yana yatırılır ve adımla sallanır. */
+ const rs=sc.rs||(sc.rs={k:0});
+ rs.k+=((spr&&mv?1:0)-rs.k)*(1-Math.exp(-7*dt));
  if(two){
   const sp=rockSwing(dt),br=Math.sin(t*1.5)*.004;
-  twoH.position.set(0,-.3+(sp?sp.y:0)+br,-.58+(sp?sp.z:0));twoH.rotation.set(sp?sp.rx:.08,0,0);twoH.updateMatrix();
+  const sw=mv?ph:0,swc=mv?Math.cos(G.walk*5):0;
+  twoH.position.set(rs.k*.07+swc*.014*spk,
+   -.3+(sp?sp.y:0)+br-rs.k*.11+(mv?Math.abs(sw)*.016*spk:0),
+   -.58+(sp?sp.z:0)+rs.k*.21);
+  twoH.rotation.set((sp?sp.rx:.08)+rs.k*.44,-rs.k*.32,rs.k*.24+swc*.022*spk);twoH.updateMatrix();
   for(const sd of [1,-1]){
    const arm=sd>0?rArm:lArm;_p.set(sd*RK.dx,RK.dy,RK.dz).applyMatrix4(twoH.matrix);
    ikArm(arm,_p.x-sd*.0426,_p.y,_p.z-.068,sd*.36,-sd*RK.roll);
@@ -439,11 +446,11 @@ S.onFrame((G,t,dt,info)=>{
  const spose=swingPose(dt,!!id);
  if(spose){rArm.rotation.x=spose.a;rArm.rotation.y=-.05+spose.y}
  else if(info.act&&!GATHER.test(HG.A.key||'')){rArm.rotation.x=.13+Math.sin(t*15)*.6;rArm.rotation.y=-.1+Math.sin(t*15)*.12}
- else{rArm.rotation.x+=((id?0:-.3)-rArm.rotation.x)*(1-Math.exp(-12*dt));rArm.rotation.y*=.85}
+ else{rArm.rotation.x+=((id?0:-.3)-rArm.rotation.x)*(1-Math.exp(-12*dt))+(mv?ph*(.04+rs.k*.18)*spk:0);rArm.rotation.y*=.85}
  hand.rotation.x=id?-.33:0;
  animateHeld(G,t,dt,id);
  if(spose){hand.rotation.x+=spose.h;rArm.position.z=-.115+spose.z}else rArm.position.z=-.115;
- lArm.rotation.x=-.18+(mv?-ph*.06:0);
+ lArm.rotation.x=-.18+(mv?-ph*(.06+rs.k*.2)*spk:0);          /* koşarken kol adımla sallanır */
  lhand.rotation.set(-.3,.12,0);
  /* parmak duruşu: eşya varsa kavrama, boş elle vururken yumruk, aksi halde gevşek */
  applyPose(rigR,id?POSE.grip:(spose?POSE.fist:POSE.relax),pk);applyPose(rigL,POSE.relax,pk);

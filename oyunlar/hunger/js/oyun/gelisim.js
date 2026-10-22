@@ -51,7 +51,8 @@ const TABS=[['gel','Gelişim'],['gor','Görevler'],['mey','Meydan'],['not','Kay�
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function render(){
  const t=$('#jrT'),b=$('#jrB');if(!t||!b)return;
- t.innerHTML=TABS.map(x=>`<button type="button" class="ghost${x[0]===tab?' on':''}" data-t="${x[0]}">${x[1]}</button>`).join('');
+ const unread=noteUnread();
+ t.innerHTML=TABS.map(x=>`<button type="button" class="ghost${x[0]===tab?' on':''}" data-t="${x[0]}">${x[1]}${x[0]==='not'&&unread.length?' <b class="jbadge">'+unread.length+'</b>':''}</button>`).join('');
  let h='';
  if(tab==='gel'){
   const nx=need(G.lvl),pc=G.lvl>=MAXL?100:Math.round(G.xp/nx*100);
@@ -68,14 +69,21 @@ function render(){
  }else if(tab==='not'){
   const all=HG.NOTES||[];
   h=`<p class="mut">Bulunan kayıt: ${G.notes.length}/${all.length}. Terk edilmiş kampların sandıklarında bulunur.</p>`;
-  for(const i of G.notes)h+=`<div class="nt${i===hl?' hl':''}"><b>${esc(all[i].t)}</b><span>${esc(all[i].x)}</span></div>`;
+  for(const i of G.notes)h+=`<div class="nt${i===hl?' hl':''}${unread.includes(i)?' nw':''}"><b>${esc(all[i].t)}${unread.includes(i)?' <em class="ntag">Yeni</em>':''}</b><span>${esc(all[i].x)}</span></div>`;
   if(HG.extNotesHtml)h+=HG.extNotesHtml(esc);
+  noteSeen();                                     /* sekme görüldü: işaretler düşer */
  }else{
   const s=G.stats,rows=[['Hayatta kalınan gün',dayNo()],['Seviye',G.lvl],['Avlanan hayvan',s.hunted],['Yok edilen Gölge',s.shades],['Açılan sandık',s.chests],['Tamamlanan görev',s.quests],['Ticaret işlemi',s.traded],['Atlatılan Kan Ayı',s.blood],['Üretilen eşya',s.crafted],['Bulunan kamp',(G.camps||[]).filter(c=>G.flags['c'+c.id]).length+'/'+(G.camps||[]).length],['Bulunan köy',(G.villages||[]).filter((v,i)=>G.flags['v'+i]).length+'/'+(G.villages||[]).length],['Yürünen mesafe',Math.round(s.walked||0)+' m'],['Yüzülen mesafe',Math.round(s.swum||0)+' m'],['Toplanan midye',s.shells||0],['Salla alınan yol',Math.round(s.sailed||0)+' m'],['Keşfedilen ada',(s.islets||0)+'/'+(G.islets||[]).length],['Keşfedilen resif',(s.reefs||0)+'/'+(G.reefs||[]).length],['Toplanan mercan',s.coral||0],['Öldürülen köpek balığı',s.sharks||0]].concat(HG.extStatRows?HG.extStatRows(s):[]);
   h=rows.map(r=>`<div class="st"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
  }
  b.innerHTML=h;
 }
+/* Okunmamış kayıtlar: sandıktan çıkan not oyunu kesmez, günlükte işaretli bekler (Kayıtlar sekmesi açılınca okunmuş sayılır). */
+HG.x2reg&&HG.x2reg('nn',()=>[],v=>Array.isArray(v)?v.filter(n=>Number.isInteger(n)&&n>=0).slice(0,120):[]);
+function noteUnread(){const x=HG.X2&&HG.X2();return x&&Array.isArray(x.nn)?x.nn:[]}
+function noteSeen(){const x=HG.X2&&HG.X2();if(x&&Array.isArray(x.nn)&&x.nn.length)x.nn.length=0}
+HG.noteNew=i=>{const x=HG.X2&&HG.X2();if(!x)return;if(!Array.isArray(x.nn))x.nn=[];if(!x.nn.includes(i))x.nn.push(i)};
+HG.noteUnreadCount=()=>noteUnread().length;
 function toggleJournal(force,t,hlIdx){
  if(ui.state!=='play')return;
  const j=$('#jr'),open=force!==undefined?force:j.hidden;

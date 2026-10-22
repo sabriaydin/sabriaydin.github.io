@@ -170,7 +170,12 @@ function markers(g,tx,ty,k,sz){
   const x=tx(c.x+.5),y=ty(c.y+.5),s=Math.max(4,sz);
   g.fillStyle='#14161c';g.strokeStyle=c.vault?'#8a8a8a':'#ff5a4a';g.lineWidth=2;
   g.beginPath();g.moveTo(x-s,y+s*.8);g.lineTo(x-s,y-s*.1);g.quadraticCurveTo(x,y-s*1.6,x+s,y-s*.1);g.lineTo(x+s,y+s*.8);g.closePath();g.fill();g.stroke();
-  if(sz>5){g.fillStyle='#fff';g.strokeStyle='#000';g.font=LF(sz);g.textAlign='center';g.strokeText('Mağara',x,y-s*1.5);g.fillText('Mağara',x,y-s*1.5)}
+  if(sz>5){
+   const nm=c.kindName||'Mağara';
+   g.fillStyle='#fff';g.strokeStyle='#000';g.font=LF(sz);g.textAlign='center';g.strokeText(nm,x,y-s*1.5);g.fillText(nm,x,y-s*1.5);
+   /* zorluk: keşfedilen mağaranın ne beklediğini haritadan görmek için */
+   if(sz>7){const z=['Kolay','Orta','Zor'][c.tier||0];g.font=LF(sz*.8);g.fillStyle='#ffb0a0';g.strokeText(z,x,y+s+11);g.fillText(z,x,y+s+11)}
+  }
  }
  /* mağaradan çıkış */
  if(G.cave){
@@ -194,8 +199,8 @@ function markers(g,tx,ty,k,sz){
 }
 function playerArrow(g,x,y,r){
  const a=Math.atan2(G.fy,G.fx);
- g.save();g.translate(x,y);g.rotate(a);g.fillStyle='#d9463c';g.strokeStyle='#fff';g.lineWidth=2;
- g.beginPath();g.moveTo(r*1.4,0);g.lineTo(-r,r*.9);g.lineTo(-r*.4,0);g.lineTo(-r,-r*.9);g.closePath();g.stroke();g.fill();g.restore();
+ g.save();g.translate(x,y);g.rotate(a);g.fillStyle='#d9463c';g.strokeStyle='#fff';g.lineWidth=1.4;
+ g.beginPath();g.moveTo(r*1.5,0);g.lineTo(-r*.85,r*.75);g.lineTo(-r*.35,0);g.lineTo(-r*.85,-r*.75);g.closePath();g.stroke();g.fill();g.restore();
 }
 
 /* ---- mini harita ---- */
@@ -310,7 +315,7 @@ function big(){
  g.save();g.beginPath();g.rect(0,0,S,S);g.clip();
  markers(g,tx,ty,k,Math.max(5,S/90));
  g.restore();
- playerArrow(g,tx(G.px),ty(G.py),Math.max(6,S/60));
+ playerArrow(g,tx(G.px),ty(G.py),Math.max(4.5,S/125));          /* imleç küçük tutulur: haritayı kapatmasın */
  /* pusula: haritanın dışında, ayrı küçük bir tuvalde çizilir */
  {const cc=$('#bmc');if(cc){const q=cc.getContext('2d'),r=cc.width*.46,x=cc.width/2,y=cc.height/2+5;
   q.setTransform(1,0,0,1,0,0);q.clearRect(0,0,cc.width,cc.height);

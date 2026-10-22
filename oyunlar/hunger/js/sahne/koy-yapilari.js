@@ -48,7 +48,16 @@ function houseGeo(h){
  P.push(part(box(.14,2.05,.5),TIMB,-.6,1.02,2),part(box(.14,2.05,.5),TIMB,.6,1.02,2),part(box(1.34,.14,.5),TIMB,0,2.04,2));
  const leaf=part(box(.9,1.95,.07),WOOD,0,0,0);leaf.cf=plankCf;
  leaf.m=new THREE.Matrix4().compose(new THREE.Vector3(-.6+.45*Math.cos(1.25),.98,2.12+.45*Math.sin(1.25)),new THREE.Quaternion().setFromEuler(new THREE.Euler(0,-1.25,0)),new THREE.Vector3(1,1,1));
- P.push(leaf,part(cyl(.03,.03,.05,6),0xd9b030,.35,1.0,2.2));
+ /* Kol kapı kanadının üzerindedir: eskiden kasanın ortasına konduğu için kanat açıkken
+    havada asılı duruyordu. Kanadı açık tutan duvar kancası da eklendi. */
+ {const th=-1.25,cx0=-.6+.45*Math.cos(1.25),cz0=2.12+.45*Math.sin(1.25);
+  const ax=Math.cos(th),az=-Math.sin(th),zx=Math.sin(th),zz=Math.cos(th);
+  const hx=cx0+.33*ax+.06*zx,hz=cz0+.33*az+.06*zz;
+  P.push(leaf,
+   part(cyl(.028,.028,.055,6),0xd9b030,hx,1.0,hz,1,1,1,0,th,0),
+   part(box(.09,.028,.028),0xd9b030,hx,1.08,hz,1,1,1,0,th,0),
+   part(cyl(.02,.02,.12,5),0x5a5a60,cx0+.42*ax,1.42,cz0+.42*az,1,1,1,Math.PI/2,th,0));   /* kanadı açık tutan kanca */
+ }
  /* basamak */
  P.push(Object.assign(part(box(1.7,.16,.7),STONE,0,.06,2.6),{cf:stoneCf}));
  /* pencereler: yanlarda ve ön duvarda */
@@ -71,7 +80,7 @@ function houseGeo(h){
  P.push(part(box(6.15,.16,.34),TIMB,0,4.15,0,1,1,1,0,0,0));
  for(const sx of [-1,1]){const g=part(gable(2.9,1.7,.4),wc,(sx>0?1.8:-2.2),2.5,0,1,1,1,0,PI/2,0);if(st)g.cf=stoneCf;P.push(g)}
  /* bacası */
- const chx=h.stone?-1.2:1.3;
+ const chx=-1.25;                                  /* baca ve ocak her zaman yatağın karşı duvarında: eskiden bazı evlerde ocak yatağın içine giriyordu */
  P.push(Object.assign(part(box(.7,2.6,.7),STONED,chx,3.5,-1.1),{cf:stoneCf}),part(box(.86,.14,.86),STONE,chx,4.85,-1.1));
  /* tabela (mesleğe özgü) */
  const bx=2.2,bz=2.7;
@@ -91,16 +100,20 @@ function houseGeo(h){
   part(box(.88,.16,1.7),0xe9e2d2,1.15,.43,-.85),part(box(.92,.07,1.05),BLANK[h.prof],1.15,.55,-.5),
   Bp(.2,0xf4efe4,1.15,.6,-1.5,1.4,.5,.9,{d:1}));
  /* masa, sandalye, raf, sandık */
- P.push(part(box(1.0,.07,.8),WOODL,-1.1,.82,-1.0),...[[-.42,-.32],[.42,-.32],[-.42,.32],[.42,.32]].map(([a,b])=>part(box(.07,.8,.07),WOOD,-1.1+a,.4,-1.0+b)),
-  part(box(.4,.07,.4),WOOD,-1.1,.5,-.2),part(box(.4,.45,.07),WOOD,-1.1,.8,-.04));
- P.push(part(cyl(.07,.06,.14,8),0xc9a15a,-1.3,.9,-1.05),part(cyl(.05,.05,.1,8),0xd9d5c8,-.9,.9,-.9));
+ P.push(part(box(1.0,.07,.8),WOODL,-1.05,.82,-.45),...[[-.42,-.32],[.42,-.32],[-.42,.32],[.42,.32]].map(([a,b])=>part(box(.07,.8,.07),WOOD,-1.05+a,.4,-.45+b)),
+  part(box(.4,.07,.4),WOOD,-1.05,.5,.35),part(box(.4,.45,.07),WOOD,-1.05,.8,.51));
+ P.push(part(cyl(.07,.06,.14,8),0xc9a15a,-1.25,.9,-.5),part(cyl(.05,.05,.1,8),0xd9d5c8,-.85,.9,-.35));
  P.push(part(box(1.5,.07,.3),WOOD,-.2,1.5,-1.75),part(box(1.5,.07,.3),WOOD,-.2,1.0,-1.75));
  for(let i=0;i<4;i++){P.push(part(cyl(.06,.06,.2,7),[0x6a8a4a,0xb86a3a,0xc9a15a,0x8a5a8a][i],-.7+i*.34,1.12,-1.75),part(cyl(.05,.05,.16,7),[0xb89a6e,0xd9d5c8,0x6a8a4a,0xc9a15a][i],-.7+i*.34,1.62,-1.75))}
  P.push(part(box(.8,.5,.5),0x6b4423,-1.55,.3,.8),part(box(.82,.08,.52),TIMB,-1.55,.56,.8));
  /* ocak */
- P.push(Object.assign(part(box(1.0,.9,.5),STONE,chx>0?1.3:-1.2,.5,-1.65),{cf:stoneCf}));
+ P.push(Object.assign(part(box(.9,.9,.44),STONE,-1.45,.5,-1.72),{cf:stoneCf}));
  /* sarkıt fener (iç) */
- P.push(part(cyl(.01,.01,.5,4),0x222226,0,2.3,0),part(box(.2,.26,.2),0x2a2a30,0,1.95,0));
+ /* Sarkıt fener: ipi görünür kalınlıkta ve tavan bağlantılı; eskiden ip neredeyse görünmediği
+    için fener havada duran siyah bir kutu gibi duruyordu. */
+ P.push(part(cyl(.07,.07,.06,8),TIMB,0,2.56,0),part(cyl(.022,.022,.58,6),0x4a4038,0,2.26,0),
+  part(box(.2,.26,.2),0x2a2a30,0,1.95,0),part(box(.14,.16,.14),0xf6c84a,0,1.95,0),
+  part(box(.24,.04,.24),0x2a2a30,0,2.09,0),part(box(.24,.04,.24),0x2a2a30,0,1.81,0));
  return merge(P,{ao:.82,jit:.07});
 }
 /* gece yanan pencereler ve iç fener (ışık yayan parça) */
@@ -114,7 +127,8 @@ function glowGeoOf(h){
 /* ---------- avlu eşyaları ---------- */
 function decor(e,P,glowP,lamps){
  const c=Math.cos(e.ry||0),s=Math.sin(e.ry||0),ry0=e.ry||0;
- const gy=S.groundY(e.x,e.z);
+ /* Eğimli zeminde köy eşyasının tabanı havada kalmasın: çevresindeki en alçak nokta esas alınır. */
+ const gy=Math.min(S.groundY(e.x,e.z),S.groundY(e.x-.55,e.z),S.groundY(e.x+.55,e.z),S.groundY(e.x,e.z-.55),S.groundY(e.x,e.z+.55))-.03;
  const p=(geo,col,lx,ly,lz,sx,sy,sz,rx,ry,rz,cf)=>{const q=part(geo,col,e.x+lx*c+lz*s,gy+ly,e.z-lx*s+lz*c,sx,sy,sz,rx||0,(ry||0)+ry0,rz||0);if(cf)q.cf=cf;P.push(q);return q};
  const bp=(r,col,lx,ly,lz,sx,sy,sz,o)=>{const q=Bp(r,col,0,0,0,sx,sy,sz,o);q.m=new THREE.Matrix4().compose(new THREE.Vector3(e.x+lx*c+lz*s,gy+ly,e.z-lx*s+lz*c),new THREE.Quaternion().setFromEuler(new THREE.Euler(0,ry0+((o&&o.ry)||0),0)),new THREE.Vector3(1,1,1));P.push(q)};
  const hsh=(a)=>{let x=Math.sin((e.x*12.9898+e.z*78.233+a*37.7))*43758.5453;return x-Math.floor(x)};
@@ -226,7 +240,17 @@ function signTex(text){
  x.fillStyle='#8a5a30';x.fillRect(0,0,512,128);
  for(let i=0;i<9;i++){x.fillStyle=i%2?'rgba(0,0,0,.08)':'rgba(255,255,255,.06)';x.fillRect(0,i*14.5,512,14.5)}
  x.strokeStyle='#3a2414';x.lineWidth=8;x.strokeRect(4,4,504,120);
- x.fillStyle='#f4e8c8';x.font='bold 54px Georgia,serif';x.textAlign='center';x.textBaseline='middle';x.fillText(text,256,68);
+ /* yazı tahtaya sığdırılır: uzun köy adlarında punto küçültülür, gerekirse iki satıra bölünür */
+ x.fillStyle='#f4e8c8';x.textAlign='center';x.textBaseline='middle';
+ const MAXW=452,fit=(t,mx)=>{let f=mx;do{x.font='bold '+f+'px Georgia,serif';if(x.measureText(t).width<=MAXW)break;f-=2}while(f>18);return f};
+ if(fit(text,54)>=30){x.fillText(text,256,68)}
+ else{
+  const w=text.split(' ');let a1=text,a2='';
+  for(let i=1;i<w.length;i++){const l=w.slice(0,i).join(' '),r=w.slice(i).join(' ');
+   if(Math.abs(l.length-r.length)<Math.abs(a1.length-a2.length)||!a2){a1=l;a2=r}}
+  const f=Math.min(fit(a1,42),fit(a2||a1,42));x.font='bold '+f+'px Georgia,serif';
+  x.fillText(a1,256,68-f*.56);x.fillText(a2,256,68+f*.56);
+ }
  const t=new THREE.CanvasTexture(cv);t.encoding=THREE.sRGBEncoding;return t;
 }
 
@@ -253,7 +277,7 @@ function build(G){
    const sm=[];
    if(smokeTex)for(let i=0;i<4;i++){
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:smokeTex,color:0xb8b8b8,transparent:true,depthWrite:false,opacity:0,fog:true}));
-    const chx=h.stone?-1.2:1.3,cs=Math.cos(h.ry),sn=Math.sin(h.ry);
+    const chx=-1.25,cs=Math.cos(h.ry),sn=Math.sin(h.ry);
     sp.userData={bx:h.x+chx*cs+(-1.1)*sn,bz:h.z-chx*sn+(-1.1)*cs,by:gy+4.95,ph:i/4};
     sp.scale.set(.8,.8,1);g.add(sp);sm.push(sp);
    }

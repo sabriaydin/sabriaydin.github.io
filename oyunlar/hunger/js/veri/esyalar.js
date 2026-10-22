@@ -11,7 +11,7 @@ const IT={
  coconut:{n:'Hindistan Cevizi',s:20,food:{h:10,t:16},d:'Yenir: +10 açlık, +16 susuzluk'},
  fish:{n:'Çiğ Balık',s:20,food:{h:10,t:0,hp:-6},d:'Çiğ yenirse sağlığa zarar verir. Ateşte pişirin.'},
  cfish:{n:'Pişmiş Balık',s:20,food:{h:38,t:0},d:'Yenir: +38 açlık'},
- bottle:{n:'Boş Şişe',s:10,d:'Tatlı su gölüne bakıp sol tıkla doldurun.'},
+ bottle:{n:'Boş Şişe',s:10,d:'Tatlı su gölüne bakıp E tuşunu basılı tutarak doldurun.'},
  wbottle:{n:'Su Şişesi',s:10,food:{h:0,t:45,ret:'bottle'},d:'İçilir: +45 susuzluk'},
  meat:{n:'Çiğ Et',s:20,food:{h:14,t:0,hp:-8},d:'Çiğ yenirse sağlığa zarar verir. Ateşte pişirin.'},
  cmeat:{n:'Pişmiş Et',s:20,food:{h:46,t:0},d:'Yenir: +46 açlık'},
