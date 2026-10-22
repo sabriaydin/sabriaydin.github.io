@@ -168,6 +168,7 @@ function build(){
   '<div class="kn-flt"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara">'+
    '<div class="kn-ch" id="knCh"></div></div>'+
   '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
+  '<div class="kn-split" id="knSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek kayıt ve komut alanlarını boyutlandırın"><i></i></div>'+
   '<div class="kn-cmd" id="knCmd"></div>'+
   '<div class="kn-ft">En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı). Komut satırı için dünya kuralı "Konsol komutları" açık olmalıdır.</div></div>';
  ($('#game')||document.body).appendChild(root);
@@ -198,6 +199,53 @@ function build(){
  root.addEventListener('pointerdown',e=>{if(e.target===root)setOpen(false)});
  root.addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
  if(HG.konsolBuilt)HG.konsolBuilt(root);                 /* komut satırı ve geliştirici paneli (js/oyun/komut.js) */
+ setupSplit(root);
+}
+/* Boyutlandırma çubukları (iki tane):
+   knSplit  — kayıt listesi ile komut alanı arasında; komut alanının toplam yüksekliğini değiştirir.
+   kcSplit  — komut çıktısı ile geliştirici paneli arasında; panelin yüksekliğini değiştirir.
+   Komut yazma alanı (kc-in) her iki durumda da sabit yükseklikte kalır.
+   Seçilen yükseklikler tarayıcıda saklanır. */
+function dragBar(sp,key,getH,setH){
+ if(!sp)return;
+ let drag=null;
+ sp.addEventListener('pointerdown',e=>{
+  drag={y:e.clientY,h:getH()};sp.classList.add('on');
+  try{sp.setPointerCapture(e.pointerId)}catch(_){}
+  e.preventDefault();
+ });
+ sp.addEventListener('pointermove',e=>{if(drag)setH(drag.h+(drag.y-e.clientY))});
+ const end=()=>{if(!drag)return;drag=null;sp.classList.remove('on');
+  try{localStorage.setItem(key,String(Math.round(getH())))}catch(e){}};
+ sp.addEventListener('pointerup',end);sp.addEventListener('pointercancel',end);
+ sp.addEventListener('keydown',e=>{const d=e.key==='ArrowUp'?24:e.key==='ArrowDown'?-24:0;
+  if(d){setH(getH()+d);e.preventDefault()}});
+ sp.tabIndex=0;
+}
+const savedH=k=>{try{return parseInt(localStorage.getItem(k)||'',10)||0}catch(e){return 0}};
+function setupSplit(root){
+ const box=root.querySelector('.kn-box'),cmd=root.querySelector('#knCmd');
+ if(!box||!cmd)return;
+ const has=cmd.childElementCount>0;box.classList.toggle('has-cmd',has);
+ if(!has)return;
+ const pan=root.querySelector('#kcPan'),inp=root.querySelector('.kc-in');
+ /* Konsol kurulurken henüz görünmediğinden ölçüler sıfır gelebilir: o durumda pencere boyu
+    ve saklanan değerler kullanılır, konsol açılınca gerçek ölçülerle yeniden uygulanır. */
+ const boxH=()=>box.clientHeight||Math.round(innerHeight*.86);
+ const cmdH=()=>{const h=cmd.getBoundingClientRect().height;return h>1?h:(parseInt(box.style.getPropertyValue('--kncmd'),10)||300)};
+ const panH=()=>{const h=pan?pan.getBoundingClientRect().height:0;return h>1?h:(parseInt(cmd.style.getPropertyValue('--kcpan'),10)||210)};
+ /* 1) kayıt listesi / komut alanı */
+ const MIN=120,setCmd=h=>{const mx=Math.max(MIN,boxH()-220);box.style.setProperty('--kncmd',Math.round(Math.min(mx,Math.max(MIN,h)))+'px')};
+ /* 2) komut çıktısı / geliştirici paneli (komut yazma alanı sabit kalır) */
+ const PMIN=90,setPan=h=>{
+  const inH=(inp&&inp.getBoundingClientRect().height)||34;
+  const mx=Math.max(PMIN,cmdH()-inH-70);
+  cmd.style.setProperty('--kcpan',Math.round(Math.min(mx,Math.max(PMIN,h)))+'px');
+ };
+ const apply=()=>{setCmd(savedH('hunger-kncmd')||400);setPan(savedH('hunger-kcpan')||215)};
+ apply();HG.konsolResize=apply;
+ dragBar(root.querySelector('#knSplit'),'hunger-kncmd',cmdH,h=>{setCmd(h);setPan(panH())});
+ dragBar(root.querySelector('#kcSplit'),'hunger-kcpan',panH,setPan);
 }
 HG.konsolBox=()=>root;
 const clearKeys=()=>{const inp=HG.inp;if(!inp)return;for(const k in inp.keys)inp.keys[k]=false;inp.mouseDown=false;inp.touchAct=false};
@@ -206,6 +254,7 @@ function setOpen(v){
  build();
  if(v){
   open=true;root.hidden=false;
+  if(HG.konsolResize)try{HG.konsolResize()}catch(e){}        /* ölçüler ilk açılışta gerçek yerleşime göre uygulanır */
   if(ui.state==='play'){clearKeys();if(HG.unlock)HG.unlock(true)}
   renderAll();status();
   stT=setInterval(status,500);

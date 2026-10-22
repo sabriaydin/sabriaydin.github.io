@@ -120,8 +120,16 @@ def('konum','','bulunduğun yeri yazar',()=>{
 def('harita','','haritanın tamamını keşfedilmiş yapar',()=>{
  if(!G.explore)return say('Harita hazır değil.','hata');
  G.explore.fill(1);
+ /* sis kalkmakla yetinilmez: köy, kamp, mağara, adacık ve resif işaretleri de bulunmuş sayılır,
+    yoksa harita açık görünür ama üzerinde hiçbir konum adı çıkmaz. */
+ const F=G.flags||(G.flags={});let n=0;
+ (G.villages||[]).forEach((v,i)=>{if(!F['v'+i]){F['v'+i]=1;n++}});
+ for(const c of G.camps||[])if(!F['c'+c.id]){F['c'+c.id]=1;n++}
+ for(const c of G.caves||[])if(!F['cave'+c.id]){F['cave'+c.id]=1;n++}
+ for(const q of G.islets||[])if(!F['isl'+q.id]){F['isl'+q.id]=1;n++}
+ for(const q of G.reefs||[])if(!F['reef'+q.id]){F['reef'+q.id]=1;n++}
  if(HG.mapBuild)try{HG.mapBuild()}catch(e){}
- mark('harita');say('Haritanın tamamı açıldı.','ok');
+ mark('harita');say('Haritanın tamamı açıldı. '+n+' konum işaretlendi.','ok');
 });
 
 def('temizle','','konsol kayıtlarını siler',()=>{HG.konsol&&HG.konsol.clear&&HG.konsol.clear();if(outEl)outEl.innerHTML='';say('Kayıtlar silindi.')});
@@ -212,6 +220,7 @@ HG.konsolBuilt=root=>{
  box=root.querySelector('#knCmd');if(!box)return;
  box.innerHTML=
   '<div class="kc-out" id="kcOut"></div>'+
+  '<div class="kc-split" id="kcSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek komut çıktısı ile geliştirici paneli alanlarını boyutlandırın"><i></i></div>'+
   '<div class="kc-pan" id="kcPan" hidden><div class="kc-h">GELİŞTİRİCİ PANELİ</div><div class="kc-grid"></div>'+
    '<div class="kc-q">'+
     '<button type="button" data-c="saat 8">Sabah</button>'+

@@ -1,7 +1,7 @@
 /* Hunger 3D - geliştirici konsolu (F1) */
 #kns{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;background:rgba(5,5,6,.82);padding:12px}
 #kns[hidden]{display:none}
-#kns .kn-box{width:min(1100px,100%);height:720px;max-height:100%;min-height:0;flex:0 1 auto;display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto auto;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
+#kns .kn-box{width:min(1500px,100%);height:86vh;max-height:100%;min-height:0;flex:0 1 auto;display:grid;grid-template-rows:auto auto auto minmax(0,1fr) auto auto;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;box-shadow:0 12px 40px rgba(0,0,0,.6)}
 #kns .kn-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 #kns h1{margin:0;font-size:16px;letter-spacing:.1em}
 #kns h1 kbd{font:11px/1 system-ui,sans-serif;color:var(--mut);background:#0d0d0e;border:1px solid var(--line);border-radius:4px;padding:2px 6px;margin-left:6px;letter-spacing:0}
@@ -41,7 +41,7 @@
 
 /* ---- komut satırı ve geliştirici paneli (güncelleme 50) ---- */
 #kns .kn-cmd{display:grid;gap:6px}
-#kns .kc-out{max-height:104px;overflow:auto;font:12px/1.5 ui-monospace,Consolas,monospace;background:#0b0b0c;border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+#kns .kc-out{max-height:104px;min-height:0;overflow:auto;font:12px/1.5 ui-monospace,Consolas,monospace;background:#0b0b0c;border:1px solid var(--line);border-radius:6px;padding:4px 10px}
 #kns .kc-out:empty{display:none}
 #kns .kc-o{color:#c8c8d0;white-space:pre-wrap;overflow-wrap:anywhere}
 #kns .kc-o.in{color:#8ab4e8}
@@ -61,3 +61,27 @@
 #kns .kc-q button{font:inherit;font-size:11.5px;padding:3px 9px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);color:var(--tx);cursor:pointer}
 #kns .kc-q button:hover{background:#2c2c32;border-color:#4a4a52}
 @media (max-width:640px){#kns .kc-out{max-height:70px}}
+
+
+/* ---- Güncelleme 54: konsol boyutlandırma ---- */
+/* Komut alanı ile kayıt listesi arasına sürüklenebilir ayırıcı girer; komut alanının yüksekliği
+   --kncmd ile belirlenir, kayıt listesi kalan yeri (1fr) alır. */
+#kns .kn-box.has-cmd{grid-template-rows:auto auto auto minmax(0,1fr) 10px var(--kncmd,240px) auto}
+#kns .kn-split{display:none}
+#kns .kn-box.has-cmd .kn-split{display:grid;place-items:center;height:10px;cursor:row-resize;touch-action:none;outline:none}
+#kns .kn-split i{display:block;width:72px;height:4px;border-radius:2px;background:#3a3a44}
+#kns .kn-split:hover i,#kns .kn-split.on i,#kns .kn-split:focus-visible i{background:var(--red)}
+#kns .kn-box.has-cmd .kn-cmd{overflow:hidden;min-height:0;display:grid;gap:6px;
+ grid-template-rows:minmax(0,1fr) 10px var(--kcpan,210px) auto}
+/* Satırlar sabittir: gizli panel kendi satırını boş bırakır, komut satırı yerinden oynamaz. */
+#kns .kn-cmd .kc-out{grid-row:1;max-height:none}
+#kns .kn-cmd .kc-split{grid-row:2}
+#kns .kn-cmd .kc-pan{grid-row:3;overflow:auto;min-height:0}
+#kns .kn-cmd .kc-in{grid-row:4;align-self:end}                 /* komut yazma alanı her zaman sabit yükseklikte */
+/* geliştirici modu kapalıyken panel ve ayırıcı yer kaplamaz */
+#kns .kn-cmd:not(.dev){grid-template-rows:minmax(0,1fr) 0 0 auto}
+#kns .kn-cmd:not(.dev) .kc-split{display:none}
+#kns .kc-split{display:grid;place-items:center;height:10px;cursor:row-resize;touch-action:none;outline:none}
+#kns .kc-split i{display:block;width:72px;height:4px;border-radius:2px;background:#3a3a44}
+#kns .kc-split:hover i,#kns .kc-split.on i,#kns .kc-split:focus-visible i{background:var(--red)}
+@media (max-width:860px){#kns .kn-box{height:94vh}}
