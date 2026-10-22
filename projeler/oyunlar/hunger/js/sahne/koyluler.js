@@ -204,7 +204,7 @@ S.onFrame((G,t,dt,info)=>{
   const s1=Math.sin(ph),s2=Math.sin(ph+PI);
   o.hipL.rotation.x=s1*amp;o.hipR.rotation.x=s2*amp;
   o.knL.rotation.x=Math.max(0,-s1)*amp*1.5;o.knR.rotation.x=Math.max(0,-s2)*amp*1.5;
-  o.hip.position.y=Math.abs(Math.sin(ph))*amp*.045;
+  o.hip.position.y=.92+Math.abs(Math.sin(ph))*amp*.045;     /* bel ekleminin taban yüksekliği (.92) korunur; eskiden sıfırlanıyor ve gövde bacaklarla birlikte zemine gömülüyordu */
   o.hip.rotation.z=Math.sin(ph)*amp*.04;
   const talk=G.trading===n,idle=(n.spd||0)<.15;
   /* kollar: yürürken ters salınım, dururken hafif nefes */

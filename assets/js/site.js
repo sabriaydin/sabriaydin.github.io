@@ -56,10 +56,10 @@ window.SITE = {
       name: 'Projeler',
       items: [
         { name: 'Oyunlar', items: [
-          { name: 'Hunger (Tarayıcı Tabanlı)', url: 'oyunlar/hunger/' }
+          { name: 'Hunger (Tarayıcı Tabanlı)', url: 'projeler/oyunlar/hunger/' }
         ] },
         { name: 'Programlar', items: [
-          { name: 'Parola Defteri', url: 'https://github.com/' },
+          { name: 'Parola Defteri', url: 'projeler/programlar/parola-defteri/' },
           { name: 'IPRadar', url: 'https://github.com/' }
         ] },
         { name: 'Diğer', items: [

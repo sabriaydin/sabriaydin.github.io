@@ -156,7 +156,7 @@ if (BASE) {
   fs.writeFileSync(file, html);
 
   // Bağımsız sayfalar (araç, oyun, hakkında): canonical ve paylaşım görseli ekle, site haritasına kat
-  const EXTRA = ['hakkinda.html', 'araclar/html-editor/', 'oyunlar/hunger/'];
+  const EXTRA = ['hakkinda.html', 'araclar/html-editor/', 'projeler/oyunlar/hunger/', 'projeler/programlar/parola-defteri/'];
   for (const e of EXTRA) {
     const f = path.join(OUT, e.endsWith('/') ? e + 'index.html' : e);
     if (!fs.existsSync(f)) continue;

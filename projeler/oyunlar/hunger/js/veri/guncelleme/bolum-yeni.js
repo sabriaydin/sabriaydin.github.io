@@ -2,15 +2,9 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:57,d:"22.10.2026",t:"Köylüler çimenin içinde kalmıyor",l:[
- "Köylülerin durduğu ve dolaştığı alanda artık hiç çim bitmiyor: bacaklar tamamen görünüyor.",
- "Köy içinde çim daha da kısaldı; en uzun sap 0,13 m'ye indi.",
- "Çim sapları genel olarak kısaltıldı: en uzun sap 0,43 m."
-]},
-{n:56,d:"22.10.2026",t:"Çim boyu ve köylüler",l:[
- "Köylülerin zemine batmış görünmesi sorunu giderildi: çim sapları kısaltıldı, bacaklar artık otun içinde kaybolmuyor.",
- "Köy çevresinde çim kısa kesilmiş gibi duruyor; meydanda ve patikalarda uzun ot kaldırıldı.",
- "Eğimli arazide çim saplarının dibi zemine gömülüyor; havada duran çim kalmadı."
+{n:56,d:"22.10.2026",t:"Köylülerin zemine gömülmesi",l:[
+ "Köylülerin bel hizasından aşağısının zeminin içinde kalması sorunu giderildi: gövde ve bacaklar artık doğru yükseklikte duruyor, ayaklar zeminde görünüyor.",
+ "Köylülerin yürüme sırasındaki hafif sekme hareketi korundu."
 ]},
 {n:55,d:"22.10.2026",t:"Geliştirici konsolu yenilendi",l:[
  "Geliştirici konsolu sekmeli yapıya geçirildi: Kayıtlar, Konsol, Geliştirici ve Performans sekmeleri eklendi; her görünüm kendi sekmesinde tam yükseklikte açılıyor.",
