@@ -65,7 +65,7 @@ window.SITE = {
         ] },
         { name: 'Yazılımlarım', items: [
           { name: 'Parola Defteri', url: 'projeler/programlar/parola-defteri/' },
-          { name: 'IPRadar', url: 'https://github.com/' }
+          { name: 'IPRadar', url: 'projeler/programlar/ip-radar/' }
         ] },
         { name: 'Diğer', items: [
           { name: 'GTA SA: Mod Paketi', url: 'https://github.com/' }
