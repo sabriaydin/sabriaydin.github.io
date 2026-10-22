@@ -152,8 +152,8 @@ $('bt-ornek').onclick=()=>{
    m('etiket',{e:'temp'}),m('komut',{k:'start "" "%TEMP%"'}),m('git',{e:'baslangic'}),
    m('etiket',{e:'cikis'}),m('echo',{m:'Hoşça kalın!'}),m('bekle',{s:2,q:true}),m('cik',{k:0})];
   ciz()};
-['bt-baslik','bt-renk','bt-yanki','bt-utf','bt-gec'].forEach(i=>$(i).addEventListener('input',ciz));
-tur.addEventListener('input',form);
+['bt-baslik','bt-renk','bt-yanki','bt-utf','bt-gec'].forEach(i=>{$(i).addEventListener('input',ciz);$(i).addEventListener('change',ciz)});
+tur.addEventListener('input',form);tur.addEventListener('change',form);
 $('bt-indir').onclick=()=>Arac.indir(sat().join('\r\n')+'\r\n','betik.bat','text/plain;charset=utf-8');
 form();ciz();
 })();
