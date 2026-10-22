@@ -11,7 +11,7 @@ let lastX=-1e9,lastZ=-1e9,dirty=true;
 
 function tuftGeo(){
  const pos=[],col=[],idx=[];
- const blades=[[0,0,.5,.34],[2.1,.04,-.06,.42],[4.2,-.05,.05,.3]];
+ const blades=[[0,0,.5,.26],[2.1,.04,-.06,.32],[4.2,-.05,.05,.22]];   /* sap boyu düşürüldü: eski boyda (0,42 × ölçek ≈ 0,82 m) köylülerin bacakları çimenin içinde kalıyordu */
  let n=0;
  for(const [rot,ox,oz,hgt] of blades){
   const c=Math.cos(rot),s=Math.sin(rot),w=.045;
@@ -95,6 +95,15 @@ function genCell(G,ci){
  const hsx=[];                                                     /* köy evlerinin zemini: içeride ve duvar altında çimen/çiçek bitmez */
  for(const v of G.villages||[]){if(v.cx<x0-16||v.cx>x1+16||v.cy<z0-16||v.cy>z1+16)continue;for(const h of v.houses||[])hsx.push(h)}
  const inHouse=(x,z)=>{for(const h of hsx)if(Math.abs(x+.5-h.x)<2.6&&Math.abs(z+.5-h.z)<2.6)return true;return false};
+ /* Köy çevresinde çim kısa tutulur: meydanda ve patikalarda uzun ot köylüleri gizliyordu. */
+ const vlist=(G.villages||[]).filter(v=>!(v.cx<x0-20||v.cx>x1+20||v.cy<z0-20||v.cy>z1+20));
+ const vfac=(x,z)=>{
+  for(const v of vlist){
+   const d=Math.hypot(v.cx-x,v.cy-z);
+   if(d<15)return .42+.58*Math.max(0,(d-7)/8);
+  }
+  return 1;
+ };
  const L=[],F=[],lim=WATER_LIM();
  for(let z=z0;z<z1;z++)for(let x=x0;x<x1;x++){
   if(G.tile[z*W+x]!==T.GRASS)continue;
@@ -114,8 +123,8 @@ function genCell(G,ci){
    const sl=Math.abs(S.groundY(c.x+.3,c.z)-y)+Math.abs(S.groundY(c.x,c.z+.3)-y);
    if(sl>.42)continue;                                             /* dik yamaçta sap dikilmez */
    if(S.groundY(c.x+.45,c.z)<lim||S.groundY(c.x-.45,c.z)<lim||S.groundY(c.x,c.z+.45)<lim||S.groundY(c.x,c.z-.45)<lim)continue;   /* su kenarında sapların ucu suya girmesin */
-   const sc2=isG?.7+c.r*.7:.8+c.r*.6;
-   p.set(c.x,y-.02-Math.min(.4,sl*.55),c.z);                       /* eğimde ve uzak arazi ayrıntısında sapın dibi gömülür: havada duran çimen kalmaz */e.set(0,c.r2*6.28,0);q.setFromEuler(e);s3.set(sc2,isG?sc2*(.8+c.r2*.6):sc2,sc2);m4.compose(p,q,s3);
+   const sc2=(isG?.7+c.r*.6:.8+c.r*.6)*(isG?vfac(c.x,c.z):1);     /* köy içinde çim kısa kesilmiş gibi durur */
+   p.set(c.x,y-.02-Math.min(.4,sl*.55),c.z);                       /* eğimde ve uzak arazi ayrıntısında sapın dibi gömülür: havada duran çimen kalmaz */e.set(0,c.r2*6.28,0);q.setFromEuler(e);s3.set(sc2,isG?sc2*(.78+c.r2*.42):sc2,sc2);m4.compose(p,q,s3);
    if(isG){S.colorAt(c.x,c.z,cl);const v=.9+c.r*.35;items.push({c,me:m4.elements.slice(),rgb:[cl.r*v,cl.g*v,cl.b*v]})}
    else{cl.setHex(FCOL[c.c]);items.push({c,me:m4.elements.slice(),rgb:[cl.r,cl.g,cl.b]})}
   }
