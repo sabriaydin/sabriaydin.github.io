@@ -13,9 +13,10 @@ window.SITE = {
     windows: 'Windows Rehber',
     windowsos: 'Windows İşletim Sistemleri',
     html: 'HTML Rehberi',
-    htmlaraclari: 'HTML Araçları',
+    htmlaraclari: 'HTML Uygulamaları',
     linux: 'Linux Rehber',
-    linuxos: 'Linux İşletim Sistemleri',
+    linuxos: 'Linux Masaüstü Dağıtımları',
+    linuxgelismis: 'Gelişmiş ve Özel Amaçlı Dağıtımlar',
     batch: 'Batch Rehberi',
     batchornek: 'Batch Uygulamaları',
     sistemaraclari: 'Sistem ve Bakım Araçları',
@@ -24,7 +25,10 @@ window.SITE = {
     guvenlik: 'Güvenlik ve Gizlilik',
     gelistirici: 'Geliştirici Araçları',
     eklentiler: 'Tarayıcı Eklentileri',
-    araclar: 'Araçlar'
+    araclar: 'Araçlar',
+    oyunrehber: 'Oyun Rehberleri',
+    oyunonerileri: 'Oyun Önerileri',
+    modyama: 'Mod ve Yama'
   },
 
   // Menüdeki alt kategori grupları: Kategoriler > Grup > Kategori
@@ -32,9 +36,10 @@ window.SITE = {
   // Hiçbir gruba girmeyen kategoriler (ör. batch) menüde tek başına görünür. Grupları silersen menü düz liste olur.
   groups: [
     { key: 'windows', name: 'Windows', items: ['windows', 'windowsos'] },
-    { key: 'linux', name: 'Linux', items: ['linux', 'linuxos'] },
+    { key: 'linux', name: 'Linux', items: ['linux', 'linuxos', 'linuxgelismis'] },
     { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
-    { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] }
+    { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] },
+    { key: 'oyun', name: 'Video Oyunları', items: ['oyunrehber', 'oyunonerileri', 'modyama'] }
   ],
 
   // Ana menüde Kategoriler'in yanında görünen ek açılır menüler (Kategoriler içinde tekrar gösterilmez)
@@ -58,7 +63,7 @@ window.SITE = {
         { name: 'Oyunlar', items: [
           { name: 'Hunger (Tarayıcı Tabanlı)', url: 'projeler/oyunlar/hunger/' }
         ] },
-        { name: 'Programlar', items: [
+        { name: 'Yazılımlarım', items: [
           { name: 'Parola Defteri', url: 'projeler/programlar/parola-defteri/' },
           { name: 'IPRadar', url: 'https://github.com/' }
         ] },

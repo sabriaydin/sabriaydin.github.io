@@ -14,7 +14,7 @@ Bundan sonra `main` dalına her dosya yüklediğinde site kendini yeniler (yakla
 2. Dosyanın üstündeki **DÜZENLE** bölümünü doldur:
    - `<title>`: yazının başlığı
    - `description`: ana sayfada ve aramada görünen kısa özet
-   - `kategori`: `assets/js/site.js` içindeki kısa ad (şu an `windows`, `windowsos`, `html`, `htmlaraclari`, `linux`, `linuxos`, `batch`, `batchornek`, `sistemaraclari`, `medya`, `ofis`, `guvenlik`, `gelistirici` veya `eklentiler`)
+   - `kategori`: `assets/js/site.js` içindeki kısa ad (şu an `windows`, `windowsos`, `html`, `htmlaraclari`, `linux`, `linuxos`, `linuxgelismis`, `batch`, `batchornek`, `sistemaraclari`, `medya`, `ofis`, `guvenlik`, `gelistirici`, `eklentiler`, `oyunrehber`, `oyunonerileri` veya `modyama`)
    - `tarih`: `YIL-AY-GÜN` (örn. `2026-10-13`); aynı gün birden fazla yazı varsa sıralama için saat de eklenebilir (örn. `2026-10-13 14:30`)
    - `sabit` (isteğe bağlı): yazıyı listede başa sabitler; `kategori` (kategori/grup sayfasında), `ana` (ana sayfada) veya `hepsi`. Arama sırasında uygulanmaz
 3. "İçerik buraya gelecek" satırını sil, yazını `<div class="body">` içine yaz.
@@ -49,7 +49,7 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 `assets/js/site.js` dosyasından değiştirilir:
 - `name`, `description`, `about`: site adı, özet ve footer metni
 - `categories`: kategoriler (`kısa-ad: 'Görünen Ad'`). Menü, footer, filtre ve arama bundan beslenir. Yeni kategori eklemek için buraya bir satır ekle, yazılarda `kategori` olarak kısa adı kullan.
-- `groups`: menüdeki alt kategori grupları (Kategoriler > Grup > Kategori). Her grup `{ key: 'linux', name: 'Linux', items: ['linux', 'linuxos'] }` biçimindedir; `items` içine `categories` kısa adları yazılır. Grup adına tıklayınca gruptaki tüm yazılar listelenir (`?grup=linux`). Hiçbir gruba girmeyen kategori menüde tek başına görünür. Yeni alt kategori için önce `categories`'e satır ekle, sonra ilgili grubun `items` listesine ekle.
+- `groups`: menüdeki alt kategori grupları (Kategoriler > Grup > Kategori). Her grup `{ key: 'linux', name: 'Linux', items: ['linux', 'linuxos', 'linuxgelismis'] }` biçimindedir; `items` içine `categories` kısa adları yazılır. Grup adına tıklayınca gruptaki tüm yazılar listelenir (`?grup=linux`). Hiçbir gruba girmeyen kategori menüde tek başına görünür. Yeni alt kategori için önce `categories`'e satır ekle, sonra ilgili grubun `items` listesine ekle.
 - `menus`: ana menüde Kategoriler'in yanında görünen ek menüler. `{ name: 'Araçlar', link: 'araclar' }` biçimi açılır liste olmadan doğrudan o kategoriye giden tek bir bağlantı yapar. Açılır menü örneği: örn. `{ name: 'Programlar', items: ['eklentiler'] }`. Bu menüdeki kategoriler Kategoriler içinde tekrar gösterilmez. Öğe `{ name: 'Proje', url: 'https://...' }` biçiminde yazılırsa kategori değil, doğrudan o adrese giden bir bağlantı olur. Öğe `{ name: 'Oyunlar', items: [{ name, url }] }` biçiminde yazılırsa o başlık altında sağa açılan bir bağlantı listesi olur (Projeler menüsü böyledir). Öğe `{ key: 'ucretsiz', name: 'Ücretsiz Programlar', items: [...] }` biçiminde yazılırsa kendi alt kategorileri olan sağa açılan bir grup olur.
 - `links`: footer bağlantıları (şu an GitHub ve e-posta **örnek adrestir**, kendi bilgilerinle değiştir)
 
@@ -61,8 +61,8 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - `404.html`: bulunamadı sayfası
 - `yonlendir.html`: harici bağlantı yönlendirme sayfası (uyarılar, açık adres, 10 saniye geri sayım; `assets/js/yonlendir.js`, `assets/css/yonlendir.css`). Sitedeki tüm dış bağlantılar `app.js` ile buraya yönlendirilir; bir bağlantının doğrudan açılması için `data-direct` özelliği eklenir
 - `hakkinda.html`: hakkında, iletişim ve gizlilik sayfası (footer'dan bağlanır; sitemap'e eklenir)
-- `assets/js/linux-secici.js` ve `assets/css/linux-secici.css`: Linux İşletim Sistemleri kategorisinde (veya Linux grubunda) içerik alanını daraltmadan sağda sabit duran "Sana uygun Linux'u bul" filtreleme paneli (geniş ekranda (1760px ve üstü) içeriğin yanında açık, dar ekranda sağ kenardaki "Linux seçici" sekmesiyle açılır). Yeni bir dağıtım yazısı eklenince `linux-secici.js` başındaki `LDB` tablosuna da (zorluk, amaç, masaüstü, yayın modeli, taban) bir satır eklenmelidir; eklenmezse yazı filtre açıkken görünmez
-- `assets/css/linux.css`: Linux İşletim Sistemleri yazılarının terminal temalı özel tasarımı (terminal başlığı, özellik kartları, zorluk göstergesi); yazılarda `lx-hero` ve `lx-spec` blokları kullanılır
+- `assets/js/linux-secici.js` ve `assets/css/linux-secici.css`: Linux dağıtım kategorilerinde (veya Linux grubunda) içerik alanını daraltmadan sağda sabit duran "Sana uygun Linux'u bul" filtreleme paneli (geniş ekranda (1760px ve üstü) içeriğin yanında açık, dar ekranda sağ kenardaki "Linux seçici" sekmesiyle açılır). Yeni bir dağıtım yazısı eklenince `linux-secici.js` başındaki `LDB` tablosuna da (zorluk, amaç, masaüstü, yayın modeli, taban) bir satır eklenmelidir; eklenmezse yazı filtre açıkken görünmez
+- `assets/css/linux.css`: Linux dağıtım yazılarının terminal temalı özel tasarımı (terminal başlığı, özellik kartları, zorluk göstergesi); yazılarda `lx-hero` ve `lx-spec` blokları kullanılır
 - `assets/`: stil (`css`), kod (`js`; `arac.js` araç yazılarının ortak yardımcılarıdır), simge ve görseller (`img`)
 - `scripts/build.mjs`: yazıları tarar, liste/sitemap/RSS/paylaşım etiketlerini üretir
 - `.github/workflows/yayinla.yml`: her yüklemede build'i çalıştırıp siteyi yayınlar

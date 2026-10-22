@@ -77,7 +77,7 @@ function read(){
 }
 function update(){LXF.active=on();if(window.lxRedraw)window.lxRedraw()}
 window.lxMount=function(cat,grp){
-  var want=cat==='linuxos'||(!cat&&grp==='linux'),ex=document.getElementById('lxw');
+  var want=cat==='linuxos'||cat==='linuxgelismis'||(!cat&&grp==='linux'),ex=document.getElementById('lxw');
   if(!want){if(ex){ex.remove();var t0=document.getElementById('lxw-tab');if(t0)t0.remove();document.body.classList.remove('lxw-open')}LXF.active=false;return}
   if(ex){LXF.active=on();return}
   var a=document.createElement('aside');a.id='lxw';a.className='lxw';a.setAttribute('aria-label','Linux seçici');a.innerHTML=html();document.body.appendChild(a);
