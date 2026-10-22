@@ -32,7 +32,10 @@ HG.UPD=(HG.UPD||[]).concat([
  "Yeni komut: olcum — kare hızı, çizim çağrısı, üçgen, doku ve bellek ölçümlerini yazar.",
  "Yeni komut: izle — seçilen bir değeri (örneğin izle G.stam) panelde sürekli gösterir.",
  "Geliştirici modu kapatıldığında uçuş, hız, zaman, sis, tel kafes, ek ışık ve ölümsüzlük ayarlarının tamamı geri alınıyor.",
- "Oyun güncellendiğinde tarayıcının eski görünüm ve kod dosyalarını kullanması sorunu giderildi: dosya adresleri sürüm numarasıyla işaretleniyor."
+ "Oyun güncellendiğinde tarayıcının eski görünüm ve kod dosyalarını kullanması sorunu giderildi: dosya adresleri sürüm numarasıyla işaretleniyor.",
+ "Geliştirici modu artık dünya kuralından bağımsız: dünya kurulurken \"Konsol komutları\" seçeneği kapalı olsa bile açılabiliyor ve açıkken tüm komutlar çalışıyor.",
+ "Geliştirici modu parolayla korunuyor: komut verildiğinde parola isteniyor, girilen parola ekranda ve kayıtlarda yıldızla gösteriliyor.",
+ "Üst üste üç yanlış parolada geliştirici modu 30 saniye boyunca kilitleniyor."
 ]},
 {n:54,d:"21.10.2026",t:"Ada, köyler, mağaralar ve çok sayıda düzeltme",l:[
  "Gerçek dağlar eklendi: ada artık birkaç büyük dağ kütlesi, uzun sırtlar, aralarında vadiler ve kıyıya alçalan tepelerden oluşuyor; en yüksek zirveler 25 metreyi aşıyor.",

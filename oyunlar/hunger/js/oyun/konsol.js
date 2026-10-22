@@ -189,7 +189,7 @@ function build(){
   '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
   '<div class="kn-split" id="knSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek kayıt ve komut alanlarını boyutlandırın"><i></i></div>'+
   '<div class="kn-cmd" id="knCmd"></div>'+
-  '<div class="kn-ft">En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı). Komut satırı için dünya kuralı "Konsol komutları" açık olmalıdır.</div></div>';
+  '<div class="kn-ft">En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı). Komut satırı için dünya kuralı "Konsol komutları" açık olmalıdır; geliştirici modu bu kuraldan bağımsız çalışır ve parola ister.</div></div>';
  ($('#game')||document.body).appendChild(root);
  listEl=root.querySelector('#knL');statEl=root.querySelector('#knSt');qEl=root.querySelector('#knQ');chipsEl=root.querySelector('#knCh');
  frzEl=root.querySelector('#knFrz');autoEl=root.querySelector('#knAut');

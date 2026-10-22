@@ -10,6 +10,54 @@ const DEV_WORD='hungerdev';                      /* geliştirici modunu açan gi
 let devOn=false,box=null,inpEl=null,outEl=null,panEl=null,panT=0;
 const hist=[];let hi=-1;
 
+/* ---- geliştirici modu kilidi ----
+   Parola kaynak dosyada düz metin olarak durmaz: yalnızca iki ayrı tuzla üretilmiş, 4096 turlu
+   karışım değeri (özet) saklanır. Girilen parola aynı yoldan geçirilip bu değerle karşılaştırılır;
+   dosyayı okuyan biri parolayı buradan göremez. Üst üste yanlış denemede kısa süreli kilit gelir. */
+const PS=[0x7f4a7c15,0x9e3779b9,0x165667b1,0x27d4eb2f];
+function pmix(s,a,b){
+ let h=(0x811c9dc5^a)>>>0;
+ for(let i=0;i<s.length;i++){h=(h^s.charCodeAt(i))>>>0;h=Math.imul(h,0x01000193)>>>0}
+ for(let r=0;r<4096;r++){h=Math.imul(h^(h>>>13),(b+r)>>>0)>>>0;h=((h<<7)|(h>>>25))>>>0}
+ return ('00000'+h.toString(36)).slice(-7);
+}
+const pdigest=v=>pmix('hg:'+v,PS[0],PS[1])+pmix('hg:'+v,PS[2],PS[3]);
+const PD='0twr3uc00k2hz3';                       /* beklenen özet (parolanın kendisi değil) */
+let pwAsk=false,pwLeft=3,pwLock=0;
+function pwMode(on){
+ pwAsk=on;
+ if(!inpEl)return;
+ inpEl.type=on?'password':'text';
+ inpEl.placeholder=on?'Geliştirici parolası (iptal: boş bırakıp Enter)':'Komut yazın (yardim · Tab tamamlar · ↑↓ geçmiş)';
+ const sp=inpEl.parentNode&&inpEl.parentNode.firstChild;if(sp)sp.textContent=on?'\u25CF':'>';
+ inpEl.value='';inpEl.focus();
+}
+/* Geliştirici modunu açar veya kapatır (parola doğrulandıktan sonra çağrılır). */
+function devOpen(v){
+ devOn=!!v;
+ if(panEl)panEl.hidden=!devOn;
+ if(box)box.classList.toggle('dev',devOn);
+ if(!devOn){
+  /* kapanırken sahneye uygulanan tüm geliştirici ayarları geri alınır */
+  DEV.fly=false;DEV.spd=1;DEV.tscale=1;DEV.frozen=false;DEV.wire=false;DEV.fog=true;DEV.light=0;
+  HG.godMode=false;watch.length=0;
+  applyFog();applyWire();applyLight();
+ }else if(HG.konsolResize)try{HG.konsolResize()}catch(e){}
+ panel();
+ if(devOn)say('Geliştirici modu açıldı. Panel, anahtarlar ve ek komutlar etkin ("yardim" ile listeye bakın). Bu modda dünya kuralı aranmaz.','ok');
+ else say('Geliştirici modu kapatıldı; tüm geliştirici ayarları geri alındı.','ok');
+}
+function pwTry(v){
+ pwMode(false);
+ if(!v)return say('Geliştirici modu iptal edildi.');
+ if(pdigest(v)!==PD){
+  pwLeft--;
+  if(pwLeft<=0){pwLock=performance.now()+30000;pwLeft=3;return say('Parola yanlış. 30 saniye boyunca yeniden denenemez.','hata')}
+  return say('Parola yanlış. Kalan deneme: '+pwLeft,'hata');
+ }
+ pwLeft=3;devOpen(true);
+}
+
 const say=(m,l)=>{HG.log&&HG.log('komut',m,l);echo(m,l)};
 function echo(m,l){
  if(!outEl)return;
@@ -382,26 +430,25 @@ function readPath(q){
 function run(line){
  const txt=String(line||'').trim();
  if(!txt)return;
- echo('> '+txt,'in');
- hist.push(txt);if(hist.length>60)hist.shift();hi=-1;
- HG.log&&HG.log('komut','> '+txt);
- /* gizli komut: dünya kuralından bağımsız çalışır */
- if(txt.toLocaleLowerCase('tr')===DEV_WORD){
-  devOn=!devOn;
-  if(panEl)panEl.hidden=!devOn;
-  if(box)box.classList.toggle('dev',devOn);
-  if(!devOn){
-   /* kapanırken sahneye uygulanan tüm geliştirici ayarları geri alınır */
-   DEV.fly=false;DEV.spd=1;DEV.tscale=1;DEV.frozen=false;DEV.wire=false;DEV.fog=true;DEV.light=0;
-   HG.godMode=false;watch.length=0;
-   applyFog();applyWire();applyLight();
-  }else if(HG.konsolResize)try{HG.konsolResize()}catch(e){}
-  panel();
-  if(devOn)say('Geliştirici modu açıldı. Panel, anahtarlar ve ek komutlar etkin ("yardim" ile listeye bakın).','ok');
-  else say('Geliştirici modu kapatıldı; tüm geliştirici ayarları geri alındı.','ok');
+ const low=txt.toLocaleLowerCase('tr');
+ const isDev=low===DEV_WORD||low.startsWith(DEV_WORD+' ');
+ /* Parola tek satırda yazıldıysa ne ekrana ne kayda ne de geçmişe düşer: yıldızlanır. */
+ const shown=isDev?DEV_WORD+(txt.length>DEV_WORD.length?' ••••••':''):txt;
+ echo('> '+shown,'in');
+ if(!isDev||txt.length===DEV_WORD.length){hist.push(txt);if(hist.length>60)hist.shift()}
+ hi=-1;
+ HG.log&&HG.log('komut','> '+shown);
+ /* gizli komut: dünya kuralından bağımsız çalışır, parola ister */
+ if(isDev){
+  if(devOn)return devOpen(false);
+  if(performance.now()<pwLock)return say('Çok fazla yanlış deneme. '+Math.ceil((pwLock-performance.now())/1000)+' saniye bekleyin.','hata');
+  const arg=txt.slice(DEV_WORD.length).trim();
+  if(arg)return pwTry(arg);                     /* tek satırda: hungerdev <parola> */
+  say('Geliştirici modu parolası gerekli.');
+  pwMode(true);
   return;
  }
- if(!on())return say('Bu dünyada konsol komutları kapalı. Yeni dünya kurarken "Konsol komutları" seçeneğini açın.','hata');
+ if(!on()&&!devOn)return say('Bu dünyada konsol komutları kapalı. Yeni dünya kurarken "Konsol komutları" seçeneğini açın.','hata');
  const p=txt.split(/\s+/),name=p.shift().toLocaleLowerCase('tr');
  const c=CMD[name];
  if(!c)return say('Bilinmeyen komut: '+name+'  (yardim yazın)','hata');
@@ -527,7 +574,7 @@ HG.konsolBuilt=root=>{
     '</div>'+
    '</div>'+
   '</div>'+
-  '<div class="kc-in"><span>&gt;</span><input id="kcIn" type="text" placeholder="Komut yazın (yardim · Tab tamamlar · ↑↓ geçmiş)" autocomplete="off" spellcheck="false" aria-label="Komut satırı"></div>';
+  '<div class="kc-in"><span>&gt;</span><input id="kcIn" type="text" placeholder="Komut yazın (yardim · Tab tamamlar · ↑↓ geçmiş)" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Komut satırı"></div>';
  outEl=box.querySelector('#kcOut');panEl=box.querySelector('#kcPan');inpEl=box.querySelector('#kcIn');
  tileEl=panEl.querySelector('.kc-tiles');togEl=panEl.querySelector('.kc-tog');
  sldEl=panEl.querySelector('.kc-sld');gridEl=panEl.querySelector('.kc-grid');
@@ -553,8 +600,13 @@ HG.konsolBuilt=root=>{
  });
  inpEl.addEventListener('keydown',e=>{
   e.stopPropagation();
-  if(e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();const v=inpEl.value;inpEl.value='';run(v)}
-  else if(e.code==='ArrowUp'){e.preventDefault();if(hist.length){hi=hi<0?hist.length-1:Math.max(0,hi-1);inpEl.value=hist[hi]}}
+  if(e.code==='Enter'||e.code==='NumpadEnter'){
+   e.preventDefault();const v=inpEl.value;inpEl.value='';
+   if(pwAsk)pwTry(v);else run(v);           /* parola sorulurken satır kayda ve geçmişe yazılmaz */
+   return;
+  }
+  if(pwAsk){if(e.code==='Escape'){e.preventDefault();pwMode(false);say('Geliştirici modu iptal edildi.')}return}
+  if(e.code==='ArrowUp'){e.preventDefault();if(hist.length){hi=hi<0?hist.length-1:Math.max(0,hi-1);inpEl.value=hist[hi]}}
   else if(e.code==='ArrowDown'){e.preventDefault();if(hi>=0){hi++;if(hi>=hist.length){hi=-1;inpEl.value=''}else inpEl.value=hist[hi]}}
   else if(e.code==='Tab'){
    e.preventDefault();
@@ -565,7 +617,7 @@ HG.konsolBuilt=root=>{
   }
  });
  inpEl.addEventListener('keyup',e=>e.stopPropagation());
- echo(on()?'Komutlar açık. "yardim" yazarak listeyi görebilirsiniz.':'Bu dünyada konsol komutları kapalı (Dünya Oluştur penceresinden açılır).');
+ echo(on()?'Komutlar açık. "yardim" yazarak listeyi görebilirsiniz.':'Bu dünyada konsol komutları kapalı (Dünya Oluştur penceresinden açılır). Geliştirici modu bu kuraldan bağımsızdır.');
  clearInterval(panT);panT=setInterval(panel,400);
 };
 })();
