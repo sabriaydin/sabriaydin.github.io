@@ -135,21 +135,40 @@ function clearLog(){
 
 /* ---- durum satırı ---- */
 const BEDN={wind:'rüzgâr',sea:'deniz',foam:'köpük',leaf:'yaprak',rain:'yağmur',drum:'yağmur davulu',whisper:'fısıltı',drone:'gerilim uğultusu'};
+/* Durum şeridi: düz metin yerine ayrı ayrı kutucuklar (değere göre renklenir). */
 function status(){
  if(!statEl)return;
- const p=[];
- p.push('Durum: '+ui.state);
+ const P=[];
+ const add=(lab,val,cls,wide)=>P.push({l:lab,v:String(val),c:cls||'',w:!!wide});
+ const lvl=(v,lo,mid)=>v<lo?'bad':v<mid?'warn':'ok';
+ const perf=HG.perf||{};
+ add('Durum',ui.state+(G.cave?' · mağara':''));
+ if(perf.fps)add('FPS',perf.fps+' · '+(perf.ms||0).toFixed(1)+' ms',perf.fps<30?'bad':perf.fps<50?'warn':'ok');
  try{if(G.hp!==undefined&&ui.state!=='menu'){
-  p.push('Gün '+HG.dayNo()+' · konum '+Math.round(G.px)+','+Math.round(G.py));
-  p.push('Can '+Math.round(G.hp)+' · Açlık '+Math.round(G.hun)+' · Susuzluk '+Math.round(G.thr)+' · Dayanıklılık '+Math.round(G.stam));
+  add('Gün',HG.dayNo());
+  add('Konum',Math.round(G.px)+', '+Math.round(G.py)+(G.pz===undefined?'':' · '+G.pz.toFixed(1)+' m'));
+  add('Can',Math.round(G.hp),lvl(G.hp,25,60));
+  add('Açlık',Math.round(G.hun),lvl(G.hun,20,50));
+  add('Susuzluk',Math.round(G.thr),lvl(G.thr,20,50));
+  add('Dayanıklılık',Math.round(G.stam),lvl(G.stam,20,50));
  }}catch(e){}
  try{
-  let s='Ses: '+HG.audioState()+(ui.mute?' (sessiz)':'');
-  if(HG.sesGercek){const d=HG.sesGercek.durum();s+=' · kayıt '+d.nLoaded+(d.nFailed?' (hata '+d.nFailed+')':'')}
-  p.push(s);
-  if(HG.audioBeds){const b=HG.audioBeds(),a=[];for(const k in b)if(b[k]>.012)a.push((BEDN[k]||k)+' '+b[k].toFixed(2));p.push('Ortam sesleri: '+(a.length?a.join(', '):'yok'))}
+  let s=HG.audioState()+(ui.mute?' · sessiz':'');
+  if(HG.sesGercek){const d=HG.sesGercek.durum();s+=' · '+d.nLoaded+' kayıt'+(d.nFailed?' ('+d.nFailed+' hata)':'')}
+  add('Ses',s,ui.mute?'warn':'');
+  if(HG.audioBeds){const b=HG.audioBeds(),a=[];for(const k in b)if(b[k]>.012)a.push((BEDN[k]||k)+' '+b[k].toFixed(2));
+   add('Ortam',a.length?a.join(', '):'yok','',true)}
  }catch(e){}
- statEl.textContent=p.join('  |  ');
+ /* kutucuklar yeniden kullanılır: her karede DOM baştan kurulmaz */
+ while(statEl.childElementCount>P.length)statEl.lastChild.remove();
+ while(statEl.childElementCount<P.length){
+  const d=document.createElement('span');d.className='ks';
+  d.append(document.createElement('em'),document.createElement('b'));statEl.appendChild(d);
+ }
+ P.forEach((q,i)=>{const d=statEl.children[i];
+  d.className='ks'+(q.c?' '+q.c:'')+(q.w?' wide':'');
+  d.firstChild.textContent=q.l;d.lastChild.textContent=q.v;d.title=q.l+': '+q.v;
+ });
 }
 
 function build(){
@@ -165,7 +184,7 @@ function build(){
    '<button type="button" id="knSav">Dosyaya kaydet</button>'+
    '<button type="button" id="knX" class="ghost">Kapat</button></div></div>'+
   '<div class="kn-st" id="knSt"></div>'+
-  '<div class="kn-flt"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara">'+
+  '<div class="kn-flt"><div class="kn-qw"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara"></div>'+
    '<div class="kn-ch" id="knCh"></div></div>'+
   '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
   '<div class="kn-split" id="knSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek kayıt ve komut alanlarını boyutlandırın"><i></i></div>'+
@@ -216,7 +235,7 @@ function dragBar(sp,key,getH,setH){
  });
  sp.addEventListener('pointermove',e=>{if(drag)setH(drag.h+(drag.y-e.clientY))});
  const end=()=>{if(!drag)return;drag=null;sp.classList.remove('on');
-  try{localStorage.setItem(key,String(Math.round(getH())))}catch(e){}};
+  try{localStorage.setItem(typeof key==='function'?key():key,String(Math.round(getH())))}catch(e){}};
  sp.addEventListener('pointerup',end);sp.addEventListener('pointercancel',end);
  sp.addEventListener('keydown',e=>{const d=e.key==='ArrowUp'?24:e.key==='ArrowDown'?-24:0;
   if(d){setH(getH()+d);e.preventDefault()}});
@@ -242,9 +261,13 @@ function setupSplit(root){
   const mx=Math.max(PMIN,cmdH()-inH-70);
   cmd.style.setProperty('--kcpan',Math.round(Math.min(mx,Math.max(PMIN,h)))+'px');
  };
- const apply=()=>{setCmd(savedH('hunger-kncmd')||400);setPan(savedH('hunger-kcpan')||215)};
+/* Geliştirici modu açıkken komut alanı daha yüksek açılır (panel sığsın), kapalıyken kayıt
+    listesine yer kalır. İki durum ayrı ayrı hatırlanır. */
+ const devNow=()=>cmd.classList.contains('dev');
+ const kCmd=()=>devNow()?'hunger-kncmd-dev':'hunger-kncmd';
+ const apply=()=>{setCmd(savedH(kCmd())||(devNow()?500:230));setPan(savedH('hunger-kcpan')||310)};
  apply();HG.konsolResize=apply;
- dragBar(root.querySelector('#knSplit'),'hunger-kncmd',cmdH,h=>{setCmd(h);setPan(panH())});
+ dragBar(root.querySelector('#knSplit'),kCmd,cmdH,h=>{setCmd(h);setPan(panH())});
  dragBar(root.querySelector('#kcSplit'),'hunger-kcpan',panH,setPan);
 }
 HG.konsolBox=()=>root;

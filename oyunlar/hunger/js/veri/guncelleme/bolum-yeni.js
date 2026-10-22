@@ -2,7 +2,39 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:54,d:"22.10.2026",t:"Ada, köyler, mağaralar ve çok sayıda düzeltme",l:[
+{n:55,d:"22.10.2026",t:"Geliştirici konsolu yenilendi",l:[
+ "Geliştirici konsolu baştan tasarlandı: koyu cam yüzey, yuvarlatılmış paneller, kategori renkleri ve okunaklı tek aralıklı yazı tipi kullanıldı.",
+ "Üstteki durum satırı ayrı ayrı kutucuklara bölündü; can, açlık, susuzluk, dayanıklılık ve kare hızı değerine göre yeşil, sarı veya kırmızı görünüyor.",
+ "Kayıt listesi yeniden düzenlendi: kategori adı renkli bir etiket oldu, satırlar şeritli ve vurgulu hâle getirildi, komut satırları kırmızı kenarla ayrıldı.",
+ "Kategori çiplerine renk noktası eklendi; arama kutusuna büyüteç simgesi kondu.",
+ "Geliştirici paneli üç sütunlu bir gösterge paneline dönüştürüldü: üstte canlı ölçüm kutucukları (kare hızı, çizim, doku, bellek, hayvan, köylü, yer eşyası, ölçek), altında anahtarlar, kaydırıcılar, kısayollar ve bilgi listesi.",
+ "Panele açma-kapama anahtarları eklendi: ölümsüzlük, uçuş, zamanı durdurma, sis ve tel kafes.",
+ "Panele kaydırıcılar eklendi: saat, zaman akışı, yürüme hızı ve ek ışık.",
+ "Kısayol düğmesi sayısı 8'den 23'e çıkarıldı (saat, hava, ışınlanma, liste, ölçüm ve durum kısayolları).",
+ "Geliştirici modunda konsol daha yüksek açılıyor; açıkken ve kapalıyken seçilen pencere boyutları ayrı ayrı hatırlanıyor.",
+ "Yeni komut: ucus — yerçekimi kapanır, Boşluk ile yükselir, Ctrl ile alçalırsın.",
+ "Yeni komut: hiz — yürüme hızı çarpanı (0,2 ile 8 arası).",
+ "Yeni komut: zaman — zaman akışını hızlandırır, yavaşlatır veya durdurur.",
+ "Yeni komut: sis — sisi açar veya kapatır.",
+ "Yeni komut: cizgi — tel kafes (wireframe) görünümüne geçer.",
+ "Yeni komut: isik — karanlıkta görmek için ek ortam ışığı verir.",
+ "Yeni komut: hayvan — yakına istenen türden hayvan çıkarır.",
+ "Yeni komut: temizhayvan — verilen mesafedeki hayvanları kaldırır.",
+ "Yeni komut: seviye — oyuncu seviyesini ayarlar ve yetenek puanı verir.",
+ "Yeni komut: sikke — çantaya sikke ekler.",
+ "Yeni komut: yetenek — yetenekleri listeler ve düzeylerini ayarlar.",
+ "Yeni komut: bos — çantayı boşaltır.",
+ "Yeni komut: kaydet — oyunu hemen kaydeder.",
+ "Yeni komut: magara — mağaraları türü, zorluğu ve uzaklığıyla listeler, istenen mağara girişine ışınlar.",
+ "Yeni komut: koyler — köyleri türü ve uzaklığıyla listeler, istenen köye ışınlar.",
+ "Yeni komut: yakin — çevredeki hayvanları, köylüleri ve yerdeki eşyaları uzaklığıyla listeler.",
+ "Yeni komut: dunya — kare türü oranlarını, ağaç, kaya ve cevher sayılarını yazar.",
+ "Yeni komut: olcum — kare hızı, çizim çağrısı, üçgen, doku ve bellek ölçümlerini yazar.",
+ "Yeni komut: izle — seçilen bir değeri (örneğin izle G.stam) panelde sürekli gösterir.",
+ "Geliştirici modu kapatıldığında uçuş, hız, zaman, sis, tel kafes, ek ışık ve ölümsüzlük ayarlarının tamamı geri alınıyor.",
+ "Oyun güncellendiğinde tarayıcının eski görünüm ve kod dosyalarını kullanması sorunu giderildi: dosya adresleri sürüm numarasıyla işaretleniyor."
+]},
+{n:54,d:"21.10.2026",t:"Ada, köyler, mağaralar ve çok sayıda düzeltme",l:[
  "Gerçek dağlar eklendi: ada artık birkaç büyük dağ kütlesi, uzun sırtlar, aralarında vadiler ve kıyıya alçalan tepelerden oluşuyor; en yüksek zirveler 25 metreyi aşıyor.",
  "Düzlüklerin kayalık görünmesi sorunu giderildi: kaya zemini yalnızca dağ yamaçlarında ve yüksek yaylalarda kalıyor, kar yalnızca zirvelerde görünüyor.",
  "Biyomlar belirginleştirildi: nem ve sıcaklık bölgeleri çok daha geniş tutuldu, çam ormanı, çayır, kurak ova ve bataklık kenarı birbirinden ayrıldı.",
@@ -47,7 +79,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Geliştirici konsolunda haritayı açan komut artık köy, kamp, mağara ve adacık konumlarını da işaretliyor.",
  "Ölüm ekranında oyuncunun ayakta ve sağlıklı görünmesi sorunu giderildi: kamera yere iniyor, eller ve göstergeler kalkıyor, görüntü soluyor."
 ]},
-{n:53,d:"21.10.2026",t:"Arazi ve yüzey dokuları yenilendi",l:[
+{n:53,d:"20.10.2026",t:"Arazi ve yüzey dokuları yenilendi",l:[
  "Kum dokusu baştan yapıldı: düzenli dalga deseni yerine rüzgârla oluşmuş düzensiz kum dalgacıkları, çok ince kum tanesi, yer yer çakıl ve kabuk kırıkları eklendi.",
  "Ağaç kabuğu dokusu baştan yapıldı: boyuna uzanan derin çatlaklar, lifli kabuk levhaları ve üzerinde liken lekeleri eklendi.",
  "Çimen dokusuna öbeklenme eklendi: çimen artık her yerde aynı sıklıkta değil; seyrek ve sık kesimler ile sararmış kuru yamalar oluşuyor.",
@@ -55,7 +87,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Hayvan postu dokusu geliştirildi: tüyler artık eşit aralıklı değil, farklı uzunlukta ve kesintili tutamlar hâlinde görünüyor.",
  "Kuş tüyü dokusu baştan yapıldı: yuvarlak kabarcıklar yerine boyuna uzun ve ucu sivri tüyler, orta sap ile tüy telleri eklendi."
 ]},
-{n:52,d:"20.10.2026",t:"Köylü ve hayvan görünümleri yenilendi",l:[
+{n:52,d:"19.10.2026",t:"Köylü ve hayvan görünümleri yenilendi",l:[
  "Köylü modelleri baştan yapıldı: gövde, bel, boyun, omuz, dirsek, bilek, kalça ve diz ayrı ayrı hareket ediyor.",
  "Köylülerin yüzü ayrıntılandı: göz, kaş, burun, kulak ve ağız eklendi; göz kırpıyorlar.",
  "Saç ve sakal çeşitleri eklendi; kadın köylülerde uzun saç ve etek var.",
@@ -68,7 +100,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Tavuklara ayrı tüy dokusu eklendi.",
  "Köylülerin giysi, deri ve ten dokuları birinci kişi kollarıyla aynı kaliteye getirildi."
 ]},
-{n:51,d:"19.10.2026",t:"Ada iki kat büyüdü: dağlar, dereler, biyomlar ve köy türleri",l:[
+{n:51,d:"17.10.2026",t:"Ada iki kat büyüdü: dağlar, dereler, biyomlar ve köy türleri",l:[
  "Harita iki kat büyüdü: ada dört kat daha geniş bir alana yayıldı, keşfedilecek yer çok arttı.",
  "Arazi yeniden üretiliyor: ortada sırtlı dağ dizileri, aralarında vadiler, eteklerinde tepeler ve ovalar var; en yüksek noktalar 12 metreye çıkıyor.",
  "Dağlardan denize inen dereler eklendi. Derelerin alçak kesiminde su akıyor ve bu su içilebiliyor; yukarısı kuru dere yatağı olarak kalıyor.",
@@ -81,7 +113,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Dünya üretimi hızlandırıldı: harita dört kat büyümesine rağmen yeni oyun eskisinden daha hızlı kuruluyor.",
  "Eski kayıtlar korunuyor: önceki ada yeni haritanın ortasına yerleştiriliyor, arazi ve kurduğunuz yapılar olduğu gibi kalıyor."
 ]},
-{n:50,d:"18.10.2026",t:"Konsol komutları, düzeltmeler ve pencere görünümü",l:[
+{n:50,d:"15.10.2026",t:"Konsol komutları, düzeltmeler ve pencere görünümü",l:[
  "Bir pencere Esc ile kapatılınca hemen ardından duraklatma menüsünün açılması sorunu giderildi.",
  "Ekranın mavi kalması sorunu giderildi: bir karede hata olsa bile çizim duruyordu; artık hata konsola yazılıyor ve oyun sürüyor.",
  "Ayarlar › Kontrol'e \"Tam ekranda oyna\" seçeneği eklendi: oyuna girince tam ekrana geçilir ve tarayıcı kısayolları oyuna yönlendirilir; böylece çömelerek yürürken (Ctrl+W) sekme kapanmıyor. Esc ile tam ekrandan çıkılır.",
@@ -93,14 +125,14 @@ HG.UPD=(HG.UPD||[]).concat([
  "Konsola gizli bir komutla açılan geliştirici modu eklendi: canlı bilgi paneli (konum, kare hızı, canlı sayısı, hava, dünya kodu), hızlı düğmeler ve ek komutlar.",
  "Yükleme ekranı yenilendi; ayarlar, güncelleme notları, dünya oluşturma, kayıtlar, rehber ve ticaret pencereleri ana menüyle aynı görünüme getirildi."
 ]},
-{n:49,d:"17.10.2026",t:"Ana menü arka planı",l:[
+{n:49,d:"13.10.2026",t:"Ana menü arka planı",l:[
  "Ana menüdeki 3B dünya uçuşu kaldırıldı; yerine oyunu anımsatan hafif bir manzara çizildi: gün batımında ada silüeti, deniz, çam ve palmiye gölgeleri, kıyıda yanan kamp ateşi ve ağaçların arasında ara sıra beliren Gölge gözleri.",
  "Menü artık 3B sahneyi çizmiyor; menüde kare hızı yükü neredeyse tamamen kalktı, zayıf cihazlarda ve dizüstünde ısınma ile pil tüketimi azaldı.",
  "Menüdeki kıvılcım ve ateş böcekleri manzaraya göre seyreltildi.",
  "Ayarlar › Grafik › Menü arka plan efekti kapatılınca manzara hareketsiz tek kare olarak duruyor.",
  "Oyundan menüye dönüldüğünde menü efektlerinin durması sorunu giderildi."
 ]},
-{n:48,d:"16.10.2026",t:"Oyun içi arayüz yenilendi",l:[
+{n:48,d:"11.10.2026",t:"Oyun içi arayüz yenilendi",l:[
  "Gizlilik göstergesi ekranın ortasından alınıp mini haritanın altına taşındı; artık nişanın önünü kapatmıyor.",
  "Gizlilik göstergesi yalnızca çömelirken veya yakındaki bir hayvan tetikteyken görünüyor; yanından geçilen sakin hayvanlarda kendiliğinden açılıp kapanma sorunu giderildi.",
  "Yalnızca üretim ve ticaret malzemesi olan eşyalar (odun, taş, kömür, cevher, külçe, deri, yün, sikke ve benzerleri) artık elde tutulmuyor; seçilince eller boş kalıyor ve çıplak elle vuruluyor.",
@@ -114,7 +146,7 @@ HG.UPD=(HG.UPD||[]).concat([
  "Çanta ve üretim penceresi ile kaydırma çubukları yenilendi; tarif satırları üzerine gelince vurgulanıyor.",
  "Eşya seçilmeden boş duran açıklama kutusu gizleniyor."
 ]},
-{n:47,d:"15.10.2026",t:"Ayarlar menüsü yenilendi",l:[
+{n:47,d:"09.10.2026",t:"Ayarlar menüsü yenilendi",l:[
  "Kalite düzeyi artık çözünürlük ölçeği, gölgeler, parlama, çim, yer sisi, parçacık ve çizim mesafesi ayarlarını birlikte değiştiriyor; seçim yapınca bu ayarlar ekranda da güncelleniyor.",
  "Kalite düzeyinin altına o düzeyde neyin açık, neyin kapalı olduğunu anlatan açıklama eklendi.",
  "Kalite düzeyinin altına anlık kare hızı, çizim ölçeği ve piksel oranı eklendi.",
@@ -127,10 +159,10 @@ HG.UPD=(HG.UPD||[]).concat([
  "Çözünürlük ölçeğinin en etkili başarım ayarı olduğu belirtildi.",
  "Oyun sekmesine, dünya kurallarının Dünya Oluştur penceresinden seçildiğini belirten açıklama eklendi."
 ]},
-{n:46,d:"14.10.2026",t:"Günlük düzeltmesi",l:[
+{n:46,d:"07.10.2026",t:"Günlük düzeltmesi",l:[
  "Kamp sandıklarında bulunan Sefer Defteri kayıtlarının Günlük penceresinde yanlış metinlerle görünmesi sorunu giderildi."
 ]},
-{n:45,d:"13.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
+{n:45,d:"05.10.2026",t:"Devasa güncelleme: fizik, yapay zekâ, modeller ve hile koruması",l:[
  "Çömelme eklendi (Ctrl veya Z). Çömelince ayak sesi kesiliyor, hayvanlar oyuncuyu çok daha geç fark ediyor ve yay daha az sallanıyor.",
  "Ekranın ortasına gizlilik göstergesi eklendi: Gizli, Tetikte, Fark edildin.",
  "Zıplama hissi iyileştirildi: kenardan ayrıldıktan sonra kısa süre zıplanabiliyor, havadayken basılan zıplama tuşu yere inince çalışıyor.",
