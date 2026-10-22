@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS Grid Oyun Alanı</title>
+<meta name="description" content="Grid sütun, satır, boşluk ve hizalama özelliklerini değiştirip kutuların nasıl dizildiğini canlı gör, CSS kodunu kopyala.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-10-22 16:45">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Grid sütun, satır, boşluk ve hizalama özelliklerini değiştirip kutuların nasıl dizildiğini canlı gör, CSS kodunu kopyala.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Özellikler ne yapar?</a></li><li><a href="#b3">Grid mi, Flexbox mu?</a></li></ol></nav><!--/px-->
+<p>CSS Grid, bir alanı satır ve sütunlara bölerek öğeleri bu ızgaraya yerleştirmenin en pratik yoludur. Sayfa düzenleri, galeri görünümleri ve pano (dashboard) tasarımlarında sık kullanılır. Özellikleri ezberlemek yerine bu oyun alanında dene.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <div class="satir">
+    <label for="g-sutun"><span>Sütun sayısı: <span id="g-sutund">3</span></span><input type="range" id="g-sutun" min="1" max="8" value="3"></label>
+    <label for="g-bosluk"><span>Boşluk (gap): <span id="g-bosluk-d">10</span>px</span><input type="range" id="g-bosluk" min="0" max="40" value="10"></label>
+    <label for="g-n"><span>Kutu sayısı: <span id="g-nd">6</span></span><input type="range" id="g-n" min="1" max="16" value="6"></label>
+  </div>
+  <div class="satir">
+    <label for="g-j">justify-items
+      <select id="g-j"><option>stretch</option><option>start</option><option>center</option><option>end</option></select>
+    </label>
+    <label for="g-a">align-items
+      <select id="g-a"><option>stretch</option><option>start</option><option>center</option><option>end</option></select>
+    </label>
+  </div>
+  <div id="g-kap" style="height:300px;padding:10px;border:2px dashed #8f8a82;border-radius:8px;background:#f3f1ed;overflow:hidden" role="img" aria-label="CSS Grid önizlemesi"></div>
+  <h3>CSS kodu</h3>
+  <pre id="g-cikti"></pre>
+  <div class="dugmeler"><button type="button" data-kopyala="g-cikti">Kodu kopyala</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const guncelle=()=>{
+  const sutun=+$('g-sutun').value,n=+$('g-n').value,bosluk=$('g-bosluk').value;
+  $('g-sutund').textContent=sutun;$('g-bosluk-d').textContent=bosluk;$('g-nd').textContent=n;
+  const k=$('g-kap');
+  while(k.children.length<n){const e=document.createElement('div');e.textContent=k.children.length+1;e.style.cssText='padding:14px 10px;background:#a8231f;color:#fff;font-weight:700;text-align:center;border-radius:6px';k.appendChild(e)}
+  while(k.children.length>n)k.lastChild.remove();
+  k.style.display='grid';
+  k.style.gridTemplateColumns='repeat('+sutun+', 1fr)';
+  k.style.gap=bosluk+'px';
+  k.style.justifyItems=$('g-j').value;
+  k.style.alignItems=$('g-a').value;
+  $('g-cikti').textContent=`.kapsayici {\n  display: grid;\n  grid-template-columns: repeat(${sutun}, 1fr);\n  gap: ${bosluk}px;\n  justify-items: ${$('g-j').value};\n  align-items: ${$('g-a').value};\n}`};
+['g-sutun','g-bosluk','g-n','g-j','g-a'].forEach(i=>$(i).addEventListener('input',guncelle));
+guncelle();
+})();
+</script>
+</div>
+<h2 id="b2">Özellikler ne yapar?</h2>
+<table>
+<thead><tr><th>Özellik</th><th>Görevi</th></tr></thead>
+<tbody>
+<tr><td><code>grid-template-columns</code></td><td>Kaç sütun olacağını ve genişliklerini belirler. <code>repeat(3, 1fr)</code> üç eşit sütun oluşturur.</td></tr>
+<tr><td><code>gap</code></td><td>Satır ve sütunlar arasındaki boşluğu belirler.</td></tr>
+<tr><td><code>justify-items</code></td><td>Her öğeyi kendi hücresi içinde yatayda hizalar.</td></tr>
+<tr><td><code>align-items</code></td><td>Her öğeyi kendi hücresi içinde dikeyde hizalar.</td></tr>
+</tbody>
+</table>
+<h2 id="b3">Grid mi, Flexbox mu?</h2>
+<p>Flexbox tek boyutlu (yalnızca satır veya yalnızca sütun) düzenler için uygundur. Grid ise satır ve sütunu aynı anda kontrol etmek gerektiğinde, örneğin bir galeri veya pano düzeninde daha uygundur. İkisi birlikte de kullanılabilir: dış düzen Grid, bir kutunun içindeki öğe dizilimi Flexbox ile yapılabilir.</p>
+<blockquote>Bir galeri görünümü için en kısa yol: kapsayıcıya <code>display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;</code> yazmaktır; bu, pencere genişliğine göre sütun sayısını otomatik ayarlar.</blockquote>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

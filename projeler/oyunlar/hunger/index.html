@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Hunger</title>
+<meta name="description" content="Hunger: ıssız bir adada geçen, tarayıcıda oynanan 3B birinci kişi hayatta kalma oyunu. Ağaç kes, maden topla, sığınak kur; açlığa, susuzluğa ve soğuğa karşı hayatta kal.">
+<meta name="theme-color" content="#0d0d0e">
+<meta name="author" content="Sabri Aydın">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Sabri Aydın">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="Hunger">
+<link rel="icon" href="../../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="css/stil.css?v=1.99">
+<link rel="stylesheet" href="css/genisleme.css?v=1.99">
+<link rel="stylesheet" href="css/uretim.css?v=1.99">
+<link rel="stylesheet" href="css/konsol.css?v=1.99">
+<link rel="stylesheet" href="css/menu.css?v=1.99">
+<link rel="stylesheet" href="css/ag.css?v=1.99">
+<link rel="stylesheet" href="css/iyilestirme.css?v=1.99">
+<link rel="stylesheet" href="css/arayuz.css?v=1.99">
+</head>
+<body>
+<div id="game">
+  <canvas id="c"></canvas>
+  <div class="vig" id="vr"></div><div class="vig" id="vc"></div><div class="vig" id="vh"></div><div class="vig" id="vs"></div><div class="vig" id="uw"></div>
+  <div id="dmg"><i></i></div>
+  <div id="hud" hidden>
+    <div class="bar" id="bHp"><span>Sağlık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bHun"><span>Açlık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bThr"><span>Susuzluk</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bWar"><span>Sıcaklık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bSta"><span>Dayanıklılık</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bSan"><span>Akıl</span><i><b></b></i><u></u></div>
+    <div class="bar" id="bO2" hidden><span>Nefes</span><i><b></b></i><u></u></div>
+    <div id="sts"></div>
+    <div id="shel"></div>
+  </div>
+  <div id="comp" hidden><canvas width="880" height="64"></canvas></div>
+  <div id="clock" hidden></div>
+  <div id="goal" hidden></div>
+  <canvas id="mini" width="160" height="160" hidden></canvas>
+  <div id="cross" hidden></div>
+  <div id="tgt" hidden><b></b><i><u></u></i><span></span></div>
+  <div id="zn"></div>
+  <div id="hitm"><i></i><i></i><i></i><i></i></div>
+  <div id="tip" hidden></div>
+  <div id="prog" hidden><i></i></div>
+  <div id="feed"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <div id="hot" hidden></div>
+  <div id="hotn"></div>
+  <div id="touch" hidden>
+    <div id="joy"><i></i></div>
+    <div class="tb" id="tA">Vur</div><div class="tb" id="tB">Koy</div>
+    <div class="tb" id="tJ">Zıpla</div><div class="tb" id="tE">Ye/Al</div><div class="tb" id="tK">Günlük</div><div class="tb" id="tI">Çanta</div>
+  </div>
+  <div id="panel" hidden>
+    <div id="pbox" class="m-inv">
+      <div id="ptabs" role="tablist"><button id="tInv" class="on" type="button" role="tab" data-m="inv">Envanter</button><button id="tCrf" type="button" role="tab" data-m="craft">Üretim</button></div>
+      <div id="invScr">
+        <h2>Envanter</h2>
+        <div id="grid"></div>
+        <div id="info"></div>
+        <p class="hp">Eşyaya tıklayıp başka bir kutuya tıklayarak yerini değiştirin. Sağ tık veya çift tık: kullan. İlk 8 kutu hızlı erişim çubuğudur.</p>
+        <button id="close" class="ghost" type="button">Kapat (I / Esc)</button> <button id="sortInv" class="ghost" type="button">Çantayı düzenle</button>
+      </div>
+      <div id="crfScr">
+        <h2>Üretim</h2>
+        <div id="crfSt"></div>
+        <div id="recipes"></div>
+        <div class="crfb"><button id="crfX" class="ghost" type="button">Kapat (C / Esc)</button></div>
+      </div>
+    </div>
+  </div>
+  <div id="jr" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">GÜNLÜK</h1><div class="stabs" id="jrT"></div><div id="jrB"></div><div class="btns"><button id="jrX" class="ghost" type="button">Kapat (K / Esc)</button></div></div></div>
+  <div id="load"><div class="lbox"><h1>HUN<span>GER</span></h1><div id="loadT">Yükleniyor</div><div class="lbar"><i id="loadBar"></i></div><div class="lrow"><span id="loadSub"></span><span id="loadPct">0%</span></div><p id="loadTip"></p></div></div>
+  <div id="gd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">REHBER</h1><div class="stabs" id="gdT"></div><div id="gdB"></div><div class="btns"><button id="gdX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="sv" hidden><div class="card"><div class="svh"><h1 style="font-size:26px;letter-spacing:.1em">KAYITLI OYUNLAR</h1><span id="svC"></span></div><p id="svS"></p><div id="svL"></div><div class="btns"><button id="svF" type="button">Dosyadan yükle</button><button id="svX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="sd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">OYUNU KAYDET</h1><p id="sdS">Kayıt türünü seçin.</p>
+    <div class="sdo"><button id="sdAuto" type="button" class="opt"><b>Otomatik kayıt</b><small>Tarayıcıda saklanır. Seçtikten sonra oyun her 20 saniyede kendini günceller; Kayıtlı Oyunlar listesinden devam edilir.</small></button>
+    <button id="sdMan" type="button" class="opt"><b>Manuel kayıt</b><small>Kayıt dosyası (.json) bilgisayara indirilir. Kayıtlı Oyunlar › Dosyadan yükle ile açılır.</small></button></div>
+    <div class="btns"><button id="sdX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="wd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">DÜNYA OLUŞTUR</h1>
+    <div class="wform">
+      <label>Dünya adı<input id="wdName" type="text" maxlength="30" placeholder="İsteğe bağlı" autocomplete="off" spellcheck="false"></label>
+      <label>Dünya kodu<span class="wr"><input id="wdCode" type="text" maxlength="7" placeholder="Boşsa rastgele" autocomplete="off" spellcheck="false"><button id="wdRnd" class="ghost" type="button">Rastgele</button></span><small id="wdCodeMsg">Aynı kod aynı adayı (kıyı, göl, köy) kurar; kaynak ve hayvan sayısı aşağıdaki seçeneklere göre değişir.</small></label>
+      <label>Zorluk<select id="wdDiff"><option value="0">Kolay</option><option value="1">Normal</option><option value="2">Zor</option></select><small id="wdDiffH">Açlık, susuzluk ve hasar hızı.</small></label>
+      <label>Ölünce<select id="wdDeath"><option value="bed">Cenaze çantası (eşyalar düşer)</option><option value="free">Eşyalar kalsın</option><option value="perm">Kalıcı ölüm</option></select><small id="wdDeathH"></small></label>
+      <label>Başlangıç zamanı<select id="wdTime"><option value="0">Sabah</option><option value="1">Öğle</option><option value="2">Akşam</option></select><small id="wdTimeH"></small></label>
+      <label>Hayvan yoğunluğu<select id="wdAnim"><option value="1">Normal</option><option value="0">Seyrek</option></select><small id="wdAnimH"></small></label>
+      <label>Kaynak yoğunluğu<select id="wdRes"><option value="1.45">Az (zor)</option><option value="1">Normal</option><option value="0.4">Bol (kolay)</option></select><small id="wdResH">Ağaç, kaya ve maden sayısı.</small></label>
+      <label>Başlangıç eşyaları<select id="wdKit"><option value="0">Yalnızca El Taşı</option><option value="1">Temel set (balta, kazma, bandaj, yiyecek, su)</option></select><small id="wdKitH"></small></label>
+      <label class="chk"><input id="wdSeason" type="checkbox"><span>Mevsimler<small id="wdSeasonH">Her 6 günde bir mevsim değişir; kışın soğuk artar, ekinler durur.</small></span></label>
+      <label class="chk"><input id="wdWear" type="checkbox"><span>Alet aşınması<small id="wdWearH">Taş, bakır ve demir aletler kullandıkça aşınır ve kırılır; Çalışma Tezgâhında onarılır.</small></span></label>
+      <label class="chk"><input id="wdCmd" type="checkbox"><span>Konsol komutları<small id="wdCmdH">F1 konsolundan saat, hava, ışınlanma gibi komutlar kullanılabilir. Komut kullanılan dünyada başarım kazanılmaz.</small></span></label>
+      <label class="chk"><input id="wdPeace" type="checkbox"><span>Barış modu<small id="wdPeaceH">Gölge, kurt, ayı, köpek balığı ve denizanası bulunmaz; diğer hayvanlar saldırmaz. Arı sokması geçerlidir (yanan meşale korur).</small></span></label>
+    </div>
+    <p id="wdSum"></p>
+    <div class="btns"><button id="wdGo" type="button">Dünyayı oluştur</button><button id="wdDef" class="ghost" type="button">Varsayılan</button><button id="wdX" class="ghost" type="button">Geri (Esc)</button></div></div></div>
+  <input type="file" id="fileIn" accept=".json,application/json" hidden>
+  <div id="fade"></div>
+  <div id="bigmap" hidden><div class="bmbox"><div class="bmw"><canvas id="bm"></canvas><canvas id="bmc" width="56" height="62"></canvas></div><div id="bmcap"></div></div></div>
+  <div id="trade" hidden><div class="card"><h1 id="trT" style="font-size:26px;letter-spacing:.1em"></h1><p id="trS"></p><div id="trL"></div><div class="btns"><button id="trX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
+  <div id="nt" hidden><div class="card"><h1>GÜNCELLEMELER</h1><p>Oyuna bugüne kadar eklenen tüm değişiklikler. Ayrıntı için bir satıra tıklayın.</p><div id="ntL"></div><div id="ntP"></div><div class="btns"><button id="ntX" class="ghost" type="button">Kapat</button></div></div></div>
+  <div id="menu">
+    <canvas id="mbg" aria-hidden="true"></canvas>
+    <canvas id="mfx" aria-hidden="true"></canvas>
+    <div class="mbar t"></div><div class="mbar b"></div>
+    <div class="card">
+      <h1>HUN<span>GER</span></h1>
+      <p>Issız bir adada hayatta kal. Ağaç kes, maden çıkar, sığınak kur; açlığa, susuzluğa ve soğuğa diren. Geceleri karanlıkta bir şeyler dolaşır: ışığı yanında tut.</p>
+      <div class="btns">
+        <button id="bCont" class="wide" type="button" hidden>Devam Et</button>
+        <button id="bNew" class="wide" type="button">Yeni Oyun</button>
+        <button id="bSaved" class="ghost" type="button">Kayıtlı Oyunlar</button>
+        <button class="ghost bSet" type="button">Ayarlar</button>
+        <button id="bNotes" class="ghost" type="button">Güncelleme Notları</button>
+      </div>
+      <a class="back" href="../../index.html">← Bloga dön</a>
+    </div>
+    <div id="menuBy">Bir Sabri Aydın oyunu.</div><div id="menuVer"></div>
+  </div>
+  <div id="pause" hidden><div class="card pm"><div class="pmh"><h1>DURAKLATILDI</h1><p id="wcodeP" class="wcp"></p></div><div class="btns"><button id="bRes" class="pmp" type="button">Devam<kbd>Esc</kbd></button><button id="bSaveGame" type="button">Oyunu Kaydet</button><button id="bSaved2" type="button">Kayıtlı Oyunlar</button><button class="bGuide" type="button">Rehber</button><button class="bSet" type="button">Ayarlar</button></div><div id="pmCoop"></div><div class="btns pmx"><button id="bMenu" class="pmd" type="button">Ana Menüye Dön</button></div></div></div>
+  <div id="dead" hidden><div class="card"><h1 style="font-size:36px">HAYATTA KALAMADIN</h1><p id="why"></p><p id="stat"></p><p id="stat2"></p><p id="deadTip" class="mut"></p><div class="btns"><button id="bResp" type="button" hidden>Yeniden Doğ</button><button id="bDeadMenu" class="ghost" type="button">Ana menüye dön</button></div></div></div>
+</div>
+<script src="../ortak/three.min.js"></script>
+<script src="../ortak/peerjs.min.js"></script>
+<script src="js/cekirdek/ad-alani.js?v=1.99"></script>
+<script src="js/cekirdek/yardimcilar.js?v=1.99"></script>
+<script src="js/cekirdek/ayarlar.js?v=1.99"></script>
+<script src="js/cekirdek/tuslar.js?v=1.99"></script>
+<script src="js/cekirdek/hazirlik.js?v=1.99"></script>
+<script src="js/oyun/konsol.js?v=1.99"></script>
+<script src="js/veri/esyalar.js?v=1.99"></script>
+<script src="js/veri/notlar.js?v=1.99"></script>
+<script src="js/veri/rehber.js?v=1.99"></script>
+<script src="js/veri/tarifler.js?v=1.99"></script>
+<script src="js/veri/dugumler.js?v=1.99"></script>
+<script src="js/veri/hayvanlar.js?v=1.99"></script>
+<script src="js/veri/yenilikler.js?v=1.99"></script>
+<script src="js/veri/genisleme.js?v=1.99"></script>
+<script src="js/veri/denge.js?v=1.99"></script>
+<script src="js/dunya/uretim.js?v=1.99"></script>
+<script src="js/dunya/magara.js?v=1.99"></script>
+<script src="js/gorsel/simgeler.js?v=1.99"></script>
+<script src="js/gorsel/yeni-simgeler.js?v=1.99"></script>
+<script src="js/gorsel/genisleme-simgeler.js?v=1.99"></script>
+<script src="js/gorsel/insa-simgeler.js?v=1.99"></script>
+<script src="js/gorsel/rust-simgeler.js?v=1.99"></script>
+<script src="js/sahne/cekirdek.js?v=1.99"></script>
+<script src="js/sahne/gerceklik.js?v=1.99"></script>
+<script src="js/sahne/dokular.js?v=1.99"></script>
+<script src="js/sahne/hava.js?v=1.99"></script>
+<script src="js/sahne/isik.js?v=1.99"></script>
+<script src="js/sahne/arazi.js?v=1.99"></script>
+<script src="js/sahne/modeller.js?v=1.99"></script>
+<script src="js/sahne/cim.js?v=1.99"></script>
+<script src="js/sahne/nesneler.js?v=1.99"></script>
+<script src="js/sahne/kol.js?v=1.99"></script>
+<script src="js/sahne/esya-modelleri.js?v=1.99"></script>
+<script src="js/sahne/dusenler.js?v=1.99"></script>
+<script src="js/sahne/efektler.js?v=1.99"></script>
+<script src="js/sahne/devrilme.js?v=1.99"></script>
+<script src="js/sahne/hayvan-modelleri.js?v=1.99"></script>
+<script src="js/sahne/yeni-modeller.js?v=1.99"></script>
+<script src="js/sahne/hayvanlar.js?v=1.99"></script>
+<script src="js/sahne/koyluler.js?v=1.99"></script>
+<script src="js/sahne/koy-yapilari.js?v=1.99"></script>
+<script src="js/sahne/kamplar.js?v=1.99"></script>
+<script src="js/sahne/atmosfer.js?v=1.99"></script>
+<script src="js/sahne/parcaciklar.js?v=1.99"></script>
+<script src="js/sahne/oklar.js?v=1.99"></script>
+<script src="js/sahne/nisan.js?v=1.99"></script>
+<script src="js/sahne/magara.js?v=1.99"></script>
+<script src="js/sahne/sualti.js?v=1.99"></script>
+<script src="js/sahne/deniz.js?v=1.99"></script>
+<script src="js/sahne/yenilikler.js?v=1.99"></script>
+<script src="js/sahne/genisleme-modeller.js?v=1.99"></script>
+<script src="js/sahne/insa-modeller.js?v=1.99"></script>
+<script src="js/sahne/el-modelleri.js?v=1.99"></script>
+<script src="js/sahne/el-modelleri2.js?v=1.99"></script>
+<script src="js/sahne/sonisleme.js?v=1.99"></script>
+<script src="js/sahne/optim.js?v=1.99"></script>
+<script src="js/oyun/ses.js?v=1.99"></script>
+<script src="js/oyun/ses-gercek.js?v=1.99"></script>
+<script src="js/oyun/zaman.js?v=1.99"></script>
+<script src="js/oyun/envanter.js?v=1.99"></script>
+<script src="js/oyun/dusenler.js?v=1.99"></script>
+<script src="js/oyun/hayvanlar.js?v=1.99"></script>
+<script src="js/oyun/deniz.js?v=1.99"></script>
+<script src="js/oyun/vucut.js?v=1.99"></script>
+<script src="js/oyun/dusmanlar.js?v=1.99"></script>
+<script src="js/oyun/silah.js?v=1.99"></script>
+<script src="js/oyun/koyluler.js?v=1.99"></script>
+<script src="js/oyun/gelisim.js?v=1.99"></script>
+<script src="js/oyun/gorevler.js?v=1.99"></script>
+<script src="js/oyun/kamplar.js?v=1.99"></script>
+<script src="js/oyun/magara.js?v=1.99"></script>
+<script src="js/oyun/olaylar.js?v=1.99"></script>
+<script src="js/oyun/uretim.js?v=1.99"></script>
+<script src="js/oyun/eylem.js?v=1.99"></script>
+<script src="js/oyun/hayatta-kalma.js?v=1.99"></script>
+<script src="js/oyun/hedefler.js?v=1.99"></script>
+<script src="js/oyun/durum.js?v=1.99"></script>
+<script src="js/oyun/arayuz.js?v=1.99"></script>
+<script src="js/oyun/harita.js?v=1.99"></script>
+<script src="js/oyun/rehber.js?v=1.99"></script>
+<script src="js/oyun/basarimlar.js?v=1.99"></script>
+<script src="js/oyun/kayitlar.js?v=1.99"></script>
+<script src="js/oyun/yenilikler.js?v=1.99"></script>
+<script src="js/oyun/genisleme.js?v=1.99"></script>
+<script src="js/oyun/insa.js?v=1.99"></script>
+<script src="js/oyun/rust-insa.js?v=1.99"></script>
+<script src="js/sahne/rust-insa-sahne.js?v=1.99"></script>
+<script src="js/sahne/ag-oyuncu.js?v=1.99"></script>
+<script src="js/oyun/genisleme2.js?v=1.99"></script>
+<script src="js/oyun/genisleme3.js?v=1.99"></script>
+<script src="js/oyun/genisleme-arayuz.js?v=1.99"></script>
+<script src="js/oyun/uretim-ekrani.js?v=1.99"></script>
+<script src="js/oyun/uretim-sure.js?v=1.99"></script>
+<script src="js/oyun/koruma.js?v=1.99"></script>
+<script src="js/oyun/zorluk.js?v=1.99"></script>
+<script src="js/oyun/iyilestirme.js?v=1.99"></script>
+<script src="js/oyun/ag.js?v=1.99"></script>
+<script src="js/oyun/ag-dunya.js?v=1.99"></script>
+<script src="js/oyun/ag-varlik.js?v=1.99"></script>
+<script src="js/oyun/ag-arayuz.js?v=1.99"></script>
+<script src="js/oyun/ag-ekstra.js?v=1.99"></script>
+<script src="js/oyun/baris.js?v=1.99"></script>
+<script src="js/oyun/fizik.js?v=1.99"></script>
+<script src="js/oyun/zeka.js?v=1.99"></script>
+<script src="js/oyun/hile.js?v=1.99"></script>
+<script src="js/oyun/oynanis.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-1.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-2.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-3.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-yeni.js?v=1.99"></script>
+<script src="js/oyun/notlar.js?v=1.99"></script>
+<script src="js/oyun/komut.js?v=1.99"></script>
+<script src="js/oyun/menu.js?v=1.99"></script>
+<script src="js/oyun/menu-arka.js?v=1.99"></script>
+<script src="js/oyun/giris.js?v=1.99"></script>
+<script src="js/oyun/dongu.js?v=1.99"></script>
+</body>
+</html>

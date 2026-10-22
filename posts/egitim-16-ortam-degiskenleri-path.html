@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Ortam Değişkenleri ve PATH</title>
+<meta name="description" content="Ortam değişkenlerinin kapsamı, set ve setx farkı, PATH'e klasör ekleme, setlocal/endlocal ve komut arama sırası.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-08-01 23:03">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Ortam değişkenlerinin kapsamı, set ve setx farkı, PATH&#x27;e klasör ekleme, setlocal/endlocal ve komut arama sırası.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ortam değişkenlerini görüntüleme</a></li><li><a href="#b2">Sık kullanılan sistem değişkenleri</a></li><li><a href="#b3">Kapsam: üç seviye</a></li><li><a href="#b4">PATH&#x27;e güvenli klasör ekleme</a></li><li><a href="#b5">setlocal ve endlocal</a></li><li><a href="#b6">Komut arama sırası</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
+<p>Ortam değişkenleri, Windows ve programların ortak kullandığı adlandırılmış değerlerdir. <code>PATH</code> değişkeni, komutların hangi klasörlerde aranacağını belirler. Batch betiklerinde bunları okumayı, geçici veya kalıcı değiştirmeyi bilmek, betiklerin farklı bilgisayarlarda çalışabilmesi için gereklidir.</p>
+<h2 id="b1">Ortam değişkenlerini görüntüleme</h2>
+<pre>set                    rem tum degiskenleri listeler
+set PATH               rem adi PATH ile baslayanlari listeler
+echo %PATH%            rem PATH'in degerini yazar
+echo %USERPROFILE%     rem C:\Users\kullanici
+where notepad          rem bir komutun/programin bulundugu yeri gosterir</pre>
+<p><code>PATH</code> içindeki klasörleri alt alta görmek için:</p>
+<pre>@echo off
+for %%p in ("%PATH:;=" "%") do echo %%~p
+pause</pre>
+<h2 id="b2">Sık kullanılan sistem değişkenleri</h2>
+<table>
+<thead><tr><th>Değişken</th><th>Örnek değer</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td><code>%USERPROFILE%</code></td><td><code>C:\Users\Ali</code></td><td>Kullanıcı klasörü</td></tr>
+<tr><td><code>%APPDATA%</code></td><td><code>C:\Users\Ali\AppData\Roaming</code></td><td>Uygulama ayarları</td></tr>
+<tr><td><code>%LOCALAPPDATA%</code></td><td><code>C:\Users\Ali\AppData\Local</code></td><td>Yerel uygulama verileri</td></tr>
+<tr><td><code>%TEMP%</code></td><td><code>C:\Users\Ali\AppData\Local\Temp</code></td><td>Geçici dosyalar</td></tr>
+<tr><td><code>%ProgramFiles%</code></td><td><code>C:\Program Files</code></td><td>64 bit programlar</td></tr>
+<tr><td><code>%ProgramFiles(x86)%</code></td><td><code>C:\Program Files (x86)</code></td><td>32 bit programlar</td></tr>
+<tr><td><code>%SystemRoot%</code></td><td><code>C:\Windows</code></td><td>Windows klasörü</td></tr>
+<tr><td><code>%COMPUTERNAME%</code>, <code>%USERNAME%</code></td><td><code>PC01</code>, <code>Ali</code></td><td>Bilgisayar ve kullanıcı adı</td></tr>
+<tr><td><code>%PROCESSOR_ARCHITECTURE%</code></td><td><code>AMD64</code></td><td>İşlemci mimarisi</td></tr>
+<tr><td><code>%CD%</code></td><td><code>C:\Calisma</code></td><td>Geçerli klasör</td></tr>
+<tr><td><code>%ERRORLEVEL%</code></td><td><code>0</code></td><td>Son komutun çıkış kodu</td></tr>
+<tr><td><code>%RANDOM%</code>, <code>%DATE%</code>, <code>%TIME%</code></td><td></td><td>Her okunuşta değişen dinamik değişkenler</td></tr>
+</tbody>
+</table>
+<blockquote>Betik başka kullanıcılarda da çalışacaksa <code>C:\Users\Ali</code> gibi sabit yollar yerine <code>%USERPROFILE%</code> kullanılmalıdır. <code>%ProgramFiles(x86)%</code> ifadesindeki parantez, parantezli bloklar içinde sorun çıkarabilir; bu durumda değer önce bir değişkene alınır.</blockquote>
+<h2 id="b3">Kapsam: üç seviye</h2>
+<table>
+<thead><tr><th>Seviye</th><th>Nasıl ayarlanır?</th><th>Ne kadar sürer?</th></tr></thead>
+<tbody>
+<tr><td>Süreç (geçici)</td><td><code>set ADI=deger</code></td><td>Yalnızca o komut penceresi ve o penceredeki betik çalışırken</td></tr>
+<tr><td>Kullanıcı (kalıcı)</td><td><code>setx ADI deger</code></td><td>Bu kullanıcının sonradan açılan pencerelerinde</td></tr>
+<tr><td>Bilgisayar (kalıcı)</td><td><code>setx ADI deger /M</code> (yönetici gerekir)</td><td>Tüm kullanıcılar için, sonradan açılan pencerelerde</td></tr>
+</tbody>
+</table>
+<pre>@echo off
+rem Geçici: yalnizca bu pencere
+set "PROJE=C:\Projeler"
+
+rem Kalici (kullanici duzeyinde)
+setx PROJE "C:\Projeler"
+
+rem setx, MEVCUT pencerede degeri degistirmez:
+echo %PROJE%     rem setx'ten once ne varsa o gorunur
+pause</pre>
+<ul>
+<li><code>setx</code> değeri hemen mevcut pencereye yansıtmaz; yeni açılan pencerelerde görünür.</li>
+<li><code>setx</code> ile yazılan değer 1024 karakterle sınırlıdır; daha uzun değerler <b>sessizce kesilir</b>.</li>
+<li><code>setx PATH "%PATH%;C:\Araclar"</code> komutu, kullanıcı ve sistem <code>PATH</code> değerlerini birleştirip yalnızca kullanıcıya yazar, kopya ve kesilme sorunlarına yol açar. <b>PATH için <code>setx</code> kullanılmamalıdır.</b></li>
+</ul>
+<h2 id="b4">PATH'e güvenli klasör ekleme</h2>
+<h3>Yalnızca betik çalışırken (geçici)</h3>
+<pre>@echo off
+setlocal
+set "PATH=%PATH%;C:\Araclar"
+aractan_biri.exe
+endlocal</pre>
+<h3>Kalıcı (kullanıcı düzeyinde)</h3>
+<p>Kalıcı değişiklik için PowerShell yöntemi <code>setx</code>'in sorunlarına yol açmaz:</p>
+<pre>powershell -NoProfile -Command "$y=[Environment]::GetEnvironmentVariable('Path','User'); if ($y -notlike '*C:\Araclar*') { [Environment]::SetEnvironmentVariable('Path', ($y.TrimEnd(';') + ';C:\Araclar'), 'User') }"</pre>
+<p>Komut, klasör zaten ekliyse tekrar eklemez. Değişiklik yeni açılan pencerelerde geçerli olur. Grafik arayüzle yapmak için: <b>Başlat &gt; "ortam değişkenleri" &gt; Ortam Değişkenlerini Düzenle &gt; Path</b>.</p>
+<h2 id="b5">setlocal ve endlocal</h2>
+<p><code>setlocal</code>, betiğin yaptığı değişken değişikliklerini betik bitince (veya <code>endlocal</code> komutuyla) geri alır. Böylece betik, çağıran pencerenin değişkenlerini bozmaz.</p>
+<pre>@echo off
+setlocal
+set "GECICI=Sadece bu betikte gecerli"
+echo %GECICI%
+endlocal
+echo [%GECICI%]      rem bos: degisken silindi</pre>
+<p>Bir alt programın hesapladığı değeri <code>setlocal</code> bloğunun dışına çıkarmak için şu yöntem kullanılır:</p>
+<pre>@echo off
+call :hesapla
+echo Sonuc: %SONUC%
+pause
+exit /b
+
+:hesapla
+setlocal
+set /a ARA=6*7
+endlocal &amp; set "SONUC=%ARA%"
+exit /b</pre>
+<p><code>endlocal &amp; set "SONUC=%ARA%"</code> satırında <code>%ARA%</code> genişletmesi, <code>endlocal</code> çalışmadan <b>önce</b> yapıldığı için değer korunur.</p>
+<h2 id="b6">Komut arama sırası</h2>
+<p>Bir komut yazıldığında Windows şu sırayla arar: <b>yerleşik komutlar</b> (<code>dir</code>, <code>echo</code>...), <b>geçerli klasör</b>, ardından <code>PATH</code> içindeki klasörler. Her klasörde <code>PATHEXT</code> değişkenindeki uzantılar sırayla denenir (<code>.COM</code>, <code>.EXE</code>, <code>.BAT</code>, <code>.CMD</code>...).</p>
+<ul>
+<li>Betiğe <code>ping.bat</code>, <code>net.bat</code>, <code>test.bat</code> gibi mevcut komut adları verilmemelidir. Betik içinde <code>ping</code> yazıldığında kendi kendini çağırabilir.</li>
+<li>Aynı adlı komutlardan hangisinin çalışacağını <code>where komut</code> gösterir.</li>
+<li><code>PATH</code> içinde güvenilmeyen veya herkesin yazabildiği klasör bulunmamalıdır; saldırgan oraya sahte program koyabilir.</li>
+</ul>
+<h2 id="b7">Özet</h2>
+<ul>
+<li><code>set</code> geçici, <code>setx</code> kalıcıdır; <code>setx</code> mevcut pencereyi etkilemez ve 1024 karakterle sınırlıdır.</li>
+<li><code>PATH</code> değişikliği için <code>setx</code> yerine geçici <code>set</code> veya PowerShell kullanılır.</li>
+<li>Sabit yollar yerine <code>%USERPROFILE%</code>, <code>%APPDATA%</code> gibi değişkenler kullanılır.</li>
+<li><code>setlocal</code>/<code>endlocal</code> değişken değişikliklerini betikle sınırlar; <code>endlocal &amp; set</code> değeri dışarı çıkarır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

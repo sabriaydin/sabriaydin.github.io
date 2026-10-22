@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Kutu Modeli ve Konumlandırma</title>
+<meta name="description" content="Her HTML öğesinin content, padding, border ve margin katmanları, box-sizing, display türleri ve position özelliği.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-06-16 20:32">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>Her HTML öğesinin content, padding, border ve margin katmanları, box-sizing, display türleri ve position özelliği.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Kutu modeli</a></li><li><a href="#b2">box-sizing: border-box</a></li><li><a href="#b3">Dış boşluk ile ilgili dikkat edilecekler</a></li><li><a href="#b4">display özelliği</a></li><li><a href="#b5">Kenar süsleri</a></li><li><a href="#b6">position özelliği</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
+<p>Tarayıcı, her HTML öğesini dikdörtgen bir kutu olarak çizer. Boşlukları ve boyutları doğru ayarlamak için bu kutunun katmanlarını bilmek gerekir.</p>
+<h2 id="b1">Kutu modeli</h2>
+<p>Her kutu içten dışa doğru dört katmandan oluşur:</p>
+<table>
+<thead><tr><th>Katman</th><th>Özellik</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td>İçerik</td><td><code>width</code>, <code>height</code></td><td>Metnin veya görselin bulunduğu alan</td></tr>
+<tr><td>İç boşluk</td><td><code>padding</code></td><td>İçerik ile kenarlık arasındaki boşluk (arka plan rengi burayı da kaplar)</td></tr>
+<tr><td>Kenarlık</td><td><code>border</code></td><td>Kutunun çerçevesi</td></tr>
+<tr><td>Dış boşluk</td><td><code>margin</code></td><td>Kutunun dışındaki, komşu öğelerle arasındaki boşluk (saydamdır)</td></tr>
+</tbody>
+</table>
+<pre>.kutu {
+  width: 300px;
+  padding: 20px;
+  border: 2px solid #333;
+  margin: 16px;
+}</pre>
+<p>Kısa yazımda değerler saat yönündedir: <code>padding: 10px 20px 10px 20px</code> sırasıyla üst, sağ, alt ve sol anlamına gelir. İki değer (<code>10px 20px</code>) üst-alt ve sağ-solu, tek değer ise dört kenarı belirler. Tek yön için <code>padding-top</code>, <code>margin-left</code> gibi özellikler de vardır.</p>
+<h2 id="b2">box-sizing: border-box</h2>
+<p>Varsayılan olarak <code>width</code>, yalnızca içerik alanının genişliğidir. Yukarıdaki kutunun gerçek genişliği 300 + 20 + 20 + 2 + 2 = <b>344px</b> olur. Bu hesap karışıklığına yol açtığı için çoğu projede şu kural en başa yazılır:</p>
+<pre>*, *::before, *::after {
+  box-sizing: border-box;
+}</pre>
+<p><code>border-box</code> ile <code>width</code>, iç boşluk ve kenarlık dahil toplam genişliği belirtir; kutu 300px olarak kalır.</p>
+<h2 id="b3">Dış boşluk ile ilgili dikkat edilecekler</h2>
+<ul>
+<li><b>Dikey dış boşluklar birleşir.</b> Alt alta iki öğeden üsttekinin <code>margin-bottom: 30px</code>, alttakinin <code>margin-top: 20px</code> değeri varsa aralarındaki boşluk 50px değil, <b>30px</b> (büyük olan) olur.</li>
+<li><code>margin: 0 auto</code> ile genişliği belirli bir blok öğe yatayda ortalanır.</li>
+<li>Negatif dış boşluk verilebilir; ancak öğelerin üst üste binmesine yol açabileceği için dikkatli kullanılmalıdır.</li>
+</ul>
+<pre>.sayfa {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}</pre>
+<h2 id="b4">display özelliği</h2>
+<table>
+<thead><tr><th>Değer</th><th>Davranış</th></tr></thead>
+<tbody>
+<tr><td><code>block</code></td><td>Satırın tamamını kaplar, alt satıra geçer. <code>width</code>, <code>height</code>, <code>margin</code> uygulanır. (<code>div</code>, <code>p</code>, <code>h1</code>, <code>ul</code> varsayılan olarak böyledir.)</td></tr>
+<tr><td><code>inline</code></td><td>Metin içinde akar; <code>width</code> ve <code>height</code> uygulanmaz, dikey <code>margin</code> etki etmez. (<code>span</code>, <code>a</code>, <code>strong</code> varsayılan olarak böyledir.)</td></tr>
+<tr><td><code>inline-block</code></td><td>Satır içinde akar ancak <code>width</code>, <code>height</code> ve <code>margin</code> uygulanır. Düğmeler için uygundur.</td></tr>
+<tr><td><code>none</code></td><td>Öğe sayfada hiç yer kaplamaz (gizlenir).</td></tr>
+<tr><td><code>flex</code>, <code>grid</code></td><td>Yerleşim düzenleri. Sonraki yazılarda anlatılır.</td></tr>
+</tbody>
+</table>
+<h2 id="b5">Kenar süsleri</h2>
+<pre>.kart {
+  border-radius: 12px;                 /* yuvarlak köşe */
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+  overflow: hidden;                     /* taşan içeriği keser */
+}</pre>
+<h2 id="b6">position özelliği</h2>
+<p><code>position</code>, bir öğenin normal akıştan çıkıp başka bir yere yerleştirilmesini sağlar. <code>top</code>, <code>right</code>, <code>bottom</code>, <code>left</code> özellikleri konumu belirler.</p>
+<table>
+<thead><tr><th>Değer</th><th>Davranış</th></tr></thead>
+<tbody>
+<tr><td><code>static</code></td><td>Varsayılan. Normal akışta kalır; <code>top</code> ve <code>left</code> etkisizdir.</td></tr>
+<tr><td><code>relative</code></td><td>Normal yerine göre kaydırılır; kapladığı alan korunur. Çoğunlukla <code>absolute</code> çocukları için referans olarak kullanılır.</td></tr>
+<tr><td><code>absolute</code></td><td>Normal akıştan çıkar. Konumlandırılmış (<code>static</code> olmayan) en yakın üst öğeye göre yerleşir.</td></tr>
+<tr><td><code>fixed</code></td><td>Tarayıcı penceresine göre sabitlenir; kaydırınca yerinde kalır (sabit üst menü, "yukarı çık" düğmesi).</td></tr>
+<tr><td><code>sticky</code></td><td>Kaydırma belirli bir noktaya ulaşana kadar normal akışta, sonra yapışık kalır.</td></tr>
+</tbody>
+</table>
+<pre>.kart { position: relative; }
+.etiket {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.ust-menu {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}</pre>
+<p>Üst üste binen öğelerde hangisinin önde görüneceğini <code>z-index</code> belirler; değeri yüksek olan öne çıkar. <code>z-index</code> yalnızca konumlandırılmış öğelerde etkilidir.</p>
+<h2 id="b7">Özet</h2>
+<ul>
+<li>Kutu: içerik + <code>padding</code> + <code>border</code> + <code>margin</code>.</li>
+<li>Boyut hesabını kolaylaştırmak için <code>box-sizing: border-box</code> kullanılır.</li>
+<li>Dikey <code>margin</code> değerleri birleşir.</li>
+<li><code>position: relative</code> ve <code>absolute</code> birlikte; <code>fixed</code> ve <code>sticky</code> ise sabit öğeler için kullanılır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

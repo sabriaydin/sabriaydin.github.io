@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parola Defteri: çevrimdışı, şifreli parola yöneticisi</title><meta name="description" content="Parola Defteri, parolalarınızı yalnızca sizin bilgisayarınızda şifreli saklayan çevrimdışı bir Windows programıdır.">
+<meta property="og:title" content="Parola Defteri: çevrimdışı, şifreli parola yöneticisi"><meta property="og:description" content="Parola Defteri, parolalarınızı yalnızca sizin bilgisayarınızda şifreli saklayan çevrimdışı bir Windows programıdır."><meta property="og:type" content="website">
+<meta name="theme-color" content="#0f1619">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔐%3C/text%3E%3C/svg%3E">
+<script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
+<link rel="stylesheet" href="css/stil.css"></head><body>
+<canvas id="c" aria-hidden="true"></canvas>
+<nav><a class="br" href="index.html">Parola Defteri</a><a class="h" href="index.html#ozellikler">Özellikler</a><a class="h" href="index.html#sss">SSS</a><a href="guncellemeler.html">Güncellemeler</a><a class="b p" href="#" data-indir>İndir</a></nav>
+<section id="hero"><h1 id="h1">Parola Defteri</h1>
+<p class="lead">Parolalarınız yalnızca sizin bilgisayarınızda durur. Bulut yok, hesap yok, kimseye güvenmeniz gerekmez.</p>
+<div style="max-width:640px"><a class="b p" href="#" data-indir>İndir<span data-surum hidden></span></a><a class="b" href="#" data-vt>VirusTotal raporu</a><a class="b" href="#" data-mail>Bize ulaşın!</a></div>
+<small>Yalnızca Windows için. Çalıştırmadan önce VirusTotal raporunu inceleyebilirsiniz.</small></section>
+<section id="ozellikler">
+  <h2>Kasanızda neler var</h2>
+  <p class="sub">Her özellik aynı işi yapar: verinizi sizde tutar.</p>
+  <div class="g">
+    <div class="t"><h3>Tamamen çevrimdışı</h3><p>Hiçbir sunucuya bağlanmaz. Kayıtlarınız yalnızca bilgisayarınızdaki veriler.dat dosyasında durur.</p></div>
+    <div class="t"><h3>Şifreli kayıtlar</h3><p>Her kayıt AES-GCM ile şifrelenir. Ana parolanız düz metin olarak hiçbir yerde saklanmaz.</p></div>
+    <div class="t"><h3>Bellekte de korumalı</h3><p>Uygulama açıkken bile bellekteki veriler Windows DPAPI ile korunur.</p></div>
+    <div class="t"><h3>Ekran kaydına kapalı</h3><p>Pencerelerden ekran görüntüsü ve video kaydı alınamaz.</p></div>
+    <div class="t"><h3>Kendiliğinden kilitlenir</h3><p>Kopyaladığınız parola kısa süre sonra panodan silinir. Başında değilseniz oturum kilitlenir.</p></div>
+    <div class="t"><h3>İki adımlı giriş</h3><p>Önce ana parola, sonra güvenlik sorusu. 15 hazır sorudan birini seçersiniz. Ekran klavyesi de var.</p></div>
+    <div class="t"><h3>Yedekle ve geri yükle</h3><p>.zip veya .dat yedeği alın, istediğiniz zaman içe aktarın. Aynı kayıtlar ikinci kez eklenmez.</p></div>
+    <div class="t"><h3>Kalıcı silme</h3><p>Sıfırlarken veri dosyası rastgele baytlarla ezilir, sonra silinir. Geri getirilemez.</p></div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2>Kilidi deneyin</h2>
+  <p class="sub">Uygulamanın iki davranışını burada görebilirsiniz.</p>
+  <div class="d">
+    <div class="pn">
+      <h3>Yanlış parola girin</h3>
+      <p>Her hatalı denemede bekleme süresi ikiye katlanır ve en fazla 30 saniyeye çıkar. Uygulamayı kapatıp açmak süreyi sıfırlamaz.</p>
+      <button class="b" id="bf" type="button">Yanlış parola dene</button>
+      <div id="bfo" aria-live="polite">Henüz deneme yok.</div>
+      <div class="bar"><div id="bfb"></div></div>
+    </div>
+    <div class="pn">
+      <h3>Yazın, şifrelenişini görün</h3>
+      <p>Yazdığınız metnin şifreli halinin nasıl göründüğünü canlı izleyin.</p>
+      <input id="pt" type="text" placeholder="Bir parola yazın" autocomplete="off" aria-label="Şifrelenecek metin">
+      <div id="ct" aria-live="polite">…</div>
+      <small>Bu yalnızca görsel bir simülasyondur, gerçek AES-GCM çıktısı değildir.</small>
+    </div>
+  </div>
+</section>
+
+<section id="sss"><h2>Sık sorulanlar</h2><p class="sub">Kurmadan önce akla gelenler.</p><div class="q">
+<details><summary>Ana parolamı unutursam ne olur?</summary><p>Verileri geri getirmenin hiçbir yolu yoktur, çünkü ana parola ve güvenlik sorusu şifreleme anahtarınızdır. Giriş ekranındaki sıfırlama yalnızca verileri silip baştan başlamanızı sağlar.</p></details>
+<details><summary>Verilerim nerede duruyor?</summary><p>Programın klasöründeki veriler.dat dosyasında, yalnızca bu bilgisayarda. Hiçbir sunucuya gönderilmez.</p></details>
+<details><summary>Başka bir bilgisayara nasıl taşırım?</summary><p>Yedek alın (.zip veya .dat), yeni bilgisayarda içe aktarın ve mevcut ana parolanızla giriş yapın.</p></details>
+<details><summary>Geliştirici verilerime erişebilir mi?</summary><p>Hayır. Ana parolanız düz metin saklanmaz. Geliştirici dahil kimse verilerinize erişemez ya da parolanızı sıfırlayamaz.</p></details>
+<details><summary>Yanlış parola girersem?</summary><p>Her hatada bekleme süresi ikiye katlanır, en fazla 30 saniye olur. Programı kapatıp açsanız da bekleme devam eder.</p></details>
+</div></section>
+<section id="son"><h2>Son güncellemeler</h2><p class="sub">Yeni sürümlerde neler değiştiğini buradan takip edin.</p><div data-liste="2"></div><a class="b" href="guncellemeler.html">Tüm güncellemeler</a></section>
+<section class="fm"><h2>Anahtar sizde.</h2><p>Ana parolanızı ve güvenlik sorusunu unutursanız verileri geri getirmenin hiçbir yolu yoktur. Düzenli yedek almayı unutmayın.</p></section>
+<footer>© <span data-yil>2026</span> Parola Defteri. Tüm hakları saklıdır.</footer>
+<script src="veri.js"></script><script src="js/three.min.js"></script><script src="js/site.js"></script><script src="js/ana.js"></script><script src="js/uc.js"></script></body></html>

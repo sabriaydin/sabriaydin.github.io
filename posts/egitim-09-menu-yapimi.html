@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Menü Yapımı</title>
+<meta name="description" content="choice ve set /p ile seçenekli menü kurma, menüye geri dönen döngü, cls, color, title ve timeout kullanımı.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-04-25 20:00">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>choice ve set /p ile seçenekli menü kurma, menüye geri dönen döngü, cls, color, title ve timeout kullanımı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">choice ile menü</a></li><li><a href="#b2">Evet/Hayır sorusu</a></li><li><a href="#b3">set /p ile menü</a></li><li><a href="#b4">Görünümü düzenleme</a></li></ol></nav><!--/px-->
+<p>Birden fazla işi yapan bir script'i kullanışlı hale getirmenin yolu menüdür. Menü için iki yöntem var: tek tuşla seçim yaptıran <code>choice</code> ve yazıp Enter'a basılan <code>set /p</code>.</p>
+<h2 id="b1">choice ile menü</h2>
+<pre>@echo off
+title Ana Menu
+
+:menu
+cls
+echo ==============================
+echo          ANA MENU
+echo ==============================
+echo  1) Not Defteri'ni ac
+echo  2) Hesap makinesini ac
+echo  3) Cikis
+echo.
+choice /c 123 /n /m "Seciminiz (1-3): "
+if errorlevel 3 goto :cikis
+if errorlevel 2 goto :hesap
+if errorlevel 1 goto :notdefteri
+
+:notdefteri
+start notepad
+goto :menu
+
+:hesap
+start calc
+goto :menu
+
+:cikis
+exit /b</pre>
+<ul>
+<li><code>choice /c 123</code> kabul edilen tuşları belirler. <code>/n</code> tuş listesini gizler, <code>/m</code> mesaj yazar.</li>
+<li>Basılan tuşun sırası <code>errorlevel</code> olarak döner: 1. tuş için 1, 2. tuş için 2...</li>
+<li><code>if errorlevel n</code> "n veya daha büyük" demek olduğundan kontroller <b>büyükten küçüğe</b> yazılır. Küçükten başlarsan her seçim 1. satırı yakalar.</li>
+<li>Her bölüm <code>goto :menu</code> ile bitmeli; yoksa akış bir sonraki etikete düşer.</li>
+</ul>
+<h2 id="b2">Evet/Hayır sorusu</h2>
+<pre>choice /c EH /n /m "Devam edilsin mi? (E/H): "
+if errorlevel 2 (
+    echo Iptal edildi.
+    exit /b
+)
+echo Devam ediliyor...</pre>
+<h2 id="b3">set /p ile menü</h2>
+<p>Kullanıcının bir isim veya yol yazması gereken yerlerde <code>set /p</code> kullan. Geçersiz bir giriş olursa menüye geri döner:</p>
+<pre>@echo off
+:menu
+cls
+echo 1) Selam ver
+echo 2) Tarihi goster
+echo 3) Cikis
+echo.
+set "secim="
+set /p "secim=Seciminiz: "
+if "%secim%"=="1" goto :selam
+if "%secim%"=="2" goto :tarih
+if "%secim%"=="3" exit /b
+echo Gecersiz secim!
+timeout /t 2 &gt;nul
+goto :menu
+
+:selam
+set /p "ad=Adin: "
+echo Merhaba %ad%!
+pause
+goto :menu
+
+:tarih
+echo Bugun: %date%
+pause
+goto :menu</pre>
+<p><code>set "secim="</code> satırı, bir önceki turdaki seçimin kalmasını önler. Kullanıcı sadece Enter'a basarsa <code>set /p</code> değişkeni değiştirmez; bu satır olmasaydı eski seçim tekrar çalışırdı.</p>
+<h2 id="b4">Görünümü düzenleme</h2>
+<table>
+<thead><tr><th>Komut</th><th>Ne yapar</th></tr></thead>
+<tbody>
+<tr><td><code>cls</code></td><td>Ekranı temizler</td></tr>
+<tr><td><code>title Başlık</code></td><td>Pencere başlığını ayarlar</td></tr>
+<tr><td><code>color 0A</code></td><td>Renk: ilk hane arka plan, ikinci hane yazı rengi (0 siyah, A açık yeşil). Tüm renkler için <code>color /?</code></td></tr>
+<tr><td><code>timeout /t 3</code></td><td>3 saniye bekler (<code>/nobreak</code> tuşla atlamayı engeller)</td></tr>
+<tr><td><code>mode con cols=80 lines=25</code></td><td>Pencere boyutunu ayarlar</td></tr>
+</tbody>
+</table>
+<p>Sonraki derste döngülerde ve özel karakterlerde işini kolaylaştıracak ileri seviye ayrıntıları göreceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Etiketler, goto ve call ile Alt Programlar</title>
+<meta name="description" content="Etiket tanımlama, goto ile atlama, call ile alt program çağırma, parametre geçme ve exit /b kullanımı.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-03-26 20:48">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Etiket tanımlama, goto ile atlama, call ile alt program çağırma, parametre geçme ve exit /b kullanımı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Etiket ve goto</a></li><li><a href="#b2">goto ile tekrar (döngü)</a></li><li><a href="#b3">call ile alt program</a></li><li><a href="#b4">Alt programa parametre göndermek</a></li><li><a href="#b5">Alt programdan değer döndürmek</a></li><li><a href="#b6">Başka bir batch dosyasını çağırmak</a></li></ol></nav><!--/px-->
+<p>Script büyüdükçe tek bir uzun liste okunmaz hale gelir. Etiketler kodu bölümlere ayırır; <code>goto</code> bir etikete atlar, <code>call</code> ise bir bölümü alt program gibi çağırıp işi bitince geri döner.</p>
+<h2 id="b1">Etiket ve goto</h2>
+<p>Etiket, satır başında iki nokta (<code>:</code>) ile başlayan bir isimdir. <code>goto</code> komutu akışı o etikete taşır.</p>
+<pre>@echo off
+echo 1. adim
+goto :son
+echo Bu satir hic calismaz
+:son
+echo Bitti
+pause</pre>
+<h2 id="b2">goto ile tekrar (döngü)</h2>
+<pre>@echo off
+set /a sayac=1
+:basla
+echo Sayac: %sayac%
+set /a sayac+=1
+if %sayac% leq 5 goto :basla
+echo Dongu bitti
+pause</pre>
+<p><code>goto :eof</code> özel bir etikettir: dosyanın sonuna gider, yani script'i (veya çağrılan alt programı) bitirir. Ayrıca tanımlamana gerek yoktur.</p>
+<h2 id="b3">call ile alt program</h2>
+<p><code>call :etiket</code> yazarsan akış etikete gider, <code>exit /b</code> veya <code>goto :eof</code> ile karşılaşınca <code>call</code> satırının hemen altına geri döner.</p>
+<pre>@echo off
+call :selamla
+echo Ana programa donuldu
+call :selamla
+pause
+exit /b
+
+:selamla
+echo Merhaba!
+exit /b</pre>
+<p>Ana akışın sonuna <code>exit /b</code> koymak önemlidir. Koymazsan akış alt programların içine "düşer" ve onları istemeden çalıştırır.</p>
+<h2 id="b4">Alt programa parametre göndermek</h2>
+<p>Alt programa verdiğin değerler alt programın içinde <code>%1</code>, <code>%2</code> olarak okunur. <code>%~1</code> yazımı tırnakları temizler.</p>
+<pre>@echo off
+call :selamla Ali 25
+call :selamla "Ayse Yilmaz" 30
+pause
+exit /b
+
+:selamla
+echo Merhaba %~1, yasin %2.
+exit /b</pre>
+<h2 id="b5">Alt programdan değer döndürmek</h2>
+<p>Batch'te "return" yoktur. Alt programın içinde bir değişkeni ayarlarsın ve çağıran yer onu okur:</p>
+<pre>@echo off
+call :topla 5 3
+echo Sonuc: %sonuc%
+call :topla 10 20
+echo Sonuc: %sonuc%
+pause
+exit /b
+
+:topla
+set /a sonuc=%1+%2
+exit /b</pre>
+<p><code>exit /b 1</code> gibi bir sayı yazarsan o sayı hata kodu olarak döner (8. derste).</p>
+<h2 id="b6">Başka bir batch dosyasını çağırmak</h2>
+<p>Başka bir <code>.bat</code> dosyasını <code>call</code> ile çağırırsan iş bitince senin script'ine geri döner. <code>call</code> kullanmadan çağırırsan geri dönüş olmaz; çağrılan dosya bitince senin script'in de sonlanır.</p>
+<pre>call yedekle.bat
+echo Yedekleme bitti, devam ediliyor</pre>
+<p>Sonraki derste script'e dışarıdan değer göndermeyi ve dosya yolu parçalarını okumayı öğreneceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

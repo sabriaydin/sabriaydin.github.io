@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Resim Boyutlandırıcı ve Sıkıştırıcı</title>
+<meta name="description" content="Bir resmi istediğin genişliğe küçült ve kalite ayarıyla dosya boyutunu azalt; işlem tamamen tarayıcında yapılır, resim hiçbir yere yüklenmez.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-10-22 16:15">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir resmi istediğin genişliğe küçült ve kalite ayarıyla dosya boyutunu azalt; işlem tamamen tarayıcında yapılır, resim hiçbir yere yüklenmez.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Ne zaman kullanılır?</a></li></ol></nav><!--/px-->
+<p>Büyük boyutlu fotoğraflar e-postaya eklenirken reddedilebilir veya bir web sitesinde sayfanın yavaş açılmasına yol açar. Bu araç, resmi seçtiğin genişliğe göre küçültür ve JPEG kalitesini ayarlayarak dosya boyutunu azaltır.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <label for="rb-dosya">Resim seç
+    <input type="file" id="rb-dosya" accept="image/*">
+  </label>
+  <div class="satir">
+    <label for="rb-genislik"><span>Hedef genişlik: <span id="rb-genislikd">800</span> px</span><input type="range" id="rb-genislik" min="50" max="4000" value="800"></label>
+    <label for="rb-kalite"><span>JPEG kalitesi: %<span id="rb-kalited">80</span></span><input type="range" id="rb-kalite" min="10" max="100" value="80"></label>
+  </div>
+  <p class="not" id="rb-bilgi"></p>
+  <canvas id="rb-tuval" style="display:none"></canvas>
+  <img id="rb-onizleme" alt="Yeniden boyutlandırılmış resim önizlemesi" style="max-width:100%;border:1px solid #8f8a82;border-radius:8px;display:none">
+  <div class="dugmeler"><a id="rb-indir" download="kucultulmus.jpg" style="display:none;text-decoration:none"><button type="button">İndir</button></a></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let resim=null;
+const isle=()=>{
+  if(!resim)return;
+  const hedefG=+$('rb-genislik').value,oran=hedefG/resim.width,hedefY=Math.round(resim.height*oran);
+  const c=$('rb-tuval');c.width=hedefG;c.height=hedefY;
+  const ctx=c.getContext('2d');ctx.drawImage(resim,0,0,hedefG,hedefY);
+  const kalite=+$('rb-kalite').value/100;
+  c.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    $('rb-onizleme').src=url;$('rb-onizleme').style.display='block';
+    $('rb-indir').href=url;$('rb-indir').style.display='inline-block';
+    $('rb-bilgi').textContent='Yeni boyut: '+hedefG+' × '+hedefY+' px — dosya boyutu: '+(blob.size/1024).toFixed(1)+' KB (orijinal: '+(resim._boyut/1024).toFixed(1)+' KB)'
+  },'image/jpeg',kalite)};
+$('rb-dosya').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  $('rb-bilgi').textContent='Yükleniyor...';
+  const img=new Image();
+  img.onload=()=>{resim=img;resim._boyut=f.size;$('rb-genislik').max=Math.max(img.width,4000);$('rb-genislik').value=Math.min(img.width,800);$('rb-genislikd').textContent=$('rb-genislik').value;isle()};
+  img.src=URL.createObjectURL(f)});
+['rb-genislik','rb-kalite'].forEach(i=>$(i).addEventListener('input',()=>{$('rb-genislikd').textContent=$('rb-genislik').value;$('rb-kalited').textContent=$('rb-kalite').value;isle()}));
+})();
+</script>
+</div>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li><b>Resim seç</b> ile bilgisayarındaki bir fotoğrafı yükle (yükleme, resmi herhangi bir sunucuya göndermez; tarayıcıda açılır).</li>
+<li><b>Hedef genişliği</b> ayarla; yükseklik, resmin oranına göre otomatik hesaplanır.</li>
+<li><b>JPEG kalitesini</b> düşürerek dosya boyutunu daha da azaltabilirsin; %70-80 arası genellikle göz ile fark edilmeyen bir kalite kaybıyla belirgin boyut tasarrufu sağlar.</li>
+<li><b>İndir</b> düğmesiyle sonucu bilgisayarına kaydet.</li>
+</ol>
+<h2 id="b3">Ne zaman kullanılır?</h2>
+<ul>
+<li>E-posta veya form eklerinde dosya boyutu sınırını aşan fotoğrafları küçültmek için.</li>
+<li>Bir web sitesine veya foruma yüklenecek görselin yüklenme süresini azaltmak için.</li>
+<li>Telefon kamerasından alınan, gerçekte ihtiyaçtan çok daha yüksek çözünürlüklü fotoğrafları paylaşım için küçültmek için.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

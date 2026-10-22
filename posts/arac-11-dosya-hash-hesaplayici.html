@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dosya ve Metin Hash (Özet) Hesaplayıcı</title>
+<meta name="description" content="Bir dosyanın veya metnin SHA-256, SHA-1, SHA-384 ya da SHA-512 özetini tarayıcıda hesapla; dosya bütünlüğünü doğrulamak için kullan.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-10-22 16:05">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir dosyanın veya metnin SHA-256, SHA-1, SHA-384 ya da SHA-512 özetini tarayıcıda hesapla; dosya bütünlüğünü doğrulamak için kullan.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Hash (özet) ne işe yarar?</a></li><li><a href="#b4">Gizlilik</a></li></ol></nav><!--/px-->
+<p>Hash (özet), bir dosyanın veya metnin içeriğine göre üretilen, tek yönlü ve sabit uzunlukta bir koddur. İçerik bir bit bile değişse hash tamamen farklı çıkar; bu yüzden indirilen bir dosyanın bozulup bozulmadığını veya kaynağıyla aynı olup olmadığını doğrulamak için kullanılır.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <div class="satir">
+    <label for="hs-alg">Algoritma
+      <select id="hs-alg"><option value="SHA-256" selected>SHA-256</option><option value="SHA-1">SHA-1</option><option value="SHA-384">SHA-384</option><option value="SHA-512">SHA-512</option></select>
+    </label>
+  </div>
+  <label for="hs-dosya">Dosya seç
+    <input type="file" id="hs-dosya">
+  </label>
+  <p class="not">veya aşağıya doğrudan metin yapıştır:</p>
+  <label for="hs-metin">Metin
+    <textarea id="hs-metin" placeholder="Hash'i hesaplanacak metni buraya yapıştır"></textarea>
+  </label>
+  <div class="dugmeler">
+    <button type="button" id="hs-hesapla">Hesapla</button>
+    <button type="button" id="hs-temizle" class="ikinci">Temizle</button>
+  </div>
+  <p class="not" id="hs-durum" role="status" aria-live="polite"></p>
+  <div class="kod" id="hs-sonuc-kutusu" style="display:none">
+    <b>Özet:</b><code id="hs-sonuc"></code>
+    <button type="button" class="ikinci" id="hs-kopyala">Kopyala</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const hexle=buf=>[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+const goster=hex=>{$('hs-sonuc').textContent=hex;$('hs-sonuc-kutusu').style.display='flex'};
+const hesaplaBuf=async buf=>{
+  $('hs-durum').textContent='Hesaplanıyor...';
+  try{
+    const ozet=await crypto.subtle.digest($('hs-alg').value,buf);
+    goster(hexle(ozet));
+    $('hs-durum').textContent='Tamamlandı.'}
+  catch(e){$('hs-durum').textContent='Hesaplanamadı: '+e.message}};
+$('hs-hesapla').onclick=async()=>{
+  $('hs-sonuc-kutusu').style.display='none';$('hs-durum').textContent='';
+  const dosya=$('hs-dosya').files[0];
+  if(dosya){await hesaplaBuf(await dosya.arrayBuffer());return}
+  const metin=$('hs-metin').value;
+  if(!metin){$('hs-durum').textContent='Bir dosya seç veya metin yapıştır.';return}
+  await hesaplaBuf(new TextEncoder().encode(metin))};
+$('hs-temizle').onclick=()=>{$('hs-dosya').value='';$('hs-metin').value='';$('hs-durum').textContent='';$('hs-sonuc-kutusu').style.display='none'};
+$('hs-kopyala').onclick=()=>Arac.kopyala($('hs-sonuc').textContent,$('hs-kopyala'));
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li><b>Algoritmayı</b> seç; dosya doğrulamada genellikle SHA-256 kullanılır.</li>
+<li>Bir <b>dosya seç</b> veya alttaki kutuya bir metin yapıştır (dosya seçiliyse metin kutusu dikkate alınmaz).</li>
+<li><b>Hesapla</b> düğmesine bas, sonucu <b>Kopyala</b> ile al.</li>
+<li>Elde ettiğin özeti, kaynağın (indirme sayfası, geliştirici vb.) yayınladığı özetle karşılaştır; ikisi birbirinin aynı olmalıdır.</li>
+</ol>
+<h2 id="b3">Hash (özet) ne işe yarar?</h2>
+<ul>
+<li><b>İndirilen dosyanın bütünlüğünü doğrulama:</b> Büyük bir dosya indirirken ağ hatası dosyayı bozabilir; hesaplanan özet, kaynaktaki özetle eşleşmiyorsa dosya yeniden indirilmelidir.</li>
+<li><b>Dosyanın değiştirilip değiştirilmediğini anlama:</b> Aynı dosyanın iki farklı kopyasının özeti aynıysa içerikleri bit bit birbirinin aynısıdır.</li>
+<li><b>Parola saklama:</b> Siteler parolaları düz metin olarak değil, hash'lenmiş biçimde saklar; bu araç o işlemin basit bir gösterimidir.</li>
+</ul>
+<h2 id="b4">Gizlilik</h2>
+<p>Seçilen dosya veya yazılan metin tarayıcıdan dışarı gönderilmez; hesaplama tamamen bu sekmede, tarayıcının yerleşik şifreleme kütüphanesiyle (Web Crypto API) yapılır.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

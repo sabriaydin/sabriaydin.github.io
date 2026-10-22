@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: for Döngüleri</title>
+<meta name="description" content="for ile liste, sayı aralığı, dosya, klasör ve metin dosyası satırları üzerinde döngü kurma.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-03-24 09:53">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>for ile liste, sayı aralığı, dosya, klasör ve metin dosyası satırları üzerinde döngü kurma.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Liste üzerinde döngü</a></li><li><a href="#b2">Sayı aralığı: for /l</a></li><li><a href="#b3">Dosyalar üzerinde döngü</a></li><li><a href="#b4">Klasörler üzerinde döngü: for /d</a></li><li><a href="#b5">Alt klasörlerle birlikte: for /r</a></li><li><a href="#b6">Metin dosyasını satır satır okumak: for /f</a></li><li><a href="#b7">Komut çıktısını değişkene almak</a></li><li><a href="#b8">Dikkat: döngü içinde değişken güncelleme</a></li></ol></nav><!--/px-->
+<p><code>for</code> döngüsü aynı işi bir listedeki her öğe için tekrar eder. Dosyaları tek tek işlemek, sayı saymak veya bir metin dosyasını satır satır okumak için kullanılır.</p>
+<p>Önemli kural: Döngü değişkeni batch dosyasında <b>iki yüzde</b> (<code>%%i</code>), doğrudan komut satırına yazarken <b>tek yüzde</b> (<code>%i</code>) ile yazılır. Bu derste hep batch dosyası yazımını kullanıyoruz.</p>
+<h2 id="b1">Liste üzerinde döngü</h2>
+<pre>@echo off
+for %%i in (elma armut kiraz) do echo Meyve: %%i
+pause</pre>
+<h2 id="b2">Sayı aralığı: for /l</h2>
+<p><code>for /l</code> üç değer alır: başlangıç, adım, bitiş.</p>
+<pre>@echo off
+rem 1'den 5'e kadar say
+for /l %%i in (1,1,5) do echo Sayi: %%i
+
+rem 10'dan 0'a kadar ikişer ikişer geri say
+for /l %%i in (10,-2,0) do echo %%i
+pause</pre>
+<h2 id="b3">Dosyalar üzerinde döngü</h2>
+<pre>@echo off
+for %%f in (*.txt) do (
+    echo Dosya: %%f
+    echo Boyut: %%~zf bayt
+)
+pause</pre>
+<p>Jokerler (<code>*</code> ve <code>?</code>) kullanılabilir. <code>%%~zf</code> gibi <code>~</code> ile başlayan ifadeler dosyanın bilgisini verir; 6. derste ayrıntılı göreceksin.</p>
+<h2 id="b4">Klasörler üzerinde döngü: for /d</h2>
+<pre>@echo off
+for /d %%d in (*) do echo Klasor: %%d
+pause</pre>
+<h2 id="b5">Alt klasörlerle birlikte: for /r</h2>
+<pre>@echo off
+for /r "C:\Belgelerim" %%f in (*.pdf) do echo %%f
+pause</pre>
+<h2 id="b6">Metin dosyasını satır satır okumak: for /f</h2>
+<p><code>for /f</code> bir dosyanın satırlarını, bir komutun çıktısını veya bir metni parçalara ayırarak döngüye sokar. Seçenekler tırnak içinde yazılır:</p>
+<table>
+<thead><tr><th>Seçenek</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><code>delims=,</code></td><td>Satırı hangi karakterden böleceğini belirler (varsayılan: boşluk ve sekme)</td></tr>
+<tr><td><code>tokens=1,3</code></td><td>Bölünen parçalardan hangilerinin alınacağı</td></tr>
+<tr><td><code>skip=1</code></td><td>Baştaki 1 satırı atla (başlık satırı gibi)</td></tr>
+<tr><td><code>usebackq</code></td><td>Dosya adını çift tırnak içinde verebilmeni sağlar</td></tr>
+</tbody>
+</table>
+<p>Örnek: <code>liste.csv</code> dosyası şöyle olsun:</p>
+<pre>ad,sehir
+Ali,Ankara
+Ayse,Izmir
+Veli,Bursa</pre>
+<pre>@echo off
+for /f "skip=1 tokens=1,2 delims=," %%a in (liste.csv) do (
+    echo %%a sehri: %%b
+)
+pause</pre>
+<p>Birinci parça <code>%%a</code> değişkenine, ikinci parça bir sonraki harf olan <code>%%b</code> değişkenine otomatik atanır.</p>
+<h2 id="b7">Komut çıktısını değişkene almak</h2>
+<p>Tek tırnak içine yazılan komutun çıktısı döngüde satır satır işlenir. Bu yöntemle bir komutun sonucunu değişkende saklayabilirsin:</p>
+<pre>@echo off
+for /f "delims=" %%a in ('hostname') do set "pc=%%a"
+echo Bilgisayar adi: %pc%
+
+for /f "delims=" %%a in ('dir /b /a-d') do echo Bu klasorde dosya var: %%a
+pause</pre>
+<h2 id="b8">Dikkat: döngü içinde değişken güncelleme</h2>
+<p>Bir parantez bloğunun içinde <code>%degisken%</code> yazımı, blok çalışmaya başlamadan önce <b>tek seferde</b> değerlendirilir. Bu yüzden döngü içinde değeri değişen bir değişkeni <code>%sayac%</code> ile yazdırırsan hep eski değeri görürsün. Çözüm gecikmeli genişletmedir (<code>!sayac!</code>); 10. derste anlatıyoruz.</p>
+<p>Sonraki derste kodu bölümlere ayırmayı sağlayan etiketleri, <code>goto</code> ve <code>call</code> komutlarını öğreneceksin.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Özel Karakter Dönüştürücü</title>
+<meta name="description" content="&lt;, &gt;, &amp; ve tırnak gibi karakterleri HTML kodlarına çevir ya da kodlardan geri dönüştür.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-04-03 09:35">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>&lt;, &gt;, &amp; ve tırnak gibi karakterleri HTML kodlarına çevir ya da kodlardan geri dönüştür.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Hangi karakterler çevrilir?</a></li><li><a href="#b4">Ne zaman gerekir?</a></li></ol></nav><!--/px-->
+<p>HTML'de <code>&lt;</code> ve <code>&gt;</code> karakterleri etiket başlatır. Bir yazıda kod örneği göstermek istiyorsan bu karakterleri <code>&amp;lt;</code> ve <code>&amp;gt;</code> gibi özel kodlara çevirmen gerekir. Bu araç dönüşümü senin yerine yapar; ters yönde de çalışır.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <label for="g">Metin veya kod</label>
+  <textarea id="g" style="min-height:130px" spellcheck="false" autocomplete="off"></textarea>
+  <div class="satir">
+    <label for="mod">İşlem
+      <select id="mod">
+        <option value="e">Kodlara çevir (&lt; → &amp;lt;)</option>
+        <option value="d">Kodlardan geri çevir (&amp;lt; → &lt;)</option>
+      </select>
+    </label>
+    <label class="onay" for="tr"><input type="checkbox" id="tr"> Türkçe harfleri de sayısal koda çevir</label>
+  </div>
+  <label for="c">Sonuç</label>
+  <textarea id="c" style="min-height:130px" readonly spellcheck="false"></textarea>
+  <div class="dugmeler">
+    <button type="button" data-kopyala="c">Sonucu kopyala</button>
+    <button type="button" class="ikinci" id="takas">Sonucu girdi yap</button>
+    <button type="button" class="ikinci" id="ornek">Örnek yükle</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const kodla=(s,tr)=>{s=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return tr?s.replace(/[^\x00-\x7F]/gu,c=>'&#'+c.codePointAt(0)+';'):s};
+const coz=s=>{const t=document.createElement('textarea');t.innerHTML=s;return t.value};
+const islem=()=>{const e=$('mod').value==='e';$('tr').disabled=!e;$('c').value=e?kodla($('g').value,$('tr').checked):coz($('g').value)};
+['g','mod','tr'].forEach(i=>$(i).addEventListener('input',islem));
+$('takas').onclick=()=>{$('g').value=$('c').value;$('mod').value=$('mod').value==='e'?'d':'e';islem()};
+$('ornek').onclick=()=>{$('mod').value='e';$('g').value='<p class="not">Ayşe & Ali: "1 < 2" doğru mu?</p>';islem()};
+islem();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li>Üstteki kutuya kodunu veya metnini yaz ya da yapıştır.</li>
+<li><b>İşlem</b> olarak kodlara çevirmeyi ya da geri çevirmeyi seç; sonuç altta anında görünür.</li>
+<li><b>Sonucu kopyala</b> düğmesiyle alıp sayfana yapıştır.</li>
+</ol>
+<h2 id="b3">Hangi karakterler çevrilir?</h2>
+<table>
+<thead><tr><th>Karakter</th><th>Kod</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;</code></td><td><code>&amp;lt;</code></td></tr>
+<tr><td><code>&gt;</code></td><td><code>&amp;gt;</code></td></tr>
+<tr><td><code>&amp;</code></td><td><code>&amp;amp;</code></td></tr>
+<tr><td><code>"</code></td><td><code>&amp;quot;</code></td></tr>
+<tr><td><code>'</code></td><td><code>&amp;#39;</code></td></tr>
+</tbody>
+</table>
+<p>Türkçe harfleri sayısal koda çevirme seçeneği (<code>ğ</code> → <code>&amp;#287;</code>) dosyanı UTF-8 olarak kaydedemediğin nadir durumlarda işe yarar. Normalde <code>&lt;meta charset="utf-8"&gt;</code> yazıp dosyayı UTF-8 kaydetmek yeterlidir.</p>
+<h2 id="b4">Ne zaman gerekir?</h2>
+<ul>
+<li>Blog yazına ya da sayfana HTML kod örneği koyarken (<code>&lt;pre&gt;</code> içinde).</li>
+<li>Kullanıcıdan gelen metni sayfada güvenle göstermek için.</li>
+<li>Başka birinin verdiği, kodlanmış metni okunur hale getirmek için.</li>
+</ul>
+<p>Karakter varlıklarının tam listesi için <a href="html-02-basliklar-paragraflar.html">HTML Rehberi: Başlıklar, Paragraflar ve Metin Biçimlendirme</a> dersine bak.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux nedir? Çekirdek, dağıtım ve açık kaynak</title>
+<meta name="description" content="Linux&#x27;un ne olduğu, çekirdek ile dağıtım arasındaki fark, açık kaynak mantığı ve yaygın dağıtım aileleri.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-01 09:42">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> uname -sr</p><p class="o">Linux 6.8.0</p><p><b>$</b> cat /etc/os-release | head -n 2</p><p class="o">NAME="Ubuntu"</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Linux nedir?</a></li><li><a href="#b2">Çekirdek, dağıtım ve masaüstü farkı</a></li><li><a href="#b3">Açık kaynak ve lisans</a></li><li><a href="#b4">Dağıtım aileleri</a></li><li><a href="#b5">Linux nerelerde kullanılır?</a></li><li><a href="#b6">Linux’a nasıl başlanır?</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
+<p>Linux, bilgisayar donanımı ile programlar arasında köprü kuran açık kaynaklı bir işletim sistemi çekirdeğidir. Günlük konuşmada “Linux” denildiğinde çoğunlukla çekirdeğin yanında araçlar, masaüstü ve programlarla birlikte gelen tam bir işletim sistemi kastedilir. Bu rehber serisinin ilk yazısında temel kavramlar anlatılır.</p>
+<h2 id="b1">Linux nedir?</h2>
+<p>Linux çekirdeği 1991 yılında Linus Torvalds tarafından yazılmaya başlandı. Çekirdek; belleği, işlemciyi, diskleri ve aygıtları yönetir, programların donanıma güvenli biçimde erişmesini sağlar. Bugün telefonlardan (Android) sunuculara, süper bilgisayarlardan akıllı televizyonlara kadar çok geniş bir alanda kullanılır.</p><ul><li><b>Kararlı:</b> Sunucular aylarca, hatta yıllarca yeniden başlatılmadan çalışabilir.</li><li><b>Esnek:</b> Aynı çekirdek küçük bir yönlendiricide de büyük bir veri merkezinde de çalışır.</li><li><b>Ücretsiz ve özgür:</b> Kaynak kodu açıktır; inceleyebilir, değiştirebilir ve dağıtabilirsiniz.</li><li><b>Güvenli yapı:</b> Kullanıcı izinleri ve süreç yalıtımı sistemin temelindedir.</li></ul>
+<h2 id="b2">Çekirdek, dağıtım ve masaüstü farkı</h2>
+<p>Bir Linux sistemi birkaç katmandan oluşur. Bu katmanları ayırmak, “Linux’un birçok sürümü neden var?” sorusunu çözer.</p><table><thead><tr><th>Katman</th><th>Görevi</th><th>Örnek</th></tr></thead><tbody><tr><td>Çekirdek (kernel)</td><td>Donanımı ve kaynakları yönetir</td><td>Linux çekirdeği</td></tr><tr><td>Sistem araçları</td><td>Kabuk, dosya ve ağ komutları, başlatma sistemi</td><td>GNU araçları, systemd</td></tr><tr><td>Paket yöneticisi</td><td>Program kurma, güncelleme ve kaldırma</td><td>apt, dnf, pacman</td></tr><tr><td>Masaüstü ortamı</td><td>Pencereler, menüler, görsel arayüz</td><td>GNOME, KDE Plasma, Xfce</td></tr><tr><td>Dağıtım (distro)</td><td>Hepsinin hazır paket hâlinde derlenmiş biçimi</td><td>Ubuntu, Fedora, Arch</td></tr></tbody></table><p>Dağıtım, bu parçaları bir araya getiren, güncelleme ve destek politikasını belirleyen projedir. Aynı çekirdeği kullanan iki dağıtım, varsayılan programları ve kurulum yöntemleri bakımından birbirinden çok farklı olabilir.</p>
+<h2 id="b3">Açık kaynak ve lisans</h2>
+<p>Linux çekirdeği GNU GPL v2 lisansıyla dağıtılır. Bu lisans; programı çalıştırma, kaynağı inceleme, değiştirme ve aynı lisansla paylaşma özgürlüklerini verir. Ücretsiz olması bu özgürlüğün bir sonucudur, ancak asıl amaç özgürlüktür. Bazı kurumsal dağıtımlar (RHEL, SLES) ücretli destek ve sertifikasyon satar; yazılımın kendisi yine açıktır.</p>
+<h2 id="b4">Dağıtım aileleri</h2>
+<p>Dağıtımların çoğu birkaç büyük aileden türer. Aynı ailedeki dağıtımlar paket biçimini ve komutları paylaşır; bir tanesini öğrenmek diğerlerine geçişi kolaylaştırır.</p><table><thead><tr><th>Aile</th><th>Paket biçimi / yönetici</th><th>Dağıtımlar</th></tr></thead><tbody><tr><td>Debian</td><td>.deb — <code>apt</code></td><td>Debian, Ubuntu, Linux Mint, Pop!_OS</td></tr><tr><td>Red Hat</td><td>.rpm — <code>dnf</code></td><td>Fedora, RHEL, AlmaLinux, Rocky Linux</td></tr><tr><td>Arch</td><td>pkg.tar — <code>pacman</code></td><td>Arch Linux, Manjaro, EndeavourOS</td></tr><tr><td>SUSE</td><td>.rpm — <code>zypper</code></td><td>openSUSE, SLES</td></tr><tr><td>Bağımsız</td><td>Kendi sistemi</td><td>Alpine, Gentoo, NixOS, Void</td></tr></tbody></table><p>Bu sitede dağıtımlar tek tek “Linux İşletim Sistemleri” kategorisinde ele alınmaktadır. Başlangıç için genellikle Ubuntu, Linux Mint veya Fedora önerilir.</p>
+<h2 id="b5">Linux nerelerde kullanılır?</h2>
+<ul><li><b>Sunucular:</b> Web siteleri, veri tabanları ve bulut hizmetlerinin büyük bölümü Linux üzerinde çalışır.</li><li><b>Android:</b> Android, Linux çekirdeği üzerine kuruludur.</li><li><b>Gömülü cihazlar:</b> Yönlendiriciler, televizyonlar, otomobil ekranları, Raspberry Pi.</li><li><b>Geliştirme:</b> Yazılım geliştiricilerin sık tercih ettiği ortamdır; WSL ile Windows içinde de kullanılabilir.</li><li><b>Masaüstü:</b> Günlük kullanıma uygun, bakım gerektirmeyen ve lisans ücreti olmayan bir seçenektir.</li></ul>
+<h2 id="b6">Linux’a nasıl başlanır?</h2>
+<p>Kurmadan denemenin birkaç güvenli yolu vardır:</p><ul><li><b>Canlı USB:</b> Dağıtımın ISO dosyası bir USB belleğe yazılır, bilgisayar bellekten başlatılır; diske hiçbir şey kurulmaz.</li><li><b>Sanal makine:</b> VirtualBox veya VMware ile Windows içinde pencere olarak çalıştırılır.</li><li><b>WSL:</b> Windows 10/11 içinde komut satırı odaklı Linux ortamı sunar.</li><li><b>İkili kurulum:</b> Windows’un yanına ayrı bölüme kurulur; açılışta seçim yapılır.</li></ul><pre># Windows PowerShell (yönetici) - WSL kurulumu
+wsl --install
+wsl --list --online</pre>
+<h2 id="b7">Özet</h2>
+<ul><li>Linux bir çekirdektir; dağıtımlar çekirdeğe araçlar, paket yöneticisi ve masaüstü ekleyerek tam sistem sunar.</li><li>Çekirdek GPL ile özgürdür; kaynak kodu herkese açıktır.</li><li>Debian, Red Hat, Arch ve SUSE ana dağıtım aileleridir.</li><li>Canlı USB, sanal makine veya WSL ile risksiz denenebilir.</li><li>Sonraki yazı: terminal ve kabuk temelleri.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

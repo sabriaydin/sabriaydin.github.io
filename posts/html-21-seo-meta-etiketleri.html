@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTML Rehberi: Arama Motoru Uyumu (SEO) ve Meta Etiketleri</title>
+<meta name="description" content="title, meta description, başlık yapısı, canonical, robots, Open Graph, JSON-LD yapılandırılmış veri, sitemap.xml ve robots.txt ile sayfanın arama sonuçlarında doğru görünmesi.">
+<meta name="kategori" content="html">
+<meta name="tarih" content="2026-08-08 09:13">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e44d26;--b:#f0a04b">
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>title, meta description, başlık yapısı, canonical, robots, Open Graph, JSON-LD yapılandırılmış veri, sitemap.xml ve robots.txt ile sayfanın arama sonuçlarında doğru görünmesi.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">1. Sayfa başlığı: title</a></li><li><a href="#b2">2. Açıklama: meta description</a></li><li><a href="#b3">3. Başlık yapısı</a></li><li><a href="#b4">4. Dil ve karakter kodlaması</a></li><li><a href="#b5">5. Kanonik adres: canonical</a></li><li><a href="#b6">6. Dizine eklenmeyi denetleme: robots</a></li><li><a href="#b7">7. Paylaşım önizlemesi: Open Graph</a></li><li><a href="#b8">8. Yapılandırılmış veri: JSON-LD</a></li><li><a href="#b9">9. Bağlantı ve görsel düzeni</a></li><li><a href="#b10">10. sitemap.xml ve robots.txt</a></li><li><a href="#b11">11. Google Search Console</a></li><li><a href="#b12">Özet</a></li></ol></nav><!--/px-->
+<p>Arama motoru uyumu (SEO), bir sayfanın arama motorları tarafından doğru anlaşılmasını ve uygun aramalarda gösterilmesini kolaylaştıran çalışmaların tümüdür. Hiçbir teknik ayar sıralamayı garanti etmez; ancak aşağıdaki temel öğeler eksik olduğunda sayfa, doğru içeriğe sahip olsa bile doğru biçimde gösterilemeyebilir.</p>
+<h2 id="b1">1. Sayfa başlığı: title</h2>
+<pre>&lt;title&gt;HTML Formları: input Türleri ve Doğrulama | Sabri Aydın&lt;/title&gt;</pre>
+<ul>
+<li>Her sayfanın <b>benzersiz</b> bir başlığı olmalıdır.</li>
+<li>Önemli ifade başa yakın yazılmalıdır; yaklaşık 50-60 karakteri aşan başlıklar arama sonuçlarında kesilebilir.</li>
+<li>Başlık hem arama sonuçlarında hem tarayıcı sekmesinde görünür.</li>
+</ul>
+<h2 id="b2">2. Açıklama: meta description</h2>
+<pre>&lt;meta name="description" content="form, input türleri, label ve doğrulama ile kullanıcıdan veri alan formların hazırlanması."&gt;</pre>
+<ul>
+<li>Arama sonucunda başlığın altında çıkan özet metin için kullanılır; arama motoru farklı bir metin göstermeyi tercih edebilir.</li>
+<li>Yaklaşık 120-160 karakter, sayfanın içeriğini doğru anlatan ve tıklamaya teşvik eden bir cümle olmalıdır.</li>
+<li>Her sayfa için ayrı yazılmalı, kopyalanmamalıdır.</li>
+</ul>
+<h2 id="b3">3. Başlık yapısı</h2>
+<ul>
+<li>Her sayfada bir adet <code>&lt;h1&gt;</code> bulunmalı ve sayfanın konusunu anlatmalıdır.</li>
+<li>Alt bölümler <code>&lt;h2&gt;</code>, onların alt bölümleri <code>&lt;h3&gt;</code> ile sıralanır; seviye atlanmaz.</li>
+<li>Başlıklar anahtar sözcüklerle doldurulmaz, içeriği doğru yansıtır.</li>
+</ul>
+<h2 id="b4">4. Dil ve karakter kodlaması</h2>
+<pre>&lt;html lang="tr"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</pre>
+<p><code>lang</code>, sayfanın dilini bildirir. <code>viewport</code> etiketi mobil uyumluluk için gereklidir; arama motorları mobil uyumlu sayfaları öncelikli değerlendirir.</p>
+<h2 id="b5">5. Kanonik adres: canonical</h2>
+<p>Aynı içeriğe birden fazla adresten ulaşılabiliyorsa (örn. <code>?sayfa=2</code> eklenmiş adres veya adresin www içeren ve içermeyen sürümü) hangisinin esas adres olduğu belirtilir:</p>
+<pre>&lt;link rel="canonical" href="https://kullanici.github.io/blog/yazi.html"&gt;</pre>
+<h2 id="b6">6. Dizine eklenmeyi denetleme: robots</h2>
+<pre>&lt;meta name="robots" content="index, follow"&gt;      &lt;!-- varsayılan --&gt;
+&lt;meta name="robots" content="noindex"&gt;           &lt;!-- arama sonuçlarına eklenmesin --&gt;</pre>
+<p>Varsayılan davranış zaten <code>index, follow</code> olduğu için çoğu sayfada bu etiket yazılmaz. <code>noindex</code>, yalnızca taslak veya özel sayfalarda kullanılır.</p>
+<h2 id="b7">7. Paylaşım önizlemesi: Open Graph</h2>
+<p>Bir bağlantı sosyal ağlarda veya mesajlaşma uygulamalarında paylaşıldığında görünen başlık, açıklama ve görsel bu etiketlerden alınır:</p>
+<pre>&lt;meta property="og:type" content="article"&gt;
+&lt;meta property="og:title" content="HTML Formları"&gt;
+&lt;meta property="og:description" content="Kullanıcıdan veri alan formların hazırlanması."&gt;
+&lt;meta property="og:url" content="https://kullanici.github.io/blog/formlar.html"&gt;
+&lt;meta property="og:image" content="https://kullanici.github.io/blog/img/kapak.jpg"&gt;
+&lt;meta name="twitter:card" content="summary_large_image"&gt;</pre>
+<p>Paylaşım görseli için yaklaşık 1200x630 piksel boyutu önerilir. <code>og:image</code> tam (mutlak) adres olmalıdır.</p>
+<h2 id="b8">8. Yapılandırılmış veri: JSON-LD</h2>
+<p>Sayfanın ne olduğunu (makale, ürün, tarif vb.) arama motorlarına makine okuyabilir biçimde bildirir. Uygun olduğunda arama sonuçlarında zengin görünüm sağlanabilir.</p>
+<pre>&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "HTML Formları",
+  "datePublished": "2026-10-13",
+  "author": { "@type": "Person", "name": "Sabri Aydın" },
+  "inLanguage": "tr"
+}
+&lt;/script&gt;</pre>
+<p>Yazılan verinin Google'ın <a href="https://search.google.com/test/rich-results">Zengin Sonuçlar Testi</a> aracıyla doğrulanması önerilir.</p>
+<h2 id="b9">9. Bağlantı ve görsel düzeni</h2>
+<ul>
+<li><b>Adresler:</b> Okunabilir ve kısa olmalıdır: <code>/html-rehberi/formlar</code> gibi. Türkçe karakterler adreste kullanılmaz (<code>ı</code> yerine <code>i</code>, <code>ş</code> yerine <code>s</code>).</li>
+<li><b>Görseller:</b> Anlamlı dosya adı ve <code>alt</code> metni verilir (<code>kapak.jpg</code>, <code>IMG_0042.jpg</code> yerine).</li>
+<li><b>İç bağlantılar:</b> İlgili yazılar birbirine açıklayıcı bağlantı metniyle bağlanır.</li>
+<li><b>Hız ve mobil uyum:</b> Sayfa hızı ve mobil kullanılabilirlik arama sıralamasını etkileyen faktörlerdir (bkz. <a href="html-24-performans.html">Performans</a>).</li>
+</ul>
+<h2 id="b10">10. sitemap.xml ve robots.txt</h2>
+<p><b>sitemap.xml</b>, sitedeki sayfaların listesini içerir ve arama motorlarının sayfaları bulmasını kolaylaştırır:</p>
+<pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://kullanici.github.io/blog/formlar.html&lt;/loc&gt;
+    &lt;lastmod&gt;2026-10-13&lt;/lastmod&gt;
+  &lt;/url&gt;
+&lt;/urlset&gt;</pre>
+<p><b>robots.txt</b> sitenin kök dizininde bulunur ve arama motoru botlarına hangi bölümlerin taranabileceğini bildirir. Sitemap adresi de buradan duyurulur:</p>
+<pre>User-agent: *
+Allow: /
+
+Sitemap: https://kullanici.github.io/blog/sitemap.xml</pre>
+<blockquote><code>robots.txt</code>, bir sayfayı gizlemek için güvenli bir yöntem değildir; yalnızca tarayıcı botlara yönelik bir istektir. Gizli kalması gereken içerik sayfaya konulmamalıdır.</blockquote>
+<h2 id="b11">11. Google Search Console</h2>
+<ol>
+<li><a href="https://search.google.com/search-console">search.google.com/search-console</a> adresinde Google hesabıyla oturum açılır.</li>
+<li>Sitenin adresi mülk olarak eklenir ve sahiplik doğrulanır (HTML etiketi veya dosya yöntemiyle).</li>
+<li><b>Sitemaps</b> bölümünden <code>sitemap.xml</code> adresi gönderilir.</li>
+<li><b>Performans</b> raporunda hangi aramalarda kaç gösterim ve tıklama alındığı izlenir; <b>URL Denetimi</b> ile belirli bir sayfanın dizine eklenip eklenmediği kontrol edilir.</li>
+</ol>
+<p>Yeni bir siteyi dizine eklemek günler, bazen haftalar sürebilir.</p>
+<h2 id="b12">Özet</h2>
+<ul>
+<li>Her sayfada benzersiz <code>title</code>, <code>meta description</code> ve tek bir <code>h1</code> bulunmalıdır.</li>
+<li><code>lang</code>, <code>charset</code> ve <code>viewport</code> etiketleri eksiksiz olmalıdır.</li>
+<li>Paylaşım önizlemesi için Open Graph, zengin sonuçlar için JSON-LD kullanılır.</li>
+<li><code>sitemap.xml</code> ve <code>robots.txt</code> hazırlanıp Search Console'a bildirilir.</li>
+<li>Sıralamanın asıl belirleyicisi özgün, işe yarar ve düzenli içeriktir.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

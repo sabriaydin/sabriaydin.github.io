@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rastgele Dolgu Metin Üretici (Lorem Ipsum / Türkçe)</title>
+<meta name="description" content="Tasarım ve düzen denemelerinde kullanılacak, anlamsız Latince (Lorem Ipsum) veya Türkçe dolgu metni üret.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-10-22 16:40">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Tasarım ve düzen denemelerinde kullanılacak, anlamsız Latince (Lorem Ipsum) veya Türkçe dolgu metni üret.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Dolgu metni ne işe yarar?</a></li></ol></nav><!--/px-->
+<p>Bir sayfa düzeni veya tasarım taslağı hazırlarken gerçek metin henüz hazır olmayabilir. Bu durumda yazının uzunluğunu ve genel görünümünü denemek için anlamsız "dolgu" metin kullanılır.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <div class="satir">
+    <label for="li-dil">Dil
+      <select id="li-dil"><option value="la">Latince (Lorem Ipsum)</option><option value="tr">Türkçe</option></select>
+    </label>
+    <label for="li-birim">Birim
+      <select id="li-birim"><option value="kelime">Kelime</option><option value="cumle" selected>Cümle</option><option value="paragraf">Paragraf</option></select>
+    </label>
+    <label for="li-sayi">Sayı
+      <input type="number" id="li-sayi" value="3" min="1" max="100">
+    </label>
+  </div>
+  <div class="dugmeler"><button type="button" id="li-uret">Üret</button></div>
+  <label for="li-cikti">Sonuç</label>
+  <textarea id="li-cikti" readonly></textarea>
+  <div class="dugmeler"><button type="button" data-kopyala="li-cikti" class="ikinci">Kopyala</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const KELIME={
+  la:'lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit voluptate velit esse cillum dolore eu fugiat nulla pariatur'.split(' '),
+  tr:'örnek metin burada yer tutmak amacıyla kullanılan rastgele kelimelerden oluşur tasarımda gerçek içerik yerine geçici olarak konulur sayfa düzeni yazı uzunluğuna göre değişen boşluk dağılımı test edilir okuyucu bu cümlelerin anlamına değil görünümüne bakmalıdır'.split(' ')
+};
+const ilkHarfBuyuk=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const rastgeleKelime=dil=>{const l=KELIME[dil];return l[Math.floor(Math.random()*l.length)]};
+const cumleUret=dil=>{
+  const n=5+Math.floor(Math.random()*9);
+  const kelimeler=Array.from({length:n},()=>rastgeleKelime(dil));
+  return ilkHarfBuyuk(kelimeler.join(' '))+'.'};
+const paragrafUret=dil=>{
+  const n=4+Math.floor(Math.random()*4);
+  return Array.from({length:n},()=>cumleUret(dil)).join(' ')};
+$('li-uret').onclick=()=>{
+  const dil=$('li-dil').value,birim=$('li-birim').value,sayi=Math.max(1,Math.min(100,+$('li-sayi').value||1));
+  let sonuc='';
+  if(birim==='kelime')sonuc=ilkHarfBuyuk(Array.from({length:sayi},()=>rastgeleKelime(dil)).join(' '))+'.';
+  else if(birim==='cumle')sonuc=Array.from({length:sayi},()=>cumleUret(dil)).join(' ');
+  else sonuc=Array.from({length:sayi},()=>paragrafUret(dil)).join('\n\n');
+  $('li-cikti').value=sonuc};
+$('li-uret').click();
+})();
+</script>
+</div>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li><b>Dili</b> (Latince veya Türkçe) ve <b>birimi</b> (kelime, cümle veya paragraf) seç.</li>
+<li>Kaç adet üretileceğini <b>Sayı</b> kutusuna yaz.</li>
+<li><b>Üret</b> düğmesine bas, sonucu <b>Kopyala</b> ile al ve tasarımına yapıştır.</li>
+</ol>
+<h2 id="b3">Dolgu metni ne işe yarar?</h2>
+<p>Bir web sayfası veya belge tasarlarken gerçek metin yazılmadan önce, yazının kapladığı alanı, satır sayısını ve genel dengeyi görmek gerekir. Anlamsız dolgu metni, okuyucunun içeriğe değil düzene odaklanmasını sağlar; bu nedenle gerçek görünen ama anlam taşımayan kelimeler tercih edilir.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
