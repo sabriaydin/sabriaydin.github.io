@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ouo.io / ouo.press Otomatik Atlatma Eklentileri Hakkında</title>
-<meta name="description" content="ouo.io kısaltılmış bağlantılarını otomatik atlatan eklentiler ne yapar ve neden riskli kabul edilir.">
+<title>ouo.io ouo.press Autoclick</title>
+<meta name="description" content="ouo.io ve ouo.press Autoclick eklentisi nedir, ne yapar ve resmi indirme bağlantısı.">
 <meta name="kategori" content="eklentiler">
-<meta name="tarih" content="2026-10-23 10:00">
+<meta name="tarih" content="2026-10-16 11:06">
 <meta name="author" content="Sabri Aydın">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#1e1e21">
@@ -28,20 +28,24 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#00838f;--b:#4dd0e1">
-<!--px--><div class="px-hero"><small>Tarayıcı Eklentileri</small><p>ouo.io kısaltılmış bağlantılarını otomatik atlatan eklentiler ne yapar ve neden riskli kabul edilir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">ouo.io nedir?</a></li><li><a href="#b2">"Otomatik tıklama" eklentileri ne yapar?</a></li><li><a href="#b3">Neden önerilmiyor?</a></li></ol></nav><!--/px-->
-<p><b>ouo.io</b> (ve ouo.press), bağlantıları kısaltıp aradan reklam göstererek gelir elde eden bir bağlantı kısaltma servisidir. Bazı dosya paylaşım ve film/dizi siteleri indirme bağlantılarını bu servis üzerinden kısaltılmış şekilde verir.</p>
+<!--px--><div class="px-hero"><small>Tarayıcı Eklentileri</small><p>ouo.io ve ouo.press Autoclick eklentisi nedir, ne yapar ve resmi indirme bağlantısı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">ouo.io nedir?</a></li><li><a href="#b2">Eklenti ne yapar?</a></li><li><a href="#b3">Resmi indirme bağlantısı</a></li><li><a href="#b4">Kurulum ve notlar</a></li></ol></nav><!--/px-->
+<p><b>ouo.io ouo.press Autoclick</b> (geliştirici: Jan Klass), ouo.io ve ouo.press bağlantı kısaltma sitelerindeki bekleme ve doğrulama adımlarını otomatik geçen bir Firefox eklentisidir.</p>
 <h2 id="b1">ouo.io nedir?</h2>
-<p>Bir bağlantıya tıklandığında, asıl hedefe gitmeden önce birkaç saniye bekleme ve bir reklam sayfası gösterir; bazen de "resimdeki şekli seç" gibi bir doğrulama ister. Servisin geliri bu reklamlardan gelir.</p>
-<h2 id="b2">"Otomatik tıklama" eklentileri ne yapar?</h2>
-<p>Bu bekleme ve doğrulama adımını otomatik geçmek için yazılmış, genellikle tek kişi tarafından geliştirilen ve kısa ömürlü tarayıcı eklentileri/betikleri vardır. Sayfadaki geri sayımı ve devam düğmesini kod yoluyla otomatik tetiklerler.</p>
-<h2 id="b3">Neden önerilmiyor?</h2>
+<p>ouo.io (ve ouo.press), bağlantıları kısaltıp aradan reklam göstererek gelir elde eden bir bağlantı kısaltma servisidir. Bazı dosya paylaşım ve film/dizi siteleri indirme bağlantılarını bu servis üzerinden kısaltılmış şekilde verir. Bir bağlantıya tıklandığında, asıl hedefe gitmeden önce birkaç saniye bekleme ve bazen bir "doğrulama" (captcha) adımı gösterir.</p>
+<h2 id="b2">Eklenti ne yapar?</h2>
+<p>Eklentinin resmi açıklamasına göre, ouo.io ve ouo.press sayfalarındaki <b>"Captcha"</b> ve <b>"İndir"</b> düğmelerine otomatik olarak tıklar; böylece bekleme ve doğrulama adımları elle geçilmek zorunda kalınmaz.</p>
+<h2 id="b3">Resmi indirme bağlantısı</h2>
+<p class="px-dl">Mozilla Firefox: <a href="https://addons.mozilla.org/tr/firefox/addon/ouo-io-ouo-press-autoclick/">ouo.io ouo.press Autoclick</a></p>
+<h2 id="b4">Kurulum ve notlar</h2>
+<ol>
+<li>Yukarıdaki bağlantıdan eklentiyi ekle.</li>
+<li>ouo.io veya ouo.press üzerinden kısaltılmış bir bağlantı açtığında eklenti otomatik olarak devreye girer, ek bir ayar gerekmez.</li>
+</ol>
 <ul>
-<li>Bu tür eklentiler resmi bir şirket tarafından değil, genellikle tek bir geliştirici tarafından yazılır ve çoğu zaman Chrome Web Store'da bile yayınlanmaz; bunun yerine GitHub veya forumlardan ".crx" dosyası olarak dağıtılır. Mağaza dışından ".crx" kurmak, Chrome'un güvenlik incelemesini tamamen atlar.</li>
-<li>Çalışması için "açtığın her sayfayı oku ve değiştir" gibi geniş bir izin ister; bu da sadece ouo.io değil, ziyaret ettiğin tüm siteler için geçerli olur.</li>
-<li>ouo.io gibi servisler zaman zaman kullanıcıyı başka reklam/yönlendirme sayfalarına da yönlendirebilir; bu yönlendirmeleri otomatik geçen bir eklenti, o adımların ne yaptığını görmeni de engeller.</li>
+<li>Eklenti yalnızca ouo.io ve ouo.press sayfalarında çalışır; çalışması için bu adreslerdeki sayfa içeriğini okuma izni ister.</li>
+<li>ouo.io gibi bağlantı kısaltma servisleri reklam göstererek gelir elde eder; eklenti yalnızca bekleme/doğrulama adımını otomatikleştirir, servisin kendisini değiştirmez.</li>
 </ul>
-<p>Bu nedenle bu yazıda indirilecek bir eklenti bağlantısı verilmemiştir. Kısaltılmış bir bağlantıyı atlamak yerine, dosyayı doğrudan farklı (ouo.io kullanmayan) bir kaynaktan aramak daha güvenlidir.</p>
-<blockquote>Mağaza dışından (.crx dosyası, GitHub, forum) kurulan eklentiler Chrome'un güvenlik incelemesinden geçmez ve kolayca kötü amaçlı koda dönüştürülebilir. Bu kategoriye resmi bir bağlantı verilmemiştir.</blockquote>
+<blockquote>Yalnızca bu resmi mağaza sayfasından kur. Aynı ada benzeyen başka eklentiler zararlı olabilir. Bağlantılar yazının hazırlandığı tarihte geçerliydi. Mağaza sayfaları veya eklenti sürümleri zamanla değişebilir; kurmadan önce eklentinin adını ve yayıncısını kontrol et.</blockquote>
 </div>
 </article>
 </main>

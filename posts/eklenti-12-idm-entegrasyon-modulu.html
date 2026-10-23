@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IDM Integration Module Eklentisi</title>
+<title>IDM Integration Module</title>
 <meta name="description" content="Internet Download Manager'ın tarayıcı entegrasyon eklentisi nedir, nasıl kurulur ve dikkat edilmesi gerekenler.">
 <meta name="kategori" content="eklentiler">
-<meta name="tarih" content="2026-10-23 09:40">
+<meta name="tarih" content="2026-10-14 14:52">
 <meta name="author" content="Sabri Aydın">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#1e1e21">
@@ -28,7 +28,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#00838f;--b:#4dd0e1">
-<!--px--><div class="px-hero"><small>Tarayıcı Eklentileri</small><p>Internet Download Manager'ın tarayıcı entegrasyon eklentisi nedir, nasıl kurulur ve dikkat edilmesi gerekenler.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Nasıl kurulur?</a></li><li><a href="#b3">Dikkat edilmesi gerekenler</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Tarayıcı Eklentileri</small><p>Internet Download Manager'ın tarayıcı entegrasyon eklentisi nedir, nasıl kurulur ve dikkat edilmesi gerekenler.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Resmi indirme bağlantısı</a></li><li><a href="#b3">Kurulum</a></li><li><a href="#b4">Dikkat edilmesi gerekenler</a></li></ol></nav><!--/px-->
 <p><b>IDM Integration Module</b>, Tonec Inc. tarafından geliştirilen <b>Internet Download Manager (IDM)</b> masaüstü programının tarayıcıyla konuşmasını sağlayan küçük bir yardımcı eklentidir.</p>
 <h2 id="b1">Ne işe yarar?</h2>
 <ul>
@@ -36,16 +36,25 @@
 <li>Video izlerken sayfa üzerinde bir "indir" düğmesi gösterir.</li>
 <li>Kendi başına bir indirme aracı değildir; IDM programı bilgisayarda kurulu olmadan çalışmaz.</li>
 </ul>
-<h2 id="b2">Nasıl kurulur?</h2>
-<p>Bu eklenti ayrı olarak mağazadan aranıp kurulmak zorunda değildir: <b>IDM programını resmi siteden kurduğunda</b>, program kurulum sırasında desteklediği tarayıcılara bu entegrasyonu otomatik olarak ekler veya ekleme adımını sorar.</p>
+<h2 id="b2">Resmi indirme bağlantısı</h2>
+<table>
+<thead><tr><th>Tarayıcı</th><th>Bağlantı</th></tr></thead>
+<tbody>
+<tr><td>Microsoft Edge</td><td><a href="https://microsoftedge.microsoft.com/addons/detail/idm-integration-module/llbjbkhnmlidjebalopleeepgdfgcpec">Edge Add-ons</a></td></tr>
+<tr><td>Google Chrome</td><td>Mevcut değil — bkz. aşağıdaki not</td></tr>
+</tbody>
+</table>
+<p>Ayrıca IDM programını resmi siteden kurduğunda, kurulum sırasında desteklenen tarayıcılara bu entegrasyonu otomatik olarak ekler: <a href="https://www.internetdownloadmanager.com/">internetdownloadmanager.com</a></p>
+<h2 id="b3">Kurulum</h2>
 <ol>
-<li>IDM'i resmi siteden indir ve kur: <a href="https://www.internetdownloadmanager.com/">internetdownloadmanager.com</a></li>
+<li>Edge kullanıyorsan yukarıdaki bağlantıdan eklentiyi doğrudan ekleyebilirsin.</li>
+<li>IDM'i resmi siteden indir ve kur; program kurulum sırasında tarayıcı entegrasyonunu otomatik ekler veya ekleme adımını sorar.</li>
 <li>IDM'i çalıştır; program menüsünden <b>Seçenekler &gt; Genel</b> altında tarayıcı entegrasyonlarını kontrol edebilirsin.</li>
 <li>Tarayıcın eklentiyi otomatik eklemediyse, IDM'in kendi arayüzünden "tarayıcı eklentilerini yönet" adımıyla elle etkinleştirebilirsin.</li>
 </ol>
-<h2 id="b3">Dikkat edilmesi gerekenler</h2>
-<p>IDM ücretli (deneme süreli) bir programdır. İnternette "IDM Integration Module" adıyla, resmi programla ilgisi olmayan, mağazadan bağımsız dağıtılan kopya eklentiler de bulunabiliyor; bu tür eklentilerin yayıncısı ve kaynağı doğrulanamadığından bu yazıda doğrudan bir mağaza bağlantısı verilmemiştir.</p>
-<blockquote>Bu eklentiyi yalnızca IDM programını resmi siteden kurarak edin. Arama motorunda veya üçüncü taraf sitelerde dolaşan ayrı "IDM Integration Module" dosyaları zararlı yazılım içerebilir. Bağlantılar yazının hazırlandığı tarihte geçerliydi.</blockquote>
+<h2 id="b4">Dikkat edilmesi gerekenler</h2>
+<p>IDM ücretli (deneme süreli) bir programdır. Chrome Web Store'da "IDM Integration Module" adıyla aranırken, resmi Tonec Inc. programıyla ilgisi olmayan, kişisel bir e-posta adresiyle yayınlanmış "Integration Module Download Manager" gibi taklit eklentilere rastlanabiliyor; bu yüzden bu yazıda Chrome için bir bağlantı verilmemiştir.</p>
+<blockquote>Bu eklentiyi yalnızca IDM programını resmi siteden kurarak veya yukarıdaki resmi Edge Add-ons sayfasından edin. Aynı ada benzeyen başka eklentiler zararlı olabilir. Bağlantılar yazının hazırlandığı tarihte geçerliydi.</blockquote>
 </div>
 </article>
 </main>
