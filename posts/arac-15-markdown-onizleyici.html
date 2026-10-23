@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Markdown Önizleyici</title>
+<meta name="description" content="Markdown metnini yaz, biçimlendirilmiş sonucu anında gör; başlık, kalın/italik, liste, bağlantı, alıntı ve kod blokları desteklenir.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-09-24 11:29">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Markdown metnini yaz, biçimlendirilmiş sonucu anında gör; başlık, kalın/italik, liste, bağlantı, alıntı ve kod blokları desteklenir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Desteklenen işaretler</a></li><li><a href="#b3">Nerede kullanılır?</a></li></ol></nav><!--/px-->
+<p>Markdown; GitHub, çoğu forum ve not alma uygulamasında metni basit işaretlerle biçimlendirmek için kullanılan sade bir yazım biçimidir. Bu araç yazdığın Markdown metnini anında biçimlendirilmiş olarak gösterir.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <label for="md-g">Markdown metni</label>
+  <textarea id="md-g" spellcheck="false"># Başlık
+
+Bu bir **kalın** ve *italik* örnektir.
+
+- Birinci madde
+- İkinci madde
+
+> Bir alıntı satırı.
+
+[Bağlantı örneği](https://ornek.com)
+
+`satır içi kod`</textarea>
+  <div class="dugmeler">
+    <button type="button" class="ikinci" id="md-temiz">Temizle</button>
+  </div>
+  <h3>Önizleme</h3>
+  <iframe id="md-onz" class="onizle" title="Markdown önizleme" sandbox></iframe>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),g=$('md-g'),onz=$('md-onz');
+const kacEt=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const satirIci=s=>kacEt(s)
+  .replace(/`([^`]+)`/g,'<code>$1</code>')
+  .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>')
+  .replace(/\*([^*]+)\*/g,'<i>$1</i>')
+  .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2">$1</a>');
+const donustur=md=>{
+  const satirlar=md.replace(/\r\n/g,'\n').split('\n');
+  let html='',liAcik=false,alintiAcik=false;
+  const kapat=()=>{if(liAcik){html+='</ul>';liAcik=false}if(alintiAcik){html+='</blockquote>';alintiAcik=false}};
+  satirlar.forEach(satir=>{
+    const baslik=/^(#{1,6})\s+(.*)$/.exec(satir);
+    if(baslik){kapat();const n=baslik[1].length;html+='<h'+n+'>'+satirIci(baslik[2])+'</h'+n+'>';return}
+    const madde=/^[-*]\s+(.*)$/.exec(satir);
+    if(madde){if(!liAcik){kapat();html+='<ul>';liAcik=true}html+='<li>'+satirIci(madde[1])+'</li>';return}
+    const alinti=/^>\s?(.*)$/.exec(satir);
+    if(alinti){if(!alintiAcik){kapat();html+='<blockquote>';alintiAcik=true}html+=satirIci(alinti[1])+'<br>';return}
+    if(satir.trim()===''){kapat();return}
+    kapat();html+='<p>'+satirIci(satir)+'</p>'});
+  kapat();
+  return html};
+const BAS='<!doctype html><meta charset="utf-8"><style>body{font:16px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#2a2a2e;padding:14px}code{background:#f1eee9;padding:2px 5px;border-radius:4px}blockquote{margin:0 0 1em;padding:6px 14px;border-left:4px solid #8f8a82;color:#555}h1,h2,h3,h4,h5,h6{margin:0.6em 0 0.3em}ul{margin:0.4em 0;padding-left:1.4em}a{color:#a8231f}</style>';
+const guncelle=()=>{onz.srcdoc=BAS+donustur(g.value)};
+g.addEventListener('input',guncelle);
+$('md-temiz').onclick=()=>{g.value='';guncelle()};
+guncelle();
+})();
+</script>
+</div>
+<h2 id="b2">Desteklenen işaretler</h2>
+<table>
+<thead><tr><th>Yazılan</th><th>Sonuç</th></tr></thead>
+<tbody>
+<tr><td><code># Başlık</code> ... <code>###### Başlık</code></td><td>1'den 6'ya kadar başlık seviyesi</td></tr>
+<tr><td><code>**kalın**</code></td><td><b>kalın</b> yazı</td></tr>
+<tr><td><code>*italik*</code></td><td><i>italik</i> yazı</td></tr>
+<tr><td><code>`kod`</code></td><td>satır içi kod</td></tr>
+<tr><td><code>- madde</code></td><td>madde işaretli liste</td></tr>
+<tr><td><code>&gt; alıntı</code></td><td>alıntı bloğu</td></tr>
+<tr><td><code>[metin](adres)</code></td><td>bağlantı</td></tr>
+</tbody>
+</table>
+<h2 id="b3">Nerede kullanılır?</h2>
+<p>GitHub README dosyaları, Discord ve Slack mesajları, Obsidian ve Joplin gibi not alma uygulamaları Markdown kullanır. Bu araçla bir metni yazıp sonucu görsel olarak kontrol ettikten sonra ilgili platforma yapıştırabilirsin.</p>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

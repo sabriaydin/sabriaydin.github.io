@@ -1,7 +1,10 @@
 // YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenleme.
 // Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmen yeterli.
 window.POSTS = [
+<<<<<<< HEAD
   { id: 'windows-21-print-screen-tusunu-aktif-etme', title: 'Print Screen Tuşunu Ekran Görüntüsü Aracına Dönüştürme', cat: 'windows', date: '2026-10-23', time: '13:40', excerpt: 'Print Screen (PrtSc) tuşunu Ekran Alıntısı Aracı ile çalışacak şekilde aktif etme ve ekran görüntüsü alma, adım adım görsellerle.' },
+=======
+>>>>>>> db3b1e34c6981f8e85a48d5b04ca01fa034eb6e3
   { id: 'eklenti-21-video-downloadhelper', title: 'Video DownloadHelper', cat: 'eklentiler', date: '2026-10-22', time: '23:05', excerpt: 'Video DownloadHelper nedir, web sitelerindeki videoları indirmeyi nasıl sağlar ve resmi indirme bağlantıları.' },
   { id: 'mod-yama-01-oyun-modu-kurarken-dikkat-edilecekler', title: 'Oyun Modu Kurarken Dikkat Edilecekler', cat: 'modyama', date: '2026-10-22', time: '10:10', excerpt: 'Oyunlara mod eklerken veri kaybını, uyumsuzluğu ve zararlı yazılım riskini azaltan temel kurallar.' },
   { id: 'oyun-oneri-01-dusuk-donanimda-oynanabilen-oyunlar', title: 'Düşük Donanımda Oynanabilen Oyunlar', cat: 'oyunonerileri', date: '2026-10-22', time: '10:05', excerpt: 'Eski veya orta seviye bilgisayarlarda akıcı çalışan oyun türleri, Steam bağlantılı sekiz oyun önerisi ve satın almadan önce dikkat edilecekler.' },

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IPRadar: yerel ağ IP ve cihaz tespit aracı</title>
+<meta name="description" content="IPRadar, yerel ağınızdaki aktif cihazları IP, MAC, üretici ve tahmini türüyle tarayan, sonucu otomatik CSV rapor olarak kaydeden ücretsiz bir Windows konsol programıdır.">
+<meta property="og:title" content="IPRadar: yerel ağ IP ve cihaz tespit aracı">
+<meta property="og:description" content="Yerel ağınızdaki aktif cihazları IP, MAC, üretici ve tahmini türüyle tarayan, sonucu CSV rapor olarak kaydeden ücretsiz bir Windows konsol programı.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#060a07">
+<link rel="icon" href="IPRadar-favicon.ico" sizes="32x32">
+<link rel="icon" href="IPRadar-favicon.png" type="image/png">
+<script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
+<style>
+:root{--bg:#070a08;--panel:#0c130e;--yazi:#cde8d4;--mut:#6f8f79;--ac:#39ff6a;--ac2:#ffb020;--cizgi:#1c2b20}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+  repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 4px),
+  radial-gradient(circle at 20% -10%,rgba(57,255,106,.08),transparent 45%),
+  var(--bg);
+  color:var(--yazi);font:16px/1.65 ui-monospace,SFMono-Regular,Consolas,"Cascadia Code",monospace;min-height:100vh}
+h1,h2,h3{font-family:inherit;margin:0;font-weight:700;letter-spacing:-.01em}
+a{color:var(--ac2)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:3px}
+.sarmal{max-width:980px;margin:0 auto;padding:0 20px}
+header{border-bottom:1px solid var(--cizgi);padding:16px 0;position:sticky;top:0;background:rgba(7,10,8,.88);backdrop-filter:blur(8px);z-index:5}
+header .sarmal{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.marka{color:var(--ac);font-weight:700;font-size:18px;text-decoration:none}
+.marka::before{content:"$ ";color:var(--mut)}
+header nav{display:flex;gap:16px;margin-left:auto;flex-wrap:wrap}
+header nav a{color:var(--yazi);text-decoration:none;font-size:14px}
+header nav a:hover{color:var(--ac)}
+.btn{display:inline-block;padding:.65em 1.1em;border:1px solid var(--ac);color:var(--ac);text-decoration:none;font:inherit;font-size:14px;background:transparent;cursor:pointer;white-space:nowrap}
+.btn::before{content:"> "}
+.btn:hover{background:var(--ac);color:#06160a}
+.btn.ikinci{border-color:var(--cizgi);color:var(--yazi)}
+.btn.ikinci:hover{background:var(--panel);color:var(--ac2);border-color:var(--ac2)}
+
+section{padding:64px 0}
+.ust{padding-top:52px}
+h2{font-size:clamp(22px,3.4vw,30px);color:var(--ac)}
+h2::before{content:"// ";color:var(--mut)}
+.alt{color:var(--mut);margin:10px 0 30px;max-width:62ch}
+
+/* Terminal penceresi */
+.term{background:var(--panel);border:1px solid var(--cizgi);border-radius:8px;overflow:hidden;box-shadow:0 30px 80px -40px rgba(57,255,106,.25)}
+.term .cubuk{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#0a0f0b;border-bottom:1px solid var(--cizgi)}
+.term .nokta{width:11px;height:11px;border-radius:50%;background:#3a4a3e}
+.term .baslik{margin-left:10px;color:var(--mut);font-size:13px}
+.term pre{margin:0;padding:18px 20px;min-height:360px;max-height:60vh;overflow:auto;white-space:pre-wrap;font-size:13.5px;line-height:1.55}
+.term .imlec{display:inline-block;width:8px;height:1em;background:var(--ac);vertical-align:text-bottom;animation:yan 1s steps(1) infinite}
+@keyframes yan{50%{opacity:0}}
+.c-ac{color:var(--ac)}.c-ac2{color:var(--ac2)}.c-mut{color:var(--mut)}.c-kir{color:#ff5c5c}
+
+.ozellikler{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--cizgi);border:1px solid var(--cizgi)}
+.oz{background:var(--bg);padding:22px 20px}
+.oz h3{font-size:15px;color:var(--ac2)}
+.oz h3::before{content:"[+] "}
+.oz p{margin:8px 0 0;color:var(--mut);font-size:14.5px}
+
+.asama{counter-reset:asama}
+.asama li{counter-increment:asama;list-style:none;position:relative;padding:0 0 22px 46px;border-left:1px solid var(--cizgi);margin-left:14px}
+.asama li:last-child{border-color:transparent;padding-bottom:0}
+.asama li::before{content:counter(asama);position:absolute;left:-15px;top:0;width:28px;height:28px;border:1px solid var(--ac);border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--ac);font-size:13px}
+.asama h3{font-size:15.5px;color:var(--yazi)}
+.asama p{margin:6px 0 0;color:var(--mut);font-size:14.5px}
+
+.izleyici{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.izi{border:1px solid var(--cizgi);padding:18px 18px}
+.izi b{color:var(--ac2);display:block;font-size:13px;margin-bottom:6px}
+.izi p{margin:0;color:var(--mut);font-size:14px}
+
+.q{max-width:760px}
+.q details{border:1px solid var(--cizgi);padding:14px 18px;margin-bottom:8px;background:var(--panel)}
+.q summary{cursor:pointer;font-weight:700;color:var(--yazi);font-size:14.5px}
+.q summary::marker{color:var(--ac)}
+.q p{margin:10px 0 0;color:var(--mut);font-size:14px}
+
+.kapanis{text-align:center;border-top:1px solid var(--cizgi);border-bottom:1px solid var(--cizgi)}
+.kapanis p{color:var(--mut);max-width:50ch;margin:10px auto 0}
+footer{padding:22px 0;text-align:center;color:var(--mut);font-size:13px}
+small.not{display:block;margin-top:14px;color:var(--mut);font-size:12.5px}
+</style>
+</head>
+<body>
+<header><div class="sarmal">
+  <a class="marka" href="#">iprad~</a>
+  <nav>
+    <a href="../../../index.html">← bloga dön</a>
+    <a href="#ozellikler">özellikler</a>
+    <a href="#nasil">nasıl çalışır</a>
+    <a href="#sss">sss</a>
+  </nav>
+  <a class="btn" href="#" data-indir>İndir</a>
+  <a class="btn ikinci" href="#" data-vt target="_blank" rel="noopener noreferrer">VirusTotal</a>
+</div></header>
+
+<section class="ust"><div class="sarmal">
+  <h2 style="color:var(--yazi)" id="h1">IPRadar</h2>
+  <p class="alt" style="margin-top:6px">Komut isteminde çalışan, kurulum istemeyen tek bir .exe: yerel ağınızdaki (192.168.x.x) tüm aktif cihazları IP, MAC, üretici ve tahmini türüyle listeler, sonucu otomatik olarak CSV rapora kaydeder.</p>
+  <div class="term" role="img" aria-label="IPRadar programının komut isteminde çalışırken örnek çıktısı">
+    <div class="cubuk"><span class="nokta"></span><span class="nokta"></span><span class="nokta"></span><span class="baslik">Komut İstemi — IPRadar.exe</span></div>
+    <pre id="tk"></pre>
+  </div>
+  <small class="not">Yukarıdaki, programın gerçek konsol çıktısının bir benzetimidir; IP, MAC ve cihaz adları örnek amaçlıdır.</small>
+</div></section>
+
+<section id="ozellikler"><div class="sarmal">
+  <h2>özellikler</h2>
+  <p class="alt">Program kodunda yer alan tespit yöntemleri.</p>
+  <div class="ozellikler">
+    <div class="oz"><h3>Otomatik ağ algılama</h3><p>Bilgisayarın etkin ağ bağdaştırıcısından 192.168.x gibi yerel IP bloğunu kendisi bulur; bulamazsa elle girmenizi ister.</p></div>
+    <div class="oz"><h3>254 adresi eşzamanlı tarama</h3><p>Bloktaki 1-254 arası tüm IP adresleri aynı anda, ayrı görevler (task) olarak taranır; sonuç saniyeler içinde oluşur.</p></div>
+    <div class="oz"><h3>3 aşamalı cihaz tespiti</h3><p>Önce ICMP ping, yanıt yoksa yaygın portlar (80, 443, 3389, 445, 5555, 8008 vb.), o da yoksa ARP sorgusu denenir; uykudaki cihazlar bile MAC üzerinden yakalanır.</p></div>
+    <div class="oz"><h3>MAC ve üretici tespiti</h3><p>Windows'un ARP tablosundan MAC adresini okur, OUI (ilk 3 bayt) önekini dahili üretici listesiyle (Dell, HP, Apple, Samsung, TP-Link, MikroTik, Cisco ve diğerleri) karşılaştırır.</p></div>
+    <div class="oz"><h3>Cihaz türü tahmini</h3><p>Açık portlara ve üreticiye bakarak "Windows PC", "Akıllı TV", "iPhone / iPad / Mac", "Ağ Yazıcısı", "Linux / Switch" gibi bir tür tahmini yapar.</p></div>
+    <div class="oz"><h3>Host adı çözümleme</h3><p>Mümkünse cihazın ağda yayınladığı adı (DNS/host adı) okuyarak listeye ekler.</p></div>
+    <div class="oz"><h3>Canlı ilerleme göstergesi</h3><p>Tarama sürerken kaç IP'nin tarandığı ve o ana kadar kaç cihaz bulunduğu konsolda anlık güncellenir.</p></div>
+    <div class="oz"><h3>Otomatik CSV rapor</h3><p>Tarama bitince sonuçları, tarih-saat damgalı bir .csv dosyası olarak doğrudan masaüstüne kaydeder.</p></div>
+  </div>
+</div></section>
+
+<section id="nasil"><div class="sarmal">
+  <h2>nasıl çalışır</h2>
+  <p class="alt">IPRadar.exe çalıştırıldığında izlenen sıra.</p>
+  <ol class="asama">
+    <li><h3>Programı çalıştırın</h3><p>Kurulum yoktur; indirilen IPRadar.exe dosyasına çift tıklamanız yeterlidir, bir komut istemi penceresi açılır.</p></li>
+    <li><h3>Ağ bilgisini onaylayın</h3><p>Program etkin ağ bağdaştırıcınızdan IP bloğunu (örn. 192.168.1) otomatik bulur ve gösterir; bulamazsa sizden ilk üç bloğu yazmanızı ister.</p></li>
+    <li><h3>Taramayı başlatın</h3><p>"E" yazıp Enter'a basınca 254 adres eşzamanlı olarak ping, port ve ARP sorgularıyla denetlenir; ilerleme anlık gösterilir.</p></li>
+    <li><h3>Sonuç tablosunu inceleyin</h3><p>Bulunan tüm cihazlar IP, gecikme, host adı, MAC, üretici ve tahmini tür sütunlarıyla sıralı bir tablo halinde konsola yazılır.</p></li>
+    <li><h3>CSV raporunu alın</h3><p>Aynı bilgiler, tarih-saat damgalı bir .csv dosyası olarak otomatik şekilde masaüstünüze kaydedilir.</p></li>
+  </ol>
+</div></section>
+
+<section id="gizlilik"><div class="sarmal">
+  <h2>gizlilik</h2>
+  <div class="izleyici">
+    <div class="izi"><b>Yalnızca yerel ağ</b><p>Taranan tek şey, bilgisayarınızın bağlı olduğu yerel ağdaki (192.168.x.x) cihazlardır; internete açık bir tarama yapılmaz.</p></div>
+    <div class="izi"><b>Dışarı veri gönderilmez</b><p>Program hiçbir sunucuya bağlanmaz. Tarama sonuçları yalnızca ekranınızda ve kaydettiğiniz CSV dosyasında bulunur.</p></div>
+    <div class="izi"><b>Kaynağı belli</b><p>Açık kaynaklı değildir, ancak VirusTotal raporuyla indirmeden önce dosyayı birçok antivirüs motoruna karşı kontrol edebilirsiniz.</p></div>
+  </div>
+</div></section>
+
+<section id="sss"><div class="sarmal">
+  <h2>sss</h2>
+  <div class="q">
+    <details><summary>IPRadar bir masaüstü (GUI) programı mı?</summary><p>Hayır. Komut isteminde (siyah pencere) çalışan bir konsol programıdır; grafik arayüzü yoktur.</p></details>
+    <details><summary>Yönetici (admin) izni gerekiyor mu?</summary><p>Çoğu durumda gerekmez; MAC adresi okuma işlemi Windows'un kendi ARP tablosunu kullanır. Bazı ağlarda eksiksiz sonuç için yönetici olarak çalıştırmak faydalı olabilir.</p></details>
+    <details><summary>CSV raporu nereye kaydediliyor?</summary><p>Çalıştıran kullanıcının masaüstüne, "IPRadar_Rapor_" ile başlayan, tarih ve saat içeren bir dosya adıyla kaydedilir.</p></details>
+    <details><summary>Tarama internet bağlantısı kullanır mı?</summary><p>Hayır, yalnızca yerel ağ üzerinde ping, port denetimi ve ARP sorgusu yapılır; internete çıkmaz.</p></details>
+    <details><summary>Antivirüs programı neden uyarı veriyor?</summary><p>Ağ taraması yapan, ham ağ soketleri ve ARP sorguları kullanan programlar bazı güvenlik yazılımları tarafından dikkatle işaretlenebilir. Çalıştırmadan önce yukarıdaki VirusTotal raporunu inceleyebilirsiniz.</p></details>
+  </div>
+</div></section>
+
+<section class="kapanis"><div class="sarmal">
+  <h2 style="color:var(--yazi)">Ağınızda ne olduğunu bilin.</h2>
+  <p>Tek komutla, yerel ağınıza bağlı her cihazı görün.</p>
+  <p style="margin-top:20px"><a class="btn" href="#" data-indir>İndir</a> <a class="btn ikinci" href="#" data-vt target="_blank" rel="noopener noreferrer">VirusTotal raporu</a></p>
+</div></section>
+
+<footer>© <span data-yil>2026</span> IPRadar — Geliştirici: Sabri Aydın</footer>
+
+<script>
+(()=>{
+/* ====== BURADAN DÜZENLEYİN ====== */
+/* indir: .exe dosyasının adresi. sha256: dosyanın 64 karakterlik özeti (VirusTotal düğmesi bundan oluşur). */
+const SITE={indir:"IPRadar.exe",sha256:"d32786eea9d4383811cfc9513a92f3ca7b366ca2c060f77eba85135d1b24d5f2"};
+document.querySelectorAll('[data-indir]').forEach(a=>a.href=SITE.indir||'#');
+const vt=/^[a-f0-9]{64}$/i.test(SITE.sha256||'')?'https://www.virustotal.com/gui/file/'+SITE.sha256:'#';
+document.querySelectorAll('[data-vt]').forEach(a=>a.href=vt);
+document.querySelectorAll('[data-yil]').forEach(e=>e.textContent=new Date().getFullYear());
+})();
+
+/* Terminal benzetimi: programın gerçek konsol çıktısına benzer bir akış, karakter karakter yazılır */
+(()=>{
+const el=document.getElementById('tk');
+const rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const SATIR=[
+['c-mut',"     ___  ____  ____            __          "],
+['c-mut',"    / _/ / __ \\/ __ \\____  ____/ /___ ______"],
+['c-mut',"   / /  / /_/ / /_/ / __ `/ __  / __ `/ ___/"],
+['c-mut'," _/ /  / ____/ _, _/ /_/ / /_/ / /_/ / /    "],
+['c-mut',"/___/ /_/   /_/ |_|\\__,_/\\__,_/\\__,_/_/     "],
+['',''],
+['c-ac2',"                IP ve Cihaz Tespit Aracı"],
+['c-mut',"            [ Geliştirici: Sabri Aydın ]"],
+['',''],
+['c-ac',"[+] Tespit edilen yerel ağ: 192.168.1.x"],
+['',''],
+['','Tarama başlatılsın mı? (E/H): E'],
+['',''],
+['c-ac',"[+] Tarama başlatılıyor..."],
+['c-mut',"[*] Not: Sadece yerel ağınız analiz edilir, verileriniz bilgisayarınızda kalır."],
+['',''],
+['c-ac',"[*] Taranan IP Sayısı: 254/254 | Bulunan Cihaz: 6"],
+['',''],
+['c-ac','IP Adresi       Gecikme  Host               MAC                Üretici     Tür'],
+['c-mut','------------------------------------------------------------------------------'],
+['','192.168.1.1     2ms      Yönlendirici       3C-CD-57-A2-11-09  TP-Link     Ağ Cihazı (Web Arayüzü)'],
+['','192.168.1.14    1ms      DESKTOP-9F2K       F8-BC-12-55-7A-3D  Dell        Windows PC / Sunucu'],
+['','192.168.1.23    4ms      Bilinmiyor         A4-C3-F0-6B-19-E2  Samsung     Akıllı TV (Smart TV / Cast)'],
+['','192.168.1.37    1ms      Bilinmiyor         2C-26-C5-01-8F-44  Xiaomi      Akıllı Telefon'],
+['','192.168.1.52    3ms      OFİS-YAZICI        00-26-55-9A-2C-11  Epson       Ağ Yazıcısı'],
+['','192.168.1.60    2ms      Bilinmiyor         38-CA-DA-77-0B-55  Apple       iPhone / iPad / Mac'],
+['c-mut','--------------------------------------------------------------------------------'],
+['c-ac',"[+] İşlem Tamamlandı! Ağınızda toplam 6 aktif cihaz tespit edildi."],
+['',''],
+['c-ac2',"[BAŞARILI] Rapor masaüstüne kaydedildi!"],
+['c-mut',"Dosya Adı: IPRadar_Rapor_20261023_011500.csv"]
+];
+const kacEt=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+if(rm){el.innerHTML=SATIR.map(([c,t])=>c?'<span class="'+c+'">'+kacEt(t)+'</span>':kacEt(t)).join('\n');return}
+let li=0,ki=0,html='';
+const ADIM_KARAKTER=3;
+const adim=()=>{
+  if(li>=SATIR.length){el.innerHTML=html;return}
+  const [cls,metin]=SATIR[li];
+  if(ki===0&&li>0)html+='\n';
+  const parca=metin.slice(0,ki);
+  el.innerHTML=html+(cls?'<span class="'+cls+'">'+kacEt(parca)+'</span>':kacEt(parca))+'<span class="imlec"></span>';
+  el.scrollTop=el.scrollHeight;
+  if(ki<metin.length){ki=Math.min(metin.length,ki+ADIM_KARAKTER);setTimeout(adim,metin.trim()?8:2)}
+  else{html+=(cls?'<span class="'+cls+'">'+kacEt(metin)+'</span>':kacEt(metin));li++;ki=0;setTimeout(adim,metin.trim()?18:35)}
+};
+adim();
+})();
+</script>
+</body>
+</html>
