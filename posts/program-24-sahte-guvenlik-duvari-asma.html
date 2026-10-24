@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Sahte Güvenlik Duvarı Aşma Ekranı</title>
+<meta name="description" content="Art arda engel aşılıyor mesajları göstererek bir güvenlik duvarının adım adım geçildiği izlenimini veren batch programı.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-10-16 16:25">
+
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Art arda engel aşılıyor mesajları göstererek bir güvenlik duvarının adım adım geçildiği izlenimini veren batch programı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
+<p>Bu program, önceden yazılmış bir mesaj listesini sırayla ekrana basarak bir güvenlik engelinin adım adım aşıldığı görünümünü oluşturur.</p>
+<div class="uyari"><p><b>Önemli:</b> Bu program tamamen görsel bir gösteridir; hiçbir dosyayı silmez, hiçbir ayarı değiştirmez ve internete bağlanmaz. Yalnızca ekran yazısını, rengini ve bir pencere başlığını değiştirir; pencereyi kapattığında bilgisayarında hiçbir iz kalmaz. Şaka amaçlı kullanırken karşındaki kişiyi gerçekten korkutmamaya dikkat et.</p></div>
+<h2 id="b1">Nasıl kullanılır?</h2>
+<ol>
+<li>Aşağıdaki kodu Not Defteri'ne yapıştır ve <code>program-24-sahte-guvenlik-duvari-asma.bat</code> adıyla kaydet (Kayıt türü: <b>Tüm dosyalar</b>).</li>
+<li>Çift tıklayarak çalıştır. Kapatmak için pencereyi normal şekilde kapat veya <code>Ctrl+C</code> kullan.</li>
+</ol>
+<pre>@echo off
+title Guvenlik Duvari
+color 0a
+cls
+echo GUVENLIK DUVARI TESPIT EDILDI
+echo.
+timeout /t 1 >nul
+echo [1/5] Port taramasi yapiliyor...
+timeout /t 1 >nul
+echo [2/5] Zayif nokta araniyor...
+timeout /t 1 >nul
+echo [3/5] Sifreleme cozuluyor...
+timeout /t 1 >nul
+echo [4/5] Yetki yukseltiliyor...
+timeout /t 1 >nul
+echo [5/5] Engel asildi.
+echo.
+echo GUVENLIK DUVARI GECILDI.
+pause >nul</pre>
+<h2 id="b2">Kod nasıl çalışıyor?</h2>
+<p>Bu örnekte rastgelelik yoktur; her satır sabit bir mesajı sırayla yazdırır ve aralarında <code>timeout /t 1</code> ile bir saniyelik bekleme bırakır. İstersen mesaj sayısını artırabilir veya bekleme süresini değiştirebilirsin.</p>
+<h2 id="b3">Özelleştirme</h2>
+<p>Kodun başındaki <b>AYARLAR</b> bölümündeki (varsa) değerleri değiştirerek metni, rengi veya hızı kendine göre ayarlayabilirsin. <code>color 0a</code> komutundaki ilk rakam zemin, ikinci rakam yazı rengidir (0: siyah, a: açık yeşil, b: açık camgöbeği, c: açık kırmızı, e: sarı, f: beyaz).</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

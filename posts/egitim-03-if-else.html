@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: if ve else ile Koşullar</title>
+<meta name="description" content="if ile metin, sayı, dosya ve hata kodu karşılaştırmaları; else yazımı ve sık yapılan parantez hataları.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-03-22 11:22">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>if ile metin, sayı, dosya ve hata kodu karşılaştırmaları; else yazımı ve sık yapılan parantez hataları.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Metin karşılaştırma</a></li><li><a href="#b2">if ve else</a></li><li><a href="#b3">Sayı karşılaştırma operatörleri</a></li><li><a href="#b4">Dosya ve klasör kontrolü</a></li><li><a href="#b5">Değişken tanımlı mı?</a></li><li><a href="#b6">Hata kodu kontrolü</a></li><li><a href="#b7">Birden fazla koşul</a></li></ol></nav><!--/px-->
+<p><code>if</code> komutu bir şart doğruysa komut çalıştırır. Menüler, dosya kontrolleri ve hata yönetimi hep <code>if</code> ile kurulur.</p>
+<h2 id="b1">Metin karşılaştırma</h2>
+<pre>@echo off
+set /p "cevap=Devam edilsin mi? (e/h): "
+if "%cevap%"=="e" echo Devam ediliyor...
+if "%cevap%"=="h" echo Iptal edildi.
+pause</pre>
+<p>Değişkeni <b>çift tırnak</b> içine almak önemlidir. Kullanıcı hiçbir şey yazmazsa tırnaksız <code>if %cevap%==e</code> satırı <code>if ==e</code> olur ve hata verir. Büyük/küçük harf farkını yok saymak için <code>/i</code> ekle:</p>
+<pre>if /i "%cevap%"=="E" echo Evet</pre>
+<h2 id="b2">if ve else</h2>
+<p><code>else</code>, <code>if</code> bloğunun kapanış parantezinin <b>aynı satırında</b> olmalıdır:</p>
+<pre>@echo off
+set /p "yas=Yasin kac? "
+if %yas% geq 18 (
+    echo Yetiskinsin.
+) else (
+    echo Henuz 18 yasindan kucuksun.
+)
+pause</pre>
+<p>Aşağıdaki yazım hata verir, çünkü <code>else</code> alt satıra düşmüştür:</p>
+<pre>if %yas% geq 18 (
+    echo Yetiskinsin.
+)
+else (
+    echo Kucuksun.
+)</pre>
+<h2 id="b3">Sayı karşılaştırma operatörleri</h2>
+<p>Sayılarda <code>==</code> yerine aşağıdaki kısaltmaları kullanırsan değerler sayı olarak karşılaştırılır. <code>==</code> ise metin karşılaştırır; metin olarak "10", "9"dan küçüktür.</p>
+<table>
+<thead><tr><th>Operatör</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><code>equ</code></td><td>eşit</td></tr>
+<tr><td><code>neq</code></td><td>eşit değil</td></tr>
+<tr><td><code>lss</code></td><td>küçük</td></tr>
+<tr><td><code>leq</code></td><td>küçük veya eşit</td></tr>
+<tr><td><code>gtr</code></td><td>büyük</td></tr>
+<tr><td><code>geq</code></td><td>büyük veya eşit</td></tr>
+</tbody>
+</table>
+<h2 id="b4">Dosya ve klasör kontrolü</h2>
+<pre>@echo off
+if exist "C:\Yedek" (
+    echo Yedek klasoru var.
+) else (
+    echo Yedek klasoru yok, olusturuluyor...
+    md "C:\Yedek"
+)
+pause</pre>
+<p>Tersi için <code>if not exist</code> yazılır. Yolun sonuna ters bölü ekleyerek (<code>"C:\Yedek\"</code>) yalnızca klasör olup olmadığını kontrol edebilirsin.</p>
+<h2 id="b5">Değişken tanımlı mı?</h2>
+<pre>if defined ad (echo ad tanimli) else (echo ad tanimli degil)</pre>
+<h2 id="b6">Hata kodu kontrolü</h2>
+<p>Çalışan her komut bir çıkış kodu bırakır. 0 başarı demektir. <code>if errorlevel 1</code> ifadesi, çıkış kodu 1 <b>veya daha büyükse</b> doğrudur. Ayrıntısı 8. derste.</p>
+<pre>@echo off
+ping -n 1 google.com &gt;nul
+if errorlevel 1 (
+    echo Internet yok.
+) else (
+    echo Internet var.
+)
+pause</pre>
+<h2 id="b7">Birden fazla koşul</h2>
+<p>Batch'te <code>and</code> ve <code>or</code> yoktur. "Ve" için <code>if</code> satırlarını art arda yazarsın, "veya" için bir işaret değişkeni kullanırsın:</p>
+<pre>rem VE: ikisi de dogruysa
+if "%ad%"=="Sabri" if "%sehir%"=="Izmir" echo Ikisi de dogru
+
+rem VEYA: biri dogruysa
+set "bulundu=0"
+if "%renk%"=="kirmizi" set "bulundu=1"
+if "%renk%"=="mavi" set "bulundu=1"
+if "%bulundu%"=="1" echo Renk kirmizi ya da mavi</pre>
+<p>Bir sonraki derste aynı işi tekrar tekrar yaptıran <code>for</code> döngülerine geçiyoruz.</p>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

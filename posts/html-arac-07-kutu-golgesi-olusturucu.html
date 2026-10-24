@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CSS Kutu Gölgesi (box-shadow) Oluşturucu</title>
+<meta name="description" content="Kaydırma, bulanıklık, yayılma ve renk ayarlarıyla kutu gölgesi tasarla, CSS kodunu kopyala.">
+<meta name="kategori" content="htmlaraclari">
+<meta name="tarih" content="2026-06-20 10:11">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#c0392b;--b:#ff7e5f">
+<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Kaydırma, bulanıklık, yayılma ve renk ayarlarıyla kutu gölgesi tasarla, CSS kodunu kopyala.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Ayarlar ne işe yarar?</a></li><li><a href="#b3">Örnek kullanım</a></li></ol></nav><!--/px-->
+<p>Gölge, bir kutunun sayfadan yükseliyormuş gibi görünmesini sağlar. Kart, düğme ve açılır menülerde çok kullanılır. Bu araçta kaydırıcıları oynatırsın, sonucu anında görürsün ve CSS kodunu hazır alırsın.</p>
+<h2 id="b1">Aracı dene</h2>
+<div class="arac">
+  <div class="kutu" style="display:flex;align-items:center;justify-content:center;height:220px;background:#e7e4df"><div id="g-kutu" style="width:120px;height:120px;border-radius:12px;background:#f3f1ed" role="img" aria-label="Gölge önizlemesi"></div></div>
+  <div class="satir">
+    <label for="g-x"><span>Yatay kaydırma: <span id="g-xd">0</span>px</span><input type="range" id="g-x" min="-50" max="50" value="0"></label>
+    <label for="g-y"><span>Dikey kaydırma: <span id="g-yd">10</span>px</span><input type="range" id="g-y" min="-50" max="50" value="10"></label>
+    <label for="g-b"><span>Bulanıklık: <span id="g-bd">30</span>px</span><input type="range" id="g-b" min="0" max="100" value="30"></label>
+    <label for="g-s"><span>Yayılma: <span id="g-sd">0</span>px</span><input type="range" id="g-s" min="-50" max="50" value="0"></label>
+    <label for="g-o"><span>Saydamlık: <span id="g-od">35</span>%</span><input type="range" id="g-o" min="0" max="100" value="35"></label>
+    <label for="g-c">Gölge rengi<input type="color" id="g-c" value="#000000"></label>
+  </div>
+  <label class="onay" for="g-i"><input type="checkbox" id="g-i"> İçeri gölge (inset)</label>
+  <h3>CSS kodu</h3>
+  <pre id="g-cikti"></pre>
+  <div class="dugmeler"><button type="button" data-kopyala="g-cikti">Kodu kopyala</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const rgba=(h,a)=>{const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255}, ${n>>8&255}, ${n&255}, ${a})`};
+const guncelle=()=>{
+  ['x','y','b','s','o'].forEach(k=>$('g-'+k+'d').textContent=$('g-'+k).value);
+  const v=`${$('g-i').checked?'inset ':''}${$('g-x').value}px ${$('g-y').value}px ${$('g-b').value}px ${$('g-s').value}px ${rgba($('g-c').value,($('g-o').value/100).toFixed(2))}`;
+  $('g-kutu').style.boxShadow=v;
+  $('g-cikti').textContent=`box-shadow: ${v};`};
+['g-x','g-y','g-b','g-s','g-o','g-c','g-i'].forEach(i=>$(i).addEventListener('input',guncelle));
+guncelle();
+})();
+</script>
+<h2 id="b2">Ayarlar ne işe yarar?</h2>
+<ul>
+<li><b>Yatay ve dikey kaydırma</b>: Gölgenin kutudan ne kadar uzağa düşeceğini belirler. Dikey değeri pozitif yapmak ışığın yukarıdan geldiği hissini verir.</li>
+<li><b>Bulanıklık</b>: Gölgenin kenarlarının ne kadar yumuşak olacağını belirler. 0 olursa keskin bir kenar görürsün.</li>
+<li><b>Yayılma</b>: Gölgeyi her yöne büyütür veya küçültür.</li>
+<li><b>Saydamlık</b>: Gölgenin ne kadar koyu görüneceğini belirler. Doğal görünüm için genelde düşük tutulur.</li>
+<li><b>İçeri gölge</b>: Gölgeyi kutunun içine, basılmış bir yüzey gibi çizer.</li>
+</ul>
+<h2 id="b3">Örnek kullanım</h2>
+<pre>.kart {
+  background: #f3f1ed;
+  border-radius: 12px;
+  box-shadow: 0px 10px 30px 0px rgba(0, 0, 0, 0.35);
+}</pre>
+<blockquote>İpucu: Birden fazla gölgeyi virgülle ayırıp art arda yazabilirsin. Küçük ve büyük bir gölgeyi birleştirmek daha gerçekçi bir derinlik verir.</blockquote>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

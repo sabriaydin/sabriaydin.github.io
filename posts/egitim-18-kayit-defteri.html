@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Kayıt Defteri (reg) Komutları</title>
+<meta name="description" content="reg query, add, delete, export ve import komutlarıyla kayıt defterini okuma ve değiştirme; yedekleme ve güvenlik önlemleri.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-08-29 11:09">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>reg query, add, delete, export ve import komutlarıyla kayıt defterini okuma ve değiştirme; yedekleme ve güvenlik önlemleri.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yapı</a></li><li><a href="#b2">Okuma: reg query</a></li><li><a href="#b3">Yazma: reg add</a></li><li><a href="#b4">Silme: reg delete</a></li><li><a href="#b5">Yedekleme ve geri yükleme</a></li><li><a href="#b6">Uygulamalı örnekler</a></li><li><a href="#b7">Güvenlik uyarıları</a></li><li><a href="#b8">Özet</a></li></ol></nav><!--/px-->
+<p>Kayıt defteri (Registry), Windows ve uygulamaların ayarlarını sakladığı hiyerarşik veri tabanıdır. Batch betikleri <code>reg</code> komutuyla bu veri tabanını okuyabilir ve değiştirebilir. Yanlış bir değişiklik sistemin veya programların çalışmasını bozabileceğinden her değişiklikten önce yedek alınmalıdır.</p>
+<h2 id="b1">Yapı</h2>
+<table>
+<thead><tr><th>Kısaltma</th><th>Tam ad</th><th>İçerik</th></tr></thead>
+<tbody>
+<tr><td><code>HKCU</code></td><td>HKEY_CURRENT_USER</td><td>Geçerli kullanıcının ayarları</td></tr>
+<tr><td><code>HKLM</code></td><td>HKEY_LOCAL_MACHINE</td><td>Bilgisayarın tüm kullanıcılar için ayarları (değişiklik için yönetici gerekir)</td></tr>
+<tr><td><code>HKCR</code></td><td>HKEY_CLASSES_ROOT</td><td>Dosya türü ilişkilendirmeleri</td></tr>
+<tr><td><code>HKU</code></td><td>HKEY_USERS</td><td>Tüm kullanıcı profilleri</td></tr>
+</tbody>
+</table>
+<p>Anahtarlar klasör, değerler ise bu anahtarların içindeki adlı verilerdir. Değer türleri: <code>REG_SZ</code> (metin), <code>REG_DWORD</code> (32 bit sayı), <code>REG_QWORD</code> (64 bit sayı), <code>REG_MULTI_SZ</code> (metin listesi), <code>REG_EXPAND_SZ</code> (değişken içeren metin), <code>REG_BINARY</code> (ikili veri).</p>
+<h2 id="b2">Okuma: reg query</h2>
+<pre>reg query "HKCU\Control Panel\Desktop"
+reg query "HKCU\Control Panel\Desktop" /v WallPaper
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName
+reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Run"
+reg query "HKCU\Software" /f "Sample" /s       rem alt anahtarlarda arama</pre>
+<p>Bir değerin batch değişkenine alınması:</p>
+<pre>@echo off
+for /f "tokens=2,*" %%a in ('reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" /v ProductName 2^&gt;nul ^| find "ProductName"') do set "SURUM=%%b"
+echo Windows surumu: %SURUM%
+pause</pre>
+<ul>
+<li>Çıktı satırı <code>ProductName    REG_SZ    Windows 11 Pro</code> biçimindedir; <code>tokens=2,*</code> ikinci parçadan sonrasını (<code>%%b</code>) alır.</li>
+<li><code>2^&gt;nul</code> ifadesindeki <code>^</code>, <code>for</code> içindeki komutta yönlendirme işaretinden kaçmak içindir.</li>
+</ul>
+<h2 id="b3">Yazma: reg add</h2>
+<pre>rem metin degeri
+reg add "HKCU\Software\Denemem" /v Ad /t REG_SZ /d "Merhaba" /f
+
+rem sayi degeri
+reg add "HKCU\Software\Denemem" /v Deger /t REG_DWORD /d 1 /f
+
+rem varsayilan deger
+reg add "HKCU\Software\Denemem" /ve /d "varsayilan" /f</pre>
+<table>
+<thead><tr><th>Seçenek</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><code>/v ad</code></td><td>Değer adı</td></tr>
+<tr><td><code>/t tür</code></td><td>Değer türü</td></tr>
+<tr><td><code>/d veri</code></td><td>Değerin verisi</td></tr>
+<tr><td><code>/f</code></td><td>Onay sormadan üzerine yazar</td></tr>
+<tr><td><code>/reg:64</code> / <code>/reg:32</code></td><td>64 veya 32 bit kayıt defteri görünümünü seçer</td></tr>
+</tbody>
+</table>
+<h2 id="b4">Silme: reg delete</h2>
+<pre>reg delete "HKCU\Software\Denemem" /v Ad /f      rem yalnizca bir deger
+reg delete "HKCU\Software\Denemem" /f             rem anahtar ve icindeki her sey</pre>
+<blockquote>Anahtar silme işlemi geri alınamaz. Silmeden önce yedek alınmalı, yol dikkatle denetlenmelidir. Yalnızca <code>HKCU\Software\Denemem</code> gibi kendi oluşturulan anahtarlarla deneme yapılması önerilir.</blockquote>
+<h2 id="b5">Yedekleme ve geri yükleme</h2>
+<pre>rem yedek al
+reg export "HKCU\Software\Denemem" "%USERPROFILE%\Desktop\denemem_yedek.reg" /y
+
+rem geri yukle
+reg import "%USERPROFILE%\Desktop\denemem_yedek.reg"
+
+rem tum anahtari dosyaya kaydet/yukle (hive)
+reg save "HKCU\Software\Denemem" yedek.hiv
+reg restore "HKCU\Software\Denemem" yedek.hiv</pre>
+<p><code>.reg</code> dosyası düz metindir ve Not Defteri ile incelenebilir. <code>/y</code> önceki dosyanın üzerine yazmayı onaylar.</p>
+<h2 id="b6">Uygulamalı örnekler</h2>
+<h3>Başlangıçta çalışan programları listeleme</h3>
+<pre>@echo off
+echo --- Kullanici baslangic programlari ---
+reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Run"
+echo.
+echo --- Sistem baslangic programlari ---
+reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Run"
+pause</pre>
+<h3>Dosya uzantılarını görünür yapma</h3>
+<pre>@echo off
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v HideFileExt /t REG_DWORD /d 0 /f
+echo Degisiklik, Gezgin yeniden baslatildiginda gorunur.
+taskkill /f /im explorer.exe &gt; nul
+start explorer.exe</pre>
+<p>Bu örnek <code>HideFileExt</code> değerini 0 yaparak bilinen dosya uzantılarının gösterilmesini sağlar. Gezgin'in yeniden başlatılması masaüstünün birkaç saniye kaybolmasına neden olur.</p>
+<h2 id="b7">Güvenlik uyarıları</h2>
+<ul>
+<li>Bilinmeyen kaynaklardan alınan <code>.reg</code> dosyaları çift tıklanıp içe aktarılmamalıdır; sistem ayarlarını ve başlangıç girdilerini değiştirebilir.</li>
+<li><code>HKLM</code> altındaki değişiklikler yönetici yetkisi gerektirir ve tüm kullanıcıları etkiler.</li>
+<li>Değişiklik öncesinde <code>reg export</code> ile yedek, mümkünse sistem geri yükleme noktası oluşturulmalıdır.</li>
+<li>Kötü amaçlı yazılımlar <code>Run</code> anahtarlarına kendini ekleyerek kalıcılık sağlar; bu anahtarların düzenli denetimi güvenlik açısından yararlıdır.</li>
+</ul>
+<h2 id="b8">Özet</h2>
+<ul>
+<li><code>reg query</code> okur, <code>reg add</code> yazar, <code>reg delete</code> siler, <code>reg export</code> ve <code>reg import</code> yedekler ve geri yükler.</li>
+<li>Yol boşluk içerdiğinde tırnak kullanılır; <code>HKLM</code> değişiklikleri yönetici ister.</li>
+<li>Her değişiklikten önce yedek alınır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Tarih ve Saat İşlemleri</title>
+<meta name="description" content="%date% ve %time% değişkenlerinin sınırları, bölgesel ayardan bağımsız zaman damgası, geçen süreyi ölçme, forfiles ile eski dosyaları temizleme.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-07-27 16:32">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>%date% ve %time% değişkenlerinin sınırları, bölgesel ayardan bağımsız zaman damgası, geçen süreyi ölçme, forfiles ile eski dosyaları temizleme.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">%date% ve %time%</a></li><li><a href="#b2">Bölgesel ayardan bağımsız zaman damgası</a></li><li><a href="#b3">Geçen süreyi ölçme</a></li><li><a href="#b4">Bekleme</a></li><li><a href="#b5">Eski dosyaları tarihe göre silme: forfiles</a></li><li><a href="#b6">Gün sayısı ve tarih hesabı</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
+<p>Batch betiklerinde tarih ve saat; dosya adlarına zaman damgası eklemek, yedekleri adlandırmak, işlem süresini ölçmek ve eski dosyaları silmek için kullanılır. Ancak yerleşik <code>%DATE%</code> ve <code>%TIME%</code> değişkenleri Windows'un bölgesel ayarlarına bağlı olduğundan taşınabilir betikler için dikkatli kullanılmalıdır.</p>
+<h2 id="b1">%date% ve %time%</h2>
+<pre>@echo off
+echo Tarih: %date%
+echo Saat : %time%
+pause</pre>
+<ul>
+<li><code>%DATE%</code> biçimi bölgesel ayara göre değişir (örneğin <code>13.10.2026</code>, <code>10/13/2026</code>, <code>Tue 10/13/2026</code>). Gün, ay ve yılın karakter konumları bu nedenle sabit değildir; <code>%date:~6,4%</code> gibi parçalama bir bilgisayarda doğru, başkasında yanlış çalışabilir.</li>
+<li><code>%TIME%</code> ondalıklı saniye içerir: <code>9:05:03,12</code>. Saat 10'dan küçükse başına <b>boşluk</b> gelir (<code>9</code> yerine <code> 9</code>), bu da dosya adlarında sorun çıkarır.</li>
+<li>Saatteki boşluğu sıfırla doldurmak için: <code>set "SAAT=%time: =0%"</code>.</li>
+</ul>
+<h2 id="b2">Bölgesel ayardan bağımsız zaman damgası</h2>
+<p>Her bilgisayarda aynı biçimi veren en güvenilir yol PowerShell'den tarihi biçimlendirilmiş olarak almaktır:</p>
+<pre>@echo off
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm-ss"') do set "ZAMAN=%%i"
+echo %ZAMAN%
+copy rapor.txt "rapor_%ZAMAN%.txt"
+pause</pre>
+<p>Sonuç <code>2026-10-13_21-30-05</code> gibidir. Bu biçim, dosya adlarında alfabetik sıralamanın zaman sırasıyla aynı olmasını da sağlar.</p>
+<h3>Yalnızca tarih veya yalnızca yıl, ay, gün parçaları</h3>
+<pre>for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd"') do set "BUGUN=%%i"
+set "YIL=%BUGUN:~0,4%"
+set "AY=%BUGUN:~4,2%"
+set "GUN=%BUGUN:~6,2%"
+echo %GUN%.%AY%.%YIL%</pre>
+<blockquote>Eski rehberlerde tarih almak için <code>wmic os get localdatetime</code> komutu yer alır. WMIC, Microsoft tarafından kullanımdan kaldırılmıştır ve yeni Windows 11 sürümlerinde varsayılan olarak yüklü değildir; bu nedenle PowerShell kullanılmalıdır.</blockquote>
+<h2 id="b3">Geçen süreyi ölçme</h2>
+<p>Bir işlemin kaç saniye sürdüğünü ölçmek için başlangıç ve bitiş saatleri <b>yüzde saniyeye</b> çevrilip çıkarılır:</p>
+<pre>@echo off
+setlocal
+call :yuzde_saniye BASLA
+
+rem ---- olculecek islem ----
+timeout /t 3 /nobreak &gt; nul
+rem -------------------------
+
+call :yuzde_saniye BITIS
+set /a FARK=BITIS-BASLA
+if %FARK% LSS 0 set /a FARK+=8640000
+set /a SN=FARK/100
+set /a YSN=FARK%%100
+echo Gecen sure: %SN%,%YSN% saniye
+pause
+exit /b
+
+:yuzde_saniye
+rem %1 = sonucun yazilacagi degisken (gunun basindan beri yuzde saniye)
+set "T=%time: =0%"
+for /f "tokens=1-4 delims=:.," %%a in ("%T%") do set /a %1=(((1%%a-100)*60+1%%b-100)*60+1%%c-100)*100+1%%d-100
+exit /b</pre>
+<ul>
+<li><code>delims=:.,</code> saat biçimindeki <code>:</code>, <code>.</code> ve <code>,</code> karakterlerinin hepsini ayırıcı sayar; böylece saat, dakika, saniye ve yüzde saniye dört parçaya ayrılır.</li>
+<li><code>1%%a-100</code> ifadesi, baştaki sıfır nedeniyle oluşan sekizlik sayı hatasını önler (bkz. <a href="egitim-14-aritmetik-rastgele.html">Aritmetik İşlemler</a>).</li>
+<li>Gece yarısı geçilirse fark negatif çıkar; bu durumda bir günün yüzde saniye değeri (8640000) eklenir.</li>
+</ul>
+<h2 id="b4">Bekleme</h2>
+<pre>timeout /t 10                 rem 10 saniye bekler, tusa basilirsa erken biter
+timeout /t 10 /nobreak        rem tus basimini yok sayar (Ctrl+C ile iptal edilir)
+timeout /t -1                 rem tusa basilana kadar bekler
+ping -n 6 127.0.0.1 &gt; nul     rem ~5 saniye bekler (timeout calismayan ortamlarda)</pre>
+<p><code>timeout</code>, girdi yönlendirilen durumlarda (örneğin zamanlanmış görevler) hata verebilir; bu durumda <code>ping</code> yöntemi kullanılır. Zamanlama ile ilgili ayrıntılar için bkz. <a href="egitim-19-zamanlama-otomasyon.html">Zamanlama ve Otomasyon</a>.</p>
+<h2 id="b5">Eski dosyaları tarihe göre silme: forfiles</h2>
+<p><code>forfiles</code> komutu, dosyaları son değiştirilme tarihine göre seçer. <code>/d -30</code> ifadesi "30 günden eski" anlamına gelir:</p>
+<pre>@echo off
+rem D:\Yedekler klasorunde 30 gunden eski .zip dosyalarini listele (deneme)
+forfiles /p "D:\Yedekler" /m *.zip /d -30 /c "cmd /c echo @path @fdate"
+
+rem Silmek icin (once yukaridaki liste dogrulanmalidir)
+rem forfiles /p "D:\Yedekler" /m *.zip /d -30 /c "cmd /c del @path"
+pause</pre>
+<table>
+<thead><tr><th>Parametre</th><th>Anlamı</th></tr></thead>
+<tbody>
+<tr><td><code>/p yol</code></td><td>Aranacak klasör</td></tr>
+<tr><td><code>/s</code></td><td>Alt klasörlere de bakar</td></tr>
+<tr><td><code>/m maske</code></td><td>Dosya adı maskesi (<code>*.log</code>)</td></tr>
+<tr><td><code>/d -N</code></td><td>N günden eski dosyalar. <code>/d +N</code> yeni olanlar, <code>/d gg.aa.yyyy</code> belirli tarihten eski olanlar (bölgesel biçimle)</td></tr>
+<tr><td><code>/c "komut"</code></td><td>Her dosya için çalıştırılacak komut. <code>@path</code> tam yol, <code>@file</code> dosya adı, <code>@fdate</code> tarih değişkenleridir.</td></tr>
+</tbody>
+</table>
+<blockquote>Silme komutu çalıştırılmadan önce aynı filtreyle önce yalnızca listeleme yapılmalıdır. Hedef klasörün doğru olduğundan emin olunmalıdır.</blockquote>
+<h2 id="b6">Gün sayısı ve tarih hesabı</h2>
+<p>Tarih aritmetiği (örneğin 7 gün öncesi) batch ile zordur; PowerShell kullanılır:</p>
+<pre>for /f %%i in ('powershell -NoProfile -Command "(Get-Date).AddDays(-7).ToString(''yyyy-MM-dd'')"') do set "GECEN_HAFTA=%%i"
+echo %GECEN_HAFTA%
+
+for /f %%i in ('powershell -NoProfile -Command "(Get-Date).DayOfWeek.value__"') do set "HAFTANIN_GUNU=%%i"
+rem 0 = Pazar, 1 = Pazartesi ... 6 = Cumartesi
+echo %HAFTANIN_GUNU%</pre>
+<h2 id="b7">Özet</h2>
+<ul>
+<li><code>%DATE%</code> ve <code>%TIME%</code> bölgesel ayara bağlıdır; dosya adı gibi kritik işlerde PowerShell ile <code>Get-Date -Format</code> kullanılır.</li>
+<li>Saat değerindeki başlangıç boşluğu <code>%time: =0%</code> ile sıfırlanır.</li>
+<li>Süre ölçümü için saatler yüzde saniyeye çevrilip çıkarılır.</li>
+<li><code>timeout</code> ile beklenir, <code>forfiles</code> ile eski dosyalar tarihe göre seçilir.</li>
+<li>WMIC yerine PowerShell kullanılır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

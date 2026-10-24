@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zamanlanmış Görev (schtasks) Komutu Oluşturucu</title>
+<meta name="description" content="Bir programı belirli saatte, günde, haftada veya açılışta otomatik çalıştırmak için schtasks komutunu seçeneklerle oluştur.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-05-02 16:01">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir programı belirli saatte, günde, haftada veya açılışta otomatik çalıştırmak için schtasks komutunu seçeneklerle oluştur.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Sıklık seçenekleri</a></li><li><a href="#b4">Dikkat edilecekler</a></li></ol></nav><!--/px-->
+<p>Windows Görev Zamanlayıcı, programların ve betiklerin belirli zamanlarda otomatik çalışmasını sağlar. Arayüz yerine <code>schtasks</code> komutu kullanıldığında görev tek satırla oluşturulabilir, <code>.bat</code> dosyasına eklenebilir ve başka bilgisayarlara aynı şekilde uygulanabilir. Bu araç, seçeneklere göre komutu oluşturur; çalıştırma, sorgulama ve silme komutlarını da birlikte verir.</p>
+<h2 id="b1">Aracı dene</h2>
+<style>.gg{display:grid;gap:14px}.gg[hidden],.arac .satir[hidden]{display:none}</style>
+<div class="arac">
+  <div class="satir">
+    <label for="gz-ad">Görev adı<input type="text" id="gz-ad" value="GunlukYedekleme" autocomplete="off"></label>
+    <label for="gz-sc">Çalışma sıklığı
+      <select id="gz-sc">
+        <option value="daily">Günlük</option>
+        <option value="once">Bir kez</option>
+        <option value="minute">Dakikada bir</option>
+        <option value="hourly">Saatte bir</option>
+        <option value="weekly">Haftalık</option>
+        <option value="monthly">Aylık</option>
+        <option value="onstart">Bilgisayar açılışında</option>
+        <option value="onlogon">Oturum açıldığında</option>
+        <option value="onidle">Bilgisayar boşta kalınca</option>
+      </select>
+    </label>
+  </div>
+  <label for="gz-kom">Çalıştırılacak program veya komut<input type="text" id="gz-kom" value="C:\Yedek\yedekle.bat" autocomplete="off"></label>
+  <div class="gg" id="gz-gmo" hidden>
+    <label for="gz-mo"><span id="gz-mol">Tekrar aralığı</span><input type="number" id="gz-mo" min="1" max="1439" value="1"></label>
+  </div>
+  <div class="gg" id="gz-ggun" hidden>
+    <fieldset style="border:0;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px 18px">
+      <legend style="font-weight:600;padding:0;margin-bottom:6px;width:100%">Haftanın günleri</legend>
+      <label class="onay" for="gz-d1"><input type="checkbox" id="gz-d1" value="MON" checked> Pzt</label>
+      <label class="onay" for="gz-d2"><input type="checkbox" id="gz-d2" value="TUE"> Sal</label>
+      <label class="onay" for="gz-d3"><input type="checkbox" id="gz-d3" value="WED"> Çar</label>
+      <label class="onay" for="gz-d4"><input type="checkbox" id="gz-d4" value="THU"> Per</label>
+      <label class="onay" for="gz-d5"><input type="checkbox" id="gz-d5" value="FRI"> Cum</label>
+      <label class="onay" for="gz-d6"><input type="checkbox" id="gz-d6" value="SAT"> Cmt</label>
+      <label class="onay" for="gz-d7"><input type="checkbox" id="gz-d7" value="SUN"> Paz</label>
+    </fieldset>
+  </div>
+  <div class="gg" id="gz-gay" hidden>
+    <label for="gz-gun">Ayın kaçıncı günü<input type="number" id="gz-gun" min="1" max="31" value="1"></label>
+  </div>
+  <div class="gg" id="gz-gidle" hidden>
+    <label for="gz-idle">Boşta kalma süresi (dakika)<input type="number" id="gz-idle" min="1" max="999" value="10"></label>
+  </div>
+  <div class="satir" id="gz-gsaat">
+    <label for="gz-st">Başlangıç saati<input type="time" id="gz-st" value="09:00"></label>
+    <label for="gz-tar">Başlangıç tarihi (isteğe bağlı)<input type="date" id="gz-tar"></label>
+    <label for="gz-tf">Tarih biçimi
+      <select id="gz-tf">
+        <option value="gg.aa.yyyy">gg.aa.yyyy (Türkiye)</option>
+        <option value="gg/aa/yyyy">gg/aa/yyyy</option>
+        <option value="aa/gg/yyyy">aa/gg/yyyy (ABD)</option>
+      </select>
+    </label>
+  </div>
+  <div class="satir">
+    <label for="gz-yt">Yetki
+      <select id="gz-yt">
+        <option value="">Geçerli kullanıcı</option>
+        <option value="hi">En yüksek ayrıcalıklarla (yönetici)</option>
+        <option value="sys">SYSTEM hesabı olarak</option>
+      </select>
+    </label>
+  </div>
+  <label class="onay" for="gz-f"><input type="checkbox" id="gz-f" checked> Aynı adlı görev varsa üzerine yaz (/f)</label>
+  <p class="not" id="gz-hata" role="alert"></p>
+  <p style="margin:0;font-weight:700" id="gz-ozet" role="status" aria-live="polite"></p>
+  <div id="gz-cikti" style="display:grid;gap:10px"></div>
+  <div class="dugmeler"><button type="button" id="gz-bat">Oluşturma komutunu .bat olarak indir</button></div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const GUN={MON:'Pazartesi',TUE:'Salı',WED:'Çarşamba',THU:'Perşembe',FRI:'Cuma',SAT:'Cumartesi',SUN:'Pazar'};
+const MO={minute:['Kaç dakikada bir',1,1439],hourly:['Kaç saatte bir',1,23],daily:['Kaç günde bir',1,365],weekly:['Kaç haftada bir',1,52],monthly:['Kaç ayda bir',1,12]};
+const SAATLI=['once','minute','hourly','daily','weekly','monthly'];
+let sonKomut='';
+const tarih=()=>{const v=$('gz-tar').value;if(!v)return '';const[y,m,d]=v.split('-'),f=$('gz-tf').value;
+  return f==='gg.aa.yyyy'?d+'.'+m+'.'+y:f==='gg/aa/yyyy'?d+'/'+m+'/'+y:m+'/'+d+'/'+y};
+const hesapla=()=>{
+  const sc=$('gz-sc').value;
+  $('gz-gmo').hidden=!MO[sc];$('gz-ggun').hidden=sc!=='weekly';$('gz-gay').hidden=sc!=='monthly';
+  $('gz-gidle').hidden=sc!=='onidle';$('gz-gsaat').hidden=!SAATLI.includes(sc);
+  if(MO[sc]){$('gz-mol').textContent=MO[sc][0];$('gz-mo').min=MO[sc][1];$('gz-mo').max=MO[sc][2]}
+  const out=$('gz-cikti'),hata=m=>{$('gz-hata').textContent=m;$('gz-ozet').textContent='';out.textContent='';sonKomut=''};
+  $('gz-hata').textContent='';
+  const ad=$('gz-ad').value.trim(),kom=$('gz-kom').value.trim().replace(/[\r\n]+/g,' ');
+  if(!ad||/[\\\/:*?"<>|]/.test(ad))return hata('Görev adı boş olamaz ve \\ / : * ? " < > | karakterlerini içeremez.');
+  if(!kom)return hata('Çalıştırılacak program veya komut yazılmalıdır.');
+  if(kom.length>261)return hata('Komut en fazla 261 karakter olabilir (Windows sınırı).');
+  const st=$('gz-st').value,mo=Math.floor(+$('gz-mo').value),tar=tarih();
+  if(SAATLI.includes(sc)&&sc!=='minute'&&sc!=='hourly'&&!st)return hata('Başlangıç saati seçilmelidir.');
+  if(sc==='once'&&!st)return hata('Başlangıç saati seçilmelidir.');
+  if(MO[sc]&&(!(mo>=MO[sc][1])||mo>MO[sc][2]))return hata('Tekrar aralığı '+MO[sc][1]+' ile '+MO[sc][2]+' arasında olmalıdır.');
+  const gunler=[...document.querySelectorAll('#gz-ggun input:checked')].map(x=>x.value);
+  if(sc==='weekly'&&!gunler.length)return hata('En az bir gün seçilmelidir.');
+  const ay=Math.floor(+$('gz-gun').value);
+  if(sc==='monthly'&&!(ay>=1&&ay<=31))return hata('Ayın günü 1 ile 31 arasında olmalıdır.');
+  const idle=Math.floor(+$('gz-idle').value);
+  if(sc==='onidle'&&!(idle>=1&&idle<=999))return hata('Boşta kalma süresi 1 ile 999 dakika arasında olmalıdır.');
+  const P=['schtasks /create','/tn "'+ad+'"','/tr "'+kom.replace(/"/g,'\\"')+'"','/sc '+sc.toUpperCase()];
+  if(MO[sc]&&(mo>1||sc==='minute'||sc==='hourly'))P.push('/mo '+mo);
+  if(sc==='weekly')P.push('/d '+gunler.join(','));
+  if(sc==='monthly')P.push('/d '+ay);
+  if(sc==='onidle')P.push('/i '+idle);
+  if(SAATLI.includes(sc)&&st)P.push('/st '+st);
+  if(SAATLI.includes(sc)&&tar)P.push('/sd '+tar);
+  const yt=$('gz-yt').value;
+  if(yt==='hi')P.push('/rl HIGHEST');
+  if(yt==='sys')P.push('/ru SYSTEM');
+  if($('gz-f').checked)P.push('/f');
+  const olustur=P.join(' ');
+  const T={
+    once:()=>(tar||'Bugün')+' '+st+' saatinde bir kez',
+    minute:()=>'Her '+mo+' dakikada bir'+(st?' ('+st+' saatinden itibaren)':''),
+    hourly:()=>'Her '+mo+' saatte bir'+(st?' ('+st+' saatinden itibaren)':''),
+    daily:()=>(mo>1?mo+' günde bir ':'Her gün ')+st+' saatinde',
+    weekly:()=>gunler.map(g=>GUN[g]).join(', ')+' günleri '+st+' saatinde'+(mo>1?' ('+mo+' haftada bir)':''),
+    monthly:()=>'Ayın '+ay+'. günü '+st+' saatinde'+(mo>1?' ('+mo+' ayda bir)':''),
+    onstart:()=>'Bilgisayar her açıldığında',onlogon:()=>'Her oturum açıldığında',
+    onidle:()=>'Bilgisayar '+idle+' dakika boşta kaldığında'};
+  $('gz-ozet').textContent='Görev: '+T[sc]()+' çalışacak.';
+  const L=[['Görevi oluştur',olustur],['Görevi hemen çalıştır','schtasks /run /tn "'+ad+'"'],['Görev durumunu göster','schtasks /query /tn "'+ad+'" /v /fo list'],['Görevi devre dışı bırak','schtasks /change /tn "'+ad+'" /disable'],['Görevi yeniden etkinleştir','schtasks /change /tn "'+ad+'" /enable'],['Görevi sil','schtasks /delete /tn "'+ad+'" /f']];
+  out.textContent='';
+  L.forEach((x,i)=>{
+    const h=document.createElement('div');h.style.cssText='font-weight:600;margin-top:4px';h.textContent=x[0];
+    const r=document.createElement('div');r.className='kod';
+    const c=document.createElement('code');c.id='gz-c'+i;c.textContent=x[1];
+    const b=document.createElement('button');b.type='button';b.className='ikinci';b.textContent='Kopyala';b.dataset.kopyala='gz-c'+i;
+    b.setAttribute('aria-label',x[0]+' komutunu kopyala');
+    r.append(c,b);out.append(h,r)});
+  sonKomut=olustur;
+};
+['gz-ad','gz-kom','gz-sc','gz-mo','gz-gun','gz-idle','gz-st','gz-tar','gz-tf','gz-yt','gz-f'].forEach(i=>$(i).addEventListener('input',hesapla));
+document.querySelectorAll('#gz-ggun input').forEach(x=>x.addEventListener('input',hesapla));
+$('gz-bat').onclick=()=>{hesapla();if(!sonKomut)return;
+  Arac.indir('@echo off\r\nchcp 65001 >nul\r\n'+sonKomut.replace(/%/g,'%%')+'\r\npause\r\n','gorev-olustur.bat','text/plain;charset=utf-8')};
+hesapla();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li>Görev adını ve çalıştırılacak program veya komutu yaz. Boşluk içeren yollarda tırnak gerekmez; araç komutu gerektiği gibi sarmalar.</li>
+<li>Sıklığı seç ve saat, gün gibi ayrıntıları doldur.</li>
+<li>Komutu <b>yönetici olarak açılan</b> Komut İstemi'ne yapıştır. Aynı adlı görev varsa <code>/f</code> seçeneği onun üzerine yazar.</li>
+<li>Görev oluştuktan sonra durumunu göstermek, hemen çalıştırmak veya silmek için aşağıdaki komutlar kullanılır.</li>
+</ol>
+<h2 id="b3">Sıklık seçenekleri</h2>
+<table>
+<thead><tr><th>Seçenek</th><th>Parametre</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td>Bir kez</td><td><code>/sc ONCE</code></td><td>Belirtilen saatte yalnızca bir kez çalışır. Saat geçmişse görev oluşmaz.</td></tr>
+<tr><td>Dakikada bir</td><td><code>/sc MINUTE /mo 15</code></td><td>1 ile 1439 dakika arası aralık.</td></tr>
+<tr><td>Saatte bir</td><td><code>/sc HOURLY /mo 2</code></td><td>1 ile 23 saat arası aralık.</td></tr>
+<tr><td>Günlük</td><td><code>/sc DAILY</code></td><td><code>/mo</code> ile birkaç günde bir olacak şekilde ayarlanabilir.</td></tr>
+<tr><td>Haftalık</td><td><code>/sc WEEKLY /d MON,FRI</code></td><td>Seçilen günlerde çalışır.</td></tr>
+<tr><td>Aylık</td><td><code>/sc MONTHLY /d 15</code></td><td>Ayın belirtilen gününde çalışır. 29-31. günler kısa aylarda atlanabilir.</td></tr>
+<tr><td>Açılışta / oturumda</td><td><code>/sc ONSTART</code>, <code>/sc ONLOGON</code></td><td>Saat gerekmez. Açılış görevi yönetici yetkisi gerektirir.</td></tr>
+<tr><td>Boşta kalınca</td><td><code>/sc ONIDLE /i 10</code></td><td>Bilgisayar belirtilen dakika boşta kaldığında çalışır.</td></tr>
+</tbody>
+</table>
+<h2 id="b4">Dikkat edilecekler</h2>
+<ul>
+<li>Tarih biçimi, Windows'un bölge ayarındaki kısa tarih biçimiyle uyumlu olmalıdır. Türkiye ayarlarında <code>gg.aa.yyyy</code> kullanılır; hata alınırsa araçtan başka biçim seçilebilir.</li>
+<li><code>/ru SYSTEM</code> ve <code>/rl HIGHEST</code> seçenekleri yönetici yetkisi gerektirir. Bu seçenekler yalnızca gerçekten ihtiyaç olduğunda kullanılmalıdır.</li>
+<li>Komut satırı en fazla 261 karakter olabilir. Uzun komutlar için bir <code>.bat</code> dosyası oluşturup görevden o dosya çalıştırılmalıdır.</li>
+<li>Görev, bilgisayar kapalıyken çalışmaz. Kapalı olduğu için kaçırılan görevleri sonradan çalıştırmak Görev Zamanlayıcı arayüzündeki ayarlarla yapılır.</li>
+<li>Araç komutu yalnızca üretir; hiçbir veri sunucuya gönderilmez.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Batch Rehberi: Temel Komutlar ve Yardım Alma</title>
+<meta name="description" content="echo, cls, pause, title, color, rem, cd, pushd, ver, whoami gibi sık kullanılan komutlar ve her komutun seçeneklerini /? ile öğrenme yöntemi.">
+<meta name="kategori" content="batch">
+<meta name="tarih" content="2026-06-22 23:40">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#1e8449;--b:#58d68d">
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>echo, cls, pause, title, color, rem, cd, pushd, ver, whoami gibi sık kullanılan komutlar ve her komutun seçeneklerini /? ile öğrenme yöntemi.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yardım almak: /? ve help</a></li><li><a href="#b2">Ekrana yazı yazma ve ekranı denetleme</a></li><li><a href="#b3">Klasörler arasında gezinme</a></li><li><a href="#b4">Bilgi veren komutlar</a></li><li><a href="#b5">Betiği sonlandırma</a></li><li><a href="#b6">Sık kullanılan komut grupları</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
+<p>Batch betikleri, Komut İstemi'nde çalışan komutların bir dosyaya yazılmasından ibarettir. Bu nedenle betik yazmanın ilk adımı sık kullanılan komutları ve her birinin seçeneklerine nasıl ulaşılacağını bilmektir. Bu yazıda temel komutlar gruplanarak verilir; ayrıntılı konular (değişkenler, döngüler, dosya işlemleri) rehberin diğer yazılarında ele alınır.</p>
+<h2 id="b1">Yardım almak: /? ve help</h2>
+<p>Her komutun seçenekleri, komutun sonuna <code>/?</code> yazılarak öğrenilir. Bu, rehberdeki en önemli alışkanlıktır; çünkü seçenekler Windows sürümüne göre farklılık gösterebilir.</p>
+<pre>copy /?
+robocopy /?
+help
+help dir</pre>
+<ul>
+<li><code>komut /?</code>: İlgili komutun kullanımını ve seçeneklerini gösterir.</li>
+<li><code>help</code>: Yerleşik komutların listesini verir. <code>help komut</code> tek bir komutun yardımını gösterir.</li>
+<li>Uzun yardım metinleri için çıktı bir dosyaya veya sayfalayıcıya yönlendirilebilir: <code>robocopy /? | more</code> veya <code>robocopy /? &gt; yardim.txt</code> (bkz. <a href="egitim-12-yonlendirme-filtreleme.html">Yönlendirme, Borular ve Filtreleme</a>).</li>
+<li>Resmî belgeler için Microsoft'un "Windows commands" sayfası kullanılabilir.</li>
+</ul>
+<h2 id="b2">Ekrana yazı yazma ve ekranı denetleme</h2>
+<table>
+<thead><tr><th>Komut</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td><code>@echo off</code></td><td>Komutların kendilerinin ekrana yazılmasını kapatır. Betiğin ilk satırında bulunur; <code>@</code> işareti bu satırın kendisinin de gizlenmesini sağlar.</td></tr>
+<tr><td><code>echo metin</code></td><td>Ekrana metin yazar. Boş satır için <code>echo.</code> kullanılır.</td></tr>
+<tr><td><code>echo %USERNAME%</code></td><td>Değişkenin değerini yazar.</td></tr>
+<tr><td><code>cls</code></td><td>Ekranı temizler.</td></tr>
+<tr><td><code>pause</code></td><td>"Devam etmek için bir tuşa basın" mesajıyla bekler. Betiğin penceresi çift tıklamayla açıldıysa, bitişte pencere kapanmadan önce çıktıyı okumayı sağlar.</td></tr>
+<tr><td><code>title Pencere Basligi</code></td><td>Komut penceresinin başlığını değiştirir.</td></tr>
+<tr><td><code>color 0A</code></td><td>Pencere rengini ayarlar (aşağıya bakınız).</td></tr>
+<tr><td><code>mode con cols=100 lines=30</code></td><td>Pencere boyutunu karakter cinsinden ayarlar.</td></tr>
+<tr><td><code>rem yorum</code></td><td>Yorum satırıdır; çalıştırılmaz. <code>::</code> da yorum olarak kullanılabilir, ancak parantezli bloklar içinde sorun çıkarabileceği için <code>rem</code> önerilir.</td></tr>
+</tbody>
+</table>
+<h3>color komutu</h3>
+<p><code>color</code> iki onaltılık basamak alır: ilki <b>arka plan</b>, ikincisi <b>yazı</b> rengidir. Parametresiz <code>color</code> varsayılan renklere döner.</p>
+<table>
+<thead><tr><th>Kod</th><th>Renk</th><th>Kod</th><th>Renk</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>Siyah</td><td>8</td><td>Gri</td></tr>
+<tr><td>1</td><td>Mavi</td><td>9</td><td>Açık mavi</td></tr>
+<tr><td>2</td><td>Yeşil</td><td>A</td><td>Açık yeşil</td></tr>
+<tr><td>3</td><td>Turkuaz</td><td>B</td><td>Açık turkuaz</td></tr>
+<tr><td>4</td><td>Kırmızı</td><td>C</td><td>Açık kırmızı</td></tr>
+<tr><td>5</td><td>Mor</td><td>D</td><td>Açık mor</td></tr>
+<tr><td>6</td><td>Sarı</td><td>E</td><td>Açık sarı</td></tr>
+<tr><td>7</td><td>Beyaz</td><td>F</td><td>Parlak beyaz</td></tr>
+</tbody>
+</table>
+<pre>@echo off
+title Renk Denemesi
+color 0A
+echo Siyah zemin uzerine acik yesil yazi
+pause</pre>
+<blockquote>Arka plan ve yazı rengi aynı verilirse (<code>color 00</code> gibi) yazı görünmez olur; bu durumda <code>color</code> komutu parametresiz çalıştırılır.</blockquote>
+<h2 id="b3">Klasörler arasında gezinme</h2>
+<table>
+<thead><tr><th>Komut</th><th>Açıklama</th></tr></thead>
+<tbody>
+<tr><td><code>cd</code></td><td>Geçerli klasörü yazdırır.</td></tr>
+<tr><td><code>cd klasor</code></td><td>Klasöre geçer.</td></tr>
+<tr><td><code>cd ..</code></td><td>Bir üst klasöre çıkar.</td></tr>
+<tr><td><code>cd /d D:\Projeler</code></td><td>Başka bir sürücüdeki klasöre de geçer. <code>/d</code> olmadan <code>cd</code>, sürücüyü değiştirmez.</td></tr>
+<tr><td><code>D:</code></td><td>Sürücüyü değiştirir (yalnızca sürücü harfi ve iki nokta yazılır).</td></tr>
+<tr><td><code>pushd klasor</code> / <code>popd</code></td><td>Geçerli klasörü hafızaya alıp başka klasöre geçer; <code>popd</code> ile eski klasöre dönülür. Betik çalışırken geçici olarak başka klasörde işlem yapmak için uygundur.</td></tr>
+</tbody>
+</table>
+<pre>@echo off
+echo Baslangic klasoru: %cd%
+pushd "C:\Windows"
+echo Simdi buradayiz: %cd%
+popd
+echo Geri donuldu: %cd%
+pause</pre>
+<p>Betiğin bulunduğu klasörde çalışmak için betiğin ilk satırlarında <code>cd /d "%~dp0"</code> kullanılır (bkz. <a href="egitim-06-parametreler.html">Parametreler ve %~ Değiştiricileri</a>).</p>
+<h2 id="b4">Bilgi veren komutlar</h2>
+<table>
+<thead><tr><th>Komut</th><th>Ne gösterir?</th></tr></thead>
+<tbody>
+<tr><td><code>ver</code></td><td>Windows sürüm numarası</td></tr>
+<tr><td><code>hostname</code></td><td>Bilgisayar adı</td></tr>
+<tr><td><code>whoami</code></td><td>Oturumu açan kullanıcı. <code>whoami /groups</code> grup üyeliklerini, <code>whoami /priv</code> ayrıcalıkları gösterir.</td></tr>
+<tr><td><code>date /t</code> ve <code>time /t</code></td><td>Geçerli tarih ve saat (bölgesel biçimde)</td></tr>
+<tr><td><code>set</code></td><td>Tüm ortam değişkenleri</td></tr>
+<tr><td><code>vol</code></td><td>Sürücü etiketi ve seri numarası</td></tr>
+<tr><td><code>systeminfo</code></td><td>Ayrıntılı sistem bilgisi (çalışması birkaç saniye sürer)</td></tr>
+</tbody>
+</table>
+<h2 id="b5">Betiği sonlandırma</h2>
+<ul>
+<li><code>exit</code>: Komut penceresini kapatır. Betik Komut İstemi içinden çalıştırılmışsa pencere de kapanır.</li>
+<li><code>exit /b</code>: Yalnızca betiği (veya alt programı) sonlandırır, pencere açık kalır. Betiklerde çoğunlukla bu tercih edilir.</li>
+<li><code>exit /b 1</code>: Betiği çıkış koduyla sonlandırır (bkz. <a href="egitim-08-hata-yonetimi.html">Hata Yönetimi ve Log Tutma</a>).</li>
+</ul>
+<h2 id="b6">Sık kullanılan komut grupları</h2>
+<table>
+<thead><tr><th>Amaç</th><th>Komutlar</th><th>Rehberdeki yazı</th></tr></thead>
+<tbody>
+<tr><td>Dosya ve klasör işlemleri</td><td><code>dir</code>, <code>copy</code>, <code>move</code>, <code>del</code>, <code>md</code>, <code>rd</code>, <code>robocopy</code></td><td><a href="egitim-07-dosya-klasor.html">Dosya ve Klasör İşlemleri</a></td></tr>
+<tr><td>Değişkenler</td><td><code>set</code>, <code>setlocal</code></td><td><a href="egitim-02-degiskenler.html">Değişkenler ve set Komutu</a></td></tr>
+<tr><td>Koşullar ve döngüler</td><td><code>if</code>, <code>for</code>, <code>goto</code>, <code>call</code></td><td><a href="egitim-03-if-else.html">if ve else</a>, <a href="egitim-04-for-donguleri.html">for Döngüleri</a></td></tr>
+<tr><td>Süreç ve hizmetler</td><td><code>tasklist</code>, <code>taskkill</code>, <code>sc</code>, <code>net</code></td><td><a href="egitim-17-surec-hizmet.html">Süreç ve Hizmet Yönetimi</a></td></tr>
+<tr><td>Ağ</td><td><code>ping</code>, <code>ipconfig</code>, <code>nslookup</code>, <code>netstat</code></td><td><a href="egitim-23-ag-komutlari.html">Ağ ve İnternet Komutları</a></td></tr>
+</tbody>
+</table>
+<h2 id="b7">Özet</h2>
+<ul>
+<li>Bilinmeyen bir komutun seçenekleri <code>komut /?</code> ile öğrenilir.</li>
+<li>Betikler <code>@echo off</code> ile başlar, bitişte çıktıyı okumak için <code>pause</code> kullanılır.</li>
+<li><code>cd /d</code> sürücü değiştirerek gezinir; <code>pushd</code> ve <code>popd</code> geçici klasör değişikliği içindir.</li>
+<li><code>exit /b</code> betiği sonlandırır, pencere açık kalır.</li>
+</ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
