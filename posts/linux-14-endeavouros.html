@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EndeavourOS</title>
+<meta name="description" content="Arch tabanlı, kurulumu kolay. EndeavourOS nedir, kimler için uygundur ve resmi indirme bağlantısı.">
+<meta name="kategori" content="linuxos">
+<meta name="tarih" content="2026-04-27 12:52">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> whoami</p><p class="o">EndeavourOS</p><p><b>$</b> cat hakkinda.txt</p><p class="o">Arch tabanlı, kurulumu kolay</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Öne çıkan özellikler</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantısı</a></li><li><a href="#b4">İndirdikten sonra</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li><li><a href="#b6">Bilinen güvenlik olayları</a></li></ol></nav><div class="lx-spec"><div><small>Taban</small><b>Arch</b></div><div><small>Paket yöneticisi</small><b>pacman</b></div><div><small>Masaüstü</small><b>Kurulumda seçilir</b></div><div><small>Yayın modeli</small><b>Sürekli güncel (rolling)</b></div><div><small>Zorluk</small><b><span class="lx-meter" role="img" aria-label="Zorluk: Zor"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span><small>Zor</small></b></div></div><div class="lx-tags"><span>Arch’a kolay giriş</span><span>Güncel yazılım</span></div><!--/px-->
+<p>EndeavourOS, Arch Linux tabanlı, kurulumu grafik arayüzle yapılan ve Arch’a yakın deneyim sunan bir dağıtımdır.</p>
+<h2 id="b1">Öne çıkan özellikler</h2>
+<ul>
+<li>Arch tabanlı, sürekli güncellenen (rolling) yapıdadır.</li>
+<li>Grafik kurulum programı vardır.</li>
+<li>Birden çok masaüstü ortamı seçilebilir.</li>
+<li>Arch Linux deposuna erişir.</li>
+</ul>
+<h2 id="b2">Desteklenen platformlar</h2>
+<p>Güncel gereksinimler resmi sayfada belirtilir.</p>
+<h2 id="b3">Resmi indirme bağlantısı</h2>
+<p class="px-dl">Yalnızca geliştiricisinin kendi sitesini kullan: <a href="https://endeavouros.com/">endeavouros.com</a></p>
+<h2 id="b4">İndirdikten sonra</h2>
+<ol>
+<li>İndirdiğin dosya bir <b>ISO</b> imajıdır; USB belleğe yazılması gerekir.</li>
+<li>Resmi sayfadaki sağlama (checksum) değeriyle dosyayı karşılaştır.</li>
+<li>USB’den başlat; canlı modda dene, sonra kur.</li>
+</ol>
+<h2 id="b5">Güvenli indirme ve notlar</h2>
+<ul>
+<li>Rolling yapı nedeniyle düzenli güncelleme gerekir.</li>
+<li>Yeni başlayanlar için Ubuntu veya Linux Mint daha kolay olabilir.</li>
+<li>İmajı yalnızca resmi sayfadan indir.</li>
+</ul>
+<h2 id="b6">Bilinen güvenlik olayları</h2>
+<p>Aşağıdaki olaylar kamuya açık haber ve güvenlik kaynaklarından derlenmiştir. Bu bilgiler yazının hazırlandığı tarihe göredir; güncel durum için ilgili kaynak ve resmi sayfa kontrol edilmelidir.</p>
+<table>
+<thead><tr><th style="min-width:108px">Tarih</th><th>Olay</th><th>Etkisi ve alınacak önlem</th></tr></thead>
+<tbody>
+<tr><td style="min-width:108px">Temmuz 2025</td><td><b>AUR’daki zararlı paketler:</b> Arch tabanlı sistemlerin de kullandığı AUR’a yüklenen üç tarayıcı yama paketi CHAOS RAT kuruyordu. Paketler iki gün içinde kaldırıldı.</td><td>Olay AUR kullanıcılarını ilgilendirir; resmi depolar etkilenmemiştir. EndeavourOS’ta AUR kullanıyorsan <b>PKGBUILD dosyasını kurmadan önce incele.</b></td></tr>
+<tr><td colspan="3" style="font-size:.9em"><b>Kaynak:</b> <a href="https://bleepingcomputer.com/news/security/arch-linux-pulls-aur-packages-that-installed-chaos-rat-malware">BleepingComputer</a></td></tr>
+</tbody>
+</table>
+<blockquote>Bağlantılar yazının hazırlandığı tarihte geçerliydi. Sürüm numarası ve indirme seçenekleri zamanla değişebilir; güncel bilgiler için resmi sayfaya bakılmalıdır.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

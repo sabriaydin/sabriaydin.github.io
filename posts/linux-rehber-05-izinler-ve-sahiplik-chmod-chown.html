@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dosya izinleri ve sahiplik (chmod, chown)</title>
+<meta name="description" content="Linux izin modeli: okuma/yazma/çalıştırma, sembolik ve sekizli gösterim, chmod, chown, umask ve özel izin bitleri.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-05 10:20">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> ls -l betik.sh</p><p class="o">-rwxr-xr-- 1 ayse dev 120 betik.sh</p><p><b>$</b> chmod 644 betik.sh</p><p class="o">izin değişti</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">İzin modeli</a></li><li><a href="#b2">chmod ile izin değiştirme</a></li><li><a href="#b3">Yaygın izin değerleri</a></li><li><a href="#b4">Sahiplik: chown ve chgrp</a></li><li><a href="#b5">Çalıştırılabilir dosya yapma</a></li><li><a href="#b6">umask: varsayılan izinler</a></li><li><a href="#b7">Özel izin bitleri</a></li><li><a href="#b8">ACL (ayrıntılı izin)</a></li><li><a href="#b9">Sık görülen hatalar</a></li><li><a href="#b10">Özet</a></li></ol></nav><!--/px-->
+<p>Linux çok kullanıcılı bir sistemdir. Her dosyanın bir sahibi, bir grubu ve herkese uygulanan izinleri vardır. Bu model, bir kullanıcının diğerinin dosyalarına veya sistem dosyalarına zarar vermesini engeller. İzinleri doğru anlamak hem güvenlik hem de “Permission denied” hatalarını çözmek için gereklidir.</p>
+<h2 id="b1">İzin modeli</h2>
+<p><code>ls -l</code> çıktısı izinleri gösterir:</p><pre>-rwxr-xr--  1  ayse  dev  120  Eki 20 10:00  betik.sh
+│└┬┘└┬┘└┬┘     │     │
+│ │  │  │      │     └── grup
+│ │  │  │      └──────── sahip
+│ │  │  └── diğerleri (others)
+│ │  └───── grup izinleri
+│ └──────── sahip izinleri
+└────────── tür (- dosya, d dizin, l bağlantı)</pre><table><thead><tr><th>Harf</th><th>Sayı</th><th>Dosyada</th><th>Dizinde</th></tr></thead><tbody><tr><td><code>r</code></td><td>4</td><td>Okuma</td><td>İçeriği listeleme</td></tr><tr><td><code>w</code></td><td>2</td><td>Yazma / değiştirme</td><td>İçinde dosya oluşturma ve silme</td></tr><tr><td><code>x</code></td><td>1</td><td>Çalıştırma</td><td>İçine girebilme (<code>cd</code>)</td></tr></tbody></table>
+<h2 id="b2">chmod ile izin değiştirme</h2>
+<p>İki yazım biçimi vardır. Sekizli (sayısal) biçimde her sınıfın değerleri toplanır: <code>r=4</code>, <code>w=2</code>, <code>x=1</code>.</p><table><thead><tr><th>Sayı</th><th>İzin</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>7</code></td><td><code>rwx</code></td><td>Okuma + yazma + çalıştırma</td></tr><tr><td><code>6</code></td><td><code>rw-</code></td><td>Okuma + yazma</td></tr><tr><td><code>5</code></td><td><code>r-x</code></td><td>Okuma + çalıştırma</td></tr><tr><td><code>4</code></td><td><code>r--</code></td><td>Yalnızca okuma</td></tr><tr><td><code>0</code></td><td><code>---</code></td><td>İzin yok</td></tr></tbody></table><pre>chmod 755 betik.sh      # sahip rwx, grup r-x, diğerleri r-x
+chmod 644 not.txt        # sahip rw-, diğerleri r--
+chmod 600 ~/.ssh/id_rsa  # yalnızca sahip okuyup yazar
+chmod -R 755 dizin/      # dizin ve içindekiler</pre><p>Sembolik biçimde kimin (<code>u</code> sahip, <code>g</code> grup, <code>o</code> diğer, <code>a</code> hepsi) ve ne yapılacağı (<code>+</code> ekle, <code>-</code> kaldır, <code>=</code> ayarla) yazılır:</p><pre>chmod u+x betik.sh      # sahibe çalıştırma ekle
+chmod g-w dosya          # gruptan yazmayı kaldır
+chmod o= dosya           # diğerlerinin tüm izinlerini kaldır
+chmod a+r herkese.txt    # herkese okuma</pre>
+<h2 id="b3">Yaygın izin değerleri</h2>
+<table><thead><tr><th>Değer</th><th>Kullanım</th></tr></thead><tbody><tr><td><code>644</code></td><td>Normal dosyalar</td></tr><tr><td><code>755</code></td><td>Dizinler ve çalıştırılabilir dosyalar</td></tr><tr><td><code>600</code></td><td>Gizli dosyalar (SSH anahtarı, parola dosyası)</td></tr><tr><td><code>700</code></td><td>Yalnızca sahibin girebileceği dizin</td></tr><tr><td><code>664 / 775</code></td><td>Grup çalışması için paylaşılan dosya / dizin</td></tr></tbody></table><p><b>Uyarı:</b> <code>chmod 777</code> herkese her izni verir; güvenlik açığı oluşturur ve çoğu zaman sorunun gerçek çözümü değildir.</p>
+<h2 id="b4">Sahiplik: chown ve chgrp</h2>
+<pre>chown ayse dosya.txt            # sahibi değiştir
+chown ayse:dev dosya.txt        # sahip ve grup
+chown :dev dosya.txt            # yalnızca grup
+sudo chown -R ayse:ayse /var/www/site   # dizin ve içindekiler
+chgrp dev dosya.txt             # yalnızca grup</pre><p>Sahibi değiştirmek için genellikle yönetici yetkisi (<code>sudo</code>) gerekir.</p>
+<h2 id="b5">Çalıştırılabilir dosya yapma</h2>
+<p>Bir betik indirildiğinde veya yazıldığında çalıştırma izni yoktur. Önce izin verilir, sonra yolu belirtilerek çalıştırılır.</p><pre>chmod +x betik.sh
+./betik.sh                # ./ bulunulan dizinden çalıştır
+bash betik.sh            # izin vermeden de çalıştırılabilir</pre>
+<h2 id="b6">umask: varsayılan izinler</h2>
+<p>Yeni oluşturulan dosyaların izni <code>umask</code> değerine göre belirlenir. Maske, kaldırılacak izinleri belirtir. Dosyalar için taban 666, dizinler için 777’dir.</p><table><thead><tr><th>umask</th><th>Yeni dosya</th><th>Yeni dizin</th></tr></thead><tbody><tr><td><code>022</code> (yaygın)</td><td>644</td><td>755</td></tr><tr><td><code>002</code></td><td>664</td><td>775</td></tr><tr><td><code>077</code> (özel)</td><td>600</td><td>700</td></tr></tbody></table><pre>umask          # mevcut değer
+umask 077      # bu oturum için daha kısıtlı</pre>
+<h2 id="b7">Özel izin bitleri</h2>
+<table><thead><tr><th>Bit</th><th>Sayı</th><th>Etkisi</th><th>Örnek</th></tr></thead><tbody><tr><td>setuid</td><td>4000</td><td>Dosya, sahibinin yetkisiyle çalışır</td><td><code>/usr/bin/passwd</code></td></tr><tr><td>setgid</td><td>2000</td><td>Dosya grubun yetkisiyle çalışır; dizinde yeni dosyalar grubu devralır</td><td>Paylaşılan proje dizini</td></tr><tr><td>sticky</td><td>1000</td><td>Dizinde herkes dosya oluşturur ama yalnızca sahibi siler</td><td><code>/tmp</code></td></tr></tbody></table><pre>chmod 2775 proje/      # setgid
+chmod +t paylasim/     # sticky
+ls -ld /tmp             # drwxrwxrwt: sondaki t sticky bittir</pre>
+<h2 id="b8">ACL (ayrıntılı izin)</h2>
+<p>Standart model sahip, grup ve diğerleri ile sınırlıdır. Belirli bir kullanıcıya özel izin vermek için ACL kullanılır:</p><pre>setfacl -m u:mehmet:rw rapor.txt   # mehmet kullanıcısına okuma/yazma
+getfacl rapor.txt                  # izinleri göster
+setfacl -x u:mehmet rapor.txt      # kaldır</pre>
+<h2 id="b9">Sık görülen hatalar</h2>
+<table><thead><tr><th>Hata</th><th>Neden / çözüm</th></tr></thead><tbody><tr><td><code>Permission denied</code></td><td><code>ls -l</code> ile izin ve sahibi kontrol edin; gerekirse <code>chmod</code> / <code>sudo</code></td></tr><tr><td>Betik çalışmıyor</td><td><code>chmod +x</code> verilmemiş olabilir</td></tr><tr><td>Dizine giremiyorum</td><td>Dizinde <code>x</code> izni eksiktir</td></tr><tr><td>SSH anahtarı reddediliyor</td><td>Anahtar dosyası <code>600</code>, <code>~/.ssh</code> dizini <code>700</code> olmalıdır</td></tr></tbody></table>
+<h2 id="b10">Özet</h2>
+<ul><li>İzinler sahip, grup ve diğerleri için ayrı ayrı <code>r</code>, <code>w</code>, <code>x</code> olarak tanımlanır.</li><li><code>chmod 755</code> gibi sekizli veya <code>u+x</code> gibi sembolik biçim kullanılır.</li><li><code>chown</code> sahibi ve grubu değiştirir.</li><li><code>umask</code> yeni dosyaların varsayılan iznini belirler.</li><li><code>chmod 777</code> yerine gerekli en az izin verilmelidir.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

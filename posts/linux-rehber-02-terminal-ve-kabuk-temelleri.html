@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terminal ve kabuk (bash) temelleri</title>
+<meta name="description" content="Terminal, kabuk ve komut yapısı; sık kullanılan kısayollar, yardım alma, geçmiş, takma ad ve ortam değişkenleri.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-02 14:15">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> echo $SHELL</p><p class="o">/bin/bash</p><p><b>$</b> whoami</p><p class="o">kullanici</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Terminal, kabuk ve komut</a></li><li><a href="#b2">İstem (prompt) nasıl okunur?</a></li><li><a href="#b3">Komut yapısı</a></li><li><a href="#b4">Yardım alma</a></li><li><a href="#b5">Klavye kısayolları</a></li><li><a href="#b6">Geçmiş ve takma ad (alias)</a></li><li><a href="#b7">Ortam değişkenleri</a></li><li><a href="#b8">Komutları birleştirme</a></li><li><a href="#b9">Özet</a></li></ol></nav><!--/px-->
+<p>Linux’ta birçok işlem komut satırından yapılır. Komut satırı ilk bakışta zor görünse de tekrar edilebilir, hızlı ve otomatikleştirilebilir olması nedeniyle en güçlü araçtır. Bu yazıda terminalin nasıl çalıştığı ve günlük kullanımı hızlandıran temel bilgiler anlatılmaktadır.</p>
+<h2 id="b1">Terminal, kabuk ve komut</h2>
+<p>Üç kavram sıkça karıştırılır:</p><ul><li><b>Terminal:</b> Komutları yazdığınız pencere (GNOME Terminal, Konsole, xterm).</li><li><b>Kabuk (shell):</b> Yazdığınız komutu yorumlayıp çalıştıran program (bash, zsh, fish).</li><li><b>Komut:</b> Çalıştırılacak program veya kabuğa gömülü işlev (<code>ls</code>, <code>cd</code>, <code>echo</code>).</li></ul><p>Çoğu dağıtımda varsayılan kabuk <code>bash</code>’tir. Terminali çoğu masaüstünde <code>Ctrl + Alt + T</code> ile açabilirsiniz.</p>
+<h2 id="b2">İstem (prompt) nasıl okunur?</h2>
+<p>Terminalde satır başında görünen metne istem denir:</p><pre>kullanici@bilgisayar:~/belgeler$
+  |          |         |       |
+  |          |         |       +-- $ normal kullanıcı, # root
+  |          |         +---------- bulunulan dizin (~ ev dizini)
+  |          +-------------------- makinenin adı
+  +------------------------------- kullanıcı adı</pre>
+<h2 id="b3">Komut yapısı</h2>
+<p>Bir komut genellikle üç parçadan oluşur: komut adı, seçenekler (parametreler) ve argümanlar.</p><pre>ls -l /etc
+│  │  └── argüman  (hangi dizin)
+│  └───── seçenek  (uzun biçimde listele)
+└──────── komut</pre><ul><li>Kısa seçenekler tek tire ile yazılır: <code>-l</code>, birleştirilebilir: <code>-la</code>.</li><li>Uzun seçenekler çift tire ile yazılır: <code>--all</code>, <code>--help</code>.</li><li>Linux büyük/küçük harfe duyarlıdır: <code>Belge</code> ile <code>belge</code> farklı adlardır.</li><li>Boşluk içeren adlar tırnak içine alınır: <code>cd "Belgelerim Yeni"</code>.</li></ul>
+<h2 id="b4">Yardım alma</h2>
+<p>Komutların seçenekleri ezbere bilinmez; yerleşik yardımlar kullanılır.</p><table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>komut --help</code></td><td>Kısa kullanım özeti</td></tr><tr><td><code>man komut</code></td><td>Ayrıntılı kılavuz sayfası (çıkmak için <code>q</code>, arama için <code>/</code>)</td></tr><tr><td><code>info komut</code></td><td>GNU araçları için ayrıntılı belge</td></tr><tr><td><code>whatis komut</code></td><td>Tek satırlık açıklama</td></tr><tr><td><code>apropos kelime</code></td><td>Kelimeyle ilgili komutları arar</td></tr><tr><td><code>type komut</code></td><td>Komutun türünü (yerleşik, takma ad, dosya) gösterir</td></tr></tbody></table><pre>man ls
+ls --help | less
+apropos copy</pre>
+<h2 id="b5">Klavye kısayolları</h2>
+<p>Terminalde fare kullanılmaz; bu kısayollar zaman kazandırır.</p><table><thead><tr><th>Kısayol</th><th>İşlevi</th></tr></thead><tbody><tr><td><code>Tab</code></td><td>Komut ve dosya adını tamamlar (iki kez basınca seçenekleri listeler)</td></tr><tr><td><code>↑ / ↓</code></td><td>Önceki / sonraki komutlar</td></tr><tr><td><code>Ctrl + R</code></td><td>Geçmişte arama</td></tr><tr><td><code>Ctrl + C</code></td><td>Çalışan komutu durdurur</td></tr><tr><td><code>Ctrl + D</code></td><td>Oturumu kapatır (girdiyi bitirir)</td></tr><tr><td><code>Ctrl + L</code></td><td>Ekranı temizler (<code>clear</code> ile aynı)</td></tr><tr><td><code>Ctrl + A / E</code></td><td>Satır başına / sonuna gider</td></tr><tr><td><code>Ctrl + U / K</code></td><td>İmleçten satır başına / sonuna kadar siler</td></tr><tr><td><code>Ctrl + Z</code></td><td>Komutu arka plana atar (durdurulmuş)</td></tr><tr><td><code>!!</code></td><td>Son komutu tekrarlar; <code>sudo !!</code> yetkiyle çalıştırır</td></tr></tbody></table>
+<h2 id="b6">Geçmiş ve takma ad (alias)</h2>
+<p>Kabuk, yazdığınız komutları <code>~/.bash_history</code> dosyasında saklar.</p><pre>history | tail -n 10      # son 10 komut
+!150                      # geçmişteki 150. komutu çalıştır
+history -c                # geçmişi temizle</pre><p>Uzun komutlar için kısa adlar tanımlanabilir. Kalıcı olması için <code>~/.bashrc</code> dosyasına eklenir.</p><pre>alias ll='ls -alF'
+alias guncelle='sudo apt update &amp;&amp; sudo apt upgrade'
+alias                     # tanımlı takma adlar
+unalias ll                # takma adı kaldır
+source ~/.bashrc          # değişikliği hemen uygula</pre>
+<h2 id="b7">Ortam değişkenleri</h2>
+<p>Ortam değişkenleri, kabuğun ve programların kullandığı ayarlardır. Değerine <code>$</code> işaretiyle ulaşılır.</p><table><thead><tr><th>Değişken</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>$HOME</code></td><td>Ev dizini</td></tr><tr><td><code>$USER</code></td><td>Kullanıcı adı</td></tr><tr><td><code>$PATH</code></td><td>Komutların aranacağı dizinler (iki nokta ile ayrılır)</td></tr><tr><td><code>$PWD</code></td><td>Bulunulan dizin</td></tr><tr><td><code>$LANG</code></td><td>Dil ve karakter kodlaması</td></tr></tbody></table><pre>echo $HOME
+export EDITOR=nano                 # bu oturum için
+echo 'export PATH="$HOME/bin:$PATH"' &gt;&gt; ~/.bashrc</pre>
+<h2 id="b8">Komutları birleştirme</h2>
+<table><thead><tr><th>İşaret</th><th>Anlamı</th><th>Örnek</th></tr></thead><tbody><tr><td><code>;</code></td><td>Sırayla çalıştırır</td><td><code>cd /tmp; ls</code></td></tr><tr><td><code>&amp;&amp;</code></td><td>Öncekinin başarılı olması hâlinde çalıştırır</td><td><code>mkdir x &amp;&amp; cd x</code></td></tr><tr><td><code>||</code></td><td>Öncekinin başarısız olması hâlinde çalıştırır</td><td><code>ping -c1 siteadi || echo yok</code></td></tr><tr><td><code>|</code></td><td>Çıktıyı sonrakine girdi yapar (boru)</td><td><code>ls | wc -l</code></td></tr><tr><td><code>&gt;  &gt;&gt;</code></td><td>Çıktıyı dosyaya yazar / ekler</td><td><code>ls &gt; liste.txt</code></td></tr><tr><td><code>&amp;</code></td><td>Arka planda çalıştırır</td><td><code>sleep 60 &amp;</code></td></tr></tbody></table>
+<h2 id="b9">Özet</h2>
+<ul><li>Terminal pencere, kabuk ise komutları çalıştıran programdır.</li><li>Komut yapısı: komut, seçenekler, argümanlar. Büyük/küçük harf önemlidir.</li><li><code>man</code> ve <code>--help</code> en güvenilir yardım kaynaklarıdır.</li><li><code>Tab</code>, <code>Ctrl+R</code> ve <code>Ctrl+C</code> günlük işleri hızlandırır.</li><li>Kalıcı ayarlar <code>~/.bashrc</code> dosyasında tutulur.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

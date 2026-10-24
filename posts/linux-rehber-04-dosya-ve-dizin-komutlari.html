@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dosya ve dizin komutları (ls, cp, mv, find…)</title>
+<meta name="description" content="Dosya ve dizin yönetiminin temel komutları: listeleme, oluşturma, kopyalama, taşıma, silme, arama, sıkıştırma ve görüntüleme.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-04 16:30">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> mkdir -p proje/belgeler</p><p class="o">dizin oluşturuldu</p><p><b>$</b> ls -R proje</p><p class="o">proje: belgeler</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Gezinme ve listeleme</a></li><li><a href="#b2">Oluşturma</a></li><li><a href="#b3">Kopyalama ve taşıma</a></li><li><a href="#b4">Silme (dikkat!)</a></li><li><a href="#b5">Görüntüleme</a></li><li><a href="#b6">Joker karakterler</a></li><li><a href="#b7">Dosya ve içerik arama</a></li><li><a href="#b8">Sıkıştırma ve arşivleme</a></li><li><a href="#b9">Disk kullanımı</a></li><li><a href="#b10">Özet</a></li></ol></nav><!--/px-->
+<p>Dosya ve dizin komutları, terminalde en sık kullanılan komutlardır. Bu yazıda her komut kısa açıklama ve örnekle verilmiştir. Silme ve üzerine yazma işlemleri geri alınamadığı için dikkat edilmesi gereken yerler ayrıca belirtilmiştir.</p>
+<h2 id="b1">Gezinme ve listeleme</h2>
+<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>pwd</code></td><td>Bulunulan dizini yazar</td></tr><tr><td><code>cd dizin</code></td><td>Dizin değiştirir (<code>cd</code> tek başına ev dizinine gider)</td></tr><tr><td><code>ls</code></td><td>Dizin içeriğini listeler</td></tr><tr><td><code>ls -l</code></td><td>Ayrıntılı liste (izin, sahip, boyut, tarih)</td></tr><tr><td><code>ls -a</code></td><td>Gizli (<code>.</code> ile başlayan) dosyaları da gösterir</td></tr><tr><td><code>ls -lh</code></td><td>Boyutları okunabilir biçimde (KB, MB) gösterir</td></tr><tr><td><code>ls -lt</code></td><td>Yeniden eskiye sıralar</td></tr><tr><td><code>tree</code></td><td>Dizin ağacını çizer (kurulu değilse paket yöneticisinden eklenir)</td></tr></tbody></table><pre>ls -lah /etc | head
+ls -R ~/belgeler
+tree -L 2 ~</pre>
+<h2 id="b2">Oluşturma</h2>
+<pre>mkdir proje                   # dizin
+mkdir -p a/b/c                # iç içe dizinler
+touch not.txt                 # boş dosya (veya tarih güncelleme)
+echo "ilk satır" &gt; not.txt    # dosyaya yaz (üzerine yazar)
+echo "ikinci" &gt;&gt; not.txt      # sona ekle</pre>
+<h2 id="b3">Kopyalama ve taşıma</h2>
+<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>cp kaynak hedef</code></td><td>Dosyayı kopyalar</td></tr><tr><td><code>cp -r dizin hedef</code></td><td>Dizini içindekilerle birlikte kopyalar</td></tr><tr><td><code>cp -i</code></td><td>Üzerine yazmadan önce sorar</td></tr><tr><td><code>cp -a</code></td><td>İzinler ve tarihleri koruyarak kopyalar (yedek için)</td></tr><tr><td><code>mv kaynak hedef</code></td><td>Taşır; aynı dizinde kullanılırsa yeniden adlandırır</td></tr><tr><td><code>rsync -avh kaynak/ hedef/</code></td><td>Büyük kopyalama / senkronizasyon; kesilirse devam eder</td></tr></tbody></table><pre>cp rapor.txt yedek/
+cp -r proje proje-yedek
+mv eski.txt yeni.txt         # yeniden adlandır
+mv *.jpg ~/resimler/         # birden çok dosya</pre>
+<h2 id="b4">Silme (dikkat!)</h2>
+<p>Linux’ta geri dönüşüm kutusu yoktur; komut satırından silinen dosya genellikle kurtarılamaz.</p><table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>rm dosya</code></td><td>Dosyayı siler</td></tr><tr><td><code>rm -i dosya</code></td><td>Silmeden önce onay ister</td></tr><tr><td><code>rm -r dizin</code></td><td>Dizini ve içindekileri siler</td></tr><tr><td><code>rmdir dizin</code></td><td>Yalnızca boş dizini siler (daha güvenli)</td></tr></tbody></table><p><b>Uyarı:</b> <code>rm -rf /</code> ve <code>rm -rf *</code> gibi komutlar ciddi veri kaybına yol açar. Komutu Enter’a basmadan önce iki kez kontrol edin ve alışkanlık olarak önce <code>ls</code> ile aynı kalıbı deneyin.</p><pre>ls *.tmp          # önce neyi sileceğini gör
+rm -i *.tmp        # sonra onayla silmek</pre>
+<h2 id="b5">Görüntüleme</h2>
+<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>cat dosya</code></td><td>Tüm dosyayı yazdırır</td></tr><tr><td><code>less dosya</code></td><td>Sayfa sayfa gezilir (<code>q</code> çıkış, <code>/</code> arama)</td></tr><tr><td><code>head -n 5 dosya</code></td><td>İlk 5 satır</td></tr><tr><td><code>tail -n 5 dosya</code></td><td>Son 5 satır</td></tr><tr><td><code>tail -f dosya</code></td><td>Dosyaya eklenenleri canlı izler (günlükler için)</td></tr><tr><td><code>wc -l dosya</code></td><td>Satır sayısı</td></tr><tr><td><code>nano dosya</code></td><td>Başlangıç dostu metin düzenleyici (<code>Ctrl+O</code> kaydet, <code>Ctrl+X</code> çık)</td></tr><tr><td><code>file dosya</code></td><td>Dosya türünü söyler</td></tr><tr><td><code>stat dosya</code></td><td>Boyut, izin, zaman damgaları</td></tr></tbody></table>
+<h2 id="b6">Joker karakterler</h2>
+<table><thead><tr><th>Karakter</th><th>Anlamı</th><th>Örnek</th></tr></thead><tbody><tr><td><code>*</code></td><td>Her karakter dizisi</td><td><code>ls *.txt</code></td></tr><tr><td><code>?</code></td><td>Tek karakter</td><td><code>ls dosya?.txt</code></td></tr><tr><td><code>[abc]</code></td><td>Listedeki tek karakter</td><td><code>ls [ab]*</code></td></tr><tr><td><code>{a,b}</code></td><td>Seçenekleri genişletir</td><td><code>mkdir proje/{src,doc,test}</code></td></tr></tbody></table>
+<h2 id="b7">Dosya ve içerik arama</h2>
+<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>find . -name "*.pdf"</code></td><td>Ada göre dosya arar</td></tr><tr><td><code>find . -type d -name "yedek*"</code></td><td>Yalnızca dizinleri arar</td></tr><tr><td><code>find . -mtime -7</code></td><td>Son 7 günde değişenler</td></tr><tr><td><code>find . -size +100M</code></td><td>100 MB’den büyük dosyalar</td></tr><tr><td><code>locate ad</code></td><td>Dizinlenmiş veri tabanından hızlı arama (<code>sudo updatedb</code> ile güncellenir)</td></tr><tr><td><code>grep -rn "metin" .</code></td><td>Dosyaların içinde metin arar</td></tr><tr><td><code>which komut</code></td><td>Komutun dosya yolunu gösterir</td></tr></tbody></table><pre>find ~ -name "*.log" -size +10M
+find /tmp -type f -mtime +30 -delete    # 30 günden eski dosyaları sil
+grep -rni "hata" /var/log/syslog</pre>
+<h2 id="b8">Sıkıştırma ve arşivleme</h2>
+<table><thead><tr><th>İşlem</th><th>Komut</th></tr></thead><tbody><tr><td>Arşiv oluştur (gzip)</td><td><code>tar -czvf arsiv.tar.gz dizin/</code></td></tr><tr><td>Arşivi aç</td><td><code>tar -xzvf arsiv.tar.gz</code></td></tr><tr><td>Belirli dizine aç</td><td><code>tar -xzvf arsiv.tar.gz -C hedef/</code></td></tr><tr><td>İçeriği listele</td><td><code>tar -tzvf arsiv.tar.gz</code></td></tr><tr><td>Zip oluştur / aç</td><td><code>zip -r a.zip dizin/</code> — <code>unzip a.zip</code></td></tr><tr><td>Tek dosya sıkıştır</td><td><code>gzip dosya</code> — <code>gunzip dosya.gz</code></td></tr></tbody></table><p><code>tar</code> seçenekleri: <code>c</code> oluştur, <code>x</code> aç, <code>t</code> listele, <code>z</code> gzip, <code>v</code> ayrıntı, <code>f</code> dosya adı.</p>
+<h2 id="b9">Disk kullanımı</h2>
+<pre>df -h                  # bölümlerin doluluğu
+du -sh *               # bulunulan dizindeki her öğenin boyutu
+du -h --max-depth=1 /var | sort -h</pre>
+<h2 id="b10">Özet</h2>
+<ul><li><code>ls</code>, <code>cd</code>, <code>pwd</code> ile gezinilir; <code>mkdir</code>, <code>touch</code> ile oluşturulur.</li><li><code>cp</code>, <code>mv</code>, <code>rm</code> temel işlem komutlarıdır; <code>rm</code> geri alınamaz.</li><li><code>find</code> ada ve özelliğe, <code>grep</code> içeriğe göre arar.</li><li><code>tar</code> ve <code>zip</code> ile arşivlenir.</li><li>Joker karakterler (<code>*</code>, <code>?</code>) birden çok dosyada işlem yapmayı sağlar.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

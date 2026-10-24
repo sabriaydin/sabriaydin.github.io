@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toplu Dosya Yeniden Adlandırma Komutu Oluşturucu</title>
+<meta name="description" content="Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluştur; sonucu önceden önizle.">
+<meta name="kategori" content="araclar">
+<meta name="tarih" content="2026-04-21 08:54">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#6d4c41;--b:#bcaaa4">
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluştur; sonucu önceden önizle.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">İşlemler</a></li><li><a href="#b4">PowerShell betiği nasıl çalıştırılır?</a></li><li><a href="#b5">Dikkat edilecekler</a></li></ol></nav><!--/px-->
+<p>Yüzlerce fotoğrafa aynı ön eki eklemek, sıra numarası vermek ya da uzantıyı değiştirmek elle yapıldığında uzun sürer. Bu araç, seçilen işlem için PowerShell komutunu veya toplu iş dosyasını oluşturur ve örnek dosya adları üzerinde sonucu önceden gösterir.</p>
+<h2 id="b1">Aracı dene</h2>
+<style>.gg{display:grid;gap:14px}.gg[hidden]{display:none}</style>
+<div class="arac">
+  <div class="satir">
+    <label for="rn-op">İşlem
+      <select id="rn-op">
+        <option value="on">Ön ek ekle</option>
+        <option value="son">Uzantıdan önce son ek ekle</option>
+        <option value="bul">Metin bul ve değiştir</option>
+        <option value="sira">Sıra numarası ver</option>
+        <option value="uzanti">Uzantıyı değiştir</option>
+        <option value="bosluk">Boşlukları başka karakterle değiştir</option>
+        <option value="kucuk">Küçük harfe çevir</option>
+        <option value="buyuk">BÜYÜK harfe çevir</option>
+      </select>
+    </label>
+    <label for="rn-fmt">Çıktı biçimi
+      <select id="rn-fmt">
+        <option value="ps">PowerShell</option>
+        <option value="bat">Toplu iş dosyası (.bat)</option>
+      </select>
+    </label>
+  </div>
+  <div class="satir">
+    <label for="rn-f">Dosya filtresi<input type="text" id="rn-f" value="*.jpg" autocomplete="off"></label>
+    <label for="rn-k">Klasör yolu (boşsa geçerli klasör)<input type="text" id="rn-k" placeholder="C:\Resimler\Tatil" autocomplete="off"></label>
+  </div>
+  <div class="gg" id="rn-ga">
+    <label for="rn-a"><span id="rn-al">Eklenecek ön ek</span><input type="text" id="rn-a" value="2026_" autocomplete="off"></label>
+  </div>
+  <div class="gg" id="rn-gb" hidden>
+    <label for="rn-b">Yerine yazılacak metin (boş bırakılırsa silinir)<input type="text" id="rn-b" value="Foto" autocomplete="off"></label>
+  </div>
+  <div class="gg" id="rn-gs" hidden>
+    <div class="satir">
+      <label for="rn-bas">Başlangıç numarası<input type="number" id="rn-bas" min="0" max="999999" value="1"></label>
+      <label for="rn-hane">Basamak sayısı<input type="number" id="rn-hane" min="1" max="6" value="3"></label>
+    </div>
+  </div>
+  <label class="onay" for="rn-dn"><input type="checkbox" id="rn-dn" checked> Deneme modu: dosyaları değiştirmeden yalnızca sonucu göster</label>
+  <label for="rn-ornek">Önizleme için örnek dosya adları (her satıra bir ad)
+    <textarea id="rn-ornek" rows="4" style="min-height:110px">IMG 001.JPG
+Tatil Fotoğrafı.jpg
+rapor_final.docx
+IMG 002.jpg</textarea>
+  </label>
+  <p class="not" id="rn-hata" role="alert"></p>
+  <h3 style="margin:6px 0 0">Önizleme</h3>
+  <pre id="rn-onizle"></pre>
+  <h3 style="margin:6px 0 0">Komut</h3>
+  <pre id="rn-cmd"></pre>
+  <div class="dugmeler">
+    <button type="button" data-kopyala="rn-cmd">Komutu kopyala</button>
+    <button type="button" class="ikinci" id="rn-indir">Dosya olarak indir</button>
+  </div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const CFG={
+  on:{l:'Eklenecek ön ek',v:'2026_'},son:{l:'Eklenecek son ek',v:'_yedek'},
+  bul:{l:'Aranan metin',v:'IMG',b:1},sira:{l:'Dosya adının başlangıcı (boş olabilir)',v:'foto_',s:1},
+  uzanti:{l:'Yeni uzantı (noktasız)',v:'png'},bosluk:{l:'Boşluk yerine yazılacak karakter (boşsa silinir)',v:'_'},
+  kucuk:{},buyuk:{}};
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const sp=ad=>{const k=ad.lastIndexOf('.');return k>0?[ad.slice(0,k),ad.slice(k)]:[ad,'']};
+const yeni=(ad,i,v)=>{const[b,e]=sp(ad);switch(v.op){
+  case 'on':return v.a+ad;
+  case 'son':return b+v.a+e;
+  case 'bul':return ad.replace(new RegExp(esc(v.a),'gi'),()=>v.b);
+  case 'sira':return v.a+String(v.bas+i).padStart(v.hane,'0')+e;
+  case 'uzanti':return b+'.'+v.a;
+  case 'bosluk':return ad.split(' ').join(v.a);
+  case 'kucuk':return b.toLowerCase()+e.toLowerCase();
+  default:return b.toUpperCase()+e.toUpperCase()}};
+const joker=f=>new RegExp('^'+f.split('*').map(x=>x.split('?').map(esc).join('.')).join('.*')+'$','i');
+const q=s=>"'"+s.replace(/'/g,"''")+"'";
+const GEC=/[\\\/:*?"<>|]/;
+let sonDosya='komut.txt',sonIcerik='',sonTur='text/plain';
+const op0=()=>$('rn-op').value;
+const alanlar=()=>{
+  const o=op0(),c=CFG[o];
+  $('rn-ga').hidden=!c.l;$('rn-gb').hidden=!c.b;$('rn-gs').hidden=!c.s;
+  if(c.l)$('rn-al').textContent=c.l};
+const degis=()=>{const c=CFG[op0()];if(c.l)$('rn-a').value=c.v;alanlar();hesapla()};
+const hesapla=()=>{
+  alanlar();
+  const err=m=>{$('rn-hata').textContent=m;$('rn-cmd').textContent='';$('rn-onizle').textContent='';};
+  $('rn-hata').textContent='';
+  const o=op0(),fmt=$('rn-fmt').value,dn=$('rn-dn').checked;
+  const f=$('rn-f').value.trim()||'*',kl=$('rn-k').value.trim().replace(/"/g,'');
+  const v={op:o,a:$('rn-a').value,b:$('rn-b').value,bas:Math.max(0,Math.floor(+$('rn-bas').value||0)),hane:Math.min(6,Math.max(1,Math.floor(+$('rn-hane').value||1)))};
+  if(['on','son','bul','uzanti'].includes(o)&&!v.a)return err('Bu işlem için metin alanı boş bırakılamaz.');
+  if(['on','son','bul','sira','uzanti','bosluk'].includes(o)&&GEC.test(v.a+(o==='bul'?v.b:'')))return err('Dosya adlarında \\ / : * ? " < > | karakterleri kullanılamaz.');
+  if(o==='uzanti'&&v.a.includes('.'))return err('Uzantı noktasız yazılmalıdır (örn. png).');
+  if(fmt==='bat'){
+    if(o==='kucuk'||o==='buyuk')return err('Harf büyüklüğü dönüşümü yalnızca PowerShell çıktısında desteklenir.');
+    if(/[!^']/.test(v.a+v.b+f))return err('Toplu iş dosyası çıktısında ! ^ \' karakterleri desteklenmez. PowerShell biçimi kullanılabilir.');
+    if(o==='bul'&&/=/.test(v.a))return err('Toplu iş dosyası çıktısında aranan metin = karakteri içeremez. PowerShell biçimi kullanılabilir.');
+  }
+  /* önizleme */
+  const re=joker(f),ornek=$('rn-ornek').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const eslesen=ornek.filter(x=>re.test(x)).sort((a,b)=>a.toLowerCase()<b.toLowerCase()?-1:1);
+  const harita=new Map();eslesen.forEach((x,i)=>harita.set(x,yeni(x,i,v)));
+  const satirlar=ornek.map(x=>harita.has(x)?x+'  →  '+harita.get(x):x+'  (filtreyle eşleşmiyor)');
+  const sayim={};[...harita.values()].forEach(x=>{const k=x.toLowerCase();sayim[k]=(sayim[k]||0)+1});
+  if(Object.values(sayim).some(n=>n>1))satirlar.push('','Uyarı: bazı dosyalar aynı ada dönüşüyor; yeniden adlandırma hata verir.');
+  $('rn-onizle').textContent=satirlar.join('\n')||'Örnek dosya adı girilmedi.';
+  /* komut */
+  let t;
+  if(fmt==='ps'){
+    const g='(Get-ChildItem '+(kl?'-LiteralPath '+q(kl)+' ':'')+'-Filter '+q(f)+' -File)',wi=dn?' -WhatIf':'';
+    const E='$_.Extension';
+    if(o==='on')t=g+' | Rename-Item -NewName { '+q(v.a)+' + $_.Name }'+wi;
+    else if(o==='son')t=g+' | Rename-Item -NewName { $_.BaseName + '+q(v.a)+' + '+E+' }'+wi;
+    else if(o==='bul')t=g+' | Rename-Item -NewName { $_.Name -replace [regex]::Escape('+q(v.a)+'), '+q(v.b.replace(/\$/g,'$$$$'))+' }'+wi;
+    else if(o==='sira')t='$i = '+(v.bas-1)+'\n'+g+' | Sort-Object Name | ForEach-Object {\n  $i++\n  Rename-Item -LiteralPath $_.FullName -NewName ('+q(v.a)+' + ([string]$i).PadLeft('+v.hane+", '0') + "+E+')'+wi+'\n}';
+    else if(o==='uzanti')t=g+' | Rename-Item -NewName { $_.BaseName + '+q('.'+v.a)+' }'+wi;
+    else if(o==='bosluk')t=g+' | Rename-Item -NewName { $_.Name.Replace(\' \', '+q(v.a)+') }'+wi;
+    else{const fn=o==='kucuk'?'ToLowerInvariant':'ToUpperInvariant',x='($_.BaseName.'+fn+'() + '+E+'.'+fn+'())';
+      t=g+' | Where-Object { $_.Name -cne '+x+' } | Rename-Item -NewName { '+x+' }'+wi}
+    sonDosya='yeniden-adlandir.ps1';sonIcerik='\ufeff'+t.replace(/\n/g,'\r\n')+'\r\n';
+  }else{
+    const c=s=>s.replace(/"/g,'').replace(/%/g,'%%'),e=dn?'echo ':'';
+    const L=['@echo off','chcp 65001 >nul','setlocal enabledelayedexpansion'];
+    if(kl)L.push('cd /d "'+kl.replace(/%/g,'%%')+'"');
+    if(o==='sira')L.push('set /a n='+(v.bas-1));
+    L.push('for /f "delims=" %%f in (\'dir /b /a-d "'+c(f)+'"\') do (');
+    const a=c(v.a),b=c(v.b);
+    if(o==='on')L.push('  '+e+'ren "%%f" "'+a+'%%f"');
+    else if(o==='son')L.push('  '+e+'ren "%%f" "%%~nf'+a+'%%~xf"');
+    else if(o==='bul'||o==='bosluk'){
+      L.push('  set "ad=%%f"');
+      L.push(o==='bul'?'  set "yeni=!ad:'+a+'='+b+'!"':'  set "yeni=!ad: ='+a+'!"');
+      L.push('  if not "!yeni!"=="%%f" '+e+'ren "%%f" "!yeni!"')}
+    else if(o==='sira'){
+      L.push('  set /a n+=1','  set "s=000000!n!"','  '+e+'ren "%%f" "'+a+'!s:~-'+v.hane+'!%%~xf"')}
+    else L.push('  '+e+'ren "%%f" "%%~nf.'+a+'"');
+    L.push(')','echo İşlem tamamlandı.','pause');
+    t=L.join('\n');sonDosya='yeniden-adlandir.bat';sonIcerik=L.join('\r\n')+'\r\n';
+  }
+  $('rn-cmd').textContent=t;
+};
+$('rn-op').addEventListener('input',degis);
+['rn-fmt','rn-f','rn-k','rn-a','rn-b','rn-bas','rn-hane','rn-dn','rn-ornek'].forEach(i=>$(i).addEventListener('input',hesapla));
+$('rn-indir').onclick=()=>{hesapla();if($('rn-hata').textContent)return;Arac.indir(sonIcerik,sonDosya,'text/plain;charset=utf-8')};
+hesapla();
+})();
+</script>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li><b>İşlemi</b> ve <b>çıktı biçimini</b> seç. PowerShell biçimi tüm işlemleri destekler; <code>.bat</code> biçimi harf büyüklüğü dönüşümünü desteklemez.</li>
+<li><b>Dosya filtresini</b> yaz (örn. <code>*.jpg</code>, <code>rapor*.docx</code>). Klasör yolu boş bırakılırsa komut, çalıştırıldığı klasörde işlem yapar.</li>
+<li>Örnek dosya adlarıyla <b>önizlemeyi</b> kontrol et.</li>
+<li>Komutu kopyala veya dosya olarak indir. Dosyaların bulunduğu klasörde çalıştır.</li>
+</ol>
+<p><b>Deneme modu</b> açıkken komut dosyaları değiştirmez. PowerShell çıktısında <code>-WhatIf</code> parametresi, <code>.bat</code> çıktısında ise <code>echo</code> kullanılır; yapılacak değişiklikler yalnızca ekrana yazılır. Sonuç doğru göründüğünde deneme modu kapatılıp komut yeniden oluşturulmalıdır.</p>
+<h2 id="b3">İşlemler</h2>
+<table>
+<thead><tr><th>İşlem</th><th>Örnek sonuç</th></tr></thead>
+<tbody>
+<tr><td>Ön ek ekle</td><td><code>IMG 001.jpg</code> → <code>2026_IMG 001.jpg</code></td></tr>
+<tr><td>Son ek ekle</td><td><code>rapor.docx</code> → <code>rapor_yedek.docx</code></td></tr>
+<tr><td>Metin bul ve değiştir</td><td><code>IMG 001.jpg</code> → <code>Foto 001.jpg</code></td></tr>
+<tr><td>Sıra numarası ver</td><td><code>IMG 001.jpg</code> → <code>foto_001.jpg</code></td></tr>
+<tr><td>Uzantıyı değiştir</td><td><code>resim.jpg</code> → <code>resim.png</code></td></tr>
+<tr><td>Boşlukları değiştir</td><td><code>Tatil Fotoğrafı.jpg</code> → <code>Tatil_Fotoğrafı.jpg</code></td></tr>
+<tr><td>Küçük / BÜYÜK harf</td><td><code>IMG.JPG</code> → <code>img.jpg</code> / <code>IMG.JPG</code></td></tr>
+</tbody>
+</table>
+<h2 id="b4">PowerShell betiği nasıl çalıştırılır?</h2>
+<ul>
+<li>Komut doğrudan PowerShell penceresine yapıştırılabilir.</li>
+<li>İndirilen <code>.ps1</code> dosyası çift tıklamayla çalışmaz. Dosyanın bulunduğu klasörde PowerShell açılıp <code>powershell -ExecutionPolicy Bypass -File .\yeniden-adlandir.ps1</code> komutu kullanılmalıdır.</li>
+</ul>
+<h2 id="b5">Dikkat edilecekler</h2>
+<ul>
+<li>Yeniden adlandırma geri alınamaz. Önemli dosyalarda önce deneme modu ve yedek kullanılmalıdır.</li>
+<li>Sıra numaralandırmada dosyalar ada göre sıralanır. Numara basamak sayısını aşarsa (örn. 3 basamakla 1000) numaralar bozulur; basamak sayısı yeterli seçilmelidir.</li>
+<li>Metin bulma işlemi büyük/küçük harf ayrımı yapmaz.</li>
+<li>Araç yalnızca komut üretir; dosya adları sunucuya gönderilmez.</li>
+</ul>
+<script src="../assets/js/arac.js"></script>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paket yönetimi (apt, dnf, pacman, snap, flatpak)</title>
+<meta name="description" content="Linux&#x27;ta program kurma, güncelleme ve kaldırma: apt, dnf, pacman komutları, depolar, snap/Flatpak ve kaynaktan derleme.">
+<meta name="kategori" content="linux">
+<meta name="tarih" content="2026-10-07 09:15">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<link rel="stylesheet" href="../assets/css/linux.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#e95420;--b:#f39c12">
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> sudo apt update</p><p class="o">Paket listeleri güncellendi</p><p><b>$</b> sudo apt install htop</p><p class="o">htop kuruldu</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Paket ve depo kavramı</a></li><li><a href="#b2">Hangi dağıtımda hangi komut?</a></li><li><a href="#b3">apt ile günlük kullanım</a></li><li><a href="#b4">Elle indirilen paketler</a></li><li><a href="#b5">Depo ekleme</a></li><li><a href="#b6">Evrensel paket biçimleri</a></li><li><a href="#b7">Kaynak koddan derleme</a></li><li><a href="#b8">Sorun giderme</a></li><li><a href="#b9">Özet</a></li></ol></nav><!--/px-->
+<p>Linux’ta program kurmanın olağan yolu internetten .exe indirmek değil, dağıtımın <b>paket yöneticisi</b> ile resmî depolardan kurmaktır. Bu yöntem bağımlılıkları otomatik çözer, güncellemeleri tek yerden yönetir ve imzalı paketler sayesinde güvenlidir.</p>
+<h2 id="b1">Paket ve depo kavramı</h2>
+<ul><li><b>Paket:</b> Programın dosyalarını, sürüm bilgisini ve bağımlılıklarını içeren arşiv (.deb, .rpm).</li><li><b>Depo (repository):</b> Paketlerin tutulduğu, dağıtım tarafından işletilen sunucu.</li><li><b>Bağımlılık:</b> Bir programın çalışmak için gerek duyduğu diğer paketler; yönetici bunları kendisi kurar.</li><li><b>Paket yöneticisi:</b> Depoyu sorgulayan, kurulum/kaldırma yapan araç.</li></ul>
+<h2 id="b2">Hangi dağıtımda hangi komut?</h2>
+<table><thead><tr><th>İşlem</th><th>Debian / Ubuntu (apt)</th><th>Fedora / RHEL (dnf)</th><th>Arch (pacman)</th></tr></thead><tbody><tr><td>Liste güncelle</td><td><code>sudo apt update</code></td><td><code>sudo dnf check-update</code></td><td><code>sudo pacman -Sy</code></td></tr><tr><td>Paket kur</td><td><code>sudo apt install paket</code></td><td><code>sudo dnf install paket</code></td><td><code>sudo pacman -S paket</code></td></tr><tr><td>Sistemi güncelle</td><td><code>sudo apt upgrade</code></td><td><code>sudo dnf upgrade</code></td><td><code>sudo pacman -Syu</code></td></tr><tr><td>Kaldır</td><td><code>sudo apt remove paket</code></td><td><code>sudo dnf remove paket</code></td><td><code>sudo pacman -R paket</code></td></tr><tr><td>Ara</td><td><code>apt search kelime</code></td><td><code>dnf search kelime</code></td><td><code>pacman -Ss kelime</code></td></tr><tr><td>Bilgi</td><td><code>apt show paket</code></td><td><code>dnf info paket</code></td><td><code>pacman -Si paket</code></td></tr><tr><td>Kurulu liste</td><td><code>apt list --installed</code></td><td><code>dnf list installed</code></td><td><code>pacman -Q</code></td></tr><tr><td>Gereksizleri temizle</td><td><code>sudo apt autoremove</code></td><td><code>sudo dnf autoremove</code></td><td><code>sudo pacman -Rns paket</code></td></tr></tbody></table><p>Arch’ta yalnızca <code>-Sy</code> ile liste güncellemek, ardından tek paket kurmak sistemi tutarsız bırakabilir; bunun yerine <code>-Syu</code> kullanılmalıdır.</p>
+<h2 id="b3">apt ile günlük kullanım</h2>
+<pre>sudo apt update                 # önce listeyi yenile
+sudo apt upgrade                # kurulu paketleri güncelle
+sudo apt full-upgrade           # gerekirse paket ekleyip çıkararak güncelle
+sudo apt install vlc git curl   # birden çok paket
+sudo apt remove vlc             # ayarlar kalır
+sudo apt purge vlc              # ayarlarla birlikte kaldır
+sudo apt autoremove             # artık gerekmeyen bağımlılıklar
+apt search "metin editörü"
+apt policy vlc                  # sürüm ve depo bilgisi</pre><p><code>apt update</code> yalnızca listeyi yeniler, program güncellemez; güncelleme için <code>apt upgrade</code> gerekir.</p>
+<h2 id="b4">Elle indirilen paketler</h2>
+<table><thead><tr><th>Biçim</th><th>Komut</th></tr></thead><tbody><tr><td>.deb</td><td><code>sudo apt install ./paket.deb</code></td></tr><tr><td>.rpm</td><td><code>sudo dnf install ./paket.rpm</code></td></tr><tr><td>Arch yerel paket</td><td><code>sudo pacman -U paket.pkg.tar.zst</code></td></tr></tbody></table><p>Elle indirilen paketler depo güvencesi taşımaz; yalnızca resmî kaynaklardan indirilmelidir.</p>
+<h2 id="b5">Depo ekleme</h2>
+<p>Resmî depoda bulunmayan programlar için üretici depoları veya PPA kullanılabilir. Eklemeden önce güvenilirliği kontrol edilmelidir.</p><pre># Ubuntu PPA örneği
+sudo add-apt-repository ppa:kullanici/depo
+sudo apt update
+
+# Depo listeleri
+ls /etc/apt/sources.list.d/        # Debian ailesi
+ls /etc/yum.repos.d/               # Red Hat ailesi</pre>
+<h2 id="b6">Evrensel paket biçimleri</h2>
+<p>Dağıtımdan bağımsız paketler, yeni sürüm programları herhangi bir dağıtıma kurmayı sağlar. Karşılığında disk alanı daha fazla harcanır.</p><table><thead><tr><th>Biçim</th><th>Özellik</th><th>Komut örneği</th></tr></thead><tbody><tr><td>Snap</td><td>Canonical; sandbox içinde çalışır, otomatik güncellenir</td><td><code>sudo snap install vlc</code></td></tr><tr><td>Flatpak</td><td>Masaüstü uygulamaları; Flathub deposu</td><td><code>flatpak install flathub org.videolan.VLC</code></td></tr><tr><td>AppImage</td><td>Tek dosya; kurulum gerektirmez</td><td><code>chmod +x Uygulama.AppImage &amp;&amp; ./Uygulama.AppImage</code></td></tr></tbody></table><pre>snap list
+sudo snap remove vlc
+flatpak list
+flatpak update</pre>
+<h2 id="b7">Kaynak koddan derleme</h2>
+<p>Son çare olarak program kaynak kodundan derlenebilir. Bu, paket yöneticisinin takibi dışında kalır; güncelleme ve kaldırma elle yapılır.</p><pre>sudo apt install build-essential        # derleme araçları
+tar -xzf program-1.0.tar.gz &amp;&amp; cd program-1.0
+./configure
+make
+sudo make install                          # tercihen checkinstall ile paketlenir</pre>
+<h2 id="b8">Sorun giderme</h2>
+<table><thead><tr><th>Sorun</th><th>Çözüm</th></tr></thead><tbody><tr><td>Kilit hatası: <code>Could not get lock</code></td><td>Başka bir güncelleme sürüyordur; bitmesini bekleyin</td></tr><tr><td>Bağımlılık hatası</td><td><code>sudo apt --fix-broken install</code></td></tr><tr><td>Paket bulunamıyor</td><td><code>sudo apt update</code> yapıldı mı? Depo etkin mi?</td></tr><tr><td>Yarım kalmış kurulum</td><td><code>sudo dpkg --configure -a</code></td></tr><tr><td>Disk doluyor</td><td><code>sudo apt clean</code> indirilen paket önbelleğini siler</td></tr></tbody></table>
+<h2 id="b9">Özet</h2>
+<ul><li>Programlar resmî depolardan paket yöneticisiyle kurulur; bağımlılıklar otomatik çözülür.</li><li>Debian ailesinde <code>apt</code>, Red Hat ailesinde <code>dnf</code>, Arch’ta <code>pacman</code> kullanılır.</li><li>Önce liste güncellenir (<code>apt update</code>), sonra paketler yükseltilir.</li><li>Snap, Flatpak ve AppImage dağıtımdan bağımsız seçeneklerdir.</li><li>Yalnızca güvenilir depo ve paketler kullanılmalıdır.</li></ul>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

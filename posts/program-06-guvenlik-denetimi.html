@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistem Güvenlik Denetimi (Security Audit)</title>
+<meta name="description" content="Windows Defender, güvenlik duvarı, UAC, BitLocker, Secure Boot, SMBv1 ve Uzak Masaüstü ayarlarını tek seferde denetleyip riskli bulguları listeleyen batch uygulaması.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-07-05 22:32">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Windows Defender, güvenlik duvarı, UAC, BitLocker, Secure Boot, SMBv1 ve Uzak Masaüstü ayarlarını tek seferde denetleyip riskli bulguları listeleyen batch uygulaması.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
+<p>Bir bilgisayarın güvenliği, tek bir ayardan değil birbirini tamamlayan birçok korumadan oluşur. Bu uygulama, en önemli on koruma ayarını sırayla denetler, her birini <b>[+] güvenli</b>, <b>[!] risk</b> veya <b>[?] belirlenemedi</b> olarak işaretler ve sonda özet verir. Beyaz şapkalı güvenlik uzmanlarının "önce kendi sistemini denetle" yaklaşımından esinlenmiştir ve yalnızca okuma yapar.</p>
+<h2 id="b1">Ne yapar?</h2>
+<ul>
+<li>Microsoft Defender gerçek zamanlı koruma durumunu ve virüs imzalarının yaşını kontrol eder.</li>
+<li>Güvenlik duvarının üç profilinin (Etki Alanı, Özel, Genel) açık olup olmadığına bakar.</li>
+<li>Kullanıcı Hesabı Denetimi (UAC), BitLocker, Secure Boot durumlarını okur.</li>
+<li>Konuk hesabı, SMBv1 protokolü ve Uzak Masaüstü (RDP) gibi saldırı yüzeyini büyüten ayarların açık olup olmadığını denetler.</li>
+<li>Sonuçta kontrol sayısını ve riskli bulgu sayısını özetler.</li>
+</ul>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li>Kod Not Defteri'ne yapıştırılır ve <code>guvenlik_denetimi.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
+<li>Dosyaya sağ tıklanıp <b>Yönetici olarak çalıştır</b> seçilir. Yönetici yetkisi olmadan betik uyarı verip kapanır.</li>
+</ol>
+<pre>@echo off
+setlocal EnableExtensions
+title [ SECURITY AUDIT ] Yerel Sistem Guvenlik Denetimi
+color 0A
+
+net session &gt;nul 2&gt;&amp;1
+if %errorlevel% neq 0 (
+    echo.
+    echo [!] Bu arac yonetici olarak calistirilmalidir.
+    echo     Dosyaya sag tiklayip "Yonetici olarak calistir" secin.
+    echo.
+    pause
+    exit /b 1
+)
+
+set /a TOPLAM=0
+set /a RISK=0
+
+cls
+echo.
+echo   ====================================================
+echo    [ SECURITY AUDIT ]  Yerel Sistem Guvenlik Denetimi
+echo   ====================================================
+echo    Bilgisayar : %COMPUTERNAME%
+echo    Kullanici  : %USERNAME%
+echo    Tarih      : %DATE% %TIME:~0,8%
+echo   ====================================================
+echo.
+echo [*] Denetim basliyor...
+echo.
+
+call :ps DEF "(Get-MpComputerStatus).RealTimeProtectionEnabled"
+call :degerlendir "Defender gercek zamanli koruma" "%DEF%" "True"
+
+call :ps IMZA "(New-TimeSpan -Start (Get-MpComputerStatus).AntivirusSignatureLastUpdated -End (Get-Date)).Days"
+set /a TOPLAM+=1
+if "%IMZA%"=="Bilinmiyor" goto :imza_bilinmiyor
+if %IMZA% GTR 7 goto :imza_eski
+echo [+] Virus imzalari: guncel ^(%IMZA% gun once guncellendi^)
+goto :imza_son
+:imza_bilinmiyor
+echo [?] Virus imzalari: belirlenemedi
+goto :imza_son
+:imza_eski
+echo [!] Virus imzalari: %IMZA% gundur guncellenmemis
+set /a RISK+=1
+:imza_son
+
+call :ps FW "(Get-NetFirewallProfile | Where-Object { -not $_.Enabled }).Count"
+call :degerlendir "Kapali guvenlik duvari profili sayisi" "%FW%" "0"
+
+call :reg UAC "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" "EnableLUA"
+call :degerlendir "Kullanici Hesabi Denetimi (UAC) acik" "%UAC%" "0x1"
+
+call :ps BL "try { (Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction Stop).ProtectionStatus } catch { 'Bilinmiyor' }"
+call :degerlendir "BitLocker sistem surucusu korumasi" "%BL%" "On"
+
+call :ps SB "try { Confirm-SecureBootUEFI } catch { 'Bilinmiyor' }"
+call :degerlendir "Secure Boot etkin" "%SB%" "True"
+
+call :ps GUEST "(Get-LocalUser | Where-Object { $_.SID.Value -like '*-501' }).Enabled"
+call :degerlendir "Konuk hesabi etkin" "%GUEST%" "False"
+
+call :ps SMB1 "(Get-SmbServerConfiguration).EnableSMB1Protocol"
+call :degerlendir "SMBv1 protokolu etkin" "%SMB1%" "False"
+
+call :reg RDP "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" "fDenyTSConnections"
+call :degerlendir "Uzak Masaustu (RDP) kapali" "%RDP%" "0x1"
+
+echo.
+echo   ----------------------------------------------------
+echo    Yapilan kontrol : %TOPLAM%
+echo    Riskli bulgu    : %RISK%
+echo   ----------------------------------------------------
+if %RISK% EQU 0 goto :temiz
+echo [!] Riskli bulgular icin ilgili ayari gozden gecirin.
+goto :son
+:temiz
+echo [+] Belirgin bir risk bulunmadi.
+:son
+echo.
+pause
+exit /b 0
+
+rem ---------- Alt programlar ----------
+
+:ps
+rem %1 = degisken adi, %2 = PowerShell ifadesi
+set "%~1=Bilinmiyor"
+for /f "delims=" %%i in ('powershell -NoProfile -Command "%~2" 2^&gt;nul') do set "%~1=%%i"
+exit /b
+
+:reg
+rem %1 = degisken adi, %2 = anahtar, %3 = deger adi
+set "%~1=Bilinmiyor"
+for /f "tokens=3" %%a in ('reg query "%~2" /v %~3 2^&gt;nul ^| findstr /i "%~3"') do set "%~1=%%a"
+exit /b
+
+:degerlendir
+rem %1 = aciklama, %2 = bulunan deger, %3 = guvenli deger
+set /a TOPLAM+=1
+if /i "%~2"=="Bilinmiyor" goto :deg_bilinmiyor
+if /i "%~2"=="%~3" goto :deg_iyi
+echo [!] %~1: RISK ^(deger: %~2^)
+set /a RISK+=1
+exit /b
+:deg_iyi
+echo [+] %~1: guvenli
+exit /b
+:deg_bilinmiyor
+echo [?] %~1: belirlenemedi
+exit /b</pre>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
+<ul>
+<li><b>Yönetici denetimi:</b> <code>net session</code> komutu yalnızca yönetici yetkisiyle başarılı olur; başarısız olursa betik açıklama yazıp çıkar.</li>
+<li><b><code>:ps</code> alt programı:</b> Verilen PowerShell ifadesini çalıştırıp çıktısını bir değişkene yazar. Çıktı alınamazsa değişken <code>Bilinmiyor</code> olarak kalır; böylece desteklenmeyen özellikler (örneğin Windows Home'da BitLocker) betiği bozmaz.</li>
+<li><b><code>:reg</code> alt programı:</b> <code>reg query</code> ile kayıt defteri değerini okur. <code>tokens=3</code> çıktı satırının üçüncü parçasını (değeri) alır.</li>
+<li><b><code>:degerlendir</code> alt programı:</b> Bulunan değeri beklenen güvenli değerle karşılaştırır, sonucu işaretler ve sayaçları günceller.</li>
+<li><b>Dilden bağımsızlık:</b> Türkçe Windows'ta komut çıktıları Türkçe olabileceği için betik, çıktı metnini ayrıştırmak yerine PowerShell nesnelerinin değerlerini ve kayıt defteri değerlerini okur.</li>
+</ul>
+<h2 id="b4">Sonuçların yorumlanması</h2>
+<ul>
+<li><code>[+]</code> güvenli: değer beklenen güvenli değerle aynı.</li>
+<li><code>[!]</code> risk: ilgili ayar önerilen değerden farklı. Parantez içinde bulunan değer gösterilir.</li>
+<li><code>[?]</code> belirlenemedi: özellik sistemde bulunmuyor veya okunamadı (örneğin üçüncü taraf antivirüs kullanıldığında Defender bilgisi alınamaz). Bu bir risk anlamına gelmez.</li>
+<li>Uzak Masaüstü ve SMBv1 gerçekten kullanılmıyorsa kapalı olması önerilir. Kullanılıyorsa yalnızca güvenilir ağlarda ve güçlü parolayla açık tutulmalıdır.</li>
+</ul>
+<blockquote>Bu denetim bir güvenlik sertifikası değildir; yalnızca yaygın ayarları kontrol eder. Betik yalnızca okuma ve raporlama yapar; sistem ayarlarını değiştirmez.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>
