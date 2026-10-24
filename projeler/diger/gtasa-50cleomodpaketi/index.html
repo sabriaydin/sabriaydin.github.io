@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GTA SA - CLEO 4 Mod Paketi | 2014</title>
+    <title>GTA SA - CLEO 4 Mod Paketi | 2017</title>
     <meta name="description" content="GTA San Andreas için 50 adet CLEO4 modunu içeren, tamamen Türkçe mod paketi. Hızlı ve sorunsuz kurulum.">
     <meta name="keywords" content="sabri aydın, gta san andreas, cleo mod, gta sa mod paketi">
     <meta name="author" content="Sabri Aydın">
     <meta name="robots" content="index, follow">
+    <link rel="icon" href="../../../assets/img/favicon.ico" sizes="32x32">
+    <link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+    <script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
     <style>
 
         @font-face {
@@ -22,14 +25,14 @@
             --asphalt-1: #333333;
             --asphalt-2: #222222;
             --asphalt-3: #0a0a0a;
-            
+
             --grove-green-1: #38b000;
             --grove-green-2: #008000;
             --grove-green-3: #004b23;
-            
+
             --sa-orange-1: #ff9e00;
             --sa-orange-2: #e85d04;
-            
+
             --text-main: #f0f0f0;
             --text-muted: #e0e0e0; /* Yazılar daha net okunsun diye biraz açıldı */
         }
@@ -43,18 +46,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            
+
             /* Yazıların ekranda jilet gibi net durması için optimizasyon */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
-            
-            /* DİKKAT: ARKA PLAN GÖRSELİ AYARI BURADA */
-            background-color: var(--asphalt-3); 
-            /* Siyahlık epey hafifletildi (0.8 -> 0.45 civarına çekildi) */
-            background-image: 
-                linear-gradient(rgba(10, 10, 10, 0.45), rgba(10, 10, 10, 0.65)), 
-                url('GTASanAndreas-wallpaper.jpg'); 
+
+            background-color: var(--asphalt-3);
+            background-image:
+                linear-gradient(rgba(10, 10, 10, 0.45), rgba(10, 10, 10, 0.65)),
+                url('GTASanAndreas-wallpaper.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -68,7 +69,6 @@
             box-sizing: border-box;
         }
 
-        /* Ana İçerik - Pusluluk yapan 3D efekt kaldırıldı */
         .mod-showcase {
             background: linear-gradient(145deg, rgba(34,34,34,0.85) 0%, rgba(17,17,17,0.9) 100%);
             backdrop-filter: blur(6px);
@@ -222,7 +222,7 @@
         .btn-download:hover {
             transform: translate(-3px, -3px);
             box-shadow: 9px 9px 0px var(--asphalt-3);
-            background: linear-gradient(135deg, #2b8a00 0%, var(--grove-green-2) 100%); /* Hover rengi matlaştırıldı */
+            background: linear-gradient(135deg, #2b8a00 0%, var(--grove-green-2) 100%);
             color: #fff;
         }
 
@@ -243,7 +243,7 @@
             transform: translate(-3px, -3px);
             box-shadow: 9px 9px 0px var(--asphalt-3);
         }
-        
+
         .btn-virus:active {
             transform: translate(2px, 2px);
             box-shadow: 0px 0px 0px var(--asphalt-3);
@@ -252,8 +252,8 @@
         /* Ana Sayfaya Dön Butonu */
         .btn-home {
             position: absolute;
-            bottom: 20px; /* Sağ alt köşeye alındı */
-            right: 25px;  /* Sağ alt köşeye alındı */
+            bottom: 20px;
+            right: 25px;
             text-decoration: none;
             color: var(--text-muted);
             font-family: 'Trebuchet MS', sans-serif;
@@ -288,9 +288,9 @@
 <body>
 
     <div class="portal-container">
-        
+
         <main class="mod-showcase">
-            <a href="/" class="btn-home">Ana Sayfaya Dön</a>
+            <a href="../../../index.html" class="btn-home">bloga dön</a>
             <div class="mod-title-area">
                 <span class="badge-2017">#SABRİ_AYDIN</span>
                 <h1>GTA San Andreas Cleo Mod Paketi</h1>
@@ -311,37 +311,23 @@
                 </div>
 
                 <div class="action-box">
-                    <a href="#" class="btn btn-download">Mod Paketini İndir!</a>
-                    <a href="#" class="btn btn-virus">VirusTotal Raporunu İncele</a>
+                    <a href="#" class="btn btn-download" data-indir>Mod Paketini İndir!</a>
+                    <a href="#" class="btn btn-virus" data-vt target="_blank" rel="noopener noreferrer">VirusTotal Raporunu İncele</a>
                 </div>
             </div>
         </main>
 
     </div>
 
-    <!-- Kaynak Kodu Koruması -->
     <script>
-        // Sağ tık menüsünü engelle
-        document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // F12, Ctrl+U, Ctrl+Shift+I gibi kısayolları engelle
-        document.onkeydown = function(e) {
-            if(e.keyCode == 123) { // F12
-                return false;
-            }
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
-                return false;
-            }
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) { // Ctrl+Shift+C
-                return false;
-            }
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
-                return false;
-            }
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U
-                return false;
-            }
-        }
+    (()=>{
+    /* ====== BURADAN DÜZENLEYİN ====== */
+    /* indir: .rar dosyasının adresi. sha256: dosyanın 64 karakterlik özeti (VirusTotal düğmesi bundan oluşur). */
+    const SITE={indir:"GTASanAndreasCleo4ModPaketi2017.rar",sha256:"349680b7dc0a251c7ba783c841173e1e6b2ecdaac77307173e273e857fc25f0d"};
+    document.querySelectorAll('[data-indir]').forEach(a=>a.href=SITE.indir||'#');
+    const vt=/^[a-f0-9]{64}$/i.test(SITE.sha256||'')?'https://www.virustotal.com/gui/file/'+SITE.sha256:'#';
+    document.querySelectorAll('[data-vt]').forEach(a=>a.href=vt);
+    })();
     </script>
 </body>
 </html>

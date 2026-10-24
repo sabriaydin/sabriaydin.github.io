@@ -68,7 +68,7 @@ window.SITE = {
           { name: 'IPRadar', url: 'projeler/programlar/ip-radar/' }
         ] },
         { name: 'Diğer', items: [
-          { name: 'GTA SA: Mod Paketi', url: 'https://github.com/' }
+          { name: 'GTA SA: Mod Paketi', url: 'projeler/diger/gtasa-50cleomodpaketi/' }
         ] }
       ]
     }
