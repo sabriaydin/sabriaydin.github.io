@@ -2,7 +2,6 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-<<<<<<< Updated upstream:projeler/oyunlar/hunger/js/veri/guncelleme/bolum-yeni.js
 {n:56,d:"22.10.2026",t:"Köylülerin zemine gömülmesi",l:[
  "Köylülerin bel hizasından aşağısının zeminin içinde kalması sorunu giderildi: gövde ve bacaklar artık doğru yükseklikte duruyor, ayaklar zeminde görünüyor.",
  "Köylülerin yürüme sırasındaki hafif sekme hareketi korundu."
@@ -54,9 +53,6 @@ HG.UPD=(HG.UPD||[]).concat([
  "Üst üste üç yanlış parolada geliştirici modu 30 saniye boyunca kilitleniyor."
 ]},
 {n:54,d:"21.10.2026",t:"Ada, köyler, mağaralar ve çok sayıda düzeltme",l:[
-=======
-{n:54,d:"22.10.2026",t:"Ada, köyler, mağaralar ve çok sayıda düzeltme",l:[
->>>>>>> Stashed changes:oyunlar/hunger/js/veri/guncelleme/bolum-yeni.js
  "Gerçek dağlar eklendi: ada artık birkaç büyük dağ kütlesi, uzun sırtlar, aralarında vadiler ve kıyıya alçalan tepelerden oluşuyor; en yüksek zirveler 25 metreyi aşıyor.",
  "Düzlüklerin kayalık görünmesi sorunu giderildi: kaya zemini yalnızca dağ yamaçlarında ve yüksek yaylalarda kalıyor, kar yalnızca zirvelerde görünüyor.",
  "Biyomlar belirginleştirildi: nem ve sıcaklık bölgeleri çok daha geniş tutuldu, çam ormanı, çayır, kurak ova ve bataklık kenarı birbirinden ayrıldı.",
@@ -97,19 +93,11 @@ HG.UPD=(HG.UPD||[]).concat([
  "Haritadaki oyuncu imleci küçültüldü.",
  "Ekranın üst ortasındaki pusula okunaklı hâle getirildi: koyu zemin şeridi eklendi, yazılar büyütüldü ve soluklaşma azaltıldı.",
  "Envanter penceresinin eşya açıklaması yüzünden büyüyüp küçülmesi sorunu giderildi: pencere Üretim penceresiyle aynı genişlikte sabit duruyor ve altta açıklama için yer ayrılıyor.",
-<<<<<<< Updated upstream:projeler/oyunlar/hunger/js/veri/guncelleme/bolum-yeni.js
  "Geliştirici konsolu büyütüldü (ekranın yaklaşık %86'sı) ve iki sürüklenebilir boyutlandırma çubuğu eklendi: biri kayıt listesi ile komut alanı arasında, diğeri komut çıktısı ile geliştirici paneli arasında. Komut yazma alanı her durumda sabit yükseklikte kalır.",
  "Geliştirici konsolunda haritayı açan komut artık köy, kamp, mağara ve adacık konumlarını da işaretliyor.",
  "Ölüm ekranında oyuncunun ayakta ve sağlıklı görünmesi sorunu giderildi: kamera yere iniyor, eller ve göstergeler kalkıyor, görüntü soluyor."
 ]},
 {n:53,d:"20.10.2026",t:"Arazi ve yüzey dokuları yenilendi",l:[
-=======
- "Geliştirici konsolu büyütüldü (ekranın yaklaşık %86'sı); kayıt listesi ile komut alanı arasına sürüklenebilir ayırıcı eklendi.",
- "Geliştirici konsolunda haritayı açan komut artık köy, kamp, mağara ve adacık konumlarını da işaretliyor.",
- "Ölüm ekranında oyuncunun ayakta ve sağlıklı görünmesi sorunu giderildi: kamera yere iniyor, eller ve göstergeler kalkıyor, görüntü soluyor."
-]},
-{n:53,d:"21.10.2026",t:"Arazi ve yüzey dokuları yenilendi",l:[
->>>>>>> Stashed changes:oyunlar/hunger/js/veri/guncelleme/bolum-yeni.js
  "Kum dokusu baştan yapıldı: düzenli dalga deseni yerine rüzgârla oluşmuş düzensiz kum dalgacıkları, çok ince kum tanesi, yer yer çakıl ve kabuk kırıkları eklendi.",
  "Ağaç kabuğu dokusu baştan yapıldı: boyuna uzanan derin çatlaklar, lifli kabuk levhaları ve üzerinde liken lekeleri eklendi.",
  "Çimen dokusuna öbeklenme eklendi: çimen artık her yerde aynı sıklıkta değil; seyrek ve sık kesimler ile sararmış kuru yamalar oluşuyor.",

@@ -3,11 +3,7 @@
 (()=>{
 'use strict';
 const {G,ui,$}=HG;
-<<<<<<< Updated upstream:projeler/oyunlar/hunger/js/oyun/menu.js
 HG.VERSION='1.99';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
-=======
-HG.VERSION='1.93';                               /* her güncellemede artırılır; ana menünün sağ altında görünür */
->>>>>>> Stashed changes:oyunlar/hunger/js/oyun/menu.js
 const PREF='hunger-dunya';
 
 /* ============================================================ Dünya Oluştur ============================================================ */

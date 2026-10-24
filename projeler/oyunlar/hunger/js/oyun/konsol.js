@@ -198,7 +198,6 @@ function build(){
    '</div>'+
   '</div>'+
   '<div class="kn-st" id="knSt"></div>'+
-<<<<<<< Updated upstream:projeler/oyunlar/hunger/js/oyun/konsol.js
   '<div class="kn-tabs" id="knTabs" role="tablist">'+
    TABS.map(t=>'<button type="button" class="kn-tb" data-v="'+t[0]+'" role="tab" aria-selected="false">'+
      '<span>'+t[1]+'</span><i></i></button>').join('')+
@@ -213,12 +212,6 @@ function build(){
    '<section class="kn-v" data-v="dev"><div class="kc-pan" id="kcPan"></div></section>'+
    '<section class="kn-v" data-v="perf"><div class="kn-perf" id="knPerf"></div></section>'+
   '</div>'+
-=======
-  '<div class="kn-flt"><input id="knQ" type="text" placeholder="Kayıtlarda ara…" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara">'+
-   '<div class="kn-ch" id="knCh"></div></div>'+
-  '<div class="kn-l" id="knL" role="log" aria-live="off" tabindex="0"></div>'+
-  '<div class="kn-split" id="knSplit" role="separator" aria-orientation="horizontal" title="Sürükleyerek kayıt ve komut alanlarını boyutlandırın"><i></i></div>'+
->>>>>>> Stashed changes:oyunlar/hunger/js/oyun/konsol.js
   '<div class="kn-cmd" id="knCmd"></div>'+
   '<div class="kn-ft">En son '+MAX+' kayıt saklanır, aynı kayıtlar birleştirilir (×sayı). Komut satırı için dünya kuralı "Konsol komutları" açık olmalıdır; geliştirici modu bu kuraldan bağımsız çalışır ve parola ister.</div></div>';
  ($('#game')||document.body).appendChild(root);
@@ -250,38 +243,9 @@ function build(){
  tabsEl.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(b)setTab(b.dataset.v)});
  root.addEventListener('pointerdown',e=>{if(e.target===root)setOpen(false)});
  root.addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
-<<<<<<< Updated upstream:projeler/oyunlar/hunger/js/oyun/konsol.js
  if(HG.konsolBuilt)HG.konsolBuilt(root);                 /* komut satırı, geliştirici paneli ve performans sekmesi (js/oyun/komut.js) */
  const db=[...tabsEl.children].find(x=>x.dataset.v==='dev');if(db)db.hidden=!(HG.komut&&HG.komut.dev);
  setTab(tab);
-=======
- if(HG.konsolBuilt)HG.konsolBuilt(root);                 /* komut satırı ve geliştirici paneli (js/oyun/komut.js) */
- setupSplit(root);
-}
-/* Kayıt listesi ile komut alanı arasındaki ayırıcı: sürüklendiğinde komut alanının yüksekliği
-   değişir, kayıt listesi (1fr satırı) kalan yeri alır. Seçilen yükseklik tarayıcıda saklanır. */
-function setupSplit(root){
- const box=root.querySelector('.kn-box'),sp=root.querySelector('#knSplit'),cmd=root.querySelector('#knCmd');
- if(!box||!sp||!cmd)return;
- const has=cmd.childElementCount>0;box.classList.toggle('has-cmd',has);
- if(!has)return;
- const MIN=84,setH=h=>{const mx=Math.max(MIN,box.clientHeight-260);box.style.setProperty('--kncmd',Math.round(Math.min(mx,Math.max(MIN,h)))+'px')};
- let h0=0;try{h0=parseInt(localStorage.getItem('hunger-kncmd')||'',10)||0}catch(e){}
- setH(h0||240);
- let drag=null;
- sp.addEventListener('pointerdown',e=>{
-  drag={y:e.clientY,h:cmd.getBoundingClientRect().height};sp.classList.add('on');
-  try{sp.setPointerCapture(e.pointerId)}catch(_){}
-  e.preventDefault();
- });
- sp.addEventListener('pointermove',e=>{if(drag)setH(drag.h+(drag.y-e.clientY))});
- const end=()=>{if(!drag)return;drag=null;sp.classList.remove('on');
-  try{localStorage.setItem('hunger-kncmd',String(Math.round(cmd.getBoundingClientRect().height)))}catch(e){}};
- sp.addEventListener('pointerup',end);sp.addEventListener('pointercancel',end);
- sp.addEventListener('keydown',e=>{const d=e.key==='ArrowUp'?24:e.key==='ArrowDown'?-24:0;
-  if(d){setH(cmd.getBoundingClientRect().height+d);e.preventDefault()}});
- sp.tabIndex=0;
->>>>>>> Stashed changes:oyunlar/hunger/js/oyun/konsol.js
 }
 /* ---- sekmeler: her görünüm kendi sekmesinde tam yükseklikte açılır ---- */
 function setTab(v){

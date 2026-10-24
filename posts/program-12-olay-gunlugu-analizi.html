@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Güvenlik Olay Günlüğü Analizi (Log Hunter)</title>
+<meta name="description" content="Windows güvenlik olay günlüğünde başarısız oturum açma denemelerini, hesap değişikliklerini ve Uzak Masaüstü girişlerini analiz eden batch uygulaması.">
+<meta name="kategori" content="batchornek">
+<meta name="tarih" content="2026-10-08 16:38">
+<meta name="author" content="Sabri Aydın">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#1e1e21">
+<link rel="icon" href="../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/yazi.css">
+<script src="../assets/js/site.js"></script>
+<script src="index.js"></script>
+<script src="../assets/js/frame.js"></script>
+<script src="../assets/js/app.js" defer></script>
+</head>
+<body data-page="post" data-root="../">
+<a class="skip" href="#app">İçeriğe geç</a>
+<div id="hdr"></div>
+<main id="app">
+<article class="post">
+<div class="body" style="--a:#0e6655;--b:#1abc9c">
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Windows güvenlik olay günlüğünde başarısız oturum açma denemelerini, hesap değişikliklerini ve Uzak Masaüstü girişlerini analiz eden batch uygulaması.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne yapar?</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kod nasıl çalışıyor?</a></li><li><a href="#b4">Sonuçların yorumlanması</a></li></ol></nav><!--/px-->
+<p>Windows, oturum açma denemeleri ve hesap değişiklikleri gibi güvenlik olaylarını bir günlükte tutar. Saldırı girişimleri çoğunlukla bu günlükte iz bırakır; ancak günlük binlerce kayıt içerdiği için elle incelenmesi zordur. Bu uygulama, seçilen süre içindeki önemli olayları çıkarıp özetler.</p>
+<h2 id="b1">Ne yapar?</h2>
+<ul>
+<li><b>Başarısız oturum açma (Olay 4625):</b> Toplam sayıyı, en çok deneme yapılan hesap adlarını ve kaynak adresleri gösterir. Parola tahmin saldırıları bu şekilde fark edilir.</li>
+<li><b>Hesap değişiklikleri (Olay 4720, 4724, 4726, 4732):</b> Yeni hesap oluşturma, parola sıfırlama, hesap silme ve yerel gruba üye ekleme kayıtlarını zaman sırasıyla listeler.</li>
+<li><b>Uzak Masaüstü girişleri (Olay 4624, tür 10):</b> RDP ile başarılı girişlerin sayısını, zamanını, hesap adını ve kaynak adresi gösterir.</li>
+</ul>
+<h2 id="b2">Nasıl kullanılır?</h2>
+<ol>
+<li>Kod Not Defteri'ne yapıştırılır ve <code>olay_gunlugu_analizi.bat</code> adıyla kaydedilir (<b>Kayıt türü: Tüm dosyalar</b> seçilmelidir; aksi halde dosya <code>.txt</code> olarak kaydedilir).</li>
+<li>Dosyaya sağ tıklanıp <b>Yönetici olarak çalıştır</b> seçilir. Yönetici yetkisi olmadan betik uyarı verip kapanır.</li>
+<li>Kaç saat geriye bakılacağı sorulur. Boş bırakılırsa 24 saat kullanılır.</li>
+</ol>
+<pre>@echo off
+setlocal EnableExtensions
+title [ LOG HUNTER ] Guvenlik Olay Gunlugu Analizi
+color 0A
+
+net session &gt;nul 2&gt;&amp;1
+if %errorlevel% neq 0 (
+    echo.
+    echo [!] Bu arac yonetici olarak calistirilmalidir.
+    echo     Guvenlik olay gunlugu yalnizca yonetici hesabiyla okunabilir.
+    echo.
+    pause
+    exit /b 1
+)
+
+cls
+echo.
+echo   ====================================================
+echo    [ LOG HUNTER ]  Guvenlik Olay Gunlugu Analizi
+echo   ====================================================
+echo.
+
+set "SAAT=24"
+set /p "SAAT=Kac saat geriye bakilsin [varsayilan 24]: "
+echo %SAAT%| findstr /r "^[0-9][0-9]*$" &gt;nul || set "SAAT=24"
+
+echo.
+echo [*] 1/3 Basarisiz oturum acma denemeleri ^(Olay 4625^), son %SAAT% saat
+echo.
+powershell -NoProfile -Command "$s=(Get-Date).AddHours(-%SAAT%); try { $e=@(Get-WinEvent -FilterHashtable @{LogName='Security';Id=4625;StartTime=$s} -ErrorAction Stop) } catch { $e=@() }; 'Toplam basarisiz deneme: ' + $e.Count; if ($e.Count -gt 0) { ''; 'Hesap adina gore (ilk 10):'; $e | ForEach-Object { ([xml]$_.ToXml()).Event.EventData.Data | Where-Object { $_.Name -eq 'TargetUserName' } | ForEach-Object { $_.'#text' } } | Group-Object | Sort-Object Count -Descending | Select-Object -First 10 | ForEach-Object { '  {0,-6} {1}' -f $_.Count,$_.Name }; ''; 'Kaynak adrese gore (ilk 10):'; $e | ForEach-Object { ([xml]$_.ToXml()).Event.EventData.Data | Where-Object { $_.Name -eq 'IpAddress' } | ForEach-Object { $_.'#text' } } | Group-Object | Sort-Object Count -Descending | Select-Object -First 10 | ForEach-Object { '  {0,-6} {1}' -f $_.Count,$_.Name } }"
+
+echo.
+echo [*] 2/3 Hesap degisiklikleri ^(olusturma, silme, parola sifirlama, yerel gruba ekleme^)
+echo.
+powershell -NoProfile -Command "$s=(Get-Date).AddHours(-%SAAT%); $m=@{4720='Hesap olusturuldu';4724='Parola sifirlandi';4726='Hesap silindi';4732='Yerel gruba uye eklendi'}; try { $e=@(Get-WinEvent -FilterHashtable @{LogName='Security';Id=4720,4724,4726,4732;StartTime=$s} -ErrorAction Stop) } catch { $e=@() }; if ($e.Count -eq 0) { '[+] Kayit yok.' } else { $e | Sort-Object TimeCreated | ForEach-Object { '[!] {0:dd.MM HH:mm}  {1}' -f $_.TimeCreated,$m[[int]$_.Id] } }"
+
+echo.
+echo [*] 3/3 Uzak Masaustu ^(RDP^) ile basarili girisler ^(Olay 4624, tur 10^)
+echo.
+powershell -NoProfile -Command "$s=(Get-Date).AddHours(-%SAAT%); try { $e=@(Get-WinEvent -FilterHashtable @{LogName='Security';Id=4624;StartTime=$s} -ErrorAction Stop | Where-Object { $d=([xml]$_.ToXml()).Event.EventData.Data; ($d | Where-Object { $_.Name -eq 'LogonType' }).'#text' -eq '10' }) } catch { $e=@() }; if ($e.Count -eq 0) { '[+] RDP ile basarili giris yok.' } else { '[!] RDP ile basarili giris sayisi: ' + $e.Count; $e | Select-Object -First 5 | ForEach-Object { $d=([xml]$_.ToXml()).Event.EventData.Data; '    {0:dd.MM HH:mm}  {1}  {2}' -f $_.TimeCreated,($d | Where-Object { $_.Name -eq 'TargetUserName' }).'#text',($d | Where-Object { $_.Name -eq 'IpAddress' }).'#text' } }"
+
+echo.
+echo ----------------------------------------------------------
+echo [i] Degerlendirme ipuclari:
+echo     - Ayni hesap veya adrese yuzlerce basarisiz deneme, parola
+echo       tahmin saldirisina isaret edebilir; parolayi degistirin ve
+echo       gerekmiyorsa Uzak Masaustu erisimini kapatin.
+echo     - Sizin yapmadiginiz hesap olusturma veya yetki degisikligi
+echo       ciddi bir uyaridir; hesaplari ve yoneticiler grubunu inceleyin.
+echo     - Gunluk kayitlari dolunca eski kayitlar silinir; uzun sure
+echo       geriye gitmek icin yeterli veri olmayabilir.
+echo.
+pause
+exit /b 0</pre>
+<h2 id="b3">Kod nasıl çalışıyor?</h2>
+<ul>
+<li><b>Saat doğrulaması:</b> <code>echo %SAAT%| findstr /r "^[0-9][0-9]*$"</code> girilen değerin yalnızca rakam olduğunu denetler; değilse <code>||</code> ile varsayılan değer 24 atanır.</li>
+<li><b><code>Get-WinEvent -FilterHashtable</code>:</b> Olay günlüğünü kimlik numarası ve başlangıç zamanına göre filtreler; büyük günlüklerde yalnızca ilgili kayıtları okuduğu için hızlıdır.</li>
+<li><b>Hata yakalama:</b> Belirtilen sürede hiç olay yoksa <code>Get-WinEvent</code> hata verir. <code>try ... catch</code> bu durumu boş liste olarak ele alır.</li>
+<li><b>XML ayrıştırma:</b> Hesap adı ve IP adresi gibi ayrıntılar olayın XML verisinde saklanır. <code>ToXml()</code> ile okunan veriden <code>TargetUserName</code>, <code>IpAddress</code> ve <code>LogonType</code> alanları alınır.</li>
+<li><b>Gruplama:</b> <code>Group-Object</code> aynı hesap veya adresin kaç kez göründüğünü sayar; <code>Sort-Object Count -Descending</code> en çok görünenleri başa alır.</li>
+</ul>
+<h2 id="b4">Sonuçların yorumlanması</h2>
+<ul>
+<li>Aynı hesap veya adresten kısa sürede yüzlerce başarısız deneme, parola tahmin saldırısı olabilir. Parolanın güçlendirilmesi ve gerekmiyorsa Uzak Masaüstü erişiminin kapatılması gerekir.</li>
+<li>Kullanıcı adı olarak <code>Administrator</code>, <code>admin</code>, <code>test</code> gibi genel adların denendiği görülüyorsa otomatik tarama araçları sisteme erişmeye çalışıyor olabilir.</li>
+<li>Kullanıcının kendisinin yapmadığı hesap oluşturma veya yetki değişikliği ciddi bir uyarıdır; hesaplar ve <b>Yöneticiler</b> grubu incelenmelidir.</li>
+<li>Kaynak adres <code>-</code> olarak görünüyorsa deneme yerel olarak yapılmıştır. Parolasını yanlış yazan bir kullanıcı da bu kaydı oluşturabilir.</li>
+<li>Güvenlik günlüğünün boyutu sınırlıdır; dolduğunda eski kayıtlar silinir. Uzun süre geriye gitmek için yeterli veri bulunmayabilir.</li>
+</ul>
+<blockquote>Betik yalnızca okuma ve raporlama yapar; sistem ayarlarını değiştirmez. Olay günlüğünü silmez veya değiştirmez.</blockquote>
+</div>
+</article>
+</main>
+<div id="ftr"></div>
+</body>
+</html>

@@ -37,6 +37,13 @@
             --text-muted: #e0e0e0; /* Yazılar daha net okunsun diye biraz açıldı */
         }
 
+        * { scrollbar-color: var(--grove-green-2) var(--asphalt-3); }
+        ::-webkit-scrollbar { width: 12px; height: 12px; }
+        ::-webkit-scrollbar-track { background: var(--asphalt-3); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(var(--grove-green-1), var(--grove-green-3)); border-radius: 8px; border: 2px solid var(--asphalt-3); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--grove-green-1); }
+        ::selection { background: var(--grove-green-2); color: #fff; text-shadow: none; }
+
         body {
             margin: 0;
             padding: 0;
@@ -54,7 +61,8 @@
 
             background-color: var(--asphalt-3);
             background-image:
-                linear-gradient(rgba(10, 10, 10, 0.45), rgba(10, 10, 10, 0.65)),
+                radial-gradient(ellipse at 50% 0%, rgba(56,176,0,0.08), transparent 55%),
+                linear-gradient(rgba(10, 10, 10, 0.45), rgba(10, 10, 10, 0.7)),
                 url('GTASanAndreas-wallpaper.jpg');
             background-size: cover;
             background-position: center;
@@ -69,15 +77,21 @@
             box-sizing: border-box;
         }
 
+        @keyframes panelGiris {
+            from { opacity: 0; transform: translateY(18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .mod-showcase {
-            background: linear-gradient(145deg, rgba(34,34,34,0.85) 0%, rgba(17,17,17,0.9) 100%);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            background: linear-gradient(145deg, rgba(34,34,34,0.88) 0%, rgba(17,17,17,0.94) 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border: 2px solid var(--asphalt-1);
             border-radius: 15px;
             padding: 50px;
-            box-shadow: 15px 15px 0px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0,0,0,0.5);
+            box-shadow: 15px 15px 0px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 60px -20px rgba(56,176,0,0.35);
             position: relative;
+            animation: panelGiris .6s cubic-bezier(.22,1,.36,1) both;
         }
 
         /* Sprey Boya Efekti Dekorasyon */
@@ -90,6 +104,7 @@
             font-size: 3.5rem;
             color: var(--grove-green-2);
             opacity: 0.25;
+            text-shadow: 0 0 18px rgba(56,176,0,0.5);
             transform: rotate(12deg);
             pointer-events: none;
             z-index: 0;
@@ -106,7 +121,7 @@
         /* Nabız (Pulse) Animasyonu */
         @keyframes neonPulse {
             0% { text-shadow: 2px 2px 4px #000, 0 0 10px rgba(255, 158, 0, 0.2); }
-            50% { text-shadow: 2px 2px 4px #000, 0 0 20px rgba(255, 158, 0, 0.6); }
+            50% { text-shadow: 2px 2px 4px #000, 0 0 22px rgba(255, 158, 0, 0.65); }
             100% { text-shadow: 2px 2px 4px #000, 0 0 10px rgba(255, 158, 0, 0.2); }
         }
 
@@ -116,7 +131,7 @@
             font-size: 1.8rem;
             display: inline-block;
             margin-bottom: 10px;
-            animation: neonPulse 2s infinite;
+            animation: neonPulse 2.4s ease-in-out infinite;
         }
 
         .mod-title-area h1 {
@@ -124,8 +139,9 @@
             font-size: 5rem;
             margin: 0;
             color: var(--text-main);
-            text-shadow: 4px 4px 0px var(--asphalt-3), 7px 7px 0px var(--grove-green-3);
+            text-shadow: 4px 4px 0px var(--asphalt-3), 7px 7px 0px var(--grove-green-3), 7px 7px 24px rgba(0,0,0,0.5);
             letter-spacing: 3px;
+            line-height: 1.05;
         }
 
         .content-grid {
@@ -144,7 +160,7 @@
             padding: 25px;
             border-left: 5px solid var(--grove-green-1);
             border-radius: 0 12px 12px 0;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
         .features {
@@ -154,11 +170,18 @@
         }
 
         .features li {
-            padding: 12px 0;
+            padding: 12px 4px;
             border-bottom: 1px solid var(--asphalt-2);
             display: flex;
             align-items: flex-start;
             font-size: 1.05rem;
+            border-radius: 6px;
+            transition: background .2s ease, transform .2s ease, padding-left .2s ease;
+        }
+
+        .features li:hover {
+            background: rgba(56,176,0,0.08);
+            transform: translateX(4px);
         }
 
         .features li::before {
@@ -167,6 +190,7 @@
             margin-right: 15px;
             font-size: 1.3rem;
             line-height: 1;
+            text-shadow: 0 0 8px rgba(255,158,0,0.5);
         }
 
         .features li strong {
@@ -191,7 +215,7 @@
             font-family: 'Pricedown', sans-serif;
             letter-spacing: 2px;
             border-radius: 8px;
-            transition: all 0.2s ease-in-out;
+            transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s cubic-bezier(.22,1,.36,1), background .25s ease, color .25s ease;
             text-transform: uppercase;
             border: 2px solid #000;
             position: relative;
@@ -205,8 +229,8 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: all 0.4s ease;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transition: left 0.5s ease;
         }
 
         .btn:hover::after {
@@ -221,7 +245,7 @@
 
         .btn-download:hover {
             transform: translate(-3px, -3px);
-            box-shadow: 9px 9px 0px var(--asphalt-3);
+            box-shadow: 9px 9px 0px var(--asphalt-3), 0 0 28px -4px rgba(56,176,0,0.75);
             background: linear-gradient(135deg, #2b8a00 0%, var(--grove-green-2) 100%);
             color: #fff;
         }
@@ -241,7 +265,7 @@
             background: linear-gradient(135deg, var(--asphalt-2) 0%, var(--asphalt-1) 100%);
             color: var(--sa-orange-1);
             transform: translate(-3px, -3px);
-            box-shadow: 9px 9px 0px var(--asphalt-3);
+            box-shadow: 9px 9px 0px var(--asphalt-3), 0 0 28px -6px rgba(255,158,0,0.55);
         }
 
         .btn-virus:active {
@@ -259,13 +283,14 @@
             font-family: 'Trebuchet MS', sans-serif;
             font-size: 0.9rem;
             opacity: 0.6;
-            transition: all 0.3s ease;
+            transition: opacity .3s ease, color .3s ease, transform .3s ease;
             z-index: 10;
         }
 
         .btn-home:hover {
             opacity: 1;
             color: var(--sa-orange-1);
+            transform: translateX(-2px);
         }
 
         .btn-home::before {
@@ -281,6 +306,181 @@
             }
             .mod-showcase {
                 padding: 30px;
+            }
+        }
+
+        /* ===== Ek bölümler: Kurulum, Dikkat, SSS (mevcut tasarımla aynı dil) ===== */
+        .mod-extra {
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .extra-panel {
+            background: linear-gradient(145deg, rgba(34,34,34,0.88) 0%, rgba(17,17,17,0.94) 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid var(--asphalt-1);
+            border-radius: 15px;
+            padding: 40px 50px;
+            box-shadow: 15px 15px 0px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05);
+            margin-bottom: 30px;
+            animation: panelGiris .6s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        .extra-panel:nth-of-type(2) { animation-delay: .08s; }
+        .extra-panel:nth-of-type(3) { animation-delay: .16s; }
+
+        .extra-panel h2 {
+            font-family: 'Pricedown', sans-serif;
+            font-size: 2.4rem;
+            margin: 0 0 25px;
+            color: var(--text-main);
+            text-shadow: 3px 3px 0px var(--asphalt-3), 5px 5px 0px var(--grove-green-3);
+            letter-spacing: 2px;
+        }
+
+        /* Kurulum adımları */
+        .kurulum-list {
+            list-style: none;
+            counter-reset: adim;
+            margin: 0;
+            padding: 0;
+        }
+
+        .kurulum-list li {
+            counter-increment: adim;
+            position: relative;
+            padding: 0 0 26px 58px;
+            border-left: 2px dashed var(--asphalt-1);
+            margin-left: 18px;
+        }
+
+        .kurulum-list li:last-child {
+            border-color: transparent;
+            padding-bottom: 0;
+        }
+
+        .kurulum-list li::before {
+            content: counter(adim);
+            position: absolute;
+            left: -19px;
+            top: -2px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--grove-green-1) 0%, var(--grove-green-3) 100%);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 3px 3px 0px var(--asphalt-3), 0 0 14px -2px rgba(56,176,0,0.6);
+        }
+
+        .kurulum-list h3 {
+            margin: 0;
+            font-size: 1.15rem;
+            color: var(--sa-orange-1);
+        }
+
+        .kurulum-list p {
+            margin: 6px 0 0;
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .kurulum-list code {
+            background: var(--asphalt-2);
+            color: var(--grove-green-1);
+            padding: .15em .45em;
+            border-radius: 4px;
+            font-size: .95em;
+        }
+
+        /* Dikkat kutusu */
+        .dikkat-kutu {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            background: linear-gradient(90deg, rgba(232,93,4,0.15) 0%, rgba(0,0,0,0.25) 100%);
+            border-left: 5px solid var(--sa-orange-2);
+            border-radius: 0 12px 12px 0;
+            padding: 20px 25px;
+        }
+
+        .dikkat-kutu .isaret {
+            font-family: 'Pricedown', sans-serif;
+            font-size: 1.8rem;
+            color: var(--sa-orange-1);
+            line-height: 1;
+            text-shadow: 0 0 10px rgba(255,158,0,0.6);
+        }
+
+        .dikkat-kutu p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 1.02rem;
+            line-height: 1.75;
+        }
+
+        /* SSS akordeon */
+        .sss-list details {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--asphalt-1);
+            border-radius: 8px;
+            padding: 16px 22px;
+            margin-bottom: 12px;
+            transition: border-color .2s ease, background .2s ease;
+        }
+
+        .sss-list details:hover {
+            border-color: var(--grove-green-2);
+        }
+
+        .sss-list details[open] {
+            background: rgba(56,176,0,0.07);
+        }
+
+        .sss-list summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1.05rem;
+            list-style: none;
+        }
+
+        .sss-list summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .sss-list summary::before {
+            content: "▸ ";
+            color: var(--sa-orange-1);
+            display: inline-block;
+            transition: transform .2s ease;
+        }
+
+        .sss-list details[open] summary::before {
+            content: "▸ ";
+            transform: rotate(90deg);
+        }
+
+        .sss-list p {
+            margin: 12px 0 0;
+            color: var(--text-muted);
+            font-size: .98rem;
+            line-height: 1.75;
+        }
+
+        @media (max-width: 960px) {
+            .extra-panel {
+                padding: 28px 25px;
+            }
+            .extra-panel h2 {
+                font-size: 1.9rem;
             }
         }
     </style>
@@ -316,6 +516,63 @@
                 </div>
             </div>
         </main>
+
+        <div class="mod-extra">
+            <section class="extra-panel">
+                <h2>Kurulum</h2>
+                <ol class="kurulum-list">
+                    <li>
+                        <h3>CLEO Library kurulu olsun</h3>
+                        <p>CLEO4 modlarının çalışması için oyun klasöründe <b>CLEO Library</b> (<code>CLEO.asi</code> ve <code>cleo</code> klasörü) kurulu olmalı. Bu paketin dışındadır, resmî <code>cleo.li</code> adresinden ayrıca kurulur.</p>
+                    </li>
+                    <li>
+                        <h3>Rar dosyasını indir</h3>
+                        <p>Yukarıdaki <b>Mod Paketini İndir!</b> düğmesiyle dosyayı bilgisayarına kaydet.</p>
+                    </li>
+                    <li>
+                        <h3>İçeriği çıkar</h3>
+                        <p>İndirdiğin rar dosyasını WinRAR veya 7-Zip gibi bir programla aç.</p>
+                    </li>
+                    <li>
+                        <h3><code>cleo</code> klasörüne taşı</h3>
+                        <p>Çıkan dosyaları, GTA San Andreas'ın kurulu olduğu ana klasördeki <code>cleo</code> klasörünün içine kopyala.</p>
+                    </li>
+                    <li>
+                        <h3>Oyunu başlat</h3>
+                        <p>GTA San Andreas'ı çalıştır; 50 mod otomatik olarak etkin olur.</p>
+                    </li>
+                </ol>
+            </section>
+
+            <section class="extra-panel">
+                <div class="dikkat-kutu">
+                    <span class="isaret">!</span>
+                    <p>CLEO betikleri oyun belleğine müdahale ettiği için bazı antivirüs programları yanlış alarm (false positive) verebilir. Kurmadan önce aşağıdaki <b>VirusTotal</b> raporunu incelemen önerilir. Mod, oyunun ana dosyalarını değiştirmez; <code>cleo</code> klasörü üzerinden çalışır.</p>
+                </div>
+            </section>
+
+            <section class="extra-panel">
+                <h2>SSS</h2>
+                <div class="sss-list">
+                    <details>
+                        <summary>Orijinal oyun dosyalarımı bozar mı?</summary>
+                        <p>Hayır. Modlar <code>cleo</code> klasörü üzerinden çalışır, oyunun ana dosyalarına dokunmaz. Yine de kurmadan önce oyun klasörünü yedekleyebilirsin.</p>
+                    </details>
+                    <details>
+                        <summary>CLEO Library nereden indirilir?</summary>
+                        <p>Bu paketin dışındadır; resmî <code>cleo.li</code> sitesinden veya güvendiğin bir kaynaktan ayrıca kurman gerekir.</p>
+                    </details>
+                    <details>
+                        <summary>Modlardan biri çalışmıyorsa ne yapmalıyım?</summary>
+                        <p>Önce CLEO Library'nin güncel ve doğru sürümde kurulu olduğundan emin ol; çoğu uyumsuzluk buradan kaynaklanır.</p>
+                    </details>
+                    <details>
+                        <summary>Paket hangi GTA San Andreas sürümüyle uyumlu?</summary>
+                        <p>Standart (1.0) GTA San Andreas PC sürümü ile uyumludur. Değiştirilmiş veya mod'lanmış farklı sürümlerde sorun yaşanabilir.</p>
+                    </details>
+                </div>
+            </section>
+        </div>
 
     </div>
 
