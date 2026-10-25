@@ -133,6 +133,21 @@ if(rel.length)h+=`<section class="wrap rel"><h2>Bunlar da ilgini çekebilir</h2>
 app.insertAdjacentHTML('beforeend',h)}
 /* Yana kaydırılabilen kod blokları klavyeyle de kaydırılabilsin */
 const prePin=()=>art.querySelectorAll('pre,table').forEach(e=>{e.scrollWidth>e.clientWidth?e.tabIndex=0:e.removeAttribute('tabindex')});prePin();addEventListener('resize',prePin);
+/* Her kod bloğuna (<pre>) şık bir "Kopyala" düğmesi ekle */
+art.querySelectorAll('.body>pre').forEach(pre=>{
+  if(pre.querySelector('.code-copy'))return;
+  const btn=document.createElement('button');btn.type='button';btn.className='code-copy';btn.setAttribute('aria-label','Kodu kopyala');
+  const icoCopy='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
+  const icoOk='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
+  btn.innerHTML=icoCopy+'<span>Kopyala</span>';
+  btn.onclick=async()=>{
+    const txt=pre.textContent;let ok=false;
+    try{await navigator.clipboard.writeText(txt);ok=true}catch(e){const t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(e2){}t.remove()}
+    btn.classList.toggle('ok',ok);btn.innerHTML=(ok?icoOk:icoCopy)+`<span>${ok?'Kopyalandı':'Kopyalanamadı'}</span>`;
+    setTimeout(()=>{btn.classList.remove('ok');btn.innerHTML=icoCopy+'<span>Kopyala</span>'},1800)
+  };
+  pre.appendChild(btn)
+});
 /* Okuma ilerleme çubuğu */
 const pr=document.createElement('div');pr.className='progress';pr.setAttribute('aria-hidden','true');document.body.prepend(pr);
 window.updateProgress=()=>{const r=art.getBoundingClientRect(),t=r.height-innerHeight*.5;pr.style.transform=`scaleX(${Math.max(0,Math.min(1,-r.top/(t>0?t:1)))})`};
