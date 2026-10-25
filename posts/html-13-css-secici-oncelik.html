@@ -84,19 +84,20 @@ li:nth-child(even) { background: #f3f3f3; }
 <h2 id="b5">Özgüllük: hangi kural kazanır?</h2>
 <p>Aynı öğeyi ve aynı özelliği hedefleyen birden fazla kural varsa, tarayıcı <b>özgüllüğü</b> yüksek olanı uygular. Özgüllük eşitse dosyada <b>sonra gelen</b> kural geçerli olur.</p>
 <table>
-<thead><tr><th>Seçici türü</th><th>Ağırlık</th></tr></thead>
+<thead><tr><th>Seçici türü</th><th>Karşılaştırılan sütun</th></tr></thead>
 <tbody>
-<tr><td>Satır içi stil (<code>style="..."</code>)</td><td>En yüksek</td></tr>
-<tr><td>Kimlik (<code>#ust</code>)</td><td>100</td></tr>
-<tr><td>Sınıf, nitelik, sahte sınıf (<code>.kart</code>, <code>[type]</code>, <code>:hover</code>)</td><td>10</td></tr>
-<tr><td>Etiket, sahte öğe (<code>p</code>, <code>::before</code>)</td><td>1</td></tr>
+<tr><td>Satır içi stil (<code>style="..."</code>)</td><td>En yüksek (diğer tüm sütunlardan önce gelir)</td></tr>
+<tr><td>Kimlik (<code>#ust</code>)</td><td>1. sütun: kimlik sayısı</td></tr>
+<tr><td>Sınıf, nitelik, sahte sınıf (<code>.kart</code>, <code>[type]</code>, <code>:hover</code>)</td><td>2. sütun: sınıf sayısı</td></tr>
+<tr><td>Etiket, sahte öğe (<code>p</code>, <code>::before</code>)</td><td>3. sütun: etiket sayısı</td></tr>
 </tbody>
 </table>
-<pre>p            { color: black; }   /* 1   */
-.vurgu       { color: green; }   /* 10  */
-p.vurgu      { color: blue; }    /* 11  */
-#ozel        { color: red; }     /* 100 */</pre>
-<p>Yukarıdaki kuralların hepsi aynı öğeye uygulanırsa, <code>id</code> değeri <code>ozel</code> olan öğe kırmızı, yalnızca <code>vurgu</code> sınıfı olan <code>p</code> öğesi mavi görünür.</p>
+<p>Özgüllük üç sütunlu bir değer (kimlik sayısı, sınıf sayısı, etiket sayısı) olarak tutulur ve sütunlar birbirine <b>toplanmaz</b>. Karşılaştırma önce 1. sütunda yapılır: en az bir fazla kimliği olan seçici, diğer sütunlarda ne olursa olsun kazanır. 1. sütun eşitse 2. sütuna, o da eşitse 3. sütuna bakılır. Bu yüzden ne kadar çok sınıf veya etiket eklenirse eklensin, tek bir kimlik seçicisini geçemez.</p>
+<pre>p            { color: black; }   /* (0,0,1) */
+.vurgu       { color: green; }   /* (0,1,0) */
+p.vurgu      { color: blue; }    /* (0,1,1) */
+#ozel        { color: red; }     /* (1,0,0) */</pre>
+<p>Yukarıdaki kuralların hepsi aynı öğeye uygulanırsa, 1. sütunda (kimlik sayısı) en yüksek değere sahip olan <code>id</code> değeri <code>ozel</code> olan öğe kırmızı görünür; onun dışındakiler arasında 2. sütunda (sınıf sayısı) daha yüksek değere sahip olan <code>p.vurgu</code> kuralı devreye girip öğeyi mavi yapar.</p>
 <h3>!important</h3>
 <p>Bir değerin sonuna <code>!important</code> eklenirse normal özgüllük hesabı geçersiz kalır. Ancak bu, kodun yönetilmesini zorlaştırır; yalnızca başka çözüm yoksa kullanılmalıdır.</p>
 <h2 id="b6">Kalıtım</h2>

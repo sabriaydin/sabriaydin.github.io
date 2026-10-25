@@ -33,7 +33,7 @@ window.SITE = {
 
   // Menüdeki alt kategori grupları: Kategoriler > Grup > Kategori
   // name: menüde görünen grup adı, key: adres için kısa ad, items: gruba giren kategorilerin kısa adları
-  // Hiçbir gruba girmeyen kategoriler (ör. batch) menüde tek başına görünür. Grupları silersen menü düz liste olur.
+  // Hiçbir gruba girmeyen kategoriler (ör. araclar) menüde tek başına görünür. Grupları silersen menü düz liste olur.
   groups: [
     { key: 'windows', name: 'Windows', items: ['windows', 'windowsos'] },
     { key: 'linux', name: 'Linux', items: ['linux', 'linuxos', 'linuxgelismis'] },
@@ -76,8 +76,6 @@ window.SITE = {
 
   // Footer'ın son sütunundaki bağlantılar (istediğin kadar ekleyebilir veya silebilirsin)
   links: [
-    { text: 'Hakkında ve Gizlilik', url: 'hakkinda.html' },
-    { text: 'GitHub', url: 'https://github.com/' },
-    { text: 'E-posta', url: 'mailto:ornek@eposta.com' }
+    { text: 'Hakkında ve Gizlilik', url: 'hakkinda.html' }
   ]
 };

@@ -45,9 +45,11 @@ color 0a
 cls
 echo YUKLENIYOR
 echo.
+set "SEMBOL=#*+-=~@$"
 set "cubuk="
 for /l %%i in (1,1,40) do (
-  set "cubuk=!cubuk!#"
+  set /a "idx=%random% %% 8"
+  for %%c in (!idx!) do set "cubuk=!cubuk!!SEMBOL:~%%c,1!"
   cls
   echo YUKLENIYOR
   echo.
@@ -58,7 +60,7 @@ echo.
 echo TAMAMLANDI.
 pause >nul</pre>
 <h2 id="b2">Kod nasıl çalışıyor?</h2>
-<p>Dosyanın başındaki <code>setlocal enabledelayedexpansion</code> satırı, <code>!cubuk!</code> değişkeninin döngü içinde her adımda güncellenmesini sağlar. Her adımda çubuğa bir <code>#</code> karakteri eklenir ve ekran yeniden çizilerek dolma efekti elde edilir.</p>
+<p>Dosyanın başındaki <code>setlocal enabledelayedexpansion</code> satırı, <code>!cubuk!</code> değişkeninin döngü içinde her adımda güncellenmesini sağlar. Her adımda <code>SEMBOL</code> değişkeninde tutulan karakterlerden <code>%random%</code> ile rastgele biri seçilip çubuğa eklenir ve ekran yeniden çizilerek dolma efekti elde edilir.</p>
 <h2 id="b3">Özelleştirme</h2>
 <p>Kodun başındaki <b>AYARLAR</b> bölümündeki (varsa) değerleri değiştirerek metni, rengi veya hızı kendine göre ayarlayabilirsin. <code>color 0a</code> komutundaki ilk rakam zemin, ikinci rakam yazı rengidir (0: siyah, a: açık yeşil, b: açık camgöbeği, c: açık kırmızı, e: sarı, f: beyaz).</p>
 </div>
