@@ -52,6 +52,7 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - `groups`: menüdeki alt kategori grupları (Kategoriler > Grup > Kategori). Her grup `{ key: 'linux', name: 'Linux', items: ['linux', 'linuxos', 'linuxgelismis'] }` biçimindedir; `items` içine `categories` kısa adları yazılır. Grup adına tıklayınca gruptaki tüm yazılar listelenir (`?grup=linux`). Hiçbir gruba girmeyen kategori menüde tek başına görünür. Yeni alt kategori için önce `categories`'e satır ekle, sonra ilgili grubun `items` listesine ekle.
 - `menus`: ana menüde Kategoriler'in yanında görünen ek menüler. `{ name: 'Araçlar', link: 'araclar' }` biçimi açılır liste olmadan doğrudan o kategoriye giden tek bir bağlantı yapar. Açılır menü örneği: örn. `{ name: 'Programlar', items: ['eklentiler'] }`. Bu menüdeki kategoriler Kategoriler içinde tekrar gösterilmez. Öğe `{ name: 'Proje', url: 'https://...' }` biçiminde yazılırsa kategori değil, doğrudan o adrese giden bir bağlantı olur. Öğe `{ name: 'Oyunlar', items: [{ name, url }] }` biçiminde yazılırsa o başlık altında sağa açılan bir bağlantı listesi olur (Projeler menüsü böyledir). Öğe `{ key: 'ucretsiz', name: 'Ücretsiz Programlar', items: [...] }` biçiminde yazılırsa kendi alt kategorileri olan sağa açılan bir grup olur.
 - `links`: footer bağlantıları (şu an GitHub ve e-posta **örnek adrestir**, kendi bilgilerinle değiştir)
+- `analyticsToken`: Cloudflare Web Analytics site token'ı. dash.cloudflare.com > Analytics & Logs > Web Analytics'ten bir site eklenip token kopyalanır, buraya yapıştırılır. Boş bırakılırsa analiz betiği hiç yüklenmez
 
 ## Klasör yapısı
 - `index.html`: ana sayfa
@@ -64,8 +65,10 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - `assets/js/linux-secici.js` ve `assets/css/linux-secici.css`: Linux dağıtım kategorilerinde (veya Linux grubunda) içerik alanını daraltmadan sağda sabit duran "Sana uygun Linux'u bul" filtreleme paneli (geniş ekranda (1760px ve üstü) içeriğin yanında açık, dar ekranda sağ kenardaki "Linux seçici" sekmesiyle açılır). Yeni bir dağıtım yazısı eklenince `linux-secici.js` başındaki `LDB` tablosuna da (zorluk, amaç, masaüstü, yayın modeli, taban) bir satır eklenmelidir; eklenmezse yazı filtre açıkken görünmez
 - `assets/css/linux.css`: Linux dağıtım yazılarının terminal temalı özel tasarımı (terminal başlığı, özellik kartları, zorluk göstergesi); yazılarda `lx-hero` ve `lx-spec` blokları kullanılır
 - `assets/`: stil (`css`), kod (`js`; `arac.js` araç yazılarının ortak yardımcılarıdır), simge ve görseller (`img`)
-- `scripts/build.mjs`: yazıları tarar, liste/sitemap/RSS/paylaşım etiketlerini üretir
+- `scripts/build.mjs`: yazıları tarar, liste/sitemap/RSS/paylaşım etiketlerini üretir; CSS/JS ve `posts/index.js` bağlantılarına önbellek sürümü (`?v=...`) ekler
+- `scripts/check-links.mjs`: sitedeki tüm dış bağlantıları kontrol eder, kırık olanları listeler
 - `.github/workflows/yayinla.yml`: her yüklemede build'i çalıştırıp siteyi yayınlar
+- `.github/workflows/link-kontrolu.yml`: dış bağlantıları haftalık kontrol eder, kırık bağlantı bulunursa Actions sekmesinde uyarı verir (elle de çalıştırılabilir)
 
 ## Bilgisayarında önizleme
 `index.html` dosyasını tarayıcıda açabilirsin. Yeni yazıyı listede görmek için bir kez `node scripts/build.mjs` çalıştırman gerekir (Node.js kuruluysa); yazı sayfasının kendisi build'siz de açılır. Online sitede bu işi GitHub otomatik yapar.
@@ -78,3 +81,6 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - Klavye ve ekran okuyucu desteği (içeriğe geç bağlantısı, açılır menü, odak göstergesi)
 - Yazı sayfalarında okuma çubuğu, önceki/sonraki yazı, benzer yazılar, bağlantıyı kopyalama, yazdırma düzeni
 - Telefon, tablet ve masaüstü uyumlu görünüm
+- Performans: Steam mağaza önizlemeleri gecikmeli yüklenir (`loading="lazy"`), ortak CSS/JS dosyaları değiştiğinde tarayıcı önbelleği otomatik tazelenir
+- İsteğe bağlı Cloudflare Web Analytics desteği (`analyticsToken` boşsa devre dışı)
+- Haftalık otomatik kırık bağlantı kontrolü (`.github/workflows/link-kontrolu.yml`)

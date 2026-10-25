@@ -156,7 +156,7 @@ if (BASE) {
   fs.writeFileSync(file, html);
 
   // Bağımsız sayfalar (araç, oyun, hakkında): canonical ve paylaşım görseli ekle, site haritasına kat
-  const EXTRA = ['hakkinda.html', 'araclar/html-editor/', 'projeler/oyunlar/hunger/', 'projeler/programlar/parola-defteri/', 'projeler/programlar/ip-radar/'];
+  const EXTRA = ['hakkinda.html', 'araclar/html-editor/', 'projeler/oyunlar/hunger/', 'projeler/programlar/parola-defteri/', 'projeler/programlar/ip-radar/', 'projeler/diger/gtasa-50cleomodpaketi/'];
   for (const e of EXTRA) {
     const f = path.join(OUT, e.endsWith('/') ? e + 'index.html' : e);
     if (!fs.existsSync(f)) continue;
@@ -195,6 +195,33 @@ ${posts.slice(0, 20).map(p => `  <item>
 `);
 
   fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n`);
+}
+
+// ---- Önbellek sürümü: ortak CSS/JS dosyaları ve posts/index.js içeriği değiştiğinde
+// tarayıcı eski sürümü önbellekten göstermesin diye bağlantılara ?v=içerik-özeti eklenir ----
+const hashOf = s => require('node:crypto').createHash('md5').update(s).digest('hex').slice(0, 8);
+const assetVersions = {};
+for (const rel of ['assets/js/site.js', 'assets/js/app.js', 'assets/js/frame.js', 'assets/js/arac.js', 'assets/js/linux-secici.js', 'assets/js/yonlendir.js', 'assets/css/style.css', 'assets/css/yazi.css', 'assets/css/linux.css', 'assets/css/linux-secici.css', 'assets/css/yonlendir.css']) {
+  const f = path.join(OUT, rel);
+  if (fs.existsSync(f)) assetVersions[rel] = hashOf(read(f));
+}
+const postsIndexVersion = hashOf(manifest);
+const walkHtml = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => {
+  const p = path.join(dir, e.name);
+  return e.isDirectory() ? walkHtml(p) : (e.name.endsWith('.html') ? [p] : []);
+});
+for (const file of walkHtml(OUT)) {
+  let html = read(file);
+  for (const [rel, v] of Object.entries(assetVersions)) {
+    const name = rel.split('/').pop();
+    const kind = rel.includes('/js/') ? 'js' : 'css';
+    html = html.replace(new RegExp(`((?:src|href)=")([^"]*assets\\/${kind}\\/${escapeRe(name)})(")`, 'g'), (_, a, b, c) => `${a}${b}?v=${v}${c}`);
+  }
+  const inPosts = path.dirname(path.relative(OUT, file)) === 'posts';
+  html = inPosts
+    ? html.replace(/(src=")(index\.js)(")/, (_, a, b, c) => `${a}${b}?v=${postsIndexVersion}${c}`)
+    : html.replace(/(src=")(posts\/index\.js)(")/, (_, a, b, c) => `${a}${b}?v=${postsIndexVersion}${c}`);
+  fs.writeFileSync(file, html);
 }
 
 console.log(`${posts.length} yazı yayın klasörüne işlendi: ${path.relative(process.cwd(), OUT) || OUT}`);

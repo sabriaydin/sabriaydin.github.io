@@ -13,12 +13,9 @@
     <script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
     <style>
 
-        @font-face {
-            font-family: 'Pricedown';
-            src: url('fonts/Pricedown.woff') format('woff');
-            font-display: swap;
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+        /* Lisanslı "Pricedown" yazı tipi dosyası depoda yer almadığından, benzer kalın/iri
+           görünümlü ücretsiz bir Google Fonts yazı tipi (Anton) yedek olarak kullanılıyor. */
+        @import url('https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&display=swap');
 
         /* Renk Tonları - Tekdüze renkler yerine tonlamalar */
         :root {
@@ -135,7 +132,7 @@
         }
 
         .mod-title-area h1 {
-            font-family: 'Pricedown', sans-serif;
+            font-family: 'Anton', sans-serif;
             font-size: 5rem;
             margin: 0;
             color: var(--text-main);
@@ -212,7 +209,7 @@
             text-decoration: none;
             padding: 20px 25px;
             font-size: 1.4rem;
-            font-family: 'Pricedown', sans-serif;
+            font-family: 'Anton', sans-serif;
             letter-spacing: 2px;
             border-radius: 8px;
             transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s cubic-bezier(.22,1,.36,1), background .25s ease, color .25s ease;

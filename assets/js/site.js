@@ -77,5 +77,20 @@ window.SITE = {
   // Footer'ın son sütunundaki bağlantılar (istediğin kadar ekleyebilir veya silebilirsin)
   links: [
     { text: 'Hakkında ve Gizlilik', url: 'hakkinda.html' }
-  ]
+  ],
+
+  // Cloudflare Web Analytics: dash.cloudflare.com > Analytics > Web Analytics'ten sitenin
+  // "Site token" değerini buraya yapıştır. Boş bırakılırsa hiçbir analiz betiği yüklenmez.
+  analyticsToken: ''
 };
+
+// Cloudflare Web Analytics betiğini yükler (token boşsa hiçbir şey yapmaz).
+// Bu dosya hem tarayıcıda hem de yayın sırasında (scripts/build.mjs) çalıştığı için
+// document'in var olup olmadığı önce kontrol edilir.
+if (typeof document !== 'undefined' && window.SITE.analyticsToken) {
+  var cfScript = document.createElement('script');
+  cfScript.defer = true;
+  cfScript.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+  cfScript.setAttribute('data-cf-beacon', JSON.stringify({ token: window.SITE.analyticsToken }));
+  document.head.appendChild(cfScript);
+}
