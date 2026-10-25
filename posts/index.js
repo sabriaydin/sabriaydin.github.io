@@ -1,6 +1,8 @@
 // YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenleme.
 // Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmen yeterli.
 window.POSTS = [
+  { id: 'oyun-oneri-03-turk-yapimi-mobil-oyunlar', title: 'Türk Yapımı Mobil Oyunlar', cat: 'oyunonerileri', date: '2026-10-25', time: '17:35', excerpt: 'Royal Match\'ten Head Ball 2\'ye: dünya çapında milyonlarca indirilen Türk mobil oyun stüdyoları, amiral gemisi oyunları ve App Store/Google Play bağlantıları.' },
+  { id: 'oyun-oneri-02-turk-yapimi-pc-oyunlari', title: 'Türk Yapımı PC ve Konsol Oyunları', cat: 'oyunonerileri', date: '2026-10-25', time: '17:30', excerpt: 'Mount & Blade\'den Liar\'s Bar\'a: PC ve konsolda öne çıkan Türk yapımı oyunlar, geliştirici stüdyoları ve resmi mağaza/web sitesi bağlantıları.' },
   { id: 'ucretsiz-57-stoat', title: 'Stoat: Açık Kaynak Grup Sohbet Uygulaması', cat: 'guvenlik', date: '2026-10-24', time: '19:02', excerpt: 'Stoat (Revolt) nedir, reklamsız ve açık kaynaklı grup sohbetini nasıl sağlar ve resmi indirme bağlantıları.' },
   { id: 'ucretsiz-56-comfyui', title: 'ComfyUI: Düğüm Tabanlı Yapay Zeka Görsel Üretim Aracı', cat: 'gelistirici', date: '2026-10-23', time: '12:18', excerpt: 'ComfyUI nedir, yapay zeka modellerini kendi bilgisayarında nasıl çalıştırır ve Windows, macOS, Linux için resmi indirme bağlantıları.' },
   { id: 'eklenti-21-video-downloadhelper', title: 'Video DownloadHelper', cat: 'eklentiler', date: '2026-10-22', time: '23:05', excerpt: 'Video DownloadHelper nedir, web sitelerindeki videoları indirmeyi nasıl sağlar ve resmi indirme bağlantıları.' },
