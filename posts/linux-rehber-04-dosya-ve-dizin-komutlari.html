@@ -16,11 +16,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <link rel="stylesheet" href="../assets/css/linux.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -50,7 +52,7 @@ mv *.jpg ~/resimler/         # birden çok dosya</pre>
 <p>Linux’ta geri dönüşüm kutusu yoktur; komut satırından silinen dosya genellikle kurtarılamaz.</p><table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>rm dosya</code></td><td>Dosyayı siler</td></tr><tr><td><code>rm -i dosya</code></td><td>Silmeden önce onay ister</td></tr><tr><td><code>rm -r dizin</code></td><td>Dizini ve içindekileri siler</td></tr><tr><td><code>rmdir dizin</code></td><td>Yalnızca boş dizini siler (daha güvenli)</td></tr></tbody></table><p><b>Uyarı:</b> <code>rm -rf /</code> ve <code>rm -rf *</code> gibi komutlar ciddi veri kaybına yol açar. Komutu Enter’a basmadan önce iki kez kontrol edin ve alışkanlık olarak önce <code>ls</code> ile aynı kalıbı deneyin.</p><pre>ls *.tmp          # önce neyi sileceğini gör
 rm -i *.tmp        # sonra onayla silmek</pre>
 <h2 id="b5">Görüntüleme</h2>
-<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>cat dosya</code></td><td>Tüm dosyayı yazdırır</td></tr><tr><td><code>less dosya</code></td><td>Sayfa sayfa gezilir (<code>q</code> çıkış, <code>/</code> arama)</td></tr><tr><td><code>head -n 5 dosya</code></td><td>İlk 5 satır</td></tr><tr><td><code>tail -n 5 dosya</code></td><td>Son 5 satır</td></tr><tr><td><code>tail -f dosya</code></td><td>Dosyaya eklenenleri canlı izler (günlükler için)</td></tr><tr><td><code>wc -l dosya</code></td><td>Satır sayısı</td></tr><tr><td><code>nano dosya</code></td><td>Başlangıç dostu metin düzenleyici (<code>Ctrl+O</code> kaydet, <code>Ctrl+X</code> çık)</td></tr><tr><td><code>file dosya</code></td><td>Dosya türünü söyler</td></tr><tr><td><code>stat dosya</code></td><td>Boyut, izin, zaman damgaları</td></tr></tbody></table>
+<table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>cat dosya</code></td><td>Tüm dosyayı yazdırır</td></tr><tr><td><code>less dosya</code></td><td>Sayfa sayfa gezilir (<code>q</code> çıkış, <code>/</code> arama)</td></tr><tr><td><code>head -n 5 dosya</code></td><td>İlk 5 satır</td></tr><tr><td><code>tail -n 5 dosya</code></td><td>Son 5 satır</td></tr><tr><td><code>tail -f dosya</code></td><td>Dosyaya eklenenleri canlı izler (günlükler için)</td></tr><tr><td><code>wc -l dosya</code></td><td>Satır sayısı</td></tr><tr><td><code>nano dosya</code></td><td>Başlangıç dostu metin düzenleyici (<code>Ctrl+O</code> kaydedin, <code>Ctrl+X</code> çık)</td></tr><tr><td><code>file dosya</code></td><td>Dosya türünü söyler</td></tr><tr><td><code>stat dosya</code></td><td>Boyut, izin, zaman damgaları</td></tr></tbody></table>
 <h2 id="b6">Joker karakterler</h2>
 <table><thead><tr><th>Karakter</th><th>Anlamı</th><th>Örnek</th></tr></thead><tbody><tr><td><code>*</code></td><td>Her karakter dizisi</td><td><code>ls *.txt</code></td></tr><tr><td><code>?</code></td><td>Tek karakter</td><td><code>ls dosya?.txt</code></td></tr><tr><td><code>[abc]</code></td><td>Listedeki tek karakter</td><td><code>ls [ab]*</code></td></tr><tr><td><code>{a,b}</code></td><td>Seçenekleri genişletir</td><td><code>mkdir proje/{src,doc,test}</code></td></tr></tbody></table>
 <h2 id="b7">Dosya ve içerik arama</h2>
@@ -58,7 +60,7 @@ rm -i *.tmp        # sonra onayla silmek</pre>
 find /tmp -type f -mtime +30 -delete    # 30 günden eski dosyaları sil
 grep -rni "hata" /var/log/syslog</pre><p><b>Uyarı:</b> <code>-delete</code> seçeneği eşleşen dosyaları kalıcı olarak siler. Komutu çalıştırmadan önce <code>-delete</code> olmadan deneyip hangi dosyaların eşleştiğini kontrol edin.</p>
 <h2 id="b8">Sıkıştırma ve arşivleme</h2>
-<table><thead><tr><th>İşlem</th><th>Komut</th></tr></thead><tbody><tr><td>Arşiv oluştur (gzip)</td><td><code>tar -czvf arsiv.tar.gz dizin/</code></td></tr><tr><td>Arşivi aç</td><td><code>tar -xzvf arsiv.tar.gz</code></td></tr><tr><td>Belirli dizine aç</td><td><code>tar -xzvf arsiv.tar.gz -C hedef/</code></td></tr><tr><td>İçeriği listele</td><td><code>tar -tzvf arsiv.tar.gz</code></td></tr><tr><td>Zip oluştur / aç</td><td><code>zip -r a.zip dizin/</code> — <code>unzip a.zip</code></td></tr><tr><td>Tek dosya sıkıştır</td><td><code>gzip dosya</code> — <code>gunzip dosya.gz</code></td></tr></tbody></table><p><code>tar</code> seçenekleri: <code>c</code> oluştur, <code>x</code> aç, <code>t</code> listele, <code>z</code> gzip, <code>v</code> ayrıntı, <code>f</code> dosya adı.</p>
+<table><thead><tr><th>İşlem</th><th>Komut</th></tr></thead><tbody><tr><td>Arşiv oluştur (gzip)</td><td><code>tar -czvf arsiv.tar.gz dizin/</code></td></tr><tr><td>Arşivi aç</td><td><code>tar -xzvf arsiv.tar.gz</code></td></tr><tr><td>Belirli dizine aç</td><td><code>tar -xzvf arsiv.tar.gz -C hedef/</code></td></tr><tr><td>İçeriği listele</td><td><code>tar -tzvf arsiv.tar.gz</code></td></tr><tr><td>Zip oluştur / aç</td><td><code>zip -r a.zip dizin/</code> — <code>unzip a.zip</code></td></tr><tr><td>Tek dosya sıkıştır</td><td><code>gzip dosya</code> — <code>gunzip dosya.gz</code></td></tr></tbody></table><p><code>tar</code> seçenekleri: <code>c</code> oluşturun, <code>x</code> açın, <code>t</code> listeleyin, <code>z</code> gzip, <code>v</code> ayrıntı, <code>f</code> dosya adı.</p>
 <h2 id="b9">Disk kullanımı</h2>
 <pre>df -h                  # bölümlerin doluluğu
 du -sh *               # bulunulan dizindeki her öğenin boyutu

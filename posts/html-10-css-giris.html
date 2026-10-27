@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HTML Rehberi: CSS'e Giriş, HTML'e Stil Verme</title>
-<meta name="description" content="CSS nedir, üç yazım yolu, seçiciler, renk ve yazı özellikleri, kutu modeli ve ilk stil dosyanı bağlama.">
+<meta name="description" content="CSS nedir, üç yazım yolu, seçiciler, renk ve yazı özellikleri, kutu modeli ve ilk stil dosyanızı bağlama.">
 <meta name="kategori" content="html">
 <meta name="tarih" content="2026-04-23 18:20">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,15 +30,15 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e44d26;--b:#f0a04b">
-<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>CSS nedir, üç yazım yolu, seçiciler, renk ve yazı özellikleri, kutu modeli ve ilk stil dosyanı bağlama.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">CSS nasıl yazılır?</a></li><li><a href="#b2">CSS&#x27;i sayfaya bağlamanın 3 yolu</a></li><li><a href="#b3">Seçiciler</a></li><li><a href="#b4">Sık kullanılan özellikler</a></li><li><a href="#b5">Kutu modeli</a></li><li><a href="#b6">Birimler</a></li><li><a href="#b7">Uygulama</a></li></ol></nav><!--/px-->
-<p>HTML sayfanın yapısını, <b>CSS</b> (Cascading Style Sheets) ise görünüşünü belirler: renkler, yazı tipleri, boşluklar, yerleşim. Bu derste CSS'in temelini öğrenip sayfanı güzelleştireceksin.</p>
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>CSS nedir, üç yazım yolu, seçiciler, renk ve yazı özellikleri, kutu modeli ve ilk stil dosyanızı bağlama.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">CSS nasıl yazılır?</a></li><li><a href="#b2">CSS&#x27;i sayfaya bağlamanın 3 yolu</a></li><li><a href="#b3">Seçiciler</a></li><li><a href="#b4">Sık kullanılan özellikler</a></li><li><a href="#b5">Kutu modeli</a></li><li><a href="#b6">Birimler</a></li><li><a href="#b7">Uygulama</a></li></ol></nav><!--/px-->
+<p>HTML sayfanın yapısını, <b>CSS</b> (Cascading Style Sheets) ise görünüşünü belirler: renkler, yazı tipleri, boşluklar, yerleşim. Bu derste CSS'in temelini öğrenip sayfanızı güzelleştireceksiniz.</p>
 <h2 id="b1">CSS nasıl yazılır?</h2>
 <p>Her CSS kuralı bir <b>seçici</b> ve süslü parantez içinde <b>özellik: değer;</b> çiftlerinden oluşur:</p>
 <pre>h1 {
   color: darkred;
   text-align: center;
 }</pre>
-<p>Bu kural "bütün <code>&lt;h1&gt;</code> başlıklarını koyu kırmızı yap ve ortala" demektir.</p>
+<p>Bu kural "bütün <code>&lt;h1&gt;</code> başlıklarını koyu kırmızı yapın ve ortala" demektir.</p>
 <h2 id="b2">CSS'i sayfaya bağlamanın 3 yolu</h2>
 <table>
 <thead><tr><th>Yol</th><th>Nasıl</th><th>Ne zaman</th></tr></thead>
@@ -51,7 +53,7 @@
   &lt;title&gt;Stilli sayfa&lt;/title&gt;
   &lt;link rel="stylesheet" href="style.css"&gt;
 &lt;/head&gt;</pre>
-<p>Dış dosya için <code>index.html</code> yanına <code>style.css</code> adında bir metin dosyası oluştur ve CSS kurallarını oraya yaz.</p>
+<p>Dış dosya için <code>index.html</code> yanına <code>style.css</code> adında bir metin dosyası oluşturun ve CSS kurallarını oraya yazın.</p>
 <h2 id="b3">Seçiciler</h2>
 <table>
 <thead><tr><th>Seçici</th><th>Neyi seçer</th><th>Örnek</th></tr></thead>
@@ -80,7 +82,7 @@
 <tr><td><code>width</code> / <code>max-width</code></td><td>Genişlik</td><td><code>800px</code>, <code>100%</code></td></tr>
 </tbody>
 </table>
-<p>Renk kodlarını (<code>#b72a25</code> gibi) elle bulmak zor; <a href="html-arac-01-renk-kodu-olusturucu.html">Renk Kodu Oluşturucu</a> ile istediğin rengi seçip HEX, RGB ve HSL kodunu kopyalayabilirsin. Geçişli arka planlar için <a href="html-arac-04-gradyan-olusturucu.html">CSS Gradyan Oluşturucu</a> var.</p>
+<p>Renk kodlarını (<code>#b72a25</code> gibi) elle bulmak zor; <a href="html-arac-01-renk-kodu-olusturucu.html">Renk Kodu Oluşturucu</a> ile istediğiniz rengi seçip HEX, RGB ve HSL kodunu kopyalayabilirsiniz. Geçişli arka planlar için <a href="html-arac-04-gradyan-olusturucu.html">CSS Gradyan Oluşturucu</a> var.</p>
 <h2 id="b5">Kutu modeli</h2>
 <p>Tarayıcı her HTML öğesini bir <b>kutu</b> olarak görür. Kutu, içten dışa şu katmanlardan oluşur:</p>
 <ul>
@@ -105,7 +107,7 @@
 <li><code>rem</code>: sayfanın temel yazı boyutuna oranla (<code>1rem</code> genelde 16 piksel). Yazı boyutları için esnek ve önerilen birimdir.</li>
 </ul>
 <h2 id="b7">Uygulama</h2>
-<p>Aşağıdaki kodu <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştır, renkleri ve boşlukları değiştirerek sonucu izle:</p>
+<p>Aşağıdaki kodu <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırın, renkleri ve boşlukları değiştirerek sonucu izleyin:</p>
 <pre>&lt;!DOCTYPE html&gt;
 &lt;html lang="tr"&gt;
 &lt;head&gt;
@@ -142,7 +144,7 @@
   &lt;/div&gt;
 &lt;/body&gt;
 &lt;/html&gt;</pre>
-<p>Sonraki derste şimdiye kadar öğrendiğin her şeyi birleştirip eksiksiz bir kişisel tanıtım sayfası yapacak ve yayınlayacaksın.</p>
+<p>Sonraki derste şimdiye kadar öğrendiğiniz her şeyi birleştirip eksiksiz bir kişisel tanıtım sayfası yapacak ve yayınlayacaksınız.</p>
 </div>
 </article>
 </main>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HTML Form Oluşturucu</title>
-<meta name="description" content="Alan türü, etiket ve zorunluluk seçerek hazır HTML form kodu oluştur, önizle ve kopyala.">
+<meta name="description" content="Alan türü, etiket ve zorunluluk seçerek hazır HTML form kodu oluşturun, önizleyin ve kopyalayın.">
 <meta name="kategori" content="htmlaraclari">
 <meta name="tarih" content="2026-09-17 18:20">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#c0392b;--b:#ff7e5f">
-<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Alan türü, etiket ve zorunluluk seçerek hazır HTML form kodu oluştur, önizle ve kopyala.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Önemli notlar</a></li></ol></nav><!--/px-->
-<p>Form; iletişim, kayıt ve anket gibi sayfalarda kullanıcıdan bilgi alır. Doğru yazılmış bir form için etiket, alan adı ve zorunluluk gibi parçaları bilmek gerekir. Bu araç alanları seçtikçe formu senin için yazar.</p>
-<h2 id="b1">Aracı dene</h2>
+<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Alan türü, etiket ve zorunluluk seçerek hazır HTML form kodu oluşturun, önizleyin ve kopyalayın.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Önemli notlar</a></li></ol></nav><!--/px-->
+<p>Form; iletişim, kayıt ve anket gibi sayfalarda kullanıcıdan bilgi alır. Doğru yazılmış bir form için etiket, alan adı ve zorunluluk gibi parçaları bilmek gerekir. Bu araç alanları seçtikçe formu sizin için yazar.</p>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <div class="satir">
     <label for="fm-t">Alan türü
@@ -88,16 +90,16 @@ sec();ciz();
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li><b>Alan türünü</b> seç (metin, e-posta, parola vb.).</li>
-<li>Kullanıcının göreceği <b>etiketi</b> ve sunucuya gidecek <b>alan adını</b> yaz.</li>
-<li>Gerekiyorsa <b>zorunlu alan</b> kutusunu işaretle ve <b>Alanı forma ekle</b> düğmesine bas.</li>
-<li>Önizlemeyi kontrol et, kodu kopyalayıp sayfana yapıştır.</li>
+<li><b>Alan türünü</b> seçin (metin, e-posta, parola vb.).</li>
+<li>Kullanıcının göreceği <b>etiketi</b> ve sunucuya gidecek <b>alan adını</b> yazın.</li>
+<li>Gerekiyorsa <b>zorunlu alan</b> kutusunu işaretle ve <b>Alanı forma ekle</b> düğmesine basın.</li>
+<li>Önizlemeyi kontrol edin, kodu kopyalayıp sayfanıza yapıştırın.</li>
 </ol>
 <h2 id="b3">Önemli notlar</h2>
 <ul>
 <li>Her alan bir <code>&lt;label&gt;</code> ile bağlanır; böylece etikete tıklayınca alan odaklanır ve ekran okuyucular alanı doğru okur.</li>
 <li><code>required</code> yazılan alan boş bırakılırsa tarayıcı formu göndermez.</li>
-<li>Form verisini kaydetmek için bir sunucu gerekir. GitHub Pages yalnızca statik dosya sunduğundan form göndermek için ayrı bir form servisi kullanman gerekir; koddaki <code>action="#"</code> değerini o servisin adresiyle değiştirirsin.</li>
+<li>Form verisini kaydetmek için bir sunucu gerekir. GitHub Pages yalnızca statik dosya sunduğundan form göndermek için ayrı bir form servisi kullanman gerekir; koddaki <code>action="#"</code> değerini o servisin adresiyle değiştirirsiniz.</li>
 </ul>
 <script src="../assets/js/arac.js"></script>
 </div>

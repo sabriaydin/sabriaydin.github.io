@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Batch Rehberi: PowerShell ve Yardımcı Araçlar</title>
-<meta name="description" content="Batch içinden PowerShell çağırma, çıktıyı değişkene alma, curl ile indirme, tar ile arşivleme, clip, mshta ve diğer yerleşik araçlar.">
+<meta name="description" content="Batch içinden PowerShell çağırma, çıktıyı değişkene alma, curl ile indirmeyin, tar ile arşivleme, clip, mshta ve diğer yerleşik araçlar.">
 <meta name="kategori" content="batch">
 <meta name="tarih" content="2026-09-08 23:58">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,7 +30,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#1e8449;--b:#58d68d">
-<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch içinden PowerShell çağırma, çıktıyı değişkene alma, curl ile indirme, tar ile arşivleme, clip, mshta ve diğer yerleşik araçlar.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">PowerShell&#x27;i batch içinden çağırma</a></li><li><a href="#b2">PowerShell çıktısını değişkene alma</a></li><li><a href="#b3">İnternetten dosya indirme: curl</a></li><li><a href="#b4">Arşivleme: tar ve PowerShell</a></li><li><a href="#b5">Diğer yerleşik araçlar</a></li><li><a href="#b6">Ne zaman hangisi?</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch içinden PowerShell çağırma, çıktıyı değişkene alma, curl ile indirmeyin, tar ile arşivleme, clip, mshta ve diğer yerleşik araçlar.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">PowerShell&#x27;i batch içinden çağırma</a></li><li><a href="#b2">PowerShell çıktısını değişkene alma</a></li><li><a href="#b3">İnternetten dosya indirmeyin: curl</a></li><li><a href="#b4">Arşivleme: tar ve PowerShell</a></li><li><a href="#b5">Diğer yerleşik araçlar</a></li><li><a href="#b6">Ne zaman hangisi?</a></li><li><a href="#b7">Özet</a></li></ol></nav><!--/px-->
 <p>Batch dili basit işler için yeterlidir; ancak ondalık hesap, tarih aritmetiği, JSON işleme, web isteği ve metin dönüşümü gibi işlerde yetersiz kalır. Bu durumlarda betikten Windows'a dahil gelen diğer araçlar (özellikle PowerShell) çağrılır. Bu yazı, ek yazılım kurmadan kullanılabilecek araçları tanıtır.</p>
 <h2 id="b1">PowerShell'i batch içinden çağırma</h2>
 <pre>powershell -NoProfile -Command "Get-Date"
@@ -70,7 +72,7 @@ pause</pre>
 <tr><td>Rastgele parola</td><td><code>-join ((48..57)+(65..90)+(97..122) | Get-Random -Count 16 | % {[char]$_})</code></td></tr>
 </tbody>
 </table>
-<h2 id="b3">İnternetten dosya indirme: curl</h2>
+<h2 id="b3">İnternetten dosya indirmeyin: curl</h2>
 <p>Windows 10 (1803) ve sonrasında <code>curl.exe</code> yerleşik gelir:</p>
 <pre>curl -L -o dosya.zip https://example.com/dosya.zip
 curl -s https://example.com/api/durum

@@ -39,11 +39,13 @@ const TABS=[
   ['durbar','Dayanıklılık çubukları','toggle',true,'Eşya kutularında alet dayanıklılığını gösteren ince çubuk.'],
   ['hud','Durum çubukları','toggle',true],
   ['mini','Mini harita','toggle',true],
+  ['activeQuests','Aktif görevler panosu','toggle',true,'Mini haritanın altında, kabul ettiğin köy görevlerini ve ilerlemelerini listeler.'],
   ['clock','Saat','toggle',true],
   ['goal','Hedef bildirimi','toggle',true],
   ['tip','Eylem ipuçları','toggle',true],
   ['cross','Nişan noktası','toggle',true],
   ['compass','Pusula (üst orta)','toggle',true,'Ekranın üstünde yön ve hedef işaretini gösteren pusula çubuğu.'],
+  ['compassPoi','Pusulada yakın keşifler','toggle',true,'Pusulada, en yakın keşfedilmiş köy, kamp ve mağaranın yönünü küçük renkli noktalarla gösterir.'],
   ['ui','Arayüz boyutu','range',100,70,140,5,'%','Durum çubukları ve hızlı erişim çubuğunun boyutu.'],
   ['horror','Korku görsel efektleri','range',100,0,100,5,'%','Bozulma, renk kayması ve kararma şiddeti.'],
   ['shake','Kamera sarsıntısı','range',100,0,100,5,'%'],
@@ -101,7 +103,7 @@ function persist(){
 function apply(key){
  const g=$('#game');if(!g)return;
  g.classList.toggle('no-hud',!cfg.hud);g.classList.toggle('no-mini',!cfg.mini);g.classList.toggle('no-clock',!cfg.clock);
- g.classList.toggle('no-compass',!cfg.compass);g.classList.toggle('no-goal',!cfg.goal);g.classList.toggle('no-tip',!cfg.tip);g.classList.toggle('no-cross',!cfg.cross);
+ g.classList.toggle('no-compass',!cfg.compass);g.classList.toggle('no-goal',!cfg.goal);g.classList.toggle('no-tip',!cfg.tip);g.classList.toggle('no-cross',!cfg.cross);g.classList.toggle('no-quests',!cfg.activeQuests);
  g.style.setProperty('--ui',String((cfg.ui||100)/100));
  const sc=HG.sc,S=HG.Scene;
  if(sc.R){

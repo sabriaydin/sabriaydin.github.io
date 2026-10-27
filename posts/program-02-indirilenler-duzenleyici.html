@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -32,9 +34,9 @@
 <p>İndirilenler klasörü zamanla yüzlerce dosyayla dolar. Bu program her dosyayı <b>uzantısına göre</b> ilgili alt klasöre (Resimler, Belgeler, Videolar...) taşır. Çalıştırmadan önce onay ister, aynı adlı dosya varsa üzerine yazmaz, en sonda kaç dosya taşıdığını söyler.</p>
 <h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
-<li>Kodu <code>duzenle.bat</code> adıyla kaydet. Dosyayı herhangi bir yere koyabilirsin; kendisi taşınmaz.</li>
-<li>Çift tıkla. Onay sorusuna <code>E</code> ile cevap ver.</li>
-<li>Başka bir klasörü düzenlemek istersen <code>KLASOR</code> ayarını değiştir.</li>
+<li>Kodu <code>duzenle.bat</code> adıyla kaydedin. Dosyayı herhangi bir yere koyabilirsiniz; kendisi taşınmaz.</li>
+<li>Çift tıklayın. Onay sorusuna <code>E</code> ile cevap verin.</li>
+<li>Başka bir klasörü düzenlemek isterseniz <code>KLASOR</code> ayarını değiştirin.</li>
 </ol>
 <pre>@echo off
 setlocal
@@ -105,9 +107,9 @@ goto :dongu</pre>
 </ul>
 <h2 id="b3">Özelleştirme</h2>
 <ul>
-<li>Yeni bir tür eklemek için bir <code>call :tasi</code> satırı yaz. Örnek: <code>call :tasi Yazilar epub mobi</code>.</li>
-<li><code>txt</code> dosyalarını taşımak istemiyorsan Belgeler satırından <code>txt</code> kelimesini sil.</li>
-<li>Bu script'i Masaüstünü düzenlemek için de kullanabilirsin: <code>set "KLASOR=%USERPROFILE%\Desktop"</code>.</li>
+<li>Yeni bir tür eklemek için bir <code>call :tasi</code> satırı yazın. Örnek: <code>call :tasi Yazilar epub mobi</code>.</li>
+<li><code>txt</code> dosyalarını taşımak istemiyorsanız Belgeler satırından <code>txt</code> kelimesini silin.</li>
+<li>Bu script'i Masaüstünü düzenlemek için de kullanabilirsiniz: <code>set "KLASOR=%USERPROFILE%\Desktop"</code>.</li>
 </ul>
 <blockquote>Dikkat: Dosyalar silinmez, yalnızca taşınır. Yine de ilk kullanımda önemli bir klasörde değil, sınama amaçlı birkaç dosyayla denemen önerilir. İndirmesi süren dosyalar (<code>.crdownload</code>, <code>.part</code>) listede olmadığı için taşınmaz.</blockquote>
 </div>

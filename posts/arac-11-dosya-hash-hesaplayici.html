@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dosya ve Metin Hash (Özet) Hesaplayıcı</title>
-<meta name="description" content="Bir dosyanın veya metnin SHA-256, SHA-1, SHA-384 ya da SHA-512 özetini tarayıcıda hesapla; dosya bütünlüğünü doğrulamak için kullan.">
+<meta name="description" content="Bir dosyanın veya metnin SHA-256, SHA-1, SHA-384 ya da SHA-512 özetini tarayıcıda hesaplayın; dosya bütünlüğünü doğrulamak için kullanın.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-09-13 20:51">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir dosyanın veya metnin SHA-256, SHA-1, SHA-384 ya da SHA-512 özetini tarayıcıda hesapla; dosya bütünlüğünü doğrulamak için kullan.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Hash (özet) ne işe yarar?</a></li><li><a href="#b4">Gizlilik</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir dosyanın veya metnin SHA-256, SHA-1, SHA-384 ya da SHA-512 özetini tarayıcıda hesaplayın; dosya bütünlüğünü doğrulamak için kullanın.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Hash (özet) ne işe yarar?</a></li><li><a href="#b4">Gizlilik</a></li></ol></nav><!--/px-->
 <p>Hash (özet), bir dosyanın veya metnin içeriğine göre üretilen, tek yönlü ve sabit uzunlukta bir koddur. İçerik bir bit bile değişse hash tamamen farklı çıkar; bu yüzden indirilen bir dosyanın bozulup bozulmadığını veya kaynağıyla aynı olup olmadığını doğrulamak için kullanılır.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <div class="satir">
     <label for="hs-alg">Algoritma
@@ -40,7 +42,7 @@
   <label for="hs-dosya">Dosya seç
     <input type="file" id="hs-dosya">
   </label>
-  <p class="not">veya aşağıya doğrudan metin yapıştır:</p>
+  <p class="not">veya aşağıya doğrudan metin yapıştırın:</p>
   <label for="hs-metin">Metin
     <textarea id="hs-metin" placeholder="Hash'i hesaplanacak metni buraya yapıştır"></textarea>
   </label>
@@ -79,10 +81,10 @@ $('hs-kopyala').onclick=()=>Arac.kopyala($('hs-sonuc').textContent,$('hs-kopyala
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li><b>Algoritmayı</b> seç; dosya doğrulamada genellikle SHA-256 kullanılır.</li>
-<li>Bir <b>dosya seç</b> veya alttaki kutuya bir metin yapıştır (dosya seçiliyse metin kutusu dikkate alınmaz).</li>
-<li><b>Hesapla</b> düğmesine bas, sonucu <b>Kopyala</b> ile al.</li>
-<li>Elde ettiğin özeti, kaynağın (indirme sayfası, geliştirici vb.) yayınladığı özetle karşılaştır; ikisi birbirinin aynı olmalıdır.</li>
+<li><b>Algoritmayı</b> seçin; dosya doğrulamada genellikle SHA-256 kullanılır.</li>
+<li>Bir <b>dosya seç</b> veya alttaki kutuya bir metin yapıştırın (dosya seçiliyse metin kutusu dikkate alınmaz).</li>
+<li><b>Hesapla</b> düğmesine basın, sonucu <b>Kopyala</b> ile al.</li>
+<li>Elde ettiğin özeti, kaynağın (indirme sayfası, geliştirici vb.) yayınladığı özetle karşılaştırın; ikisi birbirinin aynı olmalıdır.</li>
 </ol>
 <h2 id="b3">Hash (özet) ne işe yarar?</h2>
 <ul>

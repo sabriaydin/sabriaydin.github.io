@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -36,7 +38,7 @@ set /p "cevap=Devam edilsin mi? (e/h): "
 if "%cevap%"=="e" echo Devam ediliyor...
 if "%cevap%"=="h" echo Iptal edildi.
 pause</pre>
-<p>Değişkeni <b>çift tırnak</b> içine almak önemlidir. Kullanıcı hiçbir şey yazmazsa tırnaksız <code>if %cevap%==e</code> satırı <code>if ==e</code> olur ve hata verir. Büyük/küçük harf farkını yok saymak için <code>/i</code> ekle:</p>
+<p>Değişkeni <b>çift tırnak</b> içine almak önemlidir. Kullanıcı hiçbir şey yazmazsa tırnaksız <code>if %cevap%==e</code> satırı <code>if ==e</code> olur ve hata verir. Büyük/küçük harf farkını yok saymak için <code>/i</code> ekleyin:</p>
 <pre>if /i "%cevap%"=="E" echo Evet</pre>
 <h2 id="b2">if ve else</h2>
 <p><code>else</code>, <code>if</code> bloğunun kapanış parantezinin <b>aynı satırında</b> olmalıdır:</p>
@@ -56,7 +58,7 @@ else (
     echo Kucuksun.
 )</pre>
 <h2 id="b3">Sayı karşılaştırma operatörleri</h2>
-<p>Sayılarda <code>==</code> yerine aşağıdaki kısaltmaları kullanırsan değerler sayı olarak karşılaştırılır. <code>==</code> ise metin karşılaştırır; metin olarak "10", "9"dan küçüktür.</p>
+<p>Sayılarda <code>==</code> yerine aşağıdaki kısaltmaları kullanırsanız değerler sayı olarak karşılaştırılır. <code>==</code> ise metin karşılaştırır; metin olarak "10", "9"dan küçüktür.</p>
 <table>
 <thead><tr><th>Operatör</th><th>Anlamı</th></tr></thead>
 <tbody>
@@ -77,7 +79,7 @@ if exist "C:\Yedek" (
     md "C:\Yedek"
 )
 pause</pre>
-<p>Tersi için <code>if not exist</code> yazılır. Yolun sonuna ters bölü ekleyerek (<code>"C:\Yedek\"</code>) yalnızca klasör olup olmadığını kontrol edebilirsin.</p>
+<p>Tersi için <code>if not exist</code> yazılır. Yolun sonuna ters bölü ekleyerek (<code>"C:\Yedek\"</code>) yalnızca klasör olup olmadığını kontrol edebilirsiniz.</p>
 <h2 id="b5">Değişken tanımlı mı?</h2>
 <pre>if defined ad (echo ad tanimli) else (echo ad tanimli degil)</pre>
 <h2 id="b6">Hata kodu kontrolü</h2>
@@ -91,7 +93,7 @@ if errorlevel 1 (
 )
 pause</pre>
 <h2 id="b7">Birden fazla koşul</h2>
-<p>Batch'te <code>and</code> ve <code>or</code> yoktur. "Ve" için <code>if</code> satırlarını art arda yazarsın, "veya" için bir işaret değişkeni kullanırsın:</p>
+<p>Batch'te <code>and</code> ve <code>or</code> yoktur. "Ve" için <code>if</code> satırlarını art arda yazarsınız, "veya" için bir işaret değişkeni kullanırsınız:</p>
 <pre>rem VE: ikisi de dogruysa
 if "%ad%"=="Sabri" if "%sehir%"=="Izmir" echo Ikisi de dogru
 

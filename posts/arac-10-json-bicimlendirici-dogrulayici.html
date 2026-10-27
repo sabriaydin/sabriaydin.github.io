@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>JSON Biçimlendirici ve Doğrulayıcı</title>
-<meta name="description" content="JSON metnini girintili biçime getir veya tek satıra sıkıştır; hatalıysa hangi satır ve sütunda bozulduğunu gör.">
+<meta name="description" content="JSON metnini girintili biçime getirin veya tek satıra sıkıştırın; hatalıysa hangi satır ve sütunda bozulduğunu görün.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-09-10 14:08">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>JSON metnini girintili biçime getir veya tek satıra sıkıştır; hatalıysa hangi satır ve sütunda bozulduğunu gör.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Sık yapılan JSON hataları</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>JSON metnini girintili biçime getirin veya tek satıra sıkıştırın; hatalıysa hangi satır ve sütunda bozulduğunu görün.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Sık yapılan JSON hataları</a></li></ol></nav><!--/px-->
 <p>JSON, ayarlar dosyalarından API yanıtlarına kadar birçok yerde kullanılan bir veri biçimidir. Tek satıra sıkışmış veya elle düzenlenirken bozulmuş bir JSON metnini okumak zordur. Bu araç metni biçimlendirir, sıkıştırır ve hatalıysa bozulma noktasını gösterir.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <label for="js-g">JSON metni
     <textarea id="js-g" placeholder='{"ad":"Örnek","sayi":1,"liste":[1,2,3]}'></textarea>
@@ -83,10 +85,10 @@ $('js-temizle').onclick=()=>{$('js-g').value='';$('js-cikti').value='';$('js-hat
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li>JSON metnini kutuya yapıştır.</li>
-<li><b>Biçimlendir</b> ile okunabilir, girintili hale getir; <b>Sıkıştır</b> ile boşlukları kaldırıp tek satıra indir.</li>
+<li>JSON metnini kutuya yapıştırın.</li>
+<li><b>Biçimlendir</b> ile okunabilir, girintili hale getirin; <b>Sıkıştır</b> ile boşlukları kaldırıp tek satıra indirin.</li>
 <li>Metin geçersizse hata satırında bozulmanın yaklaşık satır ve sütun numarası gösterilir.</li>
-<li><b>Sonucu kopyala</b> ile çıktıyı panoya al.</li>
+<li><b>Sonucu kopyala</b> ile çıktıyı panoya alın.</li>
 </ol>
 <h2 id="b3">Sık yapılan JSON hataları</h2>
 <ul>

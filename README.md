@@ -1,6 +1,6 @@
 # Sabri Aydın
 
-Teknoloji, kodlama ve video oyunları üzerine kişisel blog. GitHub Pages üzerinde çalışır; yazı eklemek için tek yapman gereken `posts` klasörüne bir `.html` dosyası yüklemektir. Liste, arama, sitemap ve RSS otomatik güncellenir.
+Teknoloji ve kodlama üzerine kişisel blog. GitHub Pages üzerinde çalışır; yazı eklemek için tek yapman gereken `posts` klasörüne bir `.html` dosyası yüklemektir. Liste, arama, sitemap ve RSS otomatik güncellenir.
 
 ## Yayınlama (bir kez yapılır)
 1. GitHub'da yeni depo aç ve bu klasörün **tüm içeriğini** yükle. Gizli klasör `.github` ve `.nojekyll` dosyası da dahil olmalı (web arayüzünde "Upload files" ile klasörü sürükle; `.github` görünmüyorsa Dosya Gezgini'nde gizli dosyaları göster).
@@ -14,7 +14,7 @@ Bundan sonra `main` dalına her dosya yüklediğinde site kendini yeniler (yakla
 2. Dosyanın üstündeki **DÜZENLE** bölümünü doldur:
    - `<title>`: yazının başlığı
    - `description`: ana sayfada ve aramada görünen kısa özet
-   - `kategori`: `assets/js/site.js` içindeki kısa ad (şu an `windows`, `windowsos`, `html`, `htmlaraclari`, `linux`, `linuxos`, `linuxgelismis`, `batch`, `batchornek`, `sistemaraclari`, `medya`, `ofis`, `guvenlik`, `gelistirici`, `eklentiler`, `oyunrehber`, `oyunonerileri` veya `modyama`)
+   - `kategori`: `assets/js/site.js` içindeki kısa ad (şu an `windows`, `windowsos`, `html`, `htmlaraclari`, `linux`, `linuxos`, `linuxgelismis`, `batch`, `batchornek`, `sistemaraclari`, `medya`, `ofis`, `guvenlik`, `gelistirici`, `eklentiler`, `araclar`)
    - `tarih`: `YIL-AY-GÜN` (örn. `2026-10-13`); aynı gün birden fazla yazı varsa sıralama için saat de eklenebilir (örn. `2026-10-13 14:30`)
    - `sabit` (isteğe bağlı): yazıyı listede başa sabitler; `kategori` (kategori/grup sayfasında), `ana` (ana sayfada) veya `hepsi`. Arama sırasında uygulanmaz
 3. "İçerik buraya gelecek" satırını sil, yazını `<div class="body">` içine yaz.
@@ -63,6 +63,7 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - `yonlendir.html`: harici bağlantı yönlendirme sayfası (uyarılar, açık adres, 10 saniye geri sayım; `assets/js/yonlendir.js`, `assets/css/yonlendir.css`). Sitedeki tüm dış bağlantılar `app.js` ile buraya yönlendirilir; bir bağlantının doğrudan açılması için `data-direct` özelliği eklenir
 - `hakkinda.html`: hakkında, iletişim ve gizlilik sayfası (footer'dan bağlanır; sitemap'e eklenir)
 - `assets/js/linux-secici.js` ve `assets/css/linux-secici.css`: Linux dağıtım kategorilerinde (veya Linux grubunda) içerik alanını daraltmadan sağda sabit duran "Sana uygun Linux'u bul" filtreleme paneli (geniş ekranda (1760px ve üstü) içeriğin yanında açık, dar ekranda sağ kenardaki "Linux seçici" sekmesiyle açılır). Yeni bir dağıtım yazısı eklenince `linux-secici.js` başındaki `LDB` tablosuna da (zorluk, amaç, masaüstü, yayın modeli, taban) bir satır eklenmelidir; eklenmezse yazı filtre açıkken görünmez
+- `assets/js/sablon.js` ve `assets/css/sablon.css`: kategoriye özel yazı şablonları. Her kategorinin yazı sayfası kendi tasarımıyla (Windows: Ayarlar uygulaması, Linux Rehber: kılavuz sayfası, HTML Rehberi: kod düzenleyici, Eklentiler: mağaza sayfası vb.) çalışırken kurulur; yazı dosyalarının içeriğine dokunulmaz. Yeni yazıda yapılacak ek bir şey yoktur, `kategori` değerine göre şablon otomatik uygulanır. Yeni kategori için `sablon.js` içine bir şablon fonksiyonu, `sablon.css` içine `.t-kategori` stilleri eklenir
 - `assets/css/linux.css`: Linux dağıtım yazılarının terminal temalı özel tasarımı (terminal başlığı, özellik kartları, zorluk göstergesi); yazılarda `lx-hero` ve `lx-spec` blokları kullanılır
 - `assets/`: stil (`css`), kod (`js`; `arac.js` araç yazılarının ortak yardımcılarıdır), simge ve görseller (`img`)
 - `scripts/build.mjs`: yazıları tarar, liste/sitemap/RSS/paylaşım etiketlerini üretir; CSS/JS ve `posts/index.js` bağlantılarına önbellek sürümü (`?v=...`) ekler

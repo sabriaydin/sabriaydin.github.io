@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,7 +30,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#c2185b;--b:#ff6f91">
-<!--px--><div class="px-hero"><small>Medya Programları</small><p>VLC nedir, hangi platformlarda çalışır ve resmi indirme bağlantısı.</p><div class="prog-icon pi-pulse pi-l" style="--hue:309"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5 16 12l-6 3.5z"/></svg></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantıları</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li><li><a href="#b6">Bilinen güvenlik olayları</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Medya Programları</small><p>VLC nedir, hangi platformlarda çalışır ve resmi indirme bağlantısı.</p><div class="prog-icon pi-pulse pi-l" style="--hue:309"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.5 16 12l-6 3.5z"/></svg></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantıları</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li><li><a href="#b6">Güvenlik Geçmişi</a></li></ol></nav><!--/px-->
 <p><b>VLC media player</b>, VideoLAN projesinin geliştirdiği ücretsiz ve açık kaynaklı bir medya oynatıcıdır. Ek codec paketi gerektirmeden hemen her video ve ses biçimini, diskleri ve ağ yayınlarını oynatır; reklam ve kullanıcı takibi içermez.</p>
 <h2 id="b1">Ne işe yarar?</h2>
 <ul>
@@ -48,9 +50,9 @@
 </table>
 <h2 id="b4">Kurulum</h2>
 <ol>
-<li>Resmi sayfadaki indirme düğmesine tıkla ve kurulum dosyasını çalıştır.</li>
-<li>Dil ve bileşen seçeneklerini onaylayıp kurulumu tamamla.</li>
-<li>Video dosyasına sağ tıklayıp <b>Birlikte aç</b> menüsünden VLC'yi seç.</li>
+<li>Resmi sayfadaki indirme düğmesine tıklayın ve kurulum dosyasını çalıştırın.</li>
+<li>Dil ve bileşen seçeneklerini onaylayıp kurulumu tamamlayın.</li>
+<li>Video dosyasına sağ tıklayıp <b>Birlikte aç</b> menüsünden VLC'yi seçin.</li>
 </ol>
 <h2 id="b5">Güvenli indirme ve notlar</h2>
 <ul>
@@ -58,12 +60,12 @@
 <li>Sayfa, bulunulan platforma uygun indirme düğmesini gösterir.</li>
 <li>Mobil sürümleri yalnızca Google Play veya App Store üzerinden kurulmalıdır.</li>
 </ul>
-<h2 id="b6">Bilinen güvenlik olayları</h2>
+<h2 id="b6">Güvenlik Geçmişi</h2>
 <p>Aşağıdaki olaylar kamuya açık haber ve güvenlik kaynaklarından derlenmiştir. Bu bilgiler yazının hazırlandığı tarihe göredir; güncel durum için ilgili kaynak ve resmi sayfa kontrol edilmelidir.</p>
 <table>
 <thead><tr><th style="min-width:108px">Tarih</th><th>Olay</th><th>Etkisi ve alınacak önlem</th></tr></thead>
 <tbody>
-<tr><td style="min-width:108px">Nisan 2022</td><td><b>VLC’nin kötüye kullanılması:</b> Symantec, Çin bağlantılı APT10/Cicada grubunun, değiştirilmiş bir VLC kopyasına zararlı DLL ekleyip DLL yan yükleme (side-loading) yöntemiyle kötü amaçlı yükleyici çalıştırdığını bildirdi.</td><td>VLC’de bir açık bulunmuyordu; sorun, değiştirilmiş kopyanın dağıtılmasıydı. Resmi VLC indirmelerinde bu dosya yoktur. Saldırının işlemesi için saldırganın zaten hedef bilgisayara erişmiş olması gerekiyordu. <b>VLC’yi yalnızca resmi sayfadan indir.</b></td></tr>
+<tr><td style="min-width:108px">Nisan 2022</td><td><b>VLC’nin kötüye kullanılması:</b> Symantec, Çin bağlantılı APT10/Cicada grubunun, değiştirilmiş bir VLC kopyasına zararlı DLL ekleyip DLL yan yükleme (side-loading) yöntemiyle kötü amaçlı yükleyici çalıştırdığını bildirdi.</td><td>VLC’de bir açık bulunmuyordu; sorun, değiştirilmiş kopyanın dağıtılmasıydı. Resmi VLC indirmelerinde bu dosya yoktur. Saldırının işlemesi için saldırganın zaten hedef bilgisayara erişmiş olması gerekiyordu. <b>VLC’yi yalnızca resmi sayfadan indirin.</b></td></tr>
 <tr><td colspan="3" style="font-size:.9em"><b>Kaynak:</b> <a href="https://www.ghacks.net/2022/04/11/symantec-says-that-hackers-distributed-a-modified-version-of-vlc-and-exploited-it-for-malware-attacks/">gHacks</a></td></tr>
 </tbody>
 </table>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HTML Sayfa İskeleti Oluşturucu</title>
-<meta name="description" content="Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu al; kopyala veya indir.">
+<meta name="description" content="Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu alın; kopyalayın veya indirin.">
 <meta name="kategori" content="htmlaraclari">
 <meta name="tarih" content="2026-06-06 20:32">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#c0392b;--b:#ff7e5f">
-<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu al; kopyala veya indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Üretilen kodda neler var?</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Başlık ve dil seçerek doğru yazılmış boş bir HTML sayfa şablonu alın; kopyalayın veya indirin.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Üretilen kodda neler var?</a></li></ol></nav><!--/px-->
 <p>Her yeni sayfada <code>&lt;!DOCTYPE html&gt;</code>, <code>&lt;head&gt;</code>, <code>&lt;meta&gt;</code> gibi aynı satırları baştan yazmak sıkıcıdır ve hata yapmak kolaydır. Bu araç bilgilerini doldurduğun anda doğru yazılmış bir başlangıç şablonu üretir.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <div class="satir">
     <label for="baslik">Sayfa başlığı<input type="text" id="baslik" value="Sayfa Başlığı" autocomplete="off"></label>
@@ -41,15 +43,15 @@
   <label for="acik">Sayfa açıklaması (isteğe bağlı, arama sonuçlarında görünür)<input type="text" id="acik" autocomplete="off"></label>
   <div class="satir">
     <label class="onay" for="vp"><input type="checkbox" id="vp" checked> Mobil uyumluluk (viewport)</label>
-    <label class="onay" for="css"><input type="checkbox" id="css" checked> style.css dosyasını bağla</label>
-    <label class="onay" for="js"><input type="checkbox" id="js"> script.js dosyasını bağla</label>
-    <label class="onay" for="yap"><input type="checkbox" id="yap" checked> header, main ve footer yapısı ekle</label>
+    <label class="onay" for="css"><input type="checkbox" id="css" checked> style.css dosyasını bağlayın</label>
+    <label class="onay" for="js"><input type="checkbox" id="js"> script.js dosyasını bağlayın</label>
+    <label class="onay" for="yap"><input type="checkbox" id="yap" checked> header, main ve footer yapısı ekleyin</label>
   </div>
   <h3>HTML kodu</h3>
   <pre id="cikti"></pre>
   <div class="dugmeler">
     <button type="button" data-kopyala="cikti">Kodu kopyala</button>
-    <button type="button" class="ikinci" id="indir">index.html olarak indir</button>
+    <button type="button" class="ikinci" id="indir">index.html olarak indirin</button>
   </div>
 </div>
 <script>
@@ -75,9 +77,9 @@ uret();
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li>Sayfa başlığını, dilini ve isteğe bağlı açıklamasını yaz.</li>
-<li>İstediğin eklemeleri işaretle. CSS veya JS dosyasını bağlarsan aynı klasörde <code>style.css</code> ve <code>script.js</code> adlı dosyaları oluşturmayı unutma.</li>
-<li>Kodu kopyala veya <b>index.html olarak indir</b>. Dosyaya çift tıklayınca tarayıcıda açılır.</li>
+<li>Sayfa başlığını, dilini ve isteğe bağlı açıklamasını yazın.</li>
+<li>İstediğiniz eklemeleri işaretleyin. CSS veya JS dosyasını bağlarsanız aynı klasörde <code>style.css</code> ve <code>script.js</code> adlı dosyaları oluşturmayı unutmayın.</li>
+<li>Kodu kopyala veya <b>index.html olarak indirin</b>. Dosyaya çift tıklayınca tarayıcıda açılır.</li>
 </ol>
 <h2 id="b3">Üretilen kodda neler var?</h2>
 <ul>
@@ -87,7 +89,7 @@ uret();
 <li><code>&lt;title&gt;</code> ve açıklama: Sekme başlığı ve arama motorlarındaki özet metni.</li>
 <li><code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code>: 8. derste anlatılan anlamsal bölümler.</li>
 </ul>
-<p>Çıkan kodu denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırabilir, bu etiketlerin ne işe yaradığını <a href="html-01-html-nedir.html">HTML Rehberi</a> dersinden okuyabilirsin.</p>
+<p>Çıkan kodu denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırabilir, bu etiketlerin ne işe yaradığını <a href="html-01-html-nedir.html">HTML Rehberi</a> dersinden okuyabilirsiniz.</p>
 <script src="../assets/js/arac.js"></script>
 </div>
 </article>

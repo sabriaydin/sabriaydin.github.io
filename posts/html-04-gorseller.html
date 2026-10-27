@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -37,17 +39,17 @@
 <li><code>width</code> ve <code>height</code>: Resmin piksel cinsinden boyutu. Yazmak, resim yüklenirken sayfanın aşağı yukarı sıçramasını önler.</li>
 </ul>
 <h2 id="b1">Resmi nereye koymalı?</h2>
-<p>Resim dosyalarını sayfanın yanında bir klasöre (örneğin <code>resimler</code>) koy ve <code>src</code> içinde göreli yolla çağır:</p>
+<p>Resim dosyalarını sayfanın yanında bir klasöre (örneğin <code>resimler</code>) koyun ve <code>src</code> içinde göreli yolla çağırın:</p>
 <pre>site/
 ├── index.html
 └── resimler/
     └── kedi.jpg</pre>
-<p>Bu yapıda <code>index.html</code> içinden <code>src="resimler/kedi.jpg"</code> yazılır. Resim görünmüyorsa şunlara bak: dosya adı ve büyük/küçük harf, uzantının doğru yazılması (<code>.jpg</code> / <code>.jpeg</code>), klasör adı ve dosyanın gerçekten orada olması.</p>
+<p>Bu yapıda <code>index.html</code> içinden <code>src="resimler/kedi.jpg"</code> yazılır. Resim görünmüyorsa şunlara bakın: dosya adı ve büyük/küçük harf, uzantının doğru yazılması (<code>.jpg</code> / <code>.jpeg</code>), klasör adı ve dosyanın gerçekten orada olması.</p>
 <h2 id="b2">alt metni nasıl yazılır?</h2>
 <ul>
-<li>Resimde ne varsa kısaca anlat: "Mavi kasalı oyun bilgisayarı".</li>
-<li>"Resim" ya da "fotoğraf" kelimesiyle başlama; okuyucu bunu zaten biliyor.</li>
-<li>Süs amaçlı, anlam taşımayan resimlerde <code>alt=""</code> (boş) bırak.</li>
+<li>Resimde ne varsa kısaca anlatın: "Mavi kasalı oyun bilgisayarı".</li>
+<li>"Resim" ya da "fotoğraf" kelimesiyle başlamayın; okuyucu bunu zaten biliyor.</li>
+<li>Süs amaçlı, anlam taşımayan resimlerde <code>alt=""</code> (boş) bırakın.</li>
 </ul>
 <h2 id="b3">Resim formatları</h2>
 <table>
@@ -60,23 +62,23 @@
 <tr><td>GIF</td><td>Kısa hareketli görseller</td></tr>
 </tbody>
 </table>
-<p>Büyük fotoğrafları siteye yüklemeden önce küçült. Telefonda çekilen 5 MB'lık bir fotoğraf sayfanı yavaşlatır; genişliği 1200 piksel civarına indirip kaydetmek yeterlidir.</p>
+<p>Büyük fotoğrafları siteye yüklemeden önce küçültün. Telefonda çekilen 5 MB'lık bir fotoğraf sayfanızı yavaşlatır; genişliği 1200 piksel civarına indirip kaydetmek yeterlidir.</p>
 <h2 id="b4">figure ve figcaption</h2>
-<p>Resmin altına açıklama yazısı eklemek istersen <code>&lt;figure&gt;</code> ve <code>&lt;figcaption&gt;</code> kullan:</p>
+<p>Resmin altına açıklama yazısı eklemek isterseniz <code>&lt;figure&gt;</code> ve <code>&lt;figcaption&gt;</code> kullanın:</p>
 <pre>&lt;figure&gt;
   &lt;img src="resimler/kedi.jpg" alt="Uyuyan sarı kedi" width="600" height="400"&gt;
   &lt;figcaption&gt;Şekil 1: Öğleden sonra şekerlemesi&lt;/figcaption&gt;
 &lt;/figure&gt;</pre>
 <h2 id="b5">Geç yükleme</h2>
 <pre>&lt;img src="resimler/buyuk.jpg" alt="Manzara" width="800" height="500" loading="lazy"&gt;</pre>
-<p><code>loading="lazy"</code> resmin ancak ekrana yaklaşınca yüklenmesini sağlar. Sayfanın en üstündeki resimlerde kullanma; aşağıdakilerde işe yarar.</p>
+<p><code>loading="lazy"</code> resmin ancak ekrana yaklaşınca yüklenmesini sağlar. Sayfanın en üstündeki resimlerde kullanmayın; aşağıdakilerde işe yarar.</p>
 <h2 id="b6">Resmi sayfaya sığdırmak</h2>
-<p>Büyük resimler küçük ekranda taşabilir. Bunu CSS ile çözersin (10. derste göreceksin):</p>
+<p>Büyük resimler küçük ekranda taşabilir. Bunu CSS ile çözersiniz (10. derste göreceksiniz):</p>
 <pre>&lt;style&gt;
   img { max-width: 100%; height: auto; }
 &lt;/style&gt;</pre>
-<blockquote>Resim eklediğin sayfayı denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracını kullanabilirsin. İnternetteki bir resmin adresini <code>src</code> içine yapıştırman yeterlidir.</blockquote>
-<p>Sonraki derste bilgileri madde madde sıralamak için listeleri öğreneceksin.</p>
+<blockquote>Resim eklediğiniz sayfayı denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracını kullanabilirsiniz. İnternetteki bir resmin adresini <code>src</code> içine yapıştırmanız yeterlidir.</blockquote>
+<p>Sonraki derste bilgileri madde madde sıralamak için listeleri öğreneceksiniz.</p>
 </div>
 </article>
 </main>

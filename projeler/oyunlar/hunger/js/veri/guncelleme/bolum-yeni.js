@@ -2,6 +2,16 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
+{n:58,d:"25.10.2026",t:"Aktif görevler ve yükleme ekranı",l:[
+ "Mini haritanın altına, kabul ettiğin köy görevlerini ve ilerlemelerini gösteren bir pano eklendi.",
+ "Ayarlar > Oyun bölümüne, bu panoyu kapatabileceğin 'Aktif görevler panosu' seçeneği eklendi.",
+ "Yükleme ekranının yerleşimi sadeleştirildi: logo sol üstte, ilerleme çubuğu ekranın altında uçtan uca ve tek renk olarak gösteriliyor; bilgilendirme metinleri çubuğun üstünde, yüzde ise altında yer alıyor."
+]},
+{n:57,d:"25.10.2026",t:"Pusula iyileştirmeleri",l:[
+ "Hedef bildirimi ile pusula şeridinin üst üste binmesi sorunu giderildi; hedef bildirimi artık pusulanın hemen altında, kendi boşluğunda görünüyor.",
+ "Pusulaya, en yakın keşfedilmiş köyün, kampın ve mağaranın yönünü gösteren küçük renkli noktalar eklendi.",
+ "Ayarlar > Oyun bölümüne, bu yeni yön noktalarını kapatabileceğin 'Pusulada yakın keşifler' seçeneği eklendi."
+]},
 {n:56,d:"22.10.2026",t:"Köylülerin zemine gömülmesi",l:[
  "Köylülerin bel hizasından aşağısının zeminin içinde kalması sorunu giderildi: gövde ve bacaklar artık doğru yükseklikte duruyor, ayaklar zeminde görünüyor.",
  "Köylülerin yürüme sırasındaki hafif sekme hareketi korundu."

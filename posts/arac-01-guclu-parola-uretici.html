@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Güçlü Parola Üretici</title>
-<meta name="description" content="Uzunluğu ve karakter türlerini seçerek rastgele, güçlü parolalar oluştur; parola gücünü bit olarak gör ve kopyala.">
+<meta name="description" content="Uzunluğu ve karakter türlerini seçerek rastgele, güçlü parolalar oluşturun; parola gücünü bit olarak görün ve kopyalayın.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-10-02 16:10">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Uzunluğu ve karakter türlerini seçerek rastgele, güçlü parolalar oluştur; parola gücünü bit olarak gör ve kopyala.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Parola gücü nasıl hesaplanır?</a></li><li><a href="#b4">Güvenlik notları</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Uzunluğu ve karakter türlerini seçerek rastgele, güçlü parolalar oluşturun; parola gücünü bit olarak görün ve kopyalayın.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Parola gücü nasıl hesaplanır?</a></li><li><a href="#b4">Güvenlik notları</a></li></ol></nav><!--/px-->
 <p>Kısa, tahmin edilebilir ve her sitede aynı olan parolalar hesapların ele geçirilmesinin en yaygın nedenidir. Bu araç, tarayıcının güvenli rastgele sayı üretecini kullanarak seçilen uzunluk ve karakter türlerine göre güçlü parolalar oluşturur.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <div class="satir" style="grid-template-columns:1fr">
     <label for="pw-u"><span>Parola uzunluğu: <span id="pw-ud">16</span> karakter</span><input type="range" id="pw-u" min="8" max="64" value="16"></label>
@@ -89,10 +91,10 @@ olustur();
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li><b>Uzunluğu</b> ayarla. Önemli hesaplar için en az 16 karakter önerilir.</li>
-<li>Kullanılacak <b>karakter türlerini</b> seç. Bazı siteler sembol kabul etmez; bu durumda sembol seçeneği kapatılabilir.</li>
-<li>Gerekirse <b>karıştırılabilen karakterleri çıkar</b> seçeneğini aç; parola elle yazılacaksa kolaylık sağlar.</li>
-<li><b>Kopyala</b> düğmesiyle parolayı panoya al ve hesabın parola alanına yapıştır.</li>
+<li><b>Uzunluğu</b> ayarlayın. Önemli hesaplar için en az 16 karakter önerilir.</li>
+<li>Kullanılacak <b>karakter türlerini</b> seçin. Bazı siteler sembol kabul etmez; bu durumda sembol seçeneği kapatılabilir.</li>
+<li>Gerekirse <b>karıştırılabilen karakterleri çıkar</b> seçeneğini açın; parola elle yazılacaksa kolaylık sağlar.</li>
+<li><b>Kopyala</b> düğmesiyle parolayı panoya al ve hesabınızın parola alanına yapıştırın.</li>
 </ol>
 <h2 id="b3">Parola gücü nasıl hesaplanır?</h2>
 <p>Güç, parolanın tahmin edilmesi için gereken deneme sayısının bit cinsinden karşılığıdır. Her ek bit, tahmin süresini iki katına çıkarır. Değer, uzunluk ve karakter havuzunun büyüklüğüne göre hesaplanır.</p>
@@ -107,7 +109,7 @@ olustur();
 </table>
 <h2 id="b4">Güvenlik notları</h2>
 <ul>
-<li>Parolalar yalnızca tarayıcında üretilir; hiçbir yere gönderilmez ve kaydedilmez.</li>
+<li>Parolalar yalnızca tarayıcınızda üretilir; hiçbir yere gönderilmez ve kaydedilmez.</li>
 <li>Her hesap için ayrı bir parola kullanılmalıdır. Biri sızdığında diğer hesaplar etkilenmez.</li>
 <li>Bu kadar uzun ve rastgele parolaları akılda tutmak zordur. Bir parola yöneticisi kullanılması önerilir: <a href="ucretsiz-15-keepassxc.html">KeePassXC</a> veya <a href="ucretsiz-16-bitwarden.html">Bitwarden</a>.</li>
 <li>Mümkün olan hesaplarda <b>iki adımlı doğrulama</b> etkinleştirilmelidir.</li>

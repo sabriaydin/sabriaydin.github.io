@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ağ komutları, ağ yapılandırma ve SSH</title>
-<meta name="description" content="IP adresi görüntüleme, bağlantı testi, DNS, port dinleme, dosya indirme, SSH ile uzaktan bağlanma, scp/rsync ve güvenlik duvarı temelleri.">
+<meta name="description" content="IP adresi görüntüleme, bağlantı testi, DNS, port dinleme, dosya indirmeyin, SSH ile uzaktan bağlanma, scp/rsync ve güvenlik duvarı temelleri.">
 <meta name="kategori" content="linux">
 <meta name="tarih" content="2026-10-09 12:05">
 <meta name="author" content="Sabri Aydın">
@@ -16,11 +16,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <link rel="stylesheet" href="../assets/css/linux.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,7 +31,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e95420;--b:#f39c12">
-<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> ip -br a</p><p class="o">enp3s0 UP 192.168.1.20/24</p><p><b>$</b> ping -c 1 1.1.1.1</p><p class="o">1 packets received</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ağ bilgisini görme</a></li><li><a href="#b2">Bağlantı testi</a></li><li><a href="#b3">DNS sorgulama</a></li><li><a href="#b4">Port ve bağlantıları izleme</a></li><li><a href="#b5">Kablolu ve kablosuz ağ ayarı</a></li><li><a href="#b6">Dosya indirme: curl ve wget</a></li><li><a href="#b7">SSH ile uzaktan bağlanma</a></li><li><a href="#b8">SSH anahtarı ile parolasız ve güvenli giriş</a></li><li><a href="#b9">Dosya aktarma: scp ve rsync</a></li><li><a href="#b10">SSH tüneli</a></li><li><a href="#b11">Güvenlik duvarı (ufw)</a></li><li><a href="#b12">SSH güvenlik önerileri</a></li><li><a href="#b13">Özet</a></li></ol></nav><!--/px-->
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> ip -br a</p><p class="o">enp3s0 UP 192.168.1.20/24</p><p><b>$</b> ping -c 1 1.1.1.1</p><p class="o">1 packets received</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ağ bilgisini görme</a></li><li><a href="#b2">Bağlantı testi</a></li><li><a href="#b3">DNS sorgulama</a></li><li><a href="#b4">Port ve bağlantıları izleme</a></li><li><a href="#b5">Kablolu ve kablosuz ağ ayarı</a></li><li><a href="#b6">Dosya indirmeyin: curl ve wget</a></li><li><a href="#b7">SSH ile uzaktan bağlanma</a></li><li><a href="#b8">SSH anahtarı ile parolasız ve güvenli giriş</a></li><li><a href="#b9">Dosya aktarma: scp ve rsync</a></li><li><a href="#b10">SSH tüneli</a></li><li><a href="#b11">Güvenlik duvarı (ufw)</a></li><li><a href="#b12">SSH güvenlik önerileri</a></li><li><a href="#b13">Özet</a></li></ol></nav><!--/px-->
 <p>Linux ağ üzerinde çalışan sistemlerde en yaygın kullanılan işletim sistemidir. Bu yazıda ağ durumunu görüntüleme, sorun giderme, dosya aktarma ve <b>SSH</b> ile uzaktaki bir sisteme güvenli bağlanma konuları anlatılmaktadır.</p>
 <h2 id="b1">Ağ bilgisini görme</h2>
 <table><thead><tr><th>Komut</th><th>Açıklama</th></tr></thead><tbody><tr><td><code>ip a</code> / <code>ip -br a</code></td><td>Arayüzler ve IP adresleri (kısa biçim: <code>-br</code>)</td></tr><tr><td><code>ip r</code></td><td>Yönlendirme tablosu; varsayılan ağ geçidi</td></tr><tr><td><code>ip link</code></td><td>Arayüz durumu (UP/DOWN)</td></tr><tr><td><code>hostname -I</code></td><td>Makinenin IP adresleri</td></tr><tr><td><code>resolvectl status</code></td><td>DNS sunucuları</td></tr><tr><td><code>nmcli device status</code></td><td>NetworkManager arayüz durumu</td></tr><tr><td><code>curl ifconfig.me</code></td><td>Dış IP adresi</td></tr></tbody></table><p>Eski <code>ifconfig</code> ve <code>netstat</code> komutları yerine <code>ip</code> ve <code>ss</code> önerilir.</p>
@@ -56,7 +58,7 @@ nmcli device wifi connect "AgAdi" password "parola"
 nmcli connection show
 nmcli connection modify "Kablolu" ipv4.method manual ipv4.addresses 192.168.1.50/24 ipv4.gateway 192.168.1.1 ipv4.dns 1.1.1.1
 nmcli connection up "Kablolu"</pre><p>Ubuntu Server gibi sistemlerde ayar dosyası <code>/etc/netplan/*.yaml</code> içindedir ve <code>sudo netplan apply</code> ile uygulanır. Uzaktan bağlıyken ağ ayarını değiştirmek bağlantıyı kesebilir.</p>
-<h2 id="b6">Dosya indirme: curl ve wget</h2>
+<h2 id="b6">Dosya indirmeyin: curl ve wget</h2>
 <pre>wget https://example.com/dosya.zip              # indir
 wget -c https://example.com/buyuk.iso            # kesilen indirmeye devam et
 curl -O https://example.com/dosya.zip            # adını koruyarak indir

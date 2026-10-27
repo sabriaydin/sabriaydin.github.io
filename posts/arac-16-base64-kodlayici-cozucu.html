@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Base64 Kodlayıcı ve Çözücü</title>
-<meta name="description" content="Metni Base64'e kodla veya Base64 metni çöz; bir dosyayı doğrudan Base64 koduna dönüştür.">
+<meta name="description" content="Metni Base64'e kodla veya Base64 metni çözün; bir dosyayı doğrudan Base64 koduna dönüştürün.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-09-27 19:03">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Metni Base64'e kodla veya Base64 metni çöz; bir dosyayı doğrudan Base64 koduna dönüştür.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Base64 ne işe yarar?</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Metni Base64'e kodla veya Base64 metni çözün; bir dosyayı doğrudan Base64 koduna dönüştürün.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Base64 ne işe yarar?</a></li></ol></nav><!--/px-->
 <p>Base64, ikili verileri (resim, dosya) veya özel karakterler içeren metinleri yalnızca harf ve rakamdan oluşan bir metne dönüştürme yöntemidir. E-posta ekleri, API anahtarları ve CSS içine gömülen küçük resimlerde sık kullanılır.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <label for="b64-metin">Metin</label>
   <textarea id="b64-metin" placeholder="Kodlanacak veya çözülecek metni buraya yaz"></textarea>
@@ -67,8 +69,8 @@ $('b64-dosya').addEventListener('change',e=>{
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li><b>Metin ile çalışmak için:</b> kutuya metni yaz, <b>Base64'e kodla</b> veya <b>Base64'ü çöz</b> düğmesine bas. Sonuç aynı kutuda görünür, <b>Kopyala</b> ile alınabilir.</li>
-<li><b>Dosya ile çalışmak için:</b> alt kısımdan bir dosya seç; Base64 kodu otomatik olarak altındaki kutuda oluşur.</li>
+<li><b>Metin ile çalışmak için:</b> kutuya metni yazın, <b>Base64'e kodla</b> veya <b>Base64'ü çöz</b> düğmesine basın. Sonuç aynı kutuda görünür, <b>Kopyala</b> ile alınabilir.</li>
+<li><b>Dosya ile çalışmak için:</b> alt kısımdan bir dosya seçin; Base64 kodu otomatik olarak altındaki kutuda oluşur.</li>
 </ol>
 <h2 id="b3">Base64 ne işe yarar?</h2>
 <ul>

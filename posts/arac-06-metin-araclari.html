@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Metin Araçları: Sayaç ve Dönüştürücü</title>
-<meta name="description" content="Karakter, kelime ve cümle sayısını hesapla; metni büyük/küçük harfe çevir, satırları sırala, tekrarları sil ve Türkçe karakterleri sadeleştir.">
+<meta name="description" content="Karakter, kelime ve cümle sayısını hesaplayın; metni büyük/küçük harfe çevirin, satırları sıralayın, tekrarları silin ve Türkçe karakterleri sadeleştirin.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-09-30 18:40">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Karakter, kelime ve cümle sayısını hesapla; metni büyük/küçük harfe çevir, satırları sırala, tekrarları sil ve Türkçe karakterleri sadeleştir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Neler yapabilir?</a></li><li><a href="#b3">İstatistikler nasıl hesaplanır?</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Karakter, kelime ve cümle sayısını hesaplayın; metni büyük/küçük harfe çevirin, satırları sıralayın, tekrarları silin ve Türkçe karakterleri sadeleştirin.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Neler yapabilir?</a></li><li><a href="#b3">İstatistikler nasıl hesaplanır?</a></li></ol></nav><!--/px-->
 <p>Yazı yazarken karakter sınırını kontrol etmek, bir listeyi sıralamak ya da tekrar eden satırları temizlemek sık karşılaşılan işlerdir. Bu araç, yapıştırılan metnin istatistiklerini canlı olarak hesaplar ve tek tıklamayla çeşitli dönüştürmeler uygular. Her işlem <b>Geri al</b> düğmesiyle geri alınabilir.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <label for="mt-m">Metin
     <textarea id="mt-m" rows="9" placeholder="Metni buraya yaz veya yapıştır"></textarea>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Regex (Düzenli İfade) Test Aracı</title>
-<meta name="description" content="Bir düzenli ifadeyi (regex) bir metin üzerinde dene, eşleşmeleri renkli olarak gör ve yakalanan grupları listele.">
+<meta name="description" content="Bir düzenli ifadeyi (regex) bir metin üzerinde deneyin, eşleşmeleri renkli olarak görün ve yakalanan grupları listeleyin.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-09-21 16:47">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir düzenli ifadeyi (regex) bir metin üzerinde dene, eşleşmeleri renkli olarak gör ve yakalanan grupları listele.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Sık kullanılan kalıp bayrakları</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bir düzenli ifadeyi (regex) bir metin üzerinde deneyin, eşleşmeleri renkli olarak görün ve yakalanan grupları listeleyin.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Sık kullanılan kalıp bayrakları</a></li></ol></nav><!--/px-->
 <p>Düzenli ifadeler (regex), bir metinde belirli bir kalıba uyan parçaları bulmak veya değiştirmek için kullanılır. Kalıbı yazarken denemeden ne eşleştiğini görmek zordur; bu araç eşleşen parçaları metin üzerinde işaretler.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <div class="satir" style="grid-template-columns:2fr 1fr">
     <label for="rg-kalip">Kalıp (regex)
@@ -96,9 +98,9 @@ calistir();
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li><b>Kalıp</b> kutusuna regex yaz (örn. <code>\d{3}-\d{4}</code> üç rakam, tire, dört rakam demektir).</li>
-<li>Gerekli <b>bayrakları</b> işaretle; <code>g</code> işaretliyken metindeki tüm eşleşmeler bulunur, kapalıyken yalnızca ilki aranır.</li>
-<li><b>Test metnine</b> denenecek metni yaz; eşleşen parçalar anında vurgulanır ve altta listelenir.</li>
+<li><b>Kalıp</b> kutusuna regex yazın (örn. <code>\d{3}-\d{4}</code> üç rakam, tire, dört rakam demektir).</li>
+<li>Gerekli <b>bayrakları</b> işaretleyin; <code>g</code> işaretliyken metindeki tüm eşleşmeler bulunur, kapalıyken yalnızca ilki aranır.</li>
+<li><b>Test metnine</b> denenecek metni yazın; eşleşen parçalar anında vurgulanır ve altta listelenir.</li>
 <li>Kalıp geçersizse (örn. kapanmamış parantez) hata satırında neden gösterilir.</li>
 </ol>
 <h2 id="b3">Sık kullanılan kalıp bayrakları</h2>

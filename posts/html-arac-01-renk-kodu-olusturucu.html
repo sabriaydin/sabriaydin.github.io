@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Renk Kodu Oluşturucu</title>
-<meta name="description" content="Renk seç, HEX, RGB ve HSL kodlarını tek tıkla kopyala; uyumlu renk önerileri al.">
+<meta name="description" content="Renk seçin, HEX, RGB ve HSL kodlarını tek tıkla kopyalayın; uyumlu renk önerileri al.">
 <meta name="kategori" content="htmlaraclari">
 <meta name="tarih" content="2026-03-03 16:52">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#c0392b;--b:#ff7e5f">
-<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Renk seç, HEX, RGB ve HSL kodlarını tek tıkla kopyala; uyumlu renk önerileri al.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kodlar ne demek?</a></li><li><a href="#b4">CSS&#x27;te kullanımı</a></li></ol></nav><!--/px-->
-<p>Web sayfalarında renkler kodla yazılır. Bu araçla bir renk seçip CSS'te kullanabileceğin HEX, RGB ve HSL kodlarını anında alabilirsin. Uyumlu renk önerileri de gösterir.</p>
-<h2 id="b1">Aracı dene</h2>
+<!--px--><div class="px-hero"><small>HTML Uygulamaları</small><p>Renk seçin, HEX, RGB ve HSL kodlarını tek tıkla kopyalayın; uyumlu renk önerileri al.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">Kodlar ne demek?</a></li><li><a href="#b4">CSS&#x27;te kullanımı</a></li></ol></nav><!--/px-->
+<p>Web sayfalarında renkler kodla yazılır. Bu araçla bir renk seçip CSS'te kullanabileceğin HEX, RGB ve HSL kodlarını anında alabilirsiniz. Uyumlu renk önerileri de gösterir.</p>
+<h2 id="b1">Aracı deneyin</h2>
 <div class="arac">
   <div class="renk" id="sw"><span id="swt"></span></div>
   <div class="satir">
@@ -51,7 +53,7 @@
   <div class="kod"><b>RGB</b><code id="o-rgb"></code><button type="button" class="ikinci" data-kopyala="o-rgb">Kopyala</button></div>
   <div class="kod"><b>HSL</b><code id="o-hsl"></code><button type="button" class="ikinci" data-kopyala="o-hsl">Kopyala</button></div>
   <div class="dugmeler"><button type="button" id="rastgele">Rastgele renk</button></div>
-  <h3>Uyumlu renkler (tıklayarak seç)</h3>
+  <h3>Uyumlu renkler (tıklayarak seçin)</h3>
   <div class="palet" id="palet"></div>
 </div>
 <script>
@@ -93,10 +95,10 @@ yaz();
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ul>
-<li>Renk kutusuna tıklayıp rengi seç, ya da HEX, RGB ve HSL alanlarından birine değer yaz. Diğerleri kendiliğinden güncellenir.</li>
+<li>Renk kutusuna tıklayıp rengi seçin, ya da HEX, RGB ve HSL alanlarından birine değer yazın. Diğerleri kendiliğinden güncellenir.</li>
 <li>Kodun yanındaki <b>Kopyala</b> düğmesi kodu panoya alır.</li>
-<li><b>Rastgele renk</b> ile ilham al. Aşağıdaki uyumlu renklere tıklayarak onları seçebilirsin.</li>
-<li>Büyük renk kutusundaki yazı, rengin üzerinde okunabilir kalacak biçimde otomatik açık veya koyu olur; kendi sayfanda metin rengini seçerken de bu mantığı izle.</li>
+<li><b>Rastgele renk</b> ile ilham alın. Aşağıdaki uyumlu renklere tıklayarak onları seçebilirsiniz.</li>
+<li>Büyük renk kutusundaki yazı, rengin üzerinde okunabilir kalacak biçimde otomatik açık veya koyu olur; kendi sayfanızda metin rengini seçerken de bu mantığı izleyin.</li>
 </ul>
 <h2 id="b3">Kodlar ne demek?</h2>
 <table>
@@ -113,7 +115,7 @@ yaz();
   background-color: hsl(3, 66%, 93%);
   border-bottom: 3px solid rgb(183, 42, 37);
 }</pre>
-<p>Üç yazım da aynı sonucu verir; birini seç ve tutarlı kullan. Rengi öğrendiklerini uygulamak için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracında deneyebilirsin.</p>
+<p>Üç yazım da aynı sonucu verir; birini seçin ve tutarlı kullanın. Rengi öğrendiklerini uygulamak için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracında deneyebilirsiniz.</p>
 <script src="../assets/js/arac.js"></script>
 </div>
 </article>

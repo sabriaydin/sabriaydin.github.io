@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,7 +31,7 @@
 <article class="post">
 <div class="body" style="--a:#1e8449;--b:#58d68d">
 <!--px--><div class="px-hero"><small>Batch Rehberi</small><p>dir, copy, xcopy, robocopy, move, del, ren, md ve rd komutlarıyla dosya ve klasörleri yönetme; güvenli silme ipuçları.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Listeleme: dir</a></li><li><a href="#b2">Klasör oluşturma ve silme: md, rd</a></li><li><a href="#b3">Kopyalama: copy, xcopy, robocopy</a></li><li><a href="#b4">Taşıma ve yeniden adlandırma: move, ren</a></li><li><a href="#b5">Silme: del</a></li><li><a href="#b6">Dosya içeriği ve özellikleri</a></li><li><a href="#b7">Boşluklu yollar</a></li></ol></nav><!--/px-->
-<p>Batch'in en çok kullanıldığı alan dosya yönetimidir. Bu derste kopyalama, taşıma, silme ve listeleme komutlarının günlük kullanımını görüyorsun. Yolda boşluk olabileceği için dosya ve klasör yollarını her zaman <b>çift tırnak</b> içinde yaz.</p>
+<p>Batch'in en çok kullanıldığı alan dosya yönetimidir. Bu derste kopyalama, taşıma, silme ve listeleme komutlarının günlük kullanımını görüyorsunuz. Yolda boşluk olabileceği için dosya ve klasör yollarını her zaman <b>çift tırnak</b> içinde yazın.</p>
 <h2 id="b1">Listeleme: dir</h2>
 <pre>dir
 dir /b
@@ -69,18 +71,18 @@ robocopy "C:\Fotograflar" "D:\Yedek\Fotograflar" /e</pre>
 <thead><tr><th>Seçenek</th><th>Anlamı</th></tr></thead>
 <tbody>
 <tr><td><code>/e</code></td><td>Alt klasörleri boş olanlarla birlikte kopyala</td></tr>
-<tr><td><code>/r:2 /w:2</code></td><td>Başarısız dosyayı 2 kez dene, denemeler arasında 2 saniye bekle</td></tr>
+<tr><td><code>/r:2 /w:2</code></td><td>Başarısız dosyayı 2 kez deneyin, denemeler arasında 2 saniye bekleyin</td></tr>
 <tr><td><code>/log+:dosya.txt</code></td><td>Sonuçları log dosyasının sonuna ekle</td></tr>
-<tr><td><code>/mir</code></td><td>Hedefi kaynağın aynısı yap. <b>Dikkat:</b> kaynakta olmayan dosyaları hedeften siler</td></tr>
+<tr><td><code>/mir</code></td><td>Hedefi kaynağın aynısı yapın. <b>Dikkat:</b> kaynakta olmayan dosyaları hedeften siler</td></tr>
 </tbody>
 </table>
-<p><code>robocopy</code> çıkış kodları farklıdır: 0 ile 7 arası başarı (dosya kopyalandı, bazıları atlandı gibi durumlar), 8 ve üzeri hatadır. Bu yüzden kontrolü <code>if %errorlevel% geq 8</code> ile yaparsın (8. ders).</p>
+<p><code>robocopy</code> çıkış kodları farklıdır: 0 ile 7 arası başarı (dosya kopyalandı, bazıları atlandı gibi durumlar), 8 ve üzeri hatadır. Bu yüzden kontrolü <code>if %errorlevel% geq 8</code> ile yaparsınız (8. ders).</p>
 <h2 id="b4">Taşıma ve yeniden adlandırma: move, ren</h2>
 <pre>move rapor.docx D:\Arsiv\
 move "C:\Gecici\klasor" "D:\Arsiv\klasor"
 ren eski.txt yeni.txt
 ren *.jpeg *.jpg</pre>
-<p><code>ren</code> yalnızca adı değiştirir, dosyayı başka klasöre taşımaz; hedef adda yol yazmazsın. <code>ren *.jpeg *.jpg</code> gibi jokerle toplu uzantı değiştirebilirsin.</p>
+<p><code>ren</code> yalnızca adı değiştirir, dosyayı başka klasöre taşımaz; hedef adda yol yazmazsınız. <code>ren *.jpeg *.jpg</code> gibi jokerle toplu uzantı değiştirebilirsiniz.</p>
 <h2 id="b5">Silme: del</h2>
 <pre>del dosya.txt
 del /q /f *.tmp
@@ -93,7 +95,7 @@ del /s /q "C:\Gecici\*.log"</pre>
 <tr><td><code>/s</code></td><td>Alt klasörlerdeki eşleşen dosyaları da sil</td></tr>
 </tbody>
 </table>
-<blockquote><code>del</code> dosyaları Geri Dönüşüm Kutusu'na göndermez. Yeni yazdığın bir silme komutunu çalıştırmadan önce aynı kalıpla <code>dir /s /b "C:\Gecici\*.log"</code> komutunu çalıştırıp silinecek dosyaların listesine bak.</blockquote>
+<blockquote><code>del</code> dosyaları Geri Dönüşüm Kutusu'na göndermez. Yeni yazdığınız bir silme komutunu çalıştırmadan önce aynı kalıpla <code>dir /s /b "C:\Gecici\*.log"</code> komutunu çalıştırıp silinecek dosyaların listesine bakın.</blockquote>
 <h2 id="b6">Dosya içeriği ve özellikleri</h2>
 <pre>echo Merhaba &gt; not.txt
 echo Ikinci satir &gt;&gt; not.txt
@@ -106,7 +108,7 @@ attrib -h gizli.txt</pre>
 <p>Aşağıdaki iki satırdan birincisi hata verir, çünkü <code>Program</code> ve <code>Files</code> ayrı parametre sayılır:</p>
 <pre>copy C:\Program Files\uygulama.ini D:\Yedek\
 copy "C:\Program Files\uygulama.ini" "D:\Yedek\"</pre>
-<p>Sonraki derste komutlar başarısız olduğunda ne yapacağını, hataları nasıl yakalayacağını ve log tutmayı öğreneceksin.</p>
+<p>Sonraki derste komutlar başarısız olduğunda ne yapacağını, hataları nasıl yakalayacağını ve log tutmayı öğreneceksiniz.</p>
 </div>
 </article>
 </main>

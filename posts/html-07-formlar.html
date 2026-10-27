@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -39,7 +41,7 @@
 <ul>
 <li><code>&lt;form&gt;</code>: Tüm alanları kapsar. <code>action</code> bilginin gideceği adres, <code>method</code> gönderme yöntemidir (<code>get</code> veya <code>post</code>).</li>
 <li><code>&lt;label&gt;</code>: Alanın adıdır. <code>for</code> değeri alanın <code>id</code> değeriyle aynı olursa etikete tıklayınca alan seçilir; ekran okuyucular için de gereklidir.</li>
-<li><code>name</code>: Bilgi sunucuya bu isimle gider; yazmazsan alan gönderilmez.</li>
+<li><code>name</code>: Bilgi sunucuya bu isimle gider; yazmazsanız alan gönderilmez.</li>
 </ul>
 <h2 id="b2">input türleri</h2>
 <p><code>&lt;input&gt;</code> etiketinin <code>type</code> niteliği alanın türünü belirler. Tarayıcılar türe uygun klavye, denetim ve seçici sunar:</p>
@@ -118,8 +120,8 @@
   &lt;/fieldset&gt;
 &lt;/form&gt;</pre>
 <p><code>&lt;fieldset&gt;</code> ve <code>&lt;legend&gt;</code> ilgili alanları bir çerçevede gruplar ve gruba ad verir.</p>
-<blockquote>Önemli: GitHub Pages gibi statik sitelerde form verisini alıp saklayacak bir sunucu yoktur. Bu yüzden <code>action</code> adresi bir form hizmetine ya da kendi sunucuna işaret etmelidir. Yukarıdaki örnek arayüzü öğretmek içindir; gönderince bir yere kaydedilmez.</blockquote>
-<p>Formu görerek denemek için kodu <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştır. Sonraki derste sayfayı anlamlı bölümlere ayıran etiketleri öğreneceksin.</p>
+<blockquote>Önemli: GitHub Pages gibi statik sitelerde form verisini alıp saklayacak bir sunucu yoktur. Bu yüzden <code>action</code> adresi bir form hizmetine ya da kendi sunucunuza işaret etmelidir. Yukarıdaki örnek arayüzü öğretmek içindir; gönderince bir yere kaydedilmez.</blockquote>
+<p>Formu görerek denemek için kodu <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına yapıştırın. Sonraki derste sayfayı anlamlı bölümlere ayıran etiketleri öğreneceksiniz.</p>
 </div>
 </article>
 </main>

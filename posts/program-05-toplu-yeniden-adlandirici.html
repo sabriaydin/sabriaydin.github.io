@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,12 +31,12 @@
 <article class="post">
 <div class="body" style="--a:#0e6655;--b:#1abc9c">
 <!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Bir klasördeki dosyaları önizleyip onayınla sıra numaralı yeni adlara çeviren ve geri alma dosyası üreten batch programı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
-<p>Telefondan aktardığın yüzlerce <code>IMG_4821.jpg</code> dosyasını tek tek yeniden adlandırmak yerine bu programa klasörü ve ön eki söylersin; dosyalar <code>tatil_001.jpg</code>, <code>tatil_002.jpg</code> biçiminde sıralanır. Yeniden adlandırma <b>önizleme + onay</b> ile çalışır ve ayrıca bir <b>geri alma dosyası</b> (<code>geri_al.bat</code>) üretir; bir hata yaparsan eski adlara dönebilirsin.</p>
+<p>Telefondan aktardığın yüzlerce <code>IMG_4821.jpg</code> dosyasını tek tek yeniden adlandırmak yerine bu programa klasörü ve ön eki söylersiniz; dosyalar <code>tatil_001.jpg</code>, <code>tatil_002.jpg</code> biçiminde sıralanır. Yeniden adlandırma <b>önizleme + onay</b> ile çalışır ve ayrıca bir <b>geri alma dosyası</b> (<code>geri_al.bat</code>) üretir; bir hata yaparsanız eski adlara dönebilirsiniz.</p>
 <h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
-<li>Kodu <code>adlandir.bat</code> adıyla kaydet.</li>
-<li>Çift tıkla. Klasör yolunu yaz (Gezgin adres çubuğundan kopyalayabilirsin) ya da boş bırakıp Enter'a bas; o zaman programın bulunduğu klasör kullanılır.</li>
-<li>Yeni adın başlangıcını (<code>tatil_</code>) ve dosya uzantısını (<code>jpg</code>) yaz. Önizlemeyi kontrol edip <code>E</code> ile onayla.</li>
+<li>Kodu <code>adlandir.bat</code> adıyla kaydedin.</li>
+<li>Çift tıklayın. Klasör yolunu yazın (Gezgin adres çubuğundan kopyalayabilirsiniz) ya da boş bırakıp Enter'a basın; o zaman programın bulunduğu klasör kullanılır.</li>
+<li>Yeni adın başlangıcını (<code>tatil_</code>) ve dosya uzantısını (<code>jpg</code>) yazın. Önizlemeyi kontrol edip <code>E</code> ile onaylayın.</li>
 </ol>
 <pre>@echo off
 setlocal EnableDelayedExpansion
@@ -141,18 +143,18 @@ exit /b 0</pre>
 <ul>
 <li><b>Gecikmeli genişletme</b>: <code>setlocal EnableDelayedExpansion</code> ile döngü içinde değişen değerler <code>!SAYAC!</code> biçiminde okunur (10. ders). Bu olmadan sayaç her seferinde aynı sayıyı gösterirdi.</li>
 <li><b>Sıfırlı numara</b>: <code>NO=000!SAYAC!</code> değişkenin başına üç sıfır ekler (0007 gibi), <code>!NO:~-3!</code> ise sondan 3 karakteri alır (007). Böylece dosyalar Gezgin'de doğru sırada dizilir.</li>
-<li><b>Uzantı korunur</b>: <code>%%~xf</code> dosyanın gerçek uzantısını verir. <code>jpg</code> yazsan bile adı <code>.JPG</code> olan dosya adını <code>.JPG</code> olarak bırakır.</li>
+<li><b>Uzantı korunur</b>: <code>%%~xf</code> dosyanın gerçek uzantısını verir. <code>jpg</code> yazsanız bile adı <code>.JPG</code> olan dosya adını <code>.JPG</code> olarak bırakır.</li>
 <li><b>Güvenlik</b>: Yeni ad zaten varsa (<code>if exist</code>) dosyanın üzerine yazmaz, atlar. Çalışan script'in kendisi de listeden çıkarılır.</li>
 <li><b>Geri alma dosyası</b>: Her başarılı işlemde <code>ren "yeni" "eski"</code> satırı <code>geri_al.bat</code> içine yazılır. Çalıştırınca tüm adlar eski haline döner.</li>
-<li><b>Temizlik</b>: Tırnaklı yol yapıştırsan bile <code>%KLASOR:"=%</code> tırnakları temizler, uzantıya yanlışlıkla nokta yazsan (<code>.jpg</code>) <code>%UZANTI:.=%</code> noktayı siler.</li>
+<li><b>Temizlik</b>: Tırnaklı yol yapıştırsanız bile <code>%KLASOR:"=%</code> tırnakları temizler, uzantıya yanlışlıkla nokta yazsanız (<code>.jpg</code>) <code>%UZANTI:.=%</code> noktayı siler.</li>
 </ul>
 <h2 id="b3">Özelleştirme</h2>
 <ul>
-<li>Üç haneli numara yerine dört hane için <code>NO=0000!SAYAC!</code> ve <code>!NO:~-4!</code> yaz. 999'dan fazla dosya varsa bunu yapmalısın.</li>
-<li>Sıra numarası yerine dosyaların tümüne ön ek eklemek istersen <code>YENI</code> satırını <code>set "YENI=!ONEK!%%f"</code> yap.</li>
-<li>Aynı işi alt klasörlerdeki dosyalar için yapmak istersen bu program yeterli değildir; her klasörde ayrı çalıştır.</li>
+<li>Üç haneli numara yerine dört hane için <code>NO=0000!SAYAC!</code> ve <code>!NO:~-4!</code> yazın. 999'dan fazla dosya varsa bunu yapmalısınız.</li>
+<li>Sıra numarası yerine dosyaların tümüne ön ek eklemek isterseniz <code>YENI</code> satırını <code>set "YENI=!ONEK!%%f"</code> yapın.</li>
+<li>Aynı işi alt klasörlerdeki dosyalar için yapmak isterseniz bu program yeterli değildir; her klasörde ayrı çalıştırın.</li>
 </ul>
-<blockquote>Dikkat: Sıralama, dosya adlarının alfabetik sırasına göredir. Dosya adında ünlem işareti (!) varsa o dosya atlanabilir veya yanlış adlandırılabilir. Yeni adın başlangıcında şu karakterleri kullanma: \ / : * ? " &lt; &gt; |. İlk denemeni mutlaka dosyaların bir kopyası üzerinde yap.</blockquote>
+<blockquote>Dikkat: Sıralama, dosya adlarının alfabetik sırasına göredir. Dosya adında ünlem işareti (!) varsa o dosya atlanabilir veya yanlış adlandırılabilir. Yeni adın başlangıcında şu karakterleri kullanmayın: \ / : * ? " &lt; &gt; |. İlk denemenizi mutlaka dosyalarınızın bir kopyası üzerinde yapın.</blockquote>
 </div>
 </article>
 </main>

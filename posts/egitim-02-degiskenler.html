@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,13 +31,13 @@
 <article class="post">
 <div class="body" style="--a:#1e8449;--b:#58d68d">
 <!--px--><div class="px-hero"><small>Batch Rehberi</small><p>set ile değişken tanımlama, kullanıcıdan bilgi alma, matematik işlemleri ve hazır sistem değişkenleri.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Değişken tanımlama ve kullanma</a></li><li><a href="#b2">Kullanıcıdan bilgi alma</a></li><li><a href="#b3">Matematik işlemleri</a></li><li><a href="#b4">Hazır sistem değişkenleri</a></li><li><a href="#b5">Değişkeni silme ve listeleme</a></li><li><a href="#b6">setlocal ile değişkenleri sınırlamak</a></li></ol></nav><!--/px-->
-<p>Değişken, bir değere verdiğin isimdir. Batch'te <code>set</code> komutuyla oluşturulur ve değeri <code>%</code> işaretleri arasında yazarak kullanılır.</p>
+<p>Değişken, bir değere verdiğiniz isimdir. Batch'te <code>set</code> komutuyla oluşturulur ve değeri <code>%</code> işaretleri arasında yazarak kullanılır.</p>
 <h2 id="b1">Değişken tanımlama ve kullanma</h2>
 <pre>@echo off
 set ad=Sabri
 echo Merhaba %ad%
 pause</pre>
-<p><code>set ad=Sabri</code> satırında eşittirin etrafına boşluk koyma. <code>set ad = Sabri</code> yazarsan değişkenin adı <code>ad </code> (sonunda boşlukla) olur ve <code>%ad%</code> boş gelir. Değerin sonuna yanlışlıkla boşluk girmesini önlemek için en güvenli yazım tırnaklıdır:</p>
+<p><code>set ad=Sabri</code> satırında eşittirin etrafına boşluk koyma. <code>set ad = Sabri</code> yazarsanız değişkenin adı <code>ad </code> (sonunda boşlukla) olur ve <code>%ad%</code> boş gelir. Değerin sonuna yanlışlıkla boşluk girmesini önlemek için en güvenli yazım tırnaklıdır:</p>
 <pre>set "ad=Sabri"</pre>
 <p>Değişken adlarında büyük/küçük harf fark etmez: <code>%AD%</code> ile <code>%ad%</code> aynı değişkendir.</p>
 <h2 id="b2">Kullanıcıdan bilgi alma</h2>
@@ -84,9 +86,9 @@ pause</pre>
 <h2 id="b5">Değişkeni silme ve listeleme</h2>
 <pre>set ad=
 set</pre>
-<p><code>set ad=</code> değişkeni siler. Parametresiz <code>set</code> tüm değişkenleri listeler; <code>set a</code> yazarsan adı <code>a</code> ile başlayanları gösterir.</p>
+<p><code>set ad=</code> değişkeni siler. Parametresiz <code>set</code> tüm değişkenleri listeler; <code>set a</code> yazarsanız adı <code>a</code> ile başlayanları gösterir.</p>
 <h2 id="b6">setlocal ile değişkenleri sınırlamak</h2>
-<p>Normalde bir script içinde tanımladığın değişkenler script bittikten sonra da komut penceresinde kalır. Bunu istemiyorsan dosyanın başına <code>setlocal</code>, sonuna <code>endlocal</code> yaz. Böylece değişkenler yalnızca bu script içinde yaşar.</p>
+<p>Normalde bir script içinde tanımladığınız değişkenler script bittikten sonra da komut penceresinde kalır. Bunu istemiyorsanız dosyanın başına <code>setlocal</code>, sonuna <code>endlocal</code> yazın. Böylece değişkenler yalnızca bu script içinde yaşar.</p>
 <pre>@echo off
 setlocal
 set "gecici=Bu sadece bu scriptte var"

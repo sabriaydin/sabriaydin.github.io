@@ -16,11 +16,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <link rel="stylesheet" href="../assets/css/linux.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,15 +31,15 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e95420;--b:#f39c12">
-<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> whoami</p><p class="o">Kali Linux</p><p><b>$</b> cat hakkinda.txt</p><p class="o">Güvenlik testleri için</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Kali Linux kimler için uygun?</a></li><li><a href="#b2">Öne çıkan özellikler</a></li><li><a href="#b3">Sistem gereksinimleri (yaklaşık)</a></li><li><a href="#b4">Resmi indirme bağlantısı</a></li><li><a href="#b5">İndirdikten sonra</a></li><li><a href="#b6">Bilinen güvenlik olayları</a></li></ol></nav><div class="lx-spec"><div><small>Taban</small><b>Debian</b></div><div><small>Paket yöneticisi</small><b>APT</b></div><div><small>Masaüstü</small><b>Xfce (KDE, GNOME seçilebilir)</b></div><div><small>Yayın modeli</small><b>Sürekli güncel (rolling)</b></div><div><small>Zorluk</small><b><span class="lx-meter" role="img" aria-label="Zorluk: Orta"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span><small>Orta</small></b></div></div><div class="lx-tags"><span>Güvenlik testleri</span><span>Uzman kullanım</span></div><!--/px-->
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> whoami</p><p class="o">Kali Linux</p><p><b>$</b> cat hakkinda.txt</p><p class="o">Güvenlik testleri için</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Kali Linux kimler için uygun?</a></li><li><a href="#b2">Öne çıkan özellikler</a></li><li><a href="#b3">Sistem gereksinimleri (yaklaşık)</a></li><li><a href="#b4">Resmi indirme bağlantısı</a></li><li><a href="#b5">İndirdikten sonra</a></li><li><a href="#b6">Güvenlik Geçmişi</a></li></ol></nav><div class="lx-spec"><div><small>Taban</small><b>Debian</b></div><div><small>Paket yöneticisi</small><b>APT</b></div><div><small>Masaüstü</small><b>Xfce (KDE, GNOME seçilebilir)</b></div><div><small>Yayın modeli</small><b>Sürekli güncel (rolling)</b></div><div><small>Zorluk</small><b><span class="lx-meter" role="img" aria-label="Zorluk: Orta"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span><small>Orta</small></b></div></div><div class="lx-tags"><span>Güvenlik testleri</span><span>Uzman kullanım</span></div><!--/px-->
 <p>Kali Linux, Debian tabanlı ve sızma testi ile güvenlik araştırması için hazırlanmış bir dağıtımdır. İçinde yüzlerce güvenlik aracı hazır gelir.</p>
 <h2 id="b1">Kali Linux kimler için uygun?</h2>
 <p>Siber güvenlik öğrenenler ve yetkili güvenlik testi yapan uzmanlar.</p>
 <h2 id="b2">Öne çıkan özellikler</h2>
 <ul>
 <li><b>Masaüstü ortamı</b>: Xfce (varsayılan), ayrıca GNOME ve KDE seçenekleri.</li>
-<li><b>Yalnızca izin aldığın sistemlerde</b> kullan; izinsiz test yasa dışıdır.</li>
-<li>Günlük kullanım için tasarlanmamıştır. Ana bilgisayarına değil, <b>sanal makineye</b> kurman daha güvenlidir.</li>
+<li><b>Yalnızca izin aldığınız sistemlerde</b> kullanın; izinsiz test yasa dışıdır.</li>
+<li>Günlük kullanım için tasarlanmamıştır. Ana bilgisayarınıza değil, <b>sanal makineye</b> kurman daha güvenlidir.</li>
 <li>İndirme sayfasında doğrudan kurulum imajlarının yanında hazır <b>sanal makine</b> imajları da bulunur.</li>
 </ul>
 <h2 id="b3">Sistem gereksinimleri (yaklaşık)</h2>
@@ -51,21 +53,21 @@
 </table>
 <h2 id="b5">İndirdikten sonra</h2>
 <ol>
-<li>İndirdiğin dosya bir <b>ISO</b> imajıdır; bunu doğrudan çalıştıramazsın, USB belleğe yazman gerekir.</li>
-<li>Resmi sayfadaki <b>sağlama (checksum)</b> değeriyle dosyanı karşılaştır. Nasıl yapılacağı <a href="linux-01-linux-dagitimi-secme-ve-kurulum-usb.html">giriş yazısında</a> anlatılıyor.</li>
-<li>USB'yi hazırlayıp bilgisayarı ondan başlat; önce <b>canlı modda</b> deneyip beğenirsen kur.</li>
+<li>İndirdiğiniz dosya bir <b>ISO</b> imajıdır; bunu doğrudan çalıştıramazsınız, USB belleğe yazman gerekir.</li>
+<li>Resmi sayfadaki <b>sağlama (checksum)</b> değeriyle dosyanızı karşılaştırın. Nasıl yapılacağı <a href="linux-01-linux-dagitimi-secme-ve-kurulum-usb.html">giriş yazısında</a> anlatılıyor.</li>
+<li>USB'yi hazırlayıp bilgisayarı ondan başlatın; önce <b>canlı modda</b> deneyip beğenirseniz kurun.</li>
 </ol>
-<h2 id="b6">Bilinen güvenlik olayları</h2>
+<h2 id="b6">Güvenlik Geçmişi</h2>
 <p>Aşağıdaki olaylar kamuya açık haber ve güvenlik kaynaklarından derlenmiştir. Bu bilgiler yazının hazırlandığı tarihe göredir; güncel durum için ilgili kaynak ve resmi sayfa kontrol edilmelidir.</p>
 <table>
 <thead><tr><th style="min-width:108px">Tarih</th><th>Olay</th><th>Etkisi ve alınacak önlem</th></tr></thead>
 <tbody>
-<tr><td style="min-width:108px">Mart 2024</td><td><b>XZ Utils arka kapısı (CVE-2024-3094):</b> xz 5.6.0 ve 5.6.1 sürümlerine gizlenen arka kapı, 28 Mart 2024’te duyuruldu (CVSS 10.0). Kali Linux’ta, 26 Mart 2024’ten sonra güncelleme yapan kurulumlar 26–29 Mart arasında etkilendi.</td><td>Hata, Andres Freund tarafından SSH girişlerindeki yavaşlama fark edilerek keşfedildi. Etkilenen sürümler güncellemelerle düzeltildi. <b>Sistemini güncel tut.</b></td></tr>
+<tr><td style="min-width:108px">Mart 2024</td><td><b>XZ Utils arka kapısı (CVE-2024-3094):</b> xz 5.6.0 ve 5.6.1 sürümlerine gizlenen arka kapı, 28 Mart 2024’te duyuruldu (CVSS 10.0). Kali Linux’ta, 26 Mart 2024’ten sonra güncelleme yapan kurulumlar 26–29 Mart arasında etkilendi.</td><td>Hata, Andres Freund tarafından SSH girişlerindeki yavaşlama fark edilerek keşfedildi. Etkilenen sürümler güncellemelerle düzeltildi. <b>Sisteminizi güncel tutun.</b></td></tr>
 <tr><td colspan="3" style="font-size:.9em"><b>Kaynak:</b> <a href="https://unit42.paloaltonetworks.com/threat-brief-xz-utils-cve-2024-3094/">Palo Alto Unit 42</a></td></tr>
 </tbody>
 </table>
-<blockquote>Bağlantı, yazının hazırlandığı tarihte geçerliydi. Sayfa adresi veya sürüm numarası zamanla değişebilir; sürüm bilgilerini her zaman resmi sayfadan kontrol et. Üçüncü taraf "indirme" sitelerinden uzak dur.</blockquote>
-<p>Diğer dağıtımlara göz atmak için <a href="linux-01-linux-dagitimi-secme-ve-kurulum-usb.html">dağıtım seçme rehberine</a> bakabilirsin.</p>
+<blockquote>Bağlantı, yazının hazırlandığı tarihte geçerliydi. Sayfa adresi veya sürüm numarası zamanla değişebilir; sürüm bilgilerini her zaman resmi sayfadan kontrol edin. Üçüncü taraf "indirme" sitelerinden uzak durun.</blockquote>
+<p>Diğer dağıtımlara göz atmak için <a href="linux-01-linux-dagitimi-secme-ve-kurulum-usb.html">dağıtım seçme rehberine</a> bakabilirsiniz.</p>
 </div>
 </article>
 </main>

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HTML Rehberi: Anlamsal Etiketler ve Sayfa Düzeni</title>
-<meta name="description" content="header, nav, main, section, article, aside ve footer etiketleriyle sayfanı bölümlere ayır; div, span, id ve class kullanımı.">
+<meta name="description" content="header, nav, main, section, article, aside ve footer etiketleriyle sayfanızı bölümlere ayırın; div, span, id ve class kullanımı.">
 <meta name="kategori" content="html">
 <meta name="tarih" content="2026-04-07 16:18">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,8 +30,8 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e44d26;--b:#f0a04b">
-<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>header, nav, main, section, article, aside ve footer etiketleriyle sayfanı bölümlere ayır; div, span, id ve class kullanımı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Başlıca bölüm etiketleri</a></li><li><a href="#b2">Örnek sayfa iskeleti</a></li><li><a href="#b3">div ve span: anlamsız kutular</a></li><li><a href="#b4">class ve id</a></li><li><a href="#b5">Başlık sırasını koru</a></li><li><a href="#b6">Neden önemli?</a></li></ol></nav><!--/px-->
-<p>Şimdiye kadar öğrendiğin etiketler içeriğin türünü söylüyordu. <b>Anlamsal (semantik) etiketler</b> ise sayfanın hangi bölümünün ne işe yaradığını söyler: bu menü, burası ana içerik, burası alt bilgi. Tarayıcılar, arama motorları ve ekran okuyucular sayfayı bu sayede daha iyi anlar.</p>
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>header, nav, main, section, article, aside ve footer etiketleriyle sayfanızı bölümlere ayırın; div, span, id ve class kullanımı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Başlıca bölüm etiketleri</a></li><li><a href="#b2">Örnek sayfa iskeleti</a></li><li><a href="#b3">div ve span: anlamsız kutular</a></li><li><a href="#b4">class ve id</a></li><li><a href="#b5">Başlık sırasını koruma</a></li><li><a href="#b6">Neden önemli?</a></li></ol></nav><!--/px-->
+<p>Şimdiye kadar öğrendiğiniz etiketler içeriğin türünü söylüyordu. <b>Anlamsal (semantik) etiketler</b> ise sayfanın hangi bölümünün ne işe yaradığını söyler: bu menü, burası ana içerik, burası alt bilgi. Tarayıcılar, arama motorları ve ekran okuyucular sayfayı bu sayede daha iyi anlar.</p>
 <h2 id="b1">Başlıca bölüm etiketleri</h2>
 <table>
 <thead><tr><th>Etiket</th><th>Anlamı</th></tr></thead>
@@ -73,7 +75,7 @@
     &lt;p&gt;&amp;copy; 2026 Sabri Aydın&lt;/p&gt;
   &lt;/footer&gt;
 &lt;/body&gt;</pre>
-<p>Bu sayfa şimdilik düz görünür; yerleşimi CSS ile verirsin. Önemli olan etiketlerin <b>anlamını</b> doğru seçmendir.</p>
+<p>Bu sayfa şimdilik düz görünür; yerleşimi CSS ile verirsiniz. Önemli olan etiketlerin <b>anlamını</b> doğru seçmenizdir.</p>
 <h2 id="b3">div ve span: anlamsız kutular</h2>
 <p>Uygun bir anlamsal etiket yoksa genel amaçlı iki etiket kullanılır:</p>
 <ul>
@@ -92,21 +94,21 @@
 <tr><td><code>id</code></td><td>Sayfada tek bir öğede olmalı</td><td><code>id="iletisim"</code></td></tr>
 </tbody>
 </table>
-<p>Sınıf adlarında küçük harf, rakam ve tire kullan; boşluk kullanma. Bir öğeye birden fazla sınıf verebilirsin: <code>class="kart onemli"</code>.</p>
-<h2 id="b5">Başlık sırasını koru</h2>
+<p>Sınıf adlarında küçük harf, rakam ve tire kullanın; boşluk kullanmayın. Bir öğeye birden fazla sınıf verebilirsiniz: <code>class="kart onemli"</code>.</p>
+<h2 id="b5">Başlık sırasını koruma</h2>
 <ul>
-<li>Sayfada tek <code>&lt;h1&gt;</code> olsun.</li>
-<li>Bölümler <code>&lt;h2&gt;</code>, alt bölümler <code>&lt;h3&gt;</code> ile devam etsin.</li>
-<li>Seviye atlama: <code>&lt;h2&gt;</code> altına <code>&lt;h4&gt;</code> yazma.</li>
+<li>Sayfada tek <code>&lt;h1&gt;</code> olmalıdır.</li>
+<li>Bölümler <code>&lt;h2&gt;</code>, alt bölümler <code>&lt;h3&gt;</code> ile devam etmelidir.</li>
+<li>Seviye atlama: <code>&lt;h2&gt;</code> altına <code>&lt;h4&gt;</code> yazmayın.</li>
 </ul>
 <h2 id="b6">Neden önemli?</h2>
 <ul>
 <li><b>Erişilebilirlik</b>: Ekran okuyucu kullanan kişiler "ana içeriğe geç" ya da "menüye git" diyebilir.</li>
 <li><b>Arama motorları</b>: Sayfanın ana içeriğini ve yapısını daha doğru anlar.</li>
-<li><b>Düzen</b>: Kodu okuyan (sen dahil) kişi hangi bölümün ne olduğunu hemen görür.</li>
+<li><b>Düzen</b>: Kodu okuyan (siz dahil) kişi hangi bölümün ne olduğunu hemen görür.</li>
 </ul>
-<blockquote>Bu yapıyla başlamak için <a href="html-arac-06-sayfa-iskeleti-olusturucu.html">Sayfa İskeleti Oluşturucu</a> aracından hazır bir başlangıç şablonu alabilirsin.</blockquote>
-<p>Sonraki derste sayfana ses, video ve gömülü içerik eklemeyi öğreneceksin.</p>
+<blockquote>Bu yapıyla başlamak için <a href="html-arac-06-sayfa-iskeleti-olusturucu.html">Sayfa İskeleti Oluşturucu</a> aracından hazır bir başlangıç şablonu alabilirsiniz.</blockquote>
+<p>Sonraki derste sayfanıza ses, video ve gömülü içerik eklemeyi öğreneceksiniz.</p>
 </div>
 </article>
 </main>

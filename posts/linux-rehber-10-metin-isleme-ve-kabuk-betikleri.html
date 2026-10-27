@@ -16,11 +16,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <link rel="stylesheet" href="../assets/css/linux.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,7 +31,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e95420;--b:#f39c12">
-<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> grep -c "hata" uygulama.log</p><p class="o">17</p><p><b>$</b> ./yedekle.sh</p><p class="o">Yedek tamamlandı</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yönlendirme ve boru</a></li><li><a href="#b2">grep: metin arama</a></li><li><a href="#b3">Düzenli ifadeler (regex)</a></li><li><a href="#b4">cut, sort, uniq, wc, tr</a></li><li><a href="#b5">sed: akış düzenleyici</a></li><li><a href="#b6">awk: sütun işleme</a></li><li><a href="#b7">Betik yazmaya giriş</a></li><li><a href="#b8">Değişken, parametre ve girdi</a></li><li><a href="#b9">Koşullar</a></li><li><a href="#b10">Döngüler</a></li><li><a href="#b11">Fonksiyonlar ve hata denetimi</a></li><li><a href="#b12">Betik yazarken iyi uygulamalar</a></li><li><a href="#b13">Serinin özeti</a></li><li><a href="#b14">Özet</a></li></ol></nav><!--/px-->
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> grep -c "hata" uygulama.log</p><p class="o">17</p><p><b>$</b> ./yedekleyin.sh</p><p class="o">Yedek tamamlandı</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Yönlendirme ve boru</a></li><li><a href="#b2">grep: metin arama</a></li><li><a href="#b3">Düzenli ifadeler (regex)</a></li><li><a href="#b4">cut, sort, uniq, wc, tr</a></li><li><a href="#b5">sed: akış düzenleyici</a></li><li><a href="#b6">awk: sütun işleme</a></li><li><a href="#b7">Betik yazmaya giriş</a></li><li><a href="#b8">Değişken, parametre ve girdi</a></li><li><a href="#b9">Koşullar</a></li><li><a href="#b10">Döngüler</a></li><li><a href="#b11">Fonksiyonlar ve hata denetimi</a></li><li><a href="#b12">Betik yazarken iyi uygulamalar</a></li><li><a href="#b13">Serinin özeti</a></li><li><a href="#b14">Özet</a></li></ol></nav><!--/px-->
 <p>Linux’un en güçlü yönlerinden biri, küçük komutların birbirine bağlanarak karmaşık işleri yapabilmesidir. Çıktılar metin olduğu için bu araçlarla süzülebilir, dönüştürülebilir ve kabuk betiklerine dönüştürülerek otomatikleştirilebilir. Bu, serinin son yazısıdır.</p>
 <h2 id="b1">Yönlendirme ve boru</h2>
 <table><thead><tr><th>İşaret</th><th>Anlamı</th><th>Örnek</th></tr></thead><tbody><tr><td><code>&gt;</code></td><td>Çıktıyı dosyaya yazar (üzerine yazar)</td><td><code>ls &gt; liste.txt</code></td></tr><tr><td><code>&gt;&gt;</code></td><td>Dosyanın sonuna ekler</td><td><code>date &gt;&gt; gunluk.txt</code></td></tr><tr><td><code>&lt;</code></td><td>Girdiyi dosyadan alır</td><td><code>sort &lt; liste.txt</code></td></tr><tr><td><code>2&gt;</code></td><td>Hata çıktısını yönlendirir</td><td><code>komut 2&gt; hata.txt</code></td></tr><tr><td><code>&amp;&gt;</code></td><td>Çıktı ve hatayı birlikte yönlendirir</td><td><code>komut &amp;&gt; hepsi.txt</code></td></tr><tr><td><code>|</code></td><td>Çıktıyı sonraki komuta girdi yapar</td><td><code>ps aux | grep ssh</code></td></tr><tr><td><code>2&gt;/dev/null</code></td><td>Hata iletilerini yok sayar</td><td><code>find / -name x 2&gt;/dev/null</code></td></tr></tbody></table><pre>ls -l /etc | wc -l              # kaç öğe var?
@@ -41,7 +43,7 @@ grep -rin "password" /etc 2&gt;/dev/null
 grep -E "^(GET|POST)" erisim.log
 dmesg | grep -i usb</pre>
 <h2 id="b3">Düzenli ifadeler (regex)</h2>
-<table><thead><tr><th>Desen</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>^metin</code></td><td>Satır başı</td></tr><tr><td><code>metin$</code></td><td>Satır sonu</td></tr><tr><td><code>.</code></td><td>Herhangi bir karakter</td></tr><tr><td><code>*</code></td><td>Öncekinin 0 veya daha fazla tekrarı</td></tr><tr><td><code>+</code></td><td>1 veya daha fazla (<code>-E</code> ile)</td></tr><tr><td><code>[0-9]</code></td><td>Rakam</td></tr><tr><td><code>a|b</code></td><td>a veya b (<code>-E</code> ile)</td></tr></tbody></table><pre>grep -E "^[0-9]{1,3}(\.[0-9]{1,3}){3}" ip-listesi.txt   # IP ile başlayan satırlar</pre>
+<table><thead><tr><th>Deseniz</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>^metin</code></td><td>Satır başı</td></tr><tr><td><code>metin$</code></td><td>Satır sonu</td></tr><tr><td><code>.</code></td><td>Herhangi bir karakter</td></tr><tr><td><code>*</code></td><td>Öncekinin 0 veya daha fazla tekrarı</td></tr><tr><td><code>+</code></td><td>1 veya daha fazla (<code>-E</code> ile)</td></tr><tr><td><code>[0-9]</code></td><td>Rakam</td></tr><tr><td><code>a|b</code></td><td>a veya b (<code>-E</code> ile)</td></tr></tbody></table><pre>grep -E "^[0-9]{1,3}(\.[0-9]{1,3}){3}" ip-listesi.txt   # IP ile başlayan satırlar</pre>
 <h2 id="b4">cut, sort, uniq, wc, tr</h2>
 <pre>cut -d: -f1 /etc/passwd            # ":" ayırıcıyla 1. alan (kullanıcı adları)
 sort dosya.txt                      # alfabetik

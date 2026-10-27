@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,12 +31,12 @@
 <article class="post">
 <div class="body" style="--a:#0e6655;--b:#1abc9c">
 <!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>İnternet gitmediğinde sorunun modemde mi, internet hattında mı yoksa DNS&#x27;te mi olduğunu bulan ve rapor çıkaran batch programı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
-<p>"İnternet gitti" dediğinde sorun üç yerden biri olabilir: <b>bilgisayar-modem arası</b>, <b>modem-internet arası</b> ya da <b>alan adı çözümleme (DNS)</b>. Bu program üçünü sırayla dener, sonucu sade bir Türkçe yorumla söyler ve ayrıntılı bir rapor dosyasını masaüstüne kaydeder. Destek hattını arayacaksan bu raporu paylaşmak işini hızlandırır.</p>
+<p>"İnternet gitti" dediğinde sorun üç yerden biri olabilir: <b>bilgisayar-modem arası</b>, <b>modem-internet arası</b> ya da <b>alan adı çözümleme (DNS)</b>. Bu program üçünü sırayla dener, sonucu sade bir Türkçe yorumla söyler ve ayrıntılı bir rapor dosyasını masaüstüne kaydeder. Destek hattını arayacaksanız bu raporu paylaşmak işinizi hızlandırır.</p>
 <h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
-<li>Kodu <code>ag-kontrol.bat</code> adıyla kaydet.</li>
-<li>Çift tıkla. Özet birkaç saniyede ekrana gelir; ayrıntılı rapor en fazla yarım dakikada hazırlanır.</li>
-<li>Sonunda raporu hemen açabilirsin. Dosya masaüstünde <code>ag_raporu.txt</code> adıyla kalır.</li>
+<li>Kodu <code>ag-kontrol.bat</code> adıyla kaydedin.</li>
+<li>Çift tıklayın. Özet birkaç saniyede ekrana gelir; ayrıntılı rapor en fazla yarım dakikada hazırlanır.</li>
+<li>Sonunda raporu hemen açabilirsiniz. Dosya masaüstünde <code>ag_raporu.txt</code> adıyla kalır.</li>
 </ol>
 <pre>@echo off
 setlocal
@@ -144,8 +146,8 @@ exit /b 0</pre>
 </ul>
 <h2 id="b3">Özelleştirme</h2>
 <ul>
-<li>Farklı bir siteyi sınamak için <code>google.com</code> yerine kendi sitenin adresini yaz.</li>
-<li>Rapora Wi-Fi bilgisi eklemek için blok içine <code>netsh wlan show interfaces</code> satırı ekleyebilirsin.</li>
+<li>Farklı bir siteyi sınamak için <code>google.com</code> yerine kendi sitenizin adresini yazın.</li>
+<li>Rapora Wi-Fi bilgisi eklemek için blok içine <code>netsh wlan show interfaces</code> satırı ekleyebilirsiniz.</li>
 </ul>
 <blockquote>Dikkat: Bazı modemler ping yanıtını kapatır. "Modeme erişim: ULAŞILAMIYOR" yazsa bile internet çalışıyorsa sorun yoktur; yorum her zaman <code>INTERNET</code> sonucuna öncelik verir. Rapor IP ve bilgisayar adı gibi bilgiler içerir; herkese açık bir yerde paylaşmadan önce göz at.</blockquote>
 </div>

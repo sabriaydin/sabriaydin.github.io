@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Toplu Dosya Yeniden Adlandırma Komutu Oluşturucu</title>
-<meta name="description" content="Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluştur; sonucu önceden önizle.">
+<meta name="description" content="Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluşturun; sonucu önceden önizleyin.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-04-21 08:54">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluştur; sonucu önceden önizle.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">İşlemler</a></li><li><a href="#b4">PowerShell betiği nasıl çalıştırılır?</a></li><li><a href="#b5">Dikkat edilecekler</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Klasördeki birçok dosyayı tek seferde yeniden adlandırmak için PowerShell veya .bat komutunu otomatik oluşturun; sonucu önceden önizleyin.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Nasıl kullanılır?</a></li><li><a href="#b3">İşlemler</a></li><li><a href="#b4">PowerShell betiği nasıl çalıştırılır?</a></li><li><a href="#b5">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>Yüzlerce fotoğrafa aynı ön eki eklemek, sıra numarası vermek ya da uzantıyı değiştirmek elle yapıldığında uzun sürer. Bu araç, seçilen işlem için PowerShell komutunu veya toplu iş dosyasını oluşturur ve örnek dosya adları üzerinde sonucu önceden gösterir.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <style>.gg{display:grid;gap:14px}.gg[hidden]{display:none}</style>
 <div class="arac">
   <div class="satir">
@@ -181,10 +183,10 @@ hesapla();
 </script>
 <h2 id="b2">Nasıl kullanılır?</h2>
 <ol>
-<li><b>İşlemi</b> ve <b>çıktı biçimini</b> seç. PowerShell biçimi tüm işlemleri destekler; <code>.bat</code> biçimi harf büyüklüğü dönüşümünü desteklemez.</li>
-<li><b>Dosya filtresini</b> yaz (örn. <code>*.jpg</code>, <code>rapor*.docx</code>). Klasör yolu boş bırakılırsa komut, çalıştırıldığı klasörde işlem yapar.</li>
-<li>Örnek dosya adlarıyla <b>önizlemeyi</b> kontrol et.</li>
-<li>Komutu kopyala veya dosya olarak indir. Dosyaların bulunduğu klasörde çalıştır.</li>
+<li><b>İşlemi</b> ve <b>çıktı biçimini</b> seçin. PowerShell biçimi tüm işlemleri destekler; <code>.bat</code> biçimi harf büyüklüğü dönüşümünü desteklemez.</li>
+<li><b>Dosya filtresini</b> yazın (örn. <code>*.jpg</code>, <code>rapor*.docx</code>). Klasör yolu boş bırakılırsa komut, çalıştırıldığı klasörde işlem yapar.</li>
+<li>Örnek dosya adlarıyla <b>önizlemeyi</b> kontrol edin.</li>
+<li>Komutu kopyalayın veya dosya olarak indirin. Dosyalarınızın bulunduğu klasörde çalıştırın.</li>
 </ol>
 <p><b>Deneme modu</b> açıkken komut dosyaları değiştirmez. PowerShell çıktısında <code>-WhatIf</code> parametresi, <code>.bat</code> çıktısında ise <code>echo</code> kullanılır; yapılacak değişiklikler yalnızca ekrana yazılır. Sonuç doğru göründüğünde deneme modu kapatılıp komut yeniden oluşturulmalıdır.</p>
 <h2 id="b3">İşlemler</h2>

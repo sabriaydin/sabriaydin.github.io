@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dosya izinleri ve sahiplik (chmod, chown)</title>
-<meta name="description" content="Linux izin modeli: okuma/yazma/çalıştırma, sembolik ve sekizli gösterim, chmod, chown, umask ve özel izin bitleri.">
+<meta name="description" content="Linux izin modeli: okuma/yazma/çalıştırmayın, sembolik ve sekizli gösterim, chmod, chown, umask ve özel izin bitleri.">
 <meta name="kategori" content="linux">
 <meta name="tarih" content="2026-10-05 10:20">
 <meta name="author" content="Sabri Aydın">
@@ -16,11 +16,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <link rel="stylesheet" href="../assets/css/linux.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -44,7 +46,7 @@
 <p>İki yazım biçimi vardır. Sekizli (sayısal) biçimde her sınıfın değerleri toplanır: <code>r=4</code>, <code>w=2</code>, <code>x=1</code>.</p><table><thead><tr><th>Sayı</th><th>İzin</th><th>Anlamı</th></tr></thead><tbody><tr><td><code>7</code></td><td><code>rwx</code></td><td>Okuma + yazma + çalıştırma</td></tr><tr><td><code>6</code></td><td><code>rw-</code></td><td>Okuma + yazma</td></tr><tr><td><code>5</code></td><td><code>r-x</code></td><td>Okuma + çalıştırma</td></tr><tr><td><code>4</code></td><td><code>r--</code></td><td>Yalnızca okuma</td></tr><tr><td><code>0</code></td><td><code>---</code></td><td>İzin yok</td></tr></tbody></table><pre>chmod 755 betik.sh      # sahip rwx, grup r-x, diğerleri r-x
 chmod 644 not.txt        # sahip rw-, diğerleri r--
 chmod 600 ~/.ssh/id_rsa  # yalnızca sahip okuyup yazar
-chmod -R 755 dizin/      # dizin ve içindekiler</pre><p>Sembolik biçimde kimin (<code>u</code> sahip, <code>g</code> grup, <code>o</code> diğer, <code>a</code> hepsi) ve ne yapılacağı (<code>+</code> ekle, <code>-</code> kaldır, <code>=</code> ayarla) yazılır:</p><pre>chmod u+x betik.sh      # sahibe çalıştırma ekle
+chmod -R 755 dizin/      # dizin ve içindekiler</pre><p>Sembolik biçimde kimin (<code>u</code> sahip, <code>g</code> grup, <code>o</code> diğer, <code>a</code> hepsi) ve ne yapılacağı (<code>+</code> ekleyin, <code>-</code> kaldırın, <code>=</code> ayarlayın) yazılır:</p><pre>chmod u+x betik.sh      # sahibe çalıştırma ekle
 chmod g-w dosya          # gruptan yazmayı kaldır
 chmod o= dosya           # diğerlerinin tüm izinlerini kaldır
 chmod a+r herkese.txt    # herkese okuma</pre>

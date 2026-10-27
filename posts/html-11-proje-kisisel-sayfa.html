@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HTML Rehberi: Proje, Kişisel Tanıtım Sayfası ve Yayınlama</title>
-<meta name="description" content="Öğrendiklerini birleştirerek HTML ve CSS ile kişisel tanıtım sayfası yap, GitHub Pages ile ücretsiz yayınla.">
+<meta name="description" content="Öğrendiklerini birleştirerek HTML ve CSS ile kişisel tanıtım sayfası yapın, GitHub Pages ile ücretsiz yayınlayın.">
 <meta name="kategori" content="html">
 <meta name="tarih" content="2026-05-11 14:49">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,10 +30,10 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e44d26;--b:#f0a04b">
-<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>Öğrendiklerini birleştirerek HTML ve CSS ile kişisel tanıtım sayfası yap, GitHub Pages ile ücretsiz yayınla.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">1. Klasörü hazırla</a></li><li><a href="#b2">2. index.html</a></li><li><a href="#b3">3. style.css</a></li><li><a href="#b4">4. Kontrol et</a></li><li><a href="#b5">5. Kendine göre değiştir</a></li><li><a href="#b6">6. GitHub Pages ile yayınla</a></li><li><a href="#b7">Sırada ne var?</a></li></ol></nav><!--/px-->
-<p>Bu derste önceki derslerdeki bilgileri tek projede topluyoruz: menüsü, bölümleri ve alt bilgisi olan bir kişisel tanıtım sayfası. Sonunda sayfanı GitHub Pages ile ücretsiz yayınlayacaksın.</p>
-<h2 id="b1">1. Klasörü hazırla</h2>
-<p>Masaüstünde <code>sayfam</code> adında bir klasör aç. İçine iki dosya oluştur: <code>index.html</code> ve <code>style.css</code>.</p>
+<!--px--><div class="px-hero"><small>HTML Rehberi</small><p>Öğrendiklerini birleştirerek HTML ve CSS ile kişisel tanıtım sayfası yapın, GitHub Pages ile ücretsiz yayınlayın.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">1. Klasörü hazırlayın</a></li><li><a href="#b2">2. index.html</a></li><li><a href="#b3">3. style.css</a></li><li><a href="#b4">4. Kontrol edin</a></li><li><a href="#b5">5. Kendinize göre değiştirin</a></li><li><a href="#b6">6. GitHub Pages ile yayınlayın</a></li><li><a href="#b7">Sırada ne var?</a></li></ol></nav><!--/px-->
+<p>Bu derste önceki derslerdeki bilgileri tek projede topluyoruz: menüsü, bölümleri ve alt bilgisi olan bir kişisel tanıtım sayfası. Sonunda sayfanızı GitHub Pages ile ücretsiz yayınlayacaksınız.</p>
+<h2 id="b1">1. Klasörü hazırlayın</h2>
+<p>Masaüstünde <code>sayfam</code> adında bir klasör açın. İçine iki dosya oluşturun: <code>index.html</code> ve <code>style.css</code>.</p>
 <h2 id="b2">2. index.html</h2>
 <pre>&lt;!DOCTYPE html&gt;
 &lt;html lang="tr"&gt;
@@ -138,32 +140,32 @@ footer {
   padding: 20px;
   color: #555;
 }</pre>
-<h2 id="b4">4. Kontrol et</h2>
-<p><code>index.html</code> dosyasına çift tıkla. Menü bağlantılarına tıkladığında sayfa ilgili bölüme kaymalı. Bir değişiklik yaptığında kaydedip <b>F5</b> ile yenile. Çalışmıyorsa şunlara bak: <code>style.css</code> ile <code>index.html</code> aynı klasörde mi, dosya adları tam olarak doğru mu, etiketlerin kapanışları eksik mi?</p>
-<h2 id="b5">5. Kendine göre değiştir</h2>
+<h2 id="b4">4. Kontrol edin</h2>
+<p><code>index.html</code> dosyasına çift tıklayın. Menü bağlantılarına tıkladığında sayfa ilgili bölüme kaymalı. Bir değişiklik yaptığında kaydedip <b>F5</b> ile yenileyin. Çalışmıyorsa şunlara bakın: <code>style.css</code> ile <code>index.html</code> aynı klasörde mi, dosya adları tam olarak doğru mu, etiketlerin kapanışları eksik mi?</p>
+<h2 id="b5">5. Kendinize göre değiştirin</h2>
 <ul>
-<li>Metinleri ve e-posta adresini kendi bilgilerinle değiştir.</li>
-<li>Renkleri <a href="html-arac-01-renk-kodu-olusturucu.html">Renk Kodu Oluşturucu</a> ile seçtiğin kodlarla değiştir.</li>
-<li>Bir profil fotoğrafı ekle: <code>&lt;img src="resimler/ben.jpg" alt="Profil fotoğrafım" width="150"&gt;</code></li>
-<li>Yeni bir bölüm için <code>&lt;section id="yeni"&gt;</code> kopyalayıp menüye bağlantısını ekle.</li>
+<li>Metinleri ve e-posta adresini kendi bilgilerinizle değiştirin.</li>
+<li>Renkleri <a href="html-arac-01-renk-kodu-olusturucu.html">Renk Kodu Oluşturucu</a> ile seçtiğiniz kodlarla değiştirin.</li>
+<li>Bir profil fotoğrafı ekleyin: <code>&lt;img src="resimler/ben.jpg" alt="Profil fotoğrafım" width="150"&gt;</code></li>
+<li>Yeni bir bölüm için <code>&lt;section id="yeni"&gt;</code> kopyalayıp menüye bağlantısını ekleyin.</li>
 </ul>
-<h2 id="b6">6. GitHub Pages ile yayınla</h2>
+<h2 id="b6">6. GitHub Pages ile yayınlayın</h2>
 <ol>
-<li><a href="https://github.com">github.com</a> adresinde ücretsiz bir hesap aç.</li>
-<li>Sağ üstteki <b>+ &gt; New repository</b> ile yeni bir depo oluştur. Adını <code>sayfam</code> yaz, <b>Public</b> seç.</li>
-<li>Depo sayfasında <b>uploading an existing file</b> bağlantısına tıkla, <code>index.html</code> ve <code>style.css</code> dosyalarını sürükle ve <b>Commit changes</b> de.</li>
-<li><b>Settings &gt; Pages</b> bölümüne git. <b>Source</b> olarak <b>Deploy from a branch</b> seç, dal olarak <code>main</code> ve klasör olarak <code>/ (root)</code> seçip <b>Save</b> de.</li>
-<li>Bir iki dakika bekle. Sayfanın üstünde sitenin adresi görünür: <code>https://kullaniciadi.github.io/sayfam/</code></li>
+<li><a href="https://github.com">github.com</a> adresinde ücretsiz bir hesap açın.</li>
+<li>Sağ üstteki <b>+ &gt; New repository</b> ile yeni bir depo oluşturun. Adını <code>sayfam</code> yazın, <b>Public</b> seçin.</li>
+<li>Depo sayfasında <b>uploading an existing file</b> bağlantısına tıklayın, <code>index.html</code> ve <code>style.css</code> dosyalarınızı sürükleyin ve <b>Commit changes</b> de.</li>
+<li><b>Settings &gt; Pages</b> bölümüne gidin. <b>Source</b> olarak <b>Deploy from a branch</b> seçin, dal olarak <code>main</code> ve klasör olarak <code>/ (root)</code> seçip <b>Save</b> de.</li>
+<li>Bir iki dakika bekleyin. Sayfanın üstünde sitenizin adresi görünür: <code>https://kullaniciadi.github.io/sayfam/</code></li>
 </ol>
-<p>Dosyayı değiştirmek istediğinde GitHub'da dosyanın üzerine tıklayıp kalem simgesiyle düzenleyebilir veya aynı adlı yeni dosyayı yükleyebilirsin; site kısa sürede güncellenir.</p>
+<p>Dosyayı değiştirmek istediğinde GitHub'da dosyanın üzerine tıklayıp kalem simgesiyle düzenleyebilir veya aynı adlı yeni dosyayı yükleyebilirsiniz; site kısa sürede güncellenir.</p>
 <h2 id="b7">Sırada ne var?</h2>
 <ul>
 <li><b>Flexbox ve Grid</b>: Sayfa yerleşimini ve kartları düzenlemenin modern yolları.</li>
 <li><b>Duyarlı tasarım</b> (<code>@media</code>): Telefon ve bilgisayarda farklı görünüm.</li>
-<li><b>JavaScript</b>: Sayfana tıklanınca tepki veren, hesap yapan, veri yükleyen davranışlar.</li>
-<li><b>Araçlar</b>: Bu sitedeki <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a>, <a href="html-arac-03-tablo-olusturucu.html">Tablo Oluşturucu</a> ve <a href="html-arac-06-sayfa-iskeleti-olusturucu.html">Sayfa İskeleti</a> araçları öğrenirken işini hızlandırır.</li>
+<li><b>JavaScript</b>: Sayfanıza tıklanınca tepki veren, hesap yapan, veri yükleyen davranışlar.</li>
+<li><b>Araçlar</b>: Bu sitedeki <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a>, <a href="html-arac-03-tablo-olusturucu.html">Tablo Oluşturucu</a> ve <a href="html-arac-06-sayfa-iskeleti-olusturucu.html">Sayfa İskeleti</a> araçları öğrenirken işinizi hızlandırır.</li>
 </ul>
-<p>Tebrikler! HTML'in temelini tamamladın. Öğrenmenin en iyi yolu kendi küçük projelerini yapmaktır; bir şey bozulursa cesaretle dene, geri al ve tekrar dene.</p>
+<p>Tebrikler! HTML'in temelini tamamladın. Öğrenmenin en iyi yolu kendi küçük projelerini yapmaktır; bir şey bozulursa cesaretle deneyin, geri al ve tekrar deneyin.</p>
 </div>
 </article>
 </main>

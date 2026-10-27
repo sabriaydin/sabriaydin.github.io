@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Batch Rehberi: Gecikmeli Değişken, Kaçış Karakterleri ve Yönetici Kontrolü</title>
-<meta name="description" content="setlocal EnableDelayedExpansion ile döngülerde değişken kullanma, özel karakterleri kaçırma, Türkçe karakter ayarı ve yönetici yetkisi kontrolü.">
+<meta name="description" content="setlocal EnableDelayedExpansion ile döngülerde değişken kullanmayın, özel karakterleri kaçırma, Türkçe karakter ayarı ve yönetici yetkisi kontrolü.">
 <meta name="kategori" content="batch">
 <meta name="tarih" content="2026-05-25 09:03">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,7 +30,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#1e8449;--b:#58d68d">
-<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>setlocal EnableDelayedExpansion ile döngülerde değişken kullanma, özel karakterleri kaçırma, Türkçe karakter ayarı ve yönetici yetkisi kontrolü.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Gecikmeli değişken genişletme</a></li><li><a href="#b2">Metin parçalama ve değiştirme</a></li><li><a href="#b3">Özel karakterleri kaçırmak</a></li><li><a href="#b4">Boşluklu yollar ve start</a></li><li><a href="#b5">Türkçe karakterler</a></li><li><a href="#b6">Yönetici yetkisi kontrolü</a></li><li><a href="#b7">Bölgesel ayardan bağımsız tarih</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>setlocal EnableDelayedExpansion ile döngülerde değişken kullanmayın, özel karakterleri kaçırma, Türkçe karakter ayarı ve yönetici yetkisi kontrolü.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Gecikmeli değişken genişletme</a></li><li><a href="#b2">Metin parçalama ve değiştirme</a></li><li><a href="#b3">Özel karakterleri kaçırmak</a></li><li><a href="#b4">Boşluklu yollar ve start</a></li><li><a href="#b5">Türkçe karakterler</a></li><li><a href="#b6">Yönetici yetkisi kontrolü</a></li><li><a href="#b7">Bölgesel ayardan bağımsız tarih</a></li></ol></nav><!--/px-->
 <p>Eğitimin son dersinde script'lerin sorunsuz çalışması için bilinmesi gereken ayrıntıları topluyoruz.</p>
 <h2 id="b1">Gecikmeli değişken genişletme</h2>
 <p>Bir parantez bloğunun (<code>for</code>, <code>if</code> gövdesi) içindeki <code>%değişken%</code> ifadesi, blok çalışmaya başlamadan önce <b>bir kez</b> değerlendirilir. Bu yüzden aşağıdaki script her turda 0 yazar:</p>
@@ -48,7 +50,7 @@ for %%i in (a b c) do (
     echo Sayac: !sayac!
 )
 pause</pre>
-<p>Kural: Parantez bloğunun içinde değeri değişen bir değişkeni <code>!...!</code> ile oku. Blok dışında <code>%...%</code> yeterlidir. Gecikmeli genişletme açıkken <code>!</code> karakteri özel olur; dosya adlarında <code>!</code> varsa kaybolabilir.</p>
+<p>Kural: Parantez bloğunun içinde değeri değişen bir değişkeni <code>!...!</code> ile okuyun. Blok dışında <code>%...%</code> yeterlidir. Gecikmeli genişletme açıkken <code>!</code> karakteri özel olur; dosya adlarında <code>!</code> varsa kaybolabilir.</p>
 <h2 id="b2">Metin parçalama ve değiştirme</h2>
 <pre>@echo off
 set "metin=Merhaba Dunya"
@@ -68,29 +70,29 @@ pause</pre>
 <li><code>000</code> ile birleştirip son 3 karakteri almak, sayılara sıfır dolgusu (007) eklemenin yaygın yoludur.</li>
 </ul>
 <h2 id="b3">Özel karakterleri kaçırmak</h2>
-<p><code>&amp;</code>, <code>|</code>, <code>&lt;</code>, <code>&gt;</code>, <code>^</code> karakterleri komut satırında özel anlam taşır. Ekrana basmak istiyorsan önüne <code>^</code> koy. Yüzde işareti batch dosyasında <code>%%</code> olarak yazılır:</p>
+<p><code>&amp;</code>, <code>|</code>, <code>&lt;</code>, <code>&gt;</code>, <code>^</code> karakterleri komut satırında özel anlam taşır. Ekrana basmak istiyorsanız önüne <code>^</code> koyun. Yüzde işareti batch dosyasında <code>%%</code> olarak yazılır:</p>
 <pre>echo Ali ^&amp; Veli
 echo Sonuc ^&gt; 10
 echo 50%% indirim
 echo Bos satir icin:
 echo.</pre>
-<p>Parantez bloğunun içindeki bir yazıda kapanış parantezi varsa onu da <code>^)</code> olarak yaz.</p>
+<p>Parantez bloğunun içindeki bir yazıda kapanış parantezi varsa onu da <code>^)</code> olarak yazın.</p>
 <h2 id="b4">Boşluklu yollar ve start</h2>
-<p>Yolda boşluk varsa çift tırnak kullan. <code>start</code> komutu, tırnaklı ilk değeri pencere başlığı sayar; bu yüzden önüne boş bir başlık koymak gerekir:</p>
+<p>Yolda boşluk varsa çift tırnak kullanın. <code>start</code> komutu, tırnaklı ilk değeri pencere başlığı sayar; bu yüzden önüne boş bir başlık koymak gerekir:</p>
 <pre>start "" "C:\Program Files\Uygulama\uygulama.exe"</pre>
 <h2 id="b5">Türkçe karakterler</h2>
 <ol>
-<li>Not Defteri'nde <b>Dosya &gt; Farklı Kaydet</b> seç, Kodlama olarak <b>UTF-8</b> seç.</li>
-<li>Scriptin ilk satırından sonra <code>chcp 65001 &gt;nul</code> yaz.</li>
+<li>Not Defteri'nde <b>Dosya &gt; Farklı Kaydedin</b> seçin, Kodlama olarak <b>UTF-8</b> seçin.</li>
+<li>Scriptin ilk satırından sonra <code>chcp 65001 &gt;nul</code> yazın.</li>
 <li>Başında gizli işaret (BOM) bulunan UTF-8 dosyalarda ilk satırda hata çıkabilir; güncel Windows 10 ve 11 sürümlerinde Not Defteri varsayılan olarak işaretsiz kaydeder.</li>
 </ol>
 <pre>@echo off
 chcp 65001 &gt;nul
 echo Turkce karakterler: ğ ü ş ı ö ç İ
 pause</pre>
-<p>Harfler hâlâ bozuk görünürse pencere başlığına sağ tıkla, <b>Özellikler &gt; Yazı Tipi</b> bölümünden Consolas'ı seç. Sorun sürerse mesajlarda Türkçe karakter kullanmadan yaz. <code>goto</code> etiketlerinde (<code>:menu</code> gibi) Türkçe karakter kullanma.</p>
+<p>Harfler hâlâ bozuk görünürse pencere başlığına sağ tıklayın, <b>Özellikler &gt; Yazı Tipi</b> bölümünden Consolas'ı seçin. Sorun sürerse mesajlarda Türkçe karakter kullanmadan yazın. <code>goto</code> etiketlerinde (<code>:menu</code> gibi) Türkçe karakter kullanmayın.</p>
 <h2 id="b6">Yönetici yetkisi kontrolü</h2>
-<p>Sistem klasörlerine yazan veya servisleri değiştiren script'ler yönetici yetkisi ister. Başta kontrol edip kullanıcıyı uyarabilirsin:</p>
+<p>Sistem klasörlerine yazan veya servisleri değiştiren script'ler yönetici yetkisi ister. Başta kontrol edip kullanıcıyı uyarabilirsiniz:</p>
 <pre>@echo off
 fltmc &gt;nul 2&gt;&amp;1
 if errorlevel 1 (
@@ -101,7 +103,7 @@ if errorlevel 1 (
 )
 echo Yonetici yetkisi var.
 pause</pre>
-<p>İstersen script kendini yönetici olarak yeniden de başlatabilir. Windows bir onay penceresi gösterir:</p>
+<p>İsterseniz script kendini yönetici olarak yeniden de başlatabilir. Windows bir onay penceresi gösterir:</p>
 <pre>@echo off
 fltmc &gt;nul 2&gt;&amp;1 || (
     powershell -NoProfile -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
@@ -110,12 +112,12 @@ fltmc &gt;nul 2&gt;&amp;1 || (
 echo Yonetici olarak calisiyor.
 pause</pre>
 <h2 id="b7">Bölgesel ayardan bağımsız tarih</h2>
-<p><code>%date%</code> değişkeninin biçimi bilgisayarın bölgesel ayarına göre değişir. Dosya adında kullanılacak tarih için PowerShell ile sabit bir biçim almak daha güvenlidir:</p>
+<p><code>%date%</code> değişkeninin biçimi bilgisayarınızın bölgesel ayarına göre değişir. Dosya adında kullanılacak tarih için PowerShell ile sabit bir biçim almak daha güvenlidir:</p>
 <pre>@echo off
 for /f %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm"') do set "zaman=%%t"
 echo Zaman damgasi: %zaman%
 pause</pre>
-<p>Eğitimi tamamladın. Şimdi öğrendiklerini gerçek işlerde kullanabileceğin örnek programlara geçebilirsin; ilk durak Otomatik Yedekleme Aracı.</p>
+<p>Eğitimi tamamladın. Şimdi öğrendiklerini gerçek işlerde kullanabileceğin örnek programlara geçebilirsiniz; ilk durak Otomatik Yedekleme Aracı.</p>
 </div>
 </article>
 </main>

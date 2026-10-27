@@ -86,11 +86,31 @@ function showHotName(){
 }
 /* Pusula çubuğu (ekranın üst ortası): bakılan yöne göre kayar; işaret konulduysa yönü gösterir */
 let cmpKey='';
+/* en yakın keşfedilmiş köy/kamp/mağara: her türden yalnızca en yakını, pusulada küçük renkli bir
+   nokta olarak gösterilir (yalnızca görüş açısı içindeyken; ayardan kapatılabilir) */
+function nearestPoi(){
+ const out=[];
+ const pick=(list,flagPre,gx,gy,id,col)=>{
+  let best=null;
+  (list||[]).forEach((it,i)=>{
+   if(!G.flags[flagPre+(id?id(it):i)])return;
+   const x=gx(it),y=gy(it),d=Math.hypot(x-G.px,y-G.py);
+   if(!best||d<best.d)best={x,y,d};
+  });
+  if(best)out.push(Object.assign(best,{col}));
+ };
+ pick(G.villages,'v',v=>v.cx,v=>v.cy,null,'#f0b040');
+ pick(G.camps,'c',c=>c.x+.5,c=>c.y+.5,c=>c.id,'#cfcac0');
+ pick(G.caves,'cave',c=>c.x+.5,c=>c.y+.5,c=>c.id,'#ff5a4a');
+ out.forEach(p=>{p.b=((Math.atan2(p.x-G.px,-(p.y-G.py))*180/Math.PI)+360)%360});
+ return out;
+}
 function drawCompass(){
  const el=$('#comp');if(!el||el.hidden||!HG.cfg.compass)return;
  const hd=((Math.atan2(G.fx||0,-(G.fy||-1))*180/Math.PI)+360)%360,wp=G.wp;
  let wb=null,wd=0;if(wp){wb=((Math.atan2(wp.x-G.px,-(wp.y-G.py))*180/Math.PI)+360)%360;wd=Math.hypot(wp.x-G.px,wp.y-G.py)}
- const key=Math.round(hd*3)+'|'+(wb===null?'':Math.round(wb*3)+'|'+Math.round(wd/3));
+ const poi=HG.cfg.compassPoi!==false?nearestPoi():[];
+ const key=Math.round(hd*3)+'|'+(wb===null?'':Math.round(wb*3)+'|'+Math.round(wd/3))+'|'+poi.map(p=>Math.round(p.b*3)).join(',');
  if(key===cmpKey)return;cmpKey=key;
  const cv=el.firstElementChild,g=cv.getContext('2d'),CW=cv.width,CH=cv.height,SPAN=110,ppd=CW/SPAN;
  g.clearRect(0,0,CW,CH);
@@ -118,6 +138,13 @@ function drawCompass(){
   }else{g.fillStyle='#bdb8b0';g.fillRect(x-.9,CH-19,1.8,5)}
  }
  g.globalAlpha=1;g.shadowBlur=0;
+ /* keşfedilen en yakın noktalar: yalnızca görüş açısı içindeyken küçük bir nokta */
+ for(const p of poi){
+  const df=((p.b-hd+540)%360)-180;if(Math.abs(df)>SPAN/2-2)continue;
+  const x=CW/2+df*ppd;
+  g.fillStyle=p.col;g.strokeStyle='#1a1a1c';g.lineWidth=1.2;
+  g.beginPath();g.arc(x,CH-8,3.6,0,7);g.fill();g.stroke();
+ }
  /* merkez imleci */
  g.fillStyle='#d9463c';g.beginPath();g.moveTo(CW/2,CH-12);g.lineTo(CW/2-7,CH-1);g.lineTo(CW/2+7,CH-1);g.closePath();g.fill();
  g.font='700 18px system-ui,Segoe UI,sans-serif';g.fillStyle='rgba(255,255,255,.95)';g.shadowColor='rgba(0,0,0,.95)';g.shadowBlur=5;g.fillText(Math.round(hd)+'°',CW/2,18);
@@ -151,6 +178,13 @@ function hud(){
  const sh=G.swim?'Su derinliği: '+Math.max(0,HG.sc.WY-HG.Scene.groundY(G.px,G.py)).toFixed(1)+' m':G.onRaft?'Sal dayanıklılığı: %'+Math.max(0,Math.round(G.raftHp))+' · Su derinliği: '+Math.max(0,HG.sc.WY-HG.Scene.groundY(G.px,G.py)).toFixed(1)+' m':G.sheltered?'Barınakta: soğuk azalır':G.nearFire?'Ateşin yanında: ısınıyorsun':'';
  if(hc.sh!==sh){hc.sh=sh;$('#shel').innerHTML=sh?'<span class="st s-shl">'+esc(sh)+'</span>':''}
  const gt=goalText();if(hc.gt!==gt){hc.gt=gt;$('#goal').innerHTML=gt}
+ /* aktif görevler: mini haritanın altındaki pano, yalnızca kabul edilmiş görev varken görünür */
+ if(HG.cfg.activeQuests!==false&&HG.questList){
+  const all=HG.questList();
+  const qh=all.slice(0,4).map(({n,q})=>`<div class="qp"><b>${esc(HG.questTitle(q))}</b><span>${esc(n.name)} · ${esc(HG.questProg(q))}</span></div>`).join('');
+  const qk=all.length+'|'+qh;
+  if(hc.qh!==qk){hc.qh=qk;const qe=$('#quests');if(qe){qe.innerHTML=qh;qe.hidden=!qh}}
+ }
  HG.bodyHud();
  $('#vr').style.opacity=clamp((35-G.hp)/35,0,.85);
  $('#vc').style.opacity=clamp((30-G.warm)/30,0,.8);

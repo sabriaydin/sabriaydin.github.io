@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Batch Rehberi: Dağıtım ve Yönetici Yetkisi</title>
-<meta name="description" content="Batch betiğini başkalarına verme, SmartScreen uyarıları, yönetici olarak çalıştırma, yönetici denetimi, kısayol oluşturma ve .exe'ye dönüştürme.">
+<meta name="description" content="Batch betiğini başkalarına verme, SmartScreen uyarıları, yönetici olarak çalıştırmayın, yönetici denetimi, kısayol oluşturma ve .exe'ye dönüştürme.">
 <meta name="kategori" content="batch">
 <meta name="tarih" content="2026-10-10 08:03">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,7 +30,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#1e8449;--b:#58d68d">
-<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch betiğini başkalarına verme, SmartScreen uyarıları, yönetici olarak çalıştırma, yönetici denetimi, kısayol oluşturma ve .exe&#x27;ye dönüştürme.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">.bat ve .cmd farkı</a></li><li><a href="#b2">Çalıştırma yolları</a></li><li><a href="#b3">Yönetici yetkisi</a></li><li><a href="#b4">SmartScreen ve güvenlik uyarıları</a></li><li><a href="#b5">Kısayol oluşturma</a></li><li><a href="#b6">Başka bilgisayarlara dağıtım</a></li><li><a href="#b7">Exe&#x27;ye dönüştürme</a></li><li><a href="#b8">Betik yayınlarken kontrol listesi</a></li><li><a href="#b9">Özet</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Batch Rehberi</small><p>Batch betiğini başkalarına verme, SmartScreen uyarıları, yönetici olarak çalıştırmayın, yönetici denetimi, kısayol oluşturma ve .exe&#x27;ye dönüştürme.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">.bat ve .cmd farkı</a></li><li><a href="#b2">Çalıştırma yolları</a></li><li><a href="#b3">Yönetici yetkisi</a></li><li><a href="#b4">SmartScreen ve güvenlik uyarıları</a></li><li><a href="#b5">Kısayol oluşturma</a></li><li><a href="#b6">Başka bilgisayarlara dağıtım</a></li><li><a href="#b7">Exe&#x27;ye dönüştürme</a></li><li><a href="#b8">Betik yayınlarken kontrol listesi</a></li><li><a href="#b9">Özet</a></li></ol></nav><!--/px-->
 <p>Bir betik yazıldıktan sonra başkalarının kullanabileceği hale getirilmesi için dağıtım ve yetki konuları bilinmelidir. Bu yazıda betiğin dosya türü, güvenlik uyarıları, yönetici yetkisi isteme, kısayol oluşturma ve paylaşım önerileri ele alınır.</p>
 <h2 id="b1">.bat ve .cmd farkı</h2>
 <ul>
@@ -41,7 +43,7 @@
 <thead><tr><th>Yol</th><th>Sonuç</th></tr></thead>
 <tbody>
 <tr><td>Çift tıklama</td><td>Betik çalışır, bitince pencere kapanır (<code>pause</code> yoksa).</td></tr>
-<tr><td>Sağ tık &gt; Yönetici olarak çalıştır</td><td>Yükseltilmiş yetkiyle çalışır.</td></tr>
+<tr><td>Sağ tık &gt; Yönetici olarak çalıştırın</td><td>Yükseltilmiş yetkiyle çalışır.</td></tr>
 <tr><td><code>cmd</code> penceresinde adı yazma</td><td>Pencere açık kalır, çıktı okunabilir.</td></tr>
 <tr><td><code>cmd /k betik.bat</code></td><td>Betik bitince pencere açık kalır.</td></tr>
 <tr><td><code>cmd /c betik.bat</code></td><td>Betik bitince pencere kapanır.</td></tr>
@@ -83,10 +85,10 @@ pause</pre>
 <p>İnternetten indirilen betiklere Windows, "Web'in işareti" (Mark of the Web) ekler. İlk çalıştırmada *Windows bilgisayarınızı korudu* (SmartScreen) uyarısı görünebilir.</p>
 <ul>
 <li>Uyarı, betiğin zararlı olduğu anlamına gelmez; kaynağı doğrulanamayan dosya anlamına gelir.</li>
-<li>Kendi yazılan veya güvenilen kaynaktan alınan betik için <b>Daha fazla bilgi &gt; Yine de çalıştır</b> seçilebilir.</li>
-<li>İşareti kaldırmak için dosya <b>Özellikler &gt; Engellemeyi kaldır</b> ile veya şu komutla serbest bırakılır: <code>powershell -Command "Unblock-File -Path betik.bat"</code>.</li>
+<li>Kendi yazılan veya güvenilen kaynaktan alınan betik için <b>Daha fazla bilgi &gt; Yine de çalıştırın</b> seçilebilir.</li>
+<li>İşareti kaldırmak için dosya <b>Özellikler &gt; Engellemeyi kaldırın</b> ile veya şu komutla serbest bırakılır: <code>powershell -Command "Unblock-File -Path betik.bat"</code>.</li>
 <li>Güvenilmeyen bir betik asla çalıştırılmamalıdır. Çalıştırmadan önce Not Defteri'nde açılıp içeriği okunmalıdır.</li>
-<li>Antivirüs yazılımları, bazı batch betiklerini (özellikle <code>powershell -ExecutionPolicy Bypass</code>, indirme ve <code>Start-Process -Verb RunAs</code> içerenleri) şüpheli bulabilir. Bu yöntemler kötü amaçlı yazılımlarda da kullanıldığı için yanlış alarm olasılığı vardır.</li>
+<li>Antivirüs yazılımları, bazı batch betiklerini (özellikle <code>powershell -ExecutionPolicy Bypass</code>, indirmeyin ve <code>Start-Process -Verb RunAs</code> içerenleri) şüpheli bulabilir. Bu yöntemler kötü amaçlı yazılımlarda da kullanıldığı için yanlış alarm olasılığı vardır.</li>
 </ul>
 <h2 id="b5">Kısayol oluşturma</h2>
 <pre>@echo off

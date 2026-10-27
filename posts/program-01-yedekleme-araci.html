@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Otomatik Yedekleme Aracı</title>
-<meta name="description" content="Seçtiğin klasörü tarih damgalı olarak yedekleyen, eski yedekleri kendiliğinden temizleyen hazır batch programı.">
+<meta name="description" content="Seçtiğiniz klasörü tarih damgalı olarak yedekleyen, eski yedekleri kendiliğinden temizleyen hazır batch programı.">
 <meta name="kategori" content="batchornek">
 <meta name="tarih" content="2026-03-28 13:24">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,13 +30,13 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#0e6655;--b:#1abc9c">
-<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Seçtiğin klasörü tarih damgalı olarak yedekleyen, eski yedekleri kendiliğinden temizleyen hazır batch programı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
-<p>Bu program bir klasörü (örneğin Belgelerim) her çalıştırdığında <b>tarih ve saat damgalı yeni bir klasöre</b> kopyalar. Hata olursa seni uyarır, her işlemi bir kayıt dosyasına yazar ve yalnızca en yeni birkaç yedeği saklayıp eskilerini siler. Böylece disk dolmaz.</p>
+<!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Seçtiğiniz klasörü tarih damgalı olarak yedekleyen, eski yedekleri kendiliğinden temizleyen hazır batch programı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
+<p>Bu program bir klasörü (örneğin Belgelerim) her çalıştırdığında <b>tarih ve saat damgalı yeni bir klasöre</b> kopyalar. Hata olursa sizi uyarır, her işlemi bir kayıt dosyasına yazar ve yalnızca en yeni birkaç yedeği saklayıp eskilerini siler. Böylece disk dolmaz.</p>
 <h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
-<li>Aşağıdaki kodu Not Defteri'ne yapıştır ve <code>yedekle.bat</code> adıyla kaydet (Kayıt türü: <b>Tüm dosyalar</b>).</li>
-<li>Dosyayı Not Defteri ile aç, yalnızca <b>AYARLAR</b> bölümündeki üç satırı kendine göre değiştir.</li>
-<li>Çift tıklayarak çalıştır. İlk denemeyi küçük bir klasörle yapman önerilir.</li>
+<li>Aşağıdaki kodu Not Defteri'ne yapıştırın ve <code>yedekle.bat</code> adıyla kaydedin (Kayıt türü: <b>Tüm dosyalar</b>).</li>
+<li>Dosyayı Not Defteri ile açın, yalnızca <b>AYARLAR</b> bölümündeki üç satırı kendinize göre değiştirin.</li>
+<li>Çift tıklayarak çalıştırın. İlk denemeyi küçük bir klasörle yapman önerilir.</li>
 </ol>
 <pre>@echo off
 setlocal
@@ -108,11 +110,11 @@ exit /b %SONUC%</pre>
 </ul>
 <h2 id="b3">Özelleştirme</h2>
 <ul>
-<li>Birden fazla klasör yedeklemek için <code>robocopy</code> satırını farklı <code>KAYNAK</code> değerleriyle tekrar yazabilirsin.</li>
-<li>Harici diske yedek alıyorsan <code>HEDEF=E:\Yedekler</code> gibi yaz. Disk takılı değilse program hata mesajı gösterir.</li>
-<li>Her gün otomatik çalışması için Başlat menüsünden <b>Görev Zamanlayıcı</b>'yı aç, "Temel görev oluştur" de ve <code>yedekle.bat</code> dosyasını seç.</li>
+<li>Birden fazla klasör yedeklemek için <code>robocopy</code> satırını farklı <code>KAYNAK</code> değerleriyle tekrar yazabilirsiniz.</li>
+<li>Harici diske yedek alıyorsanız <code>HEDEF=E:\Yedekler</code> gibi yazın. Disk takılı değilse program hata mesajı gösterir.</li>
+<li>Her gün otomatik çalışması için Başlat menüsünden <b>Görev Zamanlayıcı</b>'yı açın, "Temel görev oluştur" de ve <code>yedekle.bat</code> dosyasını seçin.</li>
 </ul>
-<blockquote>Dikkat: Her yedek klasörün <b>tam kopyasıdır</b>, bu yüzden hedef diskte yeterli yer olmalı. Yolların sonuna ters bölü (\) koyma; <code>D:\Yedekler\</code> yerine <code>D:\Yedekler</code> yaz.</blockquote>
+<blockquote>Dikkat: Her yedek klasörün <b>tam kopyasıdır</b>, bu yüzden hedef diskte yeterli yer olmalı. Yolların sonuna ters bölü (\) koyma; <code>D:\Yedekler\</code> yerine <code>D:\Yedekler</code> yazın.</blockquote>
 </div>
 </article>
 </main>

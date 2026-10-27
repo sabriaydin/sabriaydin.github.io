@@ -24,18 +24,27 @@ const card=(p,h='h2')=>`<a class="card tilt${p.pin?' pinned':''}" href="${url(p)
 const tilt=()=>{if(reduced)return;document.querySelectorAll('.tilt').forEach(el=>{if(el._t)return;el._t=1;const t=el,k=6;t.addEventListener('mousemove',e=>{const r=t.getBoundingClientRect();el.style.setProperty('--ry',((e.clientX-r.left)/r.width-.5)*k+'deg');el.style.setProperty('--rx',-((e.clientY-r.top)/r.height-.5)*k+'deg')});t.addEventListener('mouseleave',()=>{el.style.removeProperty('--rx');el.style.removeProperty('--ry')})})};
 
 /* Header ve footer */
-/* Kategori grupları (site.js > groups): grup başlığı + alt kategoriler; gruba girmeyenler tek başına */
-const fg=g=>({...g,items:(g.items||[]).filter(k=>C[k])});
+/* Öğe çözümleme: dizge kategori kısa adı, {url,name} bağlantı, {key,...} iç içe grup ya da {name,items:[{name,url}]} bağlantı alt menüsü olabilir */
+function pit(it){return typeof it==='string'?(C[it]?it:null):(it&&it.url&&it.name?it:(it&&it.key?fg(it):(it&&it.name&&Array.isArray(it.items)?{name:it.name,links:it.items.filter(l=>l&&l.url&&l.name)}:null)))}
+const okIt=it=>it&&(typeof it==='string'||it.url||(it.links?it.links.length:it.items.length));
+/* Kategori grupları (site.js > groups): grup başlığı + alt kategoriler/iç içe gruplar; gruba girmeyenler tek başına */
+function fg(g){return {...g,items:(g.items||[]).map(pit).filter(okIt)}}
 const G=(S.groups||[]).map(fg).filter(g=>g.key&&g.items.length);
 /* Ek açılır menüler (site.js > menus): öğe ya bir kategori kısa adı ya da kendi alt kategorileri olan bir grup nesnesidir */
-const M=(S.menus||[]).map(m=>m.link?(C[m.link]?{name:m.name,link:m.link,items:[]}:null):({name:m.name,items:(m.items||[]).map(it=>typeof it==='string'?(C[it]?it:null):(it&&it.url&&it.name?it:(it&&it.key?fg(it):(it&&it.name&&Array.isArray(it.items)?{name:it.name,links:it.items.filter(l=>l&&l.url&&l.name)}:null)))).filter(it=>it&&(typeof it==='string'||it.url||(it.links?it.links.length:it.items.length)))})).filter(m=>m&&m.name&&(m.link||m.items.length));
-const AG=G.concat(M.flatMap(m=>m.items.filter(it=>typeof it!=='string'&&it.key)));
+const M=(S.menus||[]).map(m=>m.link?(C[m.link]?{name:m.name,link:m.link,items:[]}:null):({name:m.name,items:(m.items||[]).map(pit).filter(okIt)})).filter(m=>m&&m.name&&(m.link||m.items.length));
+/* iç içe gruplar dahil tüm grupları, URL'deki ?grup= parametresi için derinlemesine toplar */
+function collectGroups(items){let out=[];(items||[]).forEach(it=>{if(it&&typeof it==='object'&&it.key){out.push(it);out=out.concat(collectGroups(it.items))}});return out}
+const AG=G.concat(collectGroups(G.flatMap(g=>g.items))).concat(collectGroups(M.flatMap(m=>m.items)));
+/* bir grubun (iç içe gruplar dahil) kapsadığı tüm kategori kısa adlarını düzleştirir */
+function leafCats(items){let out=[];(items||[]).forEach(it=>{if(typeof it==='string')out.push(it);else if(it&&it.items)out=out.concat(leafCats(it.items))});return out}
 /* bağlantı alt menüsü (site.js > menus > items: { name, items: [{ name, url }] }) */
 const lk=it=>`<a href="${/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(it.url)?'':root}${esc(it.url)}"${/^https?:/.test(it.url)?' target="_blank" rel="noopener"':''}>${esc(it.name)}</a>`;
 const su=g=>`<div class="sg"><span class="mg" tabindex="0" aria-haspopup="true">${esc(g.name)}<span class="ar" aria-hidden="true">▸</span></span><div class="sm"><div>${g.links.map(l=>lk(l).replace('<a ','<a class="sub" ')).join('')}</div></div></div>`;
-const inG=new Set(AG.flatMap(g=>g.items).concat(M.flatMap(m=>m.link?[m.link]:m.items.filter(it=>typeof it==='string'))));
+const inG=new Set(leafCats(G.flatMap(g=>g.items)).concat(leafCats(M.flatMap(m=>m.items))).concat(M.filter(m=>m.link).map(m=>m.link)));
 const ca=k=>`<a href="${home}?cat=${k}">${esc(C[k])}</a>`;
-const sg=g=>`<div class="sg"><a class="mg" href="${home}?grup=${g.key}" aria-haspopup="true">${esc(g.name)}<span class="ar" aria-hidden="true">▸</span></a><div class="sm"><div>${g.items.map(k=>ca(k).replace('<a ','<a class="sub" ')).join('')}</div></div></div>`;
+/* grup içindeki bir öğeyi türüne göre çizer: kategori, iç içe grup, doğrudan bağlantı ya da bağlantı alt menüsü */
+const ri=it=>typeof it==='string'?ca(it).replace('<a ','<a class="sub" '):it.key?sg(it):it.url?lk(it).replace('<a ','<a class="sub" '):su(it);
+function sg(g){return `<div class="sg"><a class="mg" href="${home}?grup=${g.key}" aria-haspopup="true">${esc(g.name)}<span class="ar" aria-hidden="true">▸</span></a><div class="sm"><div>${g.items.map(ri).join('')}</div></div></div>`}
 const catHtml=G.map(sg).concat(Object.keys(C).filter(k=>!inG.has(k)).map(ca));
 $('#hdr').innerHTML=`<header class="top"><div class="wrap bar"><a class="logo" href="${home}">Sabri <b>Aydın</b></a><nav id="nav" aria-label="Ana menü"><a href="${home}"${page==='home'?' aria-current="page"':''}>Ana Sayfa</a><div class="dd"><button type="button" id="ddb" aria-haspopup="true" aria-expanded="false">Kategoriler ▾</button><div class="menu">${catHtml.join('')}</div></div>${M.map(m=>m.link?`<a href="${home}?cat=${m.link}">${esc(m.name)}</a>`:`<div class="dd"><button type="button" aria-haspopup="true" aria-expanded="false">${esc(m.name)} ▾</button><div class="menu">${m.items.map(it=>typeof it==='string'?ca(it):it.url?`<a href="${/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(it.url)?'':root}${esc(it.url)}"${/^https?:/.test(it.url)?' target="_blank" rel="noopener"':''}>${esc(it.name)}</a>`:it.links?su(it):sg(it)).join('')}</div></div>`).join('')}</nav><div class="search" role="search"><input id="s" type="search" placeholder="Sitede ara" aria-label="Sitede ara" autocomplete="off"><div id="res" hidden></div></div><button type="button" class="ib burger" id="bg" aria-label="Menüyü aç" aria-expanded="false" aria-controls="nav">☰</button></div></header>`;
 const links=(S.links||[]).map(l=>`<li><a href="${/^(?:[a-z][a-z0-9+.-]*:|\/)/i.test(l.url)?'':root}${l.url}"${/^https?:/.test(l.url)?' target="_blank" rel="noopener"':''}>${l.text}</a></li>`).join('');
@@ -63,7 +72,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){res.hidden=true;sel
 /* Ana sayfa */
 if(page==='home'){
 app.innerHTML=`<div class="wrap pg"><h1 class="sr">${S.name}: ${esc(S.description||'')}</h1><p class="status" id="cnt" hidden><span id="cntt"></span><a href="${home}">Tüm yazılara dön</a></p><div class="grid list" id="list"></div><nav class="pager" id="pager" aria-label="Sayfalama" hidden></nav><p class="sr" id="pgs" aria-live="polite"></p></div>`;
-const PER=5; // sayfa başına yazı sayısı
+const PER=7; // sayfa başına yazı sayısı
 const gk=v=>AG.some(g=>g.key===v)?v:'';
 let tot=1,cat=C[q.get('cat')]?q.get('cat'):'',grp=cat?'':gk(q.get('grup')),pg=Math.max(1,parseInt(q.get('sayfa'),10)||1),last=s.value.trim();
 const qs=n=>{const u=new URLSearchParams(),t=s.value.trim();if(cat)u.set('cat',cat);else if(grp)u.set('grup',grp);if(t)u.set('q',t);if(n>1)u.set('sayfa',n);return u.toString()};
@@ -72,7 +81,7 @@ const href=n=>home+(qs(n)?'?'+qs(n):'');
 const nums=(n,c)=>{let a=[];if(n<=9)for(let i=1;i<=n;i++)a.push(i);else if(c<=4)a=[1,2,3,4,5,n];else if(c>=n-3)a=[1,n-4,n-3,n-2,n-1,n];else a=[1,c-1,c,c+1,n];const o=[];a.forEach((v,i)=>{if(i&&v-a[i-1]>1)o.push(0);o.push(v)});return o};
 const pb=(n,t,rel,off)=>off?`<span class="pgb off" aria-hidden="true">${t}</span>`:`<a class="pgb" rel="${rel}" href="${href(n)}" data-p="${n}">${t}</a>`;
 const pager=(n,c)=>`${pb(c-1,'‹ Önceki','prev',c<=1)}<ul>${nums(n,c).map(v=>v?`<li><a class="pgn" href="${href(v)}" data-p="${v}" aria-label="Sayfa ${v}"${v===c?' aria-current="page"':''}>${v}</a></li>`:'<li><button type="button" class="gap" data-gap aria-label="Sayfa numarası yaz ve git">…</button></li>').join('')}</ul>${pb(c+1,'Sonraki ›','next',c>=n)}`;
-const draw=()=>{window.lxMount&&lxMount(cat,grp);const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi);let r=find(term).filter(p=>cat?p.cat===cat:gi?gi.items.includes(p.cat):true).filter(p=>!window.LXF||LXF.pass(p));pinCtx=term?0:(cat||gi?2:1);if(pinCtx)r=r.filter(pinOn).concat(r.filter(p=>!pinOn(p)));
+const draw=()=>{window.lxMount&&lxMount(cat,grp);const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi);let r=find(term).filter(p=>cat?p.cat===cat:gi?leafCats(gi.items).includes(p.cat):true).filter(p=>!window.LXF||LXF.pass(p));pinCtx=term?0:(cat||gi?2:1);if(pinCtx)r=r.filter(pinOn).concat(r.filter(p=>!pinOn(p)));
 if(term!==last){pg=1;last=term}
 const n=Math.max(1,Math.ceil(r.length/PER));pg=Math.min(pg,n);tot=n;
 $('#cnt').hidden=!f;$('#cntt').textContent=[cat&&C[cat]+' kategorisi',gi&&gi.name+' kategorisi',term&&'“'+term+'” araması'].filter(Boolean).join(' ve ')+': '+r.length+' yazı';
@@ -111,10 +120,12 @@ cp.onclick=async()=>{const u=location.href.split('#')[0];let ok=false;
 try{await navigator.clipboard.writeText(u);ok=true}catch(e){const t=document.createElement('textarea');t.value=u;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();try{ok=document.execCommand('copy')}catch(e2){}t.remove()}
 cp.textContent=ok?'Kopyalandı ✓':'Kopyalanamadı';setTimeout(()=>cp.textContent='Bağlantıyı kopyala',1800)};
 meta.appendChild(cp)}
+/* Kategoriye özel şablon */
+{const ct=(document.querySelector('meta[name="kategori"]')||{}).content||'';if(window.Sablon&&Sablon.has(ct))Sablon.apply(art,ct,{desc:(document.querySelector('meta[name="description"]')||{}).content||'',catName:C[ct]||ct})}
 /* Şık yazı görünümü: dosyasına işlenmemiş (yeni) yazılarda aynı görünümü çalışırken ekler */
-{const bd=$('.body',art);if(bd&&!$('.px-hero,.wx-hero,.px-toc',bd)){
+{const bd=$('.body',art);if(bd&&!art.dataset.tpl&&!$('.px-hero,.wx-hero,.px-toc',bd)){
 if(!document.querySelector('link[href$="yazi.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href=root+'assets/css/yazi.css';document.head.appendChild(l)}
-const PAL={windows:['#0067c0','#00a4ef'],windowsos:['#1f4e8c','#3d8bd9'],html:['#e44d26','#f0a04b'],htmlaraclari:['#c0392b','#ff7e5f'],linuxos:['#e95420','#f39c12'],linuxgelismis:['#8e3a12','#d9822b'],oyunrehber:['#6a1b9a','#ba68c8'],oyunonerileri:['#ad1457','#f06292'],modyama:['#2e7d32','#81c784'],batch:['#1e8449','#58d68d'],batchornek:['#0e6655','#1abc9c'],sistemaraclari:['#5b3fa0','#9b6bd9'],medya:['#c2185b','#ff6f91'],ofis:['#1565c0','#42a5f5'],guvenlik:['#b71c1c','#ef5350'],gelistirici:['#283593','#7986cb'],eklentiler:['#00838f','#4dd0e1'],araclar:['#6d4c41','#bcaaa4']};
+const PAL={windows:['#0067c0','#00a4ef'],windowsos:['#1f4e8c','#3d8bd9'],html:['#e44d26','#f0a04b'],htmlaraclari:['#c0392b','#ff7e5f'],linuxos:['#e95420','#f39c12'],linuxgelismis:['#8e3a12','#d9822b'],batch:['#1e8449','#58d68d'],batchornek:['#0e6655','#1abc9c'],sistemaraclari:['#5b3fa0','#9b6bd9'],medya:['#c2185b','#ff6f91'],ofis:['#1565c0','#42a5f5'],guvenlik:['#b71c1c','#ef5350'],gelistirici:['#283593','#7986cb'],eklentiler:['#00838f','#4dd0e1'],araclar:['#6d4c41','#bcaaa4']};
 const cat=(document.querySelector('meta[name="kategori"]')||{}).content||'',pc=PAL[cat]||['#b72a25','#ec6a63'];
 bd.style.setProperty('--a',pc[0]);bd.style.setProperty('--b',pc[1]);
 const hs=[...bd.querySelectorAll('h2')];hs.forEach((h,k)=>{if(!h.id)h.id='b'+(k+1);if(/indir/i.test(h.textContent)){const n=h.nextElementSibling;if(n&&n.tagName==='P'&&n.querySelector('a[href^="http"]'))n.classList.add('px-dl')}});
@@ -134,7 +145,7 @@ app.insertAdjacentHTML('beforeend',h)}
 /* Yana kaydırılabilen kod blokları klavyeyle de kaydırılabilsin */
 const prePin=()=>art.querySelectorAll('pre,table').forEach(e=>{e.scrollWidth>e.clientWidth?e.tabIndex=0:e.removeAttribute('tabindex')});prePin();addEventListener('resize',prePin);
 /* Her kod bloğuna (<pre>) şık bir "Kopyala" düğmesi ekle */
-art.querySelectorAll('.body>pre').forEach(pre=>{
+art.querySelectorAll('.body>pre,.body>section>pre').forEach(pre=>{
   if(pre.querySelector('.code-copy'))return;
   const btn=document.createElement('button');btn.type='button';btn.className='code-copy';btn.setAttribute('aria-label','Kodu kopyala');
   const icoCopy='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';

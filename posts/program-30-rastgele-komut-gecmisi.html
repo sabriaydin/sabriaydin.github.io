@@ -18,10 +18,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -32,11 +34,11 @@
 <div class="body" style="--a:#0e6655;--b:#1abc9c">
 <!--px--><div class="px-hero"><small>Batch Uygulamaları</small><p>Daha önce girilmiş gibi görünen rastgele komut satırlarını listeleyen, bir komut geçmişini taklit eden batch programı.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Nasıl kullanılır?</a></li><li><a href="#b2">Kod nasıl çalışıyor?</a></li><li><a href="#b3">Özelleştirme</a></li></ol></nav><!--/px-->
 <p>Bu program, önceden hazırlanmış örnek komutlardan rastgele bir liste seçip ekrana yazarak, sanki daha önce bu komutlar girilmiş gibi bir geçmiş görünümü oluşturur.</p>
-<div class="uyari"><p><b>Önemli:</b> Bu program tamamen görsel bir gösteridir; hiçbir dosyayı silmez, hiçbir ayarı değiştirmez ve internete bağlanmaz. Yalnızca ekran yazısını, rengini ve bir pencere başlığını değiştirir; pencereyi kapattığında bilgisayarında hiçbir iz kalmaz. Şaka amaçlı kullanırken karşındaki kişiyi gerçekten korkutmamaya dikkat et.</p></div>
+<div class="uyari"><p><b>Önemli:</b> Bu program tamamen görsel bir gösteridir; hiçbir dosyayı silmez, hiçbir ayarı değiştirmez ve internete bağlanmaz. Yalnızca ekran yazısını, rengini ve bir pencere başlığını değiştirir; pencereyi kapattığınızda bilgisayarınızda hiçbir iz kalmaz. Şaka amaçlı kullanırken karşındaki kişiyi gerçekten korkutmamaya dikkat et.</p></div>
 <h2 id="b1">Nasıl kullanılır?</h2>
 <ol>
-<li>Aşağıdaki kodu Not Defteri'ne yapıştır ve <code>program-30-rastgele-komut-gecmisi.bat</code> adıyla kaydet (Kayıt türü: <b>Tüm dosyalar</b>).</li>
-<li>Çift tıklayarak çalıştır. Kapatmak için pencereyi normal şekilde kapat veya <code>Ctrl+C</code> kullan.</li>
+<li>Aşağıdaki kodu Not Defteri'ne yapıştırın ve <code>program-30-rastgele-komut-gecmisi.bat</code> adıyla kaydedin (Kayıt türü: <b>Tüm dosyalar</b>).</li>
+<li>Çift tıklayarak çalıştırın. Kapatmak için pencereyi normal şekilde kapatın veya <code>Ctrl+C</code> kullanın.</li>
 </ol>
 <pre>@echo off
 title Komut Gecmisi
@@ -59,7 +61,7 @@ pause >nul</pre>
 <h2 id="b2">Kod nasıl çalışıyor?</h2>
 <p>Altı örnek komut önceden tanımlanır; döngü her seferinde rastgele birini seçerek numaralandırılmış bir liste halinde yazdırır. <code>^&gt;</code> ifadesi, komut isteminde özel anlamı olan <code>&gt;</code> karakterinin düz metin olarak yazılmasını sağlar.</p>
 <h2 id="b3">Özelleştirme</h2>
-<p>Kodun başındaki <b>AYARLAR</b> bölümündeki (varsa) değerleri değiştirerek metni, rengi veya hızı kendine göre ayarlayabilirsin. <code>color 0a</code> komutundaki ilk rakam zemin, ikinci rakam yazı rengidir (0: siyah, a: açık yeşil, b: açık camgöbeği, c: açık kırmızı, e: sarı, f: beyaz).</p>
+<p>Kodun başındaki <b>AYARLAR</b> bölümündeki (varsa) değerleri değiştirerek metni, rengi veya hızı kendinize göre ayarlayabilirsiniz. <code>color 0a</code> komutundaki ilk rakam zemin, ikinci rakam yazı rengidir (0: siyah, a: açık yeşil, b: açık camgöbeği, c: açık kırmızı, e: sarı, f: beyaz).</p>
 </div>
 </article>
 </main>

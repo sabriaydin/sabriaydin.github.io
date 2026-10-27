@@ -1,17 +1,17 @@
 // SİTE AYARLARI: metinleri, kategorileri ve bağlantıları buradan düzenle
 window.SITE = {
   name: 'Sabri Aydın',
-  description: 'Teknoloji, kodlama ve video oyunları üzerine kişisel blog.',
+  description: 'Teknoloji ve kodlama üzerine kişisel blog.',
 
   // Footer'ın ilk sütunundaki metin
-  about: 'Teknoloji, kodlama ve video oyunları üzerine notlar. Beğendiğim şeyleri burada paylaşıyorum.',
+  about: 'Teknoloji ve kodlama üzerine notlar. Beğendiğim şeyleri burada paylaşıyorum.',
 
   // Kategoriler: 'kısa-ad': 'Menüde görünen ad'
   // Yazıdaki kategori satırında (kategori) soldaki kısa adı kullan. Yeni kategori için buraya bir satır ekle.
   // Listede en yeni yazı üstte görünür (sıralama yazının tarihine ve saatine göre yapılır).
   categories: {
     windows: 'Windows Rehber',
-    windowsos: 'Windows İşletim Sistemleri',
+    windowsos: 'Windows Sürümleri',
     html: 'HTML Rehberi',
     htmlaraclari: 'HTML Uygulamaları',
     linux: 'Linux Rehber',
@@ -25,21 +25,21 @@ window.SITE = {
     guvenlik: 'Güvenlik ve Gizlilik',
     gelistirici: 'Geliştirici Araçları',
     eklentiler: 'Tarayıcı Eklentileri',
-    araclar: 'Araçlar',
-    oyunrehber: 'Oyun Rehberleri',
-    oyunonerileri: 'Oyun Önerileri',
-    modyama: 'Mod ve Yama'
+    araclar: 'Araçlar'
   },
 
   // Menüdeki alt kategori grupları: Kategoriler > Grup > Kategori
   // name: menüde görünen grup adı, key: adres için kısa ad, items: gruba giren kategorilerin kısa adları
   // Hiçbir gruba girmeyen kategoriler (ör. araclar) menüde tek başına görünür. Grupları silersen menü düz liste olur.
   groups: [
-    { key: 'windows', name: 'Windows', items: ['windows', 'windowsos'] },
-    { key: 'linux', name: 'Linux', items: ['linux', 'linuxos', 'linuxgelismis'] },
-    { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
-    { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] },
-    { key: 'oyun', name: 'Video Oyunları', items: ['oyunrehber', 'oyunonerileri', 'modyama'] }
+    { key: 'isletimsistemleri', name: 'İşletim Sistemleri', items: [
+      { key: 'windows', name: 'Windows', items: ['windows', 'windowsos'] },
+      { key: 'linux', name: 'Linux', items: ['linux', 'linuxos', 'linuxgelismis'] }
+    ] },
+    { key: 'kodlama', name: 'Kodlama', items: [
+      { key: 'html', name: 'HTML', items: ['html', 'htmlaraclari'] },
+      { key: 'batch', name: 'Batch', items: ['batch', 'batchornek'] }
+    ] }
   ],
 
   // Ana menüde Kategoriler'in yanında görünen ek açılır menüler (Kategoriler içinde tekrar gösterilmez)
@@ -61,7 +61,7 @@ window.SITE = {
       name: 'Projeler',
       items: [
         { name: 'Oyunlar', items: [
-          { name: 'Hunger (Tarayıcı Tabanlı)', url: 'projeler/oyunlar/hunger/' }
+          { name: 'Hunger', url: 'projeler/oyunlar/hunger/' }
         ] },
         { name: 'Yazılımlarım', items: [
           { name: 'Parola Defteri', url: 'projeler/programlar/parola-defteri/' },

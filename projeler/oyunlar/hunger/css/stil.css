@@ -23,9 +23,15 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-ac
 #clock{position:absolute;bottom:12px;right:12px;padding:6px 14px;background:rgba(13,13,14,.78);border:1px solid var(--line);border-radius:20px;font-size:13px;white-space:nowrap}
 #comp{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:min(600px,calc(100vw - 280px));height:46px;pointer-events:none}
 #comp canvas{display:block;width:100%;height:100%}
-#goal{position:absolute;top:46px;left:50%;transform:translateX(-50%);max-width:min(560px,92vw);padding:6px 14px;background:rgba(13,13,14,.7);border-left:3px solid var(--red);border-radius:4px;font-size:13px;color:var(--tx);text-align:left}
+#goal{position:absolute;top:62px;left:50%;transform:translateX(-50%);max-width:min(560px,92vw);padding:6px 14px;background:rgba(13,13,14,.7);border-left:3px solid var(--red);border-radius:4px;font-size:13px;color:var(--tx);text-align:left}
 #goal small{display:block;color:var(--mut);font-size:11px}
 #mini{position:absolute;right:12px;top:12px;width:132px;height:132px;border:1px solid var(--line);border-radius:6px;background:#000;image-rendering:pixelated}
+/* aktif görevler: mini haritanın altında, sağ kenara hizalı pano (yalnızca kabul edilmiş görev varken görünür) */
+#quests{position:absolute;right:12px;top:160px;width:188px;max-width:40vw;display:grid;gap:6px;padding:9px 11px;background:rgba(13,13,14,.78);border:1px solid var(--line);border-radius:8px;font-size:12px}
+#quests .qp{display:grid;gap:1px}
+#quests .qp b{font-size:12.5px;color:var(--tx)}
+#quests .qp span{color:var(--mut);font-size:11px}
+#quests .qp.more{color:var(--mut);font-size:11px;text-align:center}
 #feed{position:absolute;left:12px;bottom:236px;display:grid;gap:4px;pointer-events:none}
 #feed div{background:rgba(13,13,14,.8);border-left:3px solid var(--red);padding:3px 10px;font-size:13px;border-radius:3px;animation:fe 2.8s forwards}
 @keyframes fe{0%{opacity:0;transform:translateX(-10px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
@@ -96,6 +102,7 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
  #hud{width:150px;padding:8px}
  .bar{grid-template-columns:48px 1fr;font-size:11px}
  #mini{width:92px;height:92px}
+ #quests{top:104px;width:140px;font-size:11px;padding:7px 9px}
  #clock{right:12px;bottom:12px;font-size:12px;padding:4px 10px}
  #comp{width:calc(100vw - 130px);left:12px;transform:none;height:28px}
  #goal{top:114px;left:12px;transform:none;max-width:calc(100vw - 24px);font-size:12px}
@@ -171,9 +178,9 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .snone,.snote{color:var(--mut);font-size:12.5px;margin:12px 2px 0;line-height:1.5}
 .sqi,.spf{grid-column:1/-1;color:var(--mut);font-size:11px;margin-top:2px}
 .spf{color:#8fb98f}
-#game.photo #hud,#game.photo #hot,#game.photo #comp,#game.photo #clock,#game.photo #goal,#game.photo #mini,#game.photo #cross,#game.photo #tgt,#game.photo #tip,#game.photo #prog,#game.photo #feed,#game.photo #zn,#game.photo #hitm,#game.photo #touch{display:none!important}
+#game.photo #hud,#game.photo #hot,#game.photo #comp,#game.photo #clock,#game.photo #goal,#game.photo #mini,#game.photo #quests,#game.photo #cross,#game.photo #tgt,#game.photo #tip,#game.photo #prog,#game.photo #feed,#game.photo #zn,#game.photo #hitm,#game.photo #touch{display:none!important}
 #game.menu2d canvas#c{visibility:hidden}
-#game.no-compass #comp,#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip,#game.no-cross #cross{display:none!important}
+#game.no-compass #comp,#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip,#game.no-cross #cross,#game.no-quests #quests{display:none!important}
 #hud{transform:scale(var(--ui,1));transform-origin:left bottom}
 #hot{transform:translateX(-50%) scale(var(--ui,1));transform-origin:center bottom}
 @media (pointer:coarse){#hud{transform-origin:left top}}
@@ -218,21 +225,28 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .qi{display:grid;place-items:center;font-size:22px;font-weight:700;color:var(--red)}
 #stat2{white-space:pre-line;font-size:13px;color:var(--mut)}
 
-/* yüklenme ekranı */
-#load{position:absolute;inset:0;z-index:90;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#1a0b0b 0%,#050506 70%);transition:opacity .5s;padding:16px}
+/* yüklenme ekranı: sol üstte logo, en altta sağdan soldan uca uzanan yükleme çubuğu */
+#load{position:absolute;inset:0;z-index:90;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#1a0b0b 0%,#050506 70%);transition:opacity .5s}
 #load[hidden]{display:none}
 #load.out{opacity:0;pointer-events:none}
-#load .lbox{width:min(440px,92vw);text-align:center}
-#load h1{margin:0;font-size:46px;letter-spacing:.18em}
+.ld-top{position:absolute;left:28px;top:44px}
+#load h1{margin:0;font-size:30px;letter-spacing:.14em}
 #load h1 span{color:var(--red)}
-#loadT{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#ddd;margin:30px 0 12px}
-#load .lbar{height:4px;background:#2a2a2e;border-radius:2px;overflow:hidden}
+#loadT{display:none}
+.ld-bottom{position:absolute;left:0;right:0;bottom:100px}
+/* bilgilendirme metinleri: ipucu solda, durum metni sağda, aynı satırda */
+.ld-info{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:0 24px 12px}
+#loadTip{margin:0;font-size:15px;color:#a6a6ae;line-height:1.5;flex:1 1 auto;min-width:0}
+#loadSub{font-size:15px;color:#e8e6e2;letter-spacing:.03em;white-space:nowrap;flex:0 0 auto;text-align:right}
+#load .lbar{width:100%;height:34px;background:#19191d;overflow:hidden}
 #load .lbar[hidden]{display:none}
-#loadBar{display:block;height:100%;width:0;background:linear-gradient(90deg,#7a1010,#e02a2a);box-shadow:0 0 12px #e02a2a;transition:width .25s}
-#load .lrow{display:flex;justify-content:space-between;font-size:12px;color:#8a8a90;margin-top:8px;min-height:16px}
-#loadTip{margin:34px 0 0;font-size:13px;color:#9a9aa0;line-height:1.55;min-height:40px}
-#load{overflow:auto}
-@media (max-height:420px){#load h1{font-size:30px}#loadT{margin-top:12px}#loadTip{margin-top:14px;min-height:0}}
+#loadBar{display:block;height:100%;width:0;background:#e02a2a;transition:width .3s ease-out}
+/* yüklenme çubuğunun yüzdesi: çubuğun sağ altında */
+.ld-pctrow{display:flex;justify-content:flex-end;padding:10px 24px 0}
+#loadPct{font-size:18px;color:#f0eee9;font-weight:700;font-variant-numeric:tabular-nums}
+@media (max-width:640px){.ld-top{left:18px;top:32px}#load h1{font-size:25px}.ld-info{padding:0 16px}.ld-pctrow{padding:6px 16px 0}}
+@media (max-height:600px){.ld-bottom{bottom:60px}}
+@media (max-height:420px){.ld-top{top:20px}.ld-bottom{bottom:30px}#load .lbar{height:30px}}
 
 /* dokunmatik cihazlarda durum çubukları sol üstte kalır (sol altta joystick bulunur) */
 @media (pointer:coarse){#hud{top:12px;bottom:auto}#feed{bottom:92px}}

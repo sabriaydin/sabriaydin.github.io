@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -29,13 +31,13 @@
 <article class="post">
 <div class="body" style="--a:#e44d26;--b:#f0a04b">
 <!--px--><div class="px-hero"><small>HTML Rehberi</small><p>audio ve video etiketleri, birden fazla kaynak, YouTube ve harita gibi içerikleri iframe ile sayfaya gömme.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ses: audio</a></li><li><a href="#b2">Video: video</a></li><li><a href="#b3">Başka sitelerden içerik gömme: iframe</a></li><li><a href="#b4">Sayfaya sığdırma</a></li><li><a href="#b5">Dikkat edilecekler</a></li></ol></nav><!--/px-->
-<p>HTML ile sayfana ses ve video ekleyebilir, başka sitelerdeki içerikleri (YouTube videosu, harita) sayfanın içine gömebilirsin. Eklenti ya da ek program gerekmez; modern tarayıcılar bunları kendisi oynatır.</p>
+<p>HTML ile sayfanıza ses ve video ekleyebilir, başka sitelerdeki içerikleri (YouTube videosu, harita) sayfanın içine gömebilirsiniz. Eklenti ya da ek program gerekmez; modern tarayıcılar bunları kendisi oynatır.</p>
 <h2 id="b1">Ses: audio</h2>
 <pre>&lt;audio controls src="muzik/ornek.mp3"&gt;
   Tarayıcın ses öğesini desteklemiyor.
 &lt;/audio&gt;</pre>
 <ul>
-<li><code>controls</code>: Oynat, durdur ve ses düğmelerini gösterir. Yazmazsan oynatıcı görünmez.</li>
+<li><code>controls</code>: Oynat, durdur ve ses düğmelerini gösterir. Yazmazsanız oynatıcı görünmez.</li>
 <li>Etiketin içindeki metin, tarayıcı etiketi tanımazsa gösterilir.</li>
 <li>En yaygın formatlar: MP3, OGG, WAV.</li>
 </ul>
@@ -67,12 +69,12 @@
   allowfullscreen&gt;
 &lt;/iframe&gt;</pre>
 <ul>
-<li><code>title</code>: Ekran okuyucular için iframe'in ne olduğunu söyler. Boş bırakma.</li>
+<li><code>title</code>: Ekran okuyucular için iframe'in ne olduğunu söyler. Boş bırakmayın.</li>
 <li><code>src</code>: Gömülecek sayfanın adresi.</li>
 <li><code>allowfullscreen</code>: Tam ekran düğmesini açar.</li>
 </ul>
 <h2 id="b4">Sayfaya sığdırma</h2>
-<p>Sabit genişlikli video küçük ekranda taşabilir. CSS ile kapsayıcı genişliğine uydurabilirsin:</p>
+<p>Sabit genişlikli video küçük ekranda taşabilir. CSS ile kapsayıcı genişliğine uydurabilirsiniz:</p>
 <pre>&lt;style&gt;
   iframe, video { max-width: 100%; }
   .video-kutu iframe { width: 100%; aspect-ratio: 16 / 9; height: auto; border: 0; }
@@ -84,12 +86,12 @@
 <h2 id="b5">Dikkat edilecekler</h2>
 <ul>
 <li><b>Dosya boyutu</b>: Büyük video dosyaları sitenin açılışını yavaşlatır ve yükleme sınırlarına takılabilir. Uzun videoları bir video sitesine yükleyip <code>iframe</code> ile gömmek daha pratiktir.</li>
-<li><b>Telif hakkı</b>: Yalnızca kullanım hakkın olan müzik ve videoları yayınla.</li>
-<li><b>Otomatik ses</b>: Sayfa açılır açılmaz ses çalan sayfalar kullanıcıyı rahatsız eder; <code>autoplay</code> kullanıyorsan videoyu sessiz başlat.</li>
+<li><b>Telif hakkı</b>: Yalnızca kullanım hakkınız olan müzik ve videoları yayınlayın.</li>
+<li><b>Otomatik ses</b>: Sayfa açılır açılmaz ses çalan sayfalar kullanıcıyı rahatsız eder; <code>autoplay</code> kullanıyorsanız videoyu sessiz başlatın.</li>
 <li><b>Yol hataları</b>: Dosya <code>src</code> içindeki yolda yoksa oynatıcı boş görünür. 4. dersteki yol kurallarının aynısı geçerli.</li>
 </ul>
-<blockquote>Denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına bir YouTube gömme kodu yapıştırıp çalıştığını görebilirsin.</blockquote>
-<p>Sonraki derste sayfana renk, yazı tipi ve düzen kazandıran CSS'e giriş yapacaksın.</p>
+<blockquote>Denemek için <a href="html-arac-02-html-onizleme.html">HTML Önizleme</a> aracına bir YouTube gömme kodu yapıştırıp çalıştığını görebilirsiniz.</blockquote>
+<p>Sonraki derste sayfanıza renk, yazı tipi ve düzen kazandıran CSS'e giriş yapacaksınız.</p>
 </div>
 </article>
 </main>

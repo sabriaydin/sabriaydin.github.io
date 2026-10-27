@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Zamanlı Bilgisayar Kapatma Komutu Oluşturucu</title>
-<meta name="description" content="Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluştur; .bat dosyası olarak indir.">
+<meta name="description" content="Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluşturun; .bat dosyası olarak indirin.">
 <meta name="kategori" content="araclar">
 <meta name="tarih" content="2026-10-01 11:25">
 <meta name="author" content="Sabri Aydın">
@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,9 +30,9 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#6d4c41;--b:#bcaaa4">
-<!--px--><div class="px-hero"><small>Araçlar</small><p>Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluştur; .bat dosyası olarak indir.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı dene</a></li><li><a href="#b2">Komut nasıl çalıştırılır?</a></li><li><a href="#b3">İşlemler ve karşılıkları</a></li><li><a href="#b4">Parametrelerin anlamı</a></li><li><a href="#b5">Belirli saatte kapatma</a></li><li><a href="#b6">Dikkat edilecekler</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Araçlar</small><p>Bilgisayarı belirli bir süre sonra veya belirli saatte kapatmak, yeniden başlatmak ya da uyutmak için CMD komutunu otomatik oluşturun; .bat dosyası olarak indirin.</p></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Aracı deneyin</a></li><li><a href="#b2">Komut nasıl çalıştırılır?</a></li><li><a href="#b3">İşlemler ve karşılıkları</a></li><li><a href="#b4">Parametrelerin anlamı</a></li><li><a href="#b5">Belirli saatte kapatma</a></li><li><a href="#b6">Dikkat edilecekler</a></li></ol></nav><!--/px-->
 <p>Windows, <code>shutdown</code> komutuyla bilgisayarı zamanlı olarak kapatabilir. Komutun parametreleri (<code>/s</code>, <code>/r</code>, <code>/t</code>, <code>/f</code>, <code>/c</code>, <code>/d</code>) ezberlenmeden kullanılamaz. Bu araç, seçilen işlem ve zamana göre hazır komutu üretir; iptal komutunu da birlikte verir.</p>
-<h2 id="b1">Aracı dene</h2>
+<h2 id="b1">Aracı deneyin</h2>
 <style>#sk-gs,#sk-ts,#sk-ms{display:grid;gap:14px}#sk-gs[hidden],#sk-ts[hidden],#sk-ms[hidden]{display:none}</style>
 <div class="arac">
   <div class="satir">
@@ -88,7 +90,7 @@
     </div>
   </div>
   <div class="satir" style="grid-template-columns:1fr">
-    <label for="sk-neden">Neden kodu (olay günlüğü için, yalnızca kapat ve yeniden başlat işlemlerinde)
+    <label for="sk-neden">Neden kodu (olay günlüğü için, yalnızca kapatın ve yeniden başlat işlemlerinde)
       <select id="sk-neden">
         <option value="">Belirtme</option>
         <option value="P:4:1">Planlı: Uygulama bakımı</option>
@@ -105,8 +107,8 @@
   <h3 style="margin:6px 0 0">İptal komutu</h3>
   <div class="kod"><code id="sk-iptal"></code><button type="button" class="ikinci" data-kopyala="sk-iptal">Kopyala</button></div>
   <div class="dugmeler">
-    <button type="button" id="sk-bat">Başlatma dosyasını indir (.bat)</button>
-    <button type="button" class="ikinci" id="sk-ibat">İptal dosyasını indir (.bat)</button>
+    <button type="button" id="sk-bat">Başlatma dosyasını indirin (.bat)</button>
+    <button type="button" class="ikinci" id="sk-ibat">İptal dosyasını indirin (.bat)</button>
   </div>
 </div>
 <script>
@@ -188,9 +190,9 @@ hesapla();
 </script>
 <h2 id="b2">Komut nasıl çalıştırılır?</h2>
 <ol>
-<li>Üretilen komutu <b>Kopyala</b> düğmesiyle kopyala.</li>
-<li><code>Win + R</code> tuşlarına basıp <code>cmd</code> yazarak Komut İstemi'ni aç. Komut doğrudan <code>Win + R</code> penceresine de yapıştırılabilir.</li>
-<li>Komutu yapıştırıp <code>Enter</code> tuşuna bas. Kapatma geri sayımı başlar ve Windows bir bildirim gösterir.</li>
+<li>Üretilen komutu <b>Kopyala</b> düğmesiyle kopyalayın.</li>
+<li><code>Win + R</code> tuşlarına basıp <code>cmd</code> yazarak Komut İstemi'ni açın. Komut doğrudan <code>Win + R</code> penceresine de yapıştırılabilir.</li>
+<li>Komutu yapıştırıp <code>Enter</code> tuşuna basın. Kapatma geri sayımı başlar ve Windows bir bildirim gösterir.</li>
 <li>Vazgeçmek için <b>iptal komutu</b> çalıştırılır (<code>shutdown /a</code>).</li>
 </ol>
 <p>Komutu her seferinde yazmamak için <b>Başlatma dosyasını indir</b> düğmesiyle <code>.bat</code> dosyası alınabilir; dosyaya çift tıklanması yeterlidir.</p>
@@ -221,7 +223,7 @@ hesapla();
 <h2 id="b6">Dikkat edilecekler</h2>
 <ul>
 <li>Zorla kapatma (<code>/f</code>) seçiliyken kaydedilmemiş belgeler kaybolabilir. Önemli çalışmalarda bu seçenek kapatılmalıdır.</li>
-<li>Hazırda bekletme, oturumu kapatma, uyku ve kilitleme işlemleri geri sayım için pencereye bağlıdır; Komut İstemi penceresi kapatılırsa işlem iptal olur.</li>
+<li>Hazırda bekletme, oturumu kapatmayın, uyku ve kilitleme işlemleri geri sayım için pencereye bağlıdır; Komut İstemi penceresi kapatılırsa işlem iptal olur.</li>
 <li>İndirilen <code>.bat</code> dosyası yalnızca ilgili komutu içerir; Windows SmartScreen uyarısı gösterirse içeriği not defteriyle inceleyip çalıştırmak yeterlidir.</li>
 <li>Araç komutu yalnızca üretir; hiçbir veri sunucuya gönderilmez.</li>
 </ul>

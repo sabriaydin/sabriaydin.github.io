@@ -16,10 +16,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -28,7 +30,7 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#283593;--b:#7986cb">
-<!--px--><div class="px-hero"><small>Geliştirici Araçları</small><p>Visual Studio Code nedir, hangi platformlarda çalışır ve resmi indirme bağlantısı.</p><div class="prog-icon pi-pulse" style="--hue:345"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 4 12l5 8"/><path d="M15 4l5 8-5 8"/></svg></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantıları</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li><li><a href="#b6">Bilinen güvenlik olayları</a></li></ol></nav><!--/px-->
+<!--px--><div class="px-hero"><small>Geliştirici Araçları</small><p>Visual Studio Code nedir, hangi platformlarda çalışır ve resmi indirme bağlantısı.</p><div class="prog-icon pi-pulse" style="--hue:345"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 4 12l5 8"/><path d="M15 4l5 8-5 8"/></svg></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Ne işe yarar?</a></li><li><a href="#b2">Desteklenen platformlar</a></li><li><a href="#b3">Resmi indirme bağlantıları</a></li><li><a href="#b4">Kurulum</a></li><li><a href="#b5">Güvenli indirme ve notlar</a></li><li><a href="#b6">Güvenlik Geçmişi</a></li></ol></nav><!--/px-->
 <p><b>Visual Studio Code</b>, Microsoft tarafından geliştirilen ücretsiz ve açık kaynak tabanlı bir kod düzenleyicidir. Birçok programlama dilini destekler ve eklentilerle genişletilebilir.</p>
 <h2 id="b1">Ne işe yarar?</h2>
 <ul>
@@ -49,22 +51,22 @@
 </table>
 <h2 id="b4">Kurulum</h2>
 <ol>
-<li>İşletim sistemine uygun sürümü indir.</li>
-<li>Yükleyiciyi çalıştırıp varsayılan seçeneklerle devam et.</li>
-<li><b>Dosya &gt; Klasör Aç</b> menüsüyle çalışma klasörünü seç.</li>
+<li>İşletim sisteminize uygun sürümü indirin.</li>
+<li>Yükleyiciyi çalıştırıp varsayılan seçeneklerle devam edin.</li>
+<li><b>Dosya &gt; Klasör Açın</b> menüsüyle çalışma klasörünü seçin.</li>
 </ol>
 <h2 id="b5">Güvenli indirme ve notlar</h2>
 <ul>
 <li>Windows için <b>User</b> (yönetici hakkı gerektirmez) ve <b>System</b> yükleyici seçenekleri ile zip arşivi sunulur.</li>
-<li>İndirme ve kullanım, sayfada belirtilen lisans koşullarının ve gizlilik bildiriminin kabulünü gerektirir.</li>
+<li>İndirmeyin ve kullanım, sayfada belirtilen lisans koşullarının ve gizlilik bildiriminin kabulünü gerektirir.</li>
 <li>Eklentileri yalnızca resmi eklenti mağazasından ve güvenilir yayıncılardan kurmak gerekir.</li>
 </ul>
-<h2 id="b6">Bilinen güvenlik olayları</h2>
+<h2 id="b6">Güvenlik Geçmişi</h2>
 <p>Aşağıdaki olaylar kamuya açık haber ve güvenlik kaynaklarından derlenmiştir. Bu bilgiler yazının hazırlandığı tarihe göredir; güncel durum için ilgili kaynak ve resmi sayfa kontrol edilmelidir.</p>
 <table>
 <thead><tr><th style="min-width:108px">Tarih</th><th>Olay</th><th>Etkisi ve alınacak önlem</th></tr></thead>
 <tbody>
-<tr><td style="min-width:108px">Mayıs 2025</td><td><b>Zararlı eklentiler:</b> VS Code Marketplace’te Solidity geliştiricilerini hedefleyen ve kripto cüzdan bilgilerini çalan üç zararlı eklenti (Solaibot, among-eth, blankebesxstnion) tespit edilip kaldırıldı. Eklentiler 50’den az indirildi.</td><td>VS Code’un kendisinin ele geçirildiğine dair bir bilgi yoktur; sorun resmi mağazadaki eklentilerdir. <b>Eklentileri kurmadan önce yayıncıyı, indirme sayısını ve yorumları kontrol et.</b></td></tr>
+<tr><td style="min-width:108px">Mayıs 2025</td><td><b>Zararlı eklentiler:</b> VS Code Marketplace’te Solidity geliştiricilerini hedefleyen ve kripto cüzdan bilgilerini çalan üç zararlı eklenti (Solaibot, among-eth, blankebesxstnion) tespit edilip kaldırıldı. Eklentiler 50’den az indirildi.</td><td>VS Code’un kendisinin ele geçirildiğine dair bir bilgi yoktur; sorun resmi mağazadaki eklentilerdir. <b>Eklentileri kurmadan önce yayıncıyı, indirme sayısını ve yorumları kontrol edin.</b></td></tr>
 <tr><td colspan="3" style="font-size:.9em"><b>Kaynak:</b> <a href="https://www.helpnetsecurity.com/2025/05/21/data-stealing-vs-code-extensions-removed-from-official-marketplace/">Help Net Security</a></td></tr>
 </tbody>
 </table>

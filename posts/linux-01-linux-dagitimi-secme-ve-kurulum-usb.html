@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Linux Dağıtımı Nasıl Seçilir? Güvenli İndirme ve Kurulum USB'si</title>
-<meta name="description" content="Hangi Linux dağıtımı sana uygun? Karar rehberi, masaüstü karşılaştırması, ISO’yu güvenle indirme, sağlama doğrulama, USB hazırlama ve adım adım kurulum.">
+<title>Linux Dağıtımı Nasıl Seçilir? Güvenli İndirmeyin ve Kurulum USB'si</title>
+<meta name="description" content="Hangi Linux dağıtımı size uygun? Karar rehberi, masaüstü karşılaştırması, ISO’yu güvenle indirmeyin, sağlama doğrulama, USB hazırlama ve adım adım kurulum.">
 <meta name="kategori" content="linux">
 <meta name="tarih" content="2026-04-19 19:50">
 <meta name="sabit" content="kategori"><!-- kategori sayfasında en üstte sabit -->
@@ -17,11 +17,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;700;800&family=Newsreader:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/sablon.css">
 <link rel="stylesheet" href="../assets/css/yazi.css">
 <link rel="stylesheet" href="../assets/css/linux.css">
 <script src="../assets/js/site.js"></script>
 <script src="index.js"></script>
 <script src="../assets/js/frame.js"></script>
+<script src="../assets/js/sablon.js"></script>
 <script src="../assets/js/app.js" defer></script>
 </head>
 <body data-page="post" data-root="../">
@@ -30,8 +32,8 @@
 <main id="app">
 <article class="post">
 <div class="body" style="--a:#e95420;--b:#f39c12">
-<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> whoami</p><p class="o">Linux Dağıtımı Nasıl Seçilir?</p><p><b>$</b> cat hakkinda.txt</p><p class="o">Doğru dağıtımı seç, dosyayı güvenle indir, USB’ni hazırla.</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Linux nedir, dağıtım ne demek?</a></li><li><a href="#b2">Seçmeden önce kendine sor: 5 soru</a></li><li><a href="#b3">Hızlı karar rehberi</a></li><li><a href="#b4">Masaüstü ortamı: Linux’un yüzü</a></li><li><a href="#b5">Sabit sürüm mü, sürekli güncel mi?</a></li><li><a href="#b6">Tüm dağıtımlar bir arada</a></li><li><a href="#b7">Sadece resmi siteden indir</a></li><li><a href="#b8">Sağlama değerini (checksum) doğrula</a></li><li><a href="#b9">Kurulum USB’si hazırlama</a></li><li><a href="#b10">Bilgisayarı USB’den başlatma</a></li><li><a href="#b11">Canlı modda deneme listesi</a></li><li><a href="#b12">Kuruluma geçiş ve çift önyükleme</a></li><li><a href="#b13">En sık yapılan hatalar</a></li><li><a href="#b14">Sık sorulan sorular</a></li></ol></nav><div class="lx-spec"><div><small>Okuma</small><b>Yaklaşık 10 dakika</b></div><div><small>Kurulum süresi</small><b>Genellikle 20–45 dakika</b></div><div><small>Gerekenler</small><b>USB bellek ve yedek</b></div><div><small>Maliyet</small><b>Ücretsiz</b></div></div><!--/px-->
-<p>Linux tek bir işletim sistemi değil, aynı çekirdeği kullanan onlarca <b>dağıtımın</b> ortak adıdır. Yeni başlayanların en sık takıldığı yer de burasıdır: “Hangisini kuracağım?” Bu rehber seni dağıtım seçiminden kurulum USB’sine kadar adım adım götürür ve yolda en sık yapılan hataları gösterir.</p>
+<!--px--><div class="lx-hero"><div class="lx-bar"><i></i><i></i><i></i><span>terminal</span></div><div class="lx-scr"><p><b>$</b> whoami</p><p class="o">Linux Dağıtımı Nasıl Seçilir?</p><p><b>$</b> cat hakkinda.txt</p><p class="o">Doğru dağıtımı seçin, dosyayı güvenle indirin, USB’ni hazırlayın.</p><p><b>$</b> <span class="cur"></span></p></div></div><nav class="px-toc" aria-label="İçindekiler"><b>İçindekiler</b><ol><li><a href="#b1">Linux nedir, dağıtım ne demek?</a></li><li><a href="#b2">Seçmeden önce kendinize sorun: 5 soru</a></li><li><a href="#b3">Hızlı karar rehberi</a></li><li><a href="#b4">Masaüstü ortamı: Linux’un yüzü</a></li><li><a href="#b5">Sabit sürüm mü, sürekli güncel mi?</a></li><li><a href="#b6">Tüm dağıtımlar bir arada</a></li><li><a href="#b7">Sadece resmi siteden indirin</a></li><li><a href="#b8">Sağlama değerini (checksum) doğrulayın</a></li><li><a href="#b9">Kurulum USB’si hazırlama</a></li><li><a href="#b10">Bilgisayarı USB’den başlatma</a></li><li><a href="#b11">Canlı modda deneme listesi</a></li><li><a href="#b12">Kuruluma geçiş ve çift önyükleme</a></li><li><a href="#b13">En sık yapılan hatalar</a></li><li><a href="#b14">Sık sorulan sorular</a></li></ol></nav><div class="lx-spec"><div><small>Okuma</small><b>Yaklaşık 10 dakika</b></div><div><small>Kurulum süresi</small><b>Genellikle 20–45 dakika</b></div><div><small>Gerekenler</small><b>USB bellek ve yedek</b></div><div><small>Maliyet</small><b>Ücretsiz</b></div></div><!--/px-->
+<p>Linux tek bir işletim sistemi değil, aynı çekirdeği kullanan onlarca <b>dağıtımın</b> ortak adıdır. Yeni başlayanların en sık takıldığı yer de burasıdır: “Hangisini kuracağım?” Bu rehber sizi dağıtım seçiminden kurulum USB’sine kadar adım adım götürür ve yolda en sık yapılan hataları gösterir.</p>
 <ol class="lx-flow"><li><b>Seç</b><small>Dağıtımı belirle</small></li><li><b>İndir</b><small>Resmi siteden</small></li><li><b>Doğrula</b><small>Sağlama değeri</small></li><li><b>Yaz</b><small>USB’ye ISO</small></li><li><b>Dene</b><small>Canlı modda</small></li></ol>
 <h2 id="b1">Linux nedir, dağıtım ne demek?</h2>
 <p>Bir arabayı düşün: <b>motor</b> Linux çekirdeğidir, her marka ise bir <b>dağıtımdır</b>. Motor aynıdır; kaporta (masaüstü), vites kutusu (paket yöneticisi) ve bakım takvimi (güncelleme anlayışı) dağıtıma göre değişir.</p>
@@ -41,15 +43,15 @@
 <li><b>Paket yöneticisi</b>: yazılım kurup güncelleyen araç (APT, DNF, pacman gibi).</li>
 <li><b>Güncelleme anlayışı</b>: kararlılık mı, en yeni sürüm mü?</li>
 </ul>
-<h2 id="b2">Seçmeden önce kendine sor: 5 soru</h2>
+<h2 id="b2">Seçmeden önce kendinize sorun: 5 soru</h2>
 <ol>
-<li><b>Deneyimim ne?</b> Hiç Linux kullanmadıysan “kolay” olarak işaretlenen dağıtımlarla başla.</li>
+<li><b>Deneyimim ne?</b> Hiç Linux kullanmadıysanız “kolay” olarak işaretlenen dağıtımlarla başlayın.</li>
 <li><b>Ne için kullanacağım?</b> Günlük iş, oyun, yazılım geliştirme, sunucu veya gizlilik: her biri için farklı seçenek öne çıkar.</li>
 <li><b>Bilgisayarım ne kadar güçlü?</b> Eski veya düşük RAM’li makinelerde hafif masaüstlü dağıtımlar çok daha akıcıdır.</li>
 <li><b>Arayüz nasıl görünsün?</b> Windows’a benzeyen mi, sade ve modern mi, yoksa tamamen özelleştirilebilir mi?</li>
-<li><b>Kararlılık mı, yenilik mi?</b> Her şeyin sorunsuz çalışmasını mı istiyorsun, yoksa en yeni yazılım sürümlerini mi?</li>
+<li><b>Kararlılık mı, yenilik mi?</b> Her şeyin sorunsuz çalışmasını mı istiyorsunuz, yoksa en yeni yazılım sürümlerini mi?</li>
 </ol>
-<blockquote><b>Kısa yol:</b> Bu soruları kategori sayfasındaki <b>“Linux seçici”</b> paneliyle tek tek işaretleyebilirsin. Seçimlerine uyan dağıtım yazıları anında listelenir.</blockquote>
+<blockquote><b>Kısa yol:</b> Bu soruları kategori sayfasındaki <b>“Linux seçici”</b> paneliyle tek tek işaretleyebilirsiniz. Seçimlerine uyan dağıtım yazıları anında listelenir.</blockquote>
 <h2 id="b3">Hızlı karar rehberi</h2>
 <table>
 <thead><tr><th>Durumun</th><th>Önerilen başlangıç</th></tr></thead>
@@ -65,7 +67,7 @@
 <tr><td>Öğrenmek ve sistemi kendim kurmak istiyorum</td><td><a href="linux-06-arch-linux.html">Arch Linux</a>, <a href="linux-14-endeavouros.html">EndeavourOS</a> veya <a href="linux-29-gentoo.html">Gentoo</a></td></tr>
 </tbody>
 </table>
-<p>Hiç bilmiyorsan <b>Ubuntu</b> veya <b>Linux Mint</b> ile başla. Hemen kurmak zorunda değilsin; canlı modda denemek çoğu zaman yeterlidir.</p>
+<p>Hiç bilmiyorsanız <b>Ubuntu</b> veya <b>Linux Mint</b> ile başlayın. Hemen kurmak zorunda değilsiniz; canlı modda denemek çoğu zaman yeterlidir.</p>
 <h2 id="b4">Masaüstü ortamı: Linux’un yüzü</h2>
 <p>Aynı dağıtımın farklı masaüstü sürümleri olabilir. Görünüm ve kaynak kullanımı en çok buna bağlıdır.</p>
 <table>
@@ -120,16 +122,16 @@
 <tr><td><a href="linux-29-gentoo.html">Gentoo</a></td><td>Kaynaktan derleme, uzmanlar</td></tr>
 </tbody>
 </table>
-<h2 id="b7">Sadece resmi siteden indir</h2>
+<h2 id="b7">Sadece resmi siteden indirin</h2>
 <ul>
-<li>ISO dosyasını yalnızca dağıtımın <b>kendi sitesinden</b> indir. Bu serideki yazılardaki bağlantılar resmi adreslere gider.</li>
+<li>ISO dosyasını yalnızca dağıtımın <b>kendi sitesinden</b> indirin. Bu serideki yazılardaki bağlantılar resmi adreslere gider.</li>
 <li>Arama sonuçlarındaki reklamlara ve “ücretsiz indir” sitelerine tıklama; değiştirilmiş imajlar zararlı yazılım içerebilir.</li>
-<li>Adres çubuğundaki alan adının doğru yazıldığını ve bağlantının <b>https</b> olduğunu kontrol et.</li>
-<li>Torrent ve yansı (mirror) bağlantılarını da yalnızca resmi sayfanın önerdiği yerlerden kullan.</li>
+<li>Adres çubuğundaki alan adının doğru yazıldığını ve bağlantının <b>https</b> olduğunu kontrol edin.</li>
+<li>Torrent ve yansı (mirror) bağlantılarını da yalnızca resmi sayfanın önerdiği yerlerden kullanın.</li>
 </ul>
-<blockquote><b>Gerçek örnek:</b> 2016’da Linux Mint sitesi ele geçirildi ve bir süre zararlı bir ISO’ya yönlendirdi. Ayrıntılar için <a href="linux-03-linux-mint.html">Linux Mint yazısındaki “Bilinen güvenlik olayları”</a> bölümüne bakabilirsin. Bu yüzden indirdiğin dosyayı doğrulamak önemlidir.</blockquote>
-<h2 id="b8">Sağlama değerini (checksum) doğrula</h2>
-<p>Resmi sayfalarda ISO dosyası için bir <b>SHA256</b> değeri yayımlanır. İndirdiğin dosyanın değeri aynıysa dosya bozulmamış ve değiştirilmemiş demektir.</p>
+<blockquote><b>Gerçek örnek:</b> 2016’da Linux Mint sitesi ele geçirildi ve bir süre zararlı bir ISO’ya yönlendirdi. Ayrıntılar için <a href="linux-03-linux-mint.html">Linux Mint yazısındaki “Bilinen güvenlik olayları”</a> bölümüne bakabilirsiniz. Bu yüzden indirdiğiniz dosyayı doğrulamak önemlidir.</blockquote>
+<h2 id="b8">Sağlama değerini (checksum) doğrulayın</h2>
+<p>Resmi sayfalarda ISO dosyası için bir <b>SHA256</b> değeri yayımlanır. İndirdiğiniz dosyanın değeri aynıysa dosya bozulmamış ve değiştirilmemiş demektir.</p>
 <p>Windows’ta Komut İstemi veya PowerShell ile:</p>
 <pre>certutil -hashfile "C:\Users\Ad\Downloads\dosya.iso" SHA256</pre>
 <p>Windows PowerShell’de alternatif:</p>
@@ -138,35 +140,35 @@
 <pre>sha256sum dosya.iso</pre>
 <p>macOS’ta terminal ile:</p>
 <pre>shasum -a 256 dosya.iso</pre>
-<p>Çıkan uzun değeri indirme sayfasındakiyle karşılaştır. Tek karakter bile farklıysa dosyayı yeniden indir. Bazı dağıtımlar ayrıca <b>GPG imzası</b> yayımlar; bu, değerin kendisinin de gerçekten dağıtımdan geldiğini doğrulamanın daha güçlü yoludur.</p>
+<p>Çıkan uzun değeri indirme sayfasındakiyle karşılaştırın. Tek karakter bile farklıysa dosyayı yeniden indirin. Bazı dağıtımlar ayrıca <b>GPG imzası</b> yayımlar; bu, değerin kendisinin de gerçekten dağıtımdan geldiğini doğrulamanın daha güçlü yoludur.</p>
 <h2 id="b9">Kurulum USB’si hazırlama</h2>
-<p>ISO dosyasını USB belleğe sıradan kopyalamayla yazamazsın. Bunun için bir yazma aracı kullanılır. Araçları da resmi sitelerinden indir. USB için genellikle <b>8 GB veya daha büyük</b> bir bellek önerilir; ISO boyutunu indirme sayfasından kontrol et.</p>
+<p>ISO dosyasını USB belleğe sıradan kopyalamayla yazamazsınız. Bunun için bir yazma aracı kullanılır. Araçları da resmi sitelerinden indirin. USB için genellikle <b>8 GB veya daha büyük</b> bir bellek önerilir; ISO boyutunu indirme sayfasından kontrol edin.</p>
 <table>
 <thead><tr><th>Araç</th><th>Platform</th><th>Özelliği</th></tr></thead>
 <tbody>
 <tr><td><a href="https://rufus.ie/tr/">Rufus</a></td><td>Windows</td><td>Hızlı ve yaygın; bazı ISO’larda “ISO” veya “DD” modu sorar</td></tr>
 <tr><td><a href="https://etcher.balena.io/">balenaEtcher</a></td><td>Windows, macOS, Linux</td><td>Sade arayüz; yanlış sürücüyü seçme riskini azaltır</td></tr>
-<tr><td><a href="https://www.ventoy.net/">Ventoy</a></td><td>Windows, Linux</td><td>USB’yi bir kez hazırlarsın; birden fazla ISO’yu kopyalayıp açılışta seçersin</td></tr>
+<tr><td><a href="https://www.ventoy.net/">Ventoy</a></td><td>Windows, Linux</td><td>USB’yi bir kez hazırlarsınız; birden fazla ISO’yu kopyalayıp açılışta seçersiniz</td></tr>
 </tbody>
 </table>
-<blockquote>USB belleğe yazma işlemi içindekilerin hepsini siler. Önemli dosyalarını önce yedekle ve doğru sürücüyü seçtiğinden emin ol.</blockquote>
+<blockquote>USB belleğe yazma işlemi içindekilerin hepsini siler. Önemli dosyalarınızızı önce yedekleyin ve doğru sürücüyü seçtiğinden emin olun.</blockquote>
 <h2 id="b10">Bilgisayarı USB’den başlatma</h2>
-<p>Bilgisayarı yeniden başlatırken boot menüsü tuşuna basılı tut. Tuş üreticiye göre değişir; aşağıdakiler yaygın örneklerdir (modeline göre farklı olabilir):</p>
+<p>Bilgisayarı yeniden başlatırken boot menüsü tuşuna basılı tutun. Tuş üreticiye göre değişir; aşağıdakiler yaygın örneklerdir (modeline göre farklı olabilir):</p>
 <table>
 <thead><tr><th>Marka</th><th>Boot menüsü tuşu (genellikle)</th></tr></thead>
 <tbody>
 <tr><td>Dell, Acer, Lenovo</td><td>F12</td></tr>
 <tr><td>HP</td><td>Esc, ardından F9</td></tr>
 <tr><td>ASUS</td><td>Esc veya F8</td></tr>
-<tr><td>Diğer / emin değilsen</td><td>F2, F10, Del veya Esc (BIOS/UEFI ayarlarına girer)</td></tr>
+<tr><td>Diğer / emin değilseniz</td><td>F2, F10, Del veya Esc (BIOS/UEFI ayarlarına girer)</td></tr>
 </tbody>
 </table>
 <ul>
 <li>Menüde USB belleği <b>UEFI</b> ibaresiyle seçmek genellikle daha sorunsuzdur.</li>
-<li>Çoğu büyük dağıtım <b>Güvenli Önyükleme (Secure Boot)</b> ile çalışır. Açılmazsa dağıtımın belgelerine bak; gerekirse UEFI ayarlarından geçici olarak kapatılabilir.</li>
+<li>Çoğu büyük dağıtım <b>Güvenli Önyükleme (Secure Boot)</b> ile çalışır. Açılmazsa dağıtımın belgelerine bakın; gerekirse UEFI ayarlarından geçici olarak kapatılabilir.</li>
 </ul>
 <h2 id="b11">Canlı modda deneme listesi</h2>
-<p>Kurmadan önce sistemi USB’den “canlı” çalıştır ve şunları dene:</p>
+<p>Kurmadan önce sistemi USB’den “canlı” çalıştırın ve şunları deneyin:</p>
 <ul>
 <li>Wi-Fi ve kablolu internet bağlanıyor mu?</li>
 <li>Ses, mikrofon ve kamera çalışıyor mu?</li>
@@ -174,16 +176,16 @@
 <li>Dokunmatik yüzey ve klavye kısayolları sorunsuz mu?</li>
 <li>Bluetooth ve yazıcı gibi gündelik cihazlar görünüyor mu?</li>
 </ul>
-<p>Bir şey çalışmıyorsa dağıtımın adı ve model numaranla arama yapmak çoğu zaman çözüm gösterir; veya başka bir dağıtımı denersin.</p>
+<p>Bir şey çalışmıyorsa dağıtımın adı ve model numaranla arama yapmak çoğu zaman çözüm gösterir; veya başka bir dağıtımı denersiniz.</p>
 <h2 id="b12">Kuruluma geçiş ve çift önyükleme</h2>
 <ol>
-<li>Önemli dosyalarının <b>yedeğini</b> al.</li>
-<li>Windows ile birlikte kuracaksan (çift önyükleme), Windows’ta <b>BitLocker</b> veya cihaz şifrelemesi açıksa önce <b>kurtarma anahtarını</b> yedekle; ardından <b>Hızlı Başlangıç</b>’ı kapat.</li>
-<li>Kurulum programında <b>diske sil ve kur</b> seçeneği tüm veriyi siler; <b>yanına kur</b> seçeneği Windows’u korur. Hangisini seçtiğini iki kez kontrol et.</li>
-<li>Dilini, saat dilimini ve klavye düzenini seç; kullanıcı adı ve güçlü bir parola belirle.</li>
-<li>Kurulum bitince USB’yi çıkarıp yeniden başlat.</li>
+<li>Önemli dosyalarınızızın <b>yedeğini</b> al.</li>
+<li>Windows ile birlikte kuracaksanız (çift önyükleme), Windows’ta <b>BitLocker</b> veya cihaz şifrelemesi açıksa önce <b>kurtarma anahtarını</b> yedekleyin; ardından <b>Hızlı Başlangıç</b>’ı kapatın.</li>
+<li>Kurulum programında <b>diske silin ve kur</b> seçeneği tüm veriyi siler; <b>yanına kur</b> seçeneği Windows’u korur. Hangisini seçtiğini iki kez kontrol edin.</li>
+<li>Dilini, saat dilimini ve klavye düzenini seçin; kullanıcı adı ve güçlü bir parola belirleyin.</li>
+<li>Kurulum bitince USB’yi çıkarıp yeniden başlatın.</li>
 </ol>
-<p>Emin değilsen önce bir <b>sanal makinede</b> denemek riski sıfıra yaklaştırır.</p>
+<p>Emin değilseniz önce bir <b>sanal makinede</b> denemek riski sıfıra yaklaştırır.</p>
 <h2 id="b13">En sık yapılan hatalar</h2>
 <ul>
 <li>ISO dosyasını doğrulamadan kullanmak.</li>
@@ -199,10 +201,10 @@
 <h3>Windows’umu silmem gerekir mi?</h3>
 <p>Hayır. Çift önyükleme ile ikisi birlikte kurulabilir; ancak bu adım dikkat ister. Önce canlı modda veya sanal makinede denemen önerilir.</p>
 <h3>Kurduktan sonra beğenmezsem ne olur?</h3>
-<p>Başka bir dağıtımı aynı yöntemle USB’ye yazıp tekrar kurabilirsin. Önemli dosyalarını yedek bulundurmak bu yüzden önemlidir.</p>
+<p>Başka bir dağıtımı aynı yöntemle USB’ye yazıp tekrar kurabilirsiniz. Önemli dosyalarınızızı yedek bulundurmak bu yüzden önemlidir.</p>
 <h3>Hangi dağıtım en iyisi?</h3>
-<p>“En iyi” yoktur; sana en uygun olan vardır. Yukarıdaki sorular ve kategori sayfasındaki <b>Linux seçici</b> bu eşleşmeyi bulmana yardım eder.</p>
-<p>Merak ettiğin dağıtımın yazısına tablodan geçebilirsin. İyi kurulumlar!</p>
+<p>“En iyi” yoktur; size en uygun olan vardır. Yukarıdaki sorular ve kategori sayfasındaki <b>Linux seçici</b> bu eşleşmeyi bulmana yardım eder.</p>
+<p>Merak ettiğin dağıtımın yazısına tablodan geçebilirsiniz. İyi kurulumlar!</p>
 </div>
 </article>
 </main>
