@@ -9,21 +9,26 @@ const S=HG.Ses,{ui}=HG;
 const R=S.R,tc=S.tc;
 const BASE='ses/';
 const LISTE={gun:['muzik-gun1.mp3','muzik-gun2.mp3','muzik-gun3.mp3'],gece:['muzik-gece1.mp3','muzik-gece2.mp3']};
-const M={el:null,g:null,calar:false,calisti:false,bozuk:false,sonuk:false,bekle:3,son:''};
+const M={el:null,g:null,calar:false,calisti:false,bozuk:false,sonuk:false,dogrudan:false,bekle:3,son:''};
 
 function kur(){
  if(M.el||M.bozuk)return;
  try{
   const ac=S.ac(),el=new Audio();
-  el.preload='none';el.loop=false;el.crossOrigin='anonymous';
+  el.preload='none';el.loop=false;
+  /* crossOrigin ayarlanmaz: dosyalar oyunla aynı adreste durur, ayarlamak bazı
+     tarayıcılarda ve yerel dosyadan açılışta sesi tümden susturur */
   el.addEventListener('ended',()=>{M.calar=false;M.bekle=R(55,150)});
   el.addEventListener('playing',()=>{M.calisti=true});
   el.addEventListener('error',()=>{
    if(M.calar||M.el){M.calar=false;M.bozuk=!M.calisti;M.bekle=R(60,120)}
   });
-  const src=ac.createMediaElementSource(el);
-  M.g=ac.createGain();M.g.gain.value=0;
-  src.connect(M.g);M.g.connect(S.kanal('mus'));
+  /* ses dosyası ses motoruna bağlanır; bağlanamazsa parça doğrudan çalar (ses düzeyi öğeden ayarlanır) */
+  try{
+   const src=ac.createMediaElementSource(el);
+   M.g=ac.createGain();M.g.gain.value=0;
+   src.connect(M.g);M.g.connect(S.kanal('mus'));
+  }catch(e){M.dogrudan=true;el.volume=0;if(HG.audioDebug)console.warn('müzik motora bağlanamadı',e)}
   M.el=el;
   document.addEventListener('visibilitychange',()=>{
    if(!M.el||!M.calar)return;
@@ -31,9 +36,16 @@ function kur(){
   });
  }catch(e){M.bozuk=true}
 }
+/* ses düzeyi: motora bağlıysa kazanç düğümü, değilse doğrudan öğenin kendisi */
+function seviye(v,tau){
+ if(M.dogrudan){
+  const C=HG.cfg;
+  try{M.el.volume=Math.max(0,Math.min(1,v*(C.mus/100)*(C.master/100)))}catch(e){}
+ }else if(M.g)tc(M.g.gain,v,tau);
+}
 function durdur(){
  if(M.sonuk)return;
- M.sonuk=true;tc(M.g.gain,0,.9);
+ M.sonuk=true;seviye(0,.9);
  setTimeout(()=>{
   if(!M.sonuk)return;
   try{M.el.pause()}catch(e){}
@@ -47,8 +59,8 @@ function basla(gece,menu){
  try{
   M.el.src=BASE+f;M.el.currentTime=0;
   const p=M.el.play();
-  if(p&&p.then)p.then(()=>{M.calar=true;M.sonuk=false;tc(M.g.gain,.9,.6)},()=>{M.bekle=18});
-  else{M.calar=true;tc(M.g.gain,.9,.6)}
+  if(p&&p.then)p.then(()=>{M.calar=true;M.sonuk=false;seviye(.9,.6)},()=>{M.bekle=18});
+  else{M.calar=true;seviye(.9,.6)}
  }catch(e){M.bekle=22}
 }
 function kare(e){
@@ -60,9 +72,10 @@ function kare(e){
  const korku=HG.sc.fear||0,delilik=HG.sc.insane||0;
  const gergin=e.play&&(e.G.hp<32||korku>.28||delilik>.55);
  if(M.calar){
+  if(M.dogrudan&&!M.sonuk)seviye(.9,.6);
   const dur=!ister||gergin||(e.play&&(HG.sc.rain||0)>.85);
   if(dur)durdur();
-  else if(M.sonuk){M.sonuk=false;tc(M.g.gain,.9,.9)}
+  else if(M.sonuk){M.sonuk=false;seviye(.9,.9)}
   return;
  }
  M.bekle-=e.dt;

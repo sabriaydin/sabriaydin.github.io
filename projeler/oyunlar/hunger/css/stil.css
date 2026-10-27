@@ -1,5 +1,5 @@
 /* Hunger 3D - arayüz stilleri */
-:root{--bg:#0d0d0e;--panel:#17171a;--panel2:#1f1f23;--line:#34343a;--tx:#e7e4df;--mut:#a39f98;--red:#d9463c;--red2:#a82e27}
+:root{color-scheme:dark;--bg:#0d0d0e;--panel:#17171a;--panel2:#1f1f23;--line:#34343a;--tx:#e7e4df;--mut:#a39f98;--red:#d9463c;--red2:#a82e27}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none}
 #game{position:fixed;inset:0}
@@ -23,15 +23,9 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-ac
 #clock{position:absolute;bottom:12px;right:12px;padding:6px 14px;background:rgba(13,13,14,.78);border:1px solid var(--line);border-radius:20px;font-size:13px;white-space:nowrap}
 #comp{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:min(600px,calc(100vw - 280px));height:46px;pointer-events:none}
 #comp canvas{display:block;width:100%;height:100%}
-#goal{position:absolute;top:62px;left:50%;transform:translateX(-50%);max-width:min(560px,92vw);padding:6px 14px;background:rgba(13,13,14,.7);border-left:3px solid var(--red);border-radius:4px;font-size:13px;color:var(--tx);text-align:left}
+#goal{position:absolute;top:46px;left:50%;transform:translateX(-50%);max-width:min(560px,92vw);padding:6px 14px;background:rgba(13,13,14,.7);border-left:3px solid var(--red);border-radius:4px;font-size:13px;color:var(--tx);text-align:left}
 #goal small{display:block;color:var(--mut);font-size:11px}
-#mini{position:absolute;right:12px;top:12px;width:132px;height:132px;border:1px solid var(--line);border-radius:6px;background:#000;image-rendering:pixelated}
-/* aktif görevler: mini haritanın altında, sağ kenara hizalı pano (yalnızca kabul edilmiş görev varken görünür) */
-#quests{position:absolute;right:12px;top:160px;width:188px;max-width:40vw;display:grid;gap:6px;padding:9px 11px;background:rgba(13,13,14,.78);border:1px solid var(--line);border-radius:8px;font-size:12px}
-#quests .qp{display:grid;gap:1px}
-#quests .qp b{font-size:12.5px;color:var(--tx)}
-#quests .qp span{color:var(--mut);font-size:11px}
-#quests .qp.more{color:var(--mut);font-size:11px;text-align:center}
+#mini{position:absolute;right:12px;top:12px;width:132px;height:132px;border:1px solid var(--line);border-radius:6px;background:#000;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 #feed{position:absolute;left:12px;bottom:236px;display:grid;gap:4px;pointer-events:none}
 #feed div{background:rgba(13,13,14,.8);border-left:3px solid var(--red);padding:3px 10px;font-size:13px;border-radius:3px;animation:fe 2.8s forwards}
 @keyframes fe{0%{opacity:0;transform:translateX(-10px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
@@ -40,7 +34,7 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-ac
 /* hotbar */
 #hot{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:4px;padding:6px;background:rgba(13,13,14,.82);border:1px solid var(--line);border-radius:8px}
 .slot{position:relative;width:52px;height:52px;background:var(--panel2);border:2px solid var(--line);border-radius:6px;display:grid;place-items:center;cursor:pointer}
-.slot img{width:38px;height:38px;image-rendering:pixelated;pointer-events:none}
+.slot img{width:38px;height:38px;image-rendering:-moz-crisp-edges;image-rendering:pixelated;pointer-events:none}
 .slot .n{position:absolute;right:3px;bottom:1px;font-size:12px;font-weight:700;text-shadow:0 0 3px #000,0 0 3px #000}
 .slot .k{position:absolute;left:4px;top:1px;font-size:10px;color:var(--mut)}
 .slot.sel{border-color:var(--tx);background:#2a2a30}
@@ -55,7 +49,7 @@ canvas#c{position:absolute;inset:0;width:100%;height:100%;display:block;touch-ac
 #info{margin-top:10px;min-height:116px;max-width:332px;font-size:13px}
 #recipes{display:grid;gap:6px}
 .rc{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:6px 8px;background:var(--panel2);border:1px solid var(--line);border-radius:6px}
-.rc img{width:32px;height:32px;image-rendering:pixelated}
+.rc img{width:32px;height:32px;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 .rc b{display:block;font-size:13px}
 .rc span{font-size:12px;color:var(--mut)}
 .rc .ok{color:#9ad39a}.rc .no{color:#e07b73}
@@ -102,7 +96,6 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
  #hud{width:150px;padding:8px}
  .bar{grid-template-columns:48px 1fr;font-size:11px}
  #mini{width:92px;height:92px}
- #quests{top:104px;width:140px;font-size:11px;padding:7px 9px}
  #clock{right:12px;bottom:12px;font-size:12px;padding:4px 10px}
  #comp{width:calc(100vw - 130px);left:12px;transform:none;height:28px}
  #goal{top:114px;left:12px;transform:none;max-width:calc(100vw - 24px);font-size:12px}
@@ -122,7 +115,7 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 #radial .rctr b{display:block;font-size:14px}
 #radial .rctr span{display:block;font-size:11px;color:var(--mut)}
 #radial .rs{position:absolute;width:76px;margin:-38px 0 0 -38px;padding:5px 3px 4px;text-align:center;background:rgba(13,13,14,.8);border:2px solid var(--line);border-radius:8px}
-#radial .rs img{width:32px;height:32px;image-rendering:pixelated;display:block;margin:0 auto 2px}
+#radial .rs img{width:32px;height:32px;image-rendering:-moz-crisp-edges;image-rendering:pixelated;display:block;margin:0 auto 2px}
 #radial .rs i{display:block;font-style:normal;font-size:12px}
 #radial .rs u{display:block;text-decoration:none;font-size:10px;color:var(--mut);line-height:1.15}
 #radial .rs.on{border-color:var(--red);background:rgba(60,18,16,.9);transform:scale(1.1)}
@@ -133,7 +126,7 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .slot{touch-action:none}
 .slot.dim{opacity:.35}
 #dragghost{position:fixed;z-index:9999;width:44px;height:44px;margin:-22px 0 0 -22px;pointer-events:none;opacity:.92}
-#dragghost img{width:100%;height:100%;image-rendering:pixelated}
+#dragghost img{width:100%;height:100%;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 #dragghost span{position:absolute;right:0;bottom:0;font-size:12px;font-weight:700;text-shadow:0 0 3px #000,0 0 3px #000}
 @media (max-width:760px){#tip{bottom:78px}}
 
@@ -178,9 +171,9 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .snone,.snote{color:var(--mut);font-size:12.5px;margin:12px 2px 0;line-height:1.5}
 .sqi,.spf{grid-column:1/-1;color:var(--mut);font-size:11px;margin-top:2px}
 .spf{color:#8fb98f}
-#game.photo #hud,#game.photo #hot,#game.photo #comp,#game.photo #clock,#game.photo #goal,#game.photo #mini,#game.photo #quests,#game.photo #cross,#game.photo #tgt,#game.photo #tip,#game.photo #prog,#game.photo #feed,#game.photo #zn,#game.photo #hitm,#game.photo #touch{display:none!important}
+#game.photo #hud,#game.photo #hot,#game.photo #comp,#game.photo #clock,#game.photo #goal,#game.photo #mini,#game.photo #cross,#game.photo #tgt,#game.photo #tip,#game.photo #prog,#game.photo #feed,#game.photo #zn,#game.photo #hitm,#game.photo #touch{display:none!important}
 #game.menu2d canvas#c{visibility:hidden}
-#game.no-compass #comp,#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip,#game.no-cross #cross,#game.no-quests #quests{display:none!important}
+#game.no-compass #comp,#game.no-hud #hud,#game.no-mini #mini,#game.no-clock #clock,#game.no-goal #goal,#game.no-tip #tip,#game.no-cross #cross{display:none!important}
 #hud{transform:scale(var(--ui,1));transform-origin:left bottom}
 #hot{transform:translateX(-50%) scale(var(--ui,1));transform-origin:center bottom}
 @media (pointer:coarse){#hud{transform-origin:left top}}
@@ -193,7 +186,7 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .bmw{position:relative;line-height:0}
 #bmc{position:absolute;left:calc(100% + 12px);top:0;width:56px;height:62px;pointer-events:none}
 @media (max-aspect-ratio:1/1){#bmc{left:auto;right:0;top:auto;bottom:calc(100% + 2px)}}
-#bm{border:2px solid var(--line);border-radius:6px;background:#06121f;image-rendering:pixelated}
+#bm{border:2px solid var(--line);border-radius:6px;background:#06121f;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 #bmcap{font-size:13px;color:var(--mut);white-space:pre-line;text-align:center;max-width:94vw;line-height:1.5}
 #trade{position:absolute;inset:0;z-index:30;display:grid;place-items:center;background:rgba(5,5,6,.72);padding:16px;overflow:auto}
 #trade .card{width:min(520px,100%)}
@@ -225,28 +218,21 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 .qi{display:grid;place-items:center;font-size:22px;font-weight:700;color:var(--red)}
 #stat2{white-space:pre-line;font-size:13px;color:var(--mut)}
 
-/* yüklenme ekranı: sol üstte logo, en altta sağdan soldan uca uzanan yükleme çubuğu */
-#load{position:absolute;inset:0;z-index:90;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#1a0b0b 0%,#050506 70%);transition:opacity .5s}
+/* yüklenme ekranı */
+#load{position:absolute;inset:0;z-index:90;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#1a0b0b 0%,#050506 70%);transition:opacity .5s;padding:16px}
 #load[hidden]{display:none}
 #load.out{opacity:0;pointer-events:none}
-.ld-top{position:absolute;left:28px;top:44px}
-#load h1{margin:0;font-size:30px;letter-spacing:.14em}
+#load .lbox{width:min(440px,92vw);text-align:center}
+#load h1{margin:0;font-size:46px;letter-spacing:.18em}
 #load h1 span{color:var(--red)}
-#loadT{display:none}
-.ld-bottom{position:absolute;left:0;right:0;bottom:100px}
-/* bilgilendirme metinleri: ipucu solda, durum metni sağda, aynı satırda */
-.ld-info{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:0 24px 12px}
-#loadTip{margin:0;font-size:15px;color:#a6a6ae;line-height:1.5;flex:1 1 auto;min-width:0}
-#loadSub{font-size:15px;color:#e8e6e2;letter-spacing:.03em;white-space:nowrap;flex:0 0 auto;text-align:right}
-#load .lbar{width:100%;height:34px;background:#19191d;overflow:hidden}
+#loadT{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:#ddd;margin:30px 0 12px}
+#load .lbar{height:4px;background:#2a2a2e;border-radius:2px;overflow:hidden}
 #load .lbar[hidden]{display:none}
-#loadBar{display:block;height:100%;width:0;background:#e02a2a;transition:width .3s ease-out}
-/* yüklenme çubuğunun yüzdesi: çubuğun sağ altında */
-.ld-pctrow{display:flex;justify-content:flex-end;padding:10px 24px 0}
-#loadPct{font-size:18px;color:#f0eee9;font-weight:700;font-variant-numeric:tabular-nums}
-@media (max-width:640px){.ld-top{left:18px;top:32px}#load h1{font-size:25px}.ld-info{padding:0 16px}.ld-pctrow{padding:6px 16px 0}}
-@media (max-height:600px){.ld-bottom{bottom:60px}}
-@media (max-height:420px){.ld-top{top:20px}.ld-bottom{bottom:30px}#load .lbar{height:30px}}
+#loadBar{display:block;height:100%;width:0;background:linear-gradient(90deg,#7a1010,#e02a2a);box-shadow:0 0 12px #e02a2a;transition:width .25s}
+#load .lrow{display:flex;justify-content:space-between;font-size:12px;color:#8a8a90;margin-top:8px;min-height:16px}
+#loadTip{margin:34px 0 0;font-size:13px;color:#9a9aa0;line-height:1.55;min-height:40px}
+#load{overflow:auto}
+@media (max-height:420px){#load h1{font-size:30px}#loadT{margin-top:12px}#loadTip{margin-top:14px;min-height:0}}
 
 /* dokunmatik cihazlarda durum çubukları sol üstte kalır (sol altta joystick bulunur) */
 @media (pointer:coarse){#hud{top:12px;bottom:auto}#feed{bottom:92px}}
@@ -326,7 +312,7 @@ button.ghost:hover:not(:disabled){background:#2c2c32;border-color:#4a4a52}
 #cqbar .cql{display:flex;flex-wrap:wrap;gap:4px}
 #cqbar .cqi{position:relative;width:40px;height:40px;padding:0;background:var(--panel2);border:2px solid var(--line);border-radius:6px;overflow:hidden}
 #cqbar .cqi.on{border-color:var(--red)}
-#cqbar .cqi img{width:28px;height:28px;image-rendering:pixelated}
+#cqbar .cqi img{width:28px;height:28px;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 #cqbar .cqi i{position:absolute;left:0;bottom:0;height:4px;background:var(--red)}
 #cqbar .cqi span{position:absolute;right:2px;bottom:1px;font-size:11px;font-weight:700;text-shadow:0 0 3px #000}
 /* inşa sistemi (58. güncelleme) */

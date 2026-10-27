@@ -59,6 +59,8 @@ async function yukle(){
     }catch(e){hatali++}
     bitti++;
    }));
+   /* tarayıcı bu biçimi hiç çözemiyorsa boşuna uğraşılmaz: üretilen seslerle devam edilir */
+   if(yuklenen===0&&hatali>=24){durum='yok';return}
    oran=bitti/toplam;
    await bekle(0);
   }

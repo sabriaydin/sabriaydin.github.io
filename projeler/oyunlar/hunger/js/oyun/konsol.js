@@ -156,6 +156,11 @@ function status(){
   let s=HG.audioState()+(ui.mute?' · sessiz':'');
   if(HG.sesGercek){const d=HG.sesGercek.durum();s+=' · '+d.nLoaded+' kayıt'+(d.nFailed?' ('+d.nFailed+' hata)':'')}
   add('Ses',s,ui.mute?'warn':'');
+  /* tarayıcı farklarını görmek için: örnekleme hızı, gecikme, yankı ve kulak modeli desteği */
+  if(HG.Ses&&HG.Ses.uyum){
+   const u=HG.Ses.uyum(),v=HG.Ses.sesSayisi();
+   add('Ses motoru',(u.hiz/1000).toFixed(1)+' kHz · '+u.gecikme+' ms · '+(u.yanki?'yankı var':'yankı yok')+' · '+(u.hrtf?'3B':'yatay')+' · '+v.calan+'/'+v.sinir,'',true);
+  }
   if(HG.audioBeds){const b=HG.audioBeds(),a=[];for(const k in b)if(b[k]>.012)a.push((BEDN[k]||k)+' '+b[k].toFixed(2));
    add('Ortam',a.length?a.join(', '):'yok','',true)}
  }catch(e){}

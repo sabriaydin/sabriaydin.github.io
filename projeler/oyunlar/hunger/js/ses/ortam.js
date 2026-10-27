@@ -24,7 +24,7 @@ function dongu(buf,rate){
 /* katman: üretilen kaynak + kayıt kaynağı, ortak çıkış ve süzgeç */
 function mk(ad,o){
  const g=AC.createGain();g.gain.value=0;
- const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=20000;
+ const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=S.acik();
  g.connect(lp);
  const pan=AC.createStereoPanner?AC.createStereoPanner():null;
  if(pan){lp.connect(pan);pan.connect(o.tens?tens:amb)}else lp.connect(o.tens?tens:amb);
@@ -33,7 +33,7 @@ function mk(ad,o){
   const sg=AC.createGain();sg.gain.value=1;sg.connect(g);
   let n=dongu(S.gurultu(o.synth.pink));
   const fs=[];
-  for(const [t,f,q] of o.synth.f){const bq=AC.createBiquadFilter();bq.type=t;bq.frequency.value=f;bq.Q.value=q||.7;n.connect(bq);n=bq;fs.push(bq)}
+  for(const [t,f,q] of o.synth.f){const bq=AC.createBiquadFilter();bq.type=t;bq.frequency.value=Math.min(f,S.acik());bq.Q.value=q||.7;n.connect(bq);n=bq;fs.push(bq)}
   n.connect(sg);
   b.synG=sg;b.synF=fs;
  }
@@ -52,6 +52,9 @@ const ayar=(ad,v,tau)=>{const b=bed[ad];if(b)tc(b.g.gain,clamp(v,0,1),tau||.8)};
 function kur(){
  AC=S.ac();if(!AC||kuruldu)return;
  kuruldu=true;
+ try{kurGovde()}catch(e){console.warn('ortam sesleri kurulamadı',e)}
+}
+function kurGovde(){
  amb=S.kanal('amb');tens=S.kanal('tens');
  mk('wind',   {kayit:'ruzgar', synth:{pink:true,f:[['bandpass',380,.5]]},salinim:.25});
  mk('fırtına',{kayit:'firtina',synth:{pink:true,f:[['bandpass',620,.4]]},salinim:.3});
@@ -70,26 +73,29 @@ function kur(){
  /* gerilim uğultusu: birbirine çok yakın iki alçak ton, yavaşça vurur */
  {
   const g=AC.createGain();g.gain.value=0;
-  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=180;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=Math.min(180,S.acik());
   lp.connect(g);g.connect(tens);
   for(const f of [48,49.1]){const o=AC.createOscillator();o.type='sine';o.frequency.value=f;const vg=AC.createGain();vg.gain.value=.5;o.connect(vg);vg.connect(lp);o.start()}
   bed.drone={ad:'drone',g,lp};
  }
+try{
  /* ateş: oyuncuya en yakın ateşin konumunda çalar */
  {
   const pn=S.yerlesim(0,1,0);pn.connect(S.kanal('sfx'));
   const mkF=(pink,f)=>{
    const g=AC.createGain();g.gain.value=0;
    let n=dongu(S.gurultu(pink));
-   for(const [t,fr,q] of f){const b=AC.createBiquadFilter();b.type=t;b.frequency.value=fr;b.Q.value=q||.7;n.connect(b);n=b}
+   for(const [t,fr,q] of f){const b=AC.createBiquadFilter();b.type=t;b.frequency.value=Math.min(fr,S.acik());b.Q.value=q||.7;n.connect(b);n=b}
    n.connect(g);g.connect(pn);return g;
   };
   fire={pn,catirdi:mkF(false,[['highpass',2400,.6],['lowpass',8000,.5]]),ugultu:mkF(true,[['lowpass',260,.7]]),kayit:null,kg:null};
  }
+ }catch(e){fire=null}
+ try{
  /* müzik yerine geçen yumuşak akor yastığı (muzik.js kayıt çalamazsa kullanır) */
  {
   const g=AC.createGain();g.gain.value=0;
-  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=1100;lp.Q.value=.4;
+  const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=Math.min(1100,S.acik());lp.Q.value=.4;
   lp.connect(g);g.connect(S.kanal('mus'));
   const sesler=[];
   for(let i=0;i<4;i++)for(const dt of [-7,7]){
@@ -99,12 +105,13 @@ function kur(){
   pad={g,lp,sesler,ci:0,t:6};
   S.pad=pad;
  }
+ }catch(e){pad=null}
 }
 /* ateşin kayıt katmanı: üç ayrı kayıt hafif perde farkıyla üst üste çalar, tekrar duyulmaz */
 function ateşKayit(){
- if(fire.kayit||!S.kayit)return;
+ if(!fire||fire.kayit||!S.kayit)return;
  const a=S.kayit.dongu('ates1'),b=S.kayit.dongu('ates2'),c=S.kayit.dongu('ates3');
- if(!a||!b||!c)return;
+ if(!a||!b||!c||!fire.pn)return;
  const g=AC.createGain();g.gain.value=0;g.connect(fire.pn);
  [[a,1],[b,.97],[c,1.03]].forEach(([buf,r])=>{dongu(buf,r).connect(g)});
  fire.kayit=true;fire.kg=g;
@@ -174,9 +181,9 @@ function kare(e){
  /* yağmur: barınakta boğuk, üstüne çatı davulu */
  const yv=yagmur*(play?1:.6)*dis;
  ayar('rain',(bed.rain.rec?.9:.17)*yv*(barinak?.7:1),.9);
- tc(bed.rain.lp.frequency,barinak?1000:16000,.5);
+ tc(bed.rain.lp.frequency,Math.min(barinak?1000:16000,S.acik()),.5);
  ayar('sağanak',(bed['sağanak'].rec?.9:.1)*clamp((yagmur-.5)*2,0,1)*(barinak?.7:1)*dis,.9);
- tc(bed['sağanak'].lp.frequency,barinak?1000:16000,.5);
+ tc(bed['sağanak'].lp.frequency,Math.min(barinak?1000:16000,S.acik()),.5);
  ayar('drum',.17*yv*(barinak?1.4:.35),.8);
  /* kuşlar: gündüz, kuru hava, ormanlık, korkusuz ve açık alanda */
  const kusluk=clamp(L*1.3-.3,0,1)*clamp(1-yagmur*1.6,0,1)*(.35+.65*orman)*(1-.85*deniz)*(barinak?.3:1)*clamp(1-(sc.fear||0)*2,0,1)*dis*(1-kar*.8);
@@ -205,7 +212,7 @@ function kare(e){
  const sayi=(sc.fires||[]).length;
  if(play&&ateşSayi>=0&&sayi>ateşSayi&&yakin&&fu<22)HG.snd('ignite',{x:yakin.x,y:(yakin.y||0)+.5,z:yakin.z});
  ateşSayi=play?sayi:-1;
- if(yakin&&fu<28){
+ if(fire&&yakin&&fu<28){
   S.setPos(fire.pn,yakin.x,(yakin.y||0)+.6,yakin.z);
   if(fire.kg)tc(fire.kg.gain,.8*(.85+.15*Math.sin(t*3.1)),.3);
   else{
@@ -214,7 +221,7 @@ function kare(e){
   }
   patlama-=dt;
   if(patlama<=0){patlama=R(.14,.8);if(!ui.mute&&!fire.kayit)try{S.K.pop(fire.pn)}catch(er){}}
- }else{
+ }else if(fire){
   if(fire.kg)tc(fire.kg.gain,0,.5);
   tc(fire.catirdi.gain,0,.3);tc(fire.ugultu.gain,0,.3);
  }

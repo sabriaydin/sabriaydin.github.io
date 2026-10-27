@@ -96,14 +96,33 @@ function kat(k){
  return 'eylem';
 }
 
-/* ---------------------------------------------------------- kuruluş ---------------------------------------------------------- */
+/* ---------------------------------------------------------- kuruluş ----------------------------------------------------------
+   Tarayıcı farkları burada toplanır: Chrome, Edge ve Firefox'ta ses bağlamı adı, örnekleme hızı,
+   süzgeç üst sınırı, konumlandırma modeli ve bağlamın kendiliğinden durması ayrı ayrı ele alınır. */
+let ACIK=20000;                                    /* "süzgeç kapalı" demek olan frekans: örnekleme hızına göre belirlenir */
+let HRTF=true;                                     /* kulak modeli desteği (Firefox'ta pahalıdır: yalnızca yakın sesler) */
 function initAudio(){
  if(!AC){
-  try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return;
+  /* latencyHint: oyunlarda gecikmeyi kısaltır; desteklemeyen tarayıcıda seçeneksiz kurulur */
+  try{AC=new C({latencyHint:'interactive'})}catch(e){try{AC=new C()}catch(e2){return}}
+  /* Firefox ve bazı Bluetooth aygıtlarında örnekleme hızı 48000 değildir; süzgeç sınırı buna göre ayarlanır */
+  const nyq=(AC.sampleRate||44100)/2;
+  ACIK=Math.min(20000,Math.max(3000,nyq-500));
   try{build();ready=true}catch(e){console.warn('ses kurulamadı',e);return}
+  /* ses bağlamı kendiliğinden durabilir (aygıt değişimi, uyku, sekme kısıtı): izlenir ve sürdürülür */
+  try{AC.onstatechange=()=>{if(AC.state==='suspended'&&!document.hidden)setTimeout(devam,250)}}catch(e){}
  }
- if(AC.state==='suspended'&&!document.hidden){try{AC.resume()}catch(e){}}
+ devam();
 }
+function devam(){
+ if(!AC||document.hidden)return;
+ if(AC.state==='suspended'||AC.state==='interrupted'){try{const p=AC.resume();if(p&&p.catch)p.catch(()=>{})}catch(e){}}
+}
+/* ilk dokunuş/tıklama/tuş: tarayıcıların ses izni istediği an */
+for(const ev of ['pointerdown','keydown','touchend'])
+ document.addEventListener(ev,devam,{capture:true,passive:true});
 function build(){
  /* çıkış: önce yapıştırıcı sıkıştırma, sonra tepe sınırlayıcı (kırpılma ve ani patlamaları önler) */
  limiter=AC.createDynamicsCompressor();
@@ -114,28 +133,32 @@ function build(){
  glue.threshold.value=-19;glue.knee.value=22;glue.ratio.value=2.6;glue.attack.value=.006;glue.release.value=.26;
  glue.connect(out);
  /* dünya: su altında ve mağarada tüm dünya sesleri boğuklaşır */
- worldLP=AC.createBiquadFilter();worldLP.type='lowpass';worldLP.frequency.value=22000;worldLP.Q.value=.4;
+ worldLP=AC.createBiquadFilter();worldLP.type='lowpass';worldLP.frequency.value=ACIK;worldLP.Q.value=.4;
  worldLP.connect(glue);
  world=AC.createGain();world.gain.value=1;world.connect(worldLP);
  /* kanallar */
  sfxBus=AC.createGain();sfxBus.connect(world);
- ambBus=AC.createGain();ambLP=AC.createBiquadFilter();ambLP.type='lowpass';ambLP.frequency.value=22000;
+ ambBus=AC.createGain();ambLP=AC.createBiquadFilter();ambLP.type='lowpass';ambLP.frequency.value=ACIK;
  ambBus.connect(ambLP);ambLP.connect(world);
  tensBus=AC.createGain();tensBus.connect(world);
  musDuck=AC.createGain();musDuck.gain.value=1;musDuck.connect(out);     /* müzik dünya süzgecine girmez: su altında da net kalır */
  musBus=AC.createGain();musBus.connect(musDuck);
- /* iki yankı odası: kısa (oda / orman) ve uzun (mağara / vadi). Aradaki her ortam ikisinin karışımıdır. */
- verbA=AC.createConvolver();verbA.buffer=mkIR(.95,3.1,6,false);
- verbB=AC.createConvolver();verbB.buffer=mkIR(3.4,1.9,3,true);
- dampA=AC.createBiquadFilter();dampA.type='lowpass';dampA.frequency.value=9000;
- dampB=AC.createBiquadFilter();dampB.type='lowpass';dampB.frequency.value=3200;
- retA=AC.createGain();retB=AC.createGain();
- verbA.connect(dampA);dampA.connect(retA);retA.connect(world);
- verbB.connect(dampB);dampB.connect(retB);retB.connect(world);
- sndA=AC.createGain();sndA.gain.value=.06;sfxBus.connect(sndA);sndA.connect(verbA);
- sndB=AC.createGain();sndB.gain.value=0;  sfxBus.connect(sndB);sndB.connect(verbB);
- ambSnd=AC.createGain();ambSnd.gain.value=.05;ambBus.connect(ambSnd);ambSnd.connect(verbA);
- const mSnd=AC.createGain();mSnd.gain.value=.3;musBus.connect(mSnd);mSnd.connect(verbA);
+ /* iki yankı odası: kısa (oda / orman) ve uzun (mağara / vadi). Aradaki her ortam ikisinin karışımıdır.
+    Yankı desteklenmeyen ya da kurulamadığı bir tarayıcıda oyun yankısız ama eksiksiz çalışır. */
+ try{
+  if(!AC.createConvolver)throw 0;
+  verbA=AC.createConvolver();verbA.buffer=mkIR(.95,3.1,6,false);
+  verbB=AC.createConvolver();verbB.buffer=mkIR(3.4,1.9,3,true);
+  dampA=AC.createBiquadFilter();dampA.type='lowpass';dampA.frequency.value=Math.min(9000,ACIK);
+  dampB=AC.createBiquadFilter();dampB.type='lowpass';dampB.frequency.value=Math.min(3200,ACIK);
+  retA=AC.createGain();retB=AC.createGain();
+  verbA.connect(dampA);dampA.connect(retA);retA.connect(world);
+  verbB.connect(dampB);dampB.connect(retB);retB.connect(world);
+  sndA=AC.createGain();sndA.gain.value=.06;sfxBus.connect(sndA);sndA.connect(verbA);
+  sndB=AC.createGain();sndB.gain.value=0;  sfxBus.connect(sndB);sndB.connect(verbB);
+  ambSnd=AC.createGain();ambSnd.gain.value=.05;ambBus.connect(ambSnd);ambSnd.connect(verbA);
+  const mSnd=AC.createGain();mSnd.gain.value=.3;musBus.connect(mSnd);mSnd.connect(verbA);
+ }catch(e){verbA=verbB=null;if(HG.audioDebug)console.warn('yankı kurulamadı',e)}
  B.out=out;
  white=mkNoise(2,false);pink=mkNoise(6,true);
 }
@@ -157,7 +180,8 @@ function zincir(){
  let pan=null;
  if(AC.createPanner){
   pan=AC.createPanner();
-  pan.panningModel='HRTF';pan.distanceModel='inverse';
+  try{pan.panningModel='HRTF'}catch(e){HRTF=false}
+  try{pan.distanceModel='inverse'}catch(e){}
   pan.refDistance=3;pan.rolloffFactor=1.15;pan.maxDistance=200;
   g.connect(pan);pan.connect(lp);
  }else g.connect(lp);
@@ -193,11 +217,13 @@ function al(k,pos,m,dist){
  const bus=m.bus==='amb'?ambBus:m.bus==='tens'?tensBus:sfxBus;
  if(pos&&v.pan){
   setPos(v.pan,pos.x,pos.y!==undefined?pos.y:ly,pos.z);
+  /* kulak modeli yalnızca yakın seslerde: uzakta kazancı yok, işlemciyi boşuna yorar (özellikle Firefox) */
+  if(HRTF){const m=dist<26?'HRTF':'equalpower';if(v.pan.panningModel!==m)try{v.pan.panningModel=m}catch(e){}}
   /* uzaklık ve hava: uzaktaki ses tizini yitirir */
-  v.lp.frequency.value=clamp(19000/(1+dist*dist*.0055),700,20000);
+  v.lp.frequency.value=clamp(19000/(1+dist*dist*.0055),700,ACIK);
  }else{
   if(v.pan)setPos(v.pan,lx,ly,lz);
-  v.lp.frequency.value=20000;
+  v.lp.frequency.value=ACIK;
  }
  v.lp.connect(bus);v.bagli=bus;
  canli.push(v);
@@ -265,10 +291,11 @@ function audioFrame(G,dt,mode){
  /* dinleyici: oyuncunun kulağı */
  lx=G.px;lz=G.py;ly=play&&G.pz!==undefined?G.pz+HG.EYE:2;
  const li=AC.listener,yaw=look.yaw,fx=-Math.sin(yaw),fz=-Math.cos(yaw);
- if(li.positionX){
+ /* yeni tarayıcılar ayrı parametreler, eskiler setPosition/setOrientation kullanır */
+ if(li.positionX&&li.forwardX){
   li.positionX.value=lx;li.positionY.value=ly;li.positionZ.value=lz;
   li.forwardX.value=fx;li.forwardY.value=0;li.forwardZ.value=fz;li.upX.value=0;li.upY.value=1;li.upZ.value=0;
- }else{li.setPosition(lx,ly,lz);li.setOrientation(fx,0,fz,0,1,0)}
+ }else if(li.setPosition){li.setPosition(lx,ly,lz);li.setOrientation(fx,0,fz,0,1,0)}
  /* kanal seviyeleri */
  const sessiz=ui.mute||C.master<=0;
  tc(B.out.gain,sessiz?.0001:(mode==='pause'?.38:1)*(C.master/100)+.0001,.14);
@@ -286,13 +313,17 @@ function audioFrame(G,dt,mode){
  env.ic+=     (((sh&&!cave?1:0)-env.ic)*Math.min(1,dt*2.5));
  env.suAlti+= (((head?1:0)-env.suAlti)*Math.min(1,dt*6));
  const orman=HG.Ses.orman||0;
- tc(worldLP.frequency,head?480:cave?15000:22000,.12);
- tc(sndA.gain,.05+.09*orman+.42*env.ic+.12*env.magara,.5);
- tc(sndB.gain,.62*env.magara+.05*(1-env.ic)*(1-env.magara)*(1-orman),.6);
- tc(ambSnd.gain,.04+.2*env.ic+.1*env.magara,.5);
- tc(dampA.frequency,env.ic?4200:9000,.5);
- tc(dampB.frequency,env.magara?2600:1500,.5);
- tc(ambLP.frequency,cave?5200:sh?3400:22000,.5);
+ tc(worldLP.frequency,head?480:cave?Math.min(15000,ACIK):ACIK,.12);
+ if(verbA){
+  tc(sndA.gain,.05+.09*orman+.42*env.ic+.12*env.magara,.5);
+  tc(sndB.gain,.62*env.magara+.05*(1-env.ic)*(1-env.magara)*(1-orman),.6);
+  tc(ambSnd.gain,.04+.2*env.ic+.1*env.magara,.5);
+ }
+ if(verbA){
+  tc(dampA.frequency,Math.min(env.ic?4200:9000,ACIK),.5);
+  tc(dampB.frequency,Math.min(env.magara?2600:1500,ACIK),.5);
+ }
+ tc(ambLP.frequency,Math.min(cave?5200:sh?3400:ACIK,ACIK),.5);
  /* alt sistemler: ortam sesleri ve müzik */
  for(const f of frames){
   try{f({G,dt,t,mode,play,cave,sh,head,env})}
@@ -307,6 +338,7 @@ HG.Ses={
  K,
  tc,setPos,R,clamp,
  gurultu:(p)=>p?pink:white,
+ acik:()=>ACIK,                                    /* süzgeçlerin üst sınırı (örnekleme hızına göre) */
  kanal:n=>n==='amb'?ambBus:n==='mus'?musBus:n==='tens'?tensBus:sfxBus,
  verb:()=>({a:verbA,b:verbB}),
  kare:f=>frames.push(f),                           /* alt sistem kaydı */
@@ -315,10 +347,13 @@ HG.Ses={
  /* konumlu çıkış isteyen alt sistemler için (ateş, ortam tek seslileri) */
  yerlesim:(x,y,z)=>{
   const p=AC.createPanner();
-  p.panningModel='HRTF';p.distanceModel='inverse';p.refDistance=2.5;p.rolloffFactor=1.3;p.maxDistance=120;
+  try{p.panningModel='HRTF'}catch(e){HRTF=false}
+  try{p.distanceModel='inverse'}catch(e){}
+  p.refDistance=2.5;p.rolloffFactor=1.3;p.maxDistance=120;
   setPos(p,x,y,z);return p;
  },
  sesSayisi:()=>({calan:canli.length,havuz:bos.length,sinir:MAX}),
+ uyum:()=>({hiz:AC?AC.sampleRate:0,acik:ACIK,hrtf:HRTF,yanki:!!verbA,gecikme:AC&&AC.baseLatency?+(AC.baseLatency*1000).toFixed(1):0,durum:AC?AC.state:'yok'}),
  orman:0,deniz:0,ruzgar:0                          /* ortam.js doldurur; motor yankıda kullanır */
 };
 HG.snd=snd;HG.initAudio=initAudio;HG.audioFrame=audioFrame;

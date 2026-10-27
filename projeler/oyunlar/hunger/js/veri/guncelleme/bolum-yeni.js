@@ -2,6 +2,17 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
+{n:57,d:"28.10.2026",t:"Tarayıcı uyumluluğu",l:[
+ "Oyun Chrome, Edge ve Firefox'ta aynı şekilde çalışacak biçimde gözden geçirildi.",
+ "Ses, aygıtın çalışma hızına kendini uyduruyor; kulaklık veya hoparlör değiştirildiğinde kesilme sorunu giderildi.",
+ "Bilgisayar uykudan uyandığında veya sekme uzun süre arka planda kaldığında sesin geri gelmemesi sorunu giderildi.",
+ "Yankı veya 3B ses desteklenmeyen tarayıcılarda oyun sessiz kalmıyor; o özellik olmadan çalışmayı sürdürüyor.",
+ "Ses kayıtları okunamadığında bütün sesler oyunun kendi ürettiği seslerle çalıyor; bekleme süresi kısaltıldı.",
+ "Müzik, ses düzeninin dışında kaldığı durumlarda da çalmayı sürdürüyor.",
+ "Firefox'ta kaydırma çubukları diğer tarayıcılardaki gibi ince ve koyu görünüyor.",
+ "Açılır listeler ve onay kutuları her tarayıcıda oyunun koyu görünümüne uyuyor.",
+ "Geliştirici konsoluna ses motorunun durumunu gösteren satır eklendi."
+]},
 {n:56,d:"28.10.2026",t:"Ses baştan yapıldı",l:[
  "Oyunun bütün ses düzeni baştan kuruldu; sesler artık tek bir yoldan geçiyor, birbirini bastırmıyor ve ani yükselmeler yumuşatılıyor.",
  "Bulunulan yere göre yankı eklendi: mağarada uzun ve karanlık, kulübede kısa ve yakın, ormanda yumuşak, açık arazide neredeyse yok.",

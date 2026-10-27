@@ -21,8 +21,9 @@ function N(dst,o){
  const ac=AC(),t=ac.currentTime+(o.t||0),att=o.att||.003,d=o.d||.1;
  const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
  s.buffer=S.gurultu(o.pink);
- f.type=o.ft||'lowpass';f.frequency.setValueAtTime(o.f||1000,t);
- if(o.f2)f.frequency.exponentialRampToValueAtTime(Math.max(20,o.f2),t+att+d);
+ const ust=S.acik();                               /* süzgeç frekansı aygıtın üst sınırını aşamaz */
+ f.type=o.ft||'lowpass';f.frequency.setValueAtTime(Math.min(o.f||1000,ust),t);
+ if(o.f2)f.frequency.exponentialRampToValueAtTime(clamp(o.f2,20,ust),t+att+d);
  f.Q.value=o.q||.7;
  env(g,t,o.v||.3,att,d);
  s.connect(f);f.connect(g);g.connect(dst);
@@ -44,7 +45,7 @@ function Tn(dst,o){
  }
  env(g,t,o.v||.2,att,d);
  let n=os;
- if(o.lp){const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=o.lp;f.Q.value=o.lq||.7;os.connect(f);n=f}
+ if(o.lp){const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=Math.min(o.lp,S.acik());f.Q.value=o.lq||.7;os.connect(f);n=f}
  n.connect(g);g.connect(dst);
  os.start(t);os.stop(t+att+d+.06);
  os.onended=()=>{try{os.disconnect();g.disconnect();if(n!==os)n.disconnect()}catch(e){}};
