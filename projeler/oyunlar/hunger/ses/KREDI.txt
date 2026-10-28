@@ -58,7 +58,7 @@ MIT:
 3) PROGRAMLA ÜRETİLEN SESLER
 ------------------------------------------------------------------------------------------
 Arayüz sesleri, kalp atışı, nefes, cırcır böceği, baykuş, kurt uluması, köpek balığı, deniz canlıları ve
-kayıtlar yüklenemediğinde devreye giren tüm yedek sesler oyunun kendi kodu (js/ses/kitaplik.js) tarafından üretilir.
+kayıtlar yüklenemediğinde devreye giren tüm yedek sesler oyunun kendi kodu (js/oyun/ses.js) tarafından üretilir.
 
 
 Not: Bir kayıt sahibi olarak itirazınız varsa blogdaki iletişim sayfasından (hakkinda.html) bildirildiğinde ilgili dosya kaldırılır.

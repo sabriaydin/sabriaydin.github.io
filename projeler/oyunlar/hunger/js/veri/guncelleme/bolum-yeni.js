@@ -2,35 +2,32 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
-{n:57,d:"28.10.2026",t:"Tarayıcı uyumluluğu",l:[
- "Oyun Chrome, Edge ve Firefox'ta aynı şekilde çalışacak biçimde gözden geçirildi.",
- "Ses, aygıtın çalışma hızına kendini uyduruyor; kulaklık veya hoparlör değiştirildiğinde kesilme sorunu giderildi.",
- "Bilgisayar uykudan uyandığında veya sekme uzun süre arka planda kaldığında sesin geri gelmemesi sorunu giderildi.",
- "Yankı veya 3B ses desteklenmeyen tarayıcılarda oyun sessiz kalmıyor; o özellik olmadan çalışmayı sürdürüyor.",
- "Ses kayıtları okunamadığında bütün sesler oyunun kendi ürettiği seslerle çalıyor; bekleme süresi kısaltıldı.",
- "Müzik, ses düzeninin dışında kaldığı durumlarda da çalmayı sürdürüyor.",
- "Firefox'ta kaydırma çubukları diğer tarayıcılardaki gibi ince ve koyu görünüyor.",
- "Açılır listeler ve onay kutuları her tarayıcıda oyunun koyu görünümüne uyuyor.",
- "Geliştirici konsoluna ses motorunun durumunu gösteren satır eklendi."
+{n:58,d:"25.10.2026",t:"Aktif görevler ve yükleme ekranı",l:[
+ "Mini haritanın altına, kabul ettiğin köy görevlerini ve ilerlemelerini gösteren bir pano eklendi.",
+ "Ayarlar > Oyun bölümüne, bu panoyu kapatabileceğin 'Aktif görevler panosu' seçeneği eklendi.",
+ "Yükleme ekranının yerleşimi sadeleştirildi: logo sol üstte, ilerleme çubuğu ekranın altında uçtan uca ve tek renk olarak gösteriliyor; bilgilendirme metinleri çubuğun üstünde, yüzde ise altında yer alıyor."
 ]},
-{n:56,d:"28.10.2026",t:"Ses baştan yapıldı",l:[
- "Oyunun bütün ses düzeni baştan kuruldu; sesler artık tek bir yoldan geçiyor, birbirini bastırmıyor ve ani yükselmeler yumuşatılıyor.",
- "Bulunulan yere göre yankı eklendi: mağarada uzun ve karanlık, kulübede kısa ve yakın, ormanda yumuşak, açık arazide neredeyse yok.",
- "Su altında bütün sesler boğuklaşıyor ve derinden gelen alçak bir uğultu duyuluyor.",
- "Uzaktaki sesler artık yalnızca kısılmıyor, tizini de yitiriyor; böylece uzaklık kulakla ayırt edilebiliyor.",
- "Gök gürültüsü, kızıl ay, tehlike uyarısı, görev ve seviye seslerinde müzik bir süreliğine kısılıyor, sonra kendiliğinden geri geliyor.",
- "Aynı anda çalabilecek ses sayısı sınırlandı; kalabalık anlarda önemli sesler öne çıkıyor, cızırtı ve gecikme oluşmuyor.",
- "Karda yürürken kara özgü adım sesi eklendi.",
- "Ateş yakıldığında tutuşma sesi eklendi.",
- "Kurt uluması gerçek kayıtla çalıyor; kurdun saldırı sesi hırıltıya çevrildi.",
- "Martı sesi kıyıda gündüzleri kendiliğinden duyuluyor.",
- "Mağarada duyulan taş gıcırtısı ile ağaç devrilirken çıkan gıcırtının aynı ses olması sorunu giderildi.",
- "Ses kayıtları daha hızlı yükleniyor; oyunun ilk saniyelerinde gereken sesler öne alındı ve yükleme sırasındaki takılma giderildi.",
- "Bazı ses kayıtlarının hiç çalmaması sorunu giderildi.",
- "Yağmur, rüzgâr, deniz, orman ve kuş seslerinin kimi zaman iki kez üst üste çalması sorunu giderildi.",
- "Uzun seslerin (gök gürültüsü gibi) yarıda kesilmesi sorunu giderildi."
+{n:57,d:"25.10.2026",t:"Pusula iyileştirmeleri",l:[
+ "Hedef bildirimi ile pusula şeridinin üst üste binmesi sorunu giderildi; hedef bildirimi artık pusulanın hemen altında, kendi boşluğunda görünüyor.",
+ "Pusulaya, en yakın keşfedilmiş köyün, kampın ve mağaranın yönünü gösteren küçük renkli noktalar eklendi.",
+ "Ayarlar > Oyun bölümüne, bu yeni yön noktalarını kapatabileceğin 'Pusulada yakın keşifler' seçeneği eklendi."
+]},
+{n:56,d:"22.10.2026",t:"Köylülerin zemine gömülmesi",l:[
+ "Köylülerin bel hizasından aşağısının zeminin içinde kalması sorunu giderildi: gövde ve bacaklar artık doğru yükseklikte duruyor, ayaklar zeminde görünüyor.",
+ "Köylülerin yürüme sırasındaki hafif sekme hareketi korundu."
 ]},
 {n:55,d:"22.10.2026",t:"Geliştirici konsolu yenilendi",l:[
+ "Geliştirici konsolu sekmeli yapıya geçirildi: Kayıtlar, Konsol, Geliştirici ve Performans sekmeleri eklendi; her görünüm kendi sekmesinde tam yükseklikte açılıyor.",
+ "Komut yazma alanı tüm sekmelerde altta sabit duruyor.",
+ "Geliştirici sekmesi yalnızca geliştirici modu açıkken görünüyor ve mod açıldığında kendiliğinden seçiliyor.",
+ "Başka bir sekmedeyken gelen yeni kayıt sayısı Kayıtlar sekmesinin rozetinde gösteriliyor.",
+ "Geliştirici paneli beş karta ayrıldı: Oyuncu, Dünya, Sahne, Eşya Ver ve İzleme.",
+ "Oyuncu kartına can, açlık, susuzluk, dayanıklılık ve akıl kaydırıcıları eklendi; değerler canlı olarak uygulanıyor.",
+ "Dünya kartına köy ve mağara seçicileri eklendi: listeden seçip Git düğmesiyle o konuma ışınlanılıyor. Liste adı, türü ve uzaklığı gösteriyor.",
+ "Eşya Ver kartı eklendi: eşya aranıp adet belirlenerek tek tıkla çantaya ekleniyor.",
+ "İzleme kartı eklendi: izlenen değerler listede canlı görünüyor ve tek tıkla kaldırılabiliyor.",
+ "Sahne kartına kalite düğmeleri ve canlı ekleme/temizleme kısayolları eklendi.",
+ "Performans sekmesi eklendi: son 120 ölçümün kare hızı grafiği ile çizim çağrısı, üçgen, doku, gölgelendirici, bellek ve sahne nesnesi ayrıntıları gösteriliyor.",
  "Geliştirici konsolu baştan tasarlandı: koyu cam yüzey, yuvarlatılmış paneller, kategori renkleri ve okunaklı tek aralıklı yazı tipi kullanıldı.",
  "Üstteki durum satırı ayrı ayrı kutucuklara bölündü; can, açlık, susuzluk, dayanıklılık ve kare hızı değerine göre yeşil, sarı veya kırmızı görünüyor.",
  "Kayıt listesi yeniden düzenlendi: kategori adı renkli bir etiket oldu, satırlar şeritli ve vurgulu hâle getirildi, komut satırları kırmızı kenarla ayrıldı.",
@@ -60,7 +57,10 @@ HG.UPD=(HG.UPD||[]).concat([
  "Yeni komut: olcum — kare hızı, çizim çağrısı, üçgen, doku ve bellek ölçümlerini yazar.",
  "Yeni komut: izle — seçilen bir değeri (örneğin izle G.stam) panelde sürekli gösterir.",
  "Geliştirici modu kapatıldığında uçuş, hız, zaman, sis, tel kafes, ek ışık ve ölümsüzlük ayarlarının tamamı geri alınıyor.",
- "Oyun güncellendiğinde tarayıcının eski görünüm ve kod dosyalarını kullanması sorunu giderildi: dosya adresleri sürüm numarasıyla işaretleniyor."
+ "Oyun güncellendiğinde tarayıcının eski görünüm ve kod dosyalarını kullanması sorunu giderildi: dosya adresleri sürüm numarasıyla işaretleniyor.",
+ "Geliştirici modu artık dünya kuralından bağımsız: dünya kurulurken \"Konsol komutları\" seçeneği kapalı olsa bile açılabiliyor ve açıkken tüm komutlar çalışıyor.",
+ "Geliştirici modu parolayla korunuyor: komut verildiğinde parola isteniyor, girilen parola ekranda ve kayıtlarda yıldızla gösteriliyor.",
+ "Üst üste üç yanlış parolada geliştirici modu 30 saniye boyunca kilitleniyor."
 ]},
 {n:54,d:"21.10.2026",t:"Ada, köyler, mağaralar ve çok sayıda düzeltme",l:[
  "Gerçek dağlar eklendi: ada artık birkaç büyük dağ kütlesi, uzun sırtlar, aralarında vadiler ve kıyıya alçalan tepelerden oluşuyor; en yüksek zirveler 25 metreyi aşıyor.",

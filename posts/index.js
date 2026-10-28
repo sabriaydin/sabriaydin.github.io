@@ -1,5 +1,5 @@
-// YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenleme.
-// Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmen yeterli.
+// YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenlemeyin.
+// Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmeniz yeterli.
 window.POSTS = [
   { id: 'ucretsiz-31-onlyoffice-desktop-editors', title: 'ONLYOFFICE Desktop Editors: Ücretsiz Ofis Paketi', cat: 'ofis', date: '2026-10-26', time: '11:20', excerpt: 'ONLYOFFICE Desktop Editors nedir, belge biçimlerini nasıl destekler ve resmi indirme bağlantıları.' },
   { id: 'ucretsiz-57-stoat', title: 'Stoat: Açık Kaynak Grup Sohbet Uygulaması', cat: 'guvenlik', date: '2026-10-24', time: '19:02', excerpt: 'Stoat (Revolt) nedir, reklamsız ve açık kaynaklı grup sohbetini nasıl sağlar ve resmi indirme bağlantıları.' },

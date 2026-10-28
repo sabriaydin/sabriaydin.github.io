@@ -73,8 +73,8 @@ const key = p => p.date + ' ' + (p.time || '23:59');
 posts.sort((a, b) => key(b).localeCompare(key(a)) || b.id.localeCompare(a.id));
 
 const q = s => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
-const manifest = `// YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenleme.
-// Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmen yeterli.
+const manifest = `// YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenlemeyin.
+// Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmeniz yeterli.
 window.POSTS = [
 ${posts.map(p => `  { id: ${q(p.id)}, title: ${q(p.title)}, cat: ${q(p.cat)}, date: ${q(p.date)},${p.time ? ` time: ${q(p.time)},` : ''}${p.pin ? ` pin: ${q(p.pin)},` : ''} excerpt: ${q(p.excerpt)} }`).join(',\n')}
 ];

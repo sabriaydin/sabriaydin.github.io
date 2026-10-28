@@ -11,17 +11,17 @@
 <meta property="og:site_name" content="Sabri Aydın">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:title" content="Hunger">
-<link rel="icon" href="../../assets/img/favicon.ico" sizes="32x32">
-<link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="../../assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="css/stil.css?v=1.95">
-<link rel="stylesheet" href="css/genisleme.css?v=1.94">
-<link rel="stylesheet" href="css/uretim.css?v=1.94">
-<link rel="stylesheet" href="css/konsol.css?v=1.95">
-<link rel="stylesheet" href="css/menu.css?v=1.94">
-<link rel="stylesheet" href="css/ag.css?v=1.94">
-<link rel="stylesheet" href="css/iyilestirme.css?v=1.95">
-<link rel="stylesheet" href="css/arayuz.css?v=1.95">
+<link rel="icon" href="../../../assets/img/favicon.ico" sizes="32x32">
+<link rel="icon" href="../../../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="css/stil.css?v=1.99">
+<link rel="stylesheet" href="css/genisleme.css?v=1.99">
+<link rel="stylesheet" href="css/uretim.css?v=1.99">
+<link rel="stylesheet" href="css/konsol.css?v=1.99">
+<link rel="stylesheet" href="css/menu.css?v=1.99">
+<link rel="stylesheet" href="css/ag.css?v=1.99">
+<link rel="stylesheet" href="css/iyilestirme.css?v=1.99">
+<link rel="stylesheet" href="css/arayuz.css?v=1.99">
 </head>
 <body>
 <div id="game">
@@ -43,6 +43,7 @@
   <div id="clock" hidden></div>
   <div id="goal" hidden></div>
   <canvas id="mini" width="160" height="160" hidden></canvas>
+  <div id="quests" hidden></div>
   <div id="cross" hidden></div>
   <div id="tgt" hidden><b></b><i><u></u></i><span></span></div>
   <div id="zn"></div>
@@ -77,7 +78,7 @@
     </div>
   </div>
   <div id="jr" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">GÜNLÜK</h1><div class="stabs" id="jrT"></div><div id="jrB"></div><div class="btns"><button id="jrX" class="ghost" type="button">Kapat (K / Esc)</button></div></div></div>
-  <div id="load"><div class="lbox"><h1>HUN<span>GER</span></h1><div id="loadT">Yükleniyor</div><div class="lbar"><i id="loadBar"></i></div><div class="lrow"><span id="loadSub"></span><span id="loadPct">0%</span></div><p id="loadTip"></p></div></div>
+  <div id="load"><div class="ld-top"><h1>HUN<span>GER</span></h1><div id="loadT">Yükleniyor</div></div><div class="ld-bottom"><div class="ld-info"><p id="loadTip"></p><div id="loadSub"></div></div><div class="lbar"><i id="loadBar"></i></div><div class="ld-pctrow"><span id="loadPct">0%</span></div></div></div>
   <div id="gd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">REHBER</h1><div class="stabs" id="gdT"></div><div id="gdB"></div><div class="btns"><button id="gdX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
   <div id="sv" hidden><div class="card"><div class="svh"><h1 style="font-size:26px;letter-spacing:.1em">KAYITLI OYUNLAR</h1><span id="svC"></span></div><p id="svS"></p><div id="svL"></div><div class="btns"><button id="svF" type="button">Dosyadan yükle</button><button id="svX" class="ghost" type="button">Kapat (Esc)</button></div></div></div>
   <div id="sd" hidden><div class="card"><h1 style="font-size:26px;letter-spacing:.1em">OYUNU KAYDET</h1><p id="sdS">Kayıt türünü seçin.</p>
@@ -120,7 +121,7 @@
         <button class="ghost bSet" type="button">Ayarlar</button>
         <button id="bNotes" class="ghost" type="button">Güncelleme Notları</button>
       </div>
-      <a class="back" href="../../index.html">← Bloga dön</a>
+      <a class="back" href="../../../index.html">← Bloga dön</a>
     </div>
     <div id="menuBy">Bir Sabri Aydın oyunu.</div><div id="menuVer"></div>
   </div>
@@ -129,124 +130,121 @@
 </div>
 <script src="../ortak/three.min.js"></script>
 <script src="../ortak/peerjs.min.js"></script>
-<script src="js/cekirdek/ad-alani.js?v=1.94"></script>
-<script src="js/cekirdek/yardimcilar.js?v=1.94"></script>
-<script src="js/cekirdek/ayarlar.js?v=1.94"></script>
-<script src="js/cekirdek/tuslar.js?v=1.94"></script>
-<script src="js/cekirdek/hazirlik.js?v=1.94"></script>
-<script src="js/oyun/konsol.js?v=1.95"></script>
-<script src="js/veri/esyalar.js?v=1.94"></script>
-<script src="js/veri/notlar.js?v=1.94"></script>
-<script src="js/veri/rehber.js?v=1.94"></script>
-<script src="js/veri/tarifler.js?v=1.94"></script>
-<script src="js/veri/dugumler.js?v=1.94"></script>
-<script src="js/veri/hayvanlar.js?v=1.94"></script>
-<script src="js/veri/yenilikler.js?v=1.94"></script>
-<script src="js/veri/genisleme.js?v=1.94"></script>
-<script src="js/veri/denge.js?v=1.94"></script>
-<script src="js/dunya/uretim.js?v=1.94"></script>
-<script src="js/dunya/magara.js?v=1.94"></script>
-<script src="js/gorsel/simgeler.js?v=1.94"></script>
-<script src="js/gorsel/yeni-simgeler.js?v=1.94"></script>
-<script src="js/gorsel/genisleme-simgeler.js?v=1.94"></script>
-<script src="js/gorsel/insa-simgeler.js?v=1.94"></script>
-<script src="js/gorsel/rust-simgeler.js?v=1.94"></script>
-<script src="js/sahne/cekirdek.js?v=1.94"></script>
-<script src="js/sahne/gerceklik.js?v=1.94"></script>
-<script src="js/sahne/dokular.js?v=1.94"></script>
-<script src="js/sahne/hava.js?v=1.94"></script>
-<script src="js/sahne/isik.js?v=1.94"></script>
-<script src="js/sahne/arazi.js?v=1.94"></script>
-<script src="js/sahne/modeller.js?v=1.94"></script>
-<script src="js/sahne/cim.js?v=1.94"></script>
-<script src="js/sahne/nesneler.js?v=1.94"></script>
-<script src="js/sahne/kol.js?v=1.94"></script>
-<script src="js/sahne/esya-modelleri.js?v=1.94"></script>
-<script src="js/sahne/dusenler.js?v=1.94"></script>
-<script src="js/sahne/efektler.js?v=1.94"></script>
-<script src="js/sahne/devrilme.js?v=1.94"></script>
-<script src="js/sahne/hayvan-modelleri.js?v=1.94"></script>
-<script src="js/sahne/yeni-modeller.js?v=1.94"></script>
-<script src="js/sahne/hayvanlar.js?v=1.94"></script>
-<script src="js/sahne/koyluler.js?v=1.94"></script>
-<script src="js/sahne/koy-yapilari.js?v=1.94"></script>
-<script src="js/sahne/kamplar.js?v=1.94"></script>
-<script src="js/sahne/atmosfer.js?v=1.94"></script>
-<script src="js/sahne/parcaciklar.js?v=1.94"></script>
-<script src="js/sahne/oklar.js?v=1.94"></script>
-<script src="js/sahne/nisan.js?v=1.94"></script>
-<script src="js/sahne/magara.js?v=1.94"></script>
-<script src="js/sahne/sualti.js?v=1.94"></script>
-<script src="js/sahne/deniz.js?v=1.94"></script>
-<script src="js/sahne/yenilikler.js?v=1.94"></script>
-<script src="js/sahne/genisleme-modeller.js?v=1.94"></script>
-<script src="js/sahne/insa-modeller.js?v=1.94"></script>
-<script src="js/sahne/el-modelleri.js?v=1.94"></script>
-<script src="js/sahne/el-modelleri2.js?v=1.94"></script>
-<script src="js/sahne/sonisleme.js?v=1.94"></script>
-<script src="js/sahne/optim.js?v=1.94"></script>
-<script src="js/ses/motor.js?v=1.95"></script>
-<script src="js/ses/kitaplik.js?v=1.95"></script>
-<script src="js/ses/kayit.js?v=1.95"></script>
-<script src="js/ses/ortam.js?v=1.95"></script>
-<script src="js/ses/muzik.js?v=1.95"></script>
-<script src="js/oyun/zaman.js?v=1.94"></script>
-<script src="js/oyun/envanter.js?v=1.94"></script>
-<script src="js/oyun/dusenler.js?v=1.94"></script>
-<script src="js/oyun/hayvanlar.js?v=1.94"></script>
-<script src="js/oyun/deniz.js?v=1.94"></script>
-<script src="js/oyun/vucut.js?v=1.94"></script>
-<script src="js/oyun/dusmanlar.js?v=1.94"></script>
-<script src="js/oyun/silah.js?v=1.94"></script>
-<script src="js/oyun/koyluler.js?v=1.94"></script>
-<script src="js/oyun/gelisim.js?v=1.94"></script>
-<script src="js/oyun/gorevler.js?v=1.94"></script>
-<script src="js/oyun/kamplar.js?v=1.94"></script>
-<script src="js/oyun/magara.js?v=1.94"></script>
-<script src="js/oyun/olaylar.js?v=1.94"></script>
-<script src="js/oyun/uretim.js?v=1.94"></script>
-<script src="js/oyun/eylem.js?v=1.94"></script>
-<script src="js/oyun/hayatta-kalma.js?v=1.94"></script>
-<script src="js/oyun/hedefler.js?v=1.94"></script>
-<script src="js/oyun/durum.js?v=1.94"></script>
-<script src="js/oyun/arayuz.js?v=1.94"></script>
-<script src="js/oyun/harita.js?v=1.94"></script>
-<script src="js/oyun/rehber.js?v=1.94"></script>
-<script src="js/oyun/basarimlar.js?v=1.94"></script>
-<script src="js/oyun/kayitlar.js?v=1.94"></script>
-<script src="js/oyun/yenilikler.js?v=1.94"></script>
-<script src="js/oyun/genisleme.js?v=1.94"></script>
-<script src="js/oyun/insa.js?v=1.94"></script>
-<script src="js/oyun/rust-insa.js?v=1.94"></script>
-<script src="js/sahne/rust-insa-sahne.js?v=1.94"></script>
-<script src="js/sahne/ag-oyuncu.js?v=1.94"></script>
-<script src="js/oyun/genisleme2.js?v=1.94"></script>
-<script src="js/oyun/genisleme3.js?v=1.94"></script>
-<script src="js/oyun/genisleme-arayuz.js?v=1.94"></script>
-<script src="js/oyun/uretim-ekrani.js?v=1.94"></script>
-<script src="js/oyun/uretim-sure.js?v=1.94"></script>
-<script src="js/oyun/koruma.js?v=1.94"></script>
-<script src="js/oyun/zorluk.js?v=1.94"></script>
-<script src="js/oyun/iyilestirme.js?v=1.94"></script>
-<script src="js/oyun/ag.js?v=1.94"></script>
-<script src="js/oyun/ag-dunya.js?v=1.94"></script>
-<script src="js/oyun/ag-varlik.js?v=1.94"></script>
-<script src="js/oyun/ag-arayuz.js?v=1.94"></script>
-<script src="js/oyun/ag-ekstra.js?v=1.94"></script>
-<script src="js/oyun/baris.js?v=1.94"></script>
-<script src="js/oyun/fizik.js?v=1.94"></script>
-<script src="js/oyun/zeka.js?v=1.94"></script>
-<script src="js/oyun/hile.js?v=1.94"></script>
-<script src="js/oyun/oynanis.js?v=1.94"></script>
-<script src="js/veri/guncelleme/bolum-1.js?v=1.94"></script>
-<script src="js/veri/guncelleme/bolum-2.js?v=1.94"></script>
-<script src="js/veri/guncelleme/bolum-3.js?v=1.94"></script>
-<script src="js/veri/guncelleme/bolum-yeni.js?v=1.95"></script>
-<script src="js/oyun/notlar.js?v=1.94"></script>
-<script src="js/oyun/komut.js?v=1.94"></script>
-<script src="js/oyun/menu.js?v=1.94"></script>
-<script src="js/oyun/menu-arka.js?v=1.94"></script>
-<script src="js/oyun/giris.js?v=1.94"></script>
-<script src="js/oyun/dongu.js?v=1.94"></script>
+<script src="js/cekirdek/ad-alani.js?v=1.99"></script>
+<script src="js/cekirdek/yardimcilar.js?v=1.99"></script>
+<script src="js/cekirdek/ayarlar.js?v=1.99"></script>
+<script src="js/cekirdek/tuslar.js?v=1.99"></script>
+<script src="js/cekirdek/hazirlik.js?v=1.99"></script>
+<script src="js/oyun/konsol.js?v=1.99"></script>
+<script src="js/veri/esyalar.js?v=1.99"></script>
+<script src="js/veri/notlar.js?v=1.99"></script>
+<script src="js/veri/rehber.js?v=1.99"></script>
+<script src="js/veri/tarifler.js?v=1.99"></script>
+<script src="js/veri/dugumler.js?v=1.99"></script>
+<script src="js/veri/hayvanlar.js?v=1.99"></script>
+<script src="js/veri/yenilikler.js?v=1.99"></script>
+<script src="js/veri/genisleme.js?v=1.99"></script>
+<script src="js/veri/denge.js?v=1.99"></script>
+<script src="js/dunya/uretim.js?v=1.99"></script>
+<script src="js/dunya/magara.js?v=1.99"></script>
+<script src="js/gorsel/simgeler.js?v=1.99"></script>
+<script src="js/gorsel/yeni-simgeler.js?v=1.99"></script>
+<script src="js/gorsel/genisleme-simgeler.js?v=1.99"></script>
+<script src="js/gorsel/insa-simgeler.js?v=1.99"></script>
+<script src="js/gorsel/rust-simgeler.js?v=1.99"></script>
+<script src="js/sahne/cekirdek.js?v=1.99"></script>
+<script src="js/sahne/gerceklik.js?v=1.99"></script>
+<script src="js/sahne/dokular.js?v=1.99"></script>
+<script src="js/sahne/hava.js?v=1.99"></script>
+<script src="js/sahne/isik.js?v=1.99"></script>
+<script src="js/sahne/arazi.js?v=1.99"></script>
+<script src="js/sahne/modeller.js?v=1.99"></script>
+<script src="js/sahne/cim.js?v=1.99"></script>
+<script src="js/sahne/nesneler.js?v=1.99"></script>
+<script src="js/sahne/kol.js?v=1.99"></script>
+<script src="js/sahne/esya-modelleri.js?v=1.99"></script>
+<script src="js/sahne/dusenler.js?v=1.99"></script>
+<script src="js/sahne/efektler.js?v=1.99"></script>
+<script src="js/sahne/devrilme.js?v=1.99"></script>
+<script src="js/sahne/hayvan-modelleri.js?v=1.99"></script>
+<script src="js/sahne/yeni-modeller.js?v=1.99"></script>
+<script src="js/sahne/hayvanlar.js?v=1.99"></script>
+<script src="js/sahne/koyluler.js?v=1.99"></script>
+<script src="js/sahne/koy-yapilari.js?v=1.99"></script>
+<script src="js/sahne/kamplar.js?v=1.99"></script>
+<script src="js/sahne/atmosfer.js?v=1.99"></script>
+<script src="js/sahne/parcaciklar.js?v=1.99"></script>
+<script src="js/sahne/oklar.js?v=1.99"></script>
+<script src="js/sahne/nisan.js?v=1.99"></script>
+<script src="js/sahne/magara.js?v=1.99"></script>
+<script src="js/sahne/sualti.js?v=1.99"></script>
+<script src="js/sahne/deniz.js?v=1.99"></script>
+<script src="js/sahne/yenilikler.js?v=1.99"></script>
+<script src="js/sahne/genisleme-modeller.js?v=1.99"></script>
+<script src="js/sahne/insa-modeller.js?v=1.99"></script>
+<script src="js/sahne/el-modelleri.js?v=1.99"></script>
+<script src="js/sahne/el-modelleri2.js?v=1.99"></script>
+<script src="js/sahne/sonisleme.js?v=1.99"></script>
+<script src="js/sahne/optim.js?v=1.99"></script>
+<script src="js/oyun/ses.js?v=1.99"></script>
+<script src="js/oyun/ses-gercek.js?v=1.99"></script>
+<script src="js/oyun/zaman.js?v=1.99"></script>
+<script src="js/oyun/envanter.js?v=1.99"></script>
+<script src="js/oyun/dusenler.js?v=1.99"></script>
+<script src="js/oyun/hayvanlar.js?v=1.99"></script>
+<script src="js/oyun/deniz.js?v=1.99"></script>
+<script src="js/oyun/vucut.js?v=1.99"></script>
+<script src="js/oyun/dusmanlar.js?v=1.99"></script>
+<script src="js/oyun/silah.js?v=1.99"></script>
+<script src="js/oyun/koyluler.js?v=1.99"></script>
+<script src="js/oyun/gelisim.js?v=1.99"></script>
+<script src="js/oyun/gorevler.js?v=1.99"></script>
+<script src="js/oyun/kamplar.js?v=1.99"></script>
+<script src="js/oyun/magara.js?v=1.99"></script>
+<script src="js/oyun/olaylar.js?v=1.99"></script>
+<script src="js/oyun/uretim.js?v=1.99"></script>
+<script src="js/oyun/eylem.js?v=1.99"></script>
+<script src="js/oyun/hayatta-kalma.js?v=1.99"></script>
+<script src="js/oyun/hedefler.js?v=1.99"></script>
+<script src="js/oyun/durum.js?v=1.99"></script>
+<script src="js/oyun/arayuz.js?v=1.99"></script>
+<script src="js/oyun/harita.js?v=1.99"></script>
+<script src="js/oyun/rehber.js?v=1.99"></script>
+<script src="js/oyun/basarimlar.js?v=1.99"></script>
+<script src="js/oyun/kayitlar.js?v=1.99"></script>
+<script src="js/oyun/yenilikler.js?v=1.99"></script>
+<script src="js/oyun/genisleme.js?v=1.99"></script>
+<script src="js/oyun/insa.js?v=1.99"></script>
+<script src="js/oyun/rust-insa.js?v=1.99"></script>
+<script src="js/sahne/rust-insa-sahne.js?v=1.99"></script>
+<script src="js/sahne/ag-oyuncu.js?v=1.99"></script>
+<script src="js/oyun/genisleme2.js?v=1.99"></script>
+<script src="js/oyun/genisleme3.js?v=1.99"></script>
+<script src="js/oyun/genisleme-arayuz.js?v=1.99"></script>
+<script src="js/oyun/uretim-ekrani.js?v=1.99"></script>
+<script src="js/oyun/uretim-sure.js?v=1.99"></script>
+<script src="js/oyun/koruma.js?v=1.99"></script>
+<script src="js/oyun/zorluk.js?v=1.99"></script>
+<script src="js/oyun/iyilestirme.js?v=1.99"></script>
+<script src="js/oyun/ag.js?v=1.99"></script>
+<script src="js/oyun/ag-dunya.js?v=1.99"></script>
+<script src="js/oyun/ag-varlik.js?v=1.99"></script>
+<script src="js/oyun/ag-arayuz.js?v=1.99"></script>
+<script src="js/oyun/ag-ekstra.js?v=1.99"></script>
+<script src="js/oyun/baris.js?v=1.99"></script>
+<script src="js/oyun/fizik.js?v=1.99"></script>
+<script src="js/oyun/zeka.js?v=1.99"></script>
+<script src="js/oyun/hile.js?v=1.99"></script>
+<script src="js/oyun/oynanis.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-1.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-2.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-3.js?v=1.99"></script>
+<script src="js/veri/guncelleme/bolum-yeni.js?v=1.99"></script>
+<script src="js/oyun/notlar.js?v=1.99"></script>
+<script src="js/oyun/komut.js?v=1.99"></script>
+<script src="js/oyun/menu.js?v=1.99"></script>
+<script src="js/oyun/menu-arka.js?v=1.99"></script>
+<script src="js/oyun/giris.js?v=1.99"></script>
+<script src="js/oyun/dongu.js?v=1.99"></script>
 </body>
 </html>
