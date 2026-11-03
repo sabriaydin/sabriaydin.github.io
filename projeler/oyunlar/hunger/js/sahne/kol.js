@@ -276,6 +276,7 @@ S.onInit(()=>{
  rigR=mkHand();rigL=mkHand();
  const a=mkArm(.4,false,rigR),b=mkArm(-.4,true,rigL);
  rArm=a.g;lArm=b.g;hand=a.anc;lhand=b.anc;foreR=a.fore;foreL=b.fore;
+ lArm.visible=false;                                                      /* boş sol el gösterilmez */
  slot=new THREE.Group();hand.add(slot);                                   /* eşya modeli burada durur (el ile birlikte hareket eder) */
  twoH=new THREE.Group();twoH.visible=false;root.add(twoH);                /* iki elle tutulan eşya */
  sc.viewmodel=root;
@@ -333,6 +334,80 @@ function rockSwing(dt){
  if(u<.56){const k=(u-.36)/.2,e=k*k;return {y:.2-.38*e,z:.12-.36*e,rx:.8-1.7*e}}
  const k=ease((u-.56)/.44);return {y:-.18*(1-k),z:-.24*(1-k),rx:-.9*(1-k)}
 }
+/* ---------- Yeme ve su içme animasyonu ----------
+   Üç ayrı hareket vardır:
+    eat   : katı yiyecek ağza götürülür, ısırılır ve çiğnenirken görüntü hafifçe sallanır,
+    sip   : şişe, süt gibi içecek ağza yatırılır; yutkundukça el kısa aralıklarla alçalır,
+    scoop : elde içecek yokken gölet başında el suya daldırılır, avuç dolar, ağza götürülür.
+   Hareket, eylem başlayınca yumuşakça açılır ve bitince aynı yumuşaklıkla duruşa döner. */
+const CS={k:0,kind:'',ph:0,on:false};
+const REST=[.4,-.34,-.635];                       /* elin duruş konumu (kol kökü uzayı) */
+const MOUTH=[.09,-.21,-.32];                      /* ağız hizası: ekranın alt ortası, kameraya yakın */
+const lp=(a,b,u)=>a+(b-a)*u, sstep=u=>u*u*(3-2*u);
+/* Avuçlama duruşu: parmaklar bitişik ve hafif kıvrık, başparmak kapanır (su tutan el) */
+POSE.cup={c:[[.78,.58,.26],[.84,.62,.26],[.88,.64,.28],[.92,.68,.3]],sp:[-.03,-.01,.01,.03],th:[.1,.36,.48,.38]};
+/* Suyu avuçlama çevrimi: [el konumu, el dönüşü] kilit kareleri */
+const SC_W=[
+ {p:[.26,-.42,-.56],r:[-.20,.02,-1.26]},          /* el suya doğru iner */
+ {p:[.19,-.55,-.52],r:[-.08,.04,-1.50]},          /* avuç görüş alanının altında, suda */
+ {p:[.17,-.26,-.38],r:[.10,.12,-1.44]},           /* dolu avuç kalkar */
+ {p:[.13,-.17,-.30],r:[.46,.16,-2.02]}            /* avuç ağza yatırılır */
+];
+function consumeKind(id,info){
+ const ak=HG.A.key||'';
+ if(!ak)return '';
+ /* eylem sol tuşla da etkileşim tuşuyla da sürdürülebilir (su içme E ile de yapılır) */
+ if(!info.act&&!(HG.useHoldAct&&HG.useHoldAct()))return '';
+ if(ak==='eat'){const it=id?IT[id]:null,f=it&&it.food;return f?(f.h>0?'eat':'sip'):''}
+ if(ak.slice(0,6)==='drink,')return 'scoop';
+ return '';
+}
+/* true dönerse kolu bu hareket yönetir; çağıran başka duruş uygulamaz */
+function consumePose(G,t,dt,id,info,pk){
+ const want=consumeKind(id,info);
+ if(want&&want!==CS.kind){CS.kind=want;CS.ph=0}
+ CS.k+=((want?1:0)-CS.k)*(1-Math.exp(-(want?11:8)*dt));
+ if(!want&&CS.k<.005){
+  if(CS.on){CS.on=false;CS.k=0;CS.kind='';rArm.rotation.order='XYZ';rArm.rotation.set(0,0,0);rArm.position.set(.4,-.31,-.115)}
+  return false;
+ }
+ CS.on=true;if(want)CS.ph+=dt;
+ animateHeld(G,t,dt,id);                           /* eşya modeli, meşale ışığı ve el konumu önce tazelenir */
+ const A=HG.A,pr=A.need>0?Math.min(1,Math.max(0,A.p/A.need)):0,k=sstep(CS.k);
+ let tx=MOUTH[0],ty=MOUTH[1],tz=MOUTH[2],rx=.55,ry=.3,rz=-.15,roll=.12,pose=POSE.grip,bob=0;
+ if(CS.kind==='eat'){
+  /* ısırık: el hızla ağza yaklaşır, sonra çiğnemek için biraz uzaklaşır */
+  const B=.62,s=(CS.ph%B)/B,bite=Math.exp(-Math.pow((s-.13)/.075,2));
+  tx-=.012*bite;ty+=.018*bite;tz+=.05*bite;
+  rx=.55+.2*bite;ry=.3+.12*Math.sin(CS.ph*1.1);
+  bob=Math.sin(CS.ph*12.6)*.0035*(1-bite);                     /* çiğneme: görüntü hafif oynar */
+ }else if(CS.kind==='sip'){
+  /* şişe ağza yatırılır; içerik azaldıkça eğim artar, yutkundukça el alçalır */
+  const sw=Math.exp(-Math.pow(((CS.ph%.95)-.22)/.1,2));
+  ty-=.013*sw;tz+=.012*sw;
+  rx=.85+.45*pr;ry=.18;rz=-.08;roll=.1;bob=-.0032*sw;
+ }else{
+  /* avuçla su içme: iniş, doldurma, kaldırma, ağza yatırma */
+  pose=POSE.cup;roll=-.1;
+  const u=pr;let a,b,q;
+  if(u<.30){a=SC_W[0];b=SC_W[1];q=sstep(u/.30)}
+  else if(u<.42){a=SC_W[1];b=SC_W[1];q=0}                      /* avuç suyun içinde bekler */
+  else if(u<.68){a=SC_W[1];b=SC_W[2];q=sstep((u-.42)/.26)}
+  else if(u<.90){a=SC_W[2];b=SC_W[3];q=sstep((u-.68)/.22)}
+  else{a=SC_W[3];b=SC_W[0];q=sstep((u-.90)/.10)}
+  tx=lp(a.p[0],b.p[0],q);ty=lp(a.p[1],b.p[1],q);tz=lp(a.p[2],b.p[2],q);
+  rx=lp(a.r[0],b.r[0],q);ry=lp(a.r[1],b.r[1],q);rz=lp(a.r[2],b.r[2],q);
+  if(u>=.30&&u<.42){const w=(u-.30)/.12;tx+=Math.sin(w*9.4)*.016;tz+=Math.cos(w*9.4)*.012}   /* suyu toplarken küçük dairesel hareket */
+  if(u>=.68&&u<.90)bob=-.003*Math.sin((u-.68)/.22*3.14);
+ }
+ const bx=lp(REST[0],tx,k),by=lp(REST[1],ty,k),bz=lp(REST[2],tz,k),h0=id?-.33:0;
+ ikArm(rArm,bx,by,bz,.36,roll*k);
+ hand.rotation.set(lp(h0,rx,k),lp(0,ry,k),lp(0,rz,k));
+ if(bob)root.position.y+=bob*k;
+ applyPose(rigR,pose,pk);
+ placeFore(foreR,hand);
+ return true;
+}
 /* Ön kolun ucu avucun arkasındaki bilek noktasına çevrilir */
 const _w=new THREE.Vector3(),_z=new THREE.Vector3(0,0,1);
 function placeFore(fore,anc){
@@ -352,6 +427,8 @@ const _p=new THREE.Vector3();
 const RK={dx:.105,dy:-.012,dz:.02,roll:.3};          /* taşın yan yüzeylerinde, avuç içleri içe bakan eller */
 function setTwo(on){
  twoOn=on;twoH.visible=on;
+ lArm.visible=on;                                   /* sol el yalnızca iki elle tutulan eşyada görünür */
+ if(on){CS.k=0;CS.on=false;CS.kind=''}
  if(on){rArm.rotation.order=lArm.rotation.order='YXZ'}
  else{rArm.rotation.order=lArm.rotation.order='XYZ';rArm.rotation.set(0,0,0);lArm.rotation.set(0,0,0);rArm.position.set(.4,-.31,-.115);lArm.position.set(-.4,-.37,-.115);hand.rotation.set(0,0,0);lhand.rotation.set(0,0,0)}
 }
@@ -396,7 +473,7 @@ function clearance(G,cam,front){
 S.onFrame((G,t,dt,info)=>{
  const play=info.mode==='play';
  if(!play&&sc.torchLight)sc.torchLight.intensity=0;
- root.visible=play&&!HG.deathCam&&(!!info.held||sc.swingT>=0);if(!play||HG.deathCam)return;   /* ölüm ekranında eller görünmez */
+ root.visible=play&&!HG.deathCam&&(!!info.held||sc.swingT>=0||CS.k>.005);if(!play||HG.deathCam)return;   /* ölüm ekranında eller görünmez; elle su içerken eşya olmasa da el görünür */
  const id=info.held,it=id?IT[id]:null,two=!!(it&&it.tool==='rock');
  if(id!==heldId){
   heldId=id;while(slot.children.length)slot.remove(slot.children[0]);while(twoH.children.length)twoH.remove(twoH.children[0]);
@@ -443,6 +520,8 @@ S.onFrame((G,t,dt,info)=>{
   tlOff(G,t,dt);
   return;
  }
+ /* yeme ve içme hareketi kolu tümüyle yönetir */
+ if(consumePose(G,t,dt,id,info,pk))return;
  const spose=swingPose(dt,!!id);
  if(spose){rArm.rotation.x=spose.a;rArm.rotation.y=-.05+spose.y}
  else if(info.act&&!GATHER.test(HG.A.key||'')){rArm.rotation.x=.13+Math.sin(t*15)*.6;rArm.rotation.y=-.1+Math.sin(t*15)*.12}

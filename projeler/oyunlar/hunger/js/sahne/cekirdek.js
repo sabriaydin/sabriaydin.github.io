@@ -26,6 +26,9 @@ S.init=canvas=>{
  R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.0;
  R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
  sc.scene=new THREE.Scene();sc.scene.background=sc.col(0x8ec9ee);sc.scene.fog=new THREE.FogExp2(0x8ec9ee,.0105);
+ /* Ekran kartı çizim bağlamını düşürürse three.js kendi kendine toparlar; oyuncu ne olduğunu bilsin */
+ canvas.addEventListener('webglcontextlost',()=>{try{HG.log&&HG.log('hata','Ekran kartı çizim bağlantısı koptu; geri gelmesi bekleniyor.','hata')}catch(e){}try{HG.toast&&HG.toast('Görüntü sürücüsü kesildi; geri gelmesi bekleniyor.')}catch(e){}},false);
+ canvas.addEventListener('webglcontextrestored',()=>{try{S.resize();HG.toast&&HG.toast('Görüntü geri geldi.')}catch(e){}},false);
  sc.cam=new THREE.PerspectiveCamera(75,1,.05,400);sc.cam.rotation.order='YXZ';
  sc.scene.add(sc.cam);                       /* kol modeli kameraya bağlı olduğundan sahnede olmalı */
  initFns.forEach(f=>f());
@@ -75,14 +78,46 @@ S.buildAsync=async(G,cb)=>{
 S.warmup=()=>{try{sc.R.compile(sc.scene,sc.cam)}catch(e){}};
 S.sync=G=>syncFns.forEach(f=>f(G));
 S.setMode=m=>{sc.mode=m;sc.camInit=false};
-S.resize=()=>{const w=innerWidth,h=innerHeight;sc.R.setSize(w,h,false);sc.cam.aspect=w/h;sc.cam.updateProjectionMatrix()};
+/* Pencere boyutu sıfır okunursa çizim yüzeyi de sıfırlanıyor ve ekran boş kalıyordu: en az 1 piksel */
+S.resize=()=>{const w=Math.max(1,innerWidth||1),h=Math.max(1,innerHeight||1);sc.R.setSize(w,h,false);sc.cam.aspect=w/h;sc.cam.updateProjectionMatrix()};
 /* Fare/dokunma ile bakış: dx sağa (yaw azalır), dy aşağı (pitch azalır) */
 S.look=(dx,dy)=>{const c=C(),k=c.sens/100*(1-(sc.zoomK||0)*.65);look.yaw-=dx*k;look.pitch=clamp(look.pitch-dy*k*(c.invY?-1:1),-1.5,1.5)};
 
 const tgt=new THREE.Vector3(),orbit=new THREE.Vector3();
+/* ---- Ekranın boş (mavi) kalmasına yol açan iki durum buradan engellenir ----
+   1) Oyuncunun konumu ya da bakış açısı geçersiz bir sayıya dönüşürse kamera da geçersiz olur ve
+      sahnede hiçbir şey çizilemez; son geçerli konum saklanır ve bozulma anında geri yüklenir.
+   2) Bir sahne parçası kare içinde hata verirse çizim hiç yapılmadan dönülüyordu; her parça ayrı
+      korunur, hata bir kez bildirilir ve çizim sürer. */
+const fin=v=>typeof v==='number'&&isFinite(v);
+function sanePos(G){
+ if(!fin(look.yaw))look.yaw=0;
+ if(!fin(look.pitch))look.pitch=0;
+ const p=sc.okPos||(sc.okPos={x:W/2,y:H/2,z:undefined});
+ if(fin(G.px)&&fin(G.py)&&(G.pz===undefined||fin(G.pz))){p.x=G.px;p.y=G.py;p.z=G.pz;return}
+ G.px=p.x;G.py=p.y;G.pz=p.z;G.vz=0;G.pvx=0;G.pvy=0;G.air=false;
+ if(sc.posWarn)return;
+ sc.posWarn=1;
+ try{HG.log&&HG.log('hata','Oyuncu konumu geçersiz bir sayıya dönüştü; son geçerli yere alındı.','hata')}catch(e){}
+ try{HG.toast&&HG.toast('Konumun bozuldu; son geçerli yere alındın.')}catch(e){}
+}
+const fErr=[];
+function frameErr(i,e){
+ if(fErr[i])return;fErr[i]=1;
+ try{HG.log&&HG.log('hata','Sahnenin bir parçası durdu ('+i+'): '+(e&&e.message||e),'hata');console.error(e)}catch(x){}
+ try{HG.toast&&HG.toast('Görüntünün bir parçası durdu; oyun sürüyor. Ayrıntı: F1.')}catch(x){}
+}
 S.render=(G,now,dt,info)=>{
  const t=now*.001,play=info.mode==='play',cam=sc.cam;
+ if(play){
+  sanePos(G);
+  const el=sc.R.domElement;
+  if(!el.width||!el.height)S.resize();                /* çizim yüzeyi sıfıra düşmüşse geri kurulur */
+ }
  /* kamera */
+ /* ölüm kamerası yalnızca ölüm ekranında geçerlidir: oyun yeniden başlatıldığında kalırsa
+    görüntü eski ölüm yerine çakılı kalır */
+ if(HG.deathCam&&HG.ui&&HG.ui.state!=='dead')HG.deathCam=null;
  const dc=HG.deathCam;
  if(play&&dc){
   /* ölüm kamerası: oyuncu yeniden doğmuş olsa da görüntü ölüm yerinde kalır; kamera yavaşça
@@ -120,7 +155,7 @@ S.render=(G,now,dt,info)=>{
   if(Math.abs(cam.fov-mf)>.02){cam.fov=mf;cam.updateProjectionMatrix()}
  }
  cam.updateMatrixWorld();
- for(const f of frameFns)f(G,t,dt,info);
+ for(let i=0;i<frameFns.length;i++){try{frameFns[i](G,t,dt,info)}catch(e){frameErr(i,e)}}
  if(sc.postRender)sc.postRender(sc.scene,cam,t,dt,info);else sc.R.render(sc.scene,cam);
  /* düşük başarımda otomatik kalite düşürme (yalnızca 'Otomatik' modda) */
  if(play&&dt>0&&sc.qMode==='auto'){

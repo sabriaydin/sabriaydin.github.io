@@ -2,6 +2,29 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
+{n:64,d:"03.11.2026",t:"Co-op: dört oyuncu ve ağlar arası bağlantı",l:[
+ "Co-op artık dört oyuncuya kadar oynanıyor; konuklar birbirini de görüyor ve birbirinin sohbetini, harita işaretlerini, dünyada yaptığı değişiklikleri alıyor.",
+ "Farklı ağlardaki bilgisayarların (ayrı evler, mobil internet) birbirine bağlanamaması sorunu giderildi; bağlantı artık birden çok ara sunucu ve kapı deniyor.",
+ "Co-op penceresine «Bağlantıyı sına» eklendi: ağınızın hangi aşamada takıldığını açıkça yazıyor. Aynı sınama oyun içinde Duraklat menüsünden de yapılabiliyor.",
+ "Kendi aktarma sunucunuzu girebileceğiniz bağlantı ayarları eklendi; sürekli bağlanamayan ağlar için kalıcı çözüm sunuyor.",
+ "Bağlantı koptuğunda «Yeniden bağlan» düğmesi eklendi; dünya yeniden alınıyor, çantanız ve gelişiminiz geri yükleniyor.",
+ "Oyuncu listesinde her oyuncunun kendi gecikmesi ve bağlantı türü (yerel ağ, doğrudan, aktarmalı) görünüyor.",
+ "Bağlanırken aşamalar yazıyla bildiriliyor ve bekleme süresi uzatıldı; yavaş ağlarda bağlantı yarıda kesilmiyor."
+]},
+{n:63,d:"03.11.2026",t:"Sandık penceresi",l:[
+ "Terk edilmiş sandık açıldığında pencerenin açılır açılmaz kapanması sorunu giderildi; sandık artık Envanter ekranının yanında açılıyor ve açık kalıyor.",
+ "Sandıktan uzaklaşınca pencerenin kapanması, yerleştirilmiş sandıklarda olduğu gibi kamp sandıklarında da doğru çalışıyor.",
+ "Kampın çadırı, duvarı veya sandığın önündeki zemin nişanın önüne girdiğinde sandığa hiç tepki verilmemesi sorunu giderildi.",
+ "Sandık açılınca çıkan bildirim kaldırıldı; pencere zaten açıldığı için gereksizdi."
+]},
+{n:62,d:"03.11.2026",t:"Yeme-içme hareketleri ve boş ekran",l:[
+ "Yemek yeme hareketi baştan yapıldı: yiyecek ağza götürülüp ısırılıyor, çiğnerken görüntü hafifçe oynuyor.",
+ "Şişeden içme hareketi baştan yapıldı: şişe ağza yatırılıyor, yutkundukça el kısa aralıklarla alçalıyor.",
+ "Gölet başında elle su içme hareketi eklendi: el suya daldırılıyor, dolu avuç ağza götürülüp yatırılıyor.",
+ "Boşta duran sol el kaldırıldı; sol el yalnızca iki elle tutulan eşyalarda görünüyor.",
+ "Oyun sırasında ekranın boş mavi kalması sorunu giderildi; konum bozulursa son geçerli yere dönülüyor ve görüntünün bir parçası hata verse bile çizim sürüyor.",
+ "Ekran kartının çizim bağlantısı koptuğunda bunu bildiren uyarı eklendi."
+]},
 {n:61,d:"03.11.2026",t:"Terk edilmiş sandıklar",l:[
  "Harabelerdeki ve diğer kamplardaki sandıkların, \"[E] Sandığı aç\" yazısı göründüğü hâlde açılmaması sorunu giderildi; sandığa bakıp E'ye bastığınızda açılıyor.",
  "Sandık açıldığında eşyalar doğrudan çantaya girmiyor; sandığın içi Envanter ekranında açılıyor ve istediğiniz eşyayı kutuya tıklayarak alıyorsunuz.",

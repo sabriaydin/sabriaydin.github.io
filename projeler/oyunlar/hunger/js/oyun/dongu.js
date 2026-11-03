@@ -26,26 +26,40 @@ function frame(now){
  }
  requestAnimationFrame(frame);
 }
+/* Kare içindeki bir bölümün hatası: her bölüm için bir kez bildirilir, oyun durdurulmaz */
+const pErr={};
+function partErr(ad,e){
+ if(pErr[ad])return;pErr[ad]=1;
+ try{HG.log&&HG.log('hata',ad+' durdu: '+(e&&e.message||e),'hata');console.error(e)}catch(x){}
+ try{HG.toast&&HG.toast('Bir bölüm hata verdi ('+ad+'); oyun sürüyor. Ayrıntı: F1 konsolu.')}catch(x){}
+}
 function step(now){
  const raw=(now-last)/1000,dt=Math.min(.05,raw);last=now;
  if(HG.cfg.fps){fa+=raw;fn++;if(fa>=.5){fpsEl.textContent=Math.round(fn/fa)+' FPS';fa=0;fn=0}if(fpsEl.hidden)fpsEl.hidden=false}else if(!fpsEl.hidden)fpsEl.hidden=true;
  if(HG.busy)return;   /* yükleme sürerken sahne çizilmez */
  if(ui.state==='pause'&&!(HG.coopActive&&HG.coopActive())){skip=!skip;if(skip)return}   /* duraklatmada çizim hızı yarıya iner */
- if(ui.state==='play'){
-  flushObjects();
-  G.tg=Scene.aim(G);
-  if($('#bigmap').hidden&&!ui.sleeping)HG.update(dt);
-  else if(HG.coopIdle)HG.coopIdle(dt);
-  if(ui.dirty)HG.renderInv();
-  if(!$('#panel').hidden){recT-=dt;if(recT<=0){recT=.5;HG.renderRecipes()}}
-  HG.hud();
- }else if(HG.coopActive&&HG.coopActive()&&(ui.state==='pause'||ui.state==='dead')){HG.coopIdle(dt);flushObjects()}   /* co-op: duraklatmada ve ölümde dünya akmaya devam eder */
- else if(ui.state==='menu'){ui.menuClock+=dt;G.clock+=dt*5;flushObjects()}
- const play=ui.state!=='menu',h=play?held():null;
- let place=null;
- if(ui.state==='play'&&h&&h.it.place&&G.tg){const p=HG.placeTarget(h.k);if(p)place={x:p.x,y:p.y,ok:true};else{const t=G.tg;place={x:t.x,y:t.y,ok:false}}}
- else if(ui.state==='play'&&h&&(h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaGhost)place=HG.insaGhost(h.k);
- HG.audioFrame(G,dt,ui.state);
+ /* Çizimden önceki işlerden biri hata verdiğinde kareden çıkılıyor ve ekran boş (mavi) kalıyordu:
+    her bölüm ayrı korunur; ne olursa olsun sahne çizilir ve hata F1 konsoluna yazılır. */
+ try{
+  if(ui.state==='play'){
+   flushObjects();
+   G.tg=Scene.aim(G);
+   if($('#bigmap').hidden&&!ui.sleeping)HG.update(dt);
+   else if(HG.coopIdle)HG.coopIdle(dt);
+   if(ui.dirty)HG.renderInv();
+   if(!$('#panel').hidden){recT-=dt;if(recT<=0){recT=.5;HG.renderRecipes()}}
+   HG.hud();
+  }else if(HG.coopActive&&HG.coopActive()&&(ui.state==='pause'||ui.state==='dead')){HG.coopIdle(dt);flushObjects()}   /* co-op: duraklatmada ve ölümde dünya akmaya devam eder */
+  else if(ui.state==='menu'){ui.menuClock+=dt;G.clock+=dt*5;flushObjects()}
+ }catch(e){partErr('oyun adımı',e)}
+ const play=ui.state!=='menu';
+ let h=null,place=null;
+ try{
+  h=play?held():null;
+  if(ui.state==='play'&&h&&h.it.place&&G.tg){const p=HG.placeTarget(h.k);if(p)place={x:p.x,y:p.y,ok:true};else{const t=G.tg;place={x:t.x,y:t.y,ok:false}}}
+  else if(ui.state==='play'&&h&&(h.it.tool==='plan'||h.it.tool==='hammer')&&HG.insaGhost)place=HG.insaGhost(h.k);
+ }catch(e){partErr('elde tutulan eşya',e)}
+ try{HG.audioFrame(G,dt,ui.state)}catch(e){partErr('ses',e)}
  /* Ana menüde 3B dünya çizilmez: yerine hafif 2B manzara gösterilir (js/oyun/menu-arka.js) */
  if(menuBg!==!play){menuBg=!play;$('#game').classList.toggle('menu2d',menuBg)}
  if(play)Scene.render(G,now,dt,{mode:'play',L:daylight(),tod:tod(),act:!!((inp.mouseDown||inp.touchAct)&&A.key),held:h?h.k:null,target:ui.state==='play'?G.tg:null,place,hitI:A.hitI,hitT:A.hitT,clock:ui.menuClock});

@@ -191,7 +191,14 @@ net.on('rsfull',(m)=>{
 /* ============================================================ Yerdeki eşyalar ============================================================ */
 const dropU=new Map();
 let dn=0;
-const dpre=()=>isHost()?'h':'g';
+/* Yerdeki eşyanın benzersiz numarası: ikiden çok oyuncuda iki konuk aynı numarayı üretmesin diye
+   her oyuncuya oturum başına ayrı bir ön ek verilir. */
+let dtag='';
+const dpre=()=>{
+ if(isHost())return 'h';
+ if(!dtag)dtag='g'+Math.random().toString(36).slice(2,5);
+ return dtag;
+};
 const packDrop=d=>({u:d.u,id:d.id,n:d.n,x:r2(d.x),y:r2(d.y),z:r2(d.z),vx:r2(d.vx||0),vy:r2(d.vy||0),vz:r2(d.vz||0),r:d.rest?1:0,f:d.fl?1:0,d:d.d});
 function mkDrop(q){
  if(!HG.IT[q.id]||!(q.n>0))return null;

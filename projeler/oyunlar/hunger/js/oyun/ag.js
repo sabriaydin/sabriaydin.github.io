@@ -5,7 +5,7 @@
 (()=>{
 'use strict';
 const {G,ui,look}=HG;
-const PROTO=1,PFX='hunger3d-',AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',CH=12000,MAXG=1;
+const PROTO=2,PFX='hunger3d-',AL='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',CH=12000,MAXG=3;
 const POSHZ=16,TIMEOUT=16000,TIMEOUT_LOAD=150000;
 const now=()=>performance.now();
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -15,7 +15,8 @@ const H=Object.create(null);                       /* ileti türü → işleyici
 const net=HG.net={
  role:'solo',st:'idle',msg:'',code:'',peer:null,peers:[],hostP:null,lat:0,
  name:'',wid:'',seq0:0,rules:null,
- cfg:{server:null,ice:null},                       /* server: PeerJS aracı sunucusu ({host,port,path,secure}); boşsa genel PeerJS bulutu */
+ cfg:{server:null,ice:null,relayOnly:false},       /* server: PeerJS aracı sunucusu ({host,port,path,secure}); boşsa genel PeerJS bulutu. ice/relayOnly: ag-baglanti.js doldurur */
+ mySlot:0,
  initFns:[],ticks:[],stl:[],baselines:[],banned:new Set(),pwp:null,
  PROTO,MAXG
 };
@@ -69,9 +70,15 @@ function mkPeer(id){
  const o={debug:0};
  const sv=net.cfg.server||serverPref();
  if(sv)Object.assign(o,sv);
- if(net.cfg.ice)o.config={iceServers:net.cfg.ice};
+ /* ICE sunucuları: farklı ağdaki iki bilgisayarın birbirini bulabilmesi için (ag-baglanti.js) */
+ if(net.cfg.ice&&net.cfg.ice.length){
+  o.config={iceServers:net.cfg.ice,sdpSemantics:'unified-plan'};
+  if(net.cfg.relayOnly)o.config.iceTransportPolicy='relay';
+ }
  return id?new Peer(id,o):new Peer(o);
 }
+/* Bağlantıdan önce sunucu listesi hazırlanır (kullanıcının kendi TURN adresi varsa oradan okunur) */
+const prep=()=>{try{return net.prepare?net.prepare():Promise.resolve()}catch(e){return Promise.resolve()}};
 const ERR={
  'peer-unavailable':'Bu kodla açık bir oyun bulunamadı. Kodu ve ev sahibinin çevrimiçi olduğunu denetleyin.',
  'network':'Ağ bağlantısı kurulamadı. İnternet bağlantısını denetleyin.',
@@ -113,10 +120,17 @@ function bigPart(P,d){
   dispatch(b.ty,{t:b.ty,big:true,raw:b.a.join(''),meta:b.m},P);
  }
 }
+/* Ev sahibi, bir konuktan gelen dünya değişikliğini öbür konuklara da iletir: ikiden çok oyuncuda
+   herkes aynı dünyayı görür (yıldız düzeni; konuklar birbirine doğrudan bağlanmaz). */
+const RELAY=new Set(['o','d','tb','rs','dr','cp','wp']);
 function recv(P,d){
  if(!d||typeof d!=='object')return;
  P.last=now();
  if(d.t==='~b'){bigPart(P,d);return}
+ if(net.role==='host'&&P.ready&&RELAY.has(d.t)&&net.peers.length>1){
+  if(d.t==='wp')d.n=P.name;                         /* işareti kimin koyduğu korunur */
+  net.send(d,P);
+ }
  dispatch(d.t,d,P);
 }
 
@@ -134,6 +148,41 @@ function dropRemote(P){
  const i=HG.remote.indexOf(P.rec);if(i>=0)HG.remote.splice(i,1);
  P.rec=null;
 }
+/* ---- Oyuncu listesi: konuklar birbirini ev sahibi üzerinden tanır ----
+   Konukta öbür konuklar için "sanal" oyuncu kaydı tutulur; arayüz ve sahne bunları gerçek oyuncu gibi gösterir. */
+const VP=new Map();
+function roster(){
+ const L=[{s:0,n:net.name,l:0}];
+ for(const q of net.peers)if(q.ready&&q.slot)L.push({s:q.slot,n:q.name,l:Math.round(q.lat||0)});
+ return L;
+}
+function sendRoster(){
+ if(net.role!=='host')return;
+ const l=roster();
+ for(const P of net.peers)if(P.ready)tx(P.conn,{t:'ros',me:P.slot,l});
+}
+net.sendRoster=sendRoster;
+function vpeer(s,name){
+ let P=VP.get(s);
+ if(!P){P={id:'s'+s,slot:s,name:name||'Oyuncu',ready:true,joined:true,virtual:true,rec:null,lat:0,last:now()};VP.set(s,P);addRemote(P)}
+ if(name&&P.name!==name){P.name=name;if(P.rec)P.rec.name=name}
+ return P;
+}
+function clearVp(){for(const P of VP.values())dropRemote(P);VP.clear()}
+net.on('ros',(m,P)=>{
+ if(HG.coop.mode!=='guest'||P!==net.hostP||!Array.isArray(m.l))return;
+ net.mySlot=m.me|0;
+ const keep=new Set();
+ for(const q of m.l){
+  const s=q.s|0,nm=String(q.n||'Oyuncu').slice(0,16);
+  if(s===0){P.name=nm;if(P.rec)P.rec.name=nm;if(typeof q.l==='number')P.lat=P.lat||q.l;continue}
+  if(s===net.mySlot)continue;
+  keep.add(s);
+  const V=vpeer(s,nm);
+  if(typeof q.l==='number')V.lat=q.l;
+ }
+ for(const s of Array.from(VP.keys()))if(!keep.has(s)){dropRemote(VP.get(s));VP.delete(s)}
+});
 
 /* ---- Tanımlayıcı: dünya kimliği (kayıtla birlikte saklanır) ---- */
 HG.x2reg('wid',()=>'',v=>typeof v==='string'&&/^[a-z0-9]{6,12}$/.test(v)?v:'');
@@ -159,6 +208,7 @@ net.host=function(){
  setStatus('connecting','Bağlantı sunucusuna ulaşılıyor…');
  let tries=0,done=false;
  const attempt=()=>{
+  if(net.role!=='solo'||done)return;                 /* hazırlık sürerken durum değiştiyse başlatılmaz */
   const code=genCode();let peer;
   try{peer=mkPeer(PFX+code)}catch(e){hostFail(String(e.message||e));return}
   net.peer=peer;
@@ -180,7 +230,7 @@ net.host=function(){
    if(e&&e.type!=='peer-unavailable')console.warn('peer',e);
   });
  };
- attempt();
+ prep().then(attempt,attempt);
  return true;
 };
 function onIncoming(conn){
@@ -204,6 +254,8 @@ net.on('hello',(m,P)=>{
  if(m.pid&&net.banned.has(String(m.pid))){deny(P,'Ev sahibi sizi bu oyundan çıkardı.');return}
  P.joined=true;P.name=String(m.name||'Oyuncu').replace(/[<>&"]/g,'').slice(0,16)||'Oyuncu';P.pid=String(m.pid||'').slice(0,12);P.state='snap';P.last=now();
  {const taken=new Set([net.name].concat(net.peers.filter(q=>q!==P&&q.joined).map(q=>q.name)));let nm=P.name,k=2;while(taken.has(nm))nm=P.name.slice(0,13)+' '+k++;P.name=nm}      /* aynı ad: sonuna sayı eklenir */
+ {const used=new Set(net.peers.filter(q=>q!==P&&q.joined).map(q=>q.slot));let s=1;while(used.has(s))s++;P.slot=s}                                                             /* oyuncu sırası: konuklar birbirini bu numarayla tanır */
+ if(net.probeType)net.probeType(P);
  tx(P.conn,{t:'welcome',v:PROTO,host:net.name,wid:worldId(),rules:rulesNow(),ver:HG.VERSION||''});
  HG.toast(P.name+' bağlanıyor…');
  sendSnapshot(P);
@@ -231,6 +283,7 @@ net.on('ready',(m,P)=>{
  HG.toast(P.name+' oyuna katıldı.');HG.feed(P.name+' katıldı');
  chatLine('', P.name+' oyuna katıldı.',true);
  HG.emit('coop-join',{name:P.name});
+ sendRoster();
  setStatus(net.st,net.msg);
 });
 function dropPeer(P,why){
@@ -241,6 +294,7 @@ function dropPeer(P,why){
  if(net.role==='host'){
   dropRemote(P);
   if(P.joined&&wasReady){HG.toast(P.name+' oyundan ayrıldı.');chatLine('',P.name+' oyundan ayrıldı.',true);HG.emit('coop-leave',{name:P.name,why})}
+  sendRoster();
   setStatus(net.st,net.msg);
  }else if(net.role==='guest'||HG.coop.mode==='guest'){
   hostLost(why);
@@ -266,7 +320,7 @@ net.on('deny',(m)=>{
 function resetGuest(){
  try{if(net.hostP&&net.hostP.conn)net.hostP.conn.close()}catch(e){}
  try{if(net.peer)net.peer.destroy()}catch(e){}
- net.peer=null;net.hostP=null;net.peers.length=0;
+ net.peer=null;net.hostP=null;net.peers.length=0;clearVp();
  if(net.role!=='guest'||ui.state==='menu'){net.role='solo';HG.coop.mode='solo';HG.coop.host=true}
  HG.remote.length=0;
 }
@@ -275,32 +329,56 @@ net.join=function(text){
  if(net.role!=='solo'||HG.busy){return false}
  if(code.length!==6){setStatus('error','Kod 6 karakterden oluşur (örnek: ABC-DEF).');return false}
  if(typeof Peer==='undefined'){setStatus('error','Ağ kütüphanesi yüklenemedi.');return false}
- setStatus('connecting','Ev sahibine bağlanılıyor…');
+ setStatus('connecting','Bağlantı sunucusuna ulaşılıyor…');
+ prep().then(go,go);
+ return true;
+ function go(){
+ if(net.role!=='solo')return;
  let peer;
- try{peer=mkPeer()}catch(e){setStatus('error',String(e.message||e));return false}
+ try{peer=mkPeer()}catch(e){setStatus('error',String(e.message||e));return}
  net.peer=peer;
- let opened=false;
- const to=setTimeout(()=>{if(!opened){resetGuest();setStatus('error','Ev sahibine ulaşılamadı. Kodu ve ev sahibinin çevrimiçi olduğunu denetleyin.')}},25000);
+ let opened=false,srvOk=false;
+ /* Aktarma sunucusu üzerinden kurulan bağlantılar yavaş olabilir: süre uzun tutulur ve aşamalar bildirilir */
+ const slow=setTimeout(()=>{if(!opened)setStatus('connecting',srvOk?'Ev sahibiyle yol aranıyor (ağlar arası bağlantı biraz sürebilir)…':'Bağlantı sunucusuna ulaşılamadı, yeniden deneniyor…')},9000);
+ const to=setTimeout(()=>{
+  if(opened)return;
+  clearTimeout(slow);resetGuest();
+  setStatus('error',srvOk
+   ?'Ev sahibine ulaşılamadı. Kod doğruysa iki ağ birbirini göremiyor demektir: Co-op penceresindeki «Bağlantıyı sına» ile ağınızı denetleyin.'
+   :'Bağlantı sunucusuna ulaşılamadı. İnternet bağlantınızı denetleyin.');
+ },45000);
  peer.on('open',()=>{
+  srvOk=true;setStatus('connecting','Ev sahibine bağlanılıyor…');
   const conn=peer.connect(PFX+code,{reliable:true,serialization:'json'});
   const P={id:conn.peer,conn,slot:0,name:'',ready:false,joined:true,state:'hello',last:now(),rec:null};
   net.hostP=P;net.peers=[P];
   conn.on('open',()=>{
-   opened=true;clearTimeout(to);P.last=now();
+   opened=true;clearTimeout(to);clearTimeout(slow);P.last=now();
    HG.coop.mode='guest';HG.coop.host=false;net.role='guest';net.code=code;
    tx(conn,{t:'hello',v:PROTO,ver:HG.VERSION||'',name:net.name,pid:HG.me.id});
    setStatus('connecting','Bağlandı. Dünya bekleniyor…');
+   if(net.probeType)net.probeType(P);
   });
   conn.on('data',d=>recv(P,d));
-  conn.on('close',()=>{if(net.role==='guest'||!opened){if(!opened){clearTimeout(to);resetGuest();setStatus('error','Bağlantı kurulamadı.')}else dropPeer(P,'ev sahibi ayrıldı')}});
+  conn.on('close',()=>{if(net.role==='guest'||!opened){if(!opened){clearTimeout(to);clearTimeout(slow);resetGuest();setStatus('error','Bağlantı kurulamadı.')}else dropPeer(P,'ev sahibi ayrıldı')}});
   conn.on('error',()=>{});
  });
  peer.on('error',e=>{
-  clearTimeout(to);
+  clearTimeout(to);clearTimeout(slow);
   if(!opened){resetGuest();setStatus('error',errText(e));return}
   console.warn('peer',e);
  });
- return true;
+ }
+};
+/* Bağlantı koptuktan sonra aynı kodla yeniden katılma (dünya yeniden alınır, karakter geri yüklenir) */
+net.rejoin=function(){
+ const code=net.code;
+ if(!code||net.role==='host')return false;
+ try{HG.netCharSave&&HG.netCharSave()}catch(e){}
+ lostShown=false;
+ resetGuest();
+ net.role='solo';HG.coop.mode='solo';HG.coop.host=true;
+ return net.join(code);
 };
 net.on('welcome',(m,P)=>{
  if(HG.coop.mode!=='guest')return;
@@ -357,7 +435,7 @@ net.leave=function(){
 /* Ev sahibi co-op'u kapatır: oyun tek kişilik olarak sürer */
 function shutdown(soft){
  for(const p of net.peers){try{p.conn.close()}catch(e){}dropRemote(p)}
- net.peers.length=0;
+ net.peers.length=0;clearVp();net.mySlot=0;
  try{if(net.peer)net.peer.destroy()}catch(e){}
  net.peer=null;net.code='';net.hostP=null;
  HG.remote.length=0;
@@ -370,7 +448,12 @@ net.dropPeer=dropPeer;
 
 /* ============================================================ Ortak: ping, konum, saat, sohbet ============================================================ */
 net.on('ping',(m,P)=>tx(P.conn,{t:'pong',ts:m.ts}));
-net.on('pong',(m)=>{let d=now()-m.ts;if(d>=0&&d<10000){d=Math.min(d,1500);net.lat=net.lat?net.lat*.7+d*.3:d}});
+net.on('pong',(m,P)=>{
+ let d=now()-m.ts;if(!(d>=0&&d<10000))return;
+ d=Math.min(d,1500);
+ P.lat=P.lat?P.lat*.7+d*.3:d;                       /* her oyuncunun kendi gecikmesi */
+ net.lat=net.lat?net.lat*.7+d*.3:d;
+});
 
 const FL={MV:1,SP:2,SW:4,RF:8,SH:16,TL:32,SL:64,DD:128,BW:256,HD:512,AT:1024,CR:2048};
 net.FL=FL;
@@ -382,7 +465,7 @@ function flagsNow(){
  return f;
 }
 function heldId(){const s=G.inv&&G.inv[G.sel];return s&&!(HG.matOnly&&HG.matOnly(s.id))?s.id:''}
-let posT=0,pingT=0,clkT=0,seq=0;
+let posT=0,pingT=0,clkT=0,seq=0,rosT=0;
 let lastSig='',lastTx=0;
 function sendPos(){
  const m={t:'p',q:0,x:r2(G.px),z:r2(G.py),y:G.pz===undefined?null:r2(G.pz),yw:r3(look.yaw),pt:r3(look.pitch),f:flagsNow(),h:heldId(),hp:Math.max(0,Math.round(G.hp)),w:r2(G.walk||0),s:r2(G.spdNow||0)};
@@ -391,14 +474,25 @@ function sendPos(){
  lastSig=sig;lastTx=now();m.q=++seq;
  net.send(m);
 }
-net.on('p',(m,P)=>{
- const r=P.rec;if(!r)return;
- if(!(m.x>=0&&m.x<HG.W&&m.z>=0&&m.z<HG.H&&isFinite(m.yw)&&isFinite(m.pt)))return;          /* bozuk veya harita dışı konum paketi yok sayılır */
- if(m.q<=(P.pq||0)&&m.q>(P.pq||0)-50)return;
+function applyPos(m,P){
+ const r=P.rec;if(!r)return false;
+ if(!(m.x>=0&&m.x<HG.W&&m.z>=0&&m.z<HG.H&&isFinite(m.yw)&&isFinite(m.pt)))return false;    /* bozuk veya harita dışı konum paketi yok sayılır */
+ if(m.q<=(P.pq||0)&&m.q>(P.pq||0)-50)return false;
  P.pq=m.q;
  r.x=m.x;r.z=m.z;r.y=m.y;r.yaw=m.yw;r.pitch=m.pt;r.fl=m.f|0;r.h=m.h||'';r.hp=m.hp;r.walk=m.w;r.spd=m.s;
  r.alive=!(r.fl&FL.DD);r.sh=!!(r.fl&FL.SH);r.tl=!!(r.fl&FL.TL);r.mv=!!(r.fl&FL.MV);r.seen=now();
  if(!r.init){r.init=true;r.rx=r.x;r.rz=r.z}
+ return true;
+}
+net.on('p',(m,P)=>{
+ if(!applyPos(m,P))return;
+ /* ikiden çok oyuncu: ev sahibi konumu öbür konuklara da iletir */
+ if(net.role==='host'&&P.slot&&net.peers.length>1){m.t='pr';m.k=P.slot;net.send(m,P)}   /* k: oyuncu sırası (s alanı hızı taşır) */
+});
+net.on('pr',(m,P)=>{
+ if(HG.coop.mode!=='guest'||P!==net.hostP)return;
+ const V=VP.get(m.k|0);if(!V)return;
+ V.last=now();applyPos(m,V);
 });
 net.on('clk',(m)=>{
  if(HG.coop.mode!=='guest'||typeof m.c!=='number')return;
@@ -438,11 +532,14 @@ net.on('chat',(m,P)=>{
  P.cq.push(t);
  const x=m.x.replace(/[\u0000-\u001f\u007f]/g,'').replace(/\s+/g,' ').trim().slice(0,200);
  if(!x)return;
- chatLine(P.name||'Oyuncu',x,false);
+ const kim=String(m.n||P.name||'Oyuncu').slice(0,16);
+ chatLine(kim,x,false);
  try{HG.snd('ui')}catch(e){}
+ if(net.role==='host'&&net.peers.length>1)net.send({t:'chat',x,n:kim},P);   /* öbür konuklara iletilir */
 });
 
 /* ============================================================ Kare güncellemesi ============================================================ */
+net.recv=recv;                                    /* sınama ve tanılama için */
 net.pump=function(dt){
  if(net.role==='solo')return;
  const t=now();
@@ -454,7 +551,10 @@ net.pump=function(dt){
  if(!net.peers.some(P=>P.ready))return;
  posT-=dt;if(posT<=0){posT=1/POSHZ;sendPos()}
  pingT-=dt;if(pingT<=0){pingT=2.5;net.send({t:'ping',ts:t})}
- if(net.role==='host'){clkT-=dt;if(clkT<=0){clkT=1;net.send({t:'clk',c:G.clock})}}
+ if(net.role==='host'){
+  clkT-=dt;if(clkT<=0){clkT=1;net.send({t:'clk',c:G.clock})}
+  if(net.peers.length>1){rosT-=dt;if(rosT<=0){rosT=5;sendRoster()}}                 /* oyuncu listesi ve gecikmeler tazelenir */
+ }
  for(const f of net.ticks){try{f(dt,t)}catch(e){console.error('ağ tick',e)}}
 };
 {

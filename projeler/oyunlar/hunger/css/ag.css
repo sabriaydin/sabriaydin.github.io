@@ -45,3 +45,16 @@
 /* güncelleme 64: davet bağlantısı ve oyuncu çıkarma düğmeleri */
 #cpLink{display:block;width:100%;margin-top:8px;padding:6px 10px;font-size:14px}
 .cpKick{padding:1px 8px;font-size:12px;margin-left:8px}
+
+/* Bağlantı ayarları ve sınama (güncelleme 65) */
+#cpAdv{margin-top:10px;text-align:left;border-top:1px solid var(--line);padding-top:8px}
+#cpAdv summary{cursor:pointer;font-size:13px;color:var(--mut);padding:4px 0;user-select:none}
+#cpAdv summary:hover{color:var(--tx)}
+#cpAdv[open] summary{color:var(--tx);margin-bottom:4px}
+.cpres{display:grid;gap:3px;margin:8px 0;font-size:12.5px;line-height:1.45}
+.cpres .sum{font-weight:600;color:var(--tx);margin-bottom:2px}
+.cpres .ok{color:#8fd08a}
+.cpres .no{color:#f0958d}
+.cpres .wait{color:var(--mut)}
+.cpchk{display:flex!important;align-items:center;gap:8px;font-size:12.5px;color:var(--mut);margin:6px 0}
+.cpchk input{width:auto!important;margin:0}

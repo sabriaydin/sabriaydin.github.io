@@ -58,10 +58,11 @@ net.tick(()=>{
 });
 net.on('wp',(m,P)=>{
  if(!(m.x>=0&&m.x<HG.W&&m.y>=0&&m.y<HG.H))return;
- net.pwp={x:m.x,y:m.y,by:P.name||'Oyuncu'};
+ const kim=String(m.n||P.name||'Oyuncu').slice(0,16);          /* ev sahibi üzerinden gelen işarette ad iletide taşınır */
+ net.pwp={x:m.x,y:m.y,by:kim};
  const d=Math.round(Math.hypot(m.x-G.px,m.y-G.py));
- HG.toast((P.name||'Oyuncu')+' bir hedef işaretledi ('+d+' m). Harita: M');
- net.chatLine('',(P.name||'Oyuncu')+' bir hedef işaretledi ('+d+' m).',true);
+ HG.toast(kim+' bir hedef işaretledi ('+d+' m). Harita: M');
+ net.chatLine('',kim+' bir hedef işaretledi ('+d+' m).',true);
 });
 const clearWp=()=>{net.pwp=null;lastWp=''};
 HG.on('coop-leave',clearWp);HG.on('coop-lost',clearWp);HG.on('coop',e=>{if(e&&e.mode==='solo')clearWp()});

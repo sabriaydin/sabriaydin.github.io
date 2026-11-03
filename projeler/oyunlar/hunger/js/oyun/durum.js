@@ -219,6 +219,7 @@ async function startGame(load,slotId){
  Scene.setMode('play');
  ui.state='play';ui.picked=null;ui.dirty=true;A.key='';A.p=0;A.mem={};A.memKey=null;
  A.nextSwing=A.nextDig=A.nextDive=0;A.hitI=-1;A.hitT=0;HG.useProg=null;HG.insaReset&&HG.insaReset();   /* sayaçlar oyun saatine bağlıdır: yeni oyun/kayıt yüklemede sıfırlanır */
+ HG.deathCam=null;{const gm=$('#game');if(gm)gm.classList.remove('dead')}   /* ölüm görüntüsü kalıntısı temizlenir */
  for(const id of ['#menu','#dead','#pause'])$(id).hidden=true;
  for(const id of ['#hud','#clock','#comp','#goal','#mini','#hot','#cross'])$(id).hidden=false;
  if(ui.touch)$('#touch').hidden=false;

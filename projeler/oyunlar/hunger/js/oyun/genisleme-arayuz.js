@@ -160,11 +160,9 @@ HG.openCampStore=function(c,e){
  if(p.hidden)HG.togglePanel(true);
  if(p.hidden)return false;
  if(HG.panelMode)HG.panelMode('inv');
- cur={camp:c,e};
+ cur={camp:c,e,cave:!!G.cave};
  $('#pbox').classList.add('cst');box.hidden=false;
- renderChest();ui.dirty=true;
- HG.feed&&HG.feed('Sandık açıldı: içindekiler Envanter ekranında, kutuya tıklayarak alınır.');
- return true;
+ renderChest();ui.dirty=true;return true;
 };
 HG.x2reg('cc',()=>({}),v=>{
  const out={};
@@ -482,8 +480,13 @@ function padStep(dt){
   if(ui.state!=='play')return;
   try{
    if(cur){
-    const i=cur.i,d=Math.hypot(G.px-(i%W+.5),G.py-(((i/W)|0)+.5));
-    if(cur.cave!==!!G.cave||G.obj[i]!==O.CHEST||d>7)HG.togglePanel(false);
+    /* Uzaklaşınca kapanma denetimi: yerleştirilmiş sandık kare numarasıyla, terk edilmiş kamp
+       sandığı kamp konumuyla ölçülür. Kamp sandığında kare numarası olmadığından bu denetim
+       her karede doğru çıkıyor ve pencere açılır açılmaz kapanıyordu. */
+    const i=cur.i;
+    const d=cur.camp?Math.hypot(G.px-(cur.camp.x+.5),G.py-(cur.camp.y+.5)):Math.hypot(G.px-(i%W+.5),G.py-(((i/W)|0)+.5));
+    const yok=cur.camp?false:G.obj[i]!==O.CHEST;
+    if(cur.cave!==!!G.cave||yok||d>7)HG.togglePanel(false);
    }
    if(sgI>=0){
     const i=sgI,d=Math.hypot(G.px-(i%W+.5),G.py-(((i/W)|0)+.5));
