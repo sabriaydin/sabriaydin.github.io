@@ -72,9 +72,9 @@ function openChest(){
  }
  HG.snd('chest');
  if(HG.openCampStore&&HG.openCampStore(c,e))return true;
- /* arayüz yoksa eski davranış: her şey çantaya */
- for(const q of e.it)if(q){const left=add(q.id,q.n);if(left>0)HG.spawnDrop(q.id,left)}
- c.open=true;G.nearCamp=null;delete cc[key];return true;
+ /* Pencere açılamazsa ganimet sandıkta bekler; eşyalar hiçbir durumda doğrudan çantaya girmez. */
+ HG.toast('Sandık açıldı ama içeriği gösterilemedi. Başka bir pencereyi kapatıp yeniden deneyin.');
+ return true;
 }
 /* kamp sandığı penceresi kapanınca: boşsa sandık tükenmiş sayılır (kayıtta açık olarak saklanır) */
 function campChestClosed(c){

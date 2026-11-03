@@ -348,7 +348,10 @@ function useCands(){
   const tg=G.tg,hx=tg.hx!==undefined?tg.hx:tg.x+.5,hz=tg.hz!==undefined?tg.hz:tg.y+.5,hd=Math.hypot(hx-G.px,hz-G.py),k=c[0][1];
   const o=k==='drop'?G.nearDrop:k==='chest'?G.nearCamp:k==='npc'?G.nearNpc:null;
   const ox=!o?null:k==='npc'||k==='drop'?[o.x,o.z]:[o.x+.5,o.y+.5];
-  if(ox&&Math.hypot(ox[0]-G.px,ox[1]-G.py)>hd+.5&&k!=='drop')return [];
+  /* sandık, kampın kendi karesinde durur: ışın o kareye değdiğinde vuruş noktası kare merkezinden
+     yakın çıkıyor ve sandık yanlışlıkla aday listesinden düşüyordu (harabe sandıkları açılmıyordu). */
+  const own=k==='chest'&&!tg.an&&tg.x===o.x&&tg.y===o.y;
+  if(ox&&!own&&Math.hypot(ox[0]-G.px,ox[1]-G.py)>hd+.5&&k!=='drop')return [];
  }
  return c;
 }

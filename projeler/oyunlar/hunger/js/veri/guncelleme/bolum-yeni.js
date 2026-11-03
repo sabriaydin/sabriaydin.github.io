@@ -2,6 +2,11 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
+{n:61,d:"03.11.2026",t:"Terk edilmiş sandıklar",l:[
+ "Harabelerdeki ve diğer kamplardaki sandıkların, \"[E] Sandığı aç\" yazısı göründüğü hâlde açılmaması sorunu giderildi; sandığa bakıp E'ye bastığınızda açılıyor.",
+ "Sandık açıldığında eşyalar doğrudan çantaya girmiyor; sandığın içi Envanter ekranında açılıyor ve istediğiniz eşyayı kutuya tıklayarak alıyorsunuz.",
+ "Sandık açıldığında içindekilerin nerede göründüğünü söyleyen bildirim eklendi."
+]},
 {n:60,d:"03.11.2026",t:"Oynanış geliştirmeleri",l:[
  "Açlık ve soğuk için erken uyarılar eklendi: karnın acıktığında, çok acıktığında, üşümeye başladığında ve donmak üzereyken ekranda bildirim görünüyor.",
  "Hızlı ye eklendi (varsayılan V tuşu, Ayarlar > Kontroller bölümünden değiştirilebilir): seçili eşyayı değiştirmeden, çantadaki açlığını en uygun doyuran yiyeceği yersin; pişmiş yiyecekler çiğlerden önce seçilir.",

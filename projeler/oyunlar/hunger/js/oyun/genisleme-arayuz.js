@@ -162,7 +162,9 @@ HG.openCampStore=function(c,e){
  if(HG.panelMode)HG.panelMode('inv');
  cur={camp:c,e};
  $('#pbox').classList.add('cst');box.hidden=false;
- renderChest();ui.dirty=true;return true;
+ renderChest();ui.dirty=true;
+ HG.feed&&HG.feed('Sandık açıldı: içindekiler Envanter ekranında, kutuya tıklayarak alınır.');
+ return true;
 };
 HG.x2reg('cc',()=>({}),v=>{
  const out={};
