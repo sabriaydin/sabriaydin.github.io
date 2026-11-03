@@ -861,3 +861,6 @@ html:has(.post.t){scroll-behavior:smooth}
 .t-araclar .meta .copy-link{color:#b3410a}
 .t-windowsos .meta .copy-link{color:#0d6f5c}
 .t-linuxos [style*="--a:#0369a1"] th,.t-linuxos [style*="--a:#0369a1"] small{color:#38bdf8}
+
+/* İçindekiler: aktif bağlantıdaki sol çizgi metnin üstüne binmesin */
+.t-guvenlik .t-aside a,.t-gelistirici .t-aside a,.t-sistemaraclari .t-aside a,.t-linux .t-aside a,.t-batch .t-aside a,.t-linuxos .t-aside a,.t-linuxgelismis .t-aside a{padding-left:12px}
