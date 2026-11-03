@@ -23,8 +23,10 @@ const yukle=async()=>{const o=[];
     let son=false;r.forEach(t=>{if(t===null)son=true;else if(!son){const f=ayir(t);if(f)o.push(f)}});
     if(son)break}
   return o.reverse()};
+/* Sürüm numarası tarih biçimindeyse (2026.08.25) başına "v" konmaz */
+const sur=s=>(/^\d{4}[.\-/]/.test(s)?'':'v')+s;
 const goster=(el,f)=>{const a=mk('article','t u'),h=mk('header'),dt=new Date(f.tarih);
-  h.append(mk('span','v','v'+f.surum),mk('h3','',f.baslik));
+  h.append(mk('span','v',sur(f.surum)),mk('h3','',f.baslik));
   if(!isNaN(dt)){const d=mk('time','',dt.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'}));d.dateTime=f.tarih;h.append(d)}
   a.append(h);let ul=null;
   (f.govde||'').split('\n').forEach(l=>{l=l.trim();
@@ -34,7 +36,7 @@ const goster=(el,f)=>{const a=mk('article','t u'),h=mk('header'),dt=new Date(f.t
   el.append(a)};
 const els=q('[data-liste]');
 if(els.length)yukle().then(L=>{
-  if(L[0])q('[data-surum]').forEach(e=>{e.textContent=' v'+L[0].surum;e.hidden=false});
+  if(L[0])q('[data-surum]').forEach(e=>{e.textContent=' '+sur(L[0].surum);e.hidden=false});
   els.forEach(el=>{L.slice(0,+el.dataset.liste||99).forEach(f=>goster(el,f));
     if(!L.length){const s=el.closest('#son');if(s)s.hidden=true;else el.textContent=location.protocol==='file:'?'Yerel önizlemede yazılar görünmez, site yayınlanınca görünür.':'Henüz güncelleme yok.'}})});
 })();

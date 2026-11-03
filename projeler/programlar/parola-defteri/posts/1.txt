@@ -1,4 +1,4 @@
-surum: 1.0.0
+surum: 2026.08.25
 tarih: 2026-09-30
 baslik: İlk sürüm
 
