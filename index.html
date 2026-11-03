@@ -3,6 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>
+/* Açılış intro'su: yalnızca ana sayfaya doğrudan girişte ve 24 saatte bir gösterilir.
+   Sayfa içinden (menü, geri) gelinirse, arama/etiket parametresi varsa veya tarayıcı depolaması kapalıysa gösterilmez. */
+(function(){try{
+  var KEY='introSeen', GUN=24*60*60*1000;
+  if(location.search||location.hash||/bot|crawl|spider|lighthouse/i.test(navigator.userAgent))return;
+  if(document.referrer&&document.referrer.indexOf(location.host)>-1)return;
+  localStorage.setItem('introTest','1');localStorage.removeItem('introTest');
+  var son=+localStorage.getItem(KEY)||0;
+  if(Date.now()-son<GUN)return;
+  location.replace('intro.html');
+}catch(e){}})();
+</script>
 <title>Sabri Aydın | Teknoloji ve kodlama</title>
 <meta name="description" content="Teknoloji ve kodlama üzerine kişisel blog.">
 <meta name="author" content="Sabri Aydın">
