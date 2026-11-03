@@ -117,6 +117,18 @@ GUIDE.caves=[
  ['Kayıt','Mağaradayken kaydedilen oyun, girişin önünden devam eder. Açılan sandık açık kalır.']
 ];
 
+GUIDE.coop=[
+ ['Co-op nedir','Aynı adayı dört oyuncuya kadar birlikte oynayabilirsiniz. Oyunculardan biri ev sahibidir: dünya onun bilgisayarında işler; zaman, hayvanlar, köylüler ve yaratıklar onda yürür. Öbürleri konuk olarak katılır. Bağlantı doğrudan bilgisayarlar arasında kurulur, arada bir oyun sunucusu yoktur. Co-op oyunda dünya menü açıkken de akar, oyun duraklamaz.'],
+ ['1. adım · Oyunu açan (ev sahibi)','Önce normal bir oyuna girin: yeni oyun başlatın veya bir kaydı yükleyin. Oyundayken Esc ile Duraklat menüsünü açın ve «Co-op oyun aç» düğmesine basın. Birkaç saniye içinde ABC-DEF biçiminde altı harfli bir bağlantı kodu çıkar. Kodu arkadaşlarınıza iletin: kodun üstüne tıklayınca panoya kopyalanır. «Davet bağlantısını kopyala» düğmesi ise kodu kendiliğinden dolduran bir adres verir; arkadaşınızın bağlantıya tıklayıp «Katıl» demesi yeter.'],
+ ['2. adım · Katılan (konuk)','Oyunu açın ve ana menüde kalın, oyuna girmeyin. «Oyuna Katıl» düğmesine basın; adınızı ve ev sahibinin verdiği kodu yazıp «Katıl» deyin. Dünya ev sahibinden aktarılır ve oyun kendiliğinden başlar. Bu aktarım ağa göre birkaç saniye ile yarım dakika arasında sürer. Kod, yalnızca ev sahibinin sayfası açık kaldığı sürece geçerlidir; sayfa yenilenirse kod değişir.'],
+ ['Kod çalışmıyorsa','Kodun altı karakteri de doğru yazılmalıdır; büyük-küçük harf önemsizdir, aradaki çizgi kendiliğinden konur. Kod doğru olduğu hâlde bağlanamıyorsanız iki bilgisayar birbirini göremiyor demektir. Co-op penceresindeki «Bağlantıyı sına» düğmesi ağınızı denetler ve hangi aşamada takıldığınızı yazar; aynı sınama ev sahibinde Duraklat menüsünden de yapılabilir. Sınamayı iki tarafta da çalıştırın.'],
+ ['Aynı ağ ve farklı ağ','Aynı modeme bağlı iki bilgisayar birbirini doğrudan bulur, ek ayar gerekmez. Farklı ağlardaki oyuncularda bağlantının dışarıdan kurulması gerekir; bazı internet sağlayıcıları ve mobil hatlar buna izin vermez. O zaman Co-op penceresindeki bağlantı ayarlarından kendi aktarma (TURN) sunucunuzun bilgilerini girmelisiniz. Aktarma sunucusu veriyi iki oyuncu arasında taşır ve hemen her ağda çalışır; ücretsiz hesap veren sağlayıcılar vardır.'],
+ ['Birlikte oynarken','Arkadaşlarınızı adlarıyla ve can çubuklarıyla görürsünüz; haritada ve mini haritada da işaretlenirler. Ağaç kesmek, yapı kurmak, sandık açmak gibi dünyayı değiştiren her şey herkeste aynı anda görünür. Yere atılan eşyaları herkes alabilir. Oyunu ev sahibi kaydeder; konuğun çantası ve gelişimi kendi tarayıcısında dünya başına saklanır, aynı oyuna yeniden katıldığınızda geri yüklenir.'],
+ ['Sohbet ve işaret','Enter sohbeti açar, yazıp yine Enter ile gönderirsiniz, Esc kapatır. Sohbete /yardim yazarak komutları görebilirsiniz. Haritada ({map}) bir yere tıklayıp hedef koyduğunuzda bu hedef arkadaşlarınızın haritasında da belirir ve ekranda bildirim olarak düşer; buluşmanın en kolay yolu budur.'],
+ ['Bağlantı koparsa','Konukta «Bağlantı koptu» penceresi açılır. «Yeniden bağlan» ile aynı oyuna dönersiniz: dünya yeniden alınır, çantanız ve gelişiminiz geri yüklenir. «Tek başıma devam et» derseniz dünyanın o anki kopyası sizde kalır ve oyun tek kişilik sürer; Duraklat menüsünden kaydedebilirsiniz. Ev sahibi, oyuncu listesindeki «Çıkar» düğmesiyle istenmeyen bir oyuncuyu oyundan alabilir.'],
+ ['Sınırlar','Bütün oyuncular aynı oyun sürümünü kullanmalıdır; sürümler farklıysa bağlantı reddedilir ve bu söylenir. Co-op oyunda mağaralara girilemez. Ev sahibi oyundan çıkarsa oyun herkes için biter. En çok dört oyuncu katılabilir.']
+];
+
 /* Başarımlar: [kimlik, ad, açıklama, deneyim, koşul(G)] — koşullar basarimlar.js içinde */
 HG.GUIDE=GUIDE;
 })();

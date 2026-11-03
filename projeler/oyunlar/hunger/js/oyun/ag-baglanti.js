@@ -98,9 +98,30 @@ net.prepare=async function(){
 /* ---------------------------------------------------------- Bağlantı sınaması ----------------------------------------------------------
    Üç aşama ölçülür: yerel aday (her zaman olmalı), dışarıdan görünen adres (STUN) ve aktarma (TURN).
    Ayrıca aracı sunucuya ulaşılıp ulaşılmadığına bakılır. Sonuç Türkçe cümlelerle döner. */
+/* Tarayıcının kendi içinde iki uç kurup veri kanalı açar: WebRTC'nin bu bilgisayarda
+   çalışıp çalışmadığını kesin olarak gösterir (internet gerekmez). */
+function loopTest(){
+ return new Promise(resolve=>{
+  let a=null,b=null,done=false;
+  const fin=v=>{if(done)return;done=true;try{a&&a.close()}catch(e){}try{b&&b.close()}catch(e){}resolve(v)};
+  const to=setTimeout(()=>fin(false),7000);
+  try{
+   a=new RTCPeerConnection({iceServers:[]});b=new RTCPeerConnection({iceServers:[]});
+   a.onicecandidate=e=>{if(e.candidate&&b)b.addIceCandidate(e.candidate).catch(()=>{})};
+   b.onicecandidate=e=>{if(e.candidate&&a)a.addIceCandidate(e.candidate).catch(()=>{})};
+   const ch=a.createDataChannel('x');
+   ch.onopen=()=>{clearTimeout(to);fin(true)};
+   a.createOffer().then(o=>a.setLocalDescription(o))
+    .then(()=>b.setRemoteDescription(a.localDescription))
+    .then(()=>b.createAnswer()).then(s=>b.setLocalDescription(s))
+    .then(()=>a.setRemoteDescription(b.localDescription))
+    .catch(()=>{clearTimeout(to);fin(false)});
+  }catch(e){clearTimeout(to);fin(false)}
+ });
+}
 function gatherTest(ice,only){
  return new Promise(resolve=>{
-  const out={host:false,srflx:false,relay:false,err:''};
+  const out={host:false,srflx:false,relay:false,n:0,err:''};
   let pc;
   try{
    const o={iceServers:ice};
@@ -113,6 +134,7 @@ function gatherTest(ice,only){
   pc.onicecandidate=e=>{
    if(!e.candidate){clearTimeout(to);fin();return}
    const c=String(e.candidate.candidate||'');
+   if(c)out.n++;
    if(/ typ host/.test(c))out.host=true;
    else if(/ typ srflx/.test(c))out.srflx=true;
    else if(/ typ relay/.test(c))out.relay=true;
@@ -142,21 +164,43 @@ function brokerTest(){
 }
 HG.netTest=async function(log){
  const say=m=>{try{log&&log(m)}catch(e){}};
- say('Sunucuya ulaşılıyor…');
+ say('Tarayıcı denetleniyor…');
  const ice=await iceList();
+ const loop=await loopTest();
+ say('Bağlantı sunucusuna ulaşılıyor…');
  const br=await brokerTest();
- say(br.ok?'Aracı sunucu: ulaşıldı.':'Aracı sunucu: ulaşılamadı.');
- say('Ağ yolları deneniyor…');
+ say('Ağ yolları deneniyor (bu adım 10 saniye kadar sürebilir)…');
  const g=await gatherTest(ice,false);
- const r={broker:br.ok,host:g.host,srflx:g.srflx,relay:g.relay,err:g.err||br.err||'',ice:ice.length};
- /* Sonucun anlamı */
+ const r={broker:br.ok,webrtc:loop,host:g.host,srflx:g.srflx,relay:g.relay,aday:g.n,err:g.err||br.err||'',ice:ice.length};
+ /* Her satır bir aşama: ne olduğunu ve ne anlama geldiğini söyler */
  const L=[];
- L.push(br.ok?'✓ Aracı sunucuya ulaşıldı (kod alışverişi çalışıyor).':'✗ Aracı sunucuya ulaşılamadı: internet bağlantınızı veya güvenlik duvarını denetleyin.');
- L.push(g.host?'✓ Yerel ağ adresi bulundu (aynı ağdaki bilgisayarlarla bağlanabilirsiniz).':'✗ Yerel ağ adresi bulunamadı: tarayıcı WebRTC\'yi engelliyor olabilir.');
- L.push(g.srflx?'✓ Dışarıdan görünen adres öğrenildi (farklı ağdan bağlantı denenebilir).':'✗ Dışarıdan görünen adres öğrenilemedi: ağınız STUN\'u engelliyor, farklı ağdaki biriyle oynamak için aktarma sunucusu şart.');
- L.push(g.relay?'✓ Aktarma sunucusu çalışıyor (her ağdan bağlanılabilir).':'✗ Aktarma sunucusu yanıt vermedi: internet sağlayıcınız bağlantıyı gizliyorsa (operatör ağı, mobil internet) bağlanamayabilirsiniz. Aşağıdan kendi TURN bilgilerinizi girin.');
+ L.push(loop
+  ?'✓ Tarayıcınız oyun bağlantısını (WebRTC) destekliyor.'
+  :'✗ Tarayıcınızda bağlantı kurulamıyor: WebRTC kapalı olabilir ya da bir VPN, güvenlik yazılımı veya gizlilik eklentisi engelliyor olabilir. Eklentileri kapatıp yeniden deneyin.');
+ L.push(br.ok
+  ?'✓ Bağlantı sunucusuna ulaşıldı: kod alışverişi çalışıyor.'
+  :'✗ Bağlantı sunucusuna ulaşılamadı: internetiniz veya güvenlik duvarınız engelliyor. Kod üretilemez, kodla katılınamaz.');
+ L.push(g.host
+  ?'✓ Yerel ağ adresi bulundu: aynı modeme bağlı bilgisayarlarla oynayabilirsiniz.'
+  :(g.aday>0
+   ?'• Yerel ağ adresi gizlenmiş görünüyor; aynı ağdaki bağlantı yine de çalışabilir.'
+   :'✗ Hiçbir ağ adresi bulunamadı: ağ bağdaştırıcınız kapalı olabilir veya bir yazılım WebRTC\'yi kısıtlıyor.'));
+ L.push(g.srflx
+  ?'✓ Dışarıdan görünen adresiniz öğrenildi: farklı ağdaki biriyle bağlantı denenebilir.'
+  :'✗ Dışarıdan görünen adres öğrenilemedi: ağınız bu sorguyu engelliyor. Farklı ağdaki biriyle oynamak için aktarma sunucusu gerekir.');
+ L.push(g.relay
+  ?'✓ Aktarma sunucusu çalışıyor: hemen her ağdan bağlanabilirsiniz.'
+  :'✗ Aktarma sunucusuna ulaşılamadı: ücretsiz sunucular yoğun olabilir veya ağınız engelliyor.');
  r.satir=L;
- r.ozet=!br.ok?'Aracı sunucuya ulaşılamıyor.':g.relay?'Her ağdan bağlanabilirsiniz.':g.srflx?'Çoğu ağdan bağlanabilirsiniz; bazı ağlarda aktarma sunucusu gerekir.':'Yalnızca aynı ağdaki bilgisayarlarla bağlanabilirsiniz.';
+ r.ozet=!loop?'Tarayıcınız doğrudan bağlantıya izin vermiyor.'
+  :!br.ok?'İnternet bağlantısı kurulamıyor: co-op çalışmaz.'
+  :g.relay?'Her ağdan bağlanabilirsiniz.'
+  :g.srflx?'Çoğu ağdan bağlanabilirsiniz; bazı ağlarda aktarma sunucusu gerekir.'
+  :'Yalnızca aynı ağdaki bilgisayarlarla bağlanabilirsiniz.';
+ r.oneri=!loop?'Önce VPN, antivirüs ve tarayıcı eklentilerini kapatıp sınamayı yineleyin.'
+  :!br.ok?'İnternet bağlantınızı denetleyin; şirket veya okul ağındaysanız bu ağ bağlantıyı kapatıyor olabilir.'
+  :g.relay?'Ek bir ayar gerekmiyor; kodu paylaşıp oynayabilirsiniz.'
+  :'Farklı ağdaki biriyle oynayacaksanız aşağıdaki bağlantı ayarlarından kendi aktarma (TURN) sunucunuzun bilgilerini girin. Aynı evdeki bilgisayarlarla oynamak için bir şey yapmanız gerekmez.';
  net.testSon=r;
  return r;
 };

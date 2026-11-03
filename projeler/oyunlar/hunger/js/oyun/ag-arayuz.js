@@ -7,6 +7,14 @@ const net=HG.net;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mk=(tag,id,cls,html)=>{const e=document.createElement(tag);if(id)e.id=id;if(cls)e.className=cls;if(html!==undefined)e.innerHTML=html;return e};
 const root=$('#game')||document.body;
+/* Bağlantı sınaması sonucunun ortak biçimi */
+function testHtml(r){
+ let h='<div class="sum">'+esc(r.ozet)+'</div>';
+ h+=r.satir.map(s=>'<div class="'+(s[0]==='✓'?'ok':s[0]==='•'?'wait':'no')+'">'+esc(s)+'</div>').join('');
+ if(r.oneri)h+='<div class="tip">'+esc(r.oneri)+'</div>';
+ if(net.iceWarn)h+='<div class="no">'+esc(net.iceWarn)+'</div>';
+ return h;
+}
 const copy=(txt,msg)=>{
  try{navigator.clipboard.writeText(txt).then(()=>HG.toast(msg),()=>HG.toast(txt))}catch(e){HG.toast(txt)}
 };
@@ -20,7 +28,13 @@ const dlg=mk('div','coop',null,`<div class="card"><h1 style="font-size:26px;lett
  </div>
  <p id="cpSt" class="cps"></p>
  <div class="btns"><button id="cpGo" type="button">Katıl</button><button id="cpX" class="ghost" type="button">Geri (Esc)</button></div>
- <small class="cph">Oyun kurmak için: bir oyuna girin, Duraklat menüsünde «Co-op oyun aç» düğmesine basın ve çıkan kodu arkadaşlarınıza iletin. Bütün oyuncular aynı oyun sürümünü kullanmalıdır.</small>
+ <details id="cpNas" open><summary>Nasıl bağlanılır?</summary>
+  <p class="cph"><b>Arkadaşınızın oyununa katılmak için</b> (şu an buradasınız):</p>
+  <ol class="cpadim"><li>Arkadaşınızdan altı harfli bağlantı kodunu isteyin.</li><li>Adınızı ve kodu yukarıya yazın.</li><li><b>Katıl</b> düğmesine basın; dünya aktarılır ve oyun kendiliğinden başlar.</li></ol>
+  <p class="cph"><b>Kendi oyununuzu açmak için</b>:</p>
+  <ol class="cpadim"><li>Bu pencereyi kapatıp <b>Yeni Oyun</b> başlatın ya da bir kaydı yükleyin.</li><li>Oyundayken <b>Esc</b> ile Duraklat menüsünü açın.</li><li><b>«Co-op oyun aç»</b> düğmesine basın.</li><li>Çıkan kodu arkadaşlarınıza iletin.</li></ol>
+  <p class="cph">Aynı modeme bağlı bilgisayarlar birbirini kendiliğinden bulur. Farklı ağlardaysanız ve bağlanamıyorsanız aşağıdaki sınamayı çalıştırın. Bütün oyuncular aynı oyun sürümünü kullanmalıdır.</p>
+ </details>
  <details id="cpAdv"><summary>Bağlantı ayarları ve sınama</summary>
   <p class="cph">Aynı ağdaki bilgisayarlar birbirini kendiliğinden bulur. Farklı ağlardaki (ayrı evler, mobil internet) oyuncular için ara sunucu gerekir; aşağıdaki sınama hangi aşamada takıldığınızı söyler.</p>
   <div class="btns"><button id="cpTest" class="ghost" type="button">Bağlantıyı sına</button></div>
@@ -95,8 +109,7 @@ dlg.addEventListener('pointerdown',e=>{if(e.target===dlg)closeDlg()});
   testB.disabled=true;res.innerHTML='<div class="wait">Sınanıyor…</div>';
   try{
    const r=await HG.netTest(m=>{res.innerHTML='<div class="wait">'+esc(m)+'</div>'});
-   const rows=r.satir.map(s=>'<div class="'+(s[0]==='✓'?'ok':'no')+'">'+esc(s)+'</div>').join('');
-   res.innerHTML='<div class="sum">'+esc(r.ozet)+'</div>'+rows+(net.iceWarn?'<div class="no">'+esc(net.iceWarn)+'</div>':'');
+   res.innerHTML=testHtml(r);
   }catch(e){res.innerHTML='<div class="no">Sınama yapılamadı: '+esc(String(e&&e.message||e))+'</div>'}
   testB.disabled=false;
  });
@@ -128,9 +141,10 @@ function playersHtml(){
  }
  return '<ul class="cpl">'+L.join('')+'</ul>';
 }
-let paused=false;                                   /* sınama sonucu ekranda dururken panel tazelenmez */
+/* Sınama sonucu burada saklanır: panel saniyede bir yeniden çizildiği için sonuç ekranda kalmıyordu */
+let sonTest='';
 function renderPause(){
- if(!ppanel||paused)return;
+ if(!ppanel)return;
  const live=HG.coopLive();
  if(!live){
   if(net.st==='connecting'){ppanel.innerHTML=`<p class="cps">${esc(net.msg)}</p>`;return}
@@ -140,21 +154,26 @@ function renderPause(){
  }
  if(net.role==='host'){
   const code=net.code?net.fmtCode(net.code):'…';
-  ppanel.innerHTML=`<div class="cpbox"><div class="cpk">Bağlantı kodu</div><button id="cpCopy" class="cpcode" type="button" title="Kopyalamak için tıklayın">${esc(code)}</button><small class="cph">Kodu arkadaşlarınıza iletin; kopyalamak için tıklayın. Bu sayfa açık kaldığı sürece kod geçerlidir.</small><button id="cpLink" class="ghost" type="button" title="Tıklayınca kod kendiliğinden dolan davet bağlantısını kopyalar">Davet bağlantısını kopyala</button></div>${playersHtml()}<div class="cpres" id="cpPRes"></div><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder. Arkadaşınız bağlanamıyorsa sınamayı iki tarafta da çalıştırın.</small><button id="cpEnd" class="ghost" type="button">Co-op'u kapat</button>`;
+  ppanel.innerHTML=`<div class="cpbox"><div class="cpk">Bağlantı kodu</div><button id="cpCopy" class="cpcode" type="button" title="Kopyalamak için tıklayın">${esc(code)}</button><small class="cph">Kodu arkadaşlarınıza iletin; kopyalamak için tıklayın. Bu sayfa açık kaldığı sürece kod geçerlidir.</small><button id="cpLink" class="ghost" type="button" title="Tıklayınca kod kendiliğinden dolan davet bağlantısını kopyalar">Davet bağlantısını kopyala</button></div>`+
+   `<ol class="cpadim"><li>Yukarıdaki kodu arkadaşınıza iletin.</li><li>Arkadaşınız oyunu açsın ve <b>ana menüde kalsın</b>.</li><li>Ana menüdeki <b>«Oyuna Katıl»</b> düğmesine bassın.</li><li>Adını ve kodu yazıp <b>Katıl</b> desin; dünya kendiliğinden aktarılır.</li></ol>`+
+   playersHtml()+
+   `<div class="cpres" id="cpPRes">${sonTest}</div><div class="btns"><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpPHelp" class="ghost" type="button">Nasıl oynanır?</button></div><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder. Arkadaşınız bağlanamıyorsa sınamayı iki tarafta da çalıştırın.</small><button id="cpEnd" class="ghost" type="button">Co-op'u kapat</button>`;
  }else{
-  ppanel.innerHTML=`${playersHtml()}<small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpLeave" class="ghost" type="button">Co-op'tan ayrıl</button>`;
+  ppanel.innerHTML=`${playersHtml()}<div class="cpres" id="cpPRes">${sonTest}</div><div class="btns"><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpPHelp" class="ghost" type="button">Nasıl oynanır?</button></div><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpLeave" class="ghost" type="button">Co-op'tan ayrıl</button>`;
  }
 }
 ppanel.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
+ if(b.id==='cpPHelp'){if(HG.openGuide)HG.openGuide('coop');return}
  if(b.id==='cpPTest'){
-  const res=ppanel.querySelector('#cpPRes');if(!res||!HG.netTest)return;
-  b.disabled=true;res.innerHTML='<div class="wait">Sınanıyor…</div>';
-  paused=true;                                                   /* sınama sürerken panel yeniden çizilmesin */
-  HG.netTest(m=>{res.innerHTML='<div class="wait">'+esc(m)+'</div>'}).then(r=>{
-   res.innerHTML='<div class="sum">'+esc(r.ozet)+'</div>'+r.satir.map(s=>'<div class="'+(s[0]==='✓'?'ok':'no')+'">'+esc(s)+'</div>').join('');
-   b.disabled=false;paused=false;
-  },()=>{res.innerHTML='<div class="no">Sınama yapılamadı.</div>';b.disabled=false;paused=false});
+  if(!HG.netTest)return;
+  b.disabled=true;
+  const yaz=h=>{sonTest=h;const r=ppanel.querySelector('#cpPRes');if(r)r.innerHTML=h};
+  yaz('<div class="wait">Sınanıyor…</div>');
+  HG.netTest(m=>yaz('<div class="wait">'+esc(m)+'</div>')).then(r=>{
+   yaz(testHtml(r));
+   const q=ppanel.querySelector('#cpPTest');if(q)q.disabled=false;
+  },()=>{yaz('<div class="no">Sınama yapılamadı.</div>');const q=ppanel.querySelector('#cpPTest');if(q)q.disabled=false});
   return;
  }
  if(b.id==='cpLink'&&net.code)copy(location.origin+location.pathname+'?coop='+net.code,'Davet bağlantısı kopyalandı.');

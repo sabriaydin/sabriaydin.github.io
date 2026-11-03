@@ -3,7 +3,7 @@
 'use strict';
 const {G,ui,IT,RC,STN,ICON,ANIMAL,inp}=HG;
 const $=HG.$;
-const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['sea','Deniz'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['news','Yeni sistemler'],['ach','Başarımlar']];
+const TABS=[['play','Oynanış'],['story','Hikâye'],['foes','Canavarlar'],['fauna','Hayvanlar'],['map','Harita'],['sea','Deniz'],['ores','Madenler'],['items','Eşyalar'],['recipes','Üretim'],['tips','Alet ve silahlar'],['caves','Mağaralar'],['coop','Co-op'],['news','Yeni sistemler'],['ach','Başarımlar']];
 let tab='play',openFrom=null;
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 /* {eylem} -> atanmış tuş */
@@ -54,6 +54,7 @@ function body(){
   case 'recipes':return recipes();
   case 'tips':return sec(HG.GUIDE.tips);
   case 'caves':return sec(HG.GUIDE.caves);
+  case 'coop':return sec(HG.GUIDE.coop||[]);
   case 'news':return sec(HG.GUIDE.news||[]);
   case 'ach':return ach();
   default:return sec(HG.GUIDE.play);
@@ -88,5 +89,7 @@ function setup(){
  addEventListener('keydown',e=>{if(e.code==='Escape'&&!$('#gd').hidden){e.stopImmediatePropagation();e.preventDefault();inp.keys.Escape=true;toggleGuide(false)}},true);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+/* Belirli bir bölümle açmak için (ör. co-op pencerelerindeki «Nasıl oynanır?») */
+HG.openGuide=t=>{if(t)tab=t;toggleGuide(true)};
 Object.assign(HG,{toggleGuide});
 })();

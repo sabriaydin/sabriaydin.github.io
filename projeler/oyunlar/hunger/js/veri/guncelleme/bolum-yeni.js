@@ -2,6 +2,13 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
+{n:65,d:"03.11.2026",t:"Co-op anlatımı",l:[
+ "Rehbere (Co-op bölümü) oyun açma, katılma, sohbet, harita işareti, bağlantı koptuğunda ne yapılacağı ve bağlanamama durumları adım adım eklendi.",
+ "Co-op penceresine ve Duraklat menüsüne «nasıl bağlanılır» adımları eklendi; artık kodun kime, nasıl verileceği ekranda yazıyor.",
+ "Duraklatma menüsüne «Nasıl oynanır?» düğmesi eklendi; rehberin Co-op bölümünü açıyor.",
+ "Bağlantı sınaması sonucunun bir saniye sonra kaybolması sorunu giderildi; sonuç ekranda kalıyor.",
+ "Bağlantı sınaması tarayıcınızın bağlantıyı destekleyip desteklemediğini de ölçüyor ve sonunda ne yapmanız gerektiğini tek cümleyle söylüyor."
+]},
 {n:64,d:"03.11.2026",t:"Co-op: dört oyuncu ve ağlar arası bağlantı",l:[
  "Co-op artık dört oyuncuya kadar oynanıyor; konuklar birbirini de görüyor ve birbirinin sohbetini, harita işaretlerini, dünyada yaptığı değişiklikleri alıyor.",
  "Farklı ağlardaki bilgisayarların (ayrı evler, mobil internet) birbirine bağlanamaması sorunu giderildi; bağlantı artık birden çok ara sunucu ve kapı deniyor.",
