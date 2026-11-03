@@ -845,3 +845,19 @@ html:has(.post.t){scroll-behavior:smooth}
 .t-araclar .arac fieldset legend{font:800 1rem var(--h)}
 .t-araclar .arac ol.bt-ol li{border:2px solid var(--ink);background:#fff}
 @media(max-width:640px){.t-araclar .arac{padding:18px}}
+
+/* Okunabilirlik düzeltmeleri: koyu şablonlarda açık/koyu renk çakışmaları */
+.t-linux .meta time,.t-html .meta time,.t-htmlaraclari .meta time,.t-linuxos .meta time,.t-linuxgelismis .meta time,.t-medya .meta time,.t-eklentiler .meta time,.t-gelistirici .meta time{color:#6b6862}
+.t-batch .meta time{color:#c8c8f0}
+.t-linuxgelismis blockquote{color:var(--fg)}
+.t-medya .sec-card{background:#16161d;border:1px solid var(--ln);box-shadow:none;color:var(--fg)}
+.t-medya .sec-card p{color:var(--fg)}
+.t-medya .sec-pill.ok{background:rgba(63,200,120,.16);color:#7ff0b0}
+.t-medya .sec-pill.warn{background:rgba(255,61,129,.16);color:#ff9cc0}
+.t-medya .sec-note{background:rgba(255,255,255,.06);color:var(--fg)}
+.t-medya .sec-note b{color:var(--ac)}
+.t-eklentiler .sec-note{background:rgba(255,255,255,.07);color:#d9d5f2}
+.t-eklentiler .sec-note b{color:#9ff0de}
+.t-araclar .meta .copy-link{color:#b3410a}
+.t-windowsos .meta .copy-link{color:#0d6f5c}
+.t-linuxos [style*="--a:#0369a1"] th,.t-linuxos [style*="--a:#0369a1"] small{color:#38bdf8}
