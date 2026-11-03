@@ -36,7 +36,7 @@ const goster=(el,f)=>{const a=mk('article','t u'),h=mk('header'),dt=new Date(f.t
   el.append(a)};
 const els=q('[data-liste]');
 if(els.length)yukle().then(L=>{
-  if(L[0])q('[data-surum]').forEach(e=>{e.textContent=' '+sur(L[0].surum);e.hidden=false});
+  if(L[0])q('[data-surum]').forEach(e=>{e.textContent='Sürüm '+sur(L[0].surum);e.hidden=false});
   els.forEach(el=>{L.slice(0,+el.dataset.liste||99).forEach(f=>goster(el,f));
     if(!L.length){const s=el.closest('#son');if(s)s.hidden=true;else el.textContent=location.protocol==='file:'?'Yerel önizlemede yazılar görünmez, site yayınlanınca görünür.':'Henüz güncelleme yok.'}})});
 })();

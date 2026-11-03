@@ -2,6 +2,11 @@
    Yeni güncelleme eklemek için dizinin içine {n: numara, d: "gg.aa.yyyy", t: "başlık", l: ["madde", ...]} kaydı eklenir; sıralama otomatiktir (en yeni başta).
    Madde yazım kuralı: oyuncunun görebileceği değişiklik, "…eklendi / …giderildi / …değiştirildi / …kaldırıldı" biçiminde, tam cümle ve noktayla yazılır. */
 HG.UPD=(HG.UPD||[]).concat([
+{n:66,d:"03.11.2026",t:"TURN rehberi",l:[
+ "Rehbere TURN bölümü eklendi: TURN ve STUN'un ne olduğu, ne zaman gerektiği, ücretsiz hesabın nasıl açıldığı ve bilgilerin oyuna nasıl girileceği anlatılıyor.",
+ "Co-op penceresine ve Duraklat menüsüne «TURN rehberi» düğmesi eklendi.",
+ "Rehber, Co-op penceresi açıkken de üstte görünüyor."
+]},
 {n:65,d:"03.11.2026",t:"Co-op anlatımı",l:[
  "Rehbere (Co-op bölümü) oyun açma, katılma, sohbet, harita işareti, bağlantı koptuğunda ne yapılacağı ve bağlanamama durumları adım adım eklendi.",
  "Co-op penceresine ve Duraklat menüsüne «nasıl bağlanılır» adımları eklendi; artık kodun kime, nasıl verileceği ekranda yazıyor.",

@@ -56,3 +56,6 @@ body{min-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-
 section{width:100%}
 .fm{text-align:center;padding-bottom:10vh}
 footer{width:100%;max-width:none;margin-top:auto;padding:16px 6vw;text-align:center;font-size:14px;color:var(--mut);background:var(--pl);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--bd)}
+/* İndir düğmesi: üstte "İndir", altında "Sürüm ..." */
+.b [data-surum]{display:block;font-size:.78em;font-weight:500;opacity:.85;margin-top:.15em}
+.b [data-surum][hidden]{display:none}

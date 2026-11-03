@@ -67,3 +67,6 @@
 .cpadim b{color:var(--tx)}
 #cpPause .cpadim{margin:8px 0 10px}
 .cpres .tip{margin-top:4px;padding:6px 8px;background:rgba(255,255,255,.05);border-left:2px solid var(--red);border-radius:3px;color:var(--tx)}
+
+/* Rehber, Co-op penceresinin üstünde açılabilsin */
+#gd{z-index:59}

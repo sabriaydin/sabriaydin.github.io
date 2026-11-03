@@ -37,7 +37,7 @@ const dlg=mk('div','coop',null,`<div class="card"><h1 style="font-size:26px;lett
  </details>
  <details id="cpAdv"><summary>Bağlantı ayarları ve sınama</summary>
   <p class="cph">Aynı ağdaki bilgisayarlar birbirini kendiliğinden bulur. Farklı ağlardaki (ayrı evler, mobil internet) oyuncular için ara sunucu gerekir; aşağıdaki sınama hangi aşamada takıldığınızı söyler.</p>
-  <div class="btns"><button id="cpTest" class="ghost" type="button">Bağlantıyı sına</button></div>
+  <div class="btns"><button id="cpTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpTurnHelp" class="ghost" type="button">TURN rehberi</button></div>
   <div id="cpRes" class="cpres"></div>
   <div class="wform">
    <label>Kendi aktarma (TURN) sunucunuz<input id="cpTurn" type="text" placeholder="turn:sunucu:3478 veya https://… bilgi adresi" autocomplete="off" spellcheck="false"></label>
@@ -104,6 +104,7 @@ dlg.addEventListener('pointerdown',e=>{if(e.target===dlg)closeDlg()});
   net.agCfg.sifirla();loadCfg();
   res.innerHTML='<div class="ok">Varsayılan sunuculara dönüldü.</div>';
  });
+ const thB=q('#cpTurnHelp');if(thB)thB.addEventListener('click',()=>{if(HG.openGuide)HG.openGuide('turn')});
  testB.addEventListener('click',async()=>{
   if(!HG.netTest)return;
   testB.disabled=true;res.innerHTML='<div class="wait">Sınanıyor…</div>';
@@ -157,14 +158,15 @@ function renderPause(){
   ppanel.innerHTML=`<div class="cpbox"><div class="cpk">Bağlantı kodu</div><button id="cpCopy" class="cpcode" type="button" title="Kopyalamak için tıklayın">${esc(code)}</button><small class="cph">Kodu arkadaşlarınıza iletin; kopyalamak için tıklayın. Bu sayfa açık kaldığı sürece kod geçerlidir.</small><button id="cpLink" class="ghost" type="button" title="Tıklayınca kod kendiliğinden dolan davet bağlantısını kopyalar">Davet bağlantısını kopyala</button></div>`+
    `<ol class="cpadim"><li>Yukarıdaki kodu arkadaşınıza iletin.</li><li>Arkadaşınız oyunu açsın ve <b>ana menüde kalsın</b>.</li><li>Ana menüdeki <b>«Oyuna Katıl»</b> düğmesine bassın.</li><li>Adını ve kodu yazıp <b>Katıl</b> desin; dünya kendiliğinden aktarılır.</li></ol>`+
    playersHtml()+
-   `<div class="cpres" id="cpPRes">${sonTest}</div><div class="btns"><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpPHelp" class="ghost" type="button">Nasıl oynanır?</button></div><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder. Arkadaşınız bağlanamıyorsa sınamayı iki tarafta da çalıştırın.</small><button id="cpEnd" class="ghost" type="button">Co-op'u kapat</button>`;
+   `<div class="cpres" id="cpPRes">${sonTest}</div><div class="btns"><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpPHelp" class="ghost" type="button">Nasıl oynanır?</button><button id="cpPTurn" class="ghost" type="button">TURN rehberi</button></div><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder. Arkadaşınız bağlanamıyorsa sınamayı iki tarafta da çalıştırın.</small><button id="cpEnd" class="ghost" type="button">Co-op'u kapat</button>`;
  }else{
-  ppanel.innerHTML=`${playersHtml()}<div class="cpres" id="cpPRes">${sonTest}</div><div class="btns"><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpPHelp" class="ghost" type="button">Nasıl oynanır?</button></div><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpLeave" class="ghost" type="button">Co-op'tan ayrıl</button>`;
+  ppanel.innerHTML=`${playersHtml()}<div class="cpres" id="cpPRes">${sonTest}</div><div class="btns"><button id="cpPTest" class="ghost" type="button">Bağlantıyı sına</button><button id="cpPHelp" class="ghost" type="button">Nasıl oynanır?</button><button id="cpPTurn" class="ghost" type="button">TURN rehberi</button></div><small class="cph">Co-op'ta oyun duraklamaz; menü açıkken dünya akmaya devam eder.</small><button id="cpLeave" class="ghost" type="button">Co-op'tan ayrıl</button>`;
  }
 }
 ppanel.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
  if(b.id==='cpPHelp'){if(HG.openGuide)HG.openGuide('coop');return}
+ if(b.id==='cpPTurn'){if(HG.openGuide)HG.openGuide('turn');return}
  if(b.id==='cpPTest'){
   if(!HG.netTest)return;
   b.disabled=true;
