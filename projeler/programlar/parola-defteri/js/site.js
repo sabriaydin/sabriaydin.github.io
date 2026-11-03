@@ -1,6 +1,7 @@
 const $=s=>document.querySelector(s),rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 (()=>{const S=window.SITE||{},q=s=>document.querySelectorAll(s);
 q('[data-indir]').forEach(a=>a.href=S.indir||'#');
+q('[data-boyut]').forEach(e=>{if(S.boyut){e.textContent=' · '+S.boyut;e.hidden=false}});   /* dosya boyutu (veri.js) */
 const vt=S.virustotal||(/^[a-f0-9]{64}$/i.test(S.sha256||'')?'https://www.virustotal.com/gui/file/'+S.sha256:'#');
 q('[data-mail]').forEach(a=>a.href=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.eposta||'')?'mailto:'+S.eposta+'?subject='+encodeURIComponent('Parola Defteri hakkında'):'#');
 q('[data-yil]').forEach(e=>e.textContent=new Date().getFullYear());

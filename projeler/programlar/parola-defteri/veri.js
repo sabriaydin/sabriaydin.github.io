@@ -1,8 +1,10 @@
 /* SİTEYİ BURADAN YÖNETİN. Sadece tırnak içindeki yazıları değiştirin. */
-/* indir: programın indirme adresi. sha256: dosyanın SHA-256 kodu (64 karakter), VirusTotal butonu bundan kendiliğinden oluşur. İkisini de doldurmazsanız butonlar çalışmaz. virustotal: boş bırakın. eposta: "Bize ulaşın!" butonunun açacağı e-posta adresi. */
+/* indir: programın indirme adresi (dosya "indir" klasöründe durur). sha256: dosyanın SHA-256 kodu (64 karakter), VirusTotal butonu bundan kendiliğinden oluşur. İkisini de doldurmazsanız butonlar çalışmaz. boyut: İndir düğmesinin altında görünen dosya boyutu. virustotal: boş bırakın. eposta: "Bize ulaşın!" butonunun açacağı e-posta adresi. */
+/* YENİ SÜRÜM ÇIKARIRKEN: 1) yeni dosyayı "indir" klasörüne koyun (dosya adında Türkçe harf ve boşluk olmasın), 2) aşağıdaki indir satırına dosyanın adını yazın, 3) sha256 ve boyut satırlarını güncelleyin, 4) posts klasörüne sıradaki numarayla yeni bir .txt ekleyin. */
 window.SITE={
-  indir:"ParolaDefteri-Sürüm20260825.rar",
-  sha256:"8f928d116f24b825199b110d999f5cc0a273473156fea6559182c9e378a6ffe3",
+  indir:"indir/ParolaDefteri-Surum-20260825.rar",
+  sha256:"04d130c6ddb1b7a1554800033d58b9657efdfd5669acdaca6eea3f8efbe2aabe",
+  boyut:"67 MB",
   virustotal:"",
   eposta:""
 };
