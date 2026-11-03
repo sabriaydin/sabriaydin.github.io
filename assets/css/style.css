@@ -164,3 +164,9 @@ pre{background:#f1f1f1;color:#000;border:1px solid #ccc}
 
 /* Ana sayfa içerik genişliği yazı sayfasıyla aynı (1220px, kenar boşluğu 16px) */
 main#app>.wrap{max-width:1252px;padding-left:16px;padding-right:16px}
+
+/* Netlik: üst çubuk opak, kartlar duruyorken 3B dönüşüm uygulanmaz (yazı keskin kalır), yalnızca üzerine gelince eğilir */
+.top{background:#161618;-webkit-backdrop-filter:none;backdrop-filter:none}
+.card{transform:none}
+.card.tilt:hover{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
+.post .meta,.post .meta time{opacity:1}

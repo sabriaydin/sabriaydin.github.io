@@ -864,3 +864,18 @@ html:has(.post.t){scroll-behavior:smooth}
 
 /* İçindekiler: aktif bağlantıdaki sol çizgi metnin üstüne binmesin */
 .t-guvenlik .t-aside a,.t-gelistirici .t-aside a,.t-sistemaraclari .t-aside a,.t-linux .t-aside a,.t-batch .t-aside a,.t-linuxos .t-aside a,.t-linuxgelismis .t-aside a{padding-left:12px}
+
+/* Netlik: bölümler belirirken soluk (opaklık .25) başlamasın; yalnızca hafif kayma kalsın */
+@keyframes tIn{from{opacity:.001;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes tSec{from{transform:translateY(14px)}to{transform:none}}
+.t .body figcaption{opacity:1}
+.t .body hr{opacity:.45}
+.t-ofis .of-win{opacity:1}
+.t-windowsos .back,.t-windowsos .wl-date,.t-windowsos .wl-d{opacity:1}
+.post.t-html{--dim:#a3a3a3}
+.post.t-linux{--dim:#9db89a}
+.post.t-linuxos{--dim:#b5a89b}
+.post.t-linuxgelismis{--dim:#a9afb8}
+.post.t-medya{--dim:#b6b6c8}
+.post.t-htmlaraclari{--dim:#a9b6c8}
+.t-html .ed-tab,.t-html .ed-k,.t-html .ed-tree em{color:#a3a3a3}
