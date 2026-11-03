@@ -169,7 +169,8 @@
 #cqhud .cqp{border-radius:4px}
 #cqhud .cqp i{border-radius:4px}
 #fps{left:12px;top:12px;padding:3px 9px;border-radius:999px;background:rgba(9,9,11,.8);border-color:var(--ui-line);box-shadow:var(--ui-sh)}
-/* pencere kaydırma çubukları */
+/* pencere kaydırma çubukları: Chrome ve Edge ::-webkit-scrollbar, Firefox scrollbar-width/color kullanır */
+#pbox,#invScr,#recipes,#set .card{scrollbar-width:thin;scrollbar-color:#33333d transparent}
 #pbox::-webkit-scrollbar,#invScr::-webkit-scrollbar,#recipes::-webkit-scrollbar,#set .card::-webkit-scrollbar{width:10px}
 #pbox::-webkit-scrollbar-thumb,#invScr::-webkit-scrollbar-thumb,#recipes::-webkit-scrollbar-thumb,#set .card::-webkit-scrollbar-thumb{background:#33333d;border-radius:6px;border:2px solid transparent;background-clip:content-box}
 #pbox::-webkit-scrollbar-track,#invScr::-webkit-scrollbar-track,#recipes::-webkit-scrollbar-track,#set .card::-webkit-scrollbar-track{background:transparent}

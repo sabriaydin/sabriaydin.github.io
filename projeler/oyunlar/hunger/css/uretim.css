@@ -20,7 +20,7 @@
 .cs{padding:2px 8px;border-radius:10px;border:1px solid var(--line);background:#101012}
 .cs.ok{color:#9ad39a;border-color:#3e6a3e}.cs.no{color:var(--mut)}
 .cm{display:inline-flex;align-items:center;gap:3px;padding:1px 7px 1px 3px;border-radius:10px;border:1px solid var(--line);background:#101012;font-size:12px}
-.cm img{width:18px;height:18px;image-rendering:pixelated}
+.cm img{width:18px;height:18px;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 .cs-no{color:var(--mut)}
 #rcr{display:flex;gap:6px}
 #rcs{padding:3px 9px;font-size:12px}
@@ -32,7 +32,7 @@
 #crfScr .rb b small{font-weight:400;color:var(--mut);margin-left:6px;font-size:11px}
 .ing{display:flex;flex-wrap:wrap;gap:4px}
 .ig{display:inline-flex;align-items:center;gap:3px;padding:1px 7px 1px 3px;border-radius:10px;border:1px solid var(--line);background:#101012;font-size:12px}
-.ig img{width:16px;height:16px;image-rendering:pixelated}
+.ig img{width:16px;height:16px;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 .ig.ok{color:#9ad39a}.ig.no{color:#e07b73;border-color:#6a3e3a}
 .ig em{font-style:normal;opacity:.85}
 .stn{font-size:12px}.stn.ok{color:#9ad39a}.stn.no{color:#e0a073}

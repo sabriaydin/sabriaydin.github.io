@@ -10,7 +10,7 @@ button:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
 /* çanta paneli: temel kaynak özeti */
 #resum{display:flex;flex-wrap:wrap;gap:6px 12px;margin:8px 0 4px;padding:6px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:6px}
 #resum span{display:flex;align-items:center;gap:4px;font-size:13px}
-#resum img{width:20px;height:20px;image-rendering:pixelated}
+#resum img{width:20px;height:20px;image-rendering:-moz-crisp-edges;image-rendering:pixelated}
 #resum span.z{opacity:.4}
 
 /* ---- Dünya Oluştur: açıklama satırları, özet, hata metni (güncelleme 66) ---- */
