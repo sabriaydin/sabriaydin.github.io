@@ -1,6 +1,7 @@
 // YAZI LİSTESİ: bu dosya otomatik üretilir, elle düzenlemeyin.
 // Yazı eklemek veya silmek için posts klasöründeki .html dosyalarını değiştirmeniz yeterli.
 window.POSTS = [
+  { id: 'ucretsiz-58-advanced-ip-scanner', title: 'Advanced IP Scanner: Yerel Ağ Tarama Aracı', cat: 'sistemaraclari', date: '2026-11-09', time: '14:20', excerpt: 'Advanced IP Scanner nedir, yerel ağdaki cihazlar nasıl taranır ve resmi indirme bağlantısı.' },
   { id: 'ucretsiz-31-onlyoffice-desktop-editors', title: 'ONLYOFFICE Desktop Editors: Ücretsiz Ofis Paketi', cat: 'ofis', date: '2026-10-26', time: '11:20', excerpt: 'ONLYOFFICE Desktop Editors nedir, belge biçimlerini nasıl destekler ve resmi indirme bağlantıları.' },
   { id: 'ucretsiz-57-stoat', title: 'Stoat: Açık Kaynak Grup Sohbet Uygulaması', cat: 'guvenlik', date: '2026-10-24', time: '19:02', excerpt: 'Stoat (Revolt) nedir, reklamsız ve açık kaynaklı grup sohbetini nasıl sağlar ve resmi indirme bağlantıları.' },
   { id: 'ucretsiz-56-comfyui', title: 'ComfyUI: Düğüm Tabanlı Yapay Zeka Görsel Üretim Aracı', cat: 'gelistirici', date: '2026-10-23', time: '12:18', excerpt: 'ComfyUI nedir, yapay zeka modellerini kendi bilgisayarınızda nasıl çalıştırır ve Windows, macOS, Linux için resmi indirme bağlantıları.' },
