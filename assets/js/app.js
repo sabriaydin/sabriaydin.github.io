@@ -61,12 +61,13 @@ document.addEventListener('click',e=>{if(!e.target.closest('.dd'))setDd(false);i
 let sel=-1;const items=()=>[...res.querySelectorAll('a')];
 const mark=()=>items().forEach((a,i)=>a.classList.toggle('sel',i===sel));
 s.value=q.get('q')||'';
-s.oninput=()=>{loadFull();const v=s.value.trim(),all=v?find(v):[],r=all.slice(0,5);sel=-1;res.innerHTML=r.length?`<div class="rh">${all.length>5?`${all.length} sonuçtan ilk 5'i`:`${all.length} sonuç`}</div>`+r.map(p=>`<a href="${url(p)}"><span class="rt">${esc(p.title)}</span><span class="rc">${esc(C[p.cat]||p.cat)}</span></a>`).join(''):v?'<em>Sonuç bulunamadı</em>':'';res.hidden=!res.innerHTML;window.onSearch&&window.onSearch()};
+/* Anlık arama kaldırıldı: yazarken sonuç listesi açılmaz ve liste canlı süzülmez; arama Enter ile yapılır. Kutu boşaltılırsa liste eski haline döner. */
+s.oninput=()=>{res.hidden=true;res.innerHTML='';if(page==='home'&&!s.value.trim())window.onSearch&&window.onSearch()};
 s.onfocus=loadFull;
 s.onkeydown=e=>{const it=items();
 if(e.key==='ArrowDown'&&it.length){e.preventDefault();sel=(sel+1)%it.length;mark()}
 else if(e.key==='ArrowUp'&&it.length){e.preventDefault();sel=(sel-1+it.length)%it.length;mark()}
-else if(e.key==='Enter'){if(sel>=0&&it[sel])location.href=it[sel].href;else if(page!=='home')location.href=home+'?q='+encodeURIComponent(s.value)}};
+else if(e.key==='Enter'){if(sel>=0&&it[sel])location.href=it[sel].href;else if(page!=='home')location.href=home+'?q='+encodeURIComponent(s.value);else{loadFull();window.onSearch&&window.onSearch()}}};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){res.hidden=true;sel=-1;setDd(false)}});
 
 /* Ana sayfa */
