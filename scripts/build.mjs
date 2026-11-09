@@ -162,12 +162,6 @@ for (const p of posts) {
     html = html.replace('</head>', () => tags.join('\n') + '\n</head>');
   }
   // Yazıda zaten h1 yoksa (script içindeki metinler sayılmaz) üst bölümü ekle
-  // Okuma süresi: yazı metnindeki sözcük sayısına göre (dakikada yaklaşık 200 sözcük)
-  {
-    const bm = html.match(/<div class="body"[^>]*>([\s\S]*)<\/div>\s*(?:<aside class="ilgili"[\s\S]*?<\/aside>\s*)?<\/article>/);
-    const wc = bm ? decode(bm[1].replace(/<!--px-->[\s\S]*?<!--\/px-->/g, ' ').replace(/<(script|style|pre)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ')).split(/\s+/).filter(Boolean).length : 0;
-    p.dk = wc ? Math.max(1, Math.round(wc / 200)) : 0;
-  }
   if (!/<h1[\s>]/.test(html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ''))) html = html.replace('<article class="post">', () => '<article class="post">\n' + Frame.frame(p, C, '../'));
   // Görseller sayfa açılışını geciktirmesin
   html = html.replace(/<img\b(?![^>]*\bloading=)([^>]*?)(\/?)>/gi, (m, a, c) => `<img loading="lazy" decoding="async"${a}${c}>`);
