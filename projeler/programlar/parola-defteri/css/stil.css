@@ -59,3 +59,5 @@ footer{width:100%;max-width:none;margin-top:auto;padding:16px 6vw;text-align:cen
 /* İndir düğmesi: üstte "İndir", altında "Sürüm ..." */
 .b [data-surum]{display:block;font-size:.78em;font-weight:500;opacity:.85;margin-top:.15em}
 .b [data-surum][hidden]{display:none}
+
+h1.alt{font-size:clamp(32px,5vw,56px);font-weight:700;text-shadow:none}

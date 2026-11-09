@@ -69,6 +69,12 @@ Yazı dosyaları sadedir: yalnızca başlık, özet, kategori, tarih ve içerik 
 ## Kalite denetimi
 `node scripts/build.mjs --deploy _site --base https://...` ardından `node scripts/denetle.mjs _site`: kırık bağlantı ve görsel, eksik veya yinelenen başlık/özet, h1 sayısı, kırık içindekiler bağlantısı, alt metni olmayan görsel gibi sorunları listeler. GitHub Actions bunu her yayında çalıştırır; sonuç Actions sayfasında görünür ve yayını durdurmaz.
 
+## Proje ve program sayfaları (projeler/)
+- Her proje kendi klasöründe, kendi tasarımıyla durur (`projeler/oyunlar/`, `projeler/programlar/`, `projeler/diger/`). Menüde görünmesi için `assets/js/site.js` içindeki `menus` > `Projeler` bölümüne bir satır eklenir.
+- Yeni proje sayfasında bulunması gerekenler: `<title>`, `description`, sayfada tek bir `<h1>`, `favicon` dosyaları ve "Bloga dön" bağlantısı. Eksikler `scripts/denetle.mjs` çıktısında görünür.
+- Yeni sayfanın canonical ve paylaşım etiketlerini alması için adresi `scripts/build.mjs` içindeki `EXTRA` listesine ekleyin.
+- İndirilecek dosyalar (`.rar` gibi) depoyu büyütür; GitHub Pages sitesi için toplam boyut 1 GB'ı aşmamalıdır. Çok büyüyen dosyalar GitHub Releases'e taşınıp sayfadaki bağlantı oraya verilebilir.
+
 ## Klasör yapısı
 - `index.html`: ana sayfa
 - `araclar/html-editor/`: Online HTML Editörü; blog şablonundan bağımsız, tam sayfa tek başına çalışan araç (`index.html`, `editor.css`, `editor.js`, `templates.js`)
