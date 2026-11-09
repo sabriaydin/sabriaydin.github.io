@@ -170,3 +170,23 @@ main#app>.wrap{max-width:1252px;padding-left:16px;padding-right:16px}
 .card{transform:none}
 .card.tilt:hover{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg))}
 .post .meta,.post .meta time{opacity:1}
+
+/* Ana sayfa tanıtım bölümü */
+.hero{margin:0 0 30px;padding:6px 0 0}
+.hero-k{margin:0 0 8px;font:700 .85rem/1 var(--h);letter-spacing:.14em;text-transform:uppercase;color:var(--rd)}
+.hero-t{margin:0;font:800 clamp(2rem,5vw,3.4rem)/1.08 var(--h);letter-spacing:-.02em;color:var(--tx);max-width:18ch}
+.hero-d{margin:14px 0 0;max-width:60ch;font:1.12rem/1.6 var(--b);color:var(--mu)}
+.hero-s{display:flex;flex-wrap:wrap;gap:8px 22px;margin:18px 0 0;font:500 .95rem/1 var(--h);color:var(--mu)}
+.hero-s b{color:var(--tx);font-weight:700}
+.hero-b{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0 0}
+.hb{display:inline-block;padding:.75em 1.4em;border:1.5px solid var(--line);border-radius:99px;font:700 .95rem/1 var(--h);color:var(--tx);text-decoration:none;transition:background .2s,border-color .2s,transform .2s}
+.hb.p{background:var(--red);border-color:var(--red);color:#fff}
+.hb:hover,.hb:focus-visible{border-color:var(--rd);transform:translateY(-2px)}
+.hb.p:hover{background:#c9332d}
+.hero-h{margin:36px 0 14px;font:700 1.05rem/1.2 var(--h);letter-spacing:.02em;color:var(--mu)}
+.topics{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.topics a{display:inline-flex;align-items:center;gap:8px;padding:.5em .95em;border:1px solid var(--line);border-radius:99px;background:var(--bg2);color:var(--tx);font:600 .9rem/1.2 var(--h);text-decoration:none;transition:border-color .2s,background .2s}
+.topics a:hover,.topics a:focus-visible{border-color:var(--rd);background:#303035}
+.topics small{padding:1px 8px;border-radius:99px;background:#3b3b40;font:700 .75rem/1.5 var(--h);color:var(--mu)}
+@media(max-width:640px){.hero-d{font-size:1.02rem}.hero-h{margin-top:28px}}
+@media(max-width:640px){.topics{gap:8px}.topics a{padding:.4em .8em;font-size:.82rem}.topics small{font-size:.7rem}}

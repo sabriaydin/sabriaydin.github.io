@@ -31,8 +31,15 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
+      - name: CSS/JS küçültücüyü kur
+        run: npm install --no-save --no-package-lock esbuild@0.24.2
+
       - name: Yazı listesini, site haritasını ve RSS'i üret
         run: node scripts/build.mjs --deploy _site --base "${{ steps.pages.outputs.base_url }}"
+
+      - name: Kalite denetimi (bilgi amaçlı; yayını durdurmaz)
+        continue-on-error: true
+        run: node scripts/denetle.mjs _site
 
       - name: Yayın paketini yükle
         uses: actions/upload-pages-artifact@v3

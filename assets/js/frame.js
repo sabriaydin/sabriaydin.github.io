@@ -11,6 +11,6 @@
     `<a class="back" href="${root}index.html">‹ Tüm yazılar</a><br>` +
     `<a class="tag" href="${root}index.html?cat=${encodeURIComponent(m.cat)}">${esc(C[m.cat] || m.cat)}</a>` +
     `<h1>${esc(m.title)}</h1>` +
-    `<div class="meta"><time datetime="${m.date}">${fmt(m.date)}</time></div>`;
+    `<div class="meta"><time datetime="${m.date}">${fmt(m.date)}</time>${m.dk ? ` <time class="okuma" datetime="PT${m.dk}M">· ${m.dk} dk okuma</time>` : ''}</div>`;
   return { esc, fmt, frame };
 });

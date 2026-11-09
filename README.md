@@ -54,9 +54,26 @@ Kod bloğu içinde `<` ve `>` karakterlerini `&lt;` ve `&gt;` olarak yaz. Görse
 - `links`: footer bağlantıları (şu an GitHub ve e-posta **örnek adrestir**, kendi bilgilerinle değiştir)
 - `analyticsToken`: Cloudflare Web Analytics site token'ı. dash.cloudflare.com > Analytics & Logs > Web Analytics'ten bir site eklenip token kopyalanır, buraya yapıştırılır. Boş bırakılırsa analiz betiği hiç yüklenmez
 
+## Ortak üst/alt bölüm (kalip/)
+Yazı dosyaları sadedir: yalnızca başlık, özet, kategori, tarih ve içerik taşır. Her yazıdaki `<!--kalip:head-->`, `<!--kalip:ust-->` ve `<!--kalip:alt-->` işaretleri yayın sırasında `kalip/` klasöründeki parçalarla (yazı sayfasının ortak `<head>` satırları, üst çubuk ve alt bilgi) değiştirilir. Bu yüzden:
+- Ortak bir şeyi (stil dosyası, betik, yazı tipi, meta etiketi) değiştirmek için yalnızca `kalip/yazi-ust.html` düzenlenir; 260'tan fazla yazıya tek tek dokunulmaz.
+- Yazı dosyası tek başına tarayıcıda açılırsa tasarımsız görünür; doğru görünüm için siteyi yayınlamak veya `node scripts/build.mjs --deploy _site` çalıştırmak gerekir.
+- Yazıya özel ek stil gerekiyorsa (ör. Linux yazılarındaki `linux.css`) o satır yazının `<head>` kısmında işaretin altında kalır.
+
+## Yayın sırasında otomatik yapılanlar
+- **Yazı tipleri siteden sunulur:** `assets/fonts/` ve `assets/css/fonts.css` (Google Fonts kullanılmaz).
+- **CSS/JS küçültülür:** `assets/` altındaki dosyalar yayın klasöründe küçültülür; kaynak dosyalar olduğu gibi kalır. İş akışı `esbuild`'i kendisi kurar.
+- **Paylaşım görseli:** Her yazı kendi kategorisinin görselini (`assets/img/og/<kategori>.png`) kullanır; yeni kategori eklerseniz bu klasöre aynı adla 1200x630 bir görsel koyun, yoksa `og.png` kullanılır.
+- **İlgili yazılar:** Her yazının sonuna aynı kategoriden en benzer 3 yazı eklenir. Yazı görselleri gecikmeli yüklenir (`loading="lazy"`). Yazılara BreadcrumbList (konum yolu) yapısal verisi eklenir.
+
+## Kalite denetimi
+`node scripts/build.mjs --deploy _site --base https://...` ardından `node scripts/denetle.mjs _site`: kırık bağlantı ve görsel, eksik veya yinelenen başlık/özet, h1 sayısı, kırık içindekiler bağlantısı, alt metni olmayan görsel gibi sorunları listeler. GitHub Actions bunu her yayında çalıştırır; sonuç Actions sayfasında görünür ve yayını durdurmaz.
+
 ## Klasör yapısı
 - `index.html`: ana sayfa
 - `araclar/html-editor/`: Online HTML Editörü; blog şablonundan bağımsız, tam sayfa tek başına çalışan araç (`index.html`, `editor.css`, `editor.js`, `templates.js`)
+- `kalip/`: yazı sayfalarının ortak üst ve alt parçaları
+- `scripts/`: `build.mjs` (yayın paketi), `denetle.mjs` (kalite denetimi), `check-links.mjs` (dış bağlantı kontrolü), `sadelestir.mjs` (tek seferlik dönüştürme, yeniden çalıştırmak gerekmez)
 - `posts/`: her yazı kendi `.html` dosyasında; `posts/index.js` otomatik üretilir, elle düzenlenmez
 - `posts/_sablon.html`: yeni yazı şablonu (yayınlanmaz)
 - `404.html`: bulunamadı sayfası

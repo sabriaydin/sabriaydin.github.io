@@ -97,3 +97,16 @@ html{scroll-behavior:smooth}
 .sec-card p:last-child{margin-bottom:0}
 .sec-note{margin-top:10px;padding:10px 14px;border-radius:10px;background:#f4f4f6;font-size:.95rem;line-height:1.5}
 .sec-note b{color:var(--a)}
+
+/* İlgili yazılar (yayın sırasında eklenir). Şablondan bağımsız, sabit koyu renklerle çizilir: açık ve koyu şablonlarda aynı okunur */
+.post .ilgili{max-width:1180px;margin:34px auto 0;padding:22px 24px 24px;border:1px solid #3b3b40;border-radius:14px;background:#1e1e21;color:#e9e6e1}
+.post .ilgili h2{margin:0 0 14px;padding:0;border:0;background:none;font:700 1.15rem/1.3 'Bricolage Grotesque',system-ui,sans-serif;color:#e9e6e1;text-transform:none;letter-spacing:0}
+.post .ilgili h2::before,.post .ilgili h2::after{content:none}
+.post .ilgili ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.post .ilgili li{margin:0;padding:0}
+.post .ilgili li::before{content:none}
+.post .ilgili a{display:block;height:100%;box-sizing:border-box;padding:14px 16px;border:1px solid #3b3b40;border-radius:10px;background:#2a2a2e;color:#e9e6e1;text-decoration:none;transition:border-color .2s,transform .2s}
+.post .ilgili a:hover,.post .ilgili a:focus-visible{border-color:#ec6a63;transform:translateY(-2px)}
+.post .ilgili b{display:block;font:700 .98rem/1.35 'Bricolage Grotesque',system-ui,sans-serif;color:#e9e6e1}
+.post .ilgili span{display:-webkit-box;margin-top:6px;font:400 .88rem/1.45 system-ui,sans-serif;color:#c7c2bb;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+@media print{.ilgili{display:none}}

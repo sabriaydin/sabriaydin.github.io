@@ -71,7 +71,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){res.hidden=true;sel
 
 /* Ana sayfa */
 if(page==='home'){
-app.innerHTML=`<div class="wrap pg"><h1 class="sr">${S.name}: ${esc(S.description||'')}</h1><p class="status" id="cnt" hidden><span id="cntt"></span><a href="${home}">Tüm yazılara dön</a></p><div class="grid list" id="list"></div><nav class="pager" id="pager" aria-label="Sayfalama" hidden></nav><p class="sr" id="pgs" aria-live="polite"></p></div>`;
+const nCat={};P.forEach(p=>{nCat[p.cat]=(nCat[p.cat]||0)+1});
+const heroHtml=`<section class="hero" id="hero" aria-label="Tanıtım" hidden><p class="hero-k">${esc(S.name)}</p><p class="hero-t" aria-hidden="true">Teknoloji, kodlama ve video oyunları</p><div class="hero-s"><span><b>${P.length}</b> yazı</span><span><b>${Object.keys(nCat).length}</b> kategori</span></div><div class="hero-b"><a class="hb p" href="${home}?grup=ucretsiz">Ücretsiz programlar</a><a class="hb" href="${home}?cat=araclar">Araçlar</a></div><h2 class="hero-h">Konular</h2><ul class="topics">${Object.keys(C).filter(k=>nCat[k]).map(k=>`<li><a href="${home}?cat=${encodeURIComponent(k)}">${esc(C[k])}<small>${nCat[k]}</small></a></li>`).join('')}</ul><h2 class="hero-h">Son yazılar</h2></section>`;
+app.innerHTML=`<div class="wrap pg"><h1 class="sr">${S.name}: ${esc(S.description||'')}</h1>${heroHtml}<p class="status" id="cnt" hidden><span id="cntt"></span><a href="${home}">Tüm yazılara dön</a></p><div class="grid list" id="list"></div><nav class="pager" id="pager" aria-label="Sayfalama" hidden></nav><p class="sr" id="pgs" aria-live="polite"></p></div>`;
 const PER=7; // sayfa başına yazı sayısı
 const gk=v=>AG.some(g=>g.key===v)?v:'';
 let tot=1,cat=C[q.get('cat')]?q.get('cat'):'',grp=cat?'':gk(q.get('grup')),pg=Math.max(1,parseInt(q.get('sayfa'),10)||1),last=s.value.trim();
@@ -84,7 +86,7 @@ const pager=(n,c)=>`${pb(c-1,'‹ Önceki','prev',c<=1)}<ul>${nums(n,c).map(v=>v
 const draw=()=>{window.lxMount&&lxMount(cat,grp);const term=s.value.trim(),gi=grp?AG.find(g=>g.key===grp):null,f=!!(term||cat||gi);let r=find(term).filter(p=>cat?p.cat===cat:gi?leafCats(gi.items).includes(p.cat):true).filter(p=>!window.LXF||LXF.pass(p));pinCtx=term?0:(cat||gi?2:1);if(pinCtx)r=r.filter(pinOn).concat(r.filter(p=>!pinOn(p)));
 if(term!==last){pg=1;last=term}
 const n=Math.max(1,Math.ceil(r.length/PER));pg=Math.min(pg,n);tot=n;
-$('#cnt').hidden=!f;$('#cntt').textContent=[cat&&C[cat]+' kategorisi',gi&&gi.name+' kategorisi',term&&'“'+term+'” araması'].filter(Boolean).join(' ve ')+': '+r.length+' yazı';
+$('#cnt').hidden=!f;$('#hero').hidden=f||pg>1;$('#cntt').textContent=[cat&&C[cat]+' kategorisi',gi&&gi.name+' kategorisi',term&&'“'+term+'” araması'].filter(Boolean).join(' ve ')+': '+r.length+' yazı';
 $('#list').innerHTML=r.length?r.slice((pg-1)*PER,pg*PER).map(p=>card(p)).join(''):`<p class="mu">${term?'Eşleşen yazı yok. Başka bir kelime dene.':(window.LXF&&LXF.active?'Seçtiğin ölçütlere uyan dağıtım yok. Ölçütleri gevşetmeyi dene.':'Bu kategoride henüz yazı yok.')}</p>`;
 const pn=$('#pager');pn.hidden=n<2;pn.innerHTML=n>1?pager(n,pg):'';$('#pgs').textContent=n>1?`Sayfa ${pg} / ${n}`:'';
 /* Adres çubuğunu güncel tut (yenileyince ve geri düğmesinde aynı sayfa gelsin); dosya olarak açıldığında tarayıcı izin vermez, sorun değil */

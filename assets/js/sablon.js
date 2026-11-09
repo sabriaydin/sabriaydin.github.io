@@ -377,6 +377,7 @@
     body.append(...wrapped);
     const x = { art, body, head, secs, intro: introEl, desc: o.desc || '', catName: o.catName || cat, icon: art._icon || null };
     const r = tpl(x);
+    const ilgili = art.querySelector(':scope > .ilgili');
     art.replaceChildren();
     art.className = 'post t t-' + cat;
     art.dataset.tpl = cat;
@@ -388,6 +389,7 @@
     grid.append(body);
     art.append(grid);
     if (r.foot) art.append(r.foot);
+    if (ilgili) art.append(ilgili);
     spy(art);
     return true;
   }

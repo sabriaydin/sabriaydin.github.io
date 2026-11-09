@@ -35,6 +35,14 @@ vm.runInNewContext(read(path.join(ROOT, 'assets/js/site.js')), sandbox);
 const SITE = sandbox.window.SITE || {};
 const C = SITE.categories || {};
 
+// Ortak parçalar (kalip/): yazı dosyalarındaki <!--kalip:head-->, <!--kalip:ust-->, <!--kalip:alt--> işaretleri yayın sırasında açılır.
+// Ortak üst/alt bölümü değiştirmek için yalnızca kalip/ klasöründeki dosyalar düzenlenir; tek tek yazıya dokunulmaz.
+const kalipOku = n => read(path.join(ROOT, 'kalip', n));
+const kalipUygula = (html, kok) => html
+  .replace('<!--kalip:head-->', () => kalipOku('yazi-ust.html').replace(/\{\{kok\}\}/g, kok))
+  .replace('<!--kalip:ust-->', () => kalipOku('yazi-govde-ust.html').replace(/\{\{kok\}\}/g, kok))
+  .replace('<!--kalip:alt-->', () => kalipOku('yazi-alt.html'));
+
 // Yazıları oku: her yazının bilgisi kendi .html dosyasının üst kısmında durur
 const POSTS_DIR = path.join(ROOT, 'posts');
 const metaTag = (html, name) => {
@@ -95,7 +103,7 @@ const keep = src => {
   const rel = path.relative(ROOT, src);
   if (!rel) return true;
   const top = rel.split(path.sep)[0];
-  if (['.git', '.github', 'scripts', 'node_modules'].includes(top) || top === outTop) return false;
+  if (['.git', '.github', 'scripts', 'kalip', 'node_modules'].includes(top) || top === outTop) return false;
   if (rel === 'README.md') return false;
   // Adı _ ile başlayan yazılar taslak sayılır, yayınlanmaz
   if (path.dirname(rel) === 'posts' && path.basename(rel).startsWith('_')) return false;
@@ -113,10 +121,21 @@ copyTree(ROOT, OUT);
 fs.writeFileSync(path.join(OUT, 'posts', 'index.js'), manifest);
 if (!BASE) warn('--base verilmedi: sitemap.xml, feed.xml, canonical bağlantılar ve paylaşım görseli üretilmedi.');
 
+// İlgili yazı seçimi
+const STOP = new Set('ve ile için bir bu da de ki mi nedir nasıl olarak olan gibi daha en çok veya ya ise ne her'.split(' '));
+const words = p => new Set((p.title + ' ' + p.excerpt).toLocaleLowerCase('tr').split(/[^a-zçğıöşü0-9]+/).filter(w => w.length > 2 && !STOP.has(w)));
+const WORDS = new Map(posts.map(p => [p.id, words(p)]));
+const related = p => {
+  const mine = WORDS.get(p.id);
+  return posts.filter(q => q.id !== p.id && q.cat === p.cat)
+    .map(q => { const w = WORDS.get(q.id); let c = 0; for (const x of w) if (mine.has(x)) c++; return { q, sc: c / Math.sqrt(mine.size * w.size || 1), d: Math.abs(new Date(q.date) - new Date(p.date)) }; })
+    .sort((a, b) => b.sc - a.sc || a.d - b.d || a.q.id.localeCompare(b.q.id)).slice(0, 3).map(x => x.q);
+};
+
 // Her yazıya arama motoru ve paylaşım etiketleri ile üst bölümü ekle
 for (const p of posts) {
   const file = path.join(OUT, 'posts', p.id + '.html');
-  let html = read(file);
+  let html = kalipUygula(read(file), '../');
   const url = BASE ? `${BASE}/posts/${p.id}.html` : '';
   html = html.replace(/<title>[\s\S]*?<\/title>/, () => `<title>${xml(p.title)} | ${xml(SITE.name)}</title>`);
   if (!/property="og:title"/.test(html)) {
@@ -131,14 +150,33 @@ for (const p of posts) {
       `<meta property="article:section" content="${xml(C[p.cat])}">`
     ];
     if (BASE) {
-      tags.push(`<link rel="canonical" href="${url}">`, `<meta property="og:url" content="${url}">`, `<meta property="og:image" content="${BASE}/assets/img/og.png">`, '<meta name="twitter:card" content="summary_large_image">');
-      Object.assign(ld, { url, image: `${BASE}/assets/img/og.png`, mainEntityOfPage: url });
+      const ogImg = `${BASE}/assets/img/` + (fs.existsSync(path.join(ROOT, 'assets/img/og', p.cat + '.png')) ? `og/${p.cat}.png` : 'og.png');
+      tags.push(`<link rel="canonical" href="${url}">`, `<meta property="og:url" content="${url}">`, `<meta property="og:image" content="${ogImg}">`, '<meta property="og:image:width" content="1200">', '<meta property="og:image:height" content="630">', '<meta name="twitter:card" content="summary_large_image">');
+      Object.assign(ld, { url, image: ogImg, mainEntityOfPage: url });
+      tags.push(`<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+        { '@type': 'ListItem', position: 1, name: SITE.name, item: BASE + '/' },
+        { '@type': 'ListItem', position: 2, name: C[p.cat], item: `${BASE}/index.html?cat=${encodeURIComponent(p.cat)}` },
+        { '@type': 'ListItem', position: 3, name: p.title, item: url }] }).replace(/</g, '\\u003c')}</script>`);
     } else tags.push('<meta name="twitter:card" content="summary">');
     tags.push(`<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`);
     html = html.replace('</head>', () => tags.join('\n') + '\n</head>');
   }
   // Yazıda zaten h1 yoksa (script içindeki metinler sayılmaz) üst bölümü ekle
+  // Okuma süresi: yazı metnindeki sözcük sayısına göre (dakikada yaklaşık 200 sözcük)
+  {
+    const bm = html.match(/<div class="body"[^>]*>([\s\S]*)<\/div>\s*(?:<aside class="ilgili"[\s\S]*?<\/aside>\s*)?<\/article>/);
+    const wc = bm ? decode(bm[1].replace(/<!--px-->[\s\S]*?<!--\/px-->/g, ' ').replace(/<(script|style|pre)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ')).split(/\s+/).filter(Boolean).length : 0;
+    p.dk = wc ? Math.max(1, Math.round(wc / 200)) : 0;
+  }
   if (!/<h1[\s>]/.test(html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ''))) html = html.replace('<article class="post">', () => '<article class="post">\n' + Frame.frame(p, C, '../'));
+  // Görseller sayfa açılışını geciktirmesin
+  html = html.replace(/<img\b(?![^>]*\bloading=)([^>]*?)(\/?)>/gi, (m, a, c) => `<img loading="lazy" decoding="async"${a}${c}>`);
+  // İlgili yazılar: aynı kategoriden, başlık ve özetteki ortak sözcüklere göre en yakın 3 yazı (eşitlikte tarihe yakın olan)
+  const rel = related(p);
+  if (rel.length && !/class="ilgili"/.test(html)) {
+    const li = rel.map(r => `<li><a href="${r.id}.html"><b>${xml(r.title)}</b><span>${xml(r.excerpt)}</span></a></li>`).join('');
+    html = html.replace('</article>', () => `<aside class="ilgili" aria-labelledby="ilgiliB"><h2 id="ilgiliB">İlgili yazılar</h2><ul>${li}</ul></aside>\n</article>`);
+  }
   fs.writeFileSync(file, html);
 }
 
@@ -195,6 +233,27 @@ ${posts.slice(0, 20).map(p => `  <item>
 `);
 
   fs.writeFileSync(path.join(OUT, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${BASE}/sitemap.xml\n`);
+}
+
+// ---- Küçültme: assets/ altındaki CSS ve JS dosyaları yayın klasöründe küçültülür (kaynak dosyalar değişmez) ----
+// esbuild yoksa (yerel çalıştırma) bu adım atlanır ve site küçültülmeden yayınlanır; GitHub Actions esbuild'i kendisi kurar.
+{
+  let esb = null;
+  try { esb = require('esbuild'); } catch (e) { warn('esbuild bulunamadı: CSS/JS küçültülmedi (npm install --no-save esbuild).'); }
+  if (esb) {
+    let before = 0, after = 0, n = 0;
+    const walkAssets = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.isDirectory() ? walkAssets(path.join(d, e.name)) : [path.join(d, e.name)]);
+    for (const f of walkAssets(path.join(OUT, 'assets'))) {
+      const loader = f.endsWith('.css') ? 'css' : (f.endsWith('.js') && !f.endsWith('.min.js') ? 'js' : '');
+      if (!loader) continue;
+      const src = read(f);
+      try {
+        const r = esb.transformSync(src, { loader, minifyWhitespace: true, minifySyntax: true, legalComments: 'none', target: 'es2019' });
+        if (r.code.length < src.length) { fs.writeFileSync(f, r.code); before += src.length; after += r.code.length; n++; }
+      } catch (e) { warn(`${path.relative(OUT, f)} küçültülemedi, olduğu gibi bırakıldı: ${String(e.message).split('\n')[0]}`); }
+    }
+    console.log(`${n} CSS/JS dosyası küçültüldü: ${(before / 1024).toFixed(0)} KB -> ${(after / 1024).toFixed(0)} KB`);
+  }
 }
 
 // ---- Önbellek sürümü: ortak CSS/JS dosyaları ve posts/index.js içeriği değiştiğinde
