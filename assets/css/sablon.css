@@ -243,7 +243,7 @@
 .t-linuxos .t-aside{grid-column:2;grid-row:1;position:sticky;top:84px;padding:20px 18px;border-left:1px solid var(--ln)}
 .t-linuxos .nf-k{color:#8ae234;margin-bottom:8px;font-size:.85rem}
 .t-linuxos .nf-ls a{display:block;padding:4px 0;color:var(--fg);font-size:.84rem;line-height:1.4}
-.t-linuxos .nf-ls a span{color:var(--ac);margin-right:4px}
+.t-linuxos .nf-ls a span{color:var(--ac);color:color-mix(in srgb,var(--ac) 50%,#fff);margin-right:4px}
 .t-linuxos .nf-ls a:hover{color:var(--hl)}
 .t-linuxos .t-sec{padding-top:14px}
 .t-linuxos h2{margin:10px 0 6px;font:700 1.15rem/1.4 ui-monospace,Consolas,monospace;color:var(--ac)}
@@ -488,13 +488,13 @@
 .t-guvenlik .sg-ban{display:flex;justify-content:space-between;padding:6px 20px;background:#111;color:#ff5a4d;font:800 .78rem/1.4 "Courier New",monospace;letter-spacing:.3em}
 .t-guvenlik .sg-main{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:24px;padding:24px 30px 14px}
 .t-guvenlik .back{color:var(--rd);margin:0;font-family:var(--h)}
-.t-guvenlik .sg-k{margin:12px 0 4px;font:700 .74rem/1 "Courier New",monospace;letter-spacing:.2em;color:#7a6a3a}
+.t-guvenlik .sg-k{margin:12px 0 4px;font:700 .74rem/1 "Courier New",monospace;letter-spacing:.2em;color:#6a5a2c}
 .t-guvenlik h1{font:700 clamp(1.7rem,3.8vw,2.5rem)/1.15 Georgia,serif;color:var(--ink2)}
 .t-guvenlik .sg-d{margin:10px 0 0;font-style:italic;color:#4a4130}
 .t-guvenlik .sg-r{position:relative;padding:16px 18px;border:2px solid var(--ink2);background:rgba(255,255,255,.35);font:.82rem/1.5 "Courier New",monospace}
 .t-guvenlik .sg-stamp{position:absolute;right:-6px;top:-18px;transform:rotate(8deg);padding:3px 12px;border:3px solid var(--rd);color:var(--rd);font:900 1.05rem/1.2 "Courier New",monospace;letter-spacing:.14em;background:rgba(239,228,196,.8)}
 .t-guvenlik .sg-r dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:5px 14px}
-.t-guvenlik .sg-r dt{color:#7a6a3a}.t-guvenlik .sg-r dd{margin:0;text-align:right;font-weight:700}
+.t-guvenlik .sg-r dt{color:#6a5a2c}.t-guvenlik .sg-r dd{margin:0;text-align:right;font-weight:700}
 .t-guvenlik .meta{padding:0 30px 14px;color:#6b5d36;font-size:.82rem;font-family:var(--h);border-bottom:2px solid var(--ink2)}
 .t-guvenlik .meta .copy-link{color:var(--rd)}
 .t-guvenlik .t-grid{grid-template-columns:230px minmax(0,1fr)}
@@ -775,7 +775,7 @@ html:has(.post.t){scroll-behavior:smooth}
 .t-araclar .tz-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .t-araclar .back{margin:0;color:var(--ink);font-weight:700;text-decoration:none;border-bottom:2px solid var(--ink)}
 .t-araclar .tz-no{padding:5px 14px;border:2.5px solid var(--ink);border-radius:99px;background:#fff;font:700 .74rem/1 ui-monospace,Consolas,monospace;letter-spacing:.16em;box-shadow:3px 3px 0 var(--ink)}
-.t-araclar .tz-no b{color:var(--or)}
+.t-araclar .tz-no b{color:#b23f05}
 .t-araclar .tz-main{display:flex;align-items:center;justify-content:space-between;gap:30px;margin-top:26px}
 .t-araclar .tz-txt{max-width:700px}
 .t-araclar h1{margin:0;font:900 clamp(2rem,4.8vw,3.5rem)/1.05 var(--h);letter-spacing:-.03em;color:var(--ink)}
@@ -796,7 +796,7 @@ html:has(.post.t){scroll-behavior:smooth}
 .t-araclar .t-aside{position:sticky;top:76px;z-index:7;margin:0;padding:12px 40px;background:rgba(246,240,228,.94);backdrop-filter:blur(8px);border-bottom:3px solid var(--ink)}
 .t-araclar .tz-rail ol{display:flex;gap:8px;overflow-x:auto;margin:0;padding:3px 3px 6px;list-style:none;scrollbar-width:none}
 .t-araclar .tz-rail a{display:flex;align-items:center;gap:8px;white-space:nowrap;padding:7px 14px;border:2px solid var(--ink);border-radius:99px;background:#fff;color:var(--ink);font:700 .86rem/1.2 var(--h);text-decoration:none;box-shadow:2px 2px 0 var(--ink);transition:transform .12s,box-shadow .12s}
-.t-araclar .tz-rail a b{font:700 .72rem ui-monospace,Consolas,monospace;color:var(--or)}
+.t-araclar .tz-rail a b{font:700 .72rem ui-monospace,Consolas,monospace;color:#b23f05}
 .t-araclar .tz-rail a:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
 .t-araclar .tz-rail a.on{background:var(--ink);color:#fff}.t-araclar .tz-rail a.on b{color:var(--mu)}
 .t-araclar .body{display:grid;gap:30px;padding:34px 40px 46px;counter-reset:tz;font:1.04rem/1.75 var(--h)}
@@ -847,7 +847,7 @@ html:has(.post.t){scroll-behavior:smooth}
 @media(max-width:640px){.t-araclar .arac{padding:18px}}
 
 /* Okunabilirlik düzeltmeleri: koyu şablonlarda açık/koyu renk çakışmaları */
-.t-linux .meta time,.t-html .meta time,.t-htmlaraclari .meta time,.t-linuxos .meta time,.t-linuxgelismis .meta time,.t-medya .meta time,.t-eklentiler .meta time,.t-gelistirici .meta time{color:#6b6862}
+.t-linux .meta time,.t-html .meta time,.t-htmlaraclari .meta time,.t-linuxos .meta time,.t-linuxgelismis .meta time,.t-medya .meta time,.t-eklentiler .meta time{color:#a39e96}.t-gelistirici .meta time{color:#6b6862}
 .t-batch .meta time{color:#c8c8f0}
 .t-linuxgelismis blockquote{color:var(--fg)}
 .t-medya .sec-card{background:#16161d;border:1px solid var(--ln);box-shadow:none;color:var(--fg)}

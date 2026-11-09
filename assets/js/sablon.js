@@ -10,6 +10,19 @@
   const tx = n => (n ? n.textContent.replace(/\s+/g, ' ').trim() : '');
   const ext = a => /^https?:/i.test(a.getAttribute('href') || '');
 
+  /* Renk yardımcıları: vurgu rengini, zemine karşı en az `min` kontrast oranına gelene kadar beyaza doğru açar */
+  const DARK_BG = { linuxos: '#1d1b19' };
+  const rgb = h => { h = String(h).trim(); const m = h.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i); if (!m) return null; let x = m[1]; if (x.length === 3) x = x.replace(/./g, c => c + c); return [0, 2, 4].map(i => parseInt(x.slice(i, i + 2), 16)); };
+  const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+  function lift(col, bg, min) {
+    const c = rgb(col), b = rgb(bg);
+    if (!c || !b) return col;
+    let k = 0, cur = c;
+    while (ratio(cur, b) < min && k < 20) { k++; cur = c.map(v => Math.round(v + (255 - v) * k * .05)); }
+    return k ? '#' + cur.map(v => v.toString(16).padStart(2, '0')).join('') : col;
+  }
+
   /* Yazı gövdesini giriş + bölümler (h2) olarak ayırır */
   function split(body) {
     const intro = [], secs = [];
@@ -381,6 +394,8 @@
     art.replaceChildren();
     art.className = 'post t t-' + cat;
     art.dataset.tpl = cat;
+    /* Koyu şablonlarda dağıtımın/markanın vurgu rengi koyu zemin üzerinde okunaklı olsun (WCAG 4.5:1) */
+    if (cA && DARK_BG[cat]) { cA = lift(cA, DARK_BG[cat], 4.7); body.style.setProperty('--a', cA); }
     if (cA) art.style.setProperty('--a', cA);
     if (cB) art.style.setProperty('--b', cB);
     art.append(r.head);
