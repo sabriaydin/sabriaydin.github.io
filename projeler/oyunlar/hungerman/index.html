@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HungerMan</title>
+<meta name="description" content="HungerMan: tarayıcıda oynanan, her seferinde rastgele oluşan açık dünya hayatta kalma oyunu.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/oyun.css">
+</head>
+<body>
+<canvas id="oyun"></canvas>
+
+<!-- Oyun içi gösterge -->
+<div id="hud" hidden>
+  <div id="pusula"><div id="pusulaSerit"></div><i></i></div>
+  <div id="saat"><b id="saatDeger">06:00</b><span id="gunDeger">1. gün</span></div>
+  <div id="nisan"></div>
+  <div id="suAlti"></div>
+  <div id="hasarParla"></div>
+  <div id="altPanel">
+    <div id="durumlar">
+      <div id="canlar" class="simgeSira" aria-label="Can"></div>
+      <div id="sagDurum"><div id="oksijen" class="simgeSira" aria-label="Oksijen"></div><div id="aclik" class="simgeSira ters" aria-label="Açlık"></div></div>
+    </div>
+    <div id="cubuk"></div>
+  </div>
+  <div id="esyaAdi"></div>
+  <div id="bildirimler"></div>
+  <pre id="hata" hidden></pre>
+  <div id="fps" hidden></div>
+  <div id="tikla" hidden><b>Devam etmek için tıklayın</b><span>Duraklatmak için Esc</span></div>
+</div>
+
+<!-- Envanter ve üretim -->
+<div id="envanterEkrani" class="kaplama" hidden>
+  <div class="pencere envPencere">
+    <section class="envSol">
+      <header><h2>Envanter</h2></header>
+      <div id="envIzgara" class="izgara"></div>
+      <div id="envCubuk" class="izgara cubukIzgara"></div>
+      <div id="envDurum"></div>
+      <p class="ipucuMetin">Sol tık: al / bırak · Sağ tık: yarısını al / bir tane bırak · Shift + tık: çubuk ile çanta arasında taşı · Pencere dışına tık: yere at</p>
+    </section>
+    <section class="envSag">
+      <header class="uretimBaslik"><h2>Üretim</h2><span id="istasyonDurum"></span></header>
+      <div class="uretimUst">
+        <input id="tarifAra" type="search" placeholder="Tarif ara" autocomplete="off">
+      </div>
+      <div id="tarifSekme" class="sekmeler"></div>
+      <div id="tarifListe"></div>
+    </section>
+    <button class="kapat" id="envKapat" aria-label="Kapat">✕</button>
+  </div>
+</div>
+
+<!-- Ana menü -->
+<div id="anaMenu" class="ekran menuArka">
+  <div class="menuGok"><i class="bulut b1"></i><i class="bulut b2"></i><i class="bulut b3"></i><div class="tepeler t1"></div><div class="tepeler t2"></div><div class="tepeler t3"></div></div>
+  <div class="menuIc">
+    <h1 class="logo">HUNGER<span>MAN</span></h1>
+    <p class="altBaslik">Açık dünya hayatta kalma</p>
+    <div class="menuDugmeler">
+      <button class="dugme ana" data-git="dunyalar">Tek Oyunculu</button>
+      <button class="dugme" disabled>Çok Oyunculu <em>Yakında</em></button>
+      <button class="dugme" data-git="ayarlar">Ayarlar</button>
+      <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
+    </div>
+    <p class="surum" id="surum"></p>
+  </div>
+</div>
+
+<!-- Dünya listesi -->
+<div id="dunyalarEkrani" class="ekran menuArka" hidden>
+  <div class="pencere orta">
+    <header><h2>Dünyalar</h2></header>
+    <div id="dunyaListe" class="liste"></div>
+    <div class="altDugmeler">
+      <button class="dugme ana" data-git="yeni">Yeni Dünya</button>
+      <button class="dugme" data-git="ana">Geri</button>
+    </div>
+  </div>
+</div>
+
+<!-- Yeni dünya -->
+<div id="yeniEkrani" class="ekran menuArka" hidden>
+  <div class="pencere orta dar">
+    <header><h2>Yeni Dünya</h2></header>
+    <label class="alan">Dünya adı<input id="yeniAd" maxlength="32" value="Yeni Dünya"></label>
+    <label class="alan">Tohum <small>(boş bırakılırsa rastgele)</small><input id="yeniTohum" maxlength="40" placeholder="Rastgele"></label>
+    <p class="aciklama">Her dünya, tohum değerinden üretilir. Aynı tohum aynı haritayı verir.</p>
+    <div class="altDugmeler">
+      <button class="dugme ana" id="yeniOlustur">Dünyayı Oluştur</button>
+      <button class="dugme" data-git="dunyalar">Geri</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ayarlar -->
+<div id="ayarlarEkrani" class="ekran" hidden>
+  <div class="pencere orta dar">
+    <header><h2>Ayarlar</h2></header>
+    <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
+    <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
+    <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
+    <label class="kaydir">Ses düzeyi <b id="aSesD"></b><input type="range" id="aSes" min="0" max="1" step="0.05"></label>
+    <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
+    <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
+    <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
+    <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
+  </div>
+</div>
+
+<!-- Yardım -->
+<div id="yardimEkrani" class="ekran" hidden>
+  <div class="pencere orta genis">
+    <header><h2>Nasıl Oynanır</h2></header>
+    <div class="yardimIcerik">
+      <div>
+        <h3>Kontroller</h3>
+        <dl class="tuslar">
+          <dt>W A S D</dt><dd>Hareket</dd>
+          <dt>Boşluk</dt><dd>Zıplama, suda yukarı yüzme</dd>
+          <dt>Sol Shift / W'ye iki kez</dt><dd>Koşma</dd>
+          <dt>C</dt><dd>Eğilme (kenardan düşmez)</dd>
+          <dt>Sol tık (basılı)</dt><dd>Kazma, kesme, kırma</dd>
+          <dt>Sağ tık</dt><dd>Blok koyma, yeme, toplama, masa ve fırını açma</dd>
+          <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
+          <dt>E</dt><dd>Envanter ve üretim</dd>
+          <dt>Q / Shift + Q</dt><dd>Elindekini at / yığını at</dd>
+          <dt>F3</dt><dd>Konum ve teknik bilgiler</dd>
+          <dt>Esc</dt><dd>Duraklat</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Hayatta kalma</h3>
+        <ul>
+          <li>Ağaçları elle kesip kütük toplayın, kütükten kalas, kalastan çubuk ve <b>Üretim Masası</b> yapın.</li>
+          <li>Masanın yanında tahta kazma üretin; taş kazarak parke taş toplayın ve daha güçlü aletlere geçin.</li>
+          <li>Cevherlerin her biri belirli bir kazma seviyesi ister: kömür tahta, bakır taş, demir bakır, altın ve elmas demir kazma.</li>
+          <li>Ham cevherler <b>Fırın</b> yanında kömürle külçeye dönüşür. Kütük fırında odun kömürü verir.</li>
+          <li>Açlık çubuğu zamanla ve koşarken azalır. Böğürtlen, elma ve mantar toplayın; doyunca can yenilenir.</li>
+          <li>Su altında oksijen azalır. Yüksekten düşmek can kaybettirir.</li>
+          <li>Geceler karanlıktır; meşale (çubuk + kömür) ışık verir. Mağaralar derinde daha değerli cevherler saklar.</li>
+          <li>Oyun otomatik olarak kaydedilir.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="altDugmeler"><button class="dugme ana" id="yardimTamam">Tamam</button></div>
+  </div>
+</div>
+
+<!-- Duraklatma -->
+<div id="duraklatEkrani" class="ekran yari" hidden>
+  <div class="pencere orta dar">
+    <header><h2>Oyun Duraklatıldı</h2></header>
+    <div class="menuDugmeler">
+      <button class="dugme ana" id="devamEt">Oyuna Dön</button>
+      <button class="dugme" data-git="ayarlar">Ayarlar</button>
+      <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
+      <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ölüm -->
+<div id="olumEkrani" class="ekran olum" hidden>
+  <div class="olumIc">
+    <h2>Öldünüz</h2>
+    <p id="olumSebep"></p>
+    <p class="aciklama">Eşyalarınız öldüğünüz yere düştü.</p>
+    <div class="menuDugmeler"><button class="dugme ana" id="yenidenDog">Yeniden Doğ</button><button class="dugme" id="olumCik">Ana Menü</button></div>
+  </div>
+</div>
+
+<!-- Yükleme -->
+<div id="yuklemeEkrani" class="ekran menuArka" hidden>
+  <div class="yukleIc">
+    <h2 id="yukleBaslik">Dünya oluşturuluyor</h2>
+    <div class="cubukDis"><div id="yukleCubuk"></div></div>
+    <p id="yukleIpucu" class="aciklama"></p>
+  </div>
+</div>
+
+<div id="tasima"></div>
+<div id="ipucu" hidden></div>
+<div id="hataKutusu" hidden></div>
+
+<script type="module" src="js/ana.js"></script>
+</body>
+</html>
