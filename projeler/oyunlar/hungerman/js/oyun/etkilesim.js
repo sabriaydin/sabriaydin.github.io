@@ -15,6 +15,7 @@ export class Etkilesim {
     this.solBekleme = 0;
     this.vurus = 0;
     this.kazmaSesSayac = 0;
+    this.saldiriBekleme = 0; this.germe = 0; this.okUyari = 0; this.hedefCanli = null;
   }
 
   /* Işın izleme (DDA) */
@@ -77,12 +78,29 @@ export class Etkilesim {
   guncelle(dt, g) {
     const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu();
     this.hedef = this.isin(goz, yon);
-    this.sagBekleme -= dt; this.solBekleme -= dt;
+    /* Canlı, bloktan daha yakınsa hedef odur */
+    const vb = this.varliklar ? this.varliklar.isin(goz, yon, 3.6) : null;
+    this.hedefCanli = null;
+    if (vb && (!this.hedef || vb.t < this.hedef.t)) { this.hedefCanli = vb.v; this.hedef = null; }
+    this.sagBekleme -= dt; this.solBekleme -= dt; this.saldiriBekleme -= dt; this.okUyari -= dt;
     if (this.vurus > 0) { this.vurus += dt * 3.2; if (this.vurus >= 1) this.vurus = 0; }
 
-    /* Kırma */
+    /* Yay: sağ tık basılı tutulunca gerilir, bırakılınca ok atılır */
+    const eldeki = this.envanter.seciliId();
+    if (eldeki === 286) {
+      if (g.sag) {
+        if (this.envanter.say(287) > 0) { if (this.germe === 0) this.ses.yayGer(); this.germe = Math.min(1, this.germe + dt); }
+        else if (this.okUyari <= 0) { this.okUyari = 2; this.arayuz.bildirim('Atılacak ok mevcut değil.'); }
+      } else if (this.germe > 0) { if (this.germe > 0.15) this.okAt(goz, yon); this.germe = 0; }
+    } else this.germe = 0;
+
+    /* Saldırı */
     const h = this.hedef;
-    if (g.sol && h) {
+    if (g.sol && this.hedefCanli) {
+      this.ilerleme = 0; this.kirilanAnahtar = '';
+      if (this.saldiriBekleme <= 0) { this.saldir(this.hedefCanli); this.saldiriBekleme = 0.5; this.vurus = 0.01; }
+    } else if (g.sol && h) {
+      /* Kırma */
       const k = h.x + ',' + h.y + ',' + h.z + ',' + h.id;
       if (k !== this.kirilanAnahtar) { this.kirilanAnahtar = k; this.ilerleme = 0; }
       const sure = this.kirmaSuresi(h.id);
@@ -97,11 +115,35 @@ export class Etkilesim {
     } else { this.ilerleme = 0; this.kirilanAnahtar = ''; if (g.sol && this.vurus === 0) this.vurus = 0.01; }
 
     /* Kullanma / koyma */
-    if (g.sag && this.sagBekleme <= 0) {
+    if (g.sag && eldeki !== 286 && this.sagBekleme <= 0) {
       if (this.kullan(g)) { this.sagBekleme = 0.22; this.vurus = 0.01; }
       else this.sagBekleme = 0.05;
     }
     this.sahne.secimGoster(this.hedef, this.ilerleme);
+  }
+
+  saldir(v) {
+    const a = this.aletBilgi();
+    let hasar = a && a.tur !== 'yay' ? a.hasar : 1;
+    const o = this.oyuncu;
+    const kritik = !o.yerde && !o.suda && o.hiz.y < 0;
+    if (kritik) { hasar *= 1.5; this.dusenler.renkliParcacik([1, 0.9, 0.5], v.konum.x, v.konum.y + v.tur.boy * 0.7, v.konum.z, 8); }
+    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme: o.kosuyor ? 1.5 : 1, oyuncu: true })) {
+      this.ses.vurus();
+      if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+      this.hayatta.yor(0.1);
+    }
+  }
+
+  okAt(goz, yon) {
+    const g = this.germe;
+    const p = goz.clone().addScaledVector(yon, 0.5);
+    const tam = g >= 1;
+    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), 2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0));
+    this.envanter.harca(287, 1);
+    if (this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Yayınız kırıldı.'); }
+    this.ses.yayAt();
+    this.vurus = 0.01;
   }
 
   kir(h) {
@@ -141,6 +183,8 @@ export class Etkilesim {
     const s = env.seciliYuva(), e = s && ESYALAR[s.id];
     /* İstasyonlar */
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
+    /* Yatak */
+    if (h && BLOKLAR[h.id].yatak) { this.arayuz.uyu(h); return true; }
     /* Böğürtlen toplama */
     if (h && h.id === 28) {
       this.dunya.blokKoy(h.x, h.y, h.z, 29);
@@ -150,9 +194,11 @@ export class Etkilesim {
     }
     if (!e) return false;
     /* Yiyecek ve bakım */
+    if (e.zirh) { env.zirhGiy(); this.ses.zirhGiy(); return true; }
     if ((e.tur === 'yiyecek' || e.yenir) && e.yemek) {
       if (this.hayatta.aclik >= 20) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
-      this.hayatta.ye(e.yemek); env.seciliAzalt(1); this.ses.ye();
+      if (this.hayatta.ye(e.yemek, e.zehir || 0)) this.arayuz.bildirim('Mide bulantısı: açlık bir süre daha hızlı azalır.');
+      env.seciliAzalt(1); this.ses.ye();
       if (s.id === 269) env.ekle(270, 1);
       return true;
     }

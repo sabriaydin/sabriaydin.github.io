@@ -10,6 +10,7 @@ import { Envanter } from './oyun/envanter.js';
 import { Hayatta, OLUM_SEBEBI } from './oyun/hayatta.js';
 import { Dusenler } from './oyun/dusenler.js';
 import { Etkilesim } from './oyun/etkilesim.js';
+import { Varliklar } from './varlik/varliklar.js';
 import { ISTASYON_BLOK } from './oyun/uretim.js';
 import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
@@ -204,7 +205,7 @@ function oyunBaslat(v) {
   ekran('yukleme');
   $('#yukleBaslik').textContent = v.yeni ? 'Dünya oluşturuluyor' : 'Dünya yükleniyor';
   $('#yukleCubuk').style.width = '0%';
-  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.'];
+  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır ve doğma noktasını belirler.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
 
   const dunya = new Dunya(v.tohum, sahne);
@@ -223,7 +224,11 @@ function oyunBaslat(v) {
   hayatta.iceAktar(v.hayatta);
   oyun = { id: v.id, ad: v.ad, tohum: v.tohum, olusturma: v.olusturma || Date.now(), dunya, oyuncu, envanter, hayatta, dusenler, hud,
     zaman: v.zaman ?? 0.02, gun: v.gun || 1, dogum, sure: 0, kayitSayac: 0, tikSayac: 0, isikSayac: 0, isik: 1, hazir: false, yeniDogum: !v.oyuncu };
-  oyun.etkilesim = new Etkilesim({ dunya, oyuncu, envanter, hayatta, dusenler, ses, sahne, arayuz: { bildirim: (m, id) => hud.bildirim(m, id), envanterAc: ist => envanterAcKapa(ist) } });
+  const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
+  oyun.varliklar = varliklar; oyun.gunIsigi = 1; oyun.uyku = 0;
+  oyun.etkilesim = new Etkilesim({ dunya, oyuncu, envanter, hayatta, dusenler, ses, sahne, varliklar, arayuz: { bildirim: (m, id) => hud.bildirim(m, id), envanterAc: ist => envanterAcKapa(ist), uyu: h => uyu(h) } });
+  hayatta.zirhFn = () => envanter.zirhPuani();
+  hayatta.zirhYipran = () => { if (envanter.zirhYipran(1)) { ses.aletKirildi(); hud.bildirim('Bir zırh parçanız kırıldı.'); } };
   dusenler.iceAktar(v.dusenler);
   envanter.degisti = () => { hud.cubukCiz(); if (envEkrani.acik) envEkrani.ciz(); };
   hud.cubukCiz(); hud.durumCiz(false);
@@ -235,6 +240,8 @@ function oyunBaslat(v) {
   hayatta.olaylar.olum = sebep => olum(sebep);
   $('#hata').hidden = true;
   $('#fps').hidden = !ayar.fps;
+  $('#uyku').classList.remove('acik');
+  hud.hedef(null);
 }
 
 /* Yüklenen alan hazır olunca oyuna geç */
@@ -262,7 +269,7 @@ function olum(sebep) {
   if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
   if (envEkrani.acik) envEkrani.kapat();
   const p = o.oyuncu.konum;
-  for (const s of o.envanter.yuvalar) if (s) o.dusenler.birak(s.id, s.adet, p.x, p.y + 1, p.z, (Math.random() - 0.5) * 4, 3 + Math.random() * 2, (Math.random() - 0.5) * 4, s.dayanim, 2);
+  for (const s of o.envanter.tumEsyalar()) o.dusenler.birak(s.id, s.adet, p.x, p.y + 1, p.z, (Math.random() - 0.5) * 4, 3 + Math.random() * 2, (Math.random() - 0.5) * 4, s.dayanim, 2);
   o.envanter.temizle();
   $('#olumSebep').textContent = OLUM_SEBEBI[sebep] || 'Hayatınızı kaybettiniz.';
   ekran('olum');
@@ -296,6 +303,7 @@ function oyunBitir() {
   if (!oyun) return;
   if (envEkrani.acik) envEkrani.kapat();
   oyun.dusenler.temizle();
+  oyun.varliklar.temizle();
   sahne.sahne.remove(oyun.dusenler.grup); sahne.sahne.remove(oyun.dusenler.noktalar);
   oyun.dunya.yoket();
   sahne.secimGoster(null);
@@ -321,17 +329,33 @@ function dongu(t) {
   o.dunya.guncelle(p.x, p.z);
   if (calisiyor) {
     o.sure += dt;
+    const oncekiZaman = o.zaman;
     o.zaman += dt / GUN_SURESI;
     if (o.zaman >= 1) { o.zaman -= 1; o.gun++; o.hud.bildirim(`${o.gun}. gün başladı`); }
-    const g = kilitli ? {
+    if (oncekiZaman < 0.46 && o.zaman >= 0.46) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');
+    /* Uyku: ekran kararır, sabah olur */
+    if (o.uyku > 0) {
+      o.uyku -= dt;
+      if (!o.uyandi && o.uyku < 1.3) { o.uyandi = true; o.zaman = 0.0; o.gun++; $('#uyku').classList.remove('acik'); o.hud.bildirim(`${o.gun}. gün başladı. Doğma noktası yatağa ayarlandı.`); }
+    }
+    const g = kilitli && o.uyku <= 0 ? {
       ileri: tus.KeyW, geri: tus.KeyS, sol: tus.KeyA, sag: tus.KeyD, zipla: tus.Space,
       kos: tus.ShiftLeft || tus.ShiftRight || kosKilit, egil: tus.KeyC, kosabilir: o.hayatta.aclik > 6
     } : { kosabilir: false };
     const mesafe = o.oyuncu.guncelle(dt, g) || 0;
     o.hayatta.yor(mesafe * (o.oyuncu.kosuyor ? 0.1 : 0.01));
     o.hayatta.guncelle(dt, o.oyuncu.basSuda);
-    if (kilitli && !o.hayatta.olu) o.etkilesim.guncelle(dt, { sol: fare.sol, sag: fare.sag, egil: tus.KeyC });
+    if (kilitli && !o.hayatta.olu && o.uyku <= 0) o.etkilesim.guncelle(dt, { sol: fare.sol, sag: fare.sag, egil: tus.KeyC });
     else { o.etkilesim.ilerleme = 0; sahne.secimGoster(o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu())); }
+    o.varliklar.guncelle(dt, {
+      oyuncu: o.oyuncu, oyuncuOlu: o.hayatta.olu, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
+      oyuncuyaVur: (n, v) => {
+        o.hayatta.hasar(n, v.turAd, true);
+        const dx = o.oyuncu.konum.x - v.konum.x, dz = o.oyuncu.konum.z - v.konum.z, l = Math.hypot(dx, dz) || 1;
+        o.oyuncu.hiz.x += dx / l * 7; o.oyuncu.hiz.z += dz / l * 7; o.oyuncu.hiz.y = Math.max(o.oyuncu.hiz.y, 4.5);
+      },
+      okTopla: () => { const k = o.envanter.ekle(287, 1); if (!k) ses.topla(); return !k; }
+    });
     o.tikSayac += dt;
     if (o.tikSayac > 0.5) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); }
     o.kayitSayac += dt;
@@ -340,17 +364,18 @@ function dongu(t) {
   /* Kamera, gökyüzü, ışık */
   o.oyuncu.kameraAyarla(sahne.kamera, ayar.sallanma);
   const kosFov = o.oyuncu.kosuyor ? 8 : 0;
-  const hedefFov = ayar.fov + kosFov;
+  const hedefFov = ayar.fov + kosFov - o.etkilesim.germe * 12;
   if (Math.abs(sahne.kamera.fov - hedefFov) > 0.05) { sahne.kamera.fov += (hedefFov - sahne.kamera.fov) * Math.min(1, dt * 10); sahne.kamera.updateProjectionMatrix(); }
   const gozSuda = o.oyuncu.basSuda;
   const gun = sahne.gokGuncelle(o.zaman, sahne.kamera.position, gozSuda, o.dunya.gorus, o.sure);
+  o.gunIsigi = gun;
   /* Meşale ışıkları */
   const seciliId = o.envanter.seciliId();
   const goz = o.oyuncu.gozKonumu(gecici);
   const liste = [];
   const titre = 13.5 + Math.sin(o.sure * 9) * 0.35 + Math.sin(o.sure * 23) * 0.2;
   if (seciliId === 46) liste.push([goz.x, goz.y - 0.3, goz.z, 11]);
-  for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, 15)) liste.push([m[0], m[1], m[2], titre]);
+  for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, 15)) liste.push([m[0], m[1], m[2], (m[3] || 14) * titre / 13.5]);
   sahne.isiklariAyarla(liste);
   /* El ve düşen eşyaların ışığı */
   o.isikSayac -= dt;
@@ -368,7 +393,9 @@ function dongu(t) {
     return k;
   }, o.isik);
   sahne.elAyarla(seciliId);
-  sahne.elGuncelle(dt, o.etkilesim.vurus, o.oyuncu.adimFaz, o.isik);
+  sahne.elGuncelle(dt, o.etkilesim.vurus, o.oyuncu.adimFaz, o.isik, o.etkilesim.germe);
+  const V = o.varliklar;
+  o.hud.hedef(o.etkilesim.hedefCanli || (V.sonVurulanZaman > 0 && V.sonVurulan && !V.sonVurulan.olu ? V.sonVurulan : null));
   /* Gösterge */
   o.hud.durumCiz(o.oyuncu.basSuda);
   o.hud.pusula(o.oyuncu.yaw);
@@ -390,7 +417,19 @@ Biyom: ${BIYOMLAR[k.b]}   Zemin: ${k.h}
 Yön: ${yon.toFixed(0)}°   Görüş: ${o.dunya.gorus}
 Tohum: ${o.tohum}
 Bakılan: ${h ? `${BLOKLAR[h.id].ad} (${h.x}, ${h.y}, ${h.z})` : '-'}
-Düşen eşya: ${o.dusenler.liste.length}`;
+Düşen eşya: ${o.dusenler.liste.length}   Canlı: ${o.varliklar.liste.length} (zombi ${o.varliklar.liste.filter(v => v.tur.dusman).length})`;
+}
+
+/* Yatakta uyuma */
+function uyu(h) {
+  const o = oyun;
+  o.dogum = { x: h.x + 0.5, y: h.y + 1, z: h.z + 0.5 };
+  const gece = o.zaman > 0.52 && o.zaman < 0.97;
+  if (!gece) { o.hud.bildirim('Yalnızca geceleri uyunabilir. Doğma noktası bu yatağa ayarlandı.'); return; }
+  if (o.varliklar.yakinDusman(o.oyuncu.konum, 10)) { o.hud.bildirim('Yakında canavarlar varken uyunamaz.'); return; }
+  if (o.uyku > 0) return;
+  o.uyku = 2.6; o.uyandi = false;
+  $('#uyku').classList.add('acik');
 }
 
 /* Menüde arka plan sahnesi çizilmez; yalnız CSS katmanı görünür */

@@ -38,11 +38,12 @@ export class Dusenler {
   sil(d) { this.grup.remove(d.m); d.m.material.dispose(); }
   temizle() { for (const d of this.liste) this.sil(d); this.liste = []; this.pk = []; }
 
-  parcacik(id, x, y, z, adet = 14) {
-    const c = blokRengi(id);
+  parcacik(id, x, y, z, adet = 14) { this.renkliParcacik(blokRengi(id), x, y, z, adet, true); }
+  renkliParcacik(c, x, y, z, adet = 10, blokIci = false) {
     for (let i = 0; i < adet && this.pk.length < this.PMAX; i++) {
       const k = 0.75 + Math.random() * 0.45;
-      this.pk.push({ p: [x + Math.random() * 0.8 + 0.1, y + Math.random() * 0.8 + 0.1, z + Math.random() * 0.8 + 0.1], v: [(Math.random() - 0.5) * 4, Math.random() * 4, (Math.random() - 0.5) * 4], c: [c[0] * k, c[1] * k, c[2] * k], o: 0.6 + Math.random() * 0.5 });
+      const o = blokIci ? [Math.random() * 0.8 + 0.1, Math.random() * 0.8 + 0.1, Math.random() * 0.8 + 0.1] : [0, 0, 0];
+      this.pk.push({ p: [x + o[0], y + o[1], z + o[2]], v: blokIci ? [(Math.random() - 0.5) * 4, Math.random() * 4, (Math.random() - 0.5) * 4] : [(Math.random() - 0.5) * 1.5, 1 + Math.random() * 2, (Math.random() - 0.5) * 1.5], c: [c[0] * k, c[1] * k, c[2] * k], o: 0.6 + Math.random() * 0.5, yukselen: !blokIci });
     }
   }
 
@@ -85,7 +86,7 @@ export class Dusenler {
       const q = this.pk[i];
       q.o -= dt;
       if (q.o <= 0) { this.pk.splice(i, 1); continue; }
-      q.v[1] -= 18 * dt;
+      q.v[1] -= (q.yukselen ? 2 : 18) * dt;
       q.p[0] += q.v[0] * dt; q.p[1] += q.v[1] * dt; q.p[2] += q.v[2] * dt;
       if (KATI[this.dunya.blok(Math.floor(q.p[0]), Math.floor(q.p[1]), Math.floor(q.p[2]))]) { q.p[1] = Math.floor(q.p[1]) + 1.01; q.v[0] *= 0.5; q.v[1] = 0; q.v[2] *= 0.5; }
     }

@@ -1,6 +1,6 @@
 /* HungerMan - oyun içi gösterge: hızlı erişim çubuğu, can / açlık / oksijen, pusula, saat, bildirimler */
 import { simge } from '../grafik/doku.js';
-import { ESYALAR } from '../bloklar.js';
+import { ESYALAR, maksDayanim } from '../bloklar.js';
 
 const $ = s => document.querySelector(s);
 
@@ -16,7 +16,12 @@ const KALP_YARIM = ['.kk...kk.', 'kaak.kddk', 'kabaakddk', 'kaaaadddk', 'kaaaadd
 const BUT = ['......kk.', '.....kbbk', '....kbbk.', '..kkaak..', '.kaaaak..', 'kaaaaak..', 'kaaaak...', 'kaaak....', '.kkk.....'];
 const BUT_YARIM = ['......kk.', '.....kbbk', '....kbbk.', '..kkddk..', '.kaaddk..', 'kaaaddk..', 'kaaadk...', 'kaaak....', '.kkk.....'];
 const KABARCIK = ['..kkkk...', '.kbbaak..', 'kbbaaaak.', 'kbaaaaak.', 'kaaaaaak.', 'kaaaaaak.', '.kaaaak..', '..kkkk...', '.........'];
+const ZIRH = ['kk.....kk', 'kak...kak', 'kaakkkaak', 'kabaaaaak', '.kaaaaak.', '.kaaaaak.', '.kaaaaak.', '.kaaaaak.', '.kkkkkkk.'];
+const ZIRH_YARIM = ['kk.....kk', 'kak...kdk', 'kaakkkddk', 'kabaaddk.', '.kaaaddk.', '.kaaaddk.', '.kaaaddk.', '.kaaaddk.', '.kkkkkkk.'];
 const IMG = {
+  zirh: minik(ZIRH, { k: '#151515', a: '#c9ced6', b: '#ffffff' }),
+  zirhYarim: minik(ZIRH_YARIM, { k: '#151515', a: '#c9ced6', b: '#ffffff', d: '#3a3d42' }),
+  zirhBos: minik(ZIRH, { k: '#151515', a: '#3a3d42', b: '#4a4d52' }),
   kalp: minik(KALP, { k: '#1a0606', a: '#e3352e', b: '#ffb3ad' }),
   kalpYarim: minik(KALP_YARIM, { k: '#1a0606', a: '#e3352e', b: '#ffb3ad', d: '#3b1513' }),
   kalpBos: minik(KALP, { k: '#1a0606', a: '#3b1513', b: '#4a1d1a' }),
@@ -41,8 +46,9 @@ export class Hud {
     const e = ESYALAR[s.id];
     let h = `<img src="${simge(s.id).url}" alt="">`;
     if (s.adet > 1) h += `<span class="adet">${s.adet}</span>`;
-    if (s.dayanim != null && e && e.alet && s.dayanim < e.alet.dayanim) {
-      const o = s.dayanim / e.alet.dayanim;
+    const md = maksDayanim(e);
+    if (s.dayanim != null && md && s.dayanim < md) {
+      const o = s.dayanim / md;
       h += `<span class="day"><i style="width:${(o * 100).toFixed(0)}%;background:hsl(${Math.round(o * 120)},80%,48%)"></i></span>`;
     }
     return h;
@@ -64,7 +70,8 @@ export class Hud {
 
   durumCiz(suda) {
     const h = this.hay;
-    const anahtar = h.can + '|' + h.aclik + '|' + h.oksijen + '|' + suda;
+    const zp = this.env.zirhPuani ? this.env.zirhPuani() : 0, zehir = h.zehir > 0;
+    const anahtar = h.can + '|' + h.aclik + '|' + h.oksijen + '|' + suda + '|' + zp + '|' + zehir;
     if (anahtar === this.son.durum) return;
     if (this.son.can != null && h.can < this.son.can) { const c = $('#canlar'); c.classList.remove('titre'); void c.offsetWidth; c.classList.add('titre'); }
     this.son.durum = anahtar; this.son.can = h.can;
@@ -72,6 +79,8 @@ export class Hud {
     $('#canlar').innerHTML = sira(h.can, IMG.kalp, IMG.kalpYarim, IMG.kalpBos);
     $('#canlar').classList.toggle('az', h.can <= 4);
     $('#aclik').innerHTML = sira(h.aclik, IMG.but, IMG.butYarim, IMG.butBos);
+    $('#aclik').classList.toggle('zehirli', zehir);
+    $('#zirhSira').innerHTML = zp > 0 ? sira(zp, IMG.zirh, IMG.zirhYarim, IMG.zirhBos) : '';
     const o = $('#oksijen');
     if (suda || h.oksijen < 10) { let s = ''; for (let i = 0; i < h.oksijen; i++) s += `<img src="${IMG.kabarcik}" alt="">`; o.innerHTML = s; o.hidden = false; }
     else o.hidden = true;
@@ -109,6 +118,16 @@ export class Hud {
     const t = String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
     if (t !== this.son.saat) { this.son.saat = t; $('#saatDeger').textContent = t; }
     if (gun !== this.son.gun) { this.son.gun = gun; $('#gunDeger').textContent = gun + '. gün'; }
+  }
+  /* Bakılan veya son vurulan canlının adı ve canı */
+  hedef(v) {
+    const k = $('#hedefBilgi');
+    if (!v) { if (!k.hidden) k.hidden = true; return; }
+    k.hidden = false;
+    const a = v.tur.ad + (v.ofkeli ? ' (öfkeli)' : '');
+    if ($('#hedefAd').textContent !== a) $('#hedefAd').textContent = a;
+    $('#hedefCan').style.width = Math.max(0, v.can / v.tur.can * 100).toFixed(0) + '%';
+    k.classList.toggle('dusman', !!(v.tur.dusman || v.ofkeli));
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
   suAlti(acik) { $('#suAlti').classList.toggle('acik', acik); }

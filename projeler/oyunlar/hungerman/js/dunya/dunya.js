@@ -82,7 +82,7 @@ export class Dunya {
     if (!d) { d = new Map(); this.degisiklikler.set(k, d); }
     d.set(i, id);
     const mk = x + ',' + y + ',' + z;
-    if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5]);
+    if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14]);
     else this.mesaleler.delete(mk);
     this.kirlet(p, true);
     if (lx === 0) this.kirletK(cx - 1, cz); if (lx === PB - 1) this.kirletK(cx + 1, cz);
@@ -259,7 +259,7 @@ export class Dunya {
         if (BLOKLAR[a[j + 1]] && BLOKLAR[a[j + 1]].mesale) {
           const i = a[j], x = i % PB, z = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
           const wx = cx * PB + x, wz = cz * PB + z;
-          this.mesaleler.set(wx + ',' + y + ',' + wz, [wx + 0.5, y + 0.6, wz + 0.5]);
+          this.mesaleler.set(wx + ',' + y + ',' + wz, [wx + 0.5, y + 0.6, wz + 0.5, BLOKLAR[a[j + 1]].isik || 14]);
         }
       }
       this.degisiklikler.set(k, d);

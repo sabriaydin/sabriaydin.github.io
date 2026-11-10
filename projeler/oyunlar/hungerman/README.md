@@ -4,7 +4,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 
 > Not: Oyun `file://` ile (dosyaya çift tıklayarak) açılırsa tarayıcı arka plan işçilerini engeller. Sitede yayınlandığında veya yerel bir sunucuyla açıldığında sorunsuz çalışır.
 
-## 1. aşama (bu sürüm)
+## 1. aşama (0.1.0)
 
 - Tohumdan üretilen devasa dünya: kıyıları denizle çevrili büyük bir kıta (yaklaşık 3 500 x 3 500 blok; dünya sınırı 7 200 x 7 200 blok), nehirler, dağlar, adacıklar
 - Biyomlar: okyanus, derin okyanus, nehir, kumsal, çayır, orman, huş ormanı, tayga, çöl, dağlar
@@ -18,14 +18,24 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Pusula, saat, F3 bilgi paneli, ayarlar (görüş mesafesi, görüş açısı, hassasiyet, ses)
 - Otomatik kayıt (tarayıcının IndexedDB deposu), birden fazla dünya
 
+## 2. aşama (bu sürüm, 0.2.0)
+
+- Hayvanlar: inek, koyun, domuz, tavuk, tavşan ve kurt; biyomlarına göre gruplar hâlinde doğar, gezinir, vurulunca kaçar
+- Kurtlar saldırıya uğrayana kadar zararsızdır; saldırılırsa sürü hâlinde karşılık verir
+- Zombiler: geceleri yüzeyde, her zaman karanlık mağaralarda doğar; gün doğunca güneş altında yanar; meşale ve kamp ateşi çevresinde doğmaz
+- Savaş: yakın dövüş (kılıç en güçlü silah), düşerken kritik vuruş, geri itme, yay ve ok (gerilerek atılır, saplanan ok geri toplanır)
+- Zırh: deri, bakır, demir ve elmas; kask, göğüslük, pantolon, bot; hasarı en fazla %80 azaltır
+- Yeni eşyalar: çiğ ve pişmiş etler, çürük et (mide bulantısı yapabilir), deri, tüy, yün, ip, çakmaktaşı
+- Kamp ateşi (ışık verir, et pişirir), yatak (geceyi atlatır, doğma noktası belirler)
+- Gösterge: zırh çubuğu, bakılan canlının adı ve canı
+
 ## Sonraki aşamalar
 
-1. Hayvanlar ve geceleri ortaya çıkan zombiler, savaş sistemi
-2. Köyler, köylü NPC'ler, ticaret ve görev sistemi
-3. Tehlikeli ve ödüllü gelişmiş mağara sistemi (lav, zindanlar, sandıklar)
-4. Su altı ekosistemi, liman ve tekneler
-5. Çok oyunculu (bir oyuncu sunucu olur, diğerleri kodla katılır)
-6. Harita ve büyük harita ekranı
+1. Köyler, köylü NPC'ler, ticaret ve görev sistemi
+2. Tehlikeli ve ödüllü gelişmiş mağara sistemi (lav, zindanlar, sandıklar)
+3. Su altı ekosistemi, liman ve tekneler
+4. Çok oyunculu (bir oyuncu sunucu olur, diğerleri kodla katılır)
+5. Harita ve büyük harita ekranı
 
 ## Klasör yapısı
 
@@ -44,6 +54,7 @@ js/dunya/dunya.js     Parça yükleme / boşaltma, blok okuma-yazma
 js/grafik/sahne.js    Çizici, gökyüzü, ışıklar, seçim kutusu, eldeki eşya
 js/grafik/doku.js     Kodla çizilen dokular ve eşya simgeleri
 js/oyun/*             Oyuncu, etkileşim, envanter, üretim, hayatta kalma, düşen eşyalar
+js/varlik/*           Hayvanlar ve zombiler: türler, modeller, yapay zekâ, oklar
 js/arayuz/*           Gösterge ve envanter ekranı
 js/sistem/*           Ses ve kayıt
 ```

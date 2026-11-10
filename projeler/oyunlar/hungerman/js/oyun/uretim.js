@@ -1,16 +1,20 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39] },
   kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12] }
 };
-export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın' };
-export const ISTASYON_BLOK = { masa: 32, firin: 33 };
+export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi' };
+export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48 };
+/* Tarifin istasyon koşulu: yok, tek istasyon ya da istasyonlardan biri */
+export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? t.istasyon : [t.istasyon]);
+export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
+export const istasyonMetni = t => istasyonlar(t).map(k => ISTASYON_ADI[k]).join(' veya ');
 
-export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım']];
+export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım']];
 
 const R = [];
 const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, girdi, istasyon: istasyon || null, kategori });
@@ -48,6 +52,17 @@ MAL.forEach((m, mi) => {
 /* Yiyecek ve bakım */
 t(269, 1, [[36, 2], [270, 1]], null, 'yiyecek');
 t(268, 1, [[267, 4]], null, 'yiyecek');
+
+/* Hayatta kalma ve savaş (2. aşama) */
+t(48, 1, [[256, 3], [257, 1], ['kutuk', 3]], null, 'blok');
+t(47, 1, [[49, 3], ['kalas', 3]], 'masa', 'blok');
+t(284, 1, [[267, 3]], null, 'malzeme');
+t(286, 1, [[256, 3], [284, 3]], 'masa', 'savas');
+t(287, 4, [[256, 1], [283, 1], [285, 1]], null, 'savas');
+const ZIRH_ADET = [5, 8, 7, 4];
+ZIRH_MALZEME.forEach((m, mi) => ZIRH_ADET.forEach((a, pi) => t(400 + mi * 4 + pi, 1, [[m.mal, a]], 'masa', 'savas')));
+/* Pişirme: kamp ateşi veya fırın */
+for (const [cig, pismis] of [[271, 272], [273, 274], [275, 276], [277, 278], [279, 280]]) t(pismis, 1, [[cig, 1]], ['ates', 'firin'], 'yiyecek');
 
 export const TARIFLER = R;
 

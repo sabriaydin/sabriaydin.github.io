@@ -4,13 +4,22 @@ export class Hayatta {
   sifirla() {
     this.can = 20; this.aclik = 20; this.oksijen = 10;
     this.yorgunluk = 0; this.iyiSayac = 0; this.acSayac = 0; this.oksSayac = 0; this.bogSayac = 0;
-    this.olu = false; this.sonHasar = 0;
+    this.olu = false; this.sonHasar = 0; this.zehir = 0;
   }
   yor(n) { this.yorgunluk += n; }
-  ye(n) { this.aclik = Math.min(20, this.aclik + n); }
+  /* zehirOlasilik: çürük et gibi yiyeceklerde mide bulantısı olasılığı; true dönerse bulantı başladı */
+  ye(n, zehirOlasilik = 0) {
+    this.aclik = Math.min(20, this.aclik + n);
+    if (zehirOlasilik && Math.random() < zehirOlasilik) { this.zehir = 20; return true; }
+    return false;
+  }
   iyiles(n) { this.can = Math.min(20, this.can + n); }
-  hasar(n, sebep) {
+  /* zirhli: canlı saldırısı ve ok gibi zırhın azalttığı hasarlar */
+  hasar(n, sebep, zirhli = false) {
     if (this.olu || n <= 0) return;
+    if (zirhli && this.zirhFn) { const p = Math.min(20, this.zirhFn()); n = n * (1 - p * 0.04); if (this.zirhYipran) this.zirhYipran(); }
+    n = Math.round(n);
+    if (n <= 0) return;
     this.can = Math.max(0, this.can - n);
     this.sonHasar = performance.now();
     this.olaylar.hasar && this.olaylar.hasar(n, sebep);
@@ -20,6 +29,7 @@ export class Hayatta {
   guncelle(dt, basSuda) {
     if (this.olu) return;
     this.yor(dt * 0.045);
+    if (this.zehir > 0) { this.zehir -= dt; this.yor(dt * 1.2); }
     while (this.yorgunluk >= 4) { this.yorgunluk -= 4; if (this.aclik > 0) this.aclik--; }
     /* Tok iken can yenilenir */
     if (this.aclik >= 17 && this.can < 20) {
@@ -42,8 +52,8 @@ export class Hayatta {
       this.bogSayac = 0;
     }
   }
-  disaAktar() { return { can: this.can, aclik: this.aclik, oksijen: this.oksijen, yorgunluk: this.yorgunluk }; }
-  iceAktar(o) { if (!o) return; this.can = o.can ?? 20; this.aclik = o.aclik ?? 20; this.oksijen = o.oksijen ?? 10; this.yorgunluk = o.yorgunluk ?? 0; this.olu = this.can <= 0; }
+  disaAktar() { return { can: this.can, aclik: this.aclik, oksijen: this.oksijen, yorgunluk: this.yorgunluk, zehir: Math.max(0, this.zehir) }; }
+  iceAktar(o) { if (!o) return; this.can = o.can ?? 20; this.aclik = o.aclik ?? 20; this.oksijen = o.oksijen ?? 10; this.yorgunluk = o.yorgunluk ?? 0; this.zehir = o.zehir ?? 0; this.olu = this.can <= 0; }
 }
 
-export const OLUM_SEBEBI = { dusme: 'Yüksekten düştünüz.', aclik: 'Açlıktan öldünüz.', bogulma: 'Boğuldunuz.' };
+export const OLUM_SEBEBI = { dusme: 'Yüksekten düştünüz.', aclik: 'Açlıktan öldünüz.', bogulma: 'Boğuldunuz.', zombi: 'Bir zombi tarafından öldürüldünüz.', kurt: 'Bir kurt tarafından öldürüldünüz.' };

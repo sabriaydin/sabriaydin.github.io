@@ -252,10 +252,11 @@ export class Sahne {
     this.el.add(this.elEsya);
   }
   /* sallanma: 0..1 vuruş animasyonu, yurume: adım fazı */
-  elGuncelle(dt, vurus, yurume, isik) {
+  elGuncelle(dt, vurus, yurume, isik, germe = 0) {
     const s = vurus > 0 ? Math.sin(vurus * Math.PI) : 0;
-    this.el.position.set(0.42 + Math.sin(yurume) * 0.012, -0.38 - Math.abs(Math.cos(yurume)) * 0.014 - s * 0.08, -0.62 + s * 0.06);
-    this.el.rotation.set(-s * 0.9, -s * 0.25, 0);
+    const g = germe > 0 ? Math.min(1, germe) : 0;
+    this.el.position.set(0.42 + Math.sin(yurume) * 0.012 - g * 0.22, -0.38 - Math.abs(Math.cos(yurume)) * 0.014 - s * 0.08 + g * 0.12, -0.62 + s * 0.06 + g * 0.08);
+    this.el.rotation.set(-s * 0.9, -s * 0.25 + g * 0.5, g * 0.4 + (g >= 1 ? Math.sin(performance.now() / 40) * 0.01 : 0));
     const c = this.elKol.material.color; c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
     this.elBlokMalzeme.color.setScalar(isik);
     if (this.elEsya && this.elEsya.material !== this.elBlokMalzeme) this.elEsya.material.color.setScalar(isik);

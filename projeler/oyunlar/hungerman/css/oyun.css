@@ -193,3 +193,20 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 
 @media (max-width: 1000px) { .envPencere { grid-template-columns: 1fr; } :root { --yuva: 44px; } .yuva img { width: 30px; height: 30px; } }
 @media (max-width: 560px) { #pusula { width: 220px; } :root { --yuva: 36px; } .yuva img { width: 24px; height: 24px; } }
+
+/* ---------- 2. aşama: zırh, hedef, uyku ---------- */
+#solDurum { display: grid; gap: 3px; }
+#zirhSira:empty { display: none; }
+#hedefBilgi { position: absolute; left: 50%; top: 52px; transform: translateX(-50%); display: grid; gap: 4px; justify-items: center; min-width: 180px; padding: 5px 12px 7px; background: rgba(0, 0, 0, .5); border: 2px solid #000; border-radius: 4px; }
+#hedefBilgi b { font: 700 .92rem var(--baslik); text-shadow: 1px 1px 0 #000; }
+.hedefCubuk { width: 160px; height: 7px; background: #2a0d0b; border: 1px solid #000; }
+.hedefCubuk i { display: block; height: 100%; background: linear-gradient(#ff6a5c, #c8261d); transition: width .15s; }
+#hedefBilgi.dusman b { color: #ff9a8a; }
+#uyku { position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity 1.2s; }
+#uyku.acik { opacity: 1; }
+.zirhSatir { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.zirhIzgara { grid-template-columns: repeat(4, var(--yuva)); }
+.zirhIzgara .yuva.bosZirh img { opacity: .22; filter: grayscale(1); }
+#zirhPuan { color: var(--soluk); font-size: .88rem; }
+#zirhPuan b { color: var(--yazi); }
+#aclik.zehirli img { filter: hue-rotate(70deg) saturate(1.4) drop-shadow(0 1px 0 rgba(0, 0, 0, .7)); }

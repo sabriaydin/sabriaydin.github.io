@@ -17,12 +17,14 @@
 <div id="hud" hidden>
   <div id="pusula"><div id="pusulaSerit"></div><i></i></div>
   <div id="saat"><b id="saatDeger">06:00</b><span id="gunDeger">1. gün</span></div>
+  <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
+  <div id="uyku"></div>
   <div id="nisan"></div>
   <div id="suAlti"></div>
   <div id="hasarParla"></div>
   <div id="altPanel">
     <div id="durumlar">
-      <div id="canlar" class="simgeSira" aria-label="Can"></div>
+      <div id="solDurum"><div id="zirhSira" class="simgeSira" aria-label="Zırh"></div><div id="canlar" class="simgeSira" aria-label="Can"></div></div>
       <div id="sagDurum"><div id="oksijen" class="simgeSira" aria-label="Oksijen"></div><div id="aclik" class="simgeSira ters" aria-label="Açlık"></div></div>
     </div>
     <div id="cubuk"></div>
@@ -39,6 +41,7 @@
   <div class="pencere envPencere">
     <section class="envSol">
       <header><h2>Envanter</h2></header>
+      <div class="zirhSatir"><div id="envZirh" class="izgara zirhIzgara"></div><div id="zirhPuan"></div></div>
       <div id="envIzgara" class="izgara"></div>
       <div id="envCubuk" class="izgara cubukIzgara"></div>
       <div id="envDurum"></div>
@@ -144,6 +147,11 @@
           <li>Açlık çubuğu zamanla ve koşarken azalır. Böğürtlen, elma ve mantar toplayın; doyunca can yenilenir.</li>
           <li>Su altında oksijen azalır. Yüksekten düşmek can kaybettirir.</li>
           <li>Geceler karanlıktır; meşale (çubuk + kömür) ışık verir. Mağaralar derinde daha değerli cevherler saklar.</li>
+          <li>Geceleri ve karanlık mağaralarda zombiler ortaya çıkar; gün doğunca güneş altında yanarlar. Meşale ve kamp ateşinin çevresinde doğmazlar.</li>
+          <li>Canlılara sol tıkla vurulur; kılıç en çok hasarı verir. Düşerken yapılan vuruş kritik hasar verir. Yay, sağ tık basılı tutularak gerilir ve bırakılınca ok atar.</li>
+          <li>Zırh parçaları envanterdeki zırh yuvalarına konur ya da elde tutulurken sağ tıkla giyilir; alınan hasarı azaltır.</li>
+          <li>Hayvanlardan et, deri, yün ve tüy elde edilir. Çiğ et kamp ateşi veya fırın yanında pişirilir. Kurtlar saldırıya uğramadıkça zararsızdır.</li>
+          <li>Yatakta yalnızca geceleri uyunabilir; yatak aynı zamanda doğma noktasını belirler.</li>
           <li>Oyun otomatik olarak kaydedilir.</li>
         </ul>
       </div>

@@ -1,11 +1,12 @@
 /* HungerMan - envanter: 36 yuva (ilk 9 yuva hızlı erişim çubuğu), yığınlama, alet dayanımı */
-import { ESYALAR } from '../bloklar.js';
+import { ESYALAR, maksDayanim } from '../bloklar.js';
 
 export const YUVA = 36;
 
 export class Envanter {
   constructor() {
     this.yuvalar = new Array(YUVA).fill(null);
+    this.zirh = [null, null, null, null];
     this.secili = 0;
     this.degisti = null;
   }
@@ -14,7 +15,8 @@ export class Envanter {
   yeni(id, adet, dayanim) {
     const e = ESYALAR[id];
     const s = { id, adet };
-    if (e && e.tur === 'alet') s.dayanim = dayanim != null ? dayanim : e.alet.dayanim;
+    const m = maksDayanim(e);
+    if (m != null) s.dayanim = dayanim != null ? dayanim : m;
     return s;
   }
   /* Eşya ekler; sığmayan miktarı döndürür */
@@ -63,11 +65,32 @@ export class Envanter {
     this.bildir();
     return false;
   }
-  temizle() { this.yuvalar.fill(null); this.bildir(); }
-  disaAktar() { return { yuvalar: this.yuvalar.map(s => (s ? [s.id, s.adet, s.dayanim ?? null] : null)), secili: this.secili }; }
+  /* Toplam zırh puanı (0..20) */
+  zirhPuani() { let n = 0; for (const z of this.zirh) if (z) n += ESYALAR[z.id].zirh.puan; return n; }
+  /* Hasar alınınca giyilen zırhlar yıpranır */
+  zirhYipran(n = 1) {
+    let kirildi = false;
+    for (let i = 0; i < 4; i++) { const z = this.zirh[i]; if (!z) continue; z.dayanim -= n; if (z.dayanim <= 0) { this.zirh[i] = null; kirildi = true; } }
+    this.bildir();
+    return kirildi;
+  }
+  /* Elde tutulan zırhı giy (sağ tık) */
+  zirhGiy() {
+    const s = this.yuvalar[this.secili], e = s && ESYALAR[s.id];
+    if (!e || !e.zirh) return false;
+    const p = e.zirh.parca, eski = this.zirh[p];
+    this.zirh[p] = s; this.yuvalar[this.secili] = eski;
+    this.bildir();
+    return true;
+  }
+  temizle() { this.yuvalar.fill(null); this.zirh = [null, null, null, null]; this.bildir(); }
+  tumEsyalar() { return [...this.yuvalar, ...this.zirh].filter(Boolean); }
+  disaAktar() { const f = s => (s ? [s.id, s.adet, s.dayanim ?? null] : null); return { yuvalar: this.yuvalar.map(f), zirh: this.zirh.map(f), secili: this.secili }; }
   iceAktar(o) {
     this.yuvalar = new Array(YUVA).fill(null);
+    this.zirh = [null, null, null, null];
     if (o && o.yuvalar) o.yuvalar.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < YUVA) this.yuvalar[i] = this.yeni(s[0], s[1], s[2] ?? undefined); });
+    if (o && o.zirh) o.zirh.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < 4) this.zirh[i] = this.yeni(s[0], s[1], s[2] ?? undefined); });
     this.secili = (o && o.secili) || 0;
     this.bildir();
   }
