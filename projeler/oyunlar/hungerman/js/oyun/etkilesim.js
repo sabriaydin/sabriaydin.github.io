@@ -26,12 +26,13 @@ export class Etkilesim {
     const tdx = Math.abs(1 / yon.x), tdy = Math.abs(1 / yon.y), tdz = Math.abs(1 / yon.z);
     let tx = (sx > 0 ? x + 1 - goz.x : goz.x - x) * tdx, ty = (sy > 0 ? y + 1 - goz.y : goz.y - y) * tdy, tz = (sz > 0 ? z + 1 - goz.z : goz.z - z) * tdz;
     let nx = 0, ny = 0, nz = 0, t = 0;
-    for (let i = 0; i < 64 && t <= ERISIM; i++) {
+    const erisim = this.erisim || ERISIM;   // erisim: geliştirici modunda uzatılabilir
+    for (let i = 0; i < 160 && t <= erisim; i++) {
       const id = this.dunya.blok(x, y, z);
       if (id && CIZIM[id] !== C_YOK && !(SIVI[id] && !BITKI[id])) {
         /* Biçimli bloklar: kutularına isabet aranır (açık kapının boşluğundan geçilebilir) */
         if (SEKIL[id]) {
-          const k = hucreKutulari(this.dunya, x, y, z, id), r = kutuIsin(goz, yon, x, y, z, k, ERISIM);
+          const k = hucreKutulari(this.dunya, x, y, z, id), r = kutuIsin(goz, yon, x, y, z, k, erisim);
           if (r) return { x, y, z, id, nx: r.nx, ny: r.ny, nz: r.nz, t: r.t, py: goz.y + yon.y * r.t - y, kutu: sinirKutusu(k) };
         } else if (!BITKI[id] && !BLOKLAR[id].mesale || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
       }
@@ -44,7 +45,7 @@ export class Etkilesim {
   /* Bitkiler hücrenin ortasındaki daha küçük bir kutu olarak seçilir */
   bitkiIsabet(o, d, x, y, z) {
     const a = [x + 0.2, y, z + 0.2], b = [x + 0.8, y + 0.85, z + 0.8];
-    let t0 = 0, t1 = ERISIM;
+    let t0 = 0, t1 = this.erisim || ERISIM;
     const oo = [o.x, o.y, o.z], dd = [d.x, d.y, d.z];
     for (let i = 0; i < 3; i++) {
       if (Math.abs(dd[i]) < 1e-9) { if (oo[i] < a[i] || oo[i] > b[i]) return false; continue; }

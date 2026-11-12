@@ -366,10 +366,12 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 #konsolGirdi { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: #fff; font: inherit; }
 
 /* ---------- 9. aşama: geliştirici modu penceresi ---------- */
-.gelPencere { width: min(820px, calc(100vw - 24px)); height: min(680px, calc(100vh - 32px)); display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; }
+.gelPencere { width: min(940px, calc(100vw - 24px)); height: min(720px, calc(100vh - 32px)); display: grid; grid-template-columns: 158px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px 14px; }
+.gelPencere > header, .gelPencere > .gelMesaj { grid-column: 1 / -1; }
 .gelPencere header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-#gelIcerik { overflow-y: auto; padding-right: 4px; display: grid; align-content: start; gap: 12px; }
-#gelIcerik h4 { margin: 4px 0 -4px; font: 700 .9rem var(--baslik); color: var(--vurgu2); }
+#gelIcerik { overflow-y: auto; padding-right: 6px; display: grid; align-content: start; gap: 10px; }
+#gelIcerik h4 { margin: 0; font: 700 .92rem var(--baslik); color: var(--vurgu2); }
+#gelIcerik h5 { margin: 2px 0 -4px; font: 600 .78rem var(--govde); color: var(--soluk); text-transform: uppercase; letter-spacing: .06em; }
 .gelIzgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
 .gelAnahtar { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 2px solid #000; border-radius: 6px; background: rgba(255, 255, 255, .04); cursor: pointer; }
 .gelAnahtar input { position: absolute; opacity: 0; pointer-events: none; }
@@ -414,14 +416,6 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 .gelPencere header { padding-right: 44px; }
 
 /* ---------- 10. aşama: geliştirici penceresi eklemeleri ---------- */
-.gelHizli { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px; border: 2px solid #000; border-radius: 6px; background: rgba(0, 0, 0, .28); }
-.gelHizli button { padding: 4px 10px; border: 2px solid #000; border-radius: 99px; background: #463d33; color: var(--yazi); font: 500 .8rem var(--govde); cursor: pointer; }
-.gelHizli button:hover { background: #5a4f42; }
-.gelCip { position: relative; cursor: pointer; }
-.gelCip input { position: absolute; opacity: 0; pointer-events: none; }
-.gelCip span { display: inline-block; padding: 4px 10px; border: 2px solid #000; border-radius: 99px; background: #2c2620; color: var(--soluk); font: 500 .8rem var(--govde); }
-.gelCip input:checked + span { background: #4f8f3a; color: #fff; }
-.gelAyrac { width: 1px; height: 22px; background: rgba(255, 255, 255, .15); margin: 0 4px; }
 .gelCipler { display: flex; flex-wrap: wrap; gap: 6px; }
 .gelCipler button { padding: 4px 11px; border: 2px solid #000; border-radius: 99px; background: #2c2620; color: var(--soluk); font: 500 .8rem var(--govde); cursor: pointer; }
 .gelCipler button.on { background: var(--vurgu); color: #1a1208; }
@@ -453,3 +447,36 @@ body.gostergesiz #hud { visibility: hidden; }
 #saat .hava { display: inline-flex; align-items: center; color: rgba(255, 255, 255, .78); font: 600 .78rem var(--govde); }
 #saat .hava[hidden] { display: none; }
 #saat .hava svg { width: 15px; height: 15px; }
+
+/* ---------- 0.12.0: geliştirici penceresi yeni düzen (sol sekmeler, başlıklı bölümler) ---------- */
+.gelSekmeler { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; padding-right: 2px; }
+.gelSekmeler button { text-align: left; padding: 8px 11px; border: 2px solid transparent; border-radius: 6px; background: transparent; color: #d8cdbb; font: 600 .88rem var(--govde); cursor: pointer; }
+.gelSekmeler button:hover { background: rgba(255, 255, 255, .06); }
+.gelSekmeler button.on { background: var(--vurgu); border-color: #000; color: #1a1208; }
+.gelBaslik { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
+.gelBaslik h3 { font-size: 1.15rem; }
+.gelBaslik span { color: var(--soluk); font-size: .82rem; }
+.gelBolum { display: grid; gap: 9px; padding: 11px 12px 12px; border: 2px solid #000; border-radius: 7px; background: rgba(0, 0, 0, .22); }
+.gelDeger { margin: 0; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.gelDeger b { color: var(--vurgu2); }
+.gelDugmeler button.on { background: #4f8f3a; color: #fff; }
+.gelDugmeler button em { font-style: normal; font-size: .76rem; opacity: .75; font-variant-numeric: tabular-nums; }
+.gelDugmeler button em:empty { display: none; }
+.gelSatir select { max-width: 230px; padding: 6px 8px; border: 2px solid #000; border-radius: 4px; background: #0e0c0a; color: var(--yazi); font: .88rem var(--govde); }
+.gelListe { display: grid; gap: 4px; }
+.gelListe > div { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 5px; background: rgba(255, 255, 255, .05); font-size: .86rem; }
+.gelListe > div i { flex: none; width: 10px; height: 10px; border-radius: 50%; border: 1px solid #000; }
+.gelListe > div span { color: var(--soluk); margin-right: auto; font-variant-numeric: tabular-nums; }
+.gelListe > div b + span { margin-left: 2px; }
+.gelListe button { padding: 3px 9px; border: 2px solid #000; border-radius: 5px; background: #463d33; color: var(--yazi); font: 500 .8rem var(--govde); cursor: pointer; }
+.gelListe button:hover { background: #5a4f42; }
+.gelIlerleme { position: relative; height: 26px; border: 2px solid #000; border-radius: 5px; background: rgba(0, 0, 0, .4); overflow: hidden; }
+.gelIlerleme i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(#6aa84a, #4f8f3a); }
+.gelIlerleme span { position: absolute; inset: 0; display: grid; place-items: center; font: 600 .8rem var(--govde); color: #fff; text-shadow: 0 1px 0 #000; font-variant-numeric: tabular-nums; }
+#gelKesif { display: grid; gap: 8px; }
+#gelKesif:empty { display: none; }
+@media (max-width: 760px) {
+  .gelPencere { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto; }
+  .gelSekmeler { flex-direction: row; flex-wrap: wrap; }
+  .gelSekmeler button { padding: 5px 10px; }
+}

@@ -209,7 +209,8 @@ export class Varliklar {
     const dx = op.x - p.x, dz = op.z - p.z, dy = op.y - p.y;
     const yatay = Math.hypot(dx, dz);
     let yx = 0, yz = 0, hiz = 0, kovaliyor = false;
-    const saldirgan = (T.dusman && !(T.karanlikta && v.isik > 0.5 && !v.ofkeli)) || (T.notr && v.ofkeli);
+    /* barisci: geliştirici modunda canlılar oyunculara saldırmaz */
+    const saldirgan = !this.barisci && ((T.dusman && !(T.karanlikta && v.isik > 0.5 && !v.ofkeli)) || (T.notr && v.ofkeli));
     if (T.koylu) {
       const k = v.koy, kapi = v.koylu.kapi;
       const gece = ctx.gunIsigi < 0.32;
@@ -444,7 +445,7 @@ export class Varliklar {
       v.kuru = 0;
       const dx = op.x - p.x, dy = op.y + 1 - p.y, dz = op.z - p.z, dd = Math.hypot(dx, dy, dz) || 1;
       let yx = 0, yy = 0, yz = 0, hiz = 0;
-      if (T.dusman && ctx.oyuncuSuda && !ctx.oyuncuOlu && dd < T.gorus) {
+      if (T.dusman && !this.barisci && ctx.oyuncuSuda && !ctx.oyuncuOlu && dd < T.gorus) {
         yx = dx / dd; yy = dy / dd; yz = dz / dd; hiz = T.kosu;
         if (dd < T.menzil + 0.6 && v.saldiriBek <= 0) { v.saldiriBek = 1.5; ctx.oyuncuyaVur(T.hasar, v); const k = this.sesK(p); if (k > 0) this.ses.canli(T.ses, 'acima', 0.8 * k); }
       } else if (v.kacZaman > 0 || (!T.dusman && dd < (v.turAd === 'hamsi' ? 4.5 : 3) && ctx.oyuncuSuda)) {

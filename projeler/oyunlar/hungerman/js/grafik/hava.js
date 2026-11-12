@@ -59,7 +59,7 @@ export class Hava {
 
   /* Tek oyunculu ve sunucu: süre dolunca hava değişir; fırtınada yıldırım düşer */
   zamanla(dt, merkezler) {
-    this.sure -= dt;
+    if (!this.kilit) this.sure -= dt;   // kilit: geliştirici modunda hava kendiliğinden değişmez
     if (this.sure <= 0) {
       if (this.durum === 'acik') this.ayarla(Math.random() < 0.72 ? 'yagmur' : 'firtina');
       else if (this.durum === 'yagmur' && Math.random() < 0.18) this.ayarla('firtina');

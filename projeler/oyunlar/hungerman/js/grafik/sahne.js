@@ -199,12 +199,14 @@ export class Sahne {
     /* suda === 'maske': dalış maskesi su altında görüşü uzatır */
     const maske = suda === 'maske';
     const sis = lav ? new THREE.Color(0.9, 0.32, 0.05) : suda ? new THREE.Color(0.08, 0.22, 0.44).multiplyScalar((maske ? 0.45 : 0.35) + gun * (maske ? 0.75 : 0.65)) : ufuk;
-    const sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : (gorus * 16 - 6) * (1 - 0.42 * hy - 0.12 * hf), sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * (0.62 - 0.3 * hy);
+    let sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : (gorus * 16 - 6) * (1 - 0.42 * hy - 0.12 * hf), sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * (0.62 - 0.3 * hy);
+    /* Geliştirici: sis kapatılabilir (sisKapali), en düşük ışık en yükseğe çıkarılabilir (tamAydinlik) */
+    if (this.sisKapali) { sisBas = 9000; sisSon = 10000; }
     for (const m of this.malzemeler) {
       const u = m.uniforms;
       u.gun.value = gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
       /* Gece görüşü iksiri: en düşük ışık yükselir */
-      u.magara.value = hava.gece ? 0.72 : 0.07;
+      u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : 0.07;
       u.islak.value = m === this.opakMalzeme && !suda ? hy : 0;
     }
     this.cizici.setClearColor(sis);

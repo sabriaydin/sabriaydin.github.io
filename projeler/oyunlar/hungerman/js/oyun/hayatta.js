@@ -28,7 +28,7 @@ export class Hayatta {
     this.yorgunluk = 0; this.iyiSayac = 0; this.acSayac = 0; this.oksSayac = 0; this.bogSayac = 0;
     this.olu = false; this.sonHasar = 0; this.zehir = 0; this.agu = 0; this.aguSayac = 0; this.yanma = 0; this.yanmaSayac = 0; this.lavSayac = 0;
   }
-  yor(n) { this.yorgunluk += n; }
+  yor(n) { if (!this.tok) this.yorgunluk += n; }   // tok: geliştirici modunda açlık azalmaz
   /* zehirOlasilik: çürük et gibi yiyeceklerde mide bulantısı olasılığı; true dönerse bulantı başladı */
   ye(n, zehirOlasilik = 0) {
     this.aclik = Math.min(20, this.aclik + n);

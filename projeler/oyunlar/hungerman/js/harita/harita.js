@@ -2,9 +2,12 @@
    Oyuncunun görüş mesafesine giren her parça, üstten görünüm olarak (sütun başına en üstteki blok ve yükseklik) saklanır.
    Parçalar 16 x 16 parçalık bölgelerde toplanır; her bölge 256 x 256 piksellik bir tuvale (1 piksel = 1 blok) boyanır.
    Bölge tuvalleri hem büyük haritada hem mini haritada ölçeklenerek çizilir. */
-import { PB, PY, DENIZ, dizin } from '../sabitler.js';
-import { KATI, SIVI, LAV, YUZ_DOKU, BLOKLAR } from '../bloklar.js';
+import { PB, DENIZ } from '../sabitler.js';
+import { LAV, YUZ_DOKU } from '../bloklar.js';
 import { doseme } from '../grafik/doku.js';
+import { sutun, parcaHesapla } from './harita-hesap.js';
+
+export { parcaHesapla };
 
 export const BOLGE = 16;
 export const BOLGE_BLOK = BOLGE * PB;
@@ -27,31 +30,6 @@ function ustRenk(id) {
   return c;
 }
 
-/* Bir sütunun haritadaki karşılığı: [blok, yükseklik]; su için blok = taban bloğu, yükseklik = 128 + derinlik */
-function sutun(al) {
-  for (let y = PY - 1; y > 0; y--) {
-    const b = al(y);
-    if (!b) continue;
-    if (LAV[b]) return [b, y];
-    if (SIVI[b]) {
-      let d = 0, yy = y;
-      while (yy > 0 && SIVI[al(yy)] && !LAV[al(yy)]) { d++; yy--; }
-      return [al(yy) || 7, 128 + Math.min(127, d)];
-    }
-    if (!KATI[b] && !(BLOKLAR[b] && BLOKLAR[b].ekin != null)) continue;   // ot, çiçek, meşale görünmez; ekinler görünür
-    return [b, y];
-  }
-  return [0, 0];
-}
-export function parcaHesapla(v) {
-  const t = new Uint8Array(PB * PB * 2);
-  for (let z = 0; z < PB; z++) for (let x = 0; x < PB; x++) {
-    const [id, h] = sutun(y => v[dizin(x, y, z)]);
-    t[z * PB + x] = id; t[PB * PB + z * PB + x] = h;
-  }
-  return t;
-}
-
 const SU_SIG = [70, 138, 192], SU_DERIN = [20, 50, 108];
 
 export class Harita {
@@ -66,6 +44,9 @@ export class Harita {
     dunya.dinleyiciler.push(this.dinle);
   }
   temizle() { const i = this.dunya.dinleyiciler.indexOf(this.dinle); if (i >= 0) this.dunya.dinleyiciler.splice(i, 1); this.bolgeler.clear(); this.parcalar.clear(); }
+
+  /* Keşfedilen her şeyi unut (geliştirici: haritayı sıfırla); yüklü çevre yeniden keşfedilir */
+  sifirla() { this.bolgeler.clear(); this.parcalar.clear(); this.taze.clear(); this.sinir = null; this.sayac = 0; }
 
   bolge(rx, rz, olustur) {
     const k = rx + ',' + rz;
@@ -133,7 +114,11 @@ export class Harita {
     this.sinirGenislet(cx, cz);
     const b = this.bolge(Math.floor(cx / BOLGE), Math.floor(cz / BOLGE), true);
     b.kayitKirli = true;
-    this.parcaBoya(cx, cz); this.parcaBoya(cx + 1, cz); this.parcaBoya(cx, cz + 1);
+    this.parcaBoya(cx, cz);
+    /* Doğu ve güney komşunun yalnızca bu parçaya bakan kenarı yeniden boyanır (kabartma gölgesi komşu yüksekliğe bağlıdır) */
+    const x1 = (cx + 1) * PB, z1 = (cz + 1) * PB;
+    if (this.parcalar.has((cx + 1) + ',' + cz)) for (let z = cz * PB; z < z1; z++) this.pikselBoya(x1, z);
+    if (this.parcalar.has(cx + ',' + (cz + 1))) for (let x = cx * PB; x < x1; x++) this.pikselBoya(x, z1);
   }
   /* Yüklü bir parçadaki blok değişince sütun yeniden hesaplanır */
   blokDegisti(x, y, z) {

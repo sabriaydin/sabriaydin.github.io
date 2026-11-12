@@ -117,6 +117,20 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 12. aşama (0.12.0): Geliştirici penceresi yenilendi
+
+- Düzen: sekmeler sol tarafa alındı, her sekme başlıklı bölümlere ayrıldı; hızlı işlemler çubuğu kaldırıldı. Anahtarlar pencere her açıldığında gerçek durumu gösterir.
+- Oyuncu: ölümsüzlük, uçma, duvardan geçme, anında kırma, sınırsız eşya, açlık azalmasın; can, açlık, hareket hızı, blok erişim mesafesi; hasar ve durum sınaması (hasar, mide bulantısı, örümcek zehri, yanma, öldürme); deneyim (ekle, sıfırla); süresi seçilebilen iksir etkileri; doğma noktasını bulunulan yere ayarlama.
+- Eşyalar: hazır setler (tüccar seti eklendi), tüm eşyaları onarma, eldeki yığını doldurma, eldekini silme, envanteri boşaltma, eşya verme.
+- Dünya: saat, zaman hızı, zamanı durdurma, gün; hava ve hava kilidi; çevreyi düzleme, ekinleri ve fidanları büyütme; bakılan blok (eşyasını verme, kaldırma, başka blokla değiştirme); tekne koyma ve kaldırma; yerdeki eşyaları temizleme, parçaları yeniden çizme, kaydetme.
+- Harita (yeni): çevreyi keşfetme (2048 bloğa kadar), **tüm haritayı görünür yapma**, ilerleme çubuğu ve durdurma, haritayı sıfırlama, işaret ekleme / silme. Keşif ayrı işçilerde arka planda yapılır; oyun akıcı kalır.
+- Canlılar: barış (canlılar saldırmaz), doğmayı durdurma, dondurma; yavru olarak doğurma; çevredeki hayvanları besleme, yavruları büyütme; kaldırma; canlı sayımı.
+- Işınlanma: yerler, **biyomlar**, koordinat, yakındaki köyler, oyuncular (çok oyunculu), harita işaretleri, yüzeye çıkma, önceki konuma dönme.
+- Köy ve Görev (yeni): en yakın köyün itibarı, takasları yenileme, ölen köylüleri geri getirme; etkin görevleri teslime hazır yapma ya da bırakma; sikke.
+- Görüntü: tam aydınlık, sisi kapatma, tel kafes, parça sınırları, eli ve göstergeyi gizleme; FPS, F3 paneli, mini harita; görüş açısı ve görüş mesafesi; ekran görüntüsünü indirme.
+- Bilgi: kare süresi grafiği, teknik bilgi tablosu, bilgileri panoya kopyalama.
+- Yeni konsol komutları: `kesfet tumu`, `kesfet dur`, `harita temizle`, `isinla biyom <ad>`, `isinla oyuncu <ad>`, `isinla olum`, `isinla geri`, `dogum`, `aclik`, `tok`, `hasar`, `durum`, `erisim`, `onar`, `eldeki`, `baris`, `hayvan`, `dogur <tür> <adet> yavru`, `tekne temizle`, `duzle`, `buyut`, `yenile`, `itibar`, `koy`, `gorev`, `aydinlik`, `sis`, `goruntu`, `hava kilit`, `xp sifirla`.
+
 ## 11. aşama (0.11.0): Oynanışı zenginleştiren güncelleme
 
 **Hava durumu**
@@ -204,6 +218,8 @@ js/varlik/*           Hayvanlar, deniz canlıları, düşmanlar ve köylüler: t
 js/koy/*              Köy yönetimi, meslekler ve takaslar, görevler
 js/ag/*               Çok oyunculu: bağlantı (baglanti), sunucu, istemci, diğer oyuncuların görünümü, ortak yardımcılar
 js/harita/harita.js   Keşif haritası: parçaların üstten görünümü, bölge tuvalleri
+js/harita/harita-hesap.js Parçanın üstten görünümünün hesabı (ana iş parçacığı ve işçi ortak kullanır)
+js/harita/kesif.js, kesif-isci.js Geliştirici modunda toplu harita keşfi (arka plan işçileri)
 js/arayuz/*           Gösterge, envanter, köylü, büyük harita ve mini harita ekranları, vektör simgeler
 js/sistem/harita-kayit.js Haritanın tarayıcı deposundaki kaydı
 js/sistem/*           Ses ve kayıt

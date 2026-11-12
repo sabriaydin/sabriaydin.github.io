@@ -231,8 +231,22 @@ const konsol = new Konsol({ ses, oyun: () => oyun, kapatIste: () => panelKapat(t
   kaydet: () => oyunKaydet(),
   gorusAyarla: n => { ayar.gorus = n; ayarlariKaydet(ayar); if (oyun) oyun.dunya.gorusAyarla(n); },
   haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); },
-  gelistiriciAc: () => { panelKapat(false); if (oyun) panelAc(gelPencere); }
+  gelistiriciAc: () => { panelKapat(false); if (oyun) panelAc(gelPencere); },
+  sahne: () => sahne,
+  /* Keşfedilen harita bellekten ve tarayıcı deposundan silinir */
+  haritaSifirla: () => { if (!oyun) return; oyun.harita.sifirla(); HaritaKayit.sil(oyun.haritaKimlik).catch(() => {}); },
+  ekranGoruntusu: () => ekranGoruntusu()
 } });
+/* Oyun görüntüsünü (göstergeler olmadan) PNG olarak indir */
+function ekranGoruntusu() {
+  if (!oyun) return;
+  sahne.ciz();
+  const t = new Date(), iki = n => String(n).padStart(2, '0');
+  const ad = `hungerman-${t.getFullYear()}${iki(t.getMonth() + 1)}${iki(t.getDate())}-${iki(t.getHours())}${iki(t.getMinutes())}${iki(t.getSeconds())}.png`;
+  const a = document.createElement('a');
+  a.href = sahne.cizici.domElement.toDataURL('image/png'); a.download = ad;
+  document.body.appendChild(a); a.click(); a.remove();
+}
 /* Geliştirici modu penceresi (F9): konsolda geliştirici kodu girildikten sonra kullanılır */
 const gelPencere = new GelistiriciPenceresi({ ses, konsol, sahne, oyun: () => oyun, kapatIste: () => panelKapat(true), arayuz: {
   haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); },
@@ -484,6 +498,7 @@ function oyunBitir() {
   oyun.varliklar.temizle();
   oyun.tekneler.temizle(); oyun.fenerler.temizle(); oyun.olta.kaldir();
   oyun.hava.temizle(); ses.yagmurAyarla(0);
+  konsol.kesifBitir(); gelPencere.oyunBitti();
   sahne.sahne.remove(oyun.dusenler.grup); sahne.sahne.remove(oyun.dusenler.noktalar); sahne.sahne.remove(oyun.tekneler.grup, oyun.olta.mesh, oyun.olta.cizgi);
   oyun.dunya.yoket();
   sahne.secimGoster(null);
@@ -612,7 +627,7 @@ function adim(t) {
     const acik = o.dunya.ustKati(Math.floor(goz.x), Math.floor(goz.z)) < goz.y;
     let l = acik ? gun : 0.12;
     for (const L of liste) { const d = Math.hypot(L[0] - goz.x, L[1] - goz.y, L[2] - goz.z); l = Math.max(l, Math.min(1, (1 - d / (L[3] * 0.9)) * 1.1)); }
-    o.isikHedef = Math.max(o.hayatta.etki('gece') ? 0.75 : 0.1, l);
+    o.isikHedef = Math.max(sahne.tamAydinlik ? 1 : o.hayatta.etki('gece') ? 0.75 : 0.1, l);
     /* Yağmur sesi: çatı altında boğuk, karda ve çölde yok */
     o.havaAcik = H.acikta(goz);
     ses.yagmurAyarla(calisiyor && !gozSuda && yagisTur === 1 ? H.yogunluk * (o.havaAcik ? 1 : 0.45) : 0, !o.havaAcik);
