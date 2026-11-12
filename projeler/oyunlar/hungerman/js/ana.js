@@ -30,6 +30,7 @@ import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
+import { Konsol } from './arayuz/konsol.js';
 
 const $ = s => document.querySelector(s);
 const tuval = $('#oyun');
@@ -43,6 +44,7 @@ $('#surum').textContent = 'Sürüm ' + SURUM;
 const ayar = ayarlariYukle();
 if (!ayar.ad) { ayar.ad = 'Oyuncu' + (100 + Math.floor(Math.random() * 900)); ayarlariKaydet(ayar); }
 if (ayar.miniHarita === undefined) ayar.miniHarita = true;
+if (ayar.konsol === undefined) ayar.konsol = true;
 const ses = new Ses(); ses.duzeyAyarla(ayar.ses);
 let sahne;
 try { sahne = new Sahne(tuval); } catch (e) { hataGoster('WebGL başlatılamadı. Tarayıcınız veya ekran kartı sürücünüz WebGL desteklemiyor olabilir.'); throw e; }
@@ -84,7 +86,7 @@ function ayarFormu() {
   bag('#aFov', 'fov', v => v + '°');
   bag('#aHas', 'hassasiyet', v => v.toFixed(2) + '×');
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb');
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb');
 }
 function ayarUygula() {
   ayarlariKaydet(ayar);
@@ -136,6 +138,8 @@ addEventListener('keydown', e => {
   if (oyun && aktifEkran === 'oyun') {
     if (['Space', 'Tab', 'F3', 'KeyQ'].includes(e.code) || (e.ctrlKey && ['KeyS', 'KeyD', 'KeyF'].includes(e.code))) e.preventDefault();
     if (e.code === 'Tab' && oyun.ag) oyuncuListesiGoster(true);
+    /* Geliştirici konsolu: F8 (veya 1 tuşunun solundaki tuş) */
+    if ((e.code === 'F8' || e.code === 'Backquote') && !e.repeat && ayar.konsol) { e.preventDefault(); if (konsol.acik) panelKapat(true); else if (!panelAcik() && !oyun.hayatta.olu) panelAc(konsol); return; }
     if (e.repeat) { tus[e.code] = true; return; }
     tus[e.code] = true;
     if (e.code === 'KeyW') { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
@@ -190,7 +194,7 @@ document.addEventListener('pointerlockchange', () => {
   tiklaGuncelle();
 });
 function tiklaGuncelle() { $('#tikla').hidden = !(oyun && aktifEkran === 'oyun' && !kilitli && !panelAcik() && !sohbetAcik); }
-function panelAcik() { return envEkrani.acik || koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik; }
+function panelAcik() { return envEkrani.acik || koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik || konsol.acik; }
 function seciliAyarla(n) { oyun.envanter.secili = n; oyun.hud.cubukCiz(); oyun.hud.esyaAdiGoster(); ses.tik(); }
 
 /* ---------- Envanter ekranı ---------- */
@@ -217,6 +221,14 @@ const gorevEkrani = new GorevEkrani({ ses, kapatIste: () => panelKapat(true) });
 const haritaEkrani = new HaritaEkrani({ ses, kapatIste: () => panelKapat(true) });
 const miniHarita = new MiniHarita();
 $('#miniHarita').hidden = !ayar.miniHarita;
+const konsol = new Konsol({ ses, oyun: () => oyun, kapatIste: () => panelKapat(true), arayuz: {
+  fps: () => { ayar.fps = !ayar.fps; ayarlariKaydet(ayar); $('#fps').hidden = !ayar.fps; return ayar.fps; },
+  fpsMetni: () => $('#fps').textContent || '-',
+  hataPaneli: () => { $('#hata').hidden = !$('#hata').hidden; },
+  kaydet: () => oyunKaydet(),
+  gorusAyarla: n => { ayar.gorus = n; ayarlariKaydet(ayar); if (oyun) oyun.dunya.gorusAyarla(n); },
+  haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); }
+} });
 function panelAc(panel, ...a) {
   if (!oyun || oyun.hayatta.olu || panelAcik()) return;
   if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
@@ -227,6 +239,7 @@ function panelKapat(kilitlensin) {
   if (koyluEkrani.acik) koyluEkrani.kapat();
   if (gorevEkrani.acik) gorevEkrani.kapat();
   if (haritaEkrani.acik) haritaEkrani.kapat();
+  if (konsol.acik) konsol.kapat();
   ses.kapa();
   if (kilitlensin) kilitle();
   tiklaGuncelle();
@@ -270,7 +283,7 @@ function oyunBaslat(v) {
   $('#yukleBaslik').textContent = v.istemci ? 'Dünyaya katılınıyor' : v.yeni ? 'Dünya oluşturuluyor' : 'Dünya yükleniyor';
   $('#yukleCubuk').style.width = '0%';
   const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır ve doğma noktasını belirler.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.',
-    'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C tuşuna basılır.',
+    'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C ya da Shift tuşuna basılır.', 'F8 ile açılan geliştirici konsolunda “yardim” komutu tüm komutları listeler.',
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
@@ -471,7 +484,7 @@ function adim(t) {
     /* İstemcide gün değişimi sunucudan gelir */
     if (o.istemci) o.zaman = Math.min(0.99999, o.zaman + dt / GUN_SURESI);
     else {
-      o.zaman += dt / GUN_SURESI;
+      o.zaman += dt * (o.zamanHizi || 1) / GUN_SURESI;
       if (o.zaman >= 1) { o.zaman -= 1; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı`); }
     }
     if (oncekiZaman < 0.46 && o.zaman >= 0.46) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');
@@ -493,7 +506,10 @@ function adim(t) {
     const zirh = o.envanter.zirh;
     g.palet = !!(zirh[3] && zirh[3].id === 457);
     /* Tekne: binilirken oyuncu fiziği yerine tekne sürülür; C ile inilir */
-    if (o.tekneler.binilen && (g.egil || o.hayatta.olu)) { o.tekneler.in(o.oyuncu); o.inisBekle = 0.4; }
+    /* Tekneden inme: C ya da Shift (Shift, binişten kısa süre sonra geçerlidir; koşarken binince hemen inilmesin) */
+    o.tekneSure = o.tekneler.binilen ? (o.tekneSure || 0) + dt : 0;
+    if (o.tekneler.binilen && (g.egil || o.hayatta.olu || (kilitli && (tus.ShiftLeft || tus.ShiftRight) && o.tekneSure > 0.6))) { o.tekneler.in(o.oyuncu); o.inisBekle = 0.4; }
+    $('#tekneIpucu').hidden = !o.tekneler.binilen;
     o.inisBekle = (o.inisBekle || 0) - dt;
     o.tekneler.guncelle(dt, { oyuncu: o.oyuncu, girdi: g, gunIsigi: o.gunIsigi });
     let mesafe = 0;
@@ -617,12 +633,14 @@ function adim(t) {
     else if (o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) > g.y + 2 && g.y < kol.h - 2) o.konumMetni = `Yeraltı · Derinlik ${Math.max(0, kol.h - Math.floor(p.y))} · Y ${Math.floor(p.y)}`;
     else if (o.koyler.icindeki) o.konumMetni = `${o.koyler.icindeki.ad} köyü · ${BIYOMLAR[kol.b]}`;
     else o.konumMetni = BIYOMLAR[kol.b];
-    o.isaretler = isaret;
+    /* Pusulada yalnızca oyuncunun haritada eklediği işaretler gösterilir (diğerleri mini haritada ve büyük haritada) */
+    o.isaretler = isaret.filter(m => m.sinif === 'yer');
     o.hud.gorevIzle(o.gorevler.ozet(o.envanter, p));
   }
   if (o.olumNoktasi && Math.hypot(o.olumNoktasi.x - p.x, o.olumNoktasi.z - p.z) < 3 && !o.hayatta.olu) o.olumNoktasi = null;
   o.hud.pusula(o.oyuncu.yaw, o.isaretler);
   miniHarita.ciz(o, dt);
+  konsol.guncelle(dt);
   if (haritaEkrani.acik) { haritaEkrani.guncelle(dt); haritaAlanYaz(o); }
   o.hud.saat(o.zaman, o.gun, o.konumMetni);
   o.hud.suAlti(gozSuda);
@@ -871,5 +889,5 @@ $('#bilgiTamam').onclick = () => { ses.tik(); ekran('ana'); };
 requestAnimationFrame(dongu);
 ekran('ana');
 /* Konsoldan inceleme için (oyun mantığını değiştirmez) */
-window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita };
+window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita, konsol };
 export { ESYALAR };

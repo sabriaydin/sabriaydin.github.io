@@ -1,11 +1,14 @@
 /* HungerMan - tekneler: sandal ve yelkenli
-   Tekne elde tutulup suya sağ tıklanarak konur; sağ tık ile binilir, C ile inilir, sol tık ile kırılır.
+   Tekne elde tutulup suya sağ tıklanarak konur; sağ tık ile binilir, C ya da Shift ile inilir, sol tık ile kırılır.
    Sürerken W/S hız, A/D dümen. Tekneler suda yüzer, karaya oturunca güçlükle ilerler. */
 import { THREE } from '../grafik/sahne.js';
 import { SIVI, LAV, KATI } from '../bloklar.js';
 import { parca, gurultu } from '../varlik/modeller.js';
 
 /* gen/boy: yarım genişlik ve yarım uzunluk; oturma: oyuncu ayak yüksekliğinin su çizgisine göre konumu */
+/* Tekne kökünün su yüzeyine göre yüksekliği: taban tahtası suyun üstünde kalır (içine su dolmuş gibi görünmez) */
+const YUZME = 0.18;
+
 export const TEKNE = {
   sandal: { esya: 454, ad: 'Sandal', hiz: 5.4, geri: 2, ivme: 1.7, donus: 1.9, gen: 0.62, boy: 1.25, oturma: -0.55, can: 4 },
   yelkenli: { esya: 455, ad: 'Yelkenli', hiz: 9, geri: 1.6, ivme: 0.8, donus: 1.15, gen: 0.92, boy: 1.9, oturma: -0.45, can: 6 }
@@ -111,10 +114,10 @@ export class Tekneler {
         const yz = this.yuzey(x, y, z);
         if (yz === null) return null;
         const t = { T: TEKNE[tur], yaw };
-        if (this.carpar(t, x, yz - 0.12, z, yaw)) return null;
+        if (this.carpar(t, x, yz + YUZME, z, yaw)) return null;
         if (this.liste.some(o => Math.hypot(o.p.x - x, o.p.z - z) < 1.6)) return null;
-        if (this.ag && this.ag.koyIste) { this.ag.koyIste(tur, x, yz - 0.12, z, yaw); return { T: TEKNE[tur] }; }
-        return this.ekle(tur, x, yz - 0.12, z, yaw);
+        if (this.ag && this.ag.koyIste) { this.ag.koyIste(tur, x, yz + YUZME, z, yaw); return { T: TEKNE[tur] }; }
+        return this.ekle(tur, x, yz + YUZME, z, yaw);
       }
     }
     return null;
@@ -197,7 +200,7 @@ export class Tekneler {
     const yz = this.yuzey(p.x, p.y, p.z);
     t.suda = yz !== null;
     if (t.suda) {
-      const hedef = yz - 0.12 + Math.sin(this.zaman * 1.5 + t.faz) * 0.035;
+      const hedef = yz + YUZME + Math.sin(this.zaman * 1.5 + t.faz) * 0.03;
       t.vy += (hedef - p.y) * 30 * dt;
       t.vy *= Math.pow(0.03, dt);
     } else t.vy -= 22 * dt;
@@ -218,7 +221,7 @@ export class Tekneler {
       if (this.carpar(t, p.x, p.y, nz)) { t.hiz *= 0.5; } else p.z = nz;
     }
     let ny = p.y + t.vy * dt;
-    if (KATI[this.dunya.blok(Math.floor(p.x), Math.floor(ny - 0.22), Math.floor(p.z))] && t.vy < 0) { ny = Math.floor(ny - 0.22) + 1.22; t.vy = 0; }
+    if (KATI[this.dunya.blok(Math.floor(p.x), Math.floor(ny - 0.24), Math.floor(p.z))] && t.vy < 0) { ny = Math.floor(ny - 0.24) + 1.24; t.vy = 0; }
     p.y = ny;
     if (p.y < -10) p.y = -10;
   }

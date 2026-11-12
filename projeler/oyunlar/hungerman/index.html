@@ -19,8 +19,11 @@
     <canvas id="pusulaTuval" aria-label="Pusula"></canvas>
     <div id="pusulaDerece">K · 0°</div>
   </div>
+  <div id="gorevIzleyici"></div>
+  <div id="tekneIpucu" hidden>İnmek için <b>C</b> ya da <b>Shift</b></div>
   <div id="sagUst">
-    <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
+    <div id="geceUyari" hidden></div>
+    <div id="konumDeger"></div>
     <div id="saat">
       <svg id="gunHalka" viewBox="0 0 20 20" aria-hidden="true">
         <circle class="iz" cx="10" cy="10" r="8"/>
@@ -30,9 +33,7 @@
       </svg>
       <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span>
     </div>
-    <div id="konumDeger"></div>
-    <div id="geceUyari" hidden></div>
-    <div id="gorevIzleyici"></div>
+    <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
   </div>
   <div id="yanmaEfekt"></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
@@ -92,6 +93,15 @@
     <div id="kIcerik"></div>
     <div id="kSikke" class="kSikke"></div>
     <button class="kapat" id="kKapat" aria-label="Kapat">✕</button>
+  </div>
+</div>
+
+<!-- Geliştirici konsolu -->
+<div id="konsol" hidden>
+  <div class="konsolPencere">
+    <header><b>Geliştirici Konsolu</b><span id="konsolBilgi"></span></header>
+    <div id="konsolCikti"></div>
+    <label class="konsolSatir"><span>&gt;</span><input id="konsolGirdi" autocomplete="off" spellcheck="false" placeholder="Komut yazınız (yardim)" aria-label="Komut"></label>
   </div>
 </div>
 
@@ -206,6 +216,7 @@
     <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
     <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
     <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
+    <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
     <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
   </div>
 </div>
@@ -222,6 +233,7 @@
           <dt>Boşluk</dt><dd>Zıplama, suda yukarı yüzme</dd>
           <dt>Sol Shift / W'ye iki kez</dt><dd>Koşma</dd>
           <dt>C</dt><dd>Eğilme (kenardan düşmez), tekneden inme, paletle suda dalma</dd>
+          <dt>Shift (teknede)</dt><dd>Tekneden inme</dd>
           <dt>Sol tık (basılı)</dt><dd>Kazma, kesme, kırma</dd>
           <dt>Sağ tık</dt><dd>Blok koyma, yeme, toplama, masa ve fırını açma</dd>
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
@@ -232,6 +244,7 @@
           <dt>T / Enter</dt><dd>Sohbet (çok oyunculu)</dd>
           <dt>Tab (basılı)</dt><dd>Oyuncu listesi ve katılım kodu</dd>
           <dt>F3</dt><dd>Konum ve teknik bilgiler</dd>
+          <dt>F8</dt><dd>Geliştirici konsolu (komut listesi: yardim)</dd>
           <dt>Esc</dt><dd>Duraklat</dd>
         </dl>
       </div>

@@ -135,7 +135,7 @@ export class IstemciOyun {
         if (o.tekneler.binilen || o.hayatta.olu) { this.gonder({ t: 'ti', i: t.ni, p: [r2(t.p.x), r2(t.p.y), r2(t.p.z), r3(t.yaw)] }); return; }
         if (o.olta.aktif) o.olta.kaldir();
         t.onay = true; o.tekneler.bin(t, o.oyuncu); delete t.onay;
-        o.hud.bildirim(`${t.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne');
+        o.hud.bildirim(`${t.T.ad}: W/S hız, A/D dümen. İnmek için C ya da Shift tuşuna basınız.`, 'tekne');
         break;
       }
       case 'sandik':

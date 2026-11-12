@@ -16,7 +16,7 @@ export class Hayatta {
   iyiles(n) { this.can = Math.min(20, this.can + n); }
   /* zirhli: canlı saldırısı ve ok gibi zırhın azalttığı hasarlar */
   hasar(n, sebep, zirhli = false) {
-    if (this.olu || n <= 0) return;
+    if (this.olu || n <= 0 || this.olumsuz) return;   // olumsuz: geliştirici konsolundaki ölümsüzlük
     if (zirhli && this.zirhFn) { const p = Math.min(20, this.zirhFn()); n = n * (1 - p * 0.04); if (this.zirhYipran) this.zirhYipran(); }
     n = Math.round(n);
     if (n <= 0) return;

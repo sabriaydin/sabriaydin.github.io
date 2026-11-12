@@ -16,6 +16,7 @@ export class Oyuncu {
     this.egiliyor = false; this.kosuyor = false;
     this.dusus = 0; this.adimFaz = 0; this.adimSayac = 0;
     this.yuruyenMesafe = 0;
+    this.ucus = false; this.hizCarpani = 1;   // geliştirici konsolu: uçma ve hız çarpanı
     this.olaylar = { dustu: null, adim: null, ziplad: null, suyaGirdi: null };
   }
   get boy() { return this.egiliyor ? 1.5 : 1.8; }
@@ -61,7 +62,7 @@ export class Oyuncu {
     if (this.suda && !oncekiSu && v.y < -4 && this.olaylar.suyaGirdi) this.olaylar.suyaGirdi(-v.y);
 
     /* Eğilme: tavan varsa kalkılmaz */
-    const egilIstek = g.egil;
+    const egilIstek = g.egil && !this.ucus;
     if (this.egiliyor && !egilIstek) { if (!this.carpisiyor(p.x, p.y, p.z, 1.8)) this.egiliyor = false; }
     else this.egiliyor = egilIstek;
 
@@ -72,15 +73,22 @@ export class Oyuncu {
     if (this.suda) hizMax = (this.kosuyor ? 3.2 : 2.3) * (g.palet ? 1.65 : 1);
     else if (g.palet) hizMax *= 0.85;
     if (this.lavda) hizMax = 1.1;
+    if (this.ucus) hizMax = (this.kosuyor || g.kos ? 16 : 9);
+    hizMax *= this.hizCarpani;
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
     let ix = -sy * ileri + cy * yan, iz = -cy * ileri - sy * yan;
     const l = Math.hypot(ix, iz); if (l > 0) { ix /= l; iz /= l; }
-    const ivme = this.yerde ? 14 : this.suda ? (g.palet ? 7 : 5) : 3.2;
+    const ivme = this.ucus ? 10 : this.yerde ? 14 : this.suda ? (g.palet ? 7 : 5) : 3.2;
     const k = Math.min(1, ivme * dt);
     v.x += (ix * hizMax - v.x) * k;
     v.z += (iz * hizMax - v.z) * k;
 
-    if (this.suda) {
+    if (this.ucus) {
+      /* Uçma: Boşluk yükselir, C alçalır; yer çekimi ve düşme hasarı yoktur */
+      const hedefY = ((g.zipla ? 1 : 0) - (g.egil ? 1 : 0)) * 9 * this.hizCarpani;
+      v.y += (hedefY - v.y) * Math.min(1, 10 * dt);
+      this.dusus = 0;
+    } else if (this.suda) {
       v.y -= (this.lavda ? 14 : 9) * dt;
       if (g.zipla) v.y += (g.palet ? 26 : 22) * dt;
       else if (g.palet && g.egil) v.y -= 10 * dt;

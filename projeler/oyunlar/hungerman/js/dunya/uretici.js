@@ -141,16 +141,9 @@ export class Uretici {
         /* Derinlerde boşluklar lavla dolar */
         if (oy) v[i] = y <= 10 ? 59 : 0;
       }
-      /* Yarıklar: yer yer yüzeye kadar açılan derin kanyonlar */
-      const maske = this.gY.g2(x / 420, z / 420);
-      if (maske > 0.32 && o.h >= DENIZ + 2 && !koyIcinde(this, x, z, 10)) {
-        const r = Math.abs(this.gY2.g2(x / 170, z / 170)), w = 0.009 + (maske - 0.32) * 0.03;
-        if (r < w) {
-          const tepe = r < w * 0.55 ? o.h : o.h - 3 - Math.floor((r / w) * 4);
-          const dip = 6 + Math.floor(Math.abs(this.gY3.g2(x / 40, z / 40)) * 10);
-          for (let y = dip; y <= tepe; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = y <= 10 ? 59 : 0; }
-        }
-      }
+      /* Yarıklar: yer yer yüzeye kadar açılan, kıvrılarak ilerleyen, kenarlarına doğru sığlaşan kanyonlar */
+      const dip = this.yarik(x, z, o);
+      if (dip != null) for (let y = dip; y <= o.h; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
       /* Parıltı kristalleri: derin mağaraların tavan ve tabanında */
       for (let y = 6; y < Math.min(ust, 36); y++) {
         const i = dizin(lx, y, lz);
@@ -160,6 +153,25 @@ export class Uretici {
         if ((tav === 2 && s < 0.007) || (alt === 2 && s < 0.004)) v[i] = 61;
       }
     }
+  }
+
+  /* Yarık: (x, z) sütunu bir yarığın içindeyse oyulacak en alt yüksekliği, değilse null döner.
+     Genişlik 8-18 blok; tabanı lav seviyesinin üstündedir; su kenarlarında ve köylerde oluşmaz. */
+  yarik(x, z, o) {
+    if (o.h < DENIZ + 6) return null;
+    const maske = this.gY.g2(x / 420, z / 420);
+    if (maske <= 0.3) return null;
+    const wx = x + this.gY3.g2(x / 90, z / 90) * 26, wz = z + this.gY3.g2(x / 90 + 50, z / 90 + 50) * 26;
+    const r = Math.abs(this.gY2.g2(wx / 260, wz / 260));
+    const w = 0.02 + Math.min(1, (maske - 0.3) / 0.25) * 0.028;
+    if (r >= w) return null;
+    if (koyIcinde(this, x, z, 12)) return null;
+    const k = {};
+    for (const [dx, dz] of [[7, 0], [-7, 0], [0, 7], [0, -7]]) if (this.kolon(x + dx, z + dz, k).h < DENIZ + 4) return null;
+    const f = r / w;
+    const merkez = Math.max(14, o.h - 22 - Math.floor(Math.abs(this.gY3.g2(x / 60 + 9, z / 60)) * 30));
+    const dip = Math.round(merkez + (o.h - merkez) * Math.pow(f, 1.7));
+    return dip < o.h - 1 ? dip : null;
   }
 
   /* Cevher damarları (parçaya özgü rastgele) */
@@ -212,6 +224,7 @@ export class Uretici {
       if (ust !== 4 && ust !== 45) continue;
       if (this.girisMi(x, z)) continue;
       if (koyIcinde(this, x, z)) continue;
+      if (this.yarik(x, z, o) != null) continue;
       let tur = 'mese';
       const s2 = karma2(this.tohum ^ 0x77, x, z);
       if (o.b === BY.TAYGA || o.b === BY.DAG) tur = 'ladin';
