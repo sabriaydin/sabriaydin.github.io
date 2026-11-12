@@ -42,6 +42,7 @@ varying vec3 vDunya;
 varying float vUzak;
 void main() {
   vec2 uv = vUv;
+  if (vAo > 1.5) { uv.x += sin(zaman * 0.7 + vDunya.z * 0.5) * 0.0012; uv.y += cos(zaman * 0.6 + vDunya.x * 0.5) * 0.0012; }
   #ifdef SU
     uv.x += sin(zaman * 1.3 + vDunya.z * 0.6) * 0.0015;
     uv.y += cos(zaman * 1.1 + vDunya.x * 0.6) * 0.0015;
@@ -59,9 +60,14 @@ void main() {
     float k = clamp(1.0 - d / (L.w * 0.9), 0.0, 1.0);
     m = max(m, k * k);
   }
-  vec3 gokIsik = gokRenk * max(vGok * gun, magara);
-  vec3 isik = max(gokIsik, vec3(1.0, 0.8, 0.55) * m * 1.05);
-  vec3 renk = t.rgb * vAo * isik;
+  float ao = vAo;
+  vec3 isik;
+  if (ao > 1.5) { ao = ao - 1.0; isik = vec3(1.0); }   /* lav: kendi ışığıyla parlar */
+  else {
+    vec3 gokIsik = gokRenk * max(vGok * gun, magara);
+    isik = max(gokIsik, vec3(1.0, 0.8, 0.55) * m * 1.05);
+  }
+  vec3 renk = t.rgb * ao * isik;
   float s = clamp((vUzak - sisBas) / (sisSon - sisBas), 0.0, 1.0);
   renk = mix(renk, sisRenk, s);
   gl_FragColor = vec4(renk, alfa);
@@ -172,8 +178,11 @@ export class Sahne {
     this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4);
     /* Blok aydınlatması */
     const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.82, 0.68), alacakaranlik * 0.5);
-    const sis = suda ? new THREE.Color(0.08, 0.2, 0.42).multiplyScalar(0.35 + gun * 0.65) : ufuk;
-    const sisSon = suda ? 22 : gorus * 16 - 6, sisBas = suda ? 0 : sisSon * 0.62;
+    const lav = suda === 'lav';
+    /* suda === 'maske': dalış maskesi su altında görüşü uzatır */
+    const maske = suda === 'maske';
+    const sis = lav ? new THREE.Color(0.9, 0.32, 0.05) : suda ? new THREE.Color(0.08, 0.22, 0.44).multiplyScalar((maske ? 0.45 : 0.35) + gun * (maske ? 0.75 : 0.65)) : ufuk;
+    const sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : gorus * 16 - 6, sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * 0.62;
     for (const m of this.malzemeler) {
       const u = m.uniforms;
       u.gun.value = gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;

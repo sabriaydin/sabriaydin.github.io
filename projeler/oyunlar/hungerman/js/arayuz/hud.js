@@ -71,13 +71,14 @@ export class Hud {
   durumCiz(suda) {
     const h = this.hay;
     const zp = this.env.zirhPuani ? this.env.zirhPuani() : 0, zehir = h.zehir > 0;
-    const anahtar = h.can + '|' + h.aclik + '|' + h.oksijen + '|' + suda + '|' + zp + '|' + zehir;
+    const anahtar = h.can + '|' + h.aclik + '|' + h.oksijen + '|' + suda + '|' + zp + '|' + zehir + '|' + (h.agu > 0);
     if (anahtar === this.son.durum) return;
     if (this.son.can != null && h.can < this.son.can) { const c = $('#canlar'); c.classList.remove('titre'); void c.offsetWidth; c.classList.add('titre'); }
     this.son.durum = anahtar; this.son.can = h.can;
     const sira = (deger, dolu, yarim, bos) => { let s = ''; for (let i = 0; i < 10; i++) { const v = deger - i * 2; s += `<img src="${v >= 2 ? dolu : v === 1 ? yarim : bos}" alt="">`; } return s; };
     $('#canlar').innerHTML = sira(h.can, IMG.kalp, IMG.kalpYarim, IMG.kalpBos);
     $('#canlar').classList.toggle('az', h.can <= 4);
+    $('#canlar').classList.toggle('zehirli', h.agu > 0);
     $('#aclik').innerHTML = sira(h.aclik, IMG.but, IMG.butYarim, IMG.butBos);
     $('#aclik').classList.toggle('zehirli', zehir);
     $('#zirhSira').innerHTML = zp > 0 ? sira(zp, IMG.zirh, IMG.zirhYarim, IMG.zirhBos) : '';
@@ -101,30 +102,68 @@ export class Hud {
     const s = $('#pusulaSerit');
     const yonler = { 0: 'K', 45: 'KD', 90: 'D', 135: 'GD', 180: 'G', 225: 'GB', 270: 'B', 315: 'KB' };
     let h = '';
-    for (let tur = -1; tur <= 1; tur++) for (let a = 0; a < 360; a += 15) {
-      const x = (tur * 360 + a) * 3;
-      const y = yonler[a];
-      h += y ? `<span class="${y.length === 1 ? 'ana' : ''}" style="left:${x}px">${y}</span>` : `<span class="ara" style="left:${x}px">|</span>`;
+    /* Şerit -360°..720° aralığını kapsar; 1° = 3 piksel */
+    for (let a = -360; a < 720; a += 15) {
+      const x = (a + 360) * 3, n = ((a % 360) + 360) % 360, y = yonler[n];
+      if (y) h += `<span class="ana${n === 0 ? ' kuzey' : ''}" style="left:${x}px">${y}</span>`;
+      else h += `<span class="ara" style="left:${x}px">${n}</span>`;
     }
     s.innerHTML = h;
   }
-  /* yaw: 0 = kuzey (-z) */
-  pusula(yaw) {
+  /* yaw: 0 = kuzey (-z); isaretler: [{ aci (0 = kuzey, derece), sinif, metin, baslik, mesafe, kenar }] */
+  pusula(yaw, isaretler) {
     let a = (-yaw * 180 / Math.PI) % 360; if (a < 0) a += 360;
-    $('#pusulaSerit').style.transform = `translateX(${180 - a * 3}px)`;
+    const yari = $('#pusula').clientWidth / 2 || 210;
+    $('#pusulaSerit').style.transform = `translateX(${yari - (a + 360) * 3}px)`;
+    const ad = ['K', 'KD', 'D', 'GD', 'G', 'GB', 'B', 'KB'][Math.round(a / 45) % 8];
+    const derece = `${ad} · ${Math.round(a) % 360}°`;
+    if (derece !== this.son.derece) { this.son.derece = derece; $('#pusulaDerece').textContent = derece; }
+    if (!isaretler) return;
+    const sinir = yari / 3 - 6;
+    let h = '';
+    for (const m of isaretler) {
+      let f = ((m.aci - a + 540) % 360) - 180;
+      let kenar = false;
+      if (Math.abs(f) > sinir) { if (!m.kenar) continue; f = Math.sign(f) * sinir; kenar = true; }
+      const mes = m.mesafe != null ? `<small>${m.mesafe < 1000 ? Math.round(m.mesafe) : (m.mesafe / 1000).toFixed(1) + 'b'}</small>` : '';
+      h += `<span class="${m.sinif}${kenar ? ' kenar' : ''}" style="left:${yari + f * 3}px" title="${m.baslik || ''}"><i>${m.metin}</i>${mes}</span>`;
+    }
+    if (h !== this.son.isaret) { this.son.isaret = h; $('#pusulaIsaret').innerHTML = h; }
   }
-  saat(z, gun) {
-    const dk = Math.floor(((z * 24 + 6) % 24) * 60);
+  gorevIzle(satirlar) {
+    const h = satirlar.map(q => `<div class="${q.bitti ? 'bitti' : ''}"><b>${q.metin}</b><span>${q.durum}</span></div>`).join('');
+    if (h !== this.son.gorev) { this.son.gorev = h; $('#gorevIzleyici').innerHTML = h; }
+  }
+  /* z: gün zamanı (0 = 06:00), konum: alt satır metni */
+  saat(z, gun, konum) {
+    const saatOndalik = (z * 24 + 6) % 24;
+    const dk = Math.floor(saatOndalik * 60);
     const t = String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
     if (t !== this.son.saat) { this.son.saat = t; $('#saatDeger').textContent = t; }
-    if (gun !== this.son.gun) { this.son.gun = gun; $('#gunDeger').textContent = gun + '. gün'; }
+    const h = saatOndalik;
+    const evre = h >= 5 && h < 7 ? 'Şafak' : h < 11 && h >= 7 ? 'Sabah' : h >= 11 && h < 14 ? 'Öğle' : h >= 14 && h < 17 ? 'İkindi' : h >= 17 && h < 19.5 ? 'Akşam' : 'Gece';
+    const gt = `${gun}. gün · ${evre}`;
+    if (gt !== this.son.gun) { this.son.gun = gt; $('#gunDeger').textContent = gt; }
+    const sinif = evre === 'Gece' ? 'gece' : evre === 'Şafak' ? 'safak' : evre === 'Akşam' ? 'aksam' : 'gunduz';
+    if (sinif !== this.son.evre) { this.son.evre = sinif; $('#saat').className = sinif; }
+    /* Gök yayında güneş (gündüz) veya ay (gece) */
+    const gunduz = z < 0.5, aci = (gunduz ? z : z - 0.5) * Math.PI * 2;
+    const x = 38 - Math.cos(aci) * 32, y = 36 - Math.sin(aci) * 32;
+    $('#gokCisim').setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+    /* Gece uyarısı */
+    let uyari = '', yakin = false;
+    if (z >= 0.43 && z < 0.5) { const kalan = Math.ceil((0.5 - z) * 24 * 60); uyari = `Gece yaklaşıyor · ${kalan} dk`; yakin = true; }
+    else if (z >= 0.5 && z < 0.98) uyari = 'Gece · Canavarlar ortalıkta';
+    if (uyari !== this.son.uyari) { this.son.uyari = uyari; const u = $('#geceUyari'); u.hidden = !uyari; u.textContent = uyari; u.classList.toggle('yakin', yakin); }
+    if (konum != null && konum !== this.son.konum) { this.son.konum = konum; $('#konumDeger').textContent = konum; }
   }
+
   /* Bakılan veya son vurulan canlının adı ve canı */
   hedef(v) {
     const k = $('#hedefBilgi');
     if (!v) { if (!k.hidden) k.hidden = true; return; }
     k.hidden = false;
-    const a = v.tur.ad + (v.ofkeli ? ' (öfkeli)' : '');
+    const a = (v.ad || v.tur.ad) + (v.ofkeli ? ' (öfkeli)' : '');
     if ($('#hedefAd').textContent !== a) $('#hedefAd').textContent = a;
     $('#hedefCan').style.width = Math.max(0, v.can / v.tur.can * 100).toFixed(0) + '%';
     k.classList.toggle('dusman', !!(v.tur.dusman || v.ofkeli));

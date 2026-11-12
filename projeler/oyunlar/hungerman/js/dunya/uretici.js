@@ -3,6 +3,9 @@
    Dünya, kıyıları denizle çevrili büyük bir kara parçasıdır; iç kısımda nehirler, dağlar ve farklı biyomlar bulunur. */
 import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin } from '../sabitler.js';
 import { Gurultu, karistir, karma2, karma3, uretec, yumusak } from '../rastgele.js';
+import { koyYaz, koyIcinde, enYakinKoy } from './koy-uretici.js';
+import { zindanYaz } from './zindan-uretici.js';
+import { batikYaz } from './batik-uretici.js';
 
 export const BIYOMLAR = ['Okyanus', 'Derin Okyanus', 'Nehir', 'Kumsal', 'Karlı Kumsal', 'Dağlar', 'Tayga', 'Çöl', 'Orman', 'Huş Ormanı', 'Çayır'];
 export const BY = { OKYANUS: 0, DERIN: 1, NEHIR: 2, KUMSAL: 3, KARLI_KUMSAL: 4, DAG: 5, TAYGA: 6, COL: 7, ORMAN: 8, HUS: 9, CAYIR: 10 };
@@ -16,7 +19,7 @@ export class Uretici {
     this.tohum = tohum >>> 0;
     const g = k => new Gurultu(karistir(this.tohum + k * 7919));
     this.gK = g(1); this.gD = g(2); this.gT = g(3); this.gN = g(4); this.gM = g(5); this.gR = g(6);
-    this.gNe = g(7); this.gH = g(8); this.gA = g(9); this.gB = g(10); this.gO = g(11); this.gG = g(12); this.gZ = g(13);
+    this.gNe = g(7); this.gH = g(8); this.gA = g(9); this.gB = g(10); this.gO = g(11); this.gG = g(12); this.gZ = g(13); this.gY = g(14); this.gY2 = g(15); this.gY3 = g(16);
     this.ky = { x: 0, z: 0, h: 0, b: 0, c: 0, t: 0, d: 0 };
   }
 
@@ -110,8 +113,11 @@ export class Uretici {
 
     this.magaralar(v, x0, z0, kolonlar);
     this.cevherler(v, cx, cz);
+    zindanYaz(this, v, x0, z0);
     this.agaclar(v, x0, z0);
     this.bitkiler(v, x0, z0, kolonlar);
+    batikYaz(this, v, x0, z0);
+    koyYaz(this, v, x0, z0);
     return v;
   }
 
@@ -132,7 +138,26 @@ export class Uretici {
           const n = this.gO.g3(x / 85, y / 45, z / 85);
           oy = n > 0.58 - (40 - y) * 0.004;
         }
-        if (oy) v[i] = 0;
+        /* Derinlerde boşluklar lavla dolar */
+        if (oy) v[i] = y <= 10 ? 59 : 0;
+      }
+      /* Yarıklar: yer yer yüzeye kadar açılan derin kanyonlar */
+      const maske = this.gY.g2(x / 420, z / 420);
+      if (maske > 0.32 && o.h >= DENIZ + 2 && !koyIcinde(this, x, z, 10)) {
+        const r = Math.abs(this.gY2.g2(x / 170, z / 170)), w = 0.009 + (maske - 0.32) * 0.03;
+        if (r < w) {
+          const tepe = r < w * 0.55 ? o.h : o.h - 3 - Math.floor((r / w) * 4);
+          const dip = 6 + Math.floor(Math.abs(this.gY3.g2(x / 40, z / 40)) * 10);
+          for (let y = dip; y <= tepe; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = y <= 10 ? 59 : 0; }
+        }
+      }
+      /* Parıltı kristalleri: derin mağaraların tavan ve tabanında */
+      for (let y = 6; y < Math.min(ust, 36); y++) {
+        const i = dizin(lx, y, lz);
+        if (v[i] !== 0) continue;
+        const alt = v[dizin(lx, y - 1, lz)], tav = v[dizin(lx, y + 1, lz)];
+        const s = karma3(this.tohum ^ 0x6b72, x, y, z);
+        if ((tav === 2 && s < 0.007) || (alt === 2 && s < 0.004)) v[i] = 61;
       }
     }
   }
@@ -186,6 +211,7 @@ export class Uretici {
       const ust = this.ustBlok(o, x, z);
       if (ust !== 4 && ust !== 45) continue;
       if (this.girisMi(x, z)) continue;
+      if (koyIcinde(this, x, z)) continue;
       let tur = 'mese';
       const s2 = karma2(this.tohum ^ 0x77, x, z);
       if (o.b === BY.TAYGA || o.b === BY.DAG) tur = 'ladin';
@@ -209,10 +235,22 @@ export class Uretici {
       if (alt === 7 || (h < DENIZ && v[ust] === 7)) {
         /* Su altı */
         const derin = DENIZ - h;
-        if (derin >= 2 && r < 0.07 && alt !== 7) {
+        if (alt === 7) continue;
+        const ui = dizin(lx, h + 1, lz);
+        /* Sıcak ve sığ sularda mercan resifleri */
+        const resif = o.t > 0.1 && derin >= 3 && derin <= 16 && (o.b === BY.OKYANUS || o.b === BY.DERIN) && this.gZ.g2(x / 36 + 40, z / 36) > -0.05;
+        if (resif) {
+          const r2 = karma2(this.tohum ^ 0x6d6572, x, z), renk = Math.floor(((this.gG.g2(x / 14, z / 14) + 1) / 2) * 3) % 3;
+          if (r2 < 0.42) { v[dizin(lx, h, lz)] = 62 + renk; if (r2 < 0.12 && derin >= 4) { v[ui] = 62 + ((renk + 1) % 3); if (v[ui + PB * PB] === 7) v[ui + PB * PB] = 65 + renk; } else if (v[ui] === 7) v[ui] = 65 + renk; }
+          else if (r2 < 0.62 && v[ui] === 7) v[ui] = 65 + ((renk + 2) % 3);
+          else if (r2 < 0.75 && v[ui] === 7) v[ui] = 68;
+          continue;
+        }
+        if (derin >= 2 && r < 0.07) {
           const boy = 1 + Math.floor(karma2(this.tohum ^ 0x31, x, z) * Math.min(4, derin - 1));
           for (let k = 1; k <= boy; k++) { const i = dizin(lx, h + k, lz); if (v[i] === 7) v[i] = 31; }
-        }
+        } else if (r < 0.26 && v[ui] === 7) v[ui] = 68;
+        else if (derin >= 3 && r < 0.268 && (alt === 5 || alt === 6) && v[ui] === 7) v[ui] = 69;
         continue;
       }
       if (v[ust] !== 0) continue;
@@ -228,8 +266,17 @@ export class Uretici {
     }
   }
 
-  /* Oyuncunun doğacağı nokta: kıyıya yakın, çayır veya ormanda düz bir yer */
+  /* Oyuncunun doğacağı nokta: mümkünse bir köyün yakınında */
   dogumNoktasi() {
+    const s = this.dogumAday();
+    const k = enYakinKoy(this, s.x, s.z, 4);
+    if (k && k.mesafe < 1600) {
+      const x = k.koy.x + 7, z = k.koy.z;
+      return { x: x + 0.5, y: this.kolon(x, z, {}).h + 1, z: z + 0.5 };
+    }
+    return s;
+  }
+  dogumAday() {
     const r = uretec(this.tohum ^ 0xabcdef);
     const o = {};
     for (let deneme = 0; deneme < 400; deneme++) {

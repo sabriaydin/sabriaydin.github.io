@@ -17,7 +17,18 @@ export const TURLER = {
   kurt: { ad: 'Kurt', model: 'kurt', gen: 0.3, boy: 0.85, can: 8, hiz: 1.5, kosu: 5.0, biyom: [BY.TAYGA, BY.ORMAN], grup: [2, 4], notr: true, hasar: 4, menzil: 1.1, gorus: 20,
     dusur: r => (r() < 0.5 ? [[282, 1]] : []), ses: 'kurt' },
   zombi: { ad: 'Zombi', model: 'zombi', gen: 0.3, boy: 1.95, can: 20, hiz: 1.0, kosu: 2.6, dusman: true, hasar: 3, menzil: 1.0, gorus: 26, gunesteYanar: true,
-    dusur: r => { const o = [[281, ar(r, 0, 2)]]; const s = r(); if (s < 0.025) o.push([261, 1]); else if (s < 0.06) o.push([259, 1]); else if (s < 0.08) o.push([257, 2]); return o; }, ses: 'zombi' }
+    dusur: r => { const o = [[281, ar(r, 0, 2)]]; const s = r(); if (s < 0.025) o.push([261, 1]); else if (s < 0.06) o.push([259, 1]); else if (s < 0.08) o.push([257, 2]); return o; }, ses: 'zombi' },
+  iskelet: { ad: 'İskelet', model: 'iskelet', gen: 0.3, boy: 1.95, can: 20, hiz: 1.0, kosu: 2.4, dusman: true, uzak: true, hasar: 3, menzil: 15, gorus: 22, gunesteYanar: true,
+    dusur: r => [[295, ar(r, 0, 2)], [287, ar(r, 0, 2)]], ses: 'iskelet' },
+  orumcek: { ad: 'Mağara Örümceği', model: 'orumcek', gen: 0.55, boy: 0.8, can: 16, hiz: 1.4, kosu: 4.6, dusman: true, karanlikta: true, hasar: 2, agu: true, menzil: 0.9, gorus: 18, tirmanir: true,
+    dusur: r => [[284, ar(r, 0, 2)], ...(r() < 0.25 ? [[295, 1]] : [])], ses: 'orumcek' },
+  hamsi: { ad: 'Hamsi', model: 'hamsi', gen: 0.12, boy: 0.25, can: 2, hiz: 2.0, kosu: 4.8, su: true, grup: [4, 8], dusur: () => [[297, 1]], ses: 'balik' },
+  cipura: { ad: 'Çipura', model: 'cipura', gen: 0.18, boy: 0.4, can: 4, hiz: 1.5, kosu: 4.2, su: true, grup: [1, 2], dusur: r => [[297, ar(r, 1, 2)]], ses: 'balik' },
+  ahtapot: { ad: 'Ahtapot', model: 'ahtapot', gen: 0.32, boy: 0.9, can: 8, hiz: 0.9, kosu: 3.6, su: true, grup: [1, 1], dusur: r => [[451, ar(r, 1, 2)]], ses: 'ahtapot' },
+  kopekbaligi: { ad: 'Köpekbalığı', model: 'kopekbaligi', gen: 0.55, boy: 0.8, can: 24, hiz: 1.8, kosu: 5.4, su: true, dusman: true, hasar: 4, menzil: 1.3, gorus: 16, grup: [1, 1],
+    dusur: r => [[297, ar(r, 1, 3)], ...(r() < 0.6 ? [[450, 1]] : [])], ses: 'kopekbaligi' },
+  koylu: { ad: 'Köylü', model: 'koylu', gen: 0.3, boy: 1.9, can: 20, hiz: 1.0, kosu: 3.2, koylu: true, dusur: () => [], ses: 'koylu' }
 };
 export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt'];
+export const DENIZ_CANLILARI = ['hamsi', 'cipura', 'ahtapot', 'kopekbaligi'];
 export const OLUM_KAYNAK = { zombi: 'zombi', kurt: 'kurt' };

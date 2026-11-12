@@ -16,7 +16,10 @@ export class Dunya {
     this.uretici = new Uretici(this.tohum);
     this.parcalar = new Map();
     this.degisiklikler = new Map();   // anahtar -> Map(dizin -> blok)
-    this.mesaleler = new Map();       // "x,y,z" -> [x, y, z]
+    this.mesaleler = new Map();       // "x,y,z" -> [x, y, z, güç]
+    this.ekinler = new Set();         // büyümekte olan ekinlerin "x,y,z" anahtarları
+    this.sandiklar = new Map();       // "x,y,z" -> 27 yuvalık dizi
+    this.yuvalar = new Map();         // canavar yuvaları "x,y,z" -> { x, y, z, sayac }
     this.gorus = 8;
     this.dinleyiciler = [];
     this.isciler = [];
@@ -84,6 +87,9 @@ export class Dunya {
     const mk = x + ',' + y + ',' + z;
     if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14]);
     else this.mesaleler.delete(mk);
+    if (id >= 53 && id <= 55) this.ekinler.add(mk); else this.ekinler.delete(mk);
+    if (id === 58) this.yuvalar.set(mk, { x, y, z, sayac: 5 }); else this.yuvalar.delete(mk);
+    if (eski === 59 || id === 59) this.lavIsikGuncelle(x, y, z);
     this.kirlet(p, true);
     if (lx === 0) this.kirletK(cx - 1, cz); if (lx === PB - 1) this.kirletK(cx + 1, cz);
     if (lz === 0) this.kirletK(cx, cz - 1); if (lz === PB - 1) this.kirletK(cx, cz + 1);
@@ -110,7 +116,10 @@ export class Dunya {
     /* Uzaklaşan parçaları boşalt */
     for (const p of this.parcalar.values()) {
       const dx = p.cx - pcx, dz = p.cz - pcz;
-      if (dx * dx + dz * dz > (R + 3) * (R + 3)) { this.meshSil(p); this.parcalar.delete(p.k); }
+      if (dx * dx + dz * dz > (R + 3) * (R + 3)) {
+        this.meshSil(p); this.parcalar.delete(p.k);
+        if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); }
+      }
     }
     this.isDagit();
   }
@@ -176,12 +185,47 @@ export class Dunya {
         const d = this.degisiklikler.get(p.k);
         if (d) for (const [i, id] of d) m.v[i] = id;
         p.v = m.v; p.uretiliyor = false; p.kirli = true;
+        this.kaynakTara(p);
       }
     } else if (m.tur === 'meshle') {
       const p = this.parca(m.cx, m.cz);
       if (p) { p.meshleniyor = false; this.meshKur(p, m.r); }
     }
     this.isDagit();
+  }
+
+  /* Parçadaki ışık kaynaklarını ve büyüyen ekinleri kaydet */
+  kaynakTara(p) {
+    p.kaynaklar = [];
+    const v = p.v;
+    for (let i = 0; i < v.length; i++) {
+      const id = v[i];
+      if (id !== 46 && id !== 48 && id !== 61 && id !== 58 && id !== 59 && (id < 53 || id > 55)) continue;
+      const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
+      /* Lav gölleri: her 4 x 4 alanda yüzeydeki bir blok ışık kaynağı sayılır */
+      if (id === 59 && (lx % 4 !== 1 || lz % 4 !== 1 || (y < 127 && v[i + PB * PB] === 59))) continue;
+      const x = p.cx * PB + lx, z = p.cz * PB + lz;
+      const k = x + ',' + y + ',' + z;
+      if (id === 58) this.yuvalar.set(k, { x, y, z, sayac: 5 });
+      else if (id >= 53 && id <= 55) this.ekinler.add(k);
+      else this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14)]);
+      p.kaynaklar.push(k);
+    }
+  }
+  lavIsikGuncelle(x, y, z) {
+    const k = x + ',' + y + ',' + z;
+    if (this.blok(x, y, z) === 59 && ((x % 4) + 4) % 4 === 1 && ((z % 4) + 4) % 4 === 1) this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, 11]);
+  }
+
+  /* Ekinlerin büyümesi */
+  ekinTik() {
+    for (const k of this.ekinler) {
+      if (Math.random() > 0.012) continue;
+      const [x, y, z] = k.split(',').map(Number);
+      const id = this.blok(x, y, z);
+      if (id < 53 || id > 55) { this.ekinler.delete(k); continue; }
+      this.blokKoy(x, y, z, id + 1, 'tik');
+    }
   }
 
   meshKur(p, r) {
@@ -244,23 +288,22 @@ export class Dunya {
   }
 
   /* ---------- Kayıt ---------- */
+  sandiklariAl() { return [...this.sandiklar].map(([k, y]) => [k, y.map(s => (s ? [s.id, s.adet, s.dayanim ?? null] : null))]); }
+  sandiklariYukle(l) { this.sandiklar.clear(); for (const [k, y] of l || []) this.sandiklar.set(k, y.map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}) } : null))); }
+
   degisiklikleriAl() {
     const o = [];
     for (const [k, d] of this.degisiklikler) { const a = []; for (const [i, id] of d) a.push(i, id); o.push([k, a]); }
     return o;
   }
   degisiklikleriYukle(liste) {
-    this.degisiklikler.clear(); this.mesaleler.clear();
+    this.degisiklikler.clear(); this.mesaleler.clear(); this.ekinler.clear();
     for (const [k, a] of liste || []) {
       const d = new Map();
       const [cx, cz] = k.split(',').map(Number);
       for (let j = 0; j < a.length; j += 2) {
         d.set(a[j], a[j + 1]);
-        if (BLOKLAR[a[j + 1]] && BLOKLAR[a[j + 1]].mesale) {
-          const i = a[j], x = i % PB, z = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
-          const wx = cx * PB + x, wz = cz * PB + z;
-          this.mesaleler.set(wx + ',' + y + ',' + wz, [wx + 0.5, y + 0.6, wz + 0.5, BLOKLAR[a[j + 1]].isik || 14]);
-        }
+
       }
       this.degisiklikler.set(k, d);
     }

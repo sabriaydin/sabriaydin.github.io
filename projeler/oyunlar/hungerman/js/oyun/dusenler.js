@@ -1,7 +1,7 @@
 /* HungerMan - yere düşen eşyalar ve kırılma parçacıkları */
 import { THREE } from '../grafik/sahne.js';
 import { simge, blokRengi } from '../grafik/doku.js';
-import { KATI } from '../bloklar.js';
+import { KATI, LAV } from '../bloklar.js';
 
 const DOKU = new Map();
 function doku(id) {
@@ -54,6 +54,7 @@ export class Dusenler {
       const d = this.liste[i];
       d.yas += dt;
       if (d.yas > 300) { this.sil(d); this.liste.splice(i, 1); continue; }
+      if (LAV[this.dunya.blok(Math.floor(d.p.x), Math.floor(d.p.y), Math.floor(d.p.z))]) { this.renkliParcacik([0.3, 0.3, 0.3], d.p.x, d.p.y, d.p.z, 6); this.sil(d); this.liste.splice(i, 1); continue; }
       const dx = op.x - d.p.x, dy = op.y + 0.8 - d.p.y, dz = op.z - d.p.z;
       const mes = Math.hypot(dx, dy, dz);
       if (d.yas > d.gecikme && mes < 2.6) {

@@ -1,0 +1,69 @@
+/* Hunger 3D - büyük güncelleme (51) stilleri: sandık penceresi, tabela, kısayol panosu, tarif süzgeci, altyazı, hasar sayıları, durum satırı, dünya kodu */
+
+/* ---- Depo Sandığı: çanta paneline ikinci sütun olarak girer; açıkken tarif sütunu gizlenir ---- */
+#pbox.cst{grid-template-columns:auto minmax(280px,360px)}
+#pbox.cst>#crfScr{display:none}
+#cbox h2{margin:0 0 8px}
+#cgrid{display:grid;grid-template-columns:repeat(6,52px);gap:4px}
+#cinfo{min-height:38px;margin:8px 0 0;font-size:12px;color:var(--mut);max-width:330px}
+#cinfo b{color:var(--tx);font-size:13px}
+#cbtn{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#cbtn button{padding:5px 10px;font-size:13px}
+
+/* ---- Tarif arama ve süzgeç ---- */
+#rcf{display:grid;gap:6px;margin:0 0 8px}
+#rcq{font:inherit;color:var(--tx);background:#000;border:1px solid var(--line);border-radius:6px;padding:6px 10px;width:100%;box-sizing:border-box;user-select:text;-webkit-user-select:text}
+#rcq:focus{outline:none;border-color:var(--red)}
+#rcc{display:flex;flex-wrap:wrap;gap:4px}
+#rcc button{padding:3px 9px;font-size:12px}
+#rcc button.on{background:var(--red2);border-color:var(--red)}
+#rcn{margin:2px 0}
+
+/* ---- Tabela düzenleyici ve kısayol panosu ---- */
+#sgn{z-index:40;position:absolute;inset:0;display:grid;place-items:center;background:rgba(5,5,6,.78);padding:16px;overflow:auto}
+#sgn .card{width:min(460px,100%)}
+#sgIn{font:inherit;font-size:16px;color:var(--tx);background:#000;border:1px solid var(--red);border-radius:6px;padding:9px 12px;width:100%;box-sizing:border-box;user-select:text;-webkit-user-select:text}
+#sgIn:focus{outline:none;box-shadow:0 0 0 2px rgba(217,70,60,.35)}
+
+/* ---- Durum satırı (ıslaklık, ateş, siper, barış) ---- */
+#x2s{display:flex;flex-wrap:wrap;gap:4px;font-size:11px}
+#x2s:empty{display:none}
+#x2s span{padding:1px 7px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.45)}
+#x2s .w{color:#8fc8ff;border-color:#3b6a96}
+#x2s .f{color:#ff9a8f;border-color:var(--red2)}
+#x2s .b{color:#d8d2c4}
+#x2s .p{color:#9ad39a;border-color:#3f6b3f}
+
+/* ---- Ses altyazıları ---- */
+#cap{position:absolute;left:50%;bottom:150px;transform:translateX(-50%);display:grid;gap:3px;justify-items:center;pointer-events:none;max-width:92vw}
+#cap div{padding:3px 12px;background:rgba(13,13,14,.82);border:1px solid var(--line);border-radius:12px;font-size:13px;white-space:nowrap;animation:capIn 2.6s forwards}
+@keyframes capIn{0%{opacity:0;transform:translateY(6px)}8%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+
+/* ---- Hasar sayıları ---- */
+#dmgl{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#dmgl span{position:absolute;transform:translate(-50%,-50%);font:700 20px system-ui,sans-serif;color:#fff;text-shadow:0 0 3px #000,0 0 3px #000,0 1px 4px #000;animation:dmgUp .95s ease-out forwards}
+#dmgl span.crit{color:#ffd24a;font-size:26px}
+@keyframes dmgUp{0%{opacity:0;transform:translate(-50%,-30%) scale(.7)}12%{opacity:1;transform:translate(-50%,-60%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-190%) scale(1)}}
+
+/* ---- Dünya kodu (ana menü ve duraklatma) ---- */
+.wrow{margin:6px auto 0;max-width:340px}
+#wcode{font:inherit;font-size:14px;letter-spacing:.14em;text-transform:uppercase;text-align:center;color:var(--tx);background:#000;border:1px solid var(--line);border-radius:6px;padding:7px 10px;width:100%;box-sizing:border-box;user-select:text;-webkit-user-select:text}
+#wcode:focus{outline:none;border-color:var(--red)}
+#wcode.bad{border-color:#e07b73;box-shadow:0 0 0 2px rgba(224,123,115,.35)}
+.wcp{cursor:pointer;font-size:13px;letter-spacing:.06em}
+.wcp:hover{color:var(--tx)}
+#deadTip{font-size:13px}
+
+/* ---- Günlük: Meydan sekmesi ---- */
+#jrB h3{margin:10px 0 2px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.pk>div{display:grid;gap:3px}
+.pk i{display:block;height:6px;background:#26262b;border-radius:3px;overflow:hidden}
+.pk i b{display:block;height:100%;background:var(--red);font-size:0}
+
+@media (max-width:760px){
+ #pbox.cst{grid-template-columns:1fr}
+ #cgrid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  #cap{bottom:260px}
+}
+@media (prefers-reduced-motion:reduce){#cap div,#dmgl span{animation-duration:.01s}}
+#game.photo #cap,#game.photo #dmgl,#game.photo #x2s{display:none!important}

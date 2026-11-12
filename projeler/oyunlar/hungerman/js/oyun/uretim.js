@@ -64,6 +64,30 @@ ZIRH_MALZEME.forEach((m, mi) => ZIRH_ADET.forEach((a, pi) => t(400 + mi * 4 + pi
 /* Pişirme: kamp ateşi veya fırın */
 for (const [cig, pismis] of [[271, 272], [273, 274], [275, 276], [277, 278], [279, 280]]) t(pismis, 1, [[cig, 1]], ['ates', 'firin'], 'yiyecek');
 
+/* Köy ve tarım (3. aşama) */
+t(293, 1, [[291, 3]], null, 'yiyecek');
+t(52, 1, [[291, 9]], null, 'blok');
+t(291, 9, [[52, 1]], null, 'malzeme');
+t(50, 1, [['kalas', 8]], 'masa', 'blok');
+t(51, 4, [[23, 4], [257, 1]], 'firin', 'blok');
+t(290, 1, [[266, 1], [263, 4]], 'masa', 'yiyecek');
+t(289, 1, [[34, 1], [36, 2], [265, 4]], ['ates', 'firin'], 'yiyecek');
+
+/* Mağaralar (4. aşama) */
+t(296, 3, [[295, 1]], null, 'malzeme');
+
+/* Deniz (5. aşama) */
+t(298, 1, [[297, 1]], ['ates', 'firin'], 'yiyecek');
+t(452, 1, [[451, 1]], ['ates', 'firin'], 'yiyecek');
+t(453, 1, [[256, 3], [284, 2]], 'masa', 'alet');
+t(454, 1, [['kalas', 5], [256, 2]], 'masa', 'alet');
+t(455, 1, [['kalas', 10], [49, 3], [284, 4], [256, 3]], 'masa', 'alet');
+t(456, 1, [[34, 2], [259, 2], [284, 1]], 'masa', 'savas');
+t(457, 1, [[282, 4], [284, 2]], 'masa', 'savas');
+t(62, 1, [[65, 4]], null, 'blok');
+t(63, 1, [[66, 4]], null, 'blok');
+t(64, 1, [[67, 4]], null, 'blok');
+
 export const TARIFLER = R;
 
 export function girdiAdi(g) { return GRUPLAR[g] ? GRUPLAR[g].ad : (ESYALAR[g] ? ESYALAR[g].ad : '?'); }

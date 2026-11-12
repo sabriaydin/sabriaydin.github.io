@@ -15,8 +15,22 @@
 
 <!-- Oyun içi gösterge -->
 <div id="hud" hidden>
-  <div id="pusula"><div id="pusulaSerit"></div><i></i></div>
-  <div id="saat"><b id="saatDeger">06:00</b><span id="gunDeger">1. gün</span></div>
+  <div id="pusulaKap">
+    <div id="pusula"><div id="pusulaSerit"></div><div id="pusulaIsaret"></div><b id="pusulaOk"></b></div>
+    <div id="pusulaDerece">K · 0°</div>
+  </div>
+  <div id="saat">
+    <svg id="gokYay" viewBox="0 0 76 40" aria-hidden="true">
+      <path class="yay" d="M6 36 A32 32 0 0 1 70 36"/>
+      <line class="ufuk" x1="1" y1="36" x2="75" y2="36"/>
+      <g id="gokCisim"><circle class="hale" r="7"/><circle class="disk" r="4.2"/></g>
+    </svg>
+    <div class="saatMetin"><b id="saatDeger">06:00</b><span id="gunDeger">1. gün · Şafak</span></div>
+    <div id="konumDeger"></div>
+    <div id="geceUyari" hidden></div>
+  </div>
+  <div id="yanmaEfekt"></div>
+  <div id="gorevIzleyici"></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
   <div id="uyku"></div>
   <div id="nisan"></div>
@@ -55,7 +69,32 @@
       <div id="tarifSekme" class="sekmeler"></div>
       <div id="tarifListe"></div>
     </section>
+    <section class="envSandik" hidden>
+      <header><h2>Sandık</h2><span class="ipucuMetin">Shift + tık: sandık ile envanter arasında taşı</span></header>
+      <div id="sandikIzgara" class="izgara"></div>
+    </section>
     <button class="kapat" id="envKapat" aria-label="Kapat">✕</button>
+  </div>
+</div>
+
+<!-- Köylü: ticaret ve görev -->
+<div id="koyluEkrani" class="kaplama" hidden>
+  <div class="pencere koyluPencere">
+    <header><div><h2 id="kAd"></h2><span id="kAlt" class="kAlt"></span></div><span id="kItibar" class="rozet"></span></header>
+    <p id="kSoz" class="koyluSoz"></p>
+    <div class="sekmeler" id="kSekme"><button type="button" data-s="takas">Ticaret</button><button type="button" data-s="gorev">Görev</button></div>
+    <div id="kIcerik"></div>
+    <div id="kSikke" class="kSikke"></div>
+    <button class="kapat" id="kKapat" aria-label="Kapat">✕</button>
+  </div>
+</div>
+
+<!-- Görev günlüğü -->
+<div id="gorevEkrani" class="kaplama" hidden>
+  <div class="pencere orta">
+    <header><h2>Görevler</h2></header>
+    <div id="gorevListe"></div>
+    <button class="kapat" id="gKapat" aria-label="Kapat">✕</button>
   </div>
 </div>
 
@@ -71,7 +110,7 @@
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
       <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
     </div>
-    <p class="surum" id="surum"></p>
+    <p class="surum"><span id="surum"></span> · <a href="../../../" class="siteDon">Siteye dön</a></p>
   </div>
 </div>
 
@@ -127,11 +166,12 @@
           <dt>W A S D</dt><dd>Hareket</dd>
           <dt>Boşluk</dt><dd>Zıplama, suda yukarı yüzme</dd>
           <dt>Sol Shift / W'ye iki kez</dt><dd>Koşma</dd>
-          <dt>C</dt><dd>Eğilme (kenardan düşmez)</dd>
+          <dt>C</dt><dd>Eğilme (kenardan düşmez), tekneden inme, paletle suda dalma</dd>
           <dt>Sol tık (basılı)</dt><dd>Kazma, kesme, kırma</dd>
           <dt>Sağ tık</dt><dd>Blok koyma, yeme, toplama, masa ve fırını açma</dd>
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
           <dt>E</dt><dd>Envanter ve üretim</dd>
+          <dt>J</dt><dd>Görev günlüğü</dd>
           <dt>Q / Shift + Q</dt><dd>Elindekini at / yığını at</dd>
           <dt>F3</dt><dd>Konum ve teknik bilgiler</dd>
           <dt>Esc</dt><dd>Duraklat</dd>
@@ -152,6 +192,19 @@
           <li>Zırh parçaları envanterdeki zırh yuvalarına konur ya da elde tutulurken sağ tıkla giyilir; alınan hasarı azaltır.</li>
           <li>Hayvanlardan et, deri, yün ve tüy elde edilir. Çiğ et kamp ateşi veya fırın yanında pişirilir. Kurtlar saldırıya uğramadıkça zararsızdır.</li>
           <li>Yatakta yalnızca geceleri uyunabilir; yatak aynı zamanda doğma noktasını belirler.</li>
+          <li>Haritada köyler bulunur. Köylülere sağ tıklayarak sikke karşılığında ticaret yapılır ve görev alınır. Görevler ve ticaret köydeki itibarı yükseltir; köylülere zarar vermek itibarı düşürür.</li>
+          <li>Pusuladaki ev simgesi yakındaki köyleri, sarı işaret görev hedefini gösterir. Köylüler geceleri evlerine çekilir.</li>
+          <li>Buğday tohumu toprak veya çimen üstüne ekilir ve zamanla olgunlaşır. Buğdaydan ekmek yapılır. Köy sandıklarında yararlı eşyalar bulunabilir.</li>
+          <li>Derin mağaralarda lav gölleri bulunur; lav yakar ve içine düşen eşyaları yok eder. Su içine girmek yanmayı söndürür.</li>
+          <li>Zindanlar, canavar yuvası ve ganimet sandıkları içeren taş odalardır. Yuvanın çevresine meşale koymak canavar çıkışını durdurur; yuva kazmayla kırılabilir.</li>
+          <li>İskeletler uzaktan ok atar, mağara örümcekleri duvara tırmanır ve zehirler. Kemikten elde edilen kemik tozu ekinleri hızla büyütür.</li>
+          <li>Pusulada ★ doğma noktasını, ✖ son ölüm noktasını gösterir; işaretlerin altındaki sayı blok cinsinden uzaklıktır.</li>
+          <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
+          <li>Sularda hamsi sürüleri, çipura ve ahtapot yaşar. Derin açık denizlerde dolaşan köpekbalıkları sudaki oyuncuya saldırır.</li>
+          <li>Olta sağ tıkla atılır; şamandıra suya daldığı anda yeniden sağ tıklanırsa av çekilir. Derin sularda hazine çıkma olasılığı artar. Balık ve ahtapot pişirilerek yenir.</li>
+          <li>Dalış maskesi kask yuvasına takılır; oksijeni üç kat yavaş harcatır ve su altında görüşü uzatır. Palet bot yuvasına takılır; yüzme hızını artırır, karada yürüyüşü biraz yavaşlatır.</li>
+          <li>Sandal ve yelkenli suya bakılarak sağ tıkla konur ve sağ tıkla binilir. W/S hızı, A/D dümeni ayarlar; C tuşuyla inilir. Yelkenli daha hızlı, sandal daha çeviktir. Tekneye sol tıkla vurularak kırılır.</li>
+          <li>Kıyı köylerinde iskele, deniz feneri, balıkçı kulübesi ve demirli tekneler bulunan limanlar vardır. Balıkçı balık alır; olta, tekne, maske ve palet satar. Pusuladaki ⚓ limanı, ⛵ en yakın tekneyi gösterir.</li>
           <li>Oyun otomatik olarak kaydedilir.</li>
         </ul>
       </div>

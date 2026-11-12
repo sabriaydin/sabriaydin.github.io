@@ -3,7 +3,7 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI } from '../bloklar.js';
+import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, LAV } from '../bloklar.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
 const EPS = 0.5 / 256;
@@ -55,7 +55,8 @@ export function meshle(P) {
       if (id) {
         if (OPAK[id]) s = 0;
         else if (s > 0) {
-          if (SIVI[id]) s = Math.max(0.3, s * 0.9);
+          if (LAV[id]) s = 0;
+          else if (SIVI[id]) s = Math.max(0.3, s * 0.9);
           else if (KESIK[id] && !AYNI_GIZLE[id]) s = Math.max(0.5, s * 0.86);
         }
       }
@@ -75,6 +76,7 @@ export function meshle(P) {
       capraz(gok, i, id, x, y, z, op);
       if (SIVI[id]) sivi(P, gok, i, x, y, z, su);
     } else if (ciz === C_SIVI) sivi(P, gok, i, x, y, z, su);
+    else if (ciz === C_LAV) sivi(P, gok, i, x, y, z, op, true);
   }
   return { opak: op.bitir(), su: su.bitir() };
 }
@@ -139,29 +141,31 @@ function capraz(gok, i, id, x, y, z, T) {
   }
 }
 
-function sivi(P, gok, i, x, y, z, T) {
-  const ustSivi = y < PY - 1 && SIVI[P[i + DY]];
+/* Su ve lav yüzeyleri; lav kendi ışığıyla parlar (ışık değeri 2 = gölgesiz) */
+function sivi(P, gok, i, x, y, z, T, lav = false) {
+  const ayni = n => (lav ? LAV[n] === 1 : SIVI[n] === 1 && !LAV[n]);
+  const ustSivi = y < PY - 1 && ayni(P[i + DY]);
   const h = ustSivi ? 1 : 0.875;
   for (let f = 0; f < 6; f++) {
     const Y = YUZLER[f];
     const ni = i + Y.komsu;
     if (f === 3 && y === 0) continue;
     const n = (f === 2 && y === PY - 1) ? 0 : P[ni];
-    if (SIVI[n] || OPAK[n]) continue;
+    if (ayni(n) || OPAK[n]) continue;
     if (f !== 2 && CIZIM[n] === C_KUP && !SIVI[n] && KESIK[n] === 0) continue;
-    const doku = YUZ_DOKU[7 * 6 + f];
+    const doku = YUZ_DOKU[(lav ? 59 : 7) * 6 + f];
     const b = T.n;
     const g = f === 2 ? 1 : (gok[ni] || gok[i]);
     for (let c = 0; c < 4; c++) {
       const k = Y.k[c];
       T.p.push(x + k[0], y + k[1] * h, z + k[2]);
       dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
-      T.l.push(Y.g, g);
+      if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g, g);
     }
     T.n += 4;
     T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
     /* Su yüzeyi alttan da görünsün */
-    if (f === 2) {
+    if (f === 2 && !lav) {
       const b2 = T.n;
       for (let c = 3; c >= 0; c--) {
         const k = Y.k[c];

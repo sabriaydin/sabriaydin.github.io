@@ -61,7 +61,8 @@ window.SITE = {
       name: 'Projeler',
       items: [
         { name: 'Oyunlar', items: [
-          { name: 'Hunger', url: 'projeler/oyunlar/hunger/' }
+          { name: 'Hunger', url: 'projeler/oyunlar/hunger/' },
+          { name: 'HungerMan', url: 'projeler/oyunlar/hungerman/' }
         ] },
         { name: 'Yazılımlarım', items: [
           { name: 'Parola Defteri', url: 'projeler/programlar/parola-defteri/' },

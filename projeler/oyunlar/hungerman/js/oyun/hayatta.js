@@ -4,7 +4,7 @@ export class Hayatta {
   sifirla() {
     this.can = 20; this.aclik = 20; this.oksijen = 10;
     this.yorgunluk = 0; this.iyiSayac = 0; this.acSayac = 0; this.oksSayac = 0; this.bogSayac = 0;
-    this.olu = false; this.sonHasar = 0; this.zehir = 0;
+    this.olu = false; this.sonHasar = 0; this.zehir = 0; this.agu = 0; this.aguSayac = 0; this.yanma = 0; this.yanmaSayac = 0; this.lavSayac = 0;
   }
   yor(n) { this.yorgunluk += n; }
   /* zehirOlasilik: çürük et gibi yiyeceklerde mide bulantısı olasılığı; true dönerse bulantı başladı */
@@ -25,9 +25,18 @@ export class Hayatta {
     this.olaylar.hasar && this.olaylar.hasar(n, sebep);
     if (this.can <= 0) { this.olu = true; this.olaylar.olum && this.olaylar.olum(sebep); }
   }
-  /* basSuda: baş su altında; kosuyor, mesafe: yorgunluk için */
-  guncelle(dt, basSuda) {
+  /* basSuda: baş su altında; o: { lavda, suda, maske } (dalış maskesi oksijeni üç kat yavaş harcatır) */
+  guncelle(dt, basSuda, o = {}) {
     if (this.olu) return;
+    /* Lav ve yanma: zırh korumaz */
+    if (o.lavda) { this.yanma = 6; this.lavSayac -= dt; if (this.lavSayac <= 0) { this.lavSayac = 0.5; this.hasar(4, 'lav'); } }
+    else this.lavSayac = 0;
+    if (this.yanma > 0) {
+      if (o.suda) this.yanma = 0;
+      else { this.yanma -= dt; if (!o.lavda) { this.yanmaSayac -= dt; if (this.yanmaSayac <= 0) { this.yanmaSayac = 1; this.hasar(1, 'yanma'); } } }
+    }
+    /* Örümcek zehri: canı 1'in altına düşürmez */
+    if (this.agu > 0) { this.agu -= dt; this.aguSayac -= dt; if (this.aguSayac <= 0) { this.aguSayac = 1.25; if (this.can > 1) this.hasar(1, 'agu'); } }
     this.yor(dt * 0.045);
     if (this.zehir > 0) { this.zehir -= dt; this.yor(dt * 1.2); }
     while (this.yorgunluk >= 4) { this.yorgunluk -= 4; if (this.aclik > 0) this.aclik--; }
@@ -44,7 +53,7 @@ export class Hayatta {
     /* Oksijen */
     if (basSuda) {
       this.oksSayac += dt;
-      if (this.oksSayac >= 1.4) { this.oksSayac = 0; if (this.oksijen > 0) this.oksijen--; }
+      if (this.oksSayac >= (o.maske ? 4.2 : 1.4)) { this.oksSayac = 0; if (this.oksijen > 0) this.oksijen--; }
       if (this.oksijen <= 0) { this.bogSayac += dt; if (this.bogSayac >= 1) { this.bogSayac = 0; this.hasar(2, 'bogulma'); } }
     } else {
       this.oksSayac += dt;
@@ -56,4 +65,5 @@ export class Hayatta {
   iceAktar(o) { if (!o) return; this.can = o.can ?? 20; this.aclik = o.aclik ?? 20; this.oksijen = o.oksijen ?? 10; this.yorgunluk = o.yorgunluk ?? 0; this.zehir = o.zehir ?? 0; this.olu = this.can <= 0; }
 }
 
-export const OLUM_SEBEBI = { dusme: 'Yüksekten düştünüz.', aclik: 'Açlıktan öldünüz.', bogulma: 'Boğuldunuz.', zombi: 'Bir zombi tarafından öldürüldünüz.', kurt: 'Bir kurt tarafından öldürüldünüz.' };
+export const OLUM_SEBEBI = { dusme: 'Yüksekten düştünüz.', aclik: 'Açlıktan öldünüz.', bogulma: 'Boğuldunuz.', zombi: 'Bir zombi tarafından öldürüldünüz.', kurt: 'Bir kurt tarafından öldürüldünüz.',
+  iskelet: 'Bir iskeletin okuyla öldürüldünüz.', kopekbaligi: 'Bir köpekbalığı tarafından öldürüldünüz.', orumcek: 'Bir mağara örümceği tarafından öldürüldünüz.', lav: 'Lava düştünüz.', yanma: 'Yanarak öldünüz.', agu: 'Zehirlenerek öldünüz.' };

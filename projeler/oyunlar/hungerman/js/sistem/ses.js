@@ -71,7 +71,13 @@ export class Ses {
       case 'tavuk': this.ton(950 * y, 0.07, 0.08 * h, 'triangle', 720 * y); setTimeout(() => this.ton(1050 * y, 0.06, 0.07 * h, 'triangle', 800 * y), 110); break;
       case 'tavsan': this.ton(1300 * y, 0.08, 0.05 * h, 'triangle', 1000); break;
       case 'kurt': if (tip === 'normal') { this.patlama(220, 0.6, 0.12 * h, 'lowpass', 2); this.ton(95, 0.6, 0.1 * h, 'sawtooth', 80); } else this.ton(700 * y, 0.25, 0.12 * h, 'triangle', 450); break;
+      case 'koylu': this.ton(210 * y, 0.16, 0.07 * h, 'triangle', 170 * y); setTimeout(() => this.ton(190 * y, 0.2, 0.06 * h, 'triangle', 230 * y), 170); break;
+      case 'iskelet': for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(2400 * y, 0.04, 0.12 * h, 'bandpass', 6), i * 70); break;
+      case 'orumcek': this.patlama(5200 * y, tip === 'normal' ? 0.5 : 0.25, 0.08 * h, 'highpass', 1, 0.7); break;
       case 'zombi': this.ton(105 * y, 0.9, 0.14 * h, 'sawtooth', 75 * y); this.patlama(380, 0.8, 0.08 * h, 'lowpass', 3, 0.6); break;
+      case 'balik': this.patlama(1400 * y, 0.08, 0.14 * h, 'bandpass', 2); if (tip !== 'normal') this.patlama(700, 0.15, 0.1 * h, 'lowpass', 1); break;
+      case 'kopekbaligi': if (tip === 'normal') this.patlama(160, 0.6, 0.08 * h, 'lowpass', 1.5, 0.7); else { this.patlama(500, 0.2, 0.2 * h, 'lowpass', 1); this.ton(120 * y, 0.25, 0.1 * h, 'sawtooth', 80); } break;
+      case 'ahtapot': this.patlama(800 * y, 0.18, 0.1 * h, 'lowpass', 2, 0.6); break;
     }
   }
   yayGer() { this.patlama(900, 0.25, 0.08, 'bandpass', 3, 1.4); }
@@ -80,6 +86,22 @@ export class Ses {
   okSaplandi() { this.patlama(450, 0.1, 0.22, 'bandpass', 2); this.ton(160, 0.08, 0.1, 'triangle', 120); }
   vurus() { this.patlama(800, 0.08, 0.25, 'bandpass', 1); }
   zirhGiy() { this.patlama(1800, 0.15, 0.2, 'bandpass', 2); }
+  takas() { this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }
+  gorev() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.ton(f, 0.16, 0.07, 'triangle', f), i * 90)); }
+  /* Mağara ortam sesleri */
+  damla(h = 1) { this.ton(1500 + Math.random() * 900, 0.18, 0.05 * h, 'sine', 900); }
+  lav(h = 1) { this.patlama(180 + Math.random() * 120, 0.25, 0.12 * h, 'lowpass', 2, 0.5); }
+  yanma() { this.patlama(900, 0.3, 0.12, 'bandpass', 0.8, 1.5); }
+  /* Deniz: olta, tekne, dalış */
+  olta(tip) {
+    if (tip === 'at') { this.patlama(2600, 0.22, 0.1, 'highpass', 1, 0.5); this.ton(500, 0.2, 0.04, 'triangle', 250); }
+    else if (tip === 'dusme') this.patlama(900, 0.18, 0.18, 'lowpass', 1.2, 0.5);
+    else if (tip === 'isirma') { this.patlama(1300, 0.3, 0.3, 'lowpass', 0.8, 0.4); this.patlama(2600, 0.15, 0.12, 'bandpass', 1); }
+    else if (tip === 'cek') for (let i = 0; i < 4; i++) setTimeout(() => this.ton(1800, 0.025, 0.05, 'square', 1500), i * 45);
+    else if (tip === 'yakala') { this.patlama(1100, 0.35, 0.3, 'lowpass', 0.8, 0.4); setTimeout(() => this.ton(880, 0.1, 0.08, 'triangle', 1320), 120); }
+  }
+  kurek(h = 1) { this.patlama(700 + Math.random() * 200, 0.32, 0.16 * h, 'lowpass', 0.9, 0.45); }
+  dalga(h = 1) { this.patlama(420 + Math.random() * 120, 1.2, 0.07 * h, 'lowpass', 0.6, 0.6); }
   tik() { this.ton(1200, 0.03, 0.06, 'square', 900); }
   ac() { this.ton(440, 0.06, 0.06, 'triangle', 660); }
   kapa() { this.ton(660, 0.06, 0.06, 'triangle', 440); }

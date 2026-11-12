@@ -1,0 +1,50 @@
+/* Hunger 3D - Envanter / Üretim ekranları: sekmeler ve gelişmiş Üretim ekranı */
+
+/* panel kutusu: üstte sekmeler, altında seçili ekran (Envanter ekranına sandık açıldığında ikinci sütun olarak girer) */
+#pbox{grid-template-columns:auto;align-content:start;gap:12px 18px}
+#pbox.m-inv.cst{grid-template-columns:auto minmax(280px,360px)}
+#pbox.m-craft{grid-template-columns:minmax(0,1fr);width:min(760px,calc(100vw - 24px))}
+#pbox.m-inv #crfScr,#pbox.m-craft #invScr,#pbox.m-craft #cbox{display:none}
+#ptabs{grid-column:1/-1;display:flex;gap:6px;border-bottom:1px solid var(--line);padding-bottom:10px}
+#ptabs button{font:inherit;font-size:14px;font-weight:600;color:var(--mut);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 16px;cursor:pointer}
+#ptabs button:hover{color:var(--tx)}
+#ptabs button.on{color:var(--tx);background:var(--red2);border-color:var(--red)}
+#ptabs kbd{font:11px/1 system-ui,sans-serif;color:var(--mut);background:#0d0d0e;border:1px solid var(--line);border-radius:4px;padding:2px 5px;margin-left:4px}
+#ptabs button.on kbd{color:var(--tx)}
+
+/* Üretim ekranı */
+#crfScr h2{margin:0 0 8px}
+#crfSt{display:grid;gap:6px;margin:0 0 10px;padding:8px 10px;background:var(--panel2);border:1px solid var(--line);border-radius:6px}
+.cs-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-size:12px}
+.cs-t{min-width:76px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-size:11px}
+.cs{padding:2px 8px;border-radius:10px;border:1px solid var(--line);background:#101012}
+.cs.ok{color:#9ad39a;border-color:#3e6a3e}.cs.no{color:var(--mut)}
+.cm{display:inline-flex;align-items:center;gap:3px;padding:1px 7px 1px 3px;border-radius:10px;border:1px solid var(--line);background:#101012;font-size:12px}
+.cm img{width:18px;height:18px;image-rendering:pixelated}
+.cs-no{color:var(--mut)}
+#rcr{display:flex;gap:6px}
+#rcs{padding:3px 9px;font-size:12px}
+#crfScr #recipes{max-height:min(54vh,520px);overflow:auto;padding-right:4px}
+#crfScr .rc{grid-template-columns:40px 1fr auto;align-items:start}
+#crfScr .rc.can{border-color:#3e6a3e}
+#crfScr .rc.fav{box-shadow:inset 3px 0 0 #d0a02f}
+#crfScr .rb{min-width:0;display:grid;gap:3px}
+#crfScr .rb b small{font-weight:400;color:var(--mut);margin-left:6px;font-size:11px}
+.ing{display:flex;flex-wrap:wrap;gap:4px}
+.ig{display:inline-flex;align-items:center;gap:3px;padding:1px 7px 1px 3px;border-radius:10px;border:1px solid var(--line);background:#101012;font-size:12px}
+.ig img{width:16px;height:16px;image-rendering:pixelated}
+.ig.ok{color:#9ad39a}.ig.no{color:#e07b73;border-color:#6a3e3a}
+.ig em{font-style:normal;opacity:.85}
+.stn{font-size:12px}.stn.ok{color:#9ad39a}.stn.no{color:#e0a073}
+.rd{color:var(--mut);font-size:12px}
+#crfScr .ra{display:grid;gap:4px;justify-items:stretch;min-width:84px}
+#crfScr .ra button{padding:4px 10px;font-size:12px}
+#crfScr .ra .star{font-size:15px;line-height:1;padding:3px 8px;color:var(--mut)}
+#crfScr .ra .star.on{color:#d0a02f;border-color:#d0a02f}
+.crfb{margin-top:10px}
+
+@media (max-width:760px){
+ #pbox.m-craft{width:auto}
+ #crfScr .rc{grid-template-columns:34px 1fr}
+ #crfScr .ra{grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(70px,1fr))}
+}

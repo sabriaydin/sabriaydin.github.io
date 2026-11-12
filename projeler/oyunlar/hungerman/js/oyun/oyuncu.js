@@ -1,6 +1,6 @@
 /* HungerMan - oyuncu: birinci şahıs hareket, çarpışma, yüzme, eğilme, düşme */
 import { THREE } from '../grafik/sahne.js';
-import { SIVI, KATI } from '../bloklar.js';
+import { SIVI, KATI, LAV } from '../bloklar.js';
 import { DUNYA_SINIRI } from '../sabitler.js';
 
 const YARIM = 0.3;
@@ -54,7 +54,10 @@ export class Oyuncu {
     const bas = d.blok(Math.floor(p.x), Math.floor(p.y + this.goz), Math.floor(p.z));
     const oncekiSu = this.suda;
     this.suda = SIVI[vucut] === 1 || SIVI[d.blok(Math.floor(p.x), Math.floor(p.y + 1.2), Math.floor(p.z))] === 1;
-    this.basSuda = SIVI[bas] === 1;
+    this.basSuda = SIVI[bas] === 1 && !LAV[bas];
+    const ayak = d.blok(Math.floor(p.x), Math.floor(p.y + 0.05), Math.floor(p.z));
+    this.lavda = LAV[vucut] === 1 || LAV[ayak] === 1;
+    this.basLavda = LAV[bas] === 1;
     if (this.suda && !oncekiSu && v.y < -4 && this.olaylar.suyaGirdi) this.olaylar.suyaGirdi(-v.y);
 
     /* Eğilme: tavan varsa kalkılmaz */
@@ -65,19 +68,23 @@ export class Oyuncu {
     const ileri = (g.ileri ? 1 : 0) - (g.geri ? 1 : 0), yan = (g.sag ? 1 : 0) - (g.sol ? 1 : 0);
     this.kosuyor = g.kos && ileri > 0 && !this.egiliyor && g.kosabilir;
     let hizMax = this.egiliyor ? 1.35 : this.kosuyor ? 5.7 : 4.3;
-    if (this.suda) hizMax = this.kosuyor ? 3.2 : 2.3;
+    /* Palet: suda hızlandırır, karada biraz yavaşlatır */
+    if (this.suda) hizMax = (this.kosuyor ? 3.2 : 2.3) * (g.palet ? 1.65 : 1);
+    else if (g.palet) hizMax *= 0.85;
+    if (this.lavda) hizMax = 1.1;
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
     let ix = -sy * ileri + cy * yan, iz = -cy * ileri - sy * yan;
     const l = Math.hypot(ix, iz); if (l > 0) { ix /= l; iz /= l; }
-    const ivme = this.yerde ? 14 : this.suda ? 5 : 3.2;
+    const ivme = this.yerde ? 14 : this.suda ? (g.palet ? 7 : 5) : 3.2;
     const k = Math.min(1, ivme * dt);
     v.x += (ix * hizMax - v.x) * k;
     v.z += (iz * hizMax - v.z) * k;
 
     if (this.suda) {
-      v.y -= 9 * dt;
-      if (g.zipla) v.y += 22 * dt;
-      v.y = Math.max(-3.5, Math.min(v.y, 3.2));
+      v.y -= (this.lavda ? 14 : 9) * dt;
+      if (g.zipla) v.y += (g.palet ? 26 : 22) * dt;
+      else if (g.palet && g.egil) v.y -= 10 * dt;
+      v.y = Math.max(g.palet ? -4.5 : -3.5, Math.min(v.y, g.palet ? 4 : 3.2));
       /* Su yüzeyinde kıyıya tırmanmak için hafif itiş */
       if (g.zipla && (Math.abs(v.x) > 0.5 || Math.abs(v.z) > 0.5) && this.carpisiyor(p.x + ix * 0.4, p.y + 0.3, p.z + iz * 0.4)) v.y = Math.max(v.y, 4.5);
       this.dusus = 0;

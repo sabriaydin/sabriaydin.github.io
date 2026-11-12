@@ -18,7 +18,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Pusula, saat, F3 bilgi paneli, ayarlar (görüş mesafesi, görüş açısı, hassasiyet, ses)
 - Otomatik kayıt (tarayıcının IndexedDB deposu), birden fazla dünya
 
-## 2. aşama (bu sürüm, 0.2.0)
+## 2. aşama (0.2.0)
 
 - Hayvanlar: inek, koyun, domuz, tavuk, tavşan ve kurt; biyomlarına göre gruplar hâlinde doğar, gezinir, vurulunca kaçar
 - Kurtlar saldırıya uğrayana kadar zararsızdır; saldırılırsa sürü hâlinde karşılık verir
@@ -29,13 +29,50 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Kamp ateşi (ışık verir, et pişirir), yatak (geceyi atlatır, doğma noktası belirler)
 - Gösterge: zırh çubuğu, bakılan canlının adı ve canı
 
+## 3. aşama (0.3.0)
+
+- Köyler: dünya 384 x 384 bloklu bölgelere ayrılır, uygun bölgelerde tohuma göre köy kurulur (yaklaşık 25-30 köy). Kuyu, meydan, dört yönde yollar, küçük ve büyük evler, demirci, buğday tarlaları, pazar tezgâhları ve fener direkleri bulunur. Çöl ve tayga köyleri kendi malzemeleriyle yapılır. Yeni dünyalarda oyuncu bir köyün yanında doğar.
+- Köylüler: çiftçi, kasap, demirci, oduncu, şifacı ve avcı; adları ve meslekleri köye göre sabittir. Gündüz köyde dolaşır, yanlarına gelindiğinde oyuncuya döner, zombilerden kaçar, geceleri evlerine çekilir.
+- Ticaret: sikke ile alım-satım; her köylünün 5 takası vardır, takas hakları her sabah yenilenir.
+- Görevler: getirme, avlanma (zombi, kurt) ve başka bir köye mektup götürme; aynı anda en fazla 3 görev; görev günlüğü (J) ve ekranda görev izleyici.
+- İtibar: ticaret ve görevlerle yükselir, köylülere zarar vermekle düşer; fiyatları etkiler, çok düşükse köylüler ticaret yapmaz.
+- Tarım: buğday tohumu (uzun ottan da düşer) toprak veya çimen üstüne ekilir ve olgunlaşır; buğdaydan ekmek ve saman balyası yapılır.
+- Sandık: 27 yuvalı depolama; köy sandıklarında ganimet bulunur.
+- Yeni eşyalar: sikke, ekmek, buğday, tohum, şifa iksiri, altın elma, mektup, kiremit, saman balyası, toprak yol.
+- Pusula: yakındaki köyler (ev simgesi) ve görev hedefleri (sarı işaret) gösterilir.
+
+## 4. aşama (0.4.0)
+
+- Mağaralar: Y 10 ve altındaki boşluklar lav gölüdür; lav kendi ışığıyla parlar, yakar (4 hasar / 0,5 sn), içine düşen eşyaları yok eder. Lavdan çıkınca yanma birkaç saniye sürer; su yanmayı söndürür. Lav yanındaki blok kırılınca boşluğa lav dolar.
+- Yarıklar: yer yer yüzeye kadar açılan, derinliklere inen kanyonlar.
+- Parıltı kristalleri: derin mağaraların tavan ve tabanında, ışık saçan ve toplanabilen kristaller.
+- Zindanlar: 56 x 56 bloklu hücrelerde yer yer bulunan, yosunlu taştan odalar; canavar yuvası ve değerli ganimet sandıkları (demir, altın, elmas, altın elma, yay, zırh, elmas kılıç vb.).
+- Canavar yuvası: oyuncu yakındayken ve karanlıkta canavar çıkarır; çevresine meşale konunca durur; kırılınca sikke düşürür.
+- Yeni düşmanlar: okçu iskelet (mesafeyi korur, görüş hattı varsa ok atar, güneşte yanar) ve mağara örümceği (duvara tırmanır, atılır, zehirler; aydınlıkta saldırmaz).
+- Zehir: örümcek zehri canı 1 kalbin altına düşürmez; zehirliyken kalpler yeşile döner.
+- Kemik ve kemik tozu: kemik tozu ekinleri hızla büyütür, fidanları ağaca dönüştürebilir, çimende çiçek açtırır.
+- Mağara ortam sesleri (damla, lav fokurtusu), lav içinde turuncu görüş, yanma efekti.
+- Yeni görevler: iskelet ve örümcek avı, kemik ve kristal getirme.
+- Pusula yenilendi: derece göstergesi, çentikler, işaretlerin altında uzaklık, doğma noktası (★) ve son ölüm noktası (✖) işaretleri; görev ve ölüm işaretleri ekran dışındayken kenarda gösterilir.
+- Saat/gün göstergesi yenilendi: gök yayında güneş veya ay, gün evresi (Şafak, Sabah, Öğle, İkindi, Akşam, Gece), gece uyarısı ve kalan süre, konum satırı (köy, biyom veya yeraltı derinliği).
+
+## 5. aşama (bu sürüm, 0.5.0)
+
+- Su altı ekosistemi: sığ okyanuslarda renkli mercan resifleri (blok ve dal mercanlar), deniz çayırı, deniz yosunu ve inci verebilen istiridyeler.
+- Batık gemiler: 112 x 112 bloklu hücrelerde, derin okyanus tabanında kırık direkli ahşap gövdeler; kamarasında ve güvertesinde hazine sandıkları (sikke, inci, elmas, külçe, altın elma, dalış maskesi, palet, olta).
+- Deniz canlıları: hamsi sürüleri, çipura, ahtapot ve derin açık denizde köpekbalığı. Balıklar üç boyutlu yüzer, oyuncudan kaçar, sudan çıkınca çırpınır; köpekbalığı sudaki oyuncuya saldırır.
+- Balıkçılık: olta sağ tıkla atılır, şamandıra suda yüzer; balık vurunca şamandıra dalar ve o anda çekilirse av gelir (balık, ahtapot, çer çöp ya da hazine). Derin suda hazine olasılığı artar.
+- Yeni yiyecekler: çiğ/pişmiş balık, çiğ/pişmiş ahtapot (kamp ateşi veya fırın).
+- Dalış donanımı: dalış maskesi (oksijen üç kat yavaş azalır, su altında görüş uzar) ve palet (yüzme hızı artar, karada biraz yavaşlatır; C ile dalınır).
+- Tekneler: sandal (çevik) ve yelkenli (hızlı). Suya konur, binilir (W/S hız, A/D dümen, C ile inilir), dalgada yalpalar, karaya oturur, vurularak kırılır; kürek ve yelken canlandırması, dalga sesleri. Tekneler kaydedilir.
+- Limanlar: kıyıya yakın köylerin yolu kıyıya uzatılır; ahşap iskele, uç platformu ve fenerler, beyaz-kırmızı bantlı deniz feneri (döner merdiven, camlı ışık odası, geceleri dönen ışık huzmesi), balıkçı kulübesi ve demirli tekneler. Kıyı bölgelerinde limanlı balıkçı köyleri de kurulur.
+- Balıkçı köylü: balık alır; olta, pişmiş balık, sandal, yelkenli, maske ve palet satar; balık, ahtapot, inci, köpekbalığı dişi ve köpekbalığı avı görevleri verir.
+- Pusula: ⚓ liman ve ⛵ en yakın tekne işaretleri. Konum satırı tekne hızını ve su altı derinliğini gösterir.
+
 ## Sonraki aşamalar
 
-1. Köyler, köylü NPC'ler, ticaret ve görev sistemi
-2. Tehlikeli ve ödüllü gelişmiş mağara sistemi (lav, zindanlar, sandıklar)
-3. Su altı ekosistemi, liman ve tekneler
-4. Çok oyunculu (bir oyuncu sunucu olur, diğerleri kodla katılır)
-5. Harita ve büyük harita ekranı
+1. Çok oyunculu (bir oyuncu sunucu olur, diğerleri kodla katılır)
+2. Harita ve büyük harita ekranı
 
 ## Klasör yapısı
 
@@ -48,13 +85,18 @@ js/sabitler.js        Ortak sabitler (parça boyutu, deniz seviyesi, gün süres
 js/rastgele.js        Tohumlu rastgele sayı ve gürültü fonksiyonları
 js/bloklar.js         Blok, eşya ve alet tanımları
 js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
+js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
+js/dunya/zindan-uretici.js Zindan odaları
+js/dunya/batik-uretici.js Batık gemiler
 js/dunya/meshleyici.js Blokları çizilebilir geometriye çevirir
 js/dunya/isci.js      Arka plan işçisi (üretim ve meshleme)
 js/dunya/dunya.js     Parça yükleme / boşaltma, blok okuma-yazma
 js/grafik/sahne.js    Çizici, gökyüzü, ışıklar, seçim kutusu, eldeki eşya
 js/grafik/doku.js     Kodla çizilen dokular ve eşya simgeleri
-js/oyun/*             Oyuncu, etkileşim, envanter, üretim, hayatta kalma, düşen eşyalar
-js/varlik/*           Hayvanlar ve zombiler: türler, modeller, yapay zekâ, oklar
+js/grafik/fener.js    Deniz fenerlerinin dönen ışık huzmesi
+js/oyun/*             Oyuncu, etkileşim, envanter, üretim, hayatta kalma, düşen eşyalar, olta, tekneler
+js/varlik/*           Hayvanlar, deniz canlıları, düşmanlar ve köylüler: türler, modeller, yapay zekâ, oklar
+js/koy/*              Köy yönetimi, meslekler ve takaslar, görevler
 js/arayuz/*           Gösterge ve envanter ekranı
 js/sistem/*           Ses ve kayıt
 ```
