@@ -6,6 +6,7 @@ Menü bağlantısı `assets/js/site.js` → Projeler → Oyunlar → `items` iç
 ## HungerMan (`oyunlar/hungerman/`)
 
 Sıfırdan geliştirilen, her seferinde rastgele oluşan voksel tabanlı açık dünya hayatta kalma oyunu (Three.js r169, `lib/` içinde). Ortak `three.min.js` dosyasını kullanmaz; kendi kopyası ES modülü olarak yüklenir.
+Çok oyunculu bölüm (`js/ag/`) eşler arası bağlantı için kendi `lib/peerjs.min.js` kopyasını kullanır; bu dosya yalnızca çok oyunculu açılınca yüklenir.
 Ayrıntılı dosya düzeni ve aşama notları `oyunlar/hungerman/README.md` içindedir. Menü bağlantısı: Projeler → Oyunlar → HungerMan.
 
 ## Hunger 3D FPS (`oyunlar/hunger/`)

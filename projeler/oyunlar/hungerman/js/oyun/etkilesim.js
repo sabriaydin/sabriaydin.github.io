@@ -97,8 +97,7 @@ export class Etkilesim {
       if (g.sag && this.sagBekleme <= 0 && !this.tekneler.binilen) {
         this.sagBekleme = 0.4;
         if (this.olta && this.olta.aktif) this.olta.kaldir();
-        this.tekneler.bin(this.hedefTekne, this.oyuncu);
-        this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne');
+        if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne');
       } else if (g.sol && this.saldiriBekleme <= 0) { this.saldiriBekleme = 0.3; this.vurus = 0.01; this.tekneler.vur(this.hedefTekne); }
       this.sahne.secimGoster(null, 0);
       return;

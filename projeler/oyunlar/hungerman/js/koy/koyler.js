@@ -18,11 +18,13 @@ export class Koyler {
     this.nufus = new Map();     // koyId -> Map(idx -> varlık)
     this.sayac = 0;
     this.icindeki = null;
+    this.ayna = false;   // çok oyunculu istemci: köylüleri ve limandaki tekneleri sunucu yönetir
   }
   durum(id) { return this.kayit[id] || (this.kayit[id] = { itibar: 0, takas: {}, gorevNo: {}, olu: [] }); }
   koy(id) { const [rx, rz] = id.split(',').map(Number); return koyBul(this.uretici, rx, rz); }
 
-  guncelle(dt, oyuncu) {
+  /* ekKonumlar: çok oyunculu sunucuda diğer oyuncuların konumları (köylüler onların çevresinde de ortaya çıkar) */
+  guncelle(dt, oyuncu, ekKonumlar) {
     this.sayac -= dt;
     if (this.sayac > 0) return;
     this.sayac = 1;
@@ -32,9 +34,14 @@ export class Koyler {
     const icinde = k && Math.max(Math.abs(p.x - k.x), Math.abs(p.z - k.z)) < k.yaricap ? k : null;
     if (icinde && icinde !== this.icindeki) this.bildirim(`${icinde.ad} köyüne hoş geldiniz. ${this.itibarMetni(icinde.id)}`);
     this.icindeki = icinde;
+    if (this.ayna) return;
     /* Köylüleri ortaya çıkar / kaldır */
-    for (const koy of koylerAlan(this.uretici, p.x - GORUNME, p.z - GORUNME, p.x + GORUNME, p.z + GORUNME)) {
-      if (Math.hypot(koy.x - p.x, koy.z - p.z) > GORUNME) continue;
+    const konumlar = ekKonumlar && ekKonumlar.length ? [p, ...ekKonumlar] : [p];
+    const yakin = new Map();
+    for (const q of konumlar) for (const koy of koylerAlan(this.uretici, q.x - GORUNME, q.z - GORUNME, q.x + GORUNME, q.z + GORUNME)) {
+      if (Math.hypot(koy.x - q.x, koy.z - q.z) <= GORUNME) yakin.set(koy.id, koy);
+    }
+    for (const koy of yakin.values()) {
       let n = this.nufus.get(koy.id);
       if (!n) { n = new Map(); this.nufus.set(koy.id, n); }
       const d = this.durum(koy.id);
@@ -53,7 +60,7 @@ export class Koyler {
     }
     for (const [id, n] of this.nufus) {
       const koy = this.koy(id);
-      if (koy && Math.hypot(koy.x - p.x, koy.z - p.z) < KAYBOLMA) {
+      if (koy && konumlar.some(q => Math.hypot(koy.x - q.x, koy.z - q.z) < KAYBOLMA)) {
         for (const [idx, v] of n) if (!this.varliklar.liste.includes(v)) n.delete(idx);
         continue;
       }
@@ -106,10 +113,11 @@ export class Koyler {
 
   /* Köylüye zarar verilirse */
   koyluVuruldu(v) { this.itibarDegistir(v.koy.id, -8); this.bildirim('Köylüler bu davranıştan hoşlanmadı.'); }
-  koyluOldu(v) {
+  /* sadeceDunya: çok oyunculuda köylüyü başka oyuncu öldürdüyse yalnızca köylü kalıcı olarak kaybolur (itibar onun) */
+  koyluOldu(v, sadeceDunya) {
     const d = this.durum(v.koy.id);
     if (!d.olu.includes(v.koylu.idx)) d.olu.push(v.koylu.idx);
-    this.itibarDegistir(v.koy.id, -30);
+    if (!sadeceDunya) this.itibarDegistir(v.koy.id, -30);
     const n = this.nufus.get(v.koy.id); if (n) n.delete(v.koylu.idx);
   }
 

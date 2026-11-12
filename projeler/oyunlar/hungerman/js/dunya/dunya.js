@@ -26,6 +26,12 @@ export class Dunya {
     this.ofsetler = [];
     this.merkez = [0, 0];
     this.kapat = false;
+    /* Çok oyunculu sunucu: diğer oyuncuların çevresindeki parçalar da (çizilmeden) üretilir; canlılar orada da yaşar */
+    this.ekMerkezler = [];
+    this.EK_R = 5;
+    this.ekOfsetler = [];
+    for (let z = -this.EK_R; z <= this.EK_R; z++) for (let x = -this.EK_R; x <= this.EK_R; x++) { const d = x * x + z * z; if (d <= (this.EK_R + 0.5) ** 2) this.ekOfsetler.push([x, z, d]); }
+    this.ekOfsetler.sort((a, b) => a[2] - b[2]);
     const n = Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 4) - 1));
     for (let i = 0; i < n; i++) {
       const w = new Worker(new URL('./isci.js', import.meta.url), { type: 'module' });
@@ -98,6 +104,18 @@ export class Dunya {
     for (const f of this.dinleyiciler) f(x, y, z, id, eski, kaynak);
     return true;
   }
+  /* Ağdan gelen blok değişikliği: parça yüklü değilse yalnızca değişiklik listesine işlenir */
+  agBlok(x, y, z, id) {
+    if (y < 0 || y >= PY) return false;
+    const cx = Math.floor(x / PB), cz = Math.floor(z / PB);
+    const p = this.parca(cx, cz);
+    if (p && p.v) return this.blokKoy(x, y, z, id, 'ag');
+    const k = parcaAnahtar(cx, cz);
+    let d = this.degisiklikler.get(k);
+    if (!d) { d = new Map(); this.degisiklikler.set(k, d); }
+    d.set(dizin(x - cx * PB, y, z - cz * PB), id);
+    return false;
+  }
   kirletK(cx, cz) { const p = this.parca(cx, cz); if (p) this.kirlet(p, true); }
   kirlet(p, acil) { p.kirli = true; p.surum++; if (acil) p.acil = true; }
 
@@ -117,11 +135,18 @@ export class Dunya {
     for (const p of this.parcalar.values()) {
       const dx = p.cx - pcx, dz = p.cz - pcz;
       if (dx * dx + dz * dz > (R + 3) * (R + 3)) {
+        /* Başka bir oyuncunun yakınındaysa veri kalır, yalnızca çizim kaldırılır */
+        if (this.ekMerkezler.length && this.ekYakin(p.cx, p.cz, this.EK_R + 2)) { if (p.mesh || p.suMesh) { this.meshSil(p); p.kirli = true; } continue; }
         this.meshSil(p); this.parcalar.delete(p.k);
         if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); }
       }
     }
     this.isDagit();
+  }
+
+  ekYakin(cx, cz, r) {
+    for (const [x, z] of this.ekMerkezler) if ((cx - x) ** 2 + (cz - z) ** 2 <= r * r) return true;
+    return false;
   }
 
   isDagit() {
@@ -132,7 +157,7 @@ export class Dunya {
     /* Önce oyuncunun değiştirdiği (acil) parçalar */
     for (const p of this.parcalar.values()) {
       if (!bos.length) return;
-      if (p.acil && p.v && !p.meshleniyor && this.komsularHazir(p)) { this.meshIste(bos.pop(), p); }
+      if (p.acil && p.v && !p.meshleniyor && (p.cx - pcx) ** 2 + (p.cz - pcz) ** 2 <= (R + 3) * (R + 3) && this.komsularHazir(p)) { this.meshIste(bos.pop(), p); }
     }
     for (const [ox, oz, d] of this.ofsetler) {
       if (!bos.length) return;
@@ -148,6 +173,14 @@ export class Dunya {
         continue;
       }
       if (d <= (R + 0.5) * (R + 0.5) && p.kirli && !p.meshleniyor && this.komsularHazir(p)) this.meshIste(bos.pop(), p);
+    }
+    /* Diğer oyuncuların çevresi: yalnızca blok verisi */
+    for (const [mx, mz] of this.ekMerkezler) for (const [ox, oz] of this.ekOfsetler) {
+      if (!bos.length) return;
+      const cx = mx + ox, cz = mz + oz, k = parcaAnahtar(cx, cz);
+      let p = this.parcalar.get(k);
+      if (!p) { p = { k, cx, cz, v: null, uretiliyor: false, kirli: true, acil: false, surum: 0, meshleniyor: false, mesh: null, suMesh: null }; this.parcalar.set(k, p); }
+      if (!p.v && !p.uretiliyor) { p.uretiliyor = true; const i = bos.pop(); i.mesgul = true; i.w.postMessage({ tur: 'uret', cx, cz }); }
     }
   }
 

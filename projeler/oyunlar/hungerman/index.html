@@ -48,6 +48,8 @@
   <pre id="hata" hidden></pre>
   <div id="fps" hidden></div>
   <div id="tikla" hidden><b>Devam etmek için tıklayın</b><span>Duraklatmak için Esc</span></div>
+  <div id="sohbet"><div id="sohbetListe"></div><input id="sohbetGiris" maxlength="200" placeholder="Mesaj yazınız · Enter: gönder · Esc: vazgeç" autocomplete="off" hidden></div>
+  <div id="oyuncuListesi" hidden></div>
 </div>
 
 <!-- Envanter ve üretim -->
@@ -106,7 +108,7 @@
     <p class="altBaslik">Açık dünya hayatta kalma</p>
     <div class="menuDugmeler">
       <button class="dugme ana" data-git="dunyalar">Tek Oyunculu</button>
-      <button class="dugme" disabled>Çok Oyunculu <em>Yakında</em></button>
+      <button class="dugme" data-git="cok">Çok Oyunculu</button>
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
       <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
     </div>
@@ -117,12 +119,41 @@
 <!-- Dünya listesi -->
 <div id="dunyalarEkrani" class="ekran menuArka" hidden>
   <div class="pencere orta">
-    <header><h2>Dünyalar</h2></header>
+    <header><h2 id="dunyalarBaslik">Dünyalar</h2></header>
     <div id="dunyaListe" class="liste"></div>
     <div class="altDugmeler">
       <button class="dugme ana" data-git="yeni">Yeni Dünya</button>
       <button class="dugme" data-git="ana">Geri</button>
     </div>
+  </div>
+</div>
+
+<!-- Çok oyunculu -->
+<div id="cokEkrani" class="ekran menuArka" hidden>
+  <div class="pencere orta dar">
+    <header><h2>Çok Oyunculu</h2></header>
+    <label class="alan">Oyuncu adınız<input id="cokAd" maxlength="16" autocomplete="off" spellcheck="false"></label>
+    <section class="cokBolum">
+      <h3>Bir dünyaya katıl</h3>
+      <div class="cokSatir"><input id="cokKod" maxlength="6" placeholder="Katılım kodu" autocomplete="off" spellcheck="false" aria-label="Katılım kodu"><button class="dugme ana kucuk" id="cokKatil">Katıl</button></div>
+    </section>
+    <section class="cokBolum">
+      <h3>Sunucu ol</h3>
+      <p class="aciklama">Dünyalarınızdan biri açılır ve diğer oyuncuların katılması için 6 karakterlik bir kod verilir. Oyun sırasında duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” düğmesi de aynı işi yapar.</p>
+      <button class="dugme" id="cokSunucu">Dünya Seç ve Aç</button>
+    </section>
+    <p id="cokDurum" class="cokDurum" hidden></p>
+    <p class="aciklama kucukNot">Bağlantı doğrudan oyuncular arasında kurulur; ayrı bir oyun sunucusu yoktur. İlk tanışma için PeerJS'in ücretsiz eşleştirme hizmeti kullanılır. Dünya, sunucu olan oyuncunun bilgisayarında kayıtlıdır; o oyuncu çıkınca dünya kapanır.</p>
+    <div class="altDugmeler"><button class="dugme" data-git="ana">Geri</button></div>
+  </div>
+</div>
+
+<!-- Bilgi (bağlantı kesildi vb.) -->
+<div id="bilgiEkrani" class="ekran menuArka" hidden>
+  <div class="pencere orta dar">
+    <header><h2 id="bilgiBaslik">Bilgi</h2></header>
+    <p id="bilgiMetin" class="bilgiMetin"></p>
+    <div class="altDugmeler"><button class="dugme ana" id="bilgiTamam">Ana Menü</button></div>
   </div>
 </div>
 
@@ -173,6 +204,8 @@
           <dt>E</dt><dd>Envanter ve üretim</dd>
           <dt>J</dt><dd>Görev günlüğü</dd>
           <dt>Q / Shift + Q</dt><dd>Elindekini at / yığını at</dd>
+          <dt>T / Enter</dt><dd>Sohbet (çok oyunculu)</dd>
+          <dt>Tab (basılı)</dt><dd>Oyuncu listesi ve katılım kodu</dd>
           <dt>F3</dt><dd>Konum ve teknik bilgiler</dd>
           <dt>Esc</dt><dd>Duraklat</dd>
         </dl>
@@ -205,6 +238,8 @@
           <li>Dalış maskesi kask yuvasına takılır; oksijeni üç kat yavaş harcatır ve su altında görüşü uzatır. Palet bot yuvasına takılır; yüzme hızını artırır, karada yürüyüşü biraz yavaşlatır.</li>
           <li>Sandal ve yelkenli suya bakılarak sağ tıkla konur ve sağ tıkla binilir. W/S hızı, A/D dümeni ayarlar; C tuşuyla inilir. Yelkenli daha hızlı, sandal daha çeviktir. Tekneye sol tıkla vurularak kırılır.</li>
           <li>Kıyı köylerinde iskele, deniz feneri, balıkçı kulübesi ve demirli tekneler bulunan limanlar vardır. Balıkçı balık alır; olta, tekne, maske ve palet satar. Pusuladaki ⚓ limanı, ⛵ en yakın tekneyi gösterir.</li>
+          <li>Çok oyunculu: bir oyuncu dünyasını “Dünyayı Arkadaşlara Aç” ile açar ve 6 karakterlik katılım kodunu paylaşır; diğerleri ana menüdeki Çok Oyunculu ekranından bu kodla katılır (en çok 8 oyuncu). Bloklar, canlılar, yere düşen eşyalar, sandıklar, tekneler ve zaman herkes için ortaktır; envanter, görevler ve köy itibarı her oyuncunun kendisinedir ve sunucuda oyuncu adıyla saklanır.</li>
+          <li>Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır. Pusuladaki renkli nokta diğer oyuncuları gösterir.</li>
           <li>Oyun otomatik olarak kaydedilir.</li>
         </ul>
       </div>
@@ -217,8 +252,14 @@
 <div id="duraklatEkrani" class="ekran yari" hidden>
   <div class="pencere orta dar">
     <header><h2>Oyun Duraklatıldı</h2></header>
+    <div id="agPanel" class="agPanel" hidden>
+      <div id="agKodSatir" class="agKod"><span>Katılım kodu</span><b id="agKod"></b><button class="dugme kucuk" id="agKopyala" type="button">Kopyala</button></div>
+      <div id="agOyuncular" class="agOyuncular"></div>
+      <p class="aciklama">Çok oyunculuda oyun duraklatılmaz; dünya sürmeye devam eder.</p>
+    </div>
     <div class="menuDugmeler">
       <button class="dugme ana" id="devamEt">Oyuna Dön</button>
+      <button class="dugme" id="agAc">Dünyayı Arkadaşlara Aç</button>
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
       <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
       <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>

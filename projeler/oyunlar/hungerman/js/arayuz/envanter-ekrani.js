@@ -55,6 +55,8 @@ export class EnvanterEkrani {
       this.tasinan = null;
     }
     this.tasimaCiz();
+    /* Çok oyunculu: kapanan sandığın içeriği sunucuya bildirilir */
+    if (this.sandik && this.kapandi) this.kapandi(this.sandik);
   }
 
   ciz() {

@@ -126,7 +126,7 @@ export class Hud {
       let kenar = false;
       if (Math.abs(f) > sinir) { if (!m.kenar) continue; f = Math.sign(f) * sinir; kenar = true; }
       const mes = m.mesafe != null ? `<small>${m.mesafe < 1000 ? Math.round(m.mesafe) : (m.mesafe / 1000).toFixed(1) + 'b'}</small>` : '';
-      h += `<span class="${m.sinif}${kenar ? ' kenar' : ''}" style="left:${yari + f * 3}px" title="${m.baslik || ''}"><i>${m.metin}</i>${mes}</span>`;
+      h += `<span class="${m.sinif}${kenar ? ' kenar' : ''}" style="left:${yari + f * 3}px${m.renk ? ';color:' + m.renk : ''}" title="${m.baslik || ''}"><i>${m.metin}</i>${mes}</span>`;
     }
     if (h !== this.son.isaret) { this.son.isaret = h; $('#pusulaIsaret').innerHTML = h; }
   }

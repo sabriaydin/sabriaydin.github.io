@@ -56,7 +56,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Pusula yenilendi: derece göstergesi, çentikler, işaretlerin altında uzaklık, doğma noktası (★) ve son ölüm noktası (✖) işaretleri; görev ve ölüm işaretleri ekran dışındayken kenarda gösterilir.
 - Saat/gün göstergesi yenilendi: gök yayında güneş veya ay, gün evresi (Şafak, Sabah, Öğle, İkindi, Akşam, Gece), gece uyarısı ve kalan süre, konum satırı (köy, biyom veya yeraltı derinliği).
 
-## 5. aşama (bu sürüm, 0.5.0)
+## 5. aşama (0.5.0)
 
 - Su altı ekosistemi: sığ okyanuslarda renkli mercan resifleri (blok ve dal mercanlar), deniz çayırı, deniz yosunu ve inci verebilen istiridyeler.
 - Batık gemiler: 112 x 112 bloklu hücrelerde, derin okyanus tabanında kırık direkli ahşap gövdeler; kamarasında ve güvertesinde hazine sandıkları (sikke, inci, elmas, külçe, altın elma, dalış maskesi, palet, olta).
@@ -69,17 +69,31 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Balıkçı köylü: balık alır; olta, pişmiş balık, sandal, yelkenli, maske ve palet satar; balık, ahtapot, inci, köpekbalığı dişi ve köpekbalığı avı görevleri verir.
 - Pusula: ⚓ liman ve ⛵ en yakın tekne işaretleri. Konum satırı tekne hızını ve su altı derinliğini gösterir.
 
+## 6. aşama (bu sürüm, 0.6.0): Çok oyunculu
+
+- Sunucu olma: oyun içinde duraklatma menüsündeki "Dünyayı Arkadaşlara Aç" düğmesi ya da ana menüde Çok Oyunculu > "Dünya Seç ve Aç". Dünyayı açan oyuncuya 6 karakterlik bir katılım kodu verilir (duraklatma menüsünde kopyalanabilir, Tab tuşuyla da görülür).
+- Katılma: ana menüde Çok Oyunculu ekranından oyuncu adı ve katılım kodu girilir. En çok 8 oyuncu.
+- Bağlantı doğrudan oyuncular arasında (WebRTC) kurulur; ayrı bir oyun sunucusu yoktur. İlk tanışma için PeerJS'in ücretsiz eşleştirme hizmeti kullanılır. Dünya, sunucu olan oyuncunun tarayıcısında kayıtlıdır.
+- Ortak olanlar: blok değişiklikleri, canlılar (yapay zekâ sunucuda çalışır, her canlı en yakın oyuncuya göre davranır), yere düşen eşyalar, oklar, sandıklar (aynı anda tek oyuncu açabilir), tekneler (aynı anda tek oyuncu sürer), gece-gündüz ve köylüler.
+- Kişisel olanlar: envanter, can ve açlık, görevler, köy itibarı, doğma noktası. Bunlar sunucuda oyuncu adıyla saklanır; aynı adla yeniden katılınca kalınan yerden devam edilir.
+- Sunucu, diğer oyuncuların çevresindeki parçaları da (çizmeden) üretir; böylece uzaktaki oyuncunun çevresinde de hayvanlar, canavarlar ve köylüler yaşar.
+- Diğer oyuncular insan modeliyle, isim etiketiyle ve ellerindeki eşyayla görünür; yürüme, koşma, eğilme, vurma ve tekne sürme canlandırılır. Pusulada renkli noktayla gösterilirler.
+- Sohbet: T veya Enter. Oyuncu listesi ve katılım kodu: Tab (basılı tutulur). Katılma ve ayrılma bildirimleri sohbette görünür.
+- Uyku: gece, tüm (canlı) oyuncular yatağa yattığında atlanır; yatakta beklerken hareket edilince kalkılır.
+- Çok oyunculuda duraklatma menüsü dünyayı durdurmaz. Sekme arka plandayken de dünya işlemeye devam eder.
+- Sunucu dünyayı kapatırsa ya da bağlantı koparsa diğer oyuncular bilgilendirilip ana menüye döner. Farklı sürümler, aynı ad ve dolu sunucu için açıklayıcı uyarılar verilir.
+- Kendi eşleştirme sunucusunu kullanmak isteyenler için adres çubuğuna `?sinyal=adres:port` eklenebilir (örnek: `?sinyal=localhost:9000`).
+
 ## Sonraki aşamalar
 
-1. Çok oyunculu (bir oyuncu sunucu olur, diğerleri kodla katılır)
-2. Harita ve büyük harita ekranı
+1. Harita ve büyük harita ekranı
 
 ## Klasör yapısı
 
 ```
 index.html            Menüler ve oyun ekranı
 css/oyun.css          Arayüz stilleri
-lib/                  Three.js (r169, MIT lisansı)
+lib/                  Three.js (r169, MIT lisansı), PeerJS (1.5.4, MIT lisansı; yalnız çok oyunculuda yüklenir)
 js/ana.js             Giriş noktası: menüler, girdi, oyun döngüsü, kayıt
 js/sabitler.js        Ortak sabitler (parça boyutu, deniz seviyesi, gün süresi)
 js/rastgele.js        Tohumlu rastgele sayı ve gürültü fonksiyonları
@@ -97,6 +111,7 @@ js/grafik/fener.js    Deniz fenerlerinin dönen ışık huzmesi
 js/oyun/*             Oyuncu, etkileşim, envanter, üretim, hayatta kalma, düşen eşyalar, olta, tekneler
 js/varlik/*           Hayvanlar, deniz canlıları, düşmanlar ve köylüler: türler, modeller, yapay zekâ, oklar
 js/koy/*              Köy yönetimi, meslekler ve takaslar, görevler
+js/ag/*               Çok oyunculu: bağlantı (baglanti), sunucu, istemci, diğer oyuncuların görünümü, ortak yardımcılar
 js/arayuz/*           Gösterge ve envanter ekranı
 js/sistem/*           Ses ve kayıt
 ```

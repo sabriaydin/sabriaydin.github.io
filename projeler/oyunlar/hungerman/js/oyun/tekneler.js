@@ -53,21 +53,28 @@ export class Tekneler {
     Object.assign(this, o); // sahne, dunya, dusenler, ses, varliklar
     this.liste = [];
     this.binilen = null;
+    this.ayna = false;   // çok oyunculu istemci: binilmeyen teknelerin konumu sunucudan gelir
+    this.ag = null;      // ağ kancaları
+    this.sira = 0;
     this.grup = new THREE.Group(); this.sahne.sahne.add(this.grup);
     this.zaman = 0; this.sesSayac = 0;
   }
 
-  ekle(tur, x, y, z, yaw = 0) {
+  /* ni: ağdaki tekne numarası (istemcide sunucudan gelir) */
+  ekle(tur, x, y, z, yaw = 0, ni) {
     const T = TEKNE[tur];
     const m = tur === 'yelkenli' ? yelkenliModeli() : sandalModeli();
     const t = { tur, T, m, p: new THREE.Vector3(x, y, z), yaw, hiz: 0, vy: 0, can: T.can, sarsinti: 0, faz: Math.random() * 6, kurekFaz: 0, isik: 1, suda: true, yalpa: 0 };
     m.kok.position.copy(t.p); m.kok.rotation.y = yaw;
     this.grup.add(m.kok);
     this.liste.push(t);
+    if (ni != null) t.ni = ni;
+    else if (this.ag && this.ag.eklendi) { t.ni = ++this.sira; this.ag.eklendi(t); }
     return t;
   }
   sil(t) {
     if (this.binilen === t) this.binilen = null;
+    if (this.ag && this.ag.silindi && t.ni && !this.ayna) this.ag.silindi(t);
     this.grup.remove(t.m.kok);
     t.m.kok.traverse(n => { if (n.geometry) n.geometry.dispose(); });
     t.m.malzeme.dispose();
@@ -106,6 +113,7 @@ export class Tekneler {
         const t = { T: TEKNE[tur], yaw };
         if (this.carpar(t, x, yz - 0.12, z, yaw)) return null;
         if (this.liste.some(o => Math.hypot(o.p.x - x, o.p.z - z) < 1.6)) return null;
+        if (this.ag && this.ag.koyIste) { this.ag.koyIste(tur, x, yz - 0.12, z, yaw); return { T: TEKNE[tur] }; }
         return this.ekle(tur, x, yz - 0.12, z, yaw);
       }
     }
@@ -137,6 +145,7 @@ export class Tekneler {
 
   vur(t) {
     if (t.sarsinti > 0.15) return;
+    if (this.ag && this.ag.vurIste) { t.sarsinti = 0.4; this.ses.kaz('odun'); this.dusenler.renkliParcacik([0.5, 0.36, 0.22], t.p.x, t.p.y + 0.3, t.p.z, 6); this.ag.vurIste(t); return; }
     t.can--; t.sarsinti = 0.4;
     this.ses.kaz('odun');
     this.dusenler.renkliParcacik([0.5, 0.36, 0.22], t.p.x, t.p.y + 0.3, t.p.z, 6);
@@ -148,11 +157,15 @@ export class Tekneler {
     }
   }
 
+  /* Çok oyunculuda istemci binmeden önce sunucudan onay ister; başka oyuncunun bindiği tekneye binilmez */
   bin(t, oyuncu) {
+    if (this.ag && this.ag.binIste && !t.onay) { this.ag.binIste(t); return false; }
+    if (t.binen) { if (this.ag && this.ag.dolu) this.ag.dolu(t); return false; }
     this.binilen = t;
     oyuncu.hiz.set(0, 0, 0);
     oyuncu.suda = false; oyuncu.basSuda = false; oyuncu.lavda = false; oyuncu.egiliyor = false; oyuncu.dusus = 0;
     this.koltuk(t, oyuncu);
+    return true;
   }
   koltuk(t, oyuncu) {
     const ofs = t.tur === 'yelkenli' ? 1.25 : 0.55;   // kıç tarafında oturulur
@@ -163,6 +176,7 @@ export class Tekneler {
     const t = this.binilen;
     if (!t) return;
     this.binilen = null;
+    if (this.ag && this.ag.indi) this.ag.indi(t);
     const s = Math.sin(t.yaw), c = Math.cos(t.yaw);
     const yanlar = [[t.T.gen + 0.7, 0], [-t.T.gen - 0.7, 0], [0, -t.T.boy - 0.7], [0, t.T.boy + 0.7], [t.T.gen + 1.6, 0], [-t.T.gen - 1.6, 0]];
     let su = null;
@@ -221,7 +235,16 @@ export class Tekneler {
       const ileri = binili ? (g.ileri ? 1 : 0) - (g.geri ? 1 : 0) : 0;
       const donus = binili ? (g.sol ? 1 : 0) - (g.sag ? 1 : 0) : 0;
       const eskiYaw = t.yaw;
-      this.fizik(t, dt, ileri, donus);
+      /* Başka oyuncunun sürdüğü ya da aynada gösterilen tekne: konum ağdan gelir */
+      const uzaktan = !binili && (t.binen || this.ayna);
+      if (uzaktan) {
+        if (t.hedef) {
+          const h = t.hedef;
+          if (Math.hypot(h[0] - t.p.x, h[2] - t.p.z) > 8) t.p.set(h[0], h[1], h[2]); else t.p.lerp({ x: h[0], y: h[1], z: h[2] }, Math.min(1, dt * 10));
+          let f = h[3] - t.yaw; f = Math.atan2(Math.sin(f), Math.cos(f)); t.yaw += f * Math.min(1, dt * 10);
+          t.hiz = h[4] || 0;
+        }
+      } else this.fizik(t, dt, ileri, donus);
       if (binili) {
         ctx.oyuncu.yaw += t.yaw - eskiYaw;
         this.koltuk(t, ctx.oyuncu);
@@ -242,7 +265,7 @@ export class Tekneler {
       m.kok.position.copy(t.p);
       m.kok.rotation.set(Math.sin(this.zaman * 1.1 + t.faz) * 0.025 + Math.sin(t.sarsinti * 30) * t.sarsinti * 0.15, t.yaw, Math.sin(this.zaman * 0.9 + t.faz * 2) * 0.03 + t.yalpa, 'YXZ');
       if (m.kurekler.length) {
-        const hareket = binili && (ileri || donus);
+        const hareket = binili ? (ileri || donus) : uzaktan && Math.abs(t.hiz) > 0.3;
         if (hareket) t.kurekFaz += dt * 6 * (ileri < 0 ? -1 : 1);
         m.kurekler.forEach((k, i) => {
           const s = i ? 1 : -1;
