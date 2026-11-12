@@ -80,7 +80,7 @@ export class KoyluEkrani {
     const v = this.v, k = v.koy, kl = v.koylu;
     if (b.dataset.takas != null) {
       const hata = this.koyler.takas(k, kl, +b.dataset.takas, this.envanter);
-      if (hata) this.hud.bildirim(hata); else this.ses.takas();
+      if (hata) this.hud.bildirim(hata); else { this.ses.takas(); if (this.xp) this.xp(1); }
     } else if (b.dataset.kabul) {
       const q = this.gorevler.koyluGorevi(k, kl);
       const hata = this.gorevler.kabul(q, this.envanter);

@@ -3,9 +3,13 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, LAV } from '../bloklar.js';
+import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR } from '../bloklar.js';
+import { sekilKutulari } from '../sekiller.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
+/* Altına gölge düşüren biçimli bloklar (merdiven, yarım blok, tarla) */
+const GOLGE = new Uint8Array(256);
+for (const b of BLOKLAR) if (b && (b.sekil === 'merdiven' || b.sekil === 'yarim' || b.sekil === 'tarla')) GOLGE[b.id] = 1;
 const EPS = 0.5 / 256;
 
 /* Yüzler: +x, -x, +y, -y, +z, -z (dışarıdan bakınca saat yönünün tersine) */
@@ -61,6 +65,7 @@ export function meshle(P) {
         }
       }
       gok[i] = s;
+      if (GOLGE[id]) s = 0;
     }
   }
   const op = new Tampon(), su = new Tampon();
@@ -77,6 +82,7 @@ export function meshle(P) {
       if (SIVI[id]) sivi(P, gok, i, x, y, z, su);
     } else if (ciz === C_SIVI) sivi(P, gok, i, x, y, z, su);
     else if (ciz === C_LAV) sivi(P, gok, i, x, y, z, op, true);
+    else if (ciz === C_SEKIL) sekil(P, gok, i, id, x, y, z, op);
   }
   return { opak: op.bitir(), su: su.bitir() };
 }
@@ -114,6 +120,44 @@ function kup(P, gok, i, id, x, y, z, T) {
     T.n += 4;
     if (ao[0] + ao[2] < ao[1] + ao[3]) T.i.push(tabanN + 1, tabanN + 2, tabanN + 3, tabanN + 1, tabanN + 3, tabanN);
     else T.i.push(tabanN, tabanN + 1, tabanN + 2, tabanN, tabanN + 2, tabanN + 3);
+  }
+}
+
+/* Biçimli bloklar: her kutunun yüzleri; hücre sınırındaki yüzler opak komşu varsa çizilmez.
+   Doku koordinatı kutunun hücredeki konumundan alınır (yarım blokta dokunun yarısı görünür). */
+const KOMSU_OFS = [-DZ, DX, DZ, -DX];
+const UVF = [
+  (x, y, z) => [1 - z, y], (x, y, z) => [z, y], (x, y, z) => [x, 1 - z],
+  (x, y, z) => [x, z], (x, y, z) => [x, y], (x, y, z) => [1 - x, y]
+];
+function sekil(P, gok, i, id, x, y, z, T) {
+  const kutular = sekilKutulari(id, f => P[i + KOMSU_OFS[f]]);
+  for (const k of kutular) {
+    for (let f = 0; f < 6; f++) {
+      const Y = YUZLER[f];
+      const eks = Y.n[0] ? 0 : Y.n[1] ? 1 : 2, pozitif = Y.n[eks] > 0;
+      const sinirda = pozitif ? k[eks + 3] >= 1 : k[eks] <= 0;
+      let g = gok[i];
+      if (sinirda) {
+        if (f === 3 && y === 0) continue;
+        const n = f === 2 && y === PY - 1 ? 0 : P[i + Y.komsu];
+        if (OPAK[n]) continue;
+        if (n === id && AYNI_GIZLE[id]) continue;
+        g = Math.max(g, gok[i + Y.komsu] || 0);
+      }
+      const doku = k.length > 6 ? k[6] : YUZ_DOKU[id * 6 + f];
+      const b = T.n;
+      for (let c = 0; c < 4; c++) {
+        const kc = Y.k[c];
+        const px = kc[0] ? k[3] : k[0], py = kc[1] ? k[4] : k[1], pz = kc[2] ? k[5] : k[2];
+        T.p.push(x + px, y + py, z + pz);
+        const uv = UVF[f](px, py, pz);
+        dokuUV(doku, uv[0], uv[1], T.u);
+        T.l.push(Y.g * (sinirda ? 1 : 0.92), g);
+      }
+      T.n += 4;
+      T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
+    }
   }
 }
 

@@ -1,7 +1,7 @@
 /* HungerMan - envanter ve üretim ekranı: sürükle-bırak yerine tıkla-al / tıkla-bırak, tarif arama ve kategori */
 import { simge } from '../grafik/doku.js';
-import { ESYALAR, ZIRH_PARCALARI } from '../bloklar.js';
-import { TARIFLER, KATEGORILER, ISTASYON_ADI, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni } from '../oyun/uretim.js';
+import { ESYALAR, ZIRH_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER } from '../bloklar.js';
+import { TARIFLER, KATEGORILER, ISTASYON_ADI, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar } from '../oyun/uretim.js';
 
 const $ = s => document.querySelector(s);
 
@@ -17,6 +17,8 @@ export class EnvanterEkrani {
     $('#envIzgara').innerHTML = Array.from({ length: 27 }, (_, k) => `<div class="yuva" data-i="${k + 9}"></div>`).join('');
     $('#envCubuk').innerHTML = Array.from({ length: 9 }, (_, i) => `<div class="yuva" data-i="${i}"></div>`).join('');
     $('#sandikIzgara').innerHTML = Array.from({ length: 27 }, (_, i) => `<div class="yuva" data-s="${i}"></div>`).join('');
+    this.ors = [null, null];
+    $('#orsIzgara').innerHTML = '<div class="yuva" data-o="0" title="Onarılacak eşya"></div><span class="orsArti">+</span><div class="yuva" data-o="1" title="Malzeme ya da aynı eşya"></div><span class="orsOk">➜</span><div class="yuva orsSonuc" data-o="2" title="Sonuç"></div>';
     $('#envZirh').innerHTML = ZIRH_PARCALARI.map((a, z) => `<div class="yuva zirhYuva" data-z="${z}" title="${a}"></div>`).join('');
     $('#tarifSekme').innerHTML = KATEGORILER.map(([k, a]) => `<button type="button" data-k="${k}">${a}</button>`).join('');
     $('#tarifSekme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; this.kategori = b.dataset.k; this.ses.tik(); [...$('#tarifSekme').children].forEach(x => x.classList.toggle('on', x === b)); this.tarifCiz(); });
@@ -32,7 +34,12 @@ export class EnvanterEkrani {
       const t = TARIFLER[+b.dataset.t];
       const kez = b.dataset.kez === 'hepsi' ? 64 : 1;
       const n = uret(this.envanter, t, kez);
-      if (n) { this.ses.uretim(); this.hud.bildirim(`${ESYALAR[t.cikti].ad} × ${n * t.adet} üretildi`, t.cikti); }
+      if (n) {
+        this.ses.uretim(); this.hud.bildirim(`${ESYALAR[t.cikti].ad} × ${n * t.adet} üretildi`, t.cikti);
+        /* Eritme, pişirme ve iksir yapımı deneyim kazandırır */
+        const ist = istasyonlar(t);
+        if (this.hayatta && (ist.includes('firin') || ist.includes('simya'))) this.hayatta.xpEkle(n * (ist.includes('simya') ? 2 : 0.35));
+      }
       else this.hud.bildirim('Envanterde yer yok.');
       this.ciz();
     });
@@ -42,7 +49,9 @@ export class EnvanterEkrani {
   ac(istasyon, sandik) {
     this.acik = true; this.istasyon = istasyon || null; this.sandik = sandik || null;
     if (istasyon) this.kategori = 'hepsi';
-    $('.envSag').hidden = !!this.sandik; $('.envSandik').hidden = !this.sandik;
+    /* Örs: sağ tarafta onarım bölümü */
+    const ors = istasyon === 'ors' && !this.sandik;
+    $('.envSag').hidden = !!this.sandik || ors; $('.envSandik').hidden = !this.sandik; $('.envOrs').hidden = !ors;
     this.kok.hidden = false;
     this.ciz();
   }
@@ -54,6 +63,8 @@ export class EnvanterEkrani {
       if (k > 0) this.birak(this.tasinan.id, k, this.tasinan.dayanim);
       this.tasinan = null;
     }
+    /* Örsteki eşyalar envantere döner */
+    for (let i = 0; i < 2; i++) { const o = this.ors[i]; if (!o) continue; const k = this.envanter.ekle(o.id, o.adet, o.dayanim); if (k > 0) this.birak(o.id, k, o.dayanim); this.ors[i] = null; }
     this.tasimaCiz();
     /* Çok oyunculu: kapanan sandığın içeriği sunucuya bildirilir */
     if (this.sandik && this.kapandi) this.kapandi(this.sandik);
@@ -73,6 +84,7 @@ export class EnvanterEkrani {
       el.innerHTML = s ? this.hud.yuvaIc(s) : `<img src="${simge(400 + z).url}" alt="">`;
     });
     if (this.sandik) this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { el.innerHTML = this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s]); });
+    if (this.istasyon === 'ors') this.orsCiz();
     const zp = env.zirhPuani();
     $('#zirhPuan').innerHTML = `Zırh <b>${zp}</b> / 20<br>Hasar azaltma <b>%${zp * 4}</b>`;
     const h = this.hayatta;
@@ -111,6 +123,7 @@ export class EnvanterEkrani {
     if (e.target.closest('#tarifListe, #tarifSekme, #tarifAra, .kapat')) return;
     const el = e.target.closest('.izgara .yuva');
     const env = this.envanter;
+    if (el && el.dataset.o != null) { e.preventDefault(); this.orsTikla(+el.dataset.o, e); return; }
     if (!el) {
       /* Pencere dışına tıklanırsa taşınan eşya bırakılır */
       if (this.tasinan && !e.target.closest('.pencere')) {
@@ -172,6 +185,58 @@ export class EnvanterEkrani {
     this.hareket(e);
   }
 
+  /* ---------- Örs: onarım ve birleştirme ---------- */
+  /* Sonuç: { sonuc, maliyet (seviye), harca (malzeme adedi), hata } */
+  orsHesap() {
+    const [A, B] = this.ors;
+    if (!A) return { hata: 'Onarılacak eşyayı sol yuvaya koyunuz.' };
+    const md = maksDayanim(ESYALAR[A.id]);
+    if (!md || A.dayanim == null) return { hata: 'Bu eşya onarılamaz.' };
+    if (!B) return { hata: A.dayanim >= md ? 'Eşyanın dayanımı tam.' : 'Sağ yuvaya onarım malzemesi ya da aynı eşyadan koyunuz.' };
+    if (A.dayanim >= md) return { hata: 'Eşyanın dayanımı tam.' };
+    if (B.id === A.id) {
+      const d = Math.min(md, A.dayanim + (B.dayanim ?? md) + Math.floor(md * 0.12));
+      return { sonuc: { id: A.id, adet: 1, dayanim: d }, maliyet: 2, harca: 1 };
+    }
+    const mal = onarimMalzemesi(A.id);
+    if (!mal || !mal.includes(B.id)) return { hata: `${ESYALAR[B.id].ad} bu eşyayı onarmaz.` };
+    const parca = Math.ceil(md / 4), n = Math.min(B.adet, Math.ceil((md - A.dayanim) / parca));
+    return { sonuc: { id: A.id, adet: 1, dayanim: Math.min(md, A.dayanim + n * parca) }, maliyet: n, harca: n };
+  }
+  orsCiz() {
+    const H = this.orsHesap();
+    this.kok.querySelectorAll('.yuva[data-o]').forEach(el => { const i = +el.dataset.o; el.innerHTML = this.hud.yuvaIc(i < 2 ? this.ors[i] : H.sonuc || null); el.classList.toggle('olmaz', i === 2 && !!H.sonuc && this.hayatta.seviye < H.maliyet && !this.sinirsiz()); });
+    const sv = this.hayatta.seviye;
+    $('#orsBilgi').innerHTML = H.hata ? `<span class="soluk">${H.hata}</span>`
+      : `Bedel: <b>${H.maliyet}</b> deneyim seviyesi · Seviyeniz: <b class="${sv >= H.maliyet || this.sinirsiz() ? 'ok' : 'eksik'}">${sv}</b><br><span class="soluk">Sonuca tıklanarak eşya alınır.</span>`;
+  }
+  sinirsiz() { return !!this.envanter.sinirsiz; }
+  orsTikla(i, e) {
+    const T = this.tasinan;
+    if (i === 2) {
+      const H = this.orsHesap();
+      if (!H.sonuc || T) return;
+      if (this.hayatta.seviye < H.maliyet && !this.sinirsiz()) { this.hud.bildirim('Deneyim seviyeniz yetersiz.'); return; }
+      if (!this.sinirsiz()) this.hayatta.seviyeHarca(H.maliyet);
+      this.ors[0] = null;
+      const B = this.ors[1]; B.adet -= H.harca; if (B.adet <= 0) this.ors[1] = null;
+      this.tasinan = H.sonuc;
+      this.ses.ors(); this.envanter.bildir(); this.ciz(); this.hareket(e);
+      return;
+    }
+    const s = this.ors[i];
+    if (e.shiftKey && s && !T) { const k = this.envanter.ekle(s.id, s.adet, s.dayanim); if (k) s.adet = k; else this.ors[i] = null; }
+    else if (T && !s) {
+      if (i === 0 || e.button === 2) { this.ors[i] = { ...T, adet: i === 0 || e.button === 2 ? 1 : T.adet }; T.adet -= this.ors[i].adet; if (!T.adet) this.tasinan = null; }
+      else { this.ors[i] = T; this.tasinan = null; }
+    } else if (!T && s) { this.tasinan = s; this.ors[i] = null; }
+    else if (T && s) {
+      if (i === 1 && s.id === T.id && s.dayanim == null && T.dayanim == null) { const k = Math.min(T.adet, this.envanter.yigin(s.id) - s.adet); s.adet += k; T.adet -= k; if (!T.adet) this.tasinan = null; }
+      else if (i === 1 || T.adet === 1) { this.ors[i] = T; this.tasinan = s; }
+    }
+    this.ses.tik(); this.envanter.bildir(); this.ciz(); this.hareket(e);
+  }
+
   zirhTikla(z, e) {
     const env = this.envanter, T = this.tasinan, s = env.zirh[z];
     if (e.shiftKey && s && !T) { const k = env.ekle(s.id, 1, s.dayanim); if (!k) env.zirh[z] = null; }
@@ -188,7 +253,7 @@ export class EnvanterEkrani {
     t.style.left = e.clientX + 'px'; t.style.top = e.clientY + 'px';
     const ip = $('#ipucu');
     const el = e.target.closest && e.target.closest('.izgara .yuva');
-    const s = el && (el.dataset.z != null ? this.envanter.zirh[+el.dataset.z] : el.dataset.s != null ? this.sandik && this.sandik.yuvalar[+el.dataset.s] : this.envanter.yuvalar[+el.dataset.i]);
+    const s = el && (el.dataset.o != null ? (+el.dataset.o < 2 ? this.ors[+el.dataset.o] : this.orsHesap().sonuc) : el.dataset.z != null ? this.envanter.zirh[+el.dataset.z] : el.dataset.s != null ? this.sandik && this.sandik.yuvalar[+el.dataset.s] : this.envanter.yuvalar[+el.dataset.i]);
     if (!s || this.tasinan) { ip.hidden = true; return; }
     const es = ESYALAR[s.id];
     let alt = '';
@@ -203,7 +268,12 @@ export class EnvanterEkrani {
     if (es.yemek) alt += `<span>Açlığı ${es.yemek / 2} birim giderir</span>`;
     if (es.iyilestir) alt += `<span>${es.iyilestir / 2} kalp iyileştirir</span>`;
     if (es.iyilestirme) alt += `<span>Ayrıca ${es.iyilestirme / 2} kalp iyileştirir</span>`;
-    if (es.ekin) alt += '<span>Toprak veya çimen üstüne ekilir</span>';
+    if (es.ekin) alt += '<span>Toprak, çimen veya tarla toprağına ekilir; tarlada daha hızlı büyür</span>';
+    if (es.alet && es.alet.tur === 'capa') alt = `<span>Toprağa sağ tıklanınca tarla toprağı açar</span><span>Dayanım: ${s.dayanim} / ${es.alet.dayanim}</span>`;
+    if (es.tur === 'iksir') alt += '<span>Sağ tıkla içilir</span>';
+    if (s.id === 139) alt += '<span>Sağ tıkla açılır: eşya onarımı ve birleştirme</span>';
+    if (s.id === 140) alt += '<span>Yakınında iksir üretilir</span>';
+    if (s.id === 88 || s.id === 105 || s.id === 121) alt += '<span>Sağ tıkla açılıp kapanır</span>';
     if (s.id === 288) alt += '<span>Köylülerle ticarette kullanılır</span>';
     if (es.tur === 'blok') alt += '<span>Yerleştirilebilir blok</span>';
     ip.innerHTML = `<b>${es.ad}</b>${alt}`;

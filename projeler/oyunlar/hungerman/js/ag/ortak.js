@@ -30,7 +30,7 @@ export function blokEfekti(o, ses, x, y, z, id, eski) {
   if ((id === 0 || (SIVI[id] && !BLOKLAR[id].suIcinde)) && eski && BLOKLAR[eski] && !SIVI[eski]) {
     ses.kir(BLOKLAR[eski].ses);
     o.dusenler.parcacik(eski, x, y, z);
-  } else if (id && BLOKLAR[id] && !SIVI[id] && !(id >= 54 && id <= 56)) ses.koy(BLOKLAR[id].ses);
+  } else if (id && BLOKLAR[id] && !SIVI[id] && !(BLOKLAR[id].ekin > 0) && !(BLOKLAR[id].tarla && BLOKLAR[eski] && BLOKLAR[eski].tarla)) ses.koy(BLOKLAR[id].ses);
 }
 
 /* Sandık yuvalarını ağ için diziye çevir / geri kur */

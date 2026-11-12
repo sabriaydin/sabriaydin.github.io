@@ -4,7 +4,7 @@
 import { THREE } from '../grafik/sahne.js';
 import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI } from '../sabitler.js';
 import { Uretici, agacKur } from './uretici.js';
-import { BLOKLAR, KATI, SIVI, BITKI } from '../bloklar.js';
+import { BLOKLAR, KATI, SIVI, BITKI, EKIN_SONRAKI } from '../bloklar.js';
 import { uretec } from '../rastgele.js';
 
 const SINIR_ICIN = DUNYA_SINIRI;
@@ -71,6 +71,7 @@ export class Dunya {
     return p.v[dizin(x - cx * PB, y, z - cz * PB)];
   }
   yuklu(x, z) { const p = this.parca(Math.floor(x / PB), Math.floor(z / PB)); return !!(p && p.v); }
+  sinirDisi(x, z) { return Math.abs(x) > SINIR_ICIN || Math.abs(z) > SINIR_ICIN; }
   kati(x, y, z) {
     if (Math.abs(x) > SINIR_ICIN || Math.abs(z) > SINIR_ICIN) return true;
     return KATI[this.blok(x, y, z)] === 1;
@@ -93,7 +94,7 @@ export class Dunya {
     const mk = x + ',' + y + ',' + z;
     if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14]);
     else this.mesaleler.delete(mk);
-    if (id >= 53 && id <= 55) this.ekinler.add(mk); else this.ekinler.delete(mk);
+    if (EKIN_SONRAKI[id]) this.ekinler.add(mk); else this.ekinler.delete(mk);
     if (id === 58) this.yuvalar.set(mk, { x, y, z, sayac: 5 }); else this.yuvalar.delete(mk);
     if (eski === 59 || id === 59) this.lavIsikGuncelle(x, y, z);
     this.kirlet(p, true);
@@ -233,14 +234,14 @@ export class Dunya {
     const v = p.v;
     for (let i = 0; i < v.length; i++) {
       const id = v[i];
-      if (id !== 46 && id !== 48 && id !== 61 && id !== 58 && id !== 59 && (id < 53 || id > 55)) continue;
+      if (id !== 46 && id !== 48 && id !== 61 && id !== 58 && id !== 59 && !EKIN_SONRAKI[id]) continue;
       const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
       /* Lav gölleri: her 4 x 4 alanda yüzeydeki bir blok ışık kaynağı sayılır */
       if (id === 59 && (lx % 4 !== 1 || lz % 4 !== 1 || (y < 127 && v[i + PB * PB] === 59))) continue;
       const x = p.cx * PB + lx, z = p.cz * PB + lz;
       const k = x + ',' + y + ',' + z;
       if (id === 58) this.yuvalar.set(k, { x, y, z, sayac: 5 });
-      else if (id >= 53 && id <= 55) this.ekinler.add(k);
+      else if (EKIN_SONRAKI[id]) this.ekinler.add(k);
       else this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14)]);
       p.kaynaklar.push(k);
     }
@@ -250,15 +251,25 @@ export class Dunya {
     if (this.blok(x, y, z) === 59 && ((x % 4) + 4) % 4 === 1 && ((z % 4) + 4) % 4 === 1) this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, 11]);
   }
 
-  /* Ekinlerin büyümesi */
+  /* Ekinlerin büyümesi: tarla toprağında 1,5 kat, ıslak tarlada 3 kat hızlı.
+     Tarla, 4 blok çevresinde su varsa ya da üstüne yağmur yağıyorsa ıslanır (yagiyor: hava durumu). */
   ekinTik() {
     for (const k of this.ekinler) {
-      if (Math.random() > 0.012) continue;
+      const r = Math.random();
+      if (r > 0.036) continue;
       const [x, y, z] = k.split(',').map(Number);
       const id = this.blok(x, y, z);
-      if (id < 53 || id > 55) { this.ekinler.delete(k); continue; }
-      this.blokKoy(x, y, z, id + 1, 'tik');
+      if (!EKIN_SONRAKI[id]) { this.ekinler.delete(k); continue; }
+      let alt = this.blok(x, y - 1, z);
+      if (alt === 137 && (this.suYakin(x, y - 1, z) || (this.yagiyor && this.ustKati(x, z) <= y))) { this.blokKoy(x, y - 1, z, 138, 'tik'); alt = 138; }
+      const k2 = alt === 138 ? 3 : alt === 137 ? 1.5 : 1;
+      if (r > 0.012 * k2) continue;
+      this.blokKoy(x, y, z, EKIN_SONRAKI[id], 'tik');
     }
+  }
+  suYakin(x, y, z) {
+    for (let dy = 0; dy <= 1; dy++) for (let dz = -4; dz <= 4; dz++) for (let dx = -4; dx <= 4; dx++) { const b = this.blok(x + dx, y + dy, z + dz); if (b === 7 || b === 31) return true; }
+    return false;
   }
 
   meshKur(p, r) {

@@ -173,6 +173,11 @@ export class SunucuOyun {
         o.varliklar.hasarVer(w, Math.min(30, +m.n || 1), kaynak, { itme: Math.min(2, +m.it || 1), oyuncu: true, vuran: c });
         break;
       }
+      case 'bes': { // hayvan besleme
+        const w = o.varliklar.liste.find(v => v.id === m.i);
+        if (w && !w.olu && w.konum.distanceTo(c.konum) < 9) o.varliklar.besle(w, c);
+        break;
+      }
       case 'ok': o.varliklar.okAt(new THREE.Vector3(...m.p), new THREE.Vector3(...m.v), Math.min(12, +m.h || 2), false, c); break;
       case 'sa': {  // sandık açma
         const s = m.x + ',' + m.y + ',' + m.z;
@@ -252,13 +257,20 @@ export class SunucuOyun {
     for (const c of this.istemciler.values()) {
       if (!c.durum) continue;
       if (!c.ctx) c.ctx = { oyuncu: { konum: c.konum }, oyuncuyaVur: (n, v, kaynak) => this.vur(c, n, v, kaynak), okTopla: () => { c.k.gonder({ t: 'ver', id: 287, n: 1 }); return true; } };
-      Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik });
+      Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik, firtina: ctx.firtina, yagmur: ctx.yagmur, eldeki: c.durum[5] | 0 });
       l.push(c.ctx);
     }
     ctx.oyuncular = l;
     return ctx;
   }
   vur(c, n, v, kaynak) { const k = kaynak || v.konum; c.k.gonder({ t: 'h', n, s: v.turAd, k: [r2(k.x), r2(k.z)], a: v.tur.agu ? 1 : 0 }); }
+  /* Deneyim: uzak oyuncunun beslediği hayvan yavruladığında */
+  xpVer(c, n) { c.k.gonder({ t: 'xp', n }); }
+  /* Yıldırım: tüm oyunculara gösterilir, yakındaki oyuncular hasar alır */
+  simsek(x, y, z) {
+    this.yay({ t: 'sim', p: [r2(x), r2(y), r2(z)] });
+    for (const c of this.istemciler.values()) if (c.durum && !c.olu && (c.konum.x - x) ** 2 + (c.konum.y - y) ** 2 + (c.konum.z - z) ** 2 < 3.5 * 3.5) c.k.gonder({ t: 'h', n: 6, s: 'yildirim', k: [r2(x), r2(z)], a: 0 });
+  }
 
   /* ---------- Döngü ---------- */
   guncelle(dt) {
@@ -283,6 +295,7 @@ export class SunucuOyun {
         if (dx * dx + dz * dz > CANLI_MENZIL * CANLI_MENZIL) continue;
         let b = 0;
         if (w.olu) b |= 1; if (w.hasarZaman > 0) b |= 2; if (w.yaniyor) b |= 4; if (w.nisan) b |= 8; if (!w.m.kok.visible) b |= 16; if (!w.yerde || w.kacZaman > 0) b |= 32;
+        if (w.yavru > 0) b |= 64; if (w.ask > 0) b |= 128; if (w.dinlen > 0) b |= 256;
         const a = [w.id, r2(w.konum.x), r2(w.konum.y), r2(w.konum.z), r3(w.yaw), b, Math.max(0, Math.ceil(w.can))];
         if (!c.bilinen.has(w.id)) a.push(w.tur.koylu && w.koylu ? [w.turAd, w.koylu.meslek, w.koy.id, w.koylu.idx] : [w.turAd]);
         bilinen.add(w.id);
@@ -291,14 +304,14 @@ export class SunucuOyun {
       c.bilinen = bilinen;
       const t = [];
       for (const b of o.tekneler.liste) if ((b.p.x - cx) ** 2 + (b.p.z - cz) ** 2 < TEKNE_MENZIL * TEKNE_MENZIL) t.push([b.ni, r2(b.p.x), r2(b.p.y), r2(b.p.z), r3(b.yaw), r2(b.hiz)]);
-      c.k.gonder({ t: 's', z: Math.round(o.zaman * 1e6) / 1e6, g: o.gun, o: [ben, ...digerleri.filter(a => a[0] !== c.id)], v, b: t });
+      c.k.gonder({ t: 's', z: Math.round(o.zaman * 1e6) / 1e6, g: o.gun, o: [ben, ...digerleri.filter(a => a[0] !== c.id)], v, b: t, h: o.hava ? o.hava.durum : 'acik' });
     }
   }
 
   /* Gece tüm (canlı) oyuncular yataktaysa sabah olur */
   uykuKontrol() {
     const o = this.oyun;
-    const gece = o.zaman > 0.52 && o.zaman < 0.97;
+    const gece = (o.zaman > 0.52 && o.zaman < 0.97) || (o.hava && o.hava.firtina);
     if (o.uyku > 0 || !gece) { this.uykuSay = -1; return; }
     let n = 0, t = 0;
     if (!o.hayatta.olu) { t++; if (o.yatakta) n++; }

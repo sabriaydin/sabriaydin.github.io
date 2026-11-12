@@ -1,7 +1,8 @@
 /* HungerMan - geliştirici konsolu (F8): test için komutlar, canlı bilgi satırı, komut geçmişi ve Tab ile tamamlama
    Hile niteliğindeki komutlar yalnızca "Komutlara izin ver" seçeneğiyle oluşturulan dünyalarda (ya da geliştirici kodu
    girildikten sonra) çalışır. Çok oyunculu istemcide yalnızca oyuncunun kendisini etkileyen komutlar çalışır. */
-import { ESYALAR, BLOKLAR } from '../bloklar.js';
+import { ESYALAR, BLOKLAR, ETKILER } from '../bloklar.js';
+import { HAVA, HAVA_ADI } from '../grafik/hava.js';
 import { TURLER } from '../varlik/turler.js';
 import { BIYOMLAR } from '../dunya/uretici.js';
 import { koylerAlan } from '../dunya/koy-uretici.js';
@@ -100,7 +101,7 @@ export class Konsol {
     const n = Number(ad);
     if (Number.isInteger(n) && ESYALAR[n]) return [n];
     const a = kucuk(ad).replace(/_/g, ' ');
-    const l = Object.entries(ESYALAR).filter(([, e]) => e && e.ad);
+    const l = Object.entries(ESYALAR).filter(([, e]) => e && e.ad && !e.gizli);
     const tam = l.filter(([, e]) => kucuk(e.ad) === a);
     if (tam.length) return tam.map(([i]) => +i);
     return l.filter(([, e]) => kucuk(e.ad).includes(a)).map(([i]) => +i);
@@ -195,6 +196,35 @@ export class Konsol {
       o.zaman = ((((s - 6) / 24) % 1) + 1) % 1;
       this.tamam(`Saat ${String(Math.floor(s)).padStart(2, '0')}:${String(Math.round((s % 1) * 60)).padStart(2, '0')} olarak ayarlandı.`);
     }, { hile: true, dunya: true, tamamla: () => ['safak', 'sabah', 'ogle', 'ikindi', 'aksam', 'gece', 'hiz'] });
+    ekle('hava', 'Hava durumunu değiştirir ya da şimşek çaktırır', 'hava <acik | yagmur | firtina> [süre sn] | hava simsek', (o, p) => {
+      const a = kucuk(p[0] || '');
+      if (!a) { this.yaz(`Hava: ${HAVA_ADI[o.hava.durum]} · yoğunluk %${Math.round(o.hava.yogunluk * 100)} · ${Math.round(o.hava.sure)} sn sonra değişir.`, 'bilgi'); return; }
+      if (a === 'simsek') {
+        const P = o.oyuncu.konum, ang = Math.random() * Math.PI * 2, x = Math.floor(P.x + Math.cos(ang) * 12), z = Math.floor(P.z + Math.sin(ang) * 12);
+        if (o.hava.olaylar.simsek) o.hava.olaylar.simsek(x + 0.5, o.hava.ustBlok(x, z) + 1, z + 0.5);
+        this.tamam('Şimşek çaktı.'); return;
+      }
+      if (!HAVA.includes(a)) { this.hata('Kullanım: hava <acik | yagmur | firtina> [süre sn] | hava simsek'); return; }
+      const sure = this.sayi(p[1], 0);
+      o.hava.ayarla(a, sure > 0 ? sure : undefined);
+      this.tamam(`Hava: ${HAVA_ADI[a]}${sure > 0 ? ` (${Math.round(sure)} sn)` : ''}.`);
+    }, { hile: true, dunya: true, tamamla: () => [...HAVA, 'simsek'] });
+    ekle('xp', 'Deneyim puanı ya da seviyesi ekler', 'xp <puan> | xp seviye <sayı>', (o, p) => {
+      const h = o.hayatta;
+      if (kucuk(p[0] || '') === 'seviye') { const n = Math.max(0, Math.min(200, Math.floor(this.sayi(p[1], 1)))); const hedef = h.seviye + n; while (h.seviye < hedef) h.xpEkle(1); this.tamam(`Deneyim seviyesi: ${h.seviye}.`); return; }
+      const n = this.sayi(p[0], NaN);
+      if (!Number.isFinite(n)) { this.yaz(`Deneyim: ${Math.floor(h.xp)} puan · ${h.seviye}. seviye`, 'bilgi'); return; }
+      if (n >= 0) h.xpEkle(n); else h.xp = Math.max(0, h.xp + n);
+      this.tamam(`Deneyim: ${Math.floor(h.xp)} puan · ${h.seviye}. seviye.`);
+    }, { hile: true, tamamla: () => ['seviye'] });
+    ekle('etki', 'İksir etkisi verir ya da etkileri kaldırır', 'etki <hiz | gece | nefes | ates | guc> [süre sn] | etki temizle', (o, p) => {
+      const a = kucuk(p[0] || '');
+      if (a === 'temizle') { o.hayatta.etkiler = {}; this.tamam('Tüm etkiler kaldırıldı.'); return; }
+      if (!ETKILER[a]) { this.hata('Kullanım: etki <hiz | gece | nefes | ates | guc> [süre sn] | etki temizle'); return; }
+      const sure = Math.max(1, this.sayi(p[1], 180));
+      o.hayatta.etkiEkle(a, sure);
+      this.tamam(`${ETKILER[a].ad} etkisi: ${Math.round(sure)} sn.`);
+    }, { hile: true, tamamla: () => [...Object.keys(ETKILER), 'temizle'] });
     ekle('gun', 'Gün sayısını ayarlar (canavar sayısı buna bağlıdır)', 'gun <sayı>', (o, p) => {
       const n = Math.max(1, Math.floor(this.sayi(p[0], NaN))); if (!Number.isFinite(n)) { this.hata('Kullanım: gun <sayı>'); return; }
       o.gun = n; this.tamam(`${n}. gün.`);

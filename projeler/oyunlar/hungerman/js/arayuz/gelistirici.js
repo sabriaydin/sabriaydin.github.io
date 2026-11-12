@@ -23,7 +23,10 @@ const SETLER = {
   elmas: { ad: 'Elmas donanım', esya: [[316, 1], [317, 1], [318, 1], [319, 1], [286, 1], [287, 64], [412, 1], [413, 1], [414, 1], [415, 1], [290, 8]] },
   insaat: { ad: 'İnşaat', esya: [[14, 64], [38, 64], [35, 64], [37, 64], [34, 64], [51, 64], [46, 64], [50, 4]] },
   denizci: { ad: 'Denizci', esya: [[454, 1], [455, 1], [453, 1], [456, 1], [457, 1], [298, 16]] },
-  maden: { ad: 'Madenci', esya: [[312, 1], [313, 1], [314, 1], [46, 64], [276, 16], [408, 1], [409, 1], [410, 1], [411, 1]] }
+  maden: { ad: 'Madenci', esya: [[312, 1], [313, 1], [314, 1], [46, 64], [276, 16], [408, 1], [409, 1], [410, 1], [411, 1]] },
+  yapi: { ad: 'Yapı blokları', esya: [[70, 32], [82, 32], [78, 32], [86, 32], [88, 4], [121, 4], [104, 32], [105, 2], [109, 32], [110, 16]] },
+  ciftci: { ad: 'Çiftçi', esya: [[343, 1], [292, 32], [328, 16], [329, 16], [291, 32], [104, 32], [105, 2], [296, 16]] },
+  simya: { ad: 'Simya ve örs', esya: [[140, 1], [139, 1], [331, 16], [61, 8], [283, 8], [265, 16], [297, 8], [299, 4], [263, 4], [450, 4], [296, 8], [328, 8], [257, 8]] }
 };
 
 export class GelistiriciPenceresi {
@@ -79,11 +82,14 @@ export class GelistiriciPenceresi {
           <button type="button" data-k="iyiles">Tamamen iyileş</button><button type="button" data-k="doy">Doyur</button>
           <button type="button" data-k="isinla dogum">Doğma noktasına git</button><button type="button" data-onay="envanter temizle" class="tehlike">Envanteri boşalt</button>
         </div>
+        <h4>Deneyim ve iksir etkileri</h4>
+        <div class="gelDugmeler"><button type="button" data-k="xp seviye 1">+1 seviye</button><button type="button" data-k="xp seviye 10">+10 seviye</button>
+          ${[['hiz', 'Hız'], ['gece', 'Gece görüşü'], ['nefes', 'Su altında nefes'], ['ates', 'Ateşe dayanıklılık'], ['guc', 'Güç']].map(([k, a]) => `<button type="button" data-k="etki ${k}">${a}</button>`).join('')}<button type="button" data-k="etki temizle">Etkileri kaldır</button></div>
         <h4>Hazır setler</h4>
         <div class="gelDugmeler">${Object.entries(SETLER).map(([k, s]) => `<button type="button" data-set="${k}" title="${esc(s.esya.map(([i, n]) => `${ESYALAR[i] ? ESYALAR[i].ad : i} × ${n}`).join(', '))}">${s.ad}</button>`).join('')}</div>`;
     } else if (S === 'esya') {
       const a = kucuk(this.arama);
-      const l = Object.entries(ESYALAR).filter(([, e]) => e && e.ad && (this.kat === 'hepsi' || kategori(e) === this.kat) && (!a || kucuk(e.ad).includes(a) || String(e.id) === a));
+      const l = Object.entries(ESYALAR).filter(([, e]) => e && e.ad && !e.gizli && (this.kat === 'hepsi' || kategori(e) === this.kat) && (!a || kucuk(e.ad).includes(a) || String(e.id) === a));
       ic.innerHTML = `
         <div class="gelSatir"><input type="search" id="gelAra" placeholder="Eşya adı ya da numarası" value="${esc(this.arama)}" autocomplete="off">
           <span class="gelAdet">${[1, 8, 16, 64].map(n => `<button type="button" data-adet="${n}" class="${this.adet === n ? 'on' : ''}">${n}</button>`).join('')}</span></div>
@@ -97,6 +103,8 @@ export class GelistiriciPenceresi {
         ${this.kaydirici('saat', 'Saat', 0, 23.75, 0.25, Math.round(saat * 4) / 4, v => `${String(Math.floor(v)).padStart(2, '0')}:${String(Math.round((v % 1) * 60)).padStart(2, '0')}`)}
         <div class="gelDugmeler">${[['safak', 'Şafak'], ['sabah', 'Sabah'], ['ogle', 'Öğle'], ['aksam', 'Akşam'], ['gece', 'Gece']].map(([k, a]) => `<button type="button" data-k="zaman ${k}">${a}</button>`).join('')}</div>
         ${this.kaydirici('zhiz', 'Zaman hızı (0 = durdur)', 0, 100, 1, o.zamanHizi ?? 1, v => v === 0 ? 'durdu' : v + '×')}
+        <h4>Hava durumu</h4>
+        <div class="gelDugmeler">${[['acik', 'Açık'], ['yagmur', 'Yağmur'], ['firtina', 'Fırtına']].map(([k, a]) => `<button type="button" data-k="hava ${k}" class="${o.hava && o.hava.durum === k ? 'on' : ''}">${a}</button>`).join('')}<button type="button" data-k="hava simsek">Şimşek çaktır</button></div>
         <div class="gelSatir"><label>Gün <input type="number" id="gelGun" min="1" max="9999" value="${o.gun}"></label><button type="button" data-gun="1">Uygula</button></div>
         ${this.kaydirici('gorus', 'Görüş mesafesi', 4, 16, 1, o.dunya.gorus, v => v + ' parça')}
         ${this.kaydirici('kesif', 'Haritada keşfedilecek yarıçap', 64, 512, 32, this.kesifR, v => v + ' blok')}
@@ -275,6 +283,7 @@ export class GelistiriciPenceresi {
       ['Biyom / zemin', `${BIYOMLAR[k.b]} · ${k.h}`],
       ['Bakılan blok', h ? `${BLOKLAR[h.id].ad} (${h.id}) · ${h.x}, ${h.y}, ${h.z}` : '-'],
       ['Zaman', `${o.gun}. gün · ${$('#saatDeger').textContent} · hız ${o.zamanHizi ?? 1}×`],
+      ['Hava / deneyim', `${o.hava ? o.hava.durum : '-'} (%${o.hava ? Math.round(o.hava.yogunluk * 100) : 0}) · ${o.hayatta.seviye}. seviye (${Math.floor(o.hayatta.xp)} puan)`],
       ['Canlılar', `${V.length} (düşman ${V.filter(v => v.tur.dusman).length}, hayvan ${V.filter(v => !v.tur.dusman && !v.tur.su && !v.tur.koylu).length}, deniz ${V.filter(v => v.tur.su).length}, köylü ${V.filter(v => v.tur.koylu).length})`],
       ['Ok / yerde eşya / tekne', `${o.varliklar.oklar.length} / ${o.dusenler.liste.length} / ${o.tekneler.liste.length}`],
       ['Yüklü parça', `${o.dunya.parcalar.size} (görüş ${o.dunya.gorus}) · ışık kaynağı ${o.dunya.mesaleler.size}`],

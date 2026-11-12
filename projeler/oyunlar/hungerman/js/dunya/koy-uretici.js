@@ -316,7 +316,7 @@ function binaYaz(b, M, set, al, k) {
       const kenar = lx === 0 || lz === 0 || lx === w - 1 || lz === d - 1;
       if (kenar) { if (!(lz === 0 && lx === ox)) L(lx, 0, lz, M.kutuk); else L(lx, 0, lz, 57); }
       else if (lz === (d - 1) / 2) L(lx, 0, lz, 7);
-      else { L(lx, 0, lz, 3); L(lx, 1, lz, 56); }
+      else { L(lx, 0, lz, 138); L(lx, 1, lz, lz < (d - 1) / 2 ? 56 : (lx % 3 === 0 ? 136 : 132)); }   // ıslak tarla: buğday, havuç ve patates
     }
     L(w - 1, 1, d - 1, 52); L(w - 1, 2, d - 1, 52); L(w - 2, 1, d - 1, 52);
     return;

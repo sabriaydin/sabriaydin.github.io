@@ -33,6 +33,7 @@ uniform float sisSon;
 uniform float alfa;
 uniform float zaman;
 uniform float magara;
+uniform float islak;
 uniform vec4 isiklar[${ISIK_SAYISI}];
 uniform float isikAdet;
 varying vec2 vUv;
@@ -68,6 +69,8 @@ void main() {
     isik = max(gokIsik, vec3(1.0, 0.8, 0.55) * m * 1.05);
   }
   vec3 renk = t.rgb * ao * isik;
+  /* Yağmur: açıktaki yüzeyler ıslak ve koyu görünür */
+  renk *= mix(vec3(1.0), vec3(0.76, 0.8, 0.88), islak * clamp(vGok, 0.0, 1.0));
   float s = clamp((vUzak - sisBas) / (sisSon - sisBas), 0.0, 1.0);
   renk = mix(renk, sisRenk, s);
   gl_FragColor = vec4(renk, alfa);
@@ -92,7 +95,7 @@ export class Sahne {
     this.atlasDoku = doku;
     const ortak = () => ({
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
-      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, magara: { value: 0.07 },
+      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 },
       isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 }
     });
     this.opakMalzeme = new THREE.ShaderMaterial({ uniforms: ortak(), vertexShader: BLOK_VS, fragmentShader: BLOK_FS });
@@ -152,10 +155,14 @@ export class Sahne {
   }
 
   /* Gün döngüsü: z = 0 gün doğumu, 0.25 öğle, 0.5 gün batımı, 0.75 gece yarısı */
-  gokGuncelle(z, konum, suda, gorus, zamanSn) {
+  /* hava: { y: yağış yoğunluğu 0..1, f: fırtına 0..1, simsek: şimşek parlaması 0..1, gece: gece görüşü } */
+  gokGuncelle(z, konum, suda, gorus, zamanSn, hava = {}) {
     const a = z * Math.PI * 2;
     const yuks = Math.sin(a);
-    const gun = THREE.MathUtils.clamp(yuks * 2.2 + 0.35, 0.14, 1);
+    const hy = hava.y || 0, hf = hava.f || 0, sm = hava.simsek || 0;
+    let gun = THREE.MathUtils.clamp(yuks * 2.2 + 0.35, 0.14, 1);
+    gun = Math.max(0.1, gun * (1 - 0.32 * hy - 0.22 * hf));
+    gun = Math.max(gun, sm * 0.95);
     const alacakaranlik = Math.max(0, 1 - Math.abs(yuks) * 4) * (Math.cos(a) > -2 ? 1 : 0);
     const gUst = new THREE.Color(0x6fa3ff), gUfuk = new THREE.Color(0xc4dcff);
     const nUst = new THREE.Color(0x03050c), nUfuk = new THREE.Color(0x0b1222);
@@ -163,12 +170,19 @@ export class Sahne {
     const k = THREE.MathUtils.smoothstep(yuks, -0.25, 0.25);
     const ust = nUst.clone().lerp(gUst, k), ufuk = nUfuk.clone().lerp(gUfuk, k);
     ufuk.lerp(sUfuk, alacakaranlik * 0.75);
+    /* Yağmurda gökyüzü griye döner, şimşekte aydınlanır */
+    if (hy > 0) {
+      const gri = new THREE.Color(0x6c747f).multiplyScalar(0.12 + 0.88 * k * (1 - 0.35 * hf));
+      ust.lerp(gri, hy * 0.85); ufuk.lerp(gri.clone().multiplyScalar(1.15), hy * 0.8);
+    }
+    if (sm > 0) { ust.lerp(new THREE.Color(0xdfe6ff), sm * 0.8); ufuk.lerp(new THREE.Color(0xeef1ff), sm * 0.8); }
     const gm = this.gokMalzeme.uniforms;
     gm.ust.value.copy(ust); gm.ufuk.value.copy(ufuk);
     const gy = new THREE.Vector3(Math.cos(a), yuks, 0.25).normalize();
     gm.gunesYon.value.copy(gy);
     gm.gunesHale.value.setRGB(1, 0.6, 0.3).multiplyScalar(alacakaranlik + 0.15 * k);
-    this.yildizMalzeme.opacity = THREE.MathUtils.clamp(-yuks * 3, 0, 1) * 0.9;
+    this.yildizMalzeme.opacity = THREE.MathUtils.clamp(-yuks * 3, 0, 1) * 0.9 * (1 - hy);
+    this.gunes.material.opacity = 1 - hy * 0.92; this.ay.material.opacity = 1 - hy * 0.92; this.gunes.children[0].material.opacity = 0.18 * (1 - hy);
     this.gokGrubu.position.copy(konum);
     this.gokGrubu.updateMatrixWorld(true);
     this.gunes.position.copy(gy).multiplyScalar(400); this.gunes.lookAt(konum);
@@ -177,17 +191,21 @@ export class Sahne {
     this.bulut.position.set(konum.x, PY + 4, konum.z);
     const bk = this.bulutMalzeme.map;
     bk.offset.set((konum.x + zamanSn * 1.2) / 768 % 1, -(konum.z) / 768 % 1);
-    this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4);
+    this.bulutMalzeme.color.setScalar((0.1 + gun * 0.9) * (1 - 0.5 * hy)).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
+    this.bulutMalzeme.opacity = 0.82 + 0.16 * hy;
     /* Blok aydınlatması */
     const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.82, 0.68), alacakaranlik * 0.5);
     const lav = suda === 'lav';
     /* suda === 'maske': dalış maskesi su altında görüşü uzatır */
     const maske = suda === 'maske';
     const sis = lav ? new THREE.Color(0.9, 0.32, 0.05) : suda ? new THREE.Color(0.08, 0.22, 0.44).multiplyScalar((maske ? 0.45 : 0.35) + gun * (maske ? 0.75 : 0.65)) : ufuk;
-    const sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : gorus * 16 - 6, sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * 0.62;
+    const sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : (gorus * 16 - 6) * (1 - 0.42 * hy - 0.12 * hf), sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * (0.62 - 0.3 * hy);
     for (const m of this.malzemeler) {
       const u = m.uniforms;
       u.gun.value = gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
+      /* Gece görüşü iksiri: en düşük ışık yükselir */
+      u.magara.value = hava.gece ? 0.72 : 0.07;
+      u.islak.value = m === this.opakMalzeme && !suda ? hy : 0;
     }
     this.cizici.setClearColor(sis);
     this.gokGrubu.visible = !suda; this.bulut.visible = !suda;
@@ -214,7 +232,12 @@ export class Sahne {
   }
   secimGoster(h, ilerleme) {
     if (!h) { this.secim.visible = false; this.catlak.visible = false; return; }
-    this.secim.visible = true; this.secim.position.set(h.x + 0.5, h.y + 0.5, h.z + 0.5);
+    this.secim.visible = true;
+    /* Biçimli bloklarda seçim kutusu blok biçiminin sınırına oturur */
+    const k = h.kutu || [0, 0, 0, 1, 1, 1];
+    this.secim.position.set(h.x + (k[0] + k[3]) / 2, h.y + (k[1] + k[4]) / 2, h.z + (k[2] + k[5]) / 2);
+    this.secim.scale.set(k[3] - k[0], k[4] - k[1], k[5] - k[2]);
+    this.catlak.scale.copy(this.secim.scale);
     if (ilerleme > 0) {
       this.catlak.visible = true; this.catlak.position.copy(this.secim.position);
       this.catlak.material.map = this.catlakDokular[Math.min(7, Math.floor(ilerleme * 8))];

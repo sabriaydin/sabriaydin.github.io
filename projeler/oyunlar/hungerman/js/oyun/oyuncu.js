@@ -1,7 +1,8 @@
 /* HungerMan - oyuncu: birinci şahıs hareket, çarpışma, yüzme, eğilme, düşme */
 import { THREE } from '../grafik/sahne.js';
-import { SIVI, KATI, LAV } from '../bloklar.js';
+import { SIVI, KATI, LAV, BLOKLAR } from '../bloklar.js';
 import { DUNYA_SINIRI } from '../sabitler.js';
+import { cakisma } from '../sekiller.js';
 
 const YARIM = 0.3;
 const YER_CEKIMI = 28;
@@ -17,6 +18,7 @@ export class Oyuncu {
     this.dusus = 0; this.adimFaz = 0; this.adimSayac = 0;
     this.yuruyenMesafe = 0;
     this.ucus = false; this.hizCarpani = 1; this.hayalet = false;   // geliştirici: uçma, hız çarpanı, duvardan geçme
+    this.etkiHiz = 1; this.tirmaniyor = false;                      // hız iksiri çarpanı, tırmanma merdiveninde
     this.olaylar = { dustu: null, adim: null, ziplad: null, suyaGirdi: null };
   }
   get boy() { return this.egiliyor ? 1.5 : 1.8; }
@@ -27,21 +29,27 @@ export class Oyuncu {
     return out.set(-Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp);
   }
 
+  /* Çarpışma: katı bloklar ve biçimli blokların kutuları (merdiven, yarım blok, çit...) */
   carpisiyor(x, y, z, boy = this.boy) {
     if (this.hayalet) return false;
-    const x0 = Math.floor(x - YARIM), x1 = Math.floor(x + YARIM - 1e-6);
-    const y0 = Math.floor(y), y1 = Math.floor(y + boy - 1e-6);
-    const z0 = Math.floor(z - YARIM), z1 = Math.floor(z + YARIM - 1e-6);
-    for (let by = y0; by <= y1; by++) for (let bz = z0; bz <= z1; bz++) for (let bx = x0; bx <= x1; bx++) if (this.dunya.kati(bx, by, bz)) return true;
-    return false;
+    return cakisma(this.dunya, x - YARIM, y, z - YARIM, x + YARIM, y + boy, z + YARIM);
+  }
+  /* Çakışan kutuların en yüksek üst yüzü (yere oturma ve basamak çıkma) */
+  carpanUst(x, y, z, boy = this.boy) { return cakisma(this.dunya, x - YARIM, y, z - YARIM, x + YARIM, y + boy, z + YARIM, 1); }
+  carpanAlt(x, y, z, boy = this.boy) { return cakisma(this.dunya, x - YARIM, y, z - YARIM, x + YARIM, y + boy, z + YARIM, 2); }
+  /* Basamak çıkma: yerdeyken yarım bloklara ve merdivenlere takılmadan çıkılır */
+  basamak(nx, nz) {
+    const p = this.konum;
+    if (!this.yerde || this.ucus || this.hayalet) return false;
+    const ust = this.carpanUst(nx, p.y, nz);
+    if (ust == null || ust - p.y > 0.6 || ust <= p.y) return false;
+    if (this.carpisiyor(nx, ust + 1e-3, nz) || this.carpisiyor(p.x, ust + 1e-3, p.z)) return false;
+    p.y = ust + 1e-3;
+    return true;
   }
   /* Ayak altında destek var mı (eğilirken kenardan düşmemek için) */
   destekVar(x, y, z) {
-    const x0 = Math.floor(x - YARIM), x1 = Math.floor(x + YARIM - 1e-6);
-    const z0 = Math.floor(z - YARIM), z1 = Math.floor(z + YARIM - 1e-6);
-    const by = Math.floor(y - 0.05);
-    for (let bz = z0; bz <= z1; bz++) for (let bx = x0; bx <= x1; bx++) if (this.dunya.kati(bx, by, bz)) return true;
-    return false;
+    return cakisma(this.dunya, x - YARIM, y - 0.6, z - YARIM, x + YARIM, y - 0.01, z + YARIM);
   }
   /* Oyuncunun kapladığı bir hücrede blok var mı (blok koyarken) */
   hucreyiKapliyor(bx, by, bz) {
@@ -76,6 +84,7 @@ export class Oyuncu {
     if (this.lavda) hizMax = 1.1;
     if (this.ucus) hizMax = (this.kosuyor || g.kos ? 16 : 9);
     hizMax *= this.hizCarpani;
+    if (!this.ucus && !this.suda) hizMax *= this.etkiHiz;
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
     let ix = -sy * ileri + cy * yan, iz = -cy * ileri - sy * yan;
     const l = Math.hypot(ix, iz); if (l > 0) { ix /= l; iz /= l; }
@@ -102,6 +111,15 @@ export class Oyuncu {
       if (v.y < -60) v.y = -60;
       if (g.zipla && this.yerde) { v.y = 8.6; this.yerde = false; this.olaylar.ziplad && this.olaylar.ziplad(); }
     }
+    /* Tırmanma merdiveni: ileri ya da Boşluk ile tırmanılır, C ile tutunulur, aksi hâlde yavaşça inilir */
+    const tir = id => BLOKLAR[id] && BLOKLAR[id].tirmanma;
+    this.tirmaniyor = !this.ucus && (tir(vucut) || tir(d.blok(Math.floor(p.x), Math.floor(p.y + 0.05), Math.floor(p.z))) || tir(d.blok(Math.floor(p.x), Math.floor(p.y + 1.2), Math.floor(p.z))));
+    if (this.tirmaniyor && !this.suda) {
+      if (g.ileri || g.zipla) v.y = 3.2;
+      else if (g.egil) v.y = 0;
+      else v.y = Math.max(v.y, -2.4);
+      this.dusus = 0;
+    }
 
     /* Eksen eksen hareket ve çarpışma (alt adımlar ile) */
     const adim = Math.max(1, Math.ceil(Math.max(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z)) * dt / 0.35));
@@ -112,24 +130,26 @@ export class Oyuncu {
       /* Y */
       let ny = p.y + v.y * h;
       if (this.carpisiyor(p.x, ny, p.z)) {
-        if (v.y < 0) { ny = Math.floor(ny) + 1; yerde = true; }
-        else ny = Math.floor(ny + this.boy) - this.boy - 1e-4;
+        if (v.y < 0) { const u = this.carpanUst(p.x, ny, p.z); ny = u != null && u <= p.y + 1e-3 ? u : Math.floor(ny) + 1; yerde = true; }
+        else { const a = this.carpanAlt(p.x, ny, p.z); ny = (a != null ? a : Math.floor(ny + this.boy)) - this.boy - 1e-4; }
         if (this.carpisiyor(p.x, ny, p.z)) ny = p.y;
         v.y = 0;
       }
       p.y = ny;
       /* X */
       let nx = p.x + v.x * h;
-      if (this.carpisiyor(nx, p.y, p.z) || (this.egiliyor && this.yerde && !this.destekVar(nx, p.y, p.z))) { nx = p.x; v.x = 0; }
+      if (this.carpisiyor(nx, p.y, p.z) && !this.basamak(nx, p.z)) { nx = p.x; v.x = 0; }
+      else if (this.egiliyor && this.yerde && !this.destekVar(nx, p.y, p.z)) { nx = p.x; v.x = 0; }
       p.x = nx;
       /* Z */
       let nz = p.z + v.z * h;
-      if (this.carpisiyor(p.x, p.y, nz) || (this.egiliyor && this.yerde && !this.destekVar(p.x, p.y, nz))) { nz = p.z; v.z = 0; }
+      if (this.carpisiyor(p.x, p.y, nz) && !this.basamak(p.x, nz)) { nz = p.z; v.z = 0; }
+      else if (this.egiliyor && this.yerde && !this.destekVar(p.x, p.y, nz)) { nz = p.z; v.z = 0; }
       p.z = nz;
     }
     if (!yerde && v.y === 0 && this.carpisiyor(p.x, p.y - 0.02, p.z)) yerde = true;
     /* Düşme hasarı */
-    if (!yerde && !this.suda && p.y < oncekiY) this.dusus += oncekiY - p.y;
+    if (!yerde && !this.suda && !this.tirmaniyor && p.y < oncekiY) this.dusus += oncekiY - p.y;
     if (yerde && !this.yerde) {
       if (this.dusus > 3.4 && this.olaylar.dustu) this.olaylar.dustu(this.dusus);
       this.dusus = 0;

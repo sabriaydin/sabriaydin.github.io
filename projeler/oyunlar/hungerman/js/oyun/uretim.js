@@ -1,14 +1,14 @@
 /* HungerMan - üretim tarifleri
-   istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında)
+   istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME, YUN_RENKLERI } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39] },
   kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12] }
 };
-export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi' };
-export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48 };
+export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası' };
+export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140 };
 /* Tarifin istasyon koşulu: yok, tek istasyon ya da istasyonlardan biri */
 export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? t.istasyon : [t.istasyon]);
 export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
@@ -87,6 +87,41 @@ t(457, 1, [[282, 4], [284, 2]], 'masa', 'savas');
 t(62, 1, [[65, 4]], null, 'blok');
 t(63, 1, [[66, 4]], null, 'blok');
 t(64, 1, [[67, 4]], null, 'blok');
+
+/* İnşa blokları (0.11.0) */
+[[14, 70, 82], [15, 74, 84], [35, 78, 86]].forEach(([mal, merdiven, yarim]) => {
+  t(merdiven, 4, [[mal, 6]], 'masa', 'blok');
+  t(yarim, 6, [[mal, 3]], 'masa', 'blok');
+});
+t(88, 3, [['kalas', 6]], 'masa', 'blok');
+t(121, 2, [['kalas', 6]], 'masa', 'blok');
+t(104, 3, [['kalas', 4], [256, 2]], 'masa', 'blok');
+t(105, 1, [['kalas', 2], [256, 4]], 'masa', 'blok');
+t(109, 16, [[34, 6]], 'masa', 'blok');
+t(110, 3, [[256, 7]], 'masa', 'blok');
+/* Boyalar ve renkli yün */
+t(321, 2, [[26, 1]], null, 'malzeme');
+t(323, 2, [[27, 1]], null, 'malzeme');
+t(325, 2, [[44, 1]], null, 'malzeme');
+t(324, 1, [[31, 2]], 'firin', 'malzeme');
+t(327, 1, [[257, 1]], null, 'malzeme');
+t(327, 2, [[451, 1]], null, 'malzeme');
+t(322, 2, [[321, 1], [323, 1]], null, 'malzeme');
+t(326, 2, [[321, 1], [325, 1]], null, 'malzeme');
+t(326, 1, [[265, 3]], null, 'malzeme');
+YUN_RENKLERI.forEach((r, i) => t(114 + i, 1, [[49, 1], [r.boya, 1]], null, 'blok'));
+/* Tarım */
+MAL.forEach((m, mi) => t(340 + mi, 1, [[m, 2], [256, 2]], 'masa', 'alet'));
+t(330, 1, [[329, 1]], ['ates', 'firin'], 'yiyecek');
+/* Örs ve simya */
+t(139, 1, [[261, 8], [37, 2]], 'masa', 'blok');
+t(140, 1, [[15, 3], [261, 1], [34, 1]], 'masa', 'blok');
+t(331, 3, [[34, 3]], null, 'malzeme');
+t(332, 1, [[331, 1], [283, 1], [265, 2]], 'simya', 'yiyecek');
+t(333, 1, [[331, 1], [328, 2], [61, 1]], 'simya', 'yiyecek');
+t(334, 1, [[331, 1], [297, 1], [299, 1]], 'simya', 'yiyecek');
+t(335, 1, [[331, 1], [257, 2], [263, 1]], 'simya', 'yiyecek');
+t(336, 1, [[331, 1], [450, 1], [296, 2]], 'simya', 'yiyecek');
 
 export const TARIFLER = R;
 

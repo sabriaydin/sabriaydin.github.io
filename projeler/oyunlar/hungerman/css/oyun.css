@@ -430,3 +430,26 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 .gelSayim i { font-style: normal; color: var(--vurgu2); margin-left: 3px; }
 .gelGrafik { width: 100%; height: 90px; border: 2px solid #000; border-radius: 4px; }
 body.gostergesiz #hud { visibility: hidden; }
+
+/* ---------- 0.11.0: örs, deneyim çubuğu, iksir etkileri, hava ---------- */
+.envOrs { display: flex; flex-direction: column; gap: 14px; min-width: 300px; }
+.envOrs header { padding-right: 40px; }
+.envOrs .ipucuMetin { margin: 0; }
+#orsIzgara { display: flex; align-items: center; gap: 10px; justify-content: center; padding: 18px 0 6px; }
+#orsIzgara .orsArti, #orsIzgara .orsOk { font: 700 1.4rem var(--baslik); color: #d8cdbb; }
+#orsIzgara .orsSonuc { box-shadow: 0 0 0 2px #7fd06a; }
+#orsIzgara .orsSonuc.olmaz { box-shadow: 0 0 0 2px #c0473b; opacity: .65; }
+#orsBilgi { text-align: center; font-size: .9rem; min-height: 2.6em; }
+#orsBilgi .ok { color: #8fe07a; } #orsBilgi .eksik { color: #ff7a6a; } #orsBilgi .soluk { color: #a89c8a; }
+#xpCubuk { position: relative; height: 6px; margin: 0 4px; border-radius: 3px; background: rgba(0, 0, 0, .6); box-shadow: 0 0 0 1px #000; }
+#xpCubuk i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 3px; background: linear-gradient(#b8f070, #6ac83a); transition: width .25s; }
+#xpCubuk b { position: absolute; left: 50%; top: -15px; transform: translateX(-50%); font: 700 .85rem var(--baslik); color: #9df06a; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+#xpCubuk b:empty { display: none; }
+#etkiler { position: absolute; left: 12px; top: 12px; display: grid; gap: 5px; pointer-events: none; }
+#etkiler .etki { display: flex; align-items: center; gap: 7px; padding: 3px 10px 3px 6px; border-radius: 99px; background: rgba(12, 14, 18, .55); border: 1px solid rgba(255, 255, 255, .1); font: 600 .78rem var(--govde); color: #eee; }
+#etkiler .etki i { width: 10px; height: 10px; border-radius: 50%; background: var(--r); box-shadow: 0 0 6px var(--r); }
+#etkiler .etki b { font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+#etkiler .etki.az b { color: #ffb36b; }
+#saat .hava { display: inline-flex; align-items: center; color: rgba(255, 255, 255, .78); font: 600 .78rem var(--govde); }
+#saat .hava[hidden] { display: none; }
+#saat .hava svg { width: 15px; height: 15px; }

@@ -1,6 +1,6 @@
 /* HungerMan - oyun içi gösterge: hızlı erişim çubuğu, can / açlık / oksijen, pusula, saat, bildirimler */
 import { simge } from '../grafik/doku.js';
-import { ESYALAR, maksDayanim } from '../bloklar.js';
+import { ESYALAR, maksDayanim, ETKILER } from '../bloklar.js';
 import { ikon, IKON_RENK } from './ikonlar.js';
 
 /* Pusula yazı tipleri: okunaklı, düz bir yazı tipi (piksel yazı tipi küçük boyutta zor okunur) */
@@ -195,7 +195,7 @@ export class Hud {
     if (h !== this.son.gorev) { this.son.gorev = h; $('#gorevIzleyici').innerHTML = h; }
   }
   /* z: gün zamanı (0 = 06:00), konum: alt satır metni */
-  saat(z, gun, konum) {
+  saat(z, gun, konum, firtina) {
     const saatOndalik = (z * 24 + 6) % 24;
     const dk = Math.floor(saatOndalik * 60);
     const t = String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
@@ -215,6 +215,7 @@ export class Hud {
     let uyari = '', yakin = false;
     if (z >= 0.43 && z < 0.5) { const kalan = Math.ceil((0.5 - z) * 24 * 60); uyari = `Gece yaklaşıyor · ${kalan} dk`; yakin = true; }
     else if (z >= 0.5 && z < 0.98) uyari = 'Canavarlar ortalıkta';
+    else if (firtina) uyari = 'Fırtına · Canavarlar gündüz de çıkar';
     if (uyari !== this.son.uyari) { this.son.uyari = uyari; const u = $('#geceUyari'); u.hidden = !uyari; u.textContent = uyari; u.classList.toggle('yakin', yakin); }
     if (konum != null && konum !== this.son.konum) { this.son.konum = konum; $('#konumDeger').textContent = konum; }
   }
@@ -228,6 +229,36 @@ export class Hud {
     if ($('#hedefAd').textContent !== a) $('#hedefAd').textContent = a;
     $('#hedefCan').style.width = Math.max(0, v.can / v.tur.can * 100).toFixed(0) + '%';
     k.classList.toggle('dusman', !!(v.tur.dusman || v.ofkeli));
+  }
+  /* Deneyim çubuğu: seviye ve bir sonraki seviyeye ilerleme */
+  xpCiz(h) {
+    const L = h.seviye, o = h.ilerleme, a = L + '|' + o.toFixed(3);
+    if (a === this.son.xp) return;
+    this.son.xp = a;
+    $('#xpDolu').style.width = (o * 100).toFixed(1) + '%';
+    $('#xpSeviye').textContent = L > 0 ? String(L) : '';
+  }
+  /* İksir etkileri: kalan süreleriyle sol üstte */
+  etkilerCiz(etkiler) {
+    const h = Object.entries(etkiler).filter(([k, v]) => ETKILER[k] && v > 0).map(([k, v]) => {
+      const s = Math.ceil(v), t = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      return `<div class="etki${s <= 15 ? ' az' : ''}" style="--r:${ETKILER[k].renk}"><i></i><span>${ETKILER[k].ad}</span><b>${t}</b></div>`;
+    }).join('');
+    if (h !== this.son.etki) { this.son.etki = h; $('#etkiler').innerHTML = h; }
+  }
+  /* Hava durumu simgesi (saat göstergesinde): tur 0 yağış yok, 1 yağmur, 2 kar */
+  hava(durum, tur) {
+    const a = durum + '|' + tur;
+    if (a === this.son.hava) return;
+    this.son.hava = a;
+    const el = $('#havaDeger');
+    if (durum === 'acik') { el.hidden = true; return; }
+    const bulut = '<path d="M5 11.5h8.2a2.8 2.8 0 0 0 .3-5.6A4 4 0 0 0 5.9 5.4 3 3 0 0 0 5 11.5z" fill="currentColor"/>';
+    const alt = durum === 'firtina' ? '<path d="M9.6 11.6 7.6 14.6h2l-1 2.6 3-3.6H9.7l1.2-2z" fill="#ffd257"/>'
+      : tur === 2 ? '<circle cx="6" cy="14" r="1" fill="#fff"/><circle cx="9.5" cy="15.5" r="1" fill="#fff"/><circle cx="13" cy="14" r="1" fill="#fff"/>'
+      : '<path d="M6 13.4l-.8 2M9.6 13.4l-.8 2M13.2 13.4l-.8 2" stroke="#8fc0ff" stroke-width="1.3" stroke-linecap="round"/>';
+    el.innerHTML = `<svg viewBox="0 0 18 18" aria-hidden="true">${bulut}${alt}</svg>${durum === 'firtina' ? 'Fırtına' : tur === 2 ? 'Kar' : tur === 0 ? 'Bulutlu' : 'Yağmur'}`;
+    el.hidden = false;
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
   suAlti(acik) { $('#suAlti').classList.toggle('acik', acik); }

@@ -3,7 +3,7 @@
    Parçalar 16 x 16 parçalık bölgelerde toplanır; her bölge 256 x 256 piksellik bir tuvale (1 piksel = 1 blok) boyanır.
    Bölge tuvalleri hem büyük haritada hem mini haritada ölçeklenerek çizilir. */
 import { PB, PY, DENIZ, dizin } from '../sabitler.js';
-import { KATI, SIVI, LAV, YUZ_DOKU } from '../bloklar.js';
+import { KATI, SIVI, LAV, YUZ_DOKU, BLOKLAR } from '../bloklar.js';
 import { doseme } from '../grafik/doku.js';
 
 export const BOLGE = 16;
@@ -38,7 +38,7 @@ function sutun(al) {
       while (yy > 0 && SIVI[al(yy)] && !LAV[al(yy)]) { d++; yy--; }
       return [al(yy) || 7, 128 + Math.min(127, d)];
     }
-    if (!KATI[b] && !(b >= 53 && b <= 56)) continue;   // ot, çiçek, meşale görünmez; ekinler görünür
+    if (!KATI[b] && !(BLOKLAR[b] && BLOKLAR[b].ekin != null)) continue;   // ot, çiçek, meşale görünmez; ekinler görünür
     return [b, y];
   }
   return [0, 0];

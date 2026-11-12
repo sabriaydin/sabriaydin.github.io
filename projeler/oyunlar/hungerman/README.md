@@ -117,6 +117,41 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 11. aşama (0.11.0): Oynanışı zenginleştiren güncelleme
+
+**Hava durumu**
+- Açık, yağmurlu ve fırtınalı hava; durum belirli sürelerle kendiliğinden değişir. Tayga, dağlar ve karlı kumsalda kar yağar, çölde yağış olmaz.
+- Yağmur ve kar parçacıkları her sütunun en üst bloğuna kadar düşer; çatı altına yağmaz.
+- Yağışta gökyüzü griye döner, ışık azalır, sis yaklaşır, açıktaki yüzeyler ıslak ve koyu görünür; yağmur sesi çatı altında boğuklaşır.
+- Fırtınada şimşek çakar, gök gürültüsü uzaklığa göre gecikmeli duyulur; yıldırım düştüğü yerin yakınındaki canlılara ve oyunculara hasar verir.
+- Fırtınada canavarlar gündüz de ortaya çıkar; yağmur, zombi ve iskeletlerin güneşte yanmasını önler.
+- Fırtınada yatakta uyunabilir; uyanınca hava açılır.
+- Saat göstergesinde hava simgesi görünür. Hava durumu kayıtla saklanır ve çok oyunculuda sunucudan eşitlenir.
+
+**İnşa blokları**
+- Merdiven (meşe, parke taş, taş tuğla): bakış yönüne göre konur. Yarım blok (aynı üç malzeme): yüzün alt ya da üst yarısına göre alt ya da üst yarım; iki yarım blok birleşince tam blok olur.
+- Ahşap kapı (iki blok yüksekliğinde), tuzak kapı ve çit kapısı: sağ tıkla açılır ve kapanır; eğilirken yanlarına blok konur.
+- Meşe çit ve cam bölme komşu bloklara kendiliğinden bağlanır; çitin üstünden atlanamaz.
+- Tırmanma merdiveni: katı bir duvarın yan yüzüne konur; ileri tuşu ya da Boşluk ile çıkılır, C ile tutunulur, aksi hâlde yavaşça inilir.
+- Yedi renkte yün ve boyalar (gelincik, karahindiba, peygamber çiçeği, deniz yosunu, kömür, ahtapot ve böğürtlenden).
+- Yarım bloklara ve merdivenlere yürüyerek çıkılır; çarpışma ve seçim kutusu blokların biçimine göredir.
+
+**Hayvancılık ve tarım**
+- İnek ve koyun buğday, domuz havuç ya da patates, tavuk tohum, tavşan havuç ya da karahindiba sever. Hayvanlar yemi tutan oyuncuyu izler.
+- Beslenen iki hayvan buluşup yavru yapar (5 dakika dinlenme); yavrular küçüktür ve büyür, beslenince daha hızlı büyür. Beslenen hayvanlar ve yavrular kaybolmaz ve dünya ile kaydedilir.
+- Havuç ve patates ekinleri; fırınlanmış patates. Köy tarlalarında buğday, havuç ve patates yetişir.
+- Çapa (beş malzeme) toprağı ve çimeni tarla toprağına çevirir. Tarlada ekinler 1,5 kat, ıslak tarlada 3 kat hızlı büyür; tarla, 4 blok çevresinde su varsa ya da üstüne yağmur yağarsa ıslanır.
+- Köylülere yeni takaslar: çiftçi (havuç, patates, çapa, çit), demirci (örs), oduncu (kapı, tırmanma merdiveni), şifacı (cam şişe, iksirler, simya masası), balıkçı (su altında nefes iksiri).
+
+**Deneyim, örs ve iksirler**
+- Deneyim: canavar ve hayvan avlamak, cevher kazmak, balık tutmak, ticaret, hayvan yetiştirmek, eritme ve iksir yapmak deneyim kazandırır. Hızlı erişim çubuğunun üstünde deneyim çubuğu ve seviye görünür. Ölümde deneyimin yarısı kaybedilir.
+- Örs: aletler, zırhlar, yay ve olta kendi malzemesiyle (her malzeme dayanımın dörtte biri, 1 seviye) ya da aynı türden ikinci bir eşyayla (2 seviye) onarılır.
+- Simya masası yakınında cam şişe ile iksir üretilir: hız, gece görüşü, su altında nefes, ateşe dayanıklılık, güç (3 dakika). Etkiler sol üstte kalan süreleriyle görünür ve kayıtla saklanır.
+
+**Geliştirici**
+- Konsol: `hava <acik | yagmur | firtina> [süre]`, `hava simsek`, `xp <puan>`, `xp seviye <sayı>`, `etki <hiz | gece | nefes | ates | guc> [süre]`, `etki temizle`.
+- Geliştirici penceresi: hava düğmeleri, deneyim ve etki düğmeleri, yapı blokları, çiftçi ve simya setleri.
+
 ## 0.10.1: Deniz feneri düzeltmesi
 
 - Deniz fenerinin dönen ışığı ve parlayan çekirdeği, ışık odasındaki parıltı kristaline bağlandı: kristal kırılınca ışık hemen söner, yeniden konunca yanar. Uzaktaki (yüklü olmayan) fenerler için kayıtlı blok değişikliklerine bakılır.
@@ -152,6 +187,7 @@ js/ana.js             Giriş noktası: menüler, girdi, oyun döngüsü, kayıt
 js/sabitler.js        Ortak sabitler (parça boyutu, deniz seviyesi, gün süresi)
 js/rastgele.js        Tohumlu rastgele sayı ve gürültü fonksiyonları
 js/bloklar.js         Blok, eşya ve alet tanımları
+js/sekiller.js        Biçimli bloklar (merdiven, yarım blok, kapı, çit...): kutular, çarpışma, ışın isabeti
 js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
 js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları
@@ -162,6 +198,7 @@ js/dunya/dunya.js     Parça yükleme / boşaltma, blok okuma-yazma
 js/grafik/sahne.js    Çizici, gökyüzü, ışıklar, seçim kutusu, eldeki eşya
 js/grafik/doku.js     Kodla çizilen dokular ve eşya simgeleri
 js/grafik/fener.js    Deniz fenerlerinin dönen ışık huzmesi
+js/grafik/hava.js     Hava durumu: yağmur, kar, fırtına ve şimşek
 js/oyun/*             Oyuncu, etkileşim, envanter, üretim, hayatta kalma, düşen eşyalar, olta, tekneler
 js/varlik/*           Hayvanlar, deniz canlıları, düşmanlar ve köylüler: türler, modeller, yapay zekâ, oklar
 js/koy/*              Köy yönetimi, meslekler ve takaslar, görevler

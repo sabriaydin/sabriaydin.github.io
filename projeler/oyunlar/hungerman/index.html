@@ -32,7 +32,7 @@
         <circle class="cisim" cx="10" cy="10" r="3.4"/>
         <circle class="golge" cx="11.6" cy="8.6" r="2.9"/>
       </svg>
-      <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span>
+      <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span><span id="havaDeger" class="hava" hidden></span>
     </div>
   </div>
   <div id="yanmaEfekt"></div>
@@ -46,8 +46,10 @@
       <div id="solDurum"><div id="zirhSira" class="simgeSira" aria-label="Zırh"></div><div id="canlar" class="simgeSira" aria-label="Can"></div></div>
       <div id="sagDurum"><div id="oksijen" class="simgeSira" aria-label="Oksijen"></div><div id="aclik" class="simgeSira ters" aria-label="Açlık"></div></div>
     </div>
+    <div id="xpCubuk" aria-label="Deneyim"><i id="xpDolu"></i><b id="xpSeviye"></b></div>
     <div id="cubuk"></div>
   </div>
+  <div id="etkiler"></div>
   <div id="esyaAdi"></div>
   <div id="bildirimler"></div>
   <pre id="hata" hidden></pre>
@@ -79,6 +81,12 @@
     <section class="envSandik" hidden>
       <header><h2>Sandık</h2><span class="ipucuMetin">Shift + tık: sandık ile envanter arasında taşı</span></header>
       <div id="sandikIzgara" class="izgara"></div>
+    </section>
+    <section class="envOrs" hidden>
+      <header><h2>Örs</h2><span class="ipucuMetin">Eşyalar, malzemesiyle ya da aynı türden ikinci bir eşyayla onarılır</span></header>
+      <div id="orsIzgara" class="izgara"></div>
+      <div id="orsBilgi"></div>
+      <p class="ipucuMetin">Her malzeme dayanımın dörtte birini onarır ve 1 deneyim seviyesi tutar. İki aynı eşyanın birleştirilmesi 2 seviye tutar.</p>
     </section>
     <button class="kapat" id="envKapat" aria-label="Kapat">✕</button>
   </div>
@@ -245,9 +253,9 @@
           <dt>W A S D</dt><dd>Hareket</dd>
           <dt>Boşluk</dt><dd>Zıplama, suda yukarı yüzme</dd>
           <dt>Sol Shift / W'ye iki kez</dt><dd>Koşma</dd>
-          <dt>C</dt><dd>Eğilme (kenardan düşmez), tekneden inme, paletle suda dalma</dd>
+          <dt>C</dt><dd>Eğilme (kenardan düşmez), tekneden inme, paletle suda dalma, tırmanma merdiveninde tutunma</dd>
           <dt>Sol tık (basılı)</dt><dd>Kazma, kesme, kırma</dd>
-          <dt>Sağ tık</dt><dd>Blok koyma, yeme, toplama, masa ve fırını açma</dd>
+          <dt>Sağ tık</dt><dd>Blok koyma, yeme, içme, toplama, masa ve fırını açma, kapı açma, hayvan besleme</dd>
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
           <dt>E</dt><dd>Envanter ve üretim</dd>
           <dt>J</dt><dd>Görev günlüğü</dd>

@@ -5,6 +5,7 @@ import { UzakOyuncular } from './uzak-oyuncular.js';
 import { r2, r3, v3, durumDizisi, blokEfekti, sandikDizi, sandikKur } from './ortak.js';
 import { koyBul, MESLEK_ADI } from '../dunya/koy-uretici.js';
 import { BLOKLAR, ESYALAR } from '../bloklar.js';
+import { TURLER } from '../varlik/turler.js';
 
 const ZAMAN_ASIMI = 20000;
 
@@ -40,7 +41,8 @@ export class IstemciOyun {
     o.varliklar.ayna = true; o.varliklar.dinleyici = o.oyuncu.konum;
     o.varliklar.ag = {
       vur: (v, n, kaynak, op) => this.gonder({ t: 'vur', i: v.id, n, k: kaynak ? v3(kaynak) : null, it: (op && op.itme) ?? 1 }),
-      okAt: (p, h, hasar) => this.gonder({ t: 'ok', p: v3(p), v: v3(h), h: hasar })
+      okAt: (p, h, hasar) => this.gonder({ t: 'ok', p: v3(p), v: v3(h), h: hasar }),
+      besle: v => this.gonder({ t: 'bes', i: v.id })
     };
     o.tekneler.ayna = true;
     o.tekneler.ag = {
@@ -95,6 +97,8 @@ export class IstemciOyun {
         for (const a of m.o) { if (a[0] === this.benimId) continue; this.uzak.durum(a[0], a.slice(1)); }
         o.varliklar.aynaUygula(m.v, (v, meta) => this.koyluCoz(v, meta));
         for (const b of m.b) { const t = o.tekneler.liste.find(x => x.ni === b[0]); if (t && t !== o.tekneler.binilen) t.hedef = b.slice(1); }
+        /* Hava durumu sunucudan gelir */
+        if (m.h && o.hava && o.hava.durum !== m.h) o.hava.ayarla(m.h, 9999);
         break;
       }
       case 'b': {
@@ -117,7 +121,9 @@ export class IstemciOyun {
       }
       case 'h': this.arayuz.hasar(m.n, m.s, m.k[0], m.k[1], m.a); break;
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
-      case 'ol': o.gorevler.oldurme(m.tur); if (m.k) o.koyler.itibarDegistir(m.k, -30); break;
+      case 'ol': o.gorevler.oldurme(m.tur); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
+      case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;
+      case 'sim': if (o.hava) o.hava.simsekGoster(m.p[0], m.p[1], m.p[2], o.oyuncu.konum, this.ses); break;
       case 'o+': o.varliklar.aynaOk(m.i, m.p, m.v, m.d); break;
       case 'o-': o.varliklar.aynaOkSil(m.i); break;
       case 't+': for (const a of m.l) this.tekneEkle(a); break;

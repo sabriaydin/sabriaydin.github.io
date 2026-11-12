@@ -102,6 +102,36 @@ export class Ses {
   }
   kurek(h = 1) { this.patlama(700 + Math.random() * 200, 0.32, 0.16 * h, 'lowpass', 0.9, 0.45); }
   dalga(h = 1) { this.patlama(420 + Math.random() * 120, 1.2, 0.07 * h, 'lowpass', 0.6, 0.6); }
+  /* 0.11.0: kapı, deneyim, iksir, örs, hava */
+  kapi(acik) { this.patlama(acik ? 700 : 520, 0.14, 0.3, 'bandpass', 2.2, acik ? 1.3 : 0.7); this.ton(acik ? 200 : 150, 0.08, 0.12, 'triangle', acik ? 260 : 110); }
+  xp() { this.ton(1600 + Math.random() * 500, 0.09, 0.05, 'sine', 2300); }
+  seviye() { [660, 880, 1320].forEach((f, i) => setTimeout(() => this.ton(f, 0.22, 0.07, 'triangle', f * 1.01), i * 80)); }
+  ic() { for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(900, 0.08, 0.18, 'lowpass', 2, 0.6), i * 130); }
+  ors() { this.ton(1250, 0.5, 0.12, 'triangle', 1180); this.ton(1890, 0.4, 0.05, 'sine', 1850); this.patlama(3000, 0.1, 0.25, 'highpass', 1); }
+  kalp() { this.ton(880, 0.12, 0.05, 'sine', 1100); }
+  /* Yağmur: sürekli çalan süzülmüş gürültü; hacim 0..1, boguk: çatı altında */
+  yagmurAyarla(hacim, boguk) {
+    const c = this.ctx; if (!c) return;
+    if (!this.yagmur) {
+      if (hacim <= 0.01) return;
+      const k = c.createBufferSource(); k.buffer = this.gurultu; k.loop = true;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2400; f.Q.value = 0.4;
+      const b = c.createBiquadFilter(); b.type = 'highpass'; b.frequency.value = 300;
+      const g = c.createGain(); g.gain.value = 0;
+      k.connect(b); b.connect(f); f.connect(g); g.connect(this.ana); k.start();
+      this.yagmur = { k, f, g };
+    }
+    const Y = this.yagmur, t = c.currentTime;
+    Y.g.gain.setTargetAtTime(Math.max(0, hacim) * 0.16, t, 0.4);
+    Y.f.frequency.setTargetAtTime(boguk ? 700 : 2400, t, 0.3);
+    if (hacim <= 0.01 && Y.g.gain.value < 0.002) { try { Y.k.stop(); } catch (e) { /* durmuş */ } this.yagmur = null; }
+  }
+  gokGurultusu(h = 1, yakin = false) {
+    if (!this.ctx || h <= 0.02) return;
+    if (yakin) { this.patlama(3800, 0.25, 0.45 * h, 'highpass', 0.7, 0.5); this.patlama(900, 0.5, 0.4 * h, 'lowpass', 0.8, 0.4); }
+    this.patlama(160, 2.8, 0.55 * h, 'lowpass', 1.4, 0.5);
+    setTimeout(() => this.patlama(110, 2.2, 0.35 * h, 'lowpass', 1.2, 0.6), 350);
+  }
   tik() { this.ton(1200, 0.03, 0.06, 'square', 900); }
   ac() { this.ton(440, 0.06, 0.06, 'triangle', 660); }
   kapa() { this.ton(660, 0.06, 0.06, 'triangle', 440); }

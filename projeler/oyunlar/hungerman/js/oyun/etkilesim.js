@@ -1,9 +1,10 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK } from '../bloklar.js';
+import { BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
+import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 
 const ERISIM = 5;
-const TOPRAK = new Set([3, 4, 45]);
+const TOPRAK = new Set([3, 4, 45, 137, 138]);
 
 export class Etkilesim {
   constructor(o) {
@@ -28,7 +29,11 @@ export class Etkilesim {
     for (let i = 0; i < 64 && t <= ERISIM; i++) {
       const id = this.dunya.blok(x, y, z);
       if (id && CIZIM[id] !== C_YOK && !(SIVI[id] && !BITKI[id])) {
-        if (!BITKI[id] && !BLOKLAR[id].mesale || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t };
+        /* Biçimli bloklar: kutularına isabet aranır (açık kapının boşluğundan geçilebilir) */
+        if (SEKIL[id]) {
+          const k = hucreKutulari(this.dunya, x, y, z, id), r = kutuIsin(goz, yon, x, y, z, k, ERISIM);
+          if (r) return { x, y, z, id, nx: r.nx, ny: r.ny, nz: r.nz, t: r.t, py: goz.y + yon.y * r.t - y, kutu: sinirKutusu(k) };
+        } else if (!BITKI[id] && !BLOKLAR[id].mesale || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
       }
       if (tx < ty && tx < tz) { x += sx; t = tx; tx += tdx; nx = -sx; ny = 0; nz = 0; }
       else if (ty < tz) { y += sy; t = ty; ty += tdy; nx = 0; ny = -sy; nz = 0; }
@@ -102,6 +107,15 @@ export class Etkilesim {
       this.sahne.secimGoster(null, 0);
       return;
     }
+    /* Hayvan besleme: elindeki yemi seven hayvana sağ tık */
+    if (g.sag && this.hedefCanli && this.sagBekleme <= 0 && this.varliklar.yemSever(this.hedefCanli, eldeki)) {
+      this.sagBekleme = 0.4; this.germe = 0;
+      const sonuc = this.varliklar.besle(this.hedefCanli, null);
+      if (sonuc) { this.envanter.seciliAzalt(1); this.ses.ye(); this.vurus = 0.01; }
+      else this.arayuz.bildirim('Bu hayvan şu anda beslenemez.');
+      this.sahne.secimGoster(null, 0);
+      return;
+    }
     /* Köylü ile konuşma */
     if (g.sag && this.hedefCanli && this.hedefCanli.tur.koylu && this.sagBekleme <= 0) {
       this.sagBekleme = 0.4; this.germe = 0;
@@ -145,7 +159,8 @@ export class Etkilesim {
     }
     /* Kullanma / koyma */
     else if (g.sag && eldeki !== 286 && this.sagBekleme <= 0) {
-      if (this.kullan(g)) { this.sagBekleme = 0.22; this.vurus = 0.01; }
+      this.acildi = false;
+      if (this.kullan(g)) { this.sagBekleme = this.acildi ? 0.45 : 0.22; this.vurus = 0.01; }
       else this.sagBekleme = 0.05;
     }
     this.sahne.secimGoster(this.hedef, this.ilerleme);
@@ -154,6 +169,7 @@ export class Etkilesim {
   saldir(v) {
     const a = this.aletBilgi();
     let hasar = a && a.tur !== 'yay' ? a.hasar : 1;
+    if (this.hayatta.etki('guc')) hasar *= 1.5;
     const o = this.oyuncu;
     const kritik = !o.yerde && !o.suda && o.hiz.y < 0;
     if (kritik) { hasar *= 1.5; this.dusenler.renkliParcacik([1, 0.9, 0.5], v.konum.x, v.konum.y + v.tur.boy * 0.7, v.konum.z, 8); }
@@ -185,6 +201,9 @@ export class Etkilesim {
     for (const [dx, dy, dz] of [[0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]) { const n = d.blok(h.x + dx, h.y + dy, h.z + dz); if (n === 7 || n === 31) { yeni = 7; break; } if (n === 59) yeni = 59; }
     if (h.id === 31 || b.suIcinde) yeni = 7;
     if (!d.blokKoy(h.x, h.y, h.z, yeni)) return;
+    /* Kapının diğer yarısı da kaldırılır */
+    if (b.sekil === 'kapi') { const oy = h.y + (b.ust ? -1 : 1), ob = d.blok(h.x, oy, h.z); if (BLOKLAR[ob] && BLOKLAR[ob].sekil === 'kapi') d.blokKoy(h.x, oy, h.z, 0); }
+    if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
     if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
@@ -195,6 +214,11 @@ export class Etkilesim {
     }
     this.hayatta.yor(0.025);
     /* Üstteki bitki/meşale desteksiz kalır */
+    /* Üstteki kapı da düşer */
+    if (BLOKLAR[ust] && BLOKLAR[ust].sekil === 'kapi' && !BLOKLAR[ust].ust) {
+      d.blokKoy(h.x, h.y + 1, h.z, 0); if (BLOKLAR[d.blok(h.x, h.y + 2, h.z)].sekil === 'kapi') d.blokKoy(h.x, h.y + 2, h.z, 0);
+      this.dusur(88, h.x, h.y + 1, h.z);
+    }
     if ((BITKI[ust] || (BLOKLAR[ust] && BLOKLAR[ust].mesale)) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
       d.blokKoy(h.x, h.y + 1, h.z, BLOKLAR[ust].suIcinde ? 7 : 0);
       this.dusur(ust, h.x, h.y + 1, h.z);
@@ -217,6 +241,8 @@ export class Etkilesim {
     if (h && BLOKLAR[h.id].sandik && !g.egil) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
     /* Yatak */
     if (h && BLOKLAR[h.id].yatak) { this.arayuz.uyu(h); return true; }
+    /* Kapı, çit kapısı ve tuzak kapı açılıp kapanır (eğilirken blok konur) */
+    if (h && !g.egil && this.ac(h)) { this.acildi = true; return true; }
     /* Böğürtlen toplama */
     if (h && h.id === 28) {
       this.dunya.blokKoy(h.x, h.y, h.z, 29);
@@ -239,7 +265,7 @@ export class Etkilesim {
     if (e.gubre && h) {
       const d = this.dunya;
       let oldu = false;
-      if (h.id >= 53 && h.id <= 55) { d.blokKoy(h.x, h.y, h.z, Math.min(56, h.id + 1 + Math.floor(Math.random() * 2))); oldu = true; }
+      if (EKIN_SONRAKI[h.id]) { let n = EKIN_SONRAKI[h.id]; if (Math.random() < 0.5 && EKIN_SONRAKI[n]) n = EKIN_SONRAKI[n]; d.blokKoy(h.x, h.y, h.z, n); oldu = true; }
       else if (BLOKLAR[h.id].fidan) { if (Math.random() < 0.45) d.fidanBuyut(h.x, h.y, h.z, BLOKLAR[h.id].fidan); oldu = true; }
       else if (h.id === 4 && h.ny === 1) {
         for (let k = 0; k < 10; k++) {
@@ -251,11 +277,28 @@ export class Etkilesim {
       if (oldu) { env.seciliAzalt(1); this.dusenler.renkliParcacik([0.45, 0.85, 0.35], h.x + 0.5, h.y + 1, h.z + 0.5, 10); this.ses.topla(); return true; }
       return false;
     }
-    /* Tohum ekme */
-    if (e.ekin && h) {
-      if (!TOPRAK.has(h.id) || h.ny !== 1) return false;
-      if (this.dunya.blok(h.x, h.y + 1, h.z) !== 0) return false;
+    /* Çapa: toprak ve çimen tarla toprağına çevrilir */
+    if (e.alet && e.alet.tur === 'capa') {
+      if (!h || ![3, 4, 45, 57].includes(h.id) || h.ny === -1) return false;
+      const d = this.dunya, ust = d.blok(h.x, h.y + 1, h.z);
+      if (ust && !(BLOKLAR[ust].degistirilebilir)) return false;
+      if (ust) d.blokKoy(h.x, h.y + 1, h.z, 0);
+      d.blokKoy(h.x, h.y, h.z, this.suYakin(h.x, h.y, h.z) ? 138 : 137);
+      this.ses.koy('toprak'); this.dusenler.parcacik(3, h.x, h.y, h.z, 4);
+      if (env.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+      return true;
+    }
+    /* Tohum ekme (havuç ve patates hem ekilir hem yenir) */
+    if (e.ekin && h && TOPRAK.has(h.id) && h.ny === 1 && this.dunya.blok(h.x, h.y + 1, h.z) === 0) {
       this.dunya.blokKoy(h.x, h.y + 1, h.z, e.ekin); env.seciliAzalt(1); this.ses.koy('bitki');
+      return true;
+    }
+    if (e.ekin && !e.yemek) return false;
+    /* İksir: etkisi süre boyunca devam eder, boş şişe geri kalır */
+    if (e.tur === 'iksir' && e.etki) {
+      this.hayatta.etkiEkle(e.etki.tur, e.etki.sure);
+      env.seciliAzalt(1); env.ekle(331, 1); this.ses.ic();
+      this.arayuz.bildirim(`${ETKILER[e.etki.tur].ad} etkisi başladı: 3 dakika.`, s.id);
       return true;
     }
     if ((e.tur === 'yiyecek' || e.yenir) && e.yemek) {
@@ -273,11 +316,42 @@ export class Etkilesim {
     }
     /* Blok koyma */
     if (e.tur === 'blok' && h) {
-      const id = e.blok, d = this.dunya;
+      let id = e.blok;
+      const d = this.dunya, eb = BLOKLAR[id];
+      /* Yarım blok üstüne aynı yarım blok: tam blok olur */
+      if (eb.sekil === 'yarim') {
+        const hb0 = BLOKLAR[h.id];
+        if (hb0.sekil === 'yarim' && hb0.taban === id && ((!hb0.ust && h.ny === 1) || (hb0.ust && h.ny === -1))) return this.koyVeHarca(h.x, h.y, h.z, hb0.cift, env);
+      }
       let x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
       const hb = BLOKLAR[h.id];
       if (hb.degistirilebilir) { x = h.x; y = h.y; z = h.z; }
-      const mevcut = d.blok(x, y, z);
+      let mevcut = d.blok(x, y, z);
+      if (eb.sekil === 'yarim') {
+        const mb0 = BLOKLAR[mevcut];
+        if (mb0 && mb0.sekil === 'yarim' && mb0.taban === id) return this.koyVeHarca(x, y, z, mb0.cift, env);
+      }
+      /* Biçimli blokların yönü ve durumu */
+      const f = this.bakisYonu4();
+      if (eb.sekil === 'merdiven') id = eb.taban + f;
+      else if (eb.sekil === 'yarim') id = eb.taban + (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? 1 : 0);
+      else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
+      else if (eb.sekil === 'tuzak') id = 121 + f * 2;
+      else if (eb.sekil === 'tirmanma') {
+        const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
+        if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tırmanma merdiveni katı bir duvarın yan yüzüne konur.'); return true; }
+        id = 110 + yi;
+      } else if (eb.sekil === 'kapi') {
+        const ust = d.blok(x, y + 1, z), alt = d.blok(x, y - 1, z);
+        if ((mevcut && !BLOKLAR[mevcut].degistirilebilir) || (ust && !BLOKLAR[ust].degistirilebilir)) return false;
+        if (!KATI[alt]) { this.arayuz.bildirim('Kapı katı bir zeminin üstüne konur.'); return true; }
+        if (this.oyuncu.hucreyiKapliyor(x, y, z) || this.oyuncu.hucreyiKapliyor(x, y + 1, z)) return false;
+        if (y + 1 >= 127) return false;
+        d.blokKoy(x, y, z, 88 + f * 4); d.blokKoy(x, y + 1, z, 88 + f * 4 + 1);
+        env.seciliAzalt(1); this.ses.koy('odun');
+        return true;
+      }
+      mevcut = d.blok(x, y, z);
       const mb = BLOKLAR[mevcut];
       const suBitkisi = !!BLOKLAR[id].suIcinde;
       const bitki = (BITKI[id] && !suBitkisi) || BLOKLAR[id].mesale;
@@ -298,6 +372,36 @@ export class Etkilesim {
       this.ses.koy(BLOKLAR[id].ses);
       return true;
     }
+    return false;
+  }
+
+  /* Bakış yönü dört yöne yuvarlanır: 0 kuzey (-z), 1 doğu, 2 güney, 3 batı */
+  bakisYonu4() { const y = this.oyuncu.yaw, dx = -Math.sin(y), dz = -Math.cos(y); return Math.abs(dx) > Math.abs(dz) ? (dx > 0 ? 1 : 3) : (dz > 0 ? 2 : 0); }
+  koyVeHarca(x, y, z, id, env) {
+    if (!this.dunya.blokKoy(x, y, z, id)) return false;
+    env.seciliAzalt(1); this.ses.koy(BLOKLAR[id].ses);
+    return true;
+  }
+  /* Kapı, çit kapısı, tuzak kapı */
+  ac(h) {
+    const b = BLOKLAR[h.id], d = this.dunya;
+    if (b.sekil === 'kapi') {
+      const yeniA = b.acik ? 0 : 1, oy = h.y + (b.ust ? -1 : 1), ob = BLOKLAR[d.blok(h.x, oy, h.z)];
+      d.blokKoy(h.x, h.y, h.z, 88 + b.yon * 4 + yeniA * 2 + b.ust);
+      if (ob && ob.sekil === 'kapi') d.blokKoy(h.x, oy, h.z, 88 + ob.yon * 4 + yeniA * 2 + ob.ust);
+      this.ses.kapi(yeniA);
+      return true;
+    }
+    if (b.sekil === 'citKapi') {
+      if (b.acik && this.oyuncu.hucreyiKapliyor(h.x, h.y, h.z)) return true;
+      d.blokKoy(h.x, h.y, h.z, 105 + b.eksen * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true;
+    }
+    if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
+    return false;
+  }
+  /* Tarlanın 4 blok çevresinde su var mı */
+  suYakin(x, y, z) {
+    for (let dy = 0; dy <= 1; dy++) for (let dz = -4; dz <= 4; dz++) for (let dx = -4; dx <= 4; dx++) { const b = this.dunya.blok(x + dx, y + dy, z + dz); if (b === 7 || b === 31) return true; }
     return false;
   }
 
