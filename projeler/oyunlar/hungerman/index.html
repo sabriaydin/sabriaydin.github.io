@@ -16,21 +16,25 @@
 <!-- Oyun içi gösterge -->
 <div id="hud" hidden>
   <div id="pusulaKap">
-    <div id="pusula"><div id="pusulaSerit"></div><div id="pusulaIsaret"></div><b id="pusulaOk"></b></div>
+    <canvas id="pusulaTuval" aria-label="Pusula"></canvas>
     <div id="pusulaDerece">K · 0°</div>
   </div>
-  <div id="saat">
-    <svg id="gokYay" viewBox="0 0 76 40" aria-hidden="true">
-      <path class="yay" d="M6 36 A32 32 0 0 1 70 36"/>
-      <line class="ufuk" x1="1" y1="36" x2="75" y2="36"/>
-      <g id="gokCisim"><circle class="hale" r="7"/><circle class="disk" r="4.2"/></g>
-    </svg>
-    <div class="saatMetin"><b id="saatDeger">06:00</b><span id="gunDeger">1. gün · Şafak</span></div>
+  <div id="sagUst">
+    <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
+    <div id="saat">
+      <svg id="gunHalka" viewBox="0 0 20 20" aria-hidden="true">
+        <circle class="iz" cx="10" cy="10" r="8"/>
+        <circle id="gunYay" class="yay" cx="10" cy="10" r="8" stroke-dasharray="50.27" stroke-dashoffset="50.27" transform="rotate(-90 10 10)"/>
+        <circle class="cisim" cx="10" cy="10" r="3.4"/>
+        <circle class="golge" cx="11.6" cy="8.6" r="2.9"/>
+      </svg>
+      <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span>
+    </div>
     <div id="konumDeger"></div>
     <div id="geceUyari" hidden></div>
+    <div id="gorevIzleyici"></div>
   </div>
   <div id="yanmaEfekt"></div>
-  <div id="gorevIzleyici"></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
   <div id="uyku"></div>
   <div id="nisan"></div>
@@ -88,6 +92,25 @@
     <div id="kIcerik"></div>
     <div id="kSikke" class="kSikke"></div>
     <button class="kapat" id="kKapat" aria-label="Kapat">✕</button>
+  </div>
+</div>
+
+<!-- Büyük harita -->
+<div id="haritaEkrani" hidden>
+  <canvas id="haritaTuval"></canvas>
+  <header class="haritaUst">
+    <div><h2>Harita</h2><span id="haritaAlan"></span></div>
+    <div class="haritaDugmeler">
+      <button type="button" data-h="yakin" title="Yakınlaştır">+</button><button type="button" data-h="uzak" title="Uzaklaştır">−</button>
+      <button type="button" data-h="ortala">Konumum</button><button type="button" data-h="kapat" title="Kapat (M / Esc)">✕</button>
+    </div>
+  </header>
+  <footer class="haritaAlt"><div id="haritaBilgi"></div><div id="haritaLejant"></div></footer>
+  <div id="yerForm" hidden>
+    <b id="yerBaslik">Yeni işaret</b><small id="yerKonum"></small>
+    <input id="yerAd" maxlength="24" autocomplete="off" spellcheck="false" aria-label="İşaret adı">
+    <div id="yerRenkler"></div>
+    <div class="yerDugmeler"><button type="button" class="dugme kucuk ana" id="yerKaydet">Kaydet</button><button type="button" class="dugme kucuk tehlike" id="yerSil">Sil</button><button type="button" class="dugme kucuk" id="yerVazgec">Vazgeç</button></div>
   </div>
 </div>
 
@@ -182,6 +205,7 @@
     <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
     <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
     <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
+    <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
     <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
   </div>
 </div>
@@ -203,6 +227,7 @@
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
           <dt>E</dt><dd>Envanter ve üretim</dd>
           <dt>J</dt><dd>Görev günlüğü</dd>
+          <dt>M</dt><dd>Büyük harita</dd>
           <dt>Q / Shift + Q</dt><dd>Elindekini at / yığını at</dd>
           <dt>T / Enter</dt><dd>Sohbet (çok oyunculu)</dd>
           <dt>Tab (basılı)</dt><dd>Oyuncu listesi ve katılım kodu</dd>
@@ -231,7 +256,8 @@
           <li>Derin mağaralarda lav gölleri bulunur; lav yakar ve içine düşen eşyaları yok eder. Su içine girmek yanmayı söndürür.</li>
           <li>Zindanlar, canavar yuvası ve ganimet sandıkları içeren taş odalardır. Yuvanın çevresine meşale koymak canavar çıkışını durdurur; yuva kazmayla kırılabilir.</li>
           <li>İskeletler uzaktan ok atar, mağara örümcekleri duvara tırmanır ve zehirler. Kemikten elde edilen kemik tozu ekinleri hızla büyütür.</li>
-          <li>Pusulada ★ doğma noktasını, ✖ son ölüm noktasını gösterir; işaretlerin altındaki sayı blok cinsinden uzaklıktır.</li>
+          <li>Pusulada ★ doğma noktasını, ✖ son ölüm noktasını gösterir; işaretlerin yanındaki sayı blok cinsinden uzaklıktır.</li>
+          <li>Harita, görülen yerlerden kendiliğinden çizilir ve kaydedilir. Sağ üstteki mini harita çevreyi, M tuşuyla açılan büyük harita keşfedilen tüm bölgeleri gösterir. Büyük haritada sürükleyerek kaydırılır, tekerlekle yakınlaştırılır; sol tıkla işaret eklenir veya düzenlenir, sağ tıkla silinir. İşaretler pusulada da görünür.</li>
           <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
           <li>Sularda hamsi sürüleri, çipura ve ahtapot yaşar. Derin açık denizlerde dolaşan köpekbalıkları sudaki oyuncuya saldırır.</li>
           <li>Olta sağ tıkla atılır; şamandıra suya daldığı anda yeniden sağ tıklanırsa av çekilir. Derin sularda hazine çıkma olasılığı artar. Balık ve ahtapot pişirilerek yenir.</li>

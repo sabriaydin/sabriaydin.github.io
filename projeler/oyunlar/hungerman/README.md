@@ -69,7 +69,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Balıkçı köylü: balık alır; olta, pişmiş balık, sandal, yelkenli, maske ve palet satar; balık, ahtapot, inci, köpekbalığı dişi ve köpekbalığı avı görevleri verir.
 - Pusula: ⚓ liman ve ⛵ en yakın tekne işaretleri. Konum satırı tekne hızını ve su altı derinliğini gösterir.
 
-## 6. aşama (bu sürüm, 0.6.0): Çok oyunculu
+## 6. aşama (0.6.0): Çok oyunculu
 
 - Sunucu olma: oyun içinde duraklatma menüsündeki "Dünyayı Arkadaşlara Aç" düğmesi ya da ana menüde Çok Oyunculu > "Dünya Seç ve Aç". Dünyayı açan oyuncuya 6 karakterlik bir katılım kodu verilir (duraklatma menüsünde kopyalanabilir, Tab tuşuyla da görülür).
 - Katılma: ana menüde Çok Oyunculu ekranından oyuncu adı ve katılım kodu girilir. En çok 8 oyuncu.
@@ -84,9 +84,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Sunucu dünyayı kapatırsa ya da bağlantı koparsa diğer oyuncular bilgilendirilip ana menüye döner. Farklı sürümler, aynı ad ve dolu sunucu için açıklayıcı uyarılar verilir.
 - Kendi eşleştirme sunucusunu kullanmak isteyenler için adres çubuğuna `?sinyal=adres:port` eklenebilir (örnek: `?sinyal=localhost:9000`).
 
+## 7. aşama (bu sürüm, 0.7.0): Harita
+
+- Keşif haritası: görüş mesafesine giren her yer üstten görünüm olarak kendiliğinden haritaya işlenir (en üstteki blok rengi, yükseklik gölgelemesi, su derinliği, sığ sularda taban ve kıyı çizgisi). Kırılan veya konan bloklar haritaya anında yansır.
+- Harita, dünya kaydından ayrı olarak tarayıcı deposunda bölge bölge saklanır; dünya silinince haritası da silinir. Çok oyunculuda her oyuncunun haritası kendi tarayıcısında tutulur.
+- Mini harita: sağ üstte yuvarlak, kuzey yukarıda; çevredeki köyler, limanlar, işaretler, görev hedefleri ve diğer oyuncular simgelerle görünür. Geceleri hafifçe kararır. Ayarlardan kapatılabilir.
+- Büyük harita (M): sürükleyerek kaydırma, tekerlek veya +/− ile yakınlaştırma (1 blok = 1/8 pikselden 8 piksele kadar), "Konumum" düğmesi, ölçek çubuğu, kuzey göstergesi, yakında parça ızgarası ve dünya sınırı. İmlecin altındaki konum, biyom, yükseklik veya su derinliği ve uzaklık alt satırda gösterilir. Keşfedilen alan ve işaret sayısı başlıkta yazar.
+- İşaretler: büyük haritada sol tıkla ad ve renk seçilerek işaret eklenir (en çok 30), işarete sol tıklanınca düzenlenir, sağ tıkla silinir. İşaretler pusulada ve mini haritada da görünür; kayıtla saklanır (çok oyunculuda sunucuda oyuncu adına).
+- Pusula yenilendi: tuvalde çizilen, net çentikler; üst şeritte yönler (kuzey kırmızı) ve 30° aralıklı dereceler, alt şeritte vektör simgeli işaretler ve uzaklıklar. Çakışan uzaklık yazıları gizlenir, yakın işaretler önceliklidir; ekran dışındaki işaretler kenarda okla gösterilir.
+- Saat ve gün göstergesi sadeleştirildi: tek satırlık yarı saydam şerit (gün ya da gecenin ilerleyişini gösteren küçük halka, güneş / hilal, saat, gün ve gün evresi), altında konum satırı ve yalnızca gerektiğinde görünen küçük gece uyarısı.
+
 ## Sonraki aşamalar
 
-1. Harita ve büyük harita ekranı
+Yeni aşamalar istek üzerine belirlenir.
 
 ## Klasör yapısı
 
@@ -112,7 +122,9 @@ js/oyun/*             Oyuncu, etkileşim, envanter, üretim, hayatta kalma, dü�
 js/varlik/*           Hayvanlar, deniz canlıları, düşmanlar ve köylüler: türler, modeller, yapay zekâ, oklar
 js/koy/*              Köy yönetimi, meslekler ve takaslar, görevler
 js/ag/*               Çok oyunculu: bağlantı (baglanti), sunucu, istemci, diğer oyuncuların görünümü, ortak yardımcılar
-js/arayuz/*           Gösterge ve envanter ekranı
+js/harita/harita.js   Keşif haritası: parçaların üstten görünümü, bölge tuvalleri
+js/arayuz/*           Gösterge, envanter, köylü, büyük harita ve mini harita ekranları, vektör simgeler
+js/sistem/harita-kayit.js Haritanın tarayıcı deposundaki kaydı
 js/sistem/*           Ses ve kayıt
 ```
 

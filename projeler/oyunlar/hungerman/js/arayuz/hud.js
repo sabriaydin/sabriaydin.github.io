@@ -1,6 +1,7 @@
 /* HungerMan - oyun içi gösterge: hızlı erişim çubuğu, can / açlık / oksijen, pusula, saat, bildirimler */
 import { simge } from '../grafik/doku.js';
 import { ESYALAR, maksDayanim } from '../bloklar.js';
+import { ikon, IKON_RENK } from './ikonlar.js';
 
 const $ = s => document.querySelector(s);
 
@@ -98,37 +99,92 @@ export class Hud {
     setTimeout(() => b.remove(), 3300);
   }
 
+  /* Pusula tuvalde çizilir: üst şeritte yönler ve dereceler, alt şeritte işaretler, en altta çentikler */
   pusulaKur() {
-    const s = $('#pusulaSerit');
-    const yonler = { 0: 'K', 45: 'KD', 90: 'D', 135: 'GD', 180: 'G', 225: 'GB', 270: 'B', 315: 'KB' };
-    let h = '';
-    /* Şerit -360°..720° aralığını kapsar; 1° = 3 piksel */
-    for (let a = -360; a < 720; a += 15) {
-      const x = (a + 360) * 3, n = ((a % 360) + 360) % 360, y = yonler[n];
-      if (y) h += `<span class="ana${n === 0 ? ' kuzey' : ''}" style="left:${x}px">${y}</span>`;
-      else h += `<span class="ara" style="left:${x}px">${n}</span>`;
-    }
-    s.innerHTML = h;
+    this.pTuval = $('#pusulaTuval');
+    this.pCtx = this.pTuval.getContext('2d');
+    this.pListe = [];
   }
-  /* yaw: 0 = kuzey (-z); isaretler: [{ aci (0 = kuzey, derece), sinif, metin, baslik, mesafe, kenar }] */
+  /* yaw: 0 = kuzey (-z); isaretler: [{ aci (0 = kuzey, derece), sinif, baslik, mesafe, kenar, renk }] */
   pusula(yaw, isaretler) {
     let a = (-yaw * 180 / Math.PI) % 360; if (a < 0) a += 360;
-    const yari = $('#pusula').clientWidth / 2 || 210;
-    $('#pusulaSerit').style.transform = `translateX(${yari - (a + 360) * 3}px)`;
     const ad = ['K', 'KD', 'D', 'GD', 'G', 'GB', 'B', 'KB'][Math.round(a / 45) % 8];
     const derece = `${ad} · ${Math.round(a) % 360}°`;
     if (derece !== this.son.derece) { this.son.derece = derece; $('#pusulaDerece').textContent = derece; }
-    if (!isaretler) return;
-    const sinir = yari / 3 - 6;
-    let h = '';
-    for (const m of isaretler) {
-      let f = ((m.aci - a + 540) % 360) - 180;
-      let kenar = false;
-      if (Math.abs(f) > sinir) { if (!m.kenar) continue; f = Math.sign(f) * sinir; kenar = true; }
-      const mes = m.mesafe != null ? `<small>${m.mesafe < 1000 ? Math.round(m.mesafe) : (m.mesafe / 1000).toFixed(1) + 'b'}</small>` : '';
-      h += `<span class="${m.sinif}${kenar ? ' kenar' : ''}" style="left:${yari + f * 3}px${m.renk ? ';color:' + m.renk : ''}" title="${m.baslik || ''}"><i>${m.metin}</i>${mes}</span>`;
+    if (isaretler) this.pListe = isaretler;
+    const cv = this.pTuval, r = Math.min(2, devicePixelRatio || 1);
+    const W = cv.clientWidth || 440, H = cv.clientHeight || 42;
+    if (cv.width !== Math.round(W * r) || cv.height !== Math.round(H * r)) { cv.width = Math.round(W * r); cv.height = Math.round(H * r); }
+    const ctx = this.pCtx, PX = 3, M = W / 2;
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    /* Zemin */
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(0.5, 0.5, W - 1, H - 1, 9) : ctx.rect(0.5, 0.5, W - 1, H - 1);
+    ctx.fillStyle = 'rgba(12,14,18,.58)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 1; ctx.stroke();
+    /* Çentikler ve yazılar */
+    const bas = Math.ceil((a - M / PX) / 5) * 5, son = a + M / PX;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let d = bas; d <= son; d += 5) {
+      const x = Math.round(M + (d - a) * PX) + 0.5, n = ((d % 360) + 360) % 360;
+      const ana = n % 90 === 0, ara = n % 45 === 0, orta = n % 15 === 0;
+      const h = ana ? 9 : ara ? 7 : orta ? 5 : 3;
+      ctx.strokeStyle = ana ? 'rgba(255,255,255,.85)' : ara ? 'rgba(255,255,255,.6)' : orta ? 'rgba(255,255,255,.38)' : 'rgba(255,255,255,.2)';
+      ctx.lineWidth = ana ? 1.5 : 1;
+      ctx.beginPath(); ctx.moveTo(x, H - 2); ctx.lineTo(x, H - 2 - h); ctx.stroke();
+      if (ana) {
+        ctx.font = "700 15px 'Pixelify Sans', Rubik, system-ui, sans-serif";
+        ctx.fillStyle = n === 0 ? '#ff6a5c' : '#ffffff';
+        ctx.fillText(['K', 'D', 'G', 'B'][n / 90], x, 12);
+      } else if (ara) {
+        ctx.font = "700 11px 'Pixelify Sans', Rubik, system-ui, sans-serif";
+        ctx.fillStyle = 'rgba(255,255,255,.72)';
+        ctx.fillText(['KD', 'GD', 'GB', 'KB'][(n - 45) / 90], x, 12);
+      } else if (n % 30 === 0) {
+        ctx.font = "500 9px Rubik, system-ui, sans-serif";
+        ctx.fillStyle = 'rgba(255,255,255,.42)';
+        ctx.fillText(String(n), x, 12);
+      }
     }
-    if (h !== this.son.isaret) { this.son.isaret = h; $('#pusulaIsaret').innerHTML = h; }
+    /* Orta gösterge */
+    ctx.fillStyle = '#ff6a5c';
+    ctx.beginPath(); ctx.moveTo(M - 5, 0); ctx.lineTo(M + 5, 0); ctx.lineTo(M, 6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,106,92,.35)'; ctx.fillRect(M - 0.5, 6, 1, H - 8);
+    /* İşaretler: alt şeritte simge ve uzaklık */
+    const sinir = M - 14, y = H - 15;
+    const l = [];
+    for (const m of this.pListe) {
+      let f = (((m.aci - a + 540) % 360) - 180) * PX, kenar = false;
+      if (Math.abs(f) > sinir) { if (!m.kenar) continue; f = Math.sign(f) * sinir; kenar = true; }
+      l.push([f, kenar, m]);
+    }
+    /* Yakın işaretler önceliklidir: uzaklık yazısı başka bir işaretle çakışırsa gösterilmez */
+    l.sort((p, q) => (p[2].mesafe || 0) - (q[2].mesafe || 0));
+    ctx.font = "600 9px Rubik, system-ui, sans-serif"; ctx.textBaseline = 'middle';
+    const dolu = [], cizilecek = [];
+    for (const [f, kenar, m] of l) {
+      const x = M + f;
+      let t = null;
+      if (!kenar && m.mesafe != null) {
+        const yaz = m.mesafe < 1000 ? String(Math.round(m.mesafe)) : (m.mesafe / 1000).toFixed(1) + 'b';
+        const a0 = x + 8, a1 = a0 + ctx.measureText(yaz).width;
+        if (!dolu.some(([p, q]) => a0 < q + 2 && a1 > p - 2)) { t = yaz; dolu.push([a0, a1]); }
+      }
+      dolu.push([x - 7, x + 7]);
+      cizilecek.push([x, f, kenar, m, t]);
+    }
+    for (let i = cizilecek.length - 1; i >= 0; i--) {
+      const [x, f, kenar, m, t] = cizilecek[i];
+      ikon(ctx, m.sinif, x, y, 6, m.renk || IKON_RENK[m.sinif] || '#fff', kenar ? 0.6 : 1);
+      if (kenar) {
+        ctx.fillStyle = 'rgba(255,255,255,.7)'; const s = Math.sign(f);
+        ctx.beginPath(); ctx.moveTo(x + s * 9, y); ctx.lineTo(x + s * 5.5, y - 3); ctx.lineTo(x + s * 5.5, y + 3); ctx.closePath(); ctx.fill();
+      } else if (t) {
+        ctx.textAlign = 'left'; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 2.5;
+        ctx.strokeText(t, x + 8, y + 0.5); ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.fillText(t, x + 8, y + 0.5);
+        ctx.textAlign = 'center';
+      }
+    }
   }
   gorevIzle(satirlar) {
     const h = satirlar.map(q => `<div class="${q.bitti ? 'bitti' : ''}"><b>${q.metin}</b><span>${q.durum}</span></div>`).join('');
@@ -142,18 +198,19 @@ export class Hud {
     if (t !== this.son.saat) { this.son.saat = t; $('#saatDeger').textContent = t; }
     const h = saatOndalik;
     const evre = h >= 5 && h < 7 ? 'Şafak' : h < 11 && h >= 7 ? 'Sabah' : h >= 11 && h < 14 ? 'Öğle' : h >= 14 && h < 17 ? 'İkindi' : h >= 17 && h < 19.5 ? 'Akşam' : 'Gece';
-    const gt = `${gun}. gün · ${evre}`;
+    const gt = `${gun}. gün`;
     if (gt !== this.son.gun) { this.son.gun = gt; $('#gunDeger').textContent = gt; }
+    if (evre !== this.son.evreAd) { this.son.evreAd = evre; $('#evreDeger').textContent = evre; }
     const sinif = evre === 'Gece' ? 'gece' : evre === 'Şafak' ? 'safak' : evre === 'Akşam' ? 'aksam' : 'gunduz';
     if (sinif !== this.son.evre) { this.son.evre = sinif; $('#saat').className = sinif; }
-    /* Gök yayında güneş (gündüz) veya ay (gece) */
-    const gunduz = z < 0.5, aci = (gunduz ? z : z - 0.5) * Math.PI * 2;
-    const x = 38 - Math.cos(aci) * 32, y = 36 - Math.sin(aci) * 32;
-    $('#gokCisim').setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+    /* Halka: gündüz ya da gecenin ne kadarının geçtiği */
+    const gunduz = z < 0.5, oran = gunduz ? z / 0.5 : (z - 0.5) / 0.5;
+    const yay = (50.27 * (1 - oran)).toFixed(2);
+    if (yay !== this.son.yay) { this.son.yay = yay; $('#gunYay').setAttribute('stroke-dashoffset', yay); }
     /* Gece uyarısı */
     let uyari = '', yakin = false;
     if (z >= 0.43 && z < 0.5) { const kalan = Math.ceil((0.5 - z) * 24 * 60); uyari = `Gece yaklaşıyor · ${kalan} dk`; yakin = true; }
-    else if (z >= 0.5 && z < 0.98) uyari = 'Gece · Canavarlar ortalıkta';
+    else if (z >= 0.5 && z < 0.98) uyari = 'Canavarlar ortalıkta';
     if (uyari !== this.son.uyari) { this.son.uyari = uyari; const u = $('#geceUyari'); u.hidden = !uyari; u.textContent = uyari; u.classList.toggle('yakin', yakin); }
     if (konum != null && konum !== this.son.konum) { this.son.konum = konum; $('#konumDeger').textContent = konum; }
   }
