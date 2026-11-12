@@ -16,7 +16,7 @@ export class Oyuncu {
     this.egiliyor = false; this.kosuyor = false;
     this.dusus = 0; this.adimFaz = 0; this.adimSayac = 0;
     this.yuruyenMesafe = 0;
-    this.ucus = false; this.hizCarpani = 1;   // geliştirici konsolu: uçma ve hız çarpanı
+    this.ucus = false; this.hizCarpani = 1; this.hayalet = false;   // geliştirici: uçma, hız çarpanı, duvardan geçme
     this.olaylar = { dustu: null, adim: null, ziplad: null, suyaGirdi: null };
   }
   get boy() { return this.egiliyor ? 1.5 : 1.8; }
@@ -28,6 +28,7 @@ export class Oyuncu {
   }
 
   carpisiyor(x, y, z, boy = this.boy) {
+    if (this.hayalet) return false;
     const x0 = Math.floor(x - YARIM), x1 = Math.floor(x + YARIM - 1e-6);
     const y0 = Math.floor(y), y1 = Math.floor(y + boy - 1e-6);
     const z0 = Math.floor(z - YARIM), z1 = Math.floor(z + YARIM - 1e-6);

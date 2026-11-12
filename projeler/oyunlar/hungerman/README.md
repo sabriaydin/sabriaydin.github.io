@@ -100,14 +100,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Pusulada yalnızca oyuncunun büyük haritada eklediği işaretler gösterilir; köy, liman, görev ve diğer işaretler mini haritada ve büyük haritada kalır.
 - Yarıklar yeniden tasarlandı: tek blokluk düz çatlak yerine 8-18 blok genişliğinde, kıvrılarak ilerleyen, kenarlara doğru sığlaşan doğal kanyonlar. Tabanı lav seviyesinin üstündedir; su kenarında, köylerde ve ağaçların altında oluşmaz. (Dünya tohumdan üretildiği için mevcut dünyalardaki yarıklar da yeni biçimde görünür; oyuncunun yaptığı değişiklikler korunur.)
 - Tekneler artık suyun üstünde yüzer; taban tahtası su yüzeyinin üstünde kalır, teknenin içi su dolu görünmez.
-- Tekneden inme: C ya da Shift. Teknedeyken ekranda kısa bir hatırlatma görünür.
+- Teknedeyken ekranda inme tuşu (C) için kısa bir hatırlatma görünür.
 - Geliştirici konsolu (F8 veya 1 tuşunun solundaki tuş; Ayarlar'dan kapatılabilir): canlı bilgi satırı (FPS, konum, biyom, canlı ve parça sayısı, açık modlar), komut geçmişi (↑/↓), Tab ile komut ve ad tamamlama. Komutlar: yardim, ver, esyalar, envanter temizle, isinla (koordinat, ~ göreli, koy, liman, zindan, batik, dogum, isaret), zaman (saat, sabah/ogle/aksam/gece, hiz), gun, can, doy, iyiles, olumsuz, ucus, hiz, dogur, oldur, esya temizle, tekne, blok, bloklar, konum, tohum, gorus, kesfet, harita, kaydet, fps, hata, ag, sayac, temizle. Çok oyunculu istemcide dünyayı değiştiren komutlar kapalıdır.
 
-## 9. aşama (bu sürüm, 0.9.0): Geliştirici modu
+## 9. aşama (0.9.0): Geliştirici modu
 
 - Sağ altta sıralama: konum satırı, mini harita ve hemen altında saat / gün şeridi (şeridin alt kenarı hızlı erişim çubuğuyla aynı hizadadır).
 - Komut izni: Yeni Dünya ekranındaki "Komutlara izin ver" seçeneği. İşaretlenmeyen dünyalarda konsolda yalnızca bilgi komutları (yardim, konum, tohum, sayac, blok bilgi, ag, gorus, harita, kaydet, fps, hata) çalışır. Dünya listesinde komutları açık dünyalar belirtilir.
-- Geliştirici kodu: konsolda `gelistirici <kod>` ya da yalnızca kod yazılınca o dünyada geliştirici modu ve komutlar açılır, durum kayıtla saklanır. Kod, kaynakta açık metin olarak tutulmaz.
+- Geliştirici kodu (`hungermandev+`, 10. aşamada değişti): konsolda `gelistirici <kod>` ya da yalnızca kod yazılınca o dünyada geliştirici modu ve komutlar açılır, durum kayıtla saklanır. Kod, kaynakta açık metin olarak tutulmaz.
 - Geliştirici modu penceresi (F9 ya da konsolda `gelistirici`): komut yazmadan kullanılan test penceresi.
   - Oyuncu: ölümsüzlük ve uçma anahtarları, hız / can / açlık kaydırıcıları, iyileşme, doyma, doğma noktasına gitme, envanteri boşaltma.
   - Eşyalar: aranabilir simge ızgarası; tıklanan eşyadan 1 / 16 / 64 adet (Shift + tık 64).
@@ -116,6 +116,22 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Işınlanma: en yakın köy, liman, zindan, batık, doğma noktası; X / Y / Z ile gitme; dört yöne 100 blok; haritadaki işaretlere gitme.
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
+
+## 10. aşama (bu sürüm, 0.10.0): Düzeltmeler ve geliştirici penceresi
+
+- El ve elde tutulan eşya ayrı bir çizim geçişinde, kendi kamerasıyla ve derinlik temizlenerek çizilir; duvara yaklaşınca blokların içine girmez. Elin görüş açısı sabittir (koşarken genişleyen görüş açısından etkilenmez).
+- Pusula inceltildi (30 piksel) ve okunaklı, düz bir yazı tipine geçirildi; çentikler ve işaretler yeni yüksekliğe göre yeniden yerleştirildi.
+- Tekneden inme yalnızca C tuşuyladır (Shift ile inme kaldırıldı).
+- Geliştirici kodu: `hungermandev+` (büyük / küçük harf fark etmez).
+- Geliştirici penceresi geliştirildi:
+  - Her sekmede görünen hızlı işlemler çubuğu: ölümsüz, uçma, duvardan geçme, anında kırma, sınırsız eşya; gündüz, gece, düşmanları kaldır, kaydet.
+  - Oyuncu: duvardan geçme, anında kırma, sınırsız eşya (koyma, üretim, ticaret ve görevlerde azalmaz, aletler yıpranmaz); hazır setler (başlangıç, elmas donanım, inşaat, denizci, madenci).
+  - Eşyalar: kategori seçimi (bloklar, aletler, zırh, yiyecek, diğer), numarayla arama, 1 / 8 / 16 / 64 adet, üzerine gelinen eşyanın adı.
+  - Canlılar: canlıları dondurma; hayvan ve düşman düğmeleri ayrı gruplarda; canlı sayımı.
+  - Işınlanma: son ölüm noktası; büyük haritada Ctrl + tık ile tıklanan yere ışınlanma.
+  - Görüntü (yeni): tel kafes görünümü, eli gizleme, göstergeyi gizleme (ekran görüntüsü için), FPS, F3 paneli, mini harita, görüş açısı.
+  - Performans: gerçek kare süresi grafiği (60 ve 30 FPS çizgileriyle), ortalama ve en kötü kare süresi, çizim çağrısı, üçgen, geometri ve doku sayıları, bakılan blok, ışık kaynağı sayısı, bellek sınırı.
+  - Son açılan sekme hatırlanır.
 
 ## Sonraki aşamalar
 

@@ -82,6 +82,7 @@ export class Sahne {
   constructor(tuval) {
     this.cizici = new THREE.WebGLRenderer({ canvas: tuval, antialias: false, powerPreference: 'high-performance' });
     this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    this.cizici.info.autoReset = false;
     this.sahne = new THREE.Scene();
     this.kamera = new THREE.PerspectiveCamera(75, 1, 0.05, 1000);
     this.kamera.rotation.order = 'YXZ';
@@ -111,6 +112,7 @@ export class Sahne {
     const w = innerWidth, h = innerHeight;
     this.cizici.setSize(w, h, false);
     this.kamera.aspect = w / h; this.kamera.updateProjectionMatrix();
+    if (this.elKamera) { this.elKamera.aspect = w / h; this.elKamera.updateProjectionMatrix(); }
   }
 
   /* ---------- Gökyüzü ---------- */
@@ -220,10 +222,14 @@ export class Sahne {
   }
 
   /* ---------- Elde tutulan eşya ---------- */
+  /* El ayrı bir sahnede, kendi kamerasıyla ve derinlik temizlenerek en son çizilir; duvara yaklaşınca blokların içine girmez */
   elKur() {
+    this.elSahne = new THREE.Scene();
+    this.elKamera = new THREE.PerspectiveCamera(70, 1, 0.01, 10);
+    this.elSahne.add(this.elKamera);
     this.el = new THREE.Group();
     this.el.position.set(0.42, -0.38, -0.62);
-    this.kamera.add(this.el);
+    this.elKamera.add(this.el);
     this.elKol = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.5), new THREE.MeshBasicMaterial({ color: 0xc89870 }));
     this.elKol.rotation.set(-0.25, 0.2, 0); this.elKol.position.set(0.04, -0.04, 0.1);
     this.elBlokMalzeme = new THREE.MeshBasicMaterial({ map: this.atlasDoku, alphaTest: 0.5 });
@@ -271,5 +277,10 @@ export class Sahne {
     if (this.elEsya && this.elEsya.material !== this.elBlokMalzeme) this.elEsya.material.color.setScalar(isik);
   }
 
-  ciz() { this.cizici.render(this.sahne, this.kamera); }
+  ciz() {
+    const c = this.cizici;
+    c.info.reset();
+    c.render(this.sahne, this.kamera);
+    if (this.el.visible) { c.autoClear = false; c.clearDepth(); c.render(this.elSahne, this.elKamera); c.autoClear = true; }
+  }
 }

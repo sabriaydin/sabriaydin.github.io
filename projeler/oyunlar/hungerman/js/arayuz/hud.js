@@ -3,6 +3,10 @@ import { simge } from '../grafik/doku.js';
 import { ESYALAR, maksDayanim } from '../bloklar.js';
 import { ikon, IKON_RENK } from './ikonlar.js';
 
+/* Pusula yazı tipleri: okunaklı, düz bir yazı tipi (piksel yazı tipi küçük boyutta zor okunur) */
+const PY = "'Segoe UI', Rubik, Roboto, 'Helvetica Neue', Arial, sans-serif";
+const PF = { ana: `700 13px ${PY}`, ara: `600 11px ${PY}`, sayi: `500 10px ${PY}`, mesafe: `600 10px ${PY}` };
+
 const $ = s => document.querySelector(s);
 
 /* 9 x 9 piksel küçük simgeler */
@@ -113,13 +117,13 @@ export class Hud {
     if (derece !== this.son.derece) { this.son.derece = derece; $('#pusulaDerece').textContent = derece; }
     if (isaretler) this.pListe = isaretler;
     const cv = this.pTuval, r = Math.min(2, devicePixelRatio || 1);
-    const W = cv.clientWidth || 440, H = cv.clientHeight || 42;
+    const W = cv.clientWidth || 440, H = cv.clientHeight || 30;
     if (cv.width !== Math.round(W * r) || cv.height !== Math.round(H * r)) { cv.width = Math.round(W * r); cv.height = Math.round(H * r); }
     const ctx = this.pCtx, PX = 3, M = W / 2;
     ctx.setTransform(r, 0, 0, r, 0, 0);
     ctx.clearRect(0, 0, W, H);
     /* Zemin */
-    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(0.5, 0.5, W - 1, H - 1, 9) : ctx.rect(0.5, 0.5, W - 1, H - 1);
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(0.5, 0.5, W - 1, H - 1, 7) : ctx.rect(0.5, 0.5, W - 1, H - 1);
     ctx.fillStyle = 'rgba(12,14,18,.58)'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 1; ctx.stroke();
     /* Çentikler ve yazılar */
@@ -128,30 +132,30 @@ export class Hud {
     for (let d = bas; d <= son; d += 5) {
       const x = Math.round(M + (d - a) * PX) + 0.5, n = ((d % 360) + 360) % 360;
       const ana = n % 90 === 0, ara = n % 45 === 0, orta = n % 15 === 0;
-      const h = ana ? 9 : ara ? 7 : orta ? 5 : 3;
+      const h = ana ? 6 : ara ? 5 : orta ? 3.5 : 2;
       ctx.strokeStyle = ana ? 'rgba(255,255,255,.85)' : ara ? 'rgba(255,255,255,.6)' : orta ? 'rgba(255,255,255,.38)' : 'rgba(255,255,255,.2)';
       ctx.lineWidth = ana ? 1.5 : 1;
-      ctx.beginPath(); ctx.moveTo(x, H - 2); ctx.lineTo(x, H - 2 - h); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, H - 1.5); ctx.lineTo(x, H - 1.5 - h); ctx.stroke();
       if (ana) {
-        ctx.font = "700 15px 'Pixelify Sans', Rubik, system-ui, sans-serif";
+        ctx.font = PF.ana;
         ctx.fillStyle = n === 0 ? '#ff6a5c' : '#ffffff';
-        ctx.fillText(['K', 'D', 'G', 'B'][n / 90], x, 12);
+        ctx.fillText(['K', 'D', 'G', 'B'][n / 90], x, 10.5);
       } else if (ara) {
-        ctx.font = "700 11px 'Pixelify Sans', Rubik, system-ui, sans-serif";
-        ctx.fillStyle = 'rgba(255,255,255,.72)';
-        ctx.fillText(['KD', 'GD', 'GB', 'KB'][(n - 45) / 90], x, 12);
+        ctx.font = PF.ara;
+        ctx.fillStyle = 'rgba(255,255,255,.8)';
+        ctx.fillText(['KD', 'GD', 'GB', 'KB'][(n - 45) / 90], x, 10.5);
       } else if (n % 30 === 0) {
-        ctx.font = "500 9px Rubik, system-ui, sans-serif";
-        ctx.fillStyle = 'rgba(255,255,255,.42)';
-        ctx.fillText(String(n), x, 12);
+        ctx.font = PF.sayi;
+        ctx.fillStyle = 'rgba(255,255,255,.5)';
+        ctx.fillText(String(n), x, 10.5);
       }
     }
     /* Orta gösterge */
     ctx.fillStyle = '#ff6a5c';
-    ctx.beginPath(); ctx.moveTo(M - 5, 0); ctx.lineTo(M + 5, 0); ctx.lineTo(M, 6); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(255,106,92,.35)'; ctx.fillRect(M - 0.5, 6, 1, H - 8);
+    ctx.beginPath(); ctx.moveTo(M - 4, 0); ctx.lineTo(M + 4, 0); ctx.lineTo(M, 5); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,106,92,.35)'; ctx.fillRect(M - 0.5, 5, 1, H - 6);
     /* İşaretler: alt şeritte simge ve uzaklık */
-    const sinir = M - 14, y = H - 15;
+    const sinir = M - 14, y = H - 8;
     const l = [];
     for (const m of this.pListe) {
       let f = (((m.aci - a + 540) % 360) - 180) * PX, kenar = false;
@@ -160,7 +164,7 @@ export class Hud {
     }
     /* Yakın işaretler önceliklidir: uzaklık yazısı başka bir işaretle çakışırsa gösterilmez */
     l.sort((p, q) => (p[2].mesafe || 0) - (q[2].mesafe || 0));
-    ctx.font = "600 9px Rubik, system-ui, sans-serif"; ctx.textBaseline = 'middle';
+    ctx.font = PF.mesafe; ctx.textBaseline = 'middle';
     const dolu = [], cizilecek = [];
     for (const [f, kenar, m] of l) {
       const x = M + f;
@@ -175,7 +179,7 @@ export class Hud {
     }
     for (let i = cizilecek.length - 1; i >= 0; i--) {
       const [x, f, kenar, m, t] = cizilecek[i];
-      ikon(ctx, m.sinif, x, y, 6, m.renk || IKON_RENK[m.sinif] || '#fff', kenar ? 0.6 : 1);
+      ikon(ctx, m.sinif, x, y, 5, m.renk || IKON_RENK[m.sinif] || '#fff', kenar ? 0.6 : 1);
       if (kenar) {
         ctx.fillStyle = 'rgba(255,255,255,.7)'; const s = Math.sign(f);
         ctx.beginPath(); ctx.moveTo(x + s * 9, y); ctx.lineTo(x + s * 5.5, y - 3); ctx.lineTo(x + s * 5.5, y + 3); ctx.closePath(); ctx.fill();

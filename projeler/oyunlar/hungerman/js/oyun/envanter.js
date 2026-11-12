@@ -36,6 +36,7 @@ export class Envanter {
   }
   say(id) { let n = 0; for (const s of this.yuvalar) if (s && s.id === id) n += s.adet; return n; }
   harca(id, adet) {
+    if (this.sinirsiz) return this.say(id) >= adet;   // geliştirici modu: eşyalar azalmaz
     for (let i = YUVA - 1; i >= 0 && adet > 0; i--) {
       const s = this.yuvalar[i];
       if (s && s.id === id) { const k = Math.min(adet, s.adet); s.adet -= k; adet -= k; if (!s.adet) this.yuvalar[i] = null; }
@@ -52,12 +53,14 @@ export class Envanter {
   seciliYuva() { return this.yuvalar[this.secili]; }
   seciliId() { const s = this.yuvalar[this.secili]; return s ? s.id : 0; }
   seciliAzalt(n = 1) {
+    if (this.sinirsiz) return;
     const s = this.yuvalar[this.secili]; if (!s) return;
     s.adet -= n; if (s.adet <= 0) this.yuvalar[this.secili] = null;
     this.bildir();
   }
   /* Elde tutulan aletin dayanımını azaltır; kırılırsa true döner */
   aletYipran(n = 1) {
+    if (this.sinirsiz) return false;
     const s = this.yuvalar[this.secili];
     if (!s || s.dayanim == null) return false;
     s.dayanim -= n;

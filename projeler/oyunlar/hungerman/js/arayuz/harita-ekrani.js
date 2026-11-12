@@ -132,6 +132,8 @@ export class HaritaEkrani {
     this.surukle = null;
     if (!this.acik || !s || s.oynadi || e.button !== 0 || e.target !== this.tuval) return;
     const [sx, sy] = this.yerel(e);
+    /* Geliştirici: Ctrl + tık ile tıklanan yere ışınlanma (komutlar açıksa) */
+    if (e.ctrlKey && this.isinla && this.o.komutlar) { const [x, z] = this.dunyada(sx, sy); this.isinla(Math.floor(x) + 0.5, Math.floor(z) + 0.5); return; }
     const y = this.yerBul(sx, sy);
     if (y) this.formAc(sx, sy, y);
     else {

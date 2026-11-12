@@ -187,7 +187,7 @@ export class Varliklar {
         this.modelSil(v); this.liste.splice(i, 1);
         continue;
       }
-      if (!this.dunya.yuklu(v.konum.x, v.konum.z)) continue;
+      if (!this.dunya.yuklu(v.konum.x, v.konum.z) || this.donmus) continue;   // donmus: geliştirici modunda canlılar durur
       this.varlikGuncelle(v, dt, c);
     }
     this.ayir();

@@ -1,5 +1,5 @@
 /* HungerMan - tekneler: sandal ve yelkenli
-   Tekne elde tutulup suya sağ tıklanarak konur; sağ tık ile binilir, C ya da Shift ile inilir, sol tık ile kırılır.
+   Tekne elde tutulup suya sağ tıklanarak konur; sağ tık ile binilir, C ile inilir, sol tık ile kırılır.
    Sürerken W/S hız, A/D dümen. Tekneler suda yüzer, karaya oturunca güçlükle ilerler. */
 import { THREE } from '../grafik/sahne.js';
 import { SIVI, LAV, KATI } from '../bloklar.js';

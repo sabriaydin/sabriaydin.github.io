@@ -59,7 +59,7 @@ export class Etkilesim {
   kirmaSuresi(id) {
     const b = BLOKLAR[id];
     if (!b || b.sertlik < 0) return Infinity;
-    if (b.sertlik === 0) return 0;
+    if (b.sertlik === 0 || this.aninda) return 0;   // aninda: geliştirici modunda anında kırma
     const a = this.aletBilgi();
     const dogru = a && b.alet === a.tur;
     const alabilir = b.seviye === 0 || (dogru && a.seviye >= b.seviye);
@@ -97,7 +97,7 @@ export class Etkilesim {
       if (g.sag && this.sagBekleme <= 0 && !this.tekneler.binilen) {
         this.sagBekleme = 0.4;
         if (this.olta && this.olta.aktif) this.olta.kaldir();
-        if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C ya da Shift tuşuna basınız.`, 'tekne');
+        if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne');
       } else if (g.sol && this.saldiriBekleme <= 0) { this.saldiriBekleme = 0.3; this.vurus = 0.01; this.tekneler.vur(this.hedefTekne); }
       this.sahne.secimGoster(null, 0);
       return;

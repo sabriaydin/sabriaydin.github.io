@@ -233,11 +233,16 @@ const konsol = new Konsol({ ses, oyun: () => oyun, kapatIste: () => panelKapat(t
   gelistiriciAc: () => { panelKapat(false); if (oyun) panelAc(gelPencere); }
 } });
 /* Geliştirici modu penceresi (F9): konsolda geliştirici kodu girildikten sonra kullanılır */
-const gelPencere = new GelistiriciPenceresi({ ses, konsol, oyun: () => oyun, kapatIste: () => panelKapat(true), arayuz: {
+const gelPencere = new GelistiriciPenceresi({ ses, konsol, sahne, oyun: () => oyun, kapatIste: () => panelKapat(true), arayuz: {
+  haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); },
+  konsolAc: () => { panelKapat(false); if (oyun) panelAc(konsol); },
+  fovAyarla: v => { ayar.fov = v; ayarlariKaydet(ayar); },
   fpsAc: v => { ayar.fps = v; ayarlariKaydet(ayar); $('#fps').hidden = !v; },
   hataAc: v => { $('#hata').hidden = !v; },
   miniAc: v => { ayar.miniHarita = v; ayarlariKaydet(ayar); $('#miniHarita').hidden = !v; }
 } });
+/* Büyük haritada Ctrl + tık: komutlar açıksa tıklanan yere ışınlanma */
+haritaEkrani.isinla = (x, z) => { panelKapat(true); konsol.calistir(`isinla ${x} ${z}`); };
 function panelAc(panel, ...a) {
   if (!oyun || oyun.hayatta.olu || panelAcik()) return;
   if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
@@ -293,7 +298,7 @@ function oyunBaslat(v) {
   $('#yukleBaslik').textContent = v.istemci ? 'Dünyaya katılınıyor' : v.yeni ? 'Dünya oluşturuluyor' : 'Dünya yükleniyor';
   $('#yukleCubuk').style.width = '0%';
   const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır ve doğma noktasını belirler.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.',
-    'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C ya da Shift tuşuna basılır.', 'F8 ile açılan geliştirici konsolunda “yardim” komutu tüm komutları listeler.',
+    'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C tuşuna basılır.', 'F8 ile açılan geliştirici konsolunda “yardim” komutu tüm komutları listeler.',
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
@@ -516,9 +521,8 @@ function adim(t) {
     const zirh = o.envanter.zirh;
     g.palet = !!(zirh[3] && zirh[3].id === 457);
     /* Tekne: binilirken oyuncu fiziği yerine tekne sürülür; C ile inilir */
-    /* Tekneden inme: C ya da Shift (Shift, binişten kısa süre sonra geçerlidir; koşarken binince hemen inilmesin) */
-    o.tekneSure = o.tekneler.binilen ? (o.tekneSure || 0) + dt : 0;
-    if (o.tekneler.binilen && (g.egil || o.hayatta.olu || (kilitli && (tus.ShiftLeft || tus.ShiftRight) && o.tekneSure > 0.6))) { o.tekneler.in(o.oyuncu); o.inisBekle = 0.4; }
+    /* Tekneden inme: C */
+    if (o.tekneler.binilen && (g.egil || o.hayatta.olu)) { o.tekneler.in(o.oyuncu); o.inisBekle = 0.4; }
     $('#tekneIpucu').hidden = !o.tekneler.binilen;
     o.inisBekle = (o.inisBekle || 0) - dt;
     o.tekneler.guncelle(dt, { oyuncu: o.oyuncu, girdi: g, gunIsigi: o.gunIsigi });
