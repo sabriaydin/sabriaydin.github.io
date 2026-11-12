@@ -329,7 +329,7 @@ function oyunBaslat(v) {
   const yereBirak = (id, adet) => { const p = oyuncu.konum; dusenler.birak(id, adet, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1); };
   const tekneler = new Tekneler({ sahne, dunya, dusenler, ses, varliklar });
   oyun.tekneler = tekneler;
-  oyun.fenerler = new FenerIsiklari(sahne); oyun.yakinKoyler = [];
+  oyun.fenerler = new FenerIsiklari(sahne, dunya); oyun.yakinKoyler = [];
   const olta = new Olta({ sahne, dunya, oyuncu, envanter, dusenler, ses, arayuz: { bildirim: m => hud.bildirim(m) },
     olaylar: { yakala: (id, n, hazine) => { if (hazine) hud.bildirim(`Oltaya ${ESYALAR[id].ad} takıldı.`); } } });
   oyun.olta = olta;

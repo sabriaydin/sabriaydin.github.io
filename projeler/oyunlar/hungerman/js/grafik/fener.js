@@ -1,9 +1,16 @@
 /* HungerMan - deniz fenerlerinin dönen ışık huzmesi: geceleri kıyıdan uzaklara görünür */
 import { THREE } from './sahne.js';
+import { PB, dizin, parcaAnahtar } from '../sabitler.js';
+
+const LAMBA = 61;   // ışık odasının ortasındaki parıltı kristali
 
 export class FenerIsiklari {
-  constructor(sahne) {
-    this.sahne = sahne;
+  /* dunya: lamba bloğunun yerinde olup olmadığını denetlemek için (fener kırılınca ışık söner) */
+  constructor(sahne, dunya) {
+    this.sahne = sahne; this.dunya = dunya; this.denetim = 0;
+    /* Lamba kırılır ya da yeniden konursa ışık hemen güncellenir */
+    this.dinle = (x, y, z, id) => { for (const g of this.liste.values()) { const l = g.userData.lamba; if (l[0] === x && l[1] === y && l[2] === z) g.userData.yanik = id === LAMBA; } };
+    if (dunya) dunya.dinleyiciler.push(this.dinle);
     this.liste = new Map();   // köy id -> grup
     this.malzeme = new THREE.MeshBasicMaterial({ color: 0xfff0b8, vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false });
     /* Ucu fenerde olan, birbirini dik kesen iki ince yelpaze; uzaklaştıkça genişler ve sönükleşir
@@ -39,6 +46,7 @@ export class FenerIsiklari {
       if (this.liste.has(k.id)) continue;
       const grup = new THREE.Group();
       grup.position.set(f.x + 0.5, f.y + 13.6, f.z + 0.5);
+      grup.userData.lamba = [f.x, f.y + 13, f.z]; grup.userData.yanik = this.lambaVar(f.x, f.y + 13, f.z);
       const a = new THREE.Mesh(this.geo, this.malzeme), b = new THREE.Mesh(this.geo, this.malzeme);
       b.rotation.y = Math.PI;
       const c = new THREE.Mesh(this.cekirdekGeo, this.cekirdekMalzeme);
@@ -48,11 +56,35 @@ export class FenerIsiklari {
       this.sahne.sahne.add(grup);
       this.liste.set(k.id, grup);
     }
+    this.denetim -= dt;
+    const denetle = this.denetim <= 0;
+    if (denetle) this.denetim = 0.4;
+    const kam = this.sahne.kamera.position;
     for (const [id, grup] of this.liste) {
       if (!gerekli.has(id)) { this.sahne.sahne.remove(grup); this.liste.delete(id); continue; }
+      if (denetle) grup.userData.yanik = this.lambaVar(...grup.userData.lamba);
+      grup.visible = grup.userData.yanik;
+      if (!grup.visible) continue;
       grup.rotation.y += dt * 0.55;
-      grup.children[0].visible = grup.children[1].visible = gece > 0.02;
+      /* Işık odasının içinde huzme ve çekirdek göz kamaştırmasın */
+      const yakin = kam.distanceTo(grup.position);
+      grup.children[0].visible = grup.children[1].visible = gece > 0.02 && yakin > 2.6;
+      grup.children[2].visible = yakin > 1.6;
     }
   }
-  temizle() { for (const g of this.liste.values()) this.sahne.sahne.remove(g); this.liste.clear(); }
+  /* Lamba bloğu yerinde mi: parça yüklüyse bloğa, değilse kayıtlı değişikliklere bakılır (değişmemişse üretildiği gibidir) */
+  lambaVar(x, y, z) {
+    const d = this.dunya;
+    if (!d) return true;
+    if (d.yuklu(x, z)) return d.blok(x, y, z) === LAMBA;
+    const cx = Math.floor(x / PB), cz = Math.floor(z / PB), m = d.degisiklikler.get(parcaAnahtar(cx, cz));
+    if (!m) return true;
+    const v = m.get(dizin(x - cx * PB, y, z - cz * PB));
+    return v === undefined || v === LAMBA;
+  }
+  temizle() {
+    for (const g of this.liste.values()) this.sahne.sahne.remove(g);
+    this.liste.clear();
+    if (this.dunya) { const i = this.dunya.dinleyiciler.indexOf(this.dinle); if (i >= 0) this.dunya.dinleyiciler.splice(i, 1); }
+  }
 }

@@ -117,7 +117,12 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
-## 10. aşama (bu sürüm, 0.10.0): Düzeltmeler ve geliştirici penceresi
+## 0.10.1: Deniz feneri düzeltmesi
+
+- Deniz fenerinin dönen ışığı ve parlayan çekirdeği, ışık odasındaki parıltı kristaline bağlandı: kristal kırılınca ışık hemen söner, yeniden konunca yanar. Uzaktaki (yüklü olmayan) fenerler için kayıtlı blok değişikliklerine bakılır.
+- Işık odasının içindeyken huzme ve çekirdek gizlenir; göz kamaştırmaz.
+
+## 10. aşama (0.10.0): Düzeltmeler ve geliştirici penceresi
 
 - El ve elde tutulan eşya ayrı bir çizim geçişinde, kendi kamerasıyla ve derinlik temizlenerek çizilir; duvara yaklaşınca blokların içine girmez. Elin görüş açısı sabittir (koşarken genişleyen görüş açısından etkilenmez).
 - Pusula inceltildi (30 piksel) ve okunaklı, düz bir yazı tipine geçirildi; çentikler ve işaretler yeni yüksekliğe göre yeniden yerleştirildi.
