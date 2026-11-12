@@ -23,7 +23,7 @@ function islem(mod, f) {
 }
 
 export const Kayit = {
-  listele: () => islem('readonly', s => s.getAll()).then(l => (l || []).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1 })).sort((a, b) => b.son - a.son)),
+  listele: () => islem('readonly', s => s.getAll()).then(l => (l || []).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar })).sort((a, b) => b.son - a.son)),
   yukle: id => islem('readonly', s => s.get(id)),
   kaydet: veri => islem('readwrite', s => s.put(veri)),
   sil: id => islem('readwrite', s => s.delete(id))

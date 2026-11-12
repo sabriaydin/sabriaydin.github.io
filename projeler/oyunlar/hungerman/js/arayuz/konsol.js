@@ -1,5 +1,6 @@
 /* HungerMan - geliştirici konsolu (F8): test için komutlar, canlı bilgi satırı, komut geçmişi ve Tab ile tamamlama
-   Çok oyunculu istemcide yalnızca oyuncunun kendisini etkileyen komutlar çalışır. */
+   Hile niteliğindeki komutlar yalnızca "Komutlara izin ver" seçeneğiyle oluşturulan dünyalarda (ya da geliştirici kodu
+   girildikten sonra) çalışır. Çok oyunculu istemcide yalnızca oyuncunun kendisini etkileyen komutlar çalışır. */
 import { ESYALAR, BLOKLAR } from '../bloklar.js';
 import { TURLER } from '../varlik/turler.js';
 import { BIYOMLAR } from '../dunya/uretici.js';
@@ -13,10 +14,14 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const kucuk = s => String(s).toLocaleLowerCase('tr').replace(/[ıİ]/g, 'i').replace(/ş/g, 's').replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ö/g, 'o').replace(/ç/g, 'c').trim();
 const SAKLA = 'hungerman_konsol_gecmis';
+/* Geliştirici kodu (açık metin olarak saklanmaz) */
+const KOD_OZET = 'e9ec9ca3';
+function ozet(s) { let h = 0x811c9dc5; for (const c of String(s).toUpperCase().trim()) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); }
 
 export class Konsol {
   constructor(o) {
-    Object.assign(this, o); // ses, oyun(), kapatIste, arayuz: { fps(), hataPaneli(), kaydet(), gorusAyarla(n), haritaAc() }
+    Object.assign(this, o); // ses, oyun(), kapatIste, arayuz: { fps(), hataPaneli(), kaydet(), gorusAyarla(n), haritaAc(), gelistiriciAc() }
+    this.mesajDinle = null;   // geliştirici penceresi son mesajı gösterir
     this.acik = false;
     this.kok = $('#konsol');
     this.girdi = $('#konsolGirdi');
@@ -39,6 +44,7 @@ export class Konsol {
     d.className = 'kSatir ' + sinif;
     if (html) d.innerHTML = m; else d.textContent = m;
     this.cikti.appendChild(d);
+    if (this.mesajDinle && sinif !== 'girdi') this.mesajDinle(d.textContent, sinif);
     while (this.cikti.children.length > 300) this.cikti.firstChild.remove();
     this.cikti.scrollTop = this.cikti.scrollHeight;
   }
@@ -75,10 +81,13 @@ export class Konsol {
     this.gecmis = this.gecmis.slice(-50); this.gSira = this.gecmis.length;
     try { localStorage.setItem(SAKLA, JSON.stringify(this.gecmis)); } catch (e) { /* depolama kapalı */ }
     const p = s.split(/\s+/), ad = kucuk(p.shift());
+    /* Geliştirici kodu tek başına da yazılabilir */
+    if (!this.komutlar[ad] && ozet(ad) === KOD_OZET) { this.komutlar.gelistirici.f(this.oyun(), [ad]); return; }
     const k = this.komutlar[ad];
     if (!k) { this.hata(`Bilinmeyen komut: ${ad}. Komut listesi için “yardim” yazınız.`); return; }
     const o = this.oyun();
     if (!o) { this.hata('Önce bir dünyaya girilmelidir.'); return; }
+    if (k.hile && !o.komutlar) { this.hata('Bu dünyada komutlar kapalı. Komutlar, dünya oluşturulurken “Komutlara izin ver” seçeneğiyle açılır; mevcut bir dünyada geliştirici kodu ile açılabilir (gelistirici <kod>).'); return; }
     if (k.dunya && o.istemci) { this.hata('Bu komut dünyayı değiştirir; çok oyunculu istemcide kullanılamaz (sunucu olan oyuncu kullanabilir).'); return; }
     try { k.f(o, p); } catch (e) { this.hata('Komut çalıştırılamadı: ' + (e.message || e)); }
   }
@@ -116,6 +125,15 @@ export class Konsol {
       this.yaz('Koordinatlarda ~ geçerli konumu ifade eder (örnek: isinla ~ ~20 ~). Tab tuşu komutu ve adları tamamlar; ↑/↓ geçmişte gezinir.', 'soluk');
     });
     ekle('temizle', 'Konsol çıktısını siler', 'temizle', () => { this.cikti.innerHTML = ''; });
+    ekle('gelistirici', 'Geliştirici kodu ile geliştirici modunu açar; açıksa geliştirici penceresini (F9) açar', 'gelistirici [kod]', (o, p) => {
+      if (o.gelistirici) { this.arayuz.gelistiriciAc(); return; }
+      if (!p[0]) { this.hata('Geliştirici modu kapalı. Kullanım: gelistirici <kod>'); return; }
+      if (ozet(p[0]) !== KOD_OZET) { this.hata('Geliştirici kodu geçersiz.'); return; }
+      o.gelistirici = true; o.komutlar = true;
+      this.tamam('Geliştirici modu etkin. Bu dünyada komutlar açıldı. Geliştirici penceresi F9 ile açılır.');
+      this.arayuz.kaydet();
+      this.arayuz.gelistiriciAc();
+    });
     ekle('ver', 'Envantere eşya ekler (ad veya numara)', 'ver <eşya> [adet]', (o, p) => {
       if (!p.length) { this.hata('Kullanım: ver <eşya> [adet]'); return; }
       let adet = 1;
@@ -125,7 +143,7 @@ export class Konsol {
       if (l.length > 1) { this.yaz('Birden çok eşya eşleşti: ' + l.slice(0, 20).map(i => `${ESYALAR[i].ad} (${i})`).join(', '), 'soluk'); return; }
       const k = o.envanter.ekle(l[0], adet);
       this.tamam(`${ESYALAR[l[0]].ad} × ${adet - k} verildi.` + (k ? ` ${k} tanesi sığmadı.` : ''));
-    }, { tamamla: () => Object.values(ESYALAR).filter(e => e && e.ad).map(e => e.ad.replace(/ /g, '_')) });
+    }, { hile: true, tamamla: () => Object.values(ESYALAR).filter(e => e && e.ad).map(e => e.ad.replace(/ /g, '_')) });
     ekle('esyalar', 'Eşyaları numaralarıyla listeler', 'esyalar [arama]', (o, p) => {
       const a = kucuk(p.join(' '));
       const l = Object.entries(ESYALAR).filter(([, e]) => e && e.ad && (!a || kucuk(e.ad).includes(a)));
@@ -134,7 +152,7 @@ export class Konsol {
     ekle('envanter', 'Envanteri boşaltır', 'envanter temizle', (o, p) => {
       if (kucuk(p[0] || '') !== 'temizle') { this.hata('Kullanım: envanter temizle'); return; }
       o.envanter.temizle(); this.tamam('Envanter boşaltıldı.');
-    });
+    }, { hile: true });
     ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, batik, dogum, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | batik | dogum | isaret <ad>', (o, p) => {
       const P = o.oyuncu.konum, a = kucuk(p[0] || ''), u = o.dunya.uretici, R = 1600;
       if (a === 'koy' || a === 'liman') {
@@ -167,7 +185,7 @@ export class Konsol {
       else if (p.length === 2) { x = this.koord(p[0], P.x); y = null; z = this.koord(p[1], P.z); }
       if (x == null || z == null || (p.length >= 3 && y == null)) { this.hata('Kullanım: isinla <x> [y] <z> | koy | liman | zindan | batik | dogum | isaret <ad>'); return; }
       this.isinla(o, x, y, z);
-    }, { tamamla: () => ['koy', 'liman', 'zindan', 'batik', 'dogum', 'isaret'] });
+    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'batik', 'dogum', 'isaret'] });
     ekle('zaman', 'Günün saatini ayarlar ya da zamanı hızlandırır', 'zaman <saat 0-24 | sabah | ogle | aksam | gece> | zaman hiz <çarpan>', (o, p) => {
       const a = kucuk(p[0] || '');
       if (a === 'hiz') { const h = Math.max(0, Math.min(200, this.sayi(p[1], 1))); o.zamanHizi = h; this.tamam(`Zaman hızı ${h}×.`); return; }
@@ -176,17 +194,17 @@ export class Konsol {
       if (!Number.isFinite(s)) { this.hata('Kullanım: zaman <saat 0-24 | sabah | ogle | aksam | gece> | zaman hiz <çarpan>'); return; }
       o.zaman = ((((s - 6) / 24) % 1) + 1) % 1;
       this.tamam(`Saat ${String(Math.floor(s)).padStart(2, '0')}:${String(Math.round((s % 1) * 60)).padStart(2, '0')} olarak ayarlandı.`);
-    }, { dunya: true, tamamla: () => ['safak', 'sabah', 'ogle', 'ikindi', 'aksam', 'gece', 'hiz'] });
+    }, { hile: true, dunya: true, tamamla: () => ['safak', 'sabah', 'ogle', 'ikindi', 'aksam', 'gece', 'hiz'] });
     ekle('gun', 'Gün sayısını ayarlar (canavar sayısı buna bağlıdır)', 'gun <sayı>', (o, p) => {
       const n = Math.max(1, Math.floor(this.sayi(p[0], NaN))); if (!Number.isFinite(n)) { this.hata('Kullanım: gun <sayı>'); return; }
       o.gun = n; this.tamam(`${n}. gün.`);
-    }, { dunya: true });
-    ekle('can', 'Canı ayarlar (0-20)', 'can <0-20>', (o, p) => { const n = Math.max(1, Math.min(20, Math.round(this.sayi(p[0], 20)))); o.hayatta.can = n; this.tamam(`Can ${n}.`); });
-    ekle('doy', 'Açlığı ve oksijeni doldurur', 'doy', o => { const h = o.hayatta; h.aclik = 20; h.oksijen = 10; h.yorgunluk = 0; h.zehir = 0; this.tamam('Açlık dolduruldu.'); });
-    ekle('iyiles', 'Canı, açlığı doldurur; zehir ve yanmayı kaldırır', 'iyiles', o => { const h = o.hayatta; h.can = 20; h.aclik = 20; h.oksijen = 10; h.zehir = 0; h.agu = 0; h.yanma = 0; this.tamam('Tamamen iyileşildi.'); });
-    ekle('olumsuz', 'Ölümsüzlüğü açar / kapatır (hiç hasar alınmaz)', 'olumsuz', o => { o.hayatta.olumsuz = !o.hayatta.olumsuz; this.tamam(`Ölümsüzlük ${o.hayatta.olumsuz ? 'açık' : 'kapalı'}.`); });
-    ekle('ucus', 'Uçmayı açar / kapatır (Boşluk: yüksel, C: alçal)', 'ucus', o => { o.oyuncu.ucus = !o.oyuncu.ucus; this.tamam(`Uçma ${o.oyuncu.ucus ? 'açık' : 'kapalı'}.`); });
-    ekle('hiz', 'Hareket hızı çarpanı (0,2 - 5)', 'hiz <çarpan>', (o, p) => { const h = Math.max(0.2, Math.min(5, this.sayi(p[0], 1))); o.oyuncu.hizCarpani = h; this.tamam(`Hız ${h}×.`); });
+    }, { hile: true, dunya: true });
+    ekle('can', 'Canı ayarlar (0-20)', 'can <0-20>', (o, p) => { const n = Math.max(1, Math.min(20, Math.round(this.sayi(p[0], 20)))); o.hayatta.can = n; this.tamam(`Can ${n}.`); }, { hile: true });
+    ekle('doy', 'Açlığı ve oksijeni doldurur', 'doy', o => { const h = o.hayatta; h.aclik = 20; h.oksijen = 10; h.yorgunluk = 0; h.zehir = 0; this.tamam('Açlık dolduruldu.'); }, { hile: true });
+    ekle('iyiles', 'Canı, açlığı doldurur; zehir ve yanmayı kaldırır', 'iyiles', o => { const h = o.hayatta; h.can = 20; h.aclik = 20; h.oksijen = 10; h.zehir = 0; h.agu = 0; h.yanma = 0; this.tamam('Tamamen iyileşildi.'); }, { hile: true });
+    ekle('olumsuz', 'Ölümsüzlüğü açar / kapatır (hiç hasar alınmaz)', 'olumsuz', o => { o.hayatta.olumsuz = !o.hayatta.olumsuz; this.tamam(`Ölümsüzlük ${o.hayatta.olumsuz ? 'açık' : 'kapalı'}.`); }, { hile: true });
+    ekle('ucus', 'Uçmayı açar / kapatır (Boşluk: yüksel, C: alçal)', 'ucus', o => { o.oyuncu.ucus = !o.oyuncu.ucus; this.tamam(`Uçma ${o.oyuncu.ucus ? 'açık' : 'kapalı'}.`); }, { hile: true });
+    ekle('hiz', 'Hareket hızı çarpanı (0,2 - 5)', 'hiz <çarpan>', (o, p) => { const h = Math.max(0.2, Math.min(5, this.sayi(p[0], 1))); o.oyuncu.hizCarpani = h; this.tamam(`Hız ${h}×.`); }, { hile: true });
     ekle('dogur', 'Bakılan yöne canlı doğurur', 'dogur <tür> [adet]', (o, p) => {
       const tur = kucuk(p[0] || '');
       if (!TURLER[tur] || TURLER[tur].koylu) { this.hata('Türler: ' + Object.keys(TURLER).filter(t => !TURLER[t].koylu).join(', ')); return; }
@@ -198,31 +216,32 @@ export class Konsol {
       if (T.su) { yy = Math.min(DENIZ - 1, g.y); } else { const zm = o.varliklar.zeminBul(x, z); yy = zm ? zm.y : Math.floor(o.oyuncu.konum.y); }
       for (let i = 0; i < n; i++) o.varliklar.ekle(tur, x + 0.5 + (Math.random() - 0.5) * 2, yy, z + 0.5 + (Math.random() - 0.5) * 2);
       this.tamam(`${T.ad} × ${n} doğuruldu.`);
-    }, { dunya: true, tamamla: () => Object.keys(TURLER).filter(t => !TURLER[t].koylu) });
+    }, { hile: true, dunya: true, tamamla: () => Object.keys(TURLER).filter(t => !TURLER[t].koylu) });
     ekle('oldur', 'Canlıları kaldırır', 'oldur <dusman | hayvan | deniz | hepsi | tür>', (o, p) => {
       const a = kucuk(p[0] || 'dusman');
       const sec = v => !v.tur.koylu && (a === 'hepsi' || (a === 'dusman' && v.tur.dusman) || (a === 'hayvan' && !v.tur.dusman && !v.tur.su) || (a === 'deniz' && v.tur.su) || v.turAd === a);
       const l = o.varliklar.liste.filter(sec);
       for (const v of l) o.varliklar.kaldir(v);
       this.tamam(`${l.length} canlı kaldırıldı.`);
-    }, { dunya: true, tamamla: () => ['dusman', 'hayvan', 'deniz', 'hepsi', ...Object.keys(TURLER)] });
+    }, { hile: true, dunya: true, tamamla: () => ['dusman', 'hayvan', 'deniz', 'hepsi', ...Object.keys(TURLER)] });
     ekle('esya', 'Yerdeki eşyaları siler', 'esya temizle', (o, p) => {
       if (kucuk(p[0] || '') !== 'temizle') { this.hata('Kullanım: esya temizle'); return; }
       const n = o.dusenler.liste.length;
       for (const d of [...o.dusenler.liste]) { o.dusenler.sil(d); if (o.dusenler.ag && o.dusenler.ag.silindi && d.ni) o.dusenler.ag.silindi(d); }
       o.dusenler.liste = [];
       this.tamam(`${n} eşya silindi.`);
-    }, { dunya: true });
+    }, { hile: true, dunya: true });
     ekle('tekne', 'Bakılan su yüzeyine tekne koyar', 'tekne <sandal | yelkenli>', (o, p) => {
       const tur = kucuk(p[0] || 'sandal');
       if (tur !== 'sandal' && tur !== 'yelkenli') { this.hata('Kullanım: tekne <sandal | yelkenli>'); return; }
       const t = o.tekneler.koy(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu(), tur, o.oyuncu.yaw);
       if (t) this.tamam(`${t.T.ad} konuldu.`); else this.hata('Bakılan yerde açık su yüzeyi yok.');
-    }, { tamamla: () => ['sandal', 'yelkenli'] });
+    }, { hile: true, tamamla: () => ['sandal', 'yelkenli'] });
     ekle('blok', 'Bakılan bloğun bilgisini verir ya da onu değiştirir', 'blok [bilgi | <blok numarası>]', (o, p) => {
       const h = o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu());
       if (!h) { this.hata('Bakılan bir blok yok.'); return; }
       if (p[0] && kucuk(p[0]) !== 'bilgi') {
+        if (!o.komutlar) { this.hata('Blok değiştirmek için komutlar açık olmalıdır.'); return; }
         const id = Math.floor(this.sayi(p[0], -1));
         if (!BLOKLAR[id] || !BLOKLAR[id].ad) { this.hata('Geçersiz blok numarası.'); return; }
         o.dunya.blokKoy(h.x, h.y, h.z, id); this.tamam(`(${h.x}, ${h.y}, ${h.z}) → ${BLOKLAR[id].ad}`); return;
@@ -247,7 +266,7 @@ export class Konsol {
       l.sort((a, b) => Math.hypot(a[0] * PB - P.x, a[1] * PB - P.z) - Math.hypot(b[0] * PB - P.x, b[1] * PB - P.z));
       this.kesif = { o, l, n: 0, top: l.length };
       this.tamam(`${l.length} parça haritaya işlenecek (arka planda).`);
-    });
+    }, { hile: true });
     ekle('harita', 'Büyük haritayı açar', 'harita', () => { this.arayuz.haritaAc(); });
     ekle('kaydet', 'Oyunu hemen kaydeder', 'kaydet', () => { this.arayuz.kaydet(); this.tamam('Kaydedildi.'); });
     ekle('fps', 'Kare hızı göstergesini açar / kapatır', 'fps', () => { this.tamam(`FPS göstergesi ${this.arayuz.fps() ? 'açık' : 'kapalı'}.`); });

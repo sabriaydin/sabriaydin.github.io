@@ -170,7 +170,7 @@ export class Varliklar {
     if (this.ayna) { this.aynaGuncelle(dt, ctx); return; }
     const C = ctx.oyuncular || [ctx];
     this.dogurSayac -= dt;
-    if (this.dogurSayac <= 0) { this.dogurSayac = 1.2; for (const c of C) this.dogur(c); }
+    if (this.dogurSayac <= 0) { this.dogurSayac = 1.2; if (!this.dogurmaKapali) for (const c of C) this.dogur(c); }
     for (let i = this.liste.length - 1; i >= 0; i--) {
       const v = this.liste[i];
       /* Yapay zekâ en yakın canlı oyuncuya göre, kaybolma en yakın oyuncuya göre */
@@ -539,6 +539,7 @@ export class Varliklar {
 
   /* ---------- Canavar yuvaları: yakında ve karanlıkta canavar çıkarır ---------- */
   yuvaGuncelle(dt, C) {
+    if (this.dogurmaKapali) return;   // geliştirici modu: canlı doğması durduruldu
     for (const y of this.dunya.yuvalar.values()) {
       let d2 = Infinity;
       for (const c of C) { const op = c.oyuncu.konum; d2 = Math.min(d2, (y.x + 0.5 - op.x) ** 2 + (y.y - op.y) ** 2 + (y.z + 0.5 - op.z) ** 2); }

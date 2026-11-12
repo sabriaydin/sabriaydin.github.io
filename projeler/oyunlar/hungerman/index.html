@@ -24,6 +24,7 @@
   <div id="sagUst">
     <div id="geceUyari" hidden></div>
     <div id="konumDeger"></div>
+    <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
     <div id="saat">
       <svg id="gunHalka" viewBox="0 0 20 20" aria-hidden="true">
         <circle class="iz" cx="10" cy="10" r="8"/>
@@ -33,7 +34,6 @@
       </svg>
       <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span>
     </div>
-    <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
   </div>
   <div id="yanmaEfekt"></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
@@ -102,6 +102,17 @@
     <header><b>Geliştirici Konsolu</b><span id="konsolBilgi"></span></header>
     <div id="konsolCikti"></div>
     <label class="konsolSatir"><span>&gt;</span><input id="konsolGirdi" autocomplete="off" spellcheck="false" placeholder="Komut yazınız (yardim)" aria-label="Komut"></label>
+  </div>
+</div>
+
+<!-- Geliştirici modu penceresi -->
+<div id="gelistirici" class="kaplama" hidden>
+  <div class="pencere gelPencere">
+    <header><h2>Geliştirici Modu</h2><span id="gelDurum" class="kAlt"></span></header>
+    <div class="sekmeler" id="gelSekme"></div>
+    <div id="gelIcerik"></div>
+    <div id="gelMesaj" class="gelMesaj"></div>
+    <button class="kapat" id="gelKapat" aria-label="Kapat">✕</button>
   </div>
 </div>
 
@@ -196,6 +207,7 @@
     <header><h2>Yeni Dünya</h2></header>
     <label class="alan">Dünya adı<input id="yeniAd" maxlength="32" value="Yeni Dünya"></label>
     <label class="alan">Tohum <small>(boş bırakılırsa rastgele)</small><input id="yeniTohum" maxlength="40" placeholder="Rastgele"></label>
+    <label class="secim"><input type="checkbox" id="yeniKomut"><span>Komutlara izin ver<small>Geliştirici konsolundaki (F8) eşya verme, ışınlanma, zaman ve uçma gibi komutlar bu dünyada kullanılabilir.</small></span></label>
     <p class="aciklama">Her dünya, tohum değerinden üretilir. Aynı tohum aynı haritayı verir.</p>
     <div class="altDugmeler">
       <button class="dugme ana" id="yeniOlustur">Dünyayı Oluştur</button>
@@ -245,6 +257,7 @@
           <dt>Tab (basılı)</dt><dd>Oyuncu listesi ve katılım kodu</dd>
           <dt>F3</dt><dd>Konum ve teknik bilgiler</dd>
           <dt>F8</dt><dd>Geliştirici konsolu (komut listesi: yardim)</dd>
+          <dt>F9</dt><dd>Geliştirici modu penceresi (geliştirici kodu girildikten sonra)</dd>
           <dt>Esc</dt><dd>Duraklat</dd>
         </dl>
       </div>

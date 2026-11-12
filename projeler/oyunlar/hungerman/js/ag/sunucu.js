@@ -96,7 +96,7 @@ export class SunucuOyun {
     this.istemciler.set(id, c);
     this.uzak.ekle(id, ad, renk);
     k.gonder({
-      t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, zaman: o.zaman, gun: o.gun,
+      t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, zaman: o.zaman, gun: o.gun, komutlar: !!o.komutlar,
       degisiklikler: o.dunya.degisiklikleriAl(), kayit, dogum,
       dusenler: o.dusenler.liste.map(x => this.dusenVeri(x)),
       tekneler: o.tekneler.liste.map(t => this.tekneVeri(t)),

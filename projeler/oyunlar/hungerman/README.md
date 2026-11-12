@@ -94,7 +94,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Pusula yenilendi: tuvalde çizilen, net çentikler; üst şeritte yönler (kuzey kırmızı) ve 30° aralıklı dereceler, alt şeritte vektör simgeli işaretler ve uzaklıklar. Çakışan uzaklık yazıları gizlenir, yakın işaretler önceliklidir; ekran dışındaki işaretler kenarda okla gösterilir.
 - Saat ve gün göstergesi sadeleştirildi: tek satırlık yarı saydam şerit (gün ya da gecenin ilerleyişini gösteren küçük halka, güneş / hilal, saat, gün ve gün evresi), altında konum satırı ve yalnızca gerektiğinde görünen küçük gece uyarısı.
 
-## 8. aşama (bu sürüm, 0.8.0): Düzenlemeler ve geliştirici konsolu
+## 8. aşama (0.8.0): Düzenlemeler ve geliştirici konsolu
 
 - Mini harita ile saat / gün şeridi ekranın sağ altına taşındı; hızlı erişim çubuğuyla aynı alt hizada, ortalanmış bir sütun olarak durur (üstten alta: gece uyarısı, konum, saat, mini harita). Görev izleyici sağ üste geçti.
 - Pusulada yalnızca oyuncunun büyük haritada eklediği işaretler gösterilir; köy, liman, görev ve diğer işaretler mini haritada ve büyük haritada kalır.
@@ -102,6 +102,20 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Tekneler artık suyun üstünde yüzer; taban tahtası su yüzeyinin üstünde kalır, teknenin içi su dolu görünmez.
 - Tekneden inme: C ya da Shift. Teknedeyken ekranda kısa bir hatırlatma görünür.
 - Geliştirici konsolu (F8 veya 1 tuşunun solundaki tuş; Ayarlar'dan kapatılabilir): canlı bilgi satırı (FPS, konum, biyom, canlı ve parça sayısı, açık modlar), komut geçmişi (↑/↓), Tab ile komut ve ad tamamlama. Komutlar: yardim, ver, esyalar, envanter temizle, isinla (koordinat, ~ göreli, koy, liman, zindan, batik, dogum, isaret), zaman (saat, sabah/ogle/aksam/gece, hiz), gun, can, doy, iyiles, olumsuz, ucus, hiz, dogur, oldur, esya temizle, tekne, blok, bloklar, konum, tohum, gorus, kesfet, harita, kaydet, fps, hata, ag, sayac, temizle. Çok oyunculu istemcide dünyayı değiştiren komutlar kapalıdır.
+
+## 9. aşama (bu sürüm, 0.9.0): Geliştirici modu
+
+- Sağ altta sıralama: konum satırı, mini harita ve hemen altında saat / gün şeridi (şeridin alt kenarı hızlı erişim çubuğuyla aynı hizadadır).
+- Komut izni: Yeni Dünya ekranındaki "Komutlara izin ver" seçeneği. İşaretlenmeyen dünyalarda konsolda yalnızca bilgi komutları (yardim, konum, tohum, sayac, blok bilgi, ag, gorus, harita, kaydet, fps, hata) çalışır. Dünya listesinde komutları açık dünyalar belirtilir.
+- Geliştirici kodu: konsolda `gelistirici <kod>` ya da yalnızca kod yazılınca o dünyada geliştirici modu ve komutlar açılır, durum kayıtla saklanır. Kod, kaynakta açık metin olarak tutulmaz.
+- Geliştirici modu penceresi (F9 ya da konsolda `gelistirici`): komut yazmadan kullanılan test penceresi.
+  - Oyuncu: ölümsüzlük ve uçma anahtarları, hız / can / açlık kaydırıcıları, iyileşme, doyma, doğma noktasına gitme, envanteri boşaltma.
+  - Eşyalar: aranabilir simge ızgarası; tıklanan eşyadan 1 / 16 / 64 adet (Shift + tık 64).
+  - Dünya: saat kaydırıcısı ve hazır saatler, zaman hızı (0 = durdur), gün, görüş mesafesi, canlı doğmasını durdurma, çevreyi haritada keşfetme, yerdeki eşyaları temizleme, kaydetme.
+  - Canlılar: tür düğmeleriyle doğurma (adet kaydırıcısı), düşman / hayvan / deniz canlısı / hepsini kaldırma, çevredeki canlı sayımı.
+  - Işınlanma: en yakın köy, liman, zindan, batık, doğma noktası; X / Y / Z ile gitme; dört yöne 100 blok; haritadaki işaretlere gitme.
+  - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
+- Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
 ## Sonraki aşamalar
 
