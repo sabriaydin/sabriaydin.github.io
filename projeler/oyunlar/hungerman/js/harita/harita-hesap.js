@@ -23,7 +23,7 @@ export function parcaHesapla(v) {
   const t = new Uint8Array(PB * PB * 2);
   for (let z = 0; z < PB; z++) for (let x = 0; x < PB; x++) {
     const [id, h] = sutun(y => v[dizin(x, y, z)]);
-    t[z * PB + x] = id; t[PB * PB + z * PB + x] = h;
+    t[z * PB + x] = id < 256 ? id : (BLOKLAR[id] && BLOKLAR[id].harita) || 2; t[PB * PB + z * PB + x] = h;   // 0.18.0: yeni bloklar haritada benzer renkli eski bir blokla gösterilir
   }
   return t;
 }

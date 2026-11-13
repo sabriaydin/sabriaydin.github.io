@@ -313,6 +313,24 @@ export const MODELLER = {
     const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.26, 1.25, 0], [[0.36, 1.25, 0.4, k, 0, -0.62, 0], [0.4, 0.14, 0.46, t, 0, -1.18, -0.02]]));
     return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null };
   },
+  /* 0.18.0: Kül Zombisi: kül rengi ten, közleşmiş giysi, korlu gözler */
+  kulzombi: () => zombiKalibi({ ten: '#5a5450', gomlek: '#2e2624', gomlekKoyu: '#221c1a', pantolon: '#3a2a26', ayakkabi: '#1a1412', sac: '#2a2420', goz: '#ff8a2a', agiz: '#1e1816',
+    ek: { govde: [[0.1, 0.08, 0.02, '#ff6a1e', 0.12, 0.1, -0.14], [0.08, 0.06, 0.02, '#e8501e', -0.14, -0.15, -0.14], [0.52, 0.06, 0.28, '#4a3a34', 0, -0.26, 0]],
+      kafa: [[0.06, 0.04, 0.02, '#ffd27a', -0.12, 0.3, -0.262], [0.06, 0.04, 0.02, '#ffd27a', 0.12, 0.3, -0.262], [0.14, 0.06, 0.04, '#e8501e', 0.16, 0.42, -0.24]],
+      kol: [[0.26, 0.06, 0.26, '#e8501e', 0, -0.55, 0]], bacak: [[0.26, 0.08, 0.26, '#4a3a34', 0, -0.2, 0]] } }),
+  /* Kor Ruhu: süzülen alevli bir baş; çevresinde dönen kor çubukları, altında parlayan çekirdek */
+  korruhu: () => {
+    const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+    const kok = new THREE.Group();
+    const govde = parca(kok, malzeme, [0, 0.55, 0], [[0.22, 0.5, 0.22, '#ffcf6a'], [0.12, 0.2, 0.12, '#fff2b0', 0, -0.3, 0]]);
+    const kafa = parca(kok, malzeme, [0, 1.1, 0], [[0.5, 0.5, 0.5, '#f0a030', 0, 0.12, 0], [0.12, 0.08, 0.02, '#3a1a0a', -0.12, 0.16, -0.255], [0.12, 0.08, 0.02, '#3a1a0a', 0.12, 0.16, -0.255],
+      [0.2, 0.04, 0.02, '#8a3a10', 0, 0.02, -0.255], [0.52, 0.08, 0.52, '#ffd27a', 0, 0.4, 0], [0.12, 0.06, 0.02, '#ffe9a0', -0.12, 0.22, -0.258], [0.12, 0.06, 0.02, '#ffe9a0', 0.12, 0.22, -0.258]]);
+    const donen = new THREE.Group(); donen.position.y = 0.2; kok.add(donen);
+    const geo = [];
+    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, r = 0.5, y = i % 2 ? 0.75 : 0.25; geo.push(kutuGeo(0.1, 0.42, 0.1, '#e8702a', Math.cos(a) * r, y, Math.sin(a) * r), kutuGeo(0.1, 0.08, 0.1, '#ffd27a', Math.cos(a) * r, y + 0.24, Math.sin(a) * r)); }
+    donen.add(new THREE.Mesh(birlestir(geo), malzeme));
+    return { kok, malzeme, govde, kafa, bacaklar: [], kollar: [], kanatlar: [], kuyruk: null, donen };
+  },
   /* Yarasa: küçük gövde, büyük kulaklar, zarlı kanatlar (kanatlar.rotation.z ile çırpılır) */
   yarasa: () => {
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
@@ -332,6 +350,7 @@ export function okModeli(tur) {
   /* Boss mermileri (0.15.1): kaya, buz kıymığı, altın lanet küresi */
   if (tur === 'kaya') return new THREE.Mesh(birlestir([kutuGeo(0.55, 0.55, 0.55, '#7c7c80'), kutuGeo(0.4, 0.2, 0.58, '#5e5e64', 0.1, 0.1, 0), kutuGeo(0.2, 0.3, 0.3, '#4f7a3a', -0.18, -0.1, 0.12)]), malzeme);
   if (tur === 'buz') return new THREE.Mesh(birlestir([kutuGeo(0.1, 0.1, 0.7, '#bff4ff'), kutuGeo(0.16, 0.16, 0.2, '#e8fcff', 0, 0, -0.3), kutuGeo(0.06, 0.06, 0.3, '#7fc8e8', 0, 0, 0.3)]), malzeme);
+  if (tur === 'ates') return new THREE.Mesh(birlestir([kutuGeo(0.34, 0.34, 0.34, '#ff8a2a'), kutuGeo(0.22, 0.22, 0.46, '#ffd27a'), kutuGeo(0.46, 0.22, 0.22, '#e8501e'), kutuGeo(0.22, 0.46, 0.22, '#ffb04a')]), malzeme);   // 0.18.0: kor ruhunun ateş topu
   if (tur === 'lanet') return new THREE.Mesh(birlestir([kutuGeo(0.3, 0.3, 0.3, '#ffd24a'), kutuGeo(0.2, 0.2, 0.42, '#fff2a8'), kutuGeo(0.42, 0.2, 0.2, '#e6a82e')]), malzeme);
   const g = birlestir([kutuGeo(0.04, 0.04, 0.6, '#8a6034'), kutuGeo(0.07, 0.07, 0.1, '#55555c', 0, 0, -0.33), kutuGeo(0.01, 0.1, 0.14, '#f0f0ea', 0, 0, 0.24), kutuGeo(0.1, 0.01, 0.14, '#f0f0ea', 0, 0, 0.24)]);
   return new THREE.Mesh(g, malzeme);

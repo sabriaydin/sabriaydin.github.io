@@ -52,11 +52,16 @@ export const TURLER = {
   kedi: { ad: 'Kedi', model: 'kedi', gen: 0.22, boy: 0.6, can: 10, hiz: 1.3, kosu: 5.2, sadik: true, renkler: 5, biyom: [BY.CAYIR, BY.ORMAN, BY.HUS], grup: [1, 1], dusur: () => [], ses: 'kedi', mama: [297, 298], xp: 1 },
   at: { ad: 'At', model: 'at', gen: 0.55, boy: 1.6, can: 30, hiz: 1.4, kosu: 5.6, binek: true, renkler: 5, biyom: [BY.CAYIR, BY.SAVAN], grup: [2, 4],
     dusur: r => [[282, ar(r, 0, 2)]], ses: 'at', mama: [291, 266, 328, 290], xp: 2 },
+  /* 0.18.0: Yeraltı Diyarı canavarları (ateşe ve lava dayanıklı; yakar: isabet eden oyuncuyu tutuşturur) */
+  korruhu: { ad: 'Kor Ruhu', model: 'korruhu', gen: 0.35, boy: 1.5, can: 20, hiz: 1.4, kosu: 3.2, dusman: true, ucar: true, atesTopu: true, atesBagisik: true, hasar: 5, menzil: 1.2, gorus: 30, yakar: 4, grup: [1, 2],
+    dusur: r => [[471, ar(r, 0, 3)], ...(r() < 0.4 ? [[472, 1]] : [])], ses: 'korruhu', xp: 10 },
+  kulzombi: { ad: 'Kül Zombisi', model: 'kulzombi', aile: 'zombi', gen: 0.3, boy: 1.95, can: 24, hiz: 1.05, kosu: 2.9, dusman: true, atesBagisik: true, hasar: 4, menzil: 1.0, gorus: 26, yakar: 3,
+    dusur: r => { const o = [[281, ar(r, 0, 2)]]; if (r() < 0.12) o.push([263, 1]); if (r() < 0.1) o.push([472, 1]); return o; }, ses: 'zombi', xp: 6 },
   koylu: { ad: 'Köylü', model: 'koylu', gen: 0.3, boy: 1.9, can: 20, hiz: 1.0, kosu: 3.2, koylu: true, dusur: () => [], ses: 'koylu' }
 };
 export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt', 'at', 'kedi'];
 export const DENIZ_CANLILARI = ['hamsi', 'cipura', 'ahtapot', 'kopekbaligi'];
 export const OLUM_KAYNAK = { zombi: 'zombi', kurt: 'kurt' };
 /* Dünyada doğan düşman canavarlar (görev, başarım ve sayım için) */
-export const CANAVARLAR = ['zombi', 'iskelet', 'orumcek', 'mumya', 'bogulmus', 'buziskelet', 'yarasa', 'kopekbaligi', 'haydut', 'firavun', 'buzbuyucu', 'reis', 'muhafiz'];
+export const CANAVARLAR = ['zombi', 'iskelet', 'orumcek', 'mumya', 'bogulmus', 'buziskelet', 'yarasa', 'kopekbaligi', 'haydut', 'firavun', 'buzbuyucu', 'reis', 'muhafiz', 'korruhu', 'kulzombi'];
 export const BOSSLAR = ['firavun', 'buzbuyucu', 'reis', 'muhafiz'];

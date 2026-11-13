@@ -2,13 +2,17 @@
    Parçaları oyuncunun çevresinde yükler / boşaltır, işçilere üretim ve meshleme işi dağıtır,
    blok okuma-yazma ve oyuncu değişikliklerini (kayıt ve ileride ağ eşitlemesi için) tutar. */
 import { THREE } from '../grafik/sahne.js';
-import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI } from '../sabitler.js';
-import { Uretici, agacKur } from './uretici.js';
-import { BLOKLAR, KATI, SIVI, BITKI, EKIN_SONRAKI } from '../bloklar.js';
+import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
+import { Uretici, agacKur, KARLI, karliZirve, BY } from './uretici.js';
+import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST } from '../bloklar.js';
+
+/* 0.18.0: mevsime göre ekin ve fidan büyüme hızı (ilkbahar, yaz, sonbahar, kış) */
+const MEVSIM_BUYUME = [1.4, 1.15, 0.85, 0.25];
+const YAPRAK = new Set([9, 11, 13, 145]);
 import { uretec } from '../rastgele.js';
 
 /* Işık kaynağı sayılan bloklar (meşale niteliği taşıyanlar, örümcek yuvası ve lav) */
-const KAYNAK = new Uint8Array(256);
+const KAYNAK = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && (b.mesale || b.mekanik || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
 
 const SINIR_ICIN = DUNYA_SINIRI;
@@ -76,9 +80,10 @@ export class Dunya {
     return p.v[dizin(x - cx * PB, y, z - cz * PB)];
   }
   yuklu(x, z) { const p = this.parca(Math.floor(x / PB), Math.floor(z / PB)); return !!(p && p.v); }
-  sinirDisi(x, z) { return Math.abs(x) > SINIR_ICIN || Math.abs(z) > SINIR_ICIN; }
+  /* 0.18.0: Yeraltı Diyarı'nın kendi sınırı vardır */
+  sinirDisi(x, z) { return diyarMi(x) ? Math.abs(x - DIYAR_X) > DIYAR_SINIR || Math.abs(z) > DIYAR_SINIR : Math.abs(x) > SINIR_ICIN || Math.abs(z) > SINIR_ICIN; }
   kati(x, y, z) {
-    if (Math.abs(x) > SINIR_ICIN || Math.abs(z) > SINIR_ICIN) return true;
+    if (this.sinirDisi(x, z)) return true;
     return KATI[this.blok(x, y, z)] === 1;
   }
 
@@ -93,9 +98,12 @@ export class Dunya {
     if (eski === id) return false;
     p.v[i] = id;
     const k = parcaAnahtar(cx, cz);
-    let d = this.degisiklikler.get(k);
-    if (!d) { d = new Map(); this.degisiklikler.set(k, d); }
-    d.set(i, id);
+    /* 0.18.0: mevsimlik kar ve buz kayda geçmez (parça yeniden yüklenince kendiliğinden kalkar) */
+    if (kaynak !== 'mevsim') {
+      let d = this.degisiklikler.get(k);
+      if (!d) { d = new Map(); this.degisiklikler.set(k, d); }
+      d.set(i, id);
+    }
     const mk = x + ',' + y + ',' + z;
     if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14, BLOKLAR[id].soguk ? 1 : 0]);
     else this.mesaleler.delete(mk);
@@ -200,7 +208,7 @@ export class Dunya {
   }
 
   meshIste(isci, p) {
-    const P = new Uint8Array(DB * DB * PY);
+    const P = new Uint16Array(DB * DB * PY);
     const g = [];
     for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) g.push(this.parca(p.cx + dx, p.cz + dz).v);
     for (let y = 0; y < PY; y++) for (let z = -1; z <= PB; z++) {
@@ -269,7 +277,7 @@ export class Dunya {
       if (!EKIN_SONRAKI[id]) { this.ekinler.delete(k); continue; }
       let alt = this.blok(x, y - 1, z);
       if (alt === 137 && (this.suYakin(x, y - 1, z) || (this.yagiyor && this.ustKati(x, z) <= y))) { this.blokKoy(x, y - 1, z, 138, 'tik'); alt = 138; }
-      const k2 = alt === 138 ? 3 : alt === 137 ? 1.5 : 1;
+      const k2 = (alt === 138 ? 3 : alt === 137 ? 1.5 : 1) * MEVSIM_BUYUME[this.mevsim || 0];   // 0.18.0: mevsime göre büyüme
       if (r > 0.012 * k2) continue;
       this.blokKoy(x, y, z, EKIN_SONRAKI[id], 'tik');
     }
@@ -326,7 +334,36 @@ export class Dunya {
         const lx = (r() * PB) | 0, lz = (r() * PB) | 0, y = 1 + ((r() * (PY - 2)) | 0);
         const id = p.v[dizin(lx, y, lz)];
         if (id === 29 && r() < 0.06) this.blokKoy(p.cx * PB + lx, y, p.cz * PB + lz, 28, 'tik');
-        else if (BLOKLAR[id] && BLOKLAR[id].fidan && r() < 0.04) this.fidanBuyut(p.cx * PB + lx, y, p.cz * PB + lz, BLOKLAR[id].fidan);
+        else if (BLOKLAR[id] && BLOKLAR[id].fidan && r() < 0.04 * MEVSIM_BUYUME[this.mevsim || 0]) this.fidanBuyut(p.cx * PB + lx, y, p.cz * PB + lz, BLOKLAR[id].fidan);
+      }
+    }
+  }
+  /* 0.18.0: Mevsim tiki (tek oyunculu ve sunucu): kışın açıktaki zemine kar yağar, su yüzeyi donar;
+     diğer mevsimlerde karlı olmayan bölgelerde kar erir, buz çözülür; ilkbaharda çimenlerde çiçek açar */
+  mevsimTik(px, pz) {
+    const m = this.mevsim;
+    if (m == null || diyarMi(px)) return;
+    const pcx = Math.floor(px / PB), pcz = Math.floor(pz / PB), r = Math.random;
+    for (let dz = -4; dz <= 4; dz++) for (let dx = -4; dx <= 4; dx++) {
+      const p = this.parca(pcx + dx, pcz + dz);
+      if (!p || !p.v) continue;
+      for (let n = 0; n < 3; n++) {
+        const lx = (r() * PB) | 0, lz = (r() * PB) | 0, x = p.cx * PB + lx, z = p.cz * PB + lz;
+        let y = PY - 2;
+        while (y > 1 && p.v[dizin(lx, y, lz)] === 0) y--;
+        const top = p.v[dizin(lx, y, lz)];
+        const kol = this.uretici.kolon(x, z, {});
+        const karli = KARLI.has(kol.b) || karliZirve(kol), sicak = kol.b === BY.COL || kol.b === BY.SAVAN;
+        if (m === 3) {
+          if (sicak || top === 141) continue;
+          if (top === 7 && kol.b !== BY.OKYANUS && kol.b !== BY.DERIN && r() < 0.5) this.blokKoy(x, y, z, 22, 'mevsim');
+          else if (BITKI[top] && BLOKLAR[top].degistirilebilir && !SIVI[top] && r() < 0.3) this.blokKoy(x, y, z, 141, 'mevsim');
+          else if (KATI[top] && (OPAK[top] || YAPRAK.has(top)) && y < PY - 2 && r() < (this.yagiyor ? 0.6 : 0.15)) this.blokKoy(x, y + 1, z, 141, 'mevsim');
+        } else if (!karli) {
+          if (top === 141 && r() < (m === 0 ? 0.6 : 0.95)) this.blokKoy(x, y, z, 0, 'mevsim');
+          else if (top === 22 && p.v[dizin(lx, y - 1, lz)] === 7 && r() < 0.5) this.blokKoy(x, y, z, 7, 'mevsim');
+          else if (m === 0 && top === 4 && y < PY - 2 && r() < 0.015) this.blokKoy(x, y + 1, z, r() < 0.5 ? 26 : 27, 'tik');
+        }
       }
     }
   }

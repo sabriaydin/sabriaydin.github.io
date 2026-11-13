@@ -2,7 +2,7 @@
    Oyuncunun görüş mesafesine giren her parça, üstten görünüm olarak (sütun başına en üstteki blok ve yükseklik) saklanır.
    Parçalar 16 x 16 parçalık bölgelerde toplanır; her bölge 256 x 256 piksellik bir tuvale (1 piksel = 1 blok) boyanır.
    Bölge tuvalleri hem büyük haritada hem mini haritada ölçeklenerek çizilir. */
-import { PB, DENIZ } from '../sabitler.js';
+import { PB, DENIZ, diyarMi } from '../sabitler.js';
 import { LAV, YUZ_DOKU } from '../bloklar.js';
 import { doseme } from '../grafik/doku.js';
 import { sutun, parcaHesapla } from './harita-hesap.js';
@@ -101,6 +101,7 @@ export class Harita {
       if (this.taze.has(k)) continue;
       const p = d.parcalar.get(k);
       if (!p || !p.v) continue;
+      if (diyarMi(cx * PB)) continue;   // 0.18.0: Yeraltı Diyarı haritaya işlenmez
       this.taze.add(k);
       const yeni = parcaHesapla(p.v), eski = this.parcalar.get(k);
       if (eski && eski.every((v, i) => v === yeni[i])) continue;

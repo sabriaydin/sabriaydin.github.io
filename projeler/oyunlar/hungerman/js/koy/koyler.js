@@ -8,7 +8,8 @@ import { zindanAt } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
 import { batikAt } from '../dunya/batik-uretici.js';
 import { yapiAt } from '../dunya/yapi-uretici.js';
-import { DENIZ } from '../sabitler.js';
+import { DENIZ, diyarMi } from '../sabitler.js';
+import { kaleAt } from '../dunya/diyar-uretici.js';
 
 const GORUNME = 120, KAYBOLMA = 170;
 const TAKAS_SINIRI = 8;
@@ -135,7 +136,10 @@ export class Koyler {
     else if (madenAt(this.uretici, x, y, z)) tur = 'maden';
     if (batikAt(this.uretici, x, y, z)) tur = 'batik';
     const yp = yapiAt(this.uretici, x, y, z); if (yp) tur = yp.tur;
-    const tablo = tur === 'tapinak'
+    if (diyarMi(x)) tur = kaleAt(this.uretici, x, y, z) ? 'kale' : 'diyar';   // 0.18.0
+    const tablo = tur === 'kale' || tur === 'diyar'
+      ? [[472, 1, 3, 0.6], [471, 2, 8, 0.6], [263, 2, 6, 0.6], [264, 1, 3, 0.45], [515, 1, 4, 0.4], [288, 5, 15], [290, 1, 2, 0.3], [335, 1, 2, 0.35], [473, 1, 1, 0.25], [287, 6, 16, 0.4], [316, 1, 1, 0.08], [319, 1, 1, 0.06], [474, 1, 1, 0.05], [412, 1, 1, 0.05]]
+      : tur === 'tapinak'
       ? [[263, 2, 7], [264, 1, 3, 0.5], [288, 5, 15], [290, 1, 2, 0.3], [289, 1, 2, 0.4], [61, 1, 4, 0.5], [281, 2, 6, 0.6], [295, 2, 6, 0.5], [412, 1, 1, 0.06], [319, 1, 1, 0.05], [5, 4, 10, 0.3], [331, 1, 3, 0.3]]
       : tur === 'ormanTapinak'
       ? [[288, 3, 10], [263, 1, 4, 0.6], [264, 1, 2, 0.35], [287, 6, 16, 0.6], [286, 1, 1, 0.3], [290, 1, 1, 0.25], [61, 1, 3, 0.4], [284, 2, 6, 0.5], [332, 1, 1, 0.2], [335, 1, 1, 0.2], [266, 2, 5, 0.5]]

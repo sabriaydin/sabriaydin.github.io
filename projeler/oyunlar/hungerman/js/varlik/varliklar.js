@@ -9,7 +9,7 @@ import { KATI, SIVI, KESIK, BITKI, LAV } from '../bloklar.js';
 import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
 import { karma3 } from '../rastgele.js';
-import { PY, DENIZ } from '../sabitler.js';
+import { PY, DENIZ, diyarMi } from '../sabitler.js';
 import { cakisma } from '../sekiller.js';
 
 let SIRA = 1;
@@ -88,8 +88,28 @@ export class Varliklar {
   }
 
   /* ---------- Doğma ---------- */
+  /* 0.18.0: Yeraltı Diyarı: hayvan doğmaz; kül zombileri ve kor ruhları gece gündüz doğar */
+  diyarDogur(ctx) {
+    const op = ctx.oyuncu.konum;
+    let n = 0;
+    for (const v of this.liste) if (!v.olu && v.tur.dusman && (v.konum.x - op.x) ** 2 + (v.konum.z - op.z) ** 2 < 100 * 100) n++;
+    if (n >= 12) return;
+    for (let deneme = 0; deneme < 8; deneme++) {
+      const a = Math.random() * Math.PI * 2, r = 16 + Math.random() * 26;
+      const x = Math.floor(op.x + Math.cos(a) * r), z = Math.floor(op.z + Math.sin(a) * r);
+      if (!this.dunya.yuklu(x, z)) continue;
+      const y0 = Math.floor(Math.max(34, Math.min(PY - 6, op.y - 14 + Math.random() * 28)));
+      let y = null;
+      for (let k = 0; k < 16; k++) { const t = y0 - k; if (t < 33) break; if (this.dunya.kati(x, t - 1, z) && !this.dunya.kati(x, t, z) && !this.dunya.kati(x, t + 1, z) && !SIVI[this.dunya.blok(x, t, z)]) { y = t; break; } }
+      if (y == null || (x + 0.5 - op.x) ** 2 + (y - op.y) ** 2 + (z + 0.5 - op.z) ** 2 < 14 * 14) continue;
+      if (Math.random() < 0.5) this.ekle('kulzombi', x + 0.5, y, z + 0.5);
+      else if (!this.kati(x + 0.5, y + 2, z + 0.5)) this.ekle('korruhu', x + 0.5, y + 1.5, z + 0.5);
+      break;
+    }
+  }
   dogur(ctx) {
     const op = ctx.oyuncu.konum;
+    if (diyarMi(op.x)) { this.diyarDogur(ctx); return; }
     let hayvan = 0, zombi = 0;
     let su = 0, kopek = 0, hamsi = 0;
     for (const v of this.liste) { if (v.olu || (v.konum.x - op.x) ** 2 + (v.konum.z - op.z) ** 2 > 128 * 128) continue; if (v.tur.su) { su++; if (v.turAd === 'kopekbaligi') kopek++; if (v.turAd === 'hamsi') hamsi++; } else if (v.tur.dusman) zombi++; else if (!v.tur.koylu && !v.evcil) hayvan++; }
@@ -356,7 +376,7 @@ export class Varliklar {
     /* Zıplama */
     if (v.yerde && hiz > 0 && v.engel && !this.carpisiyor(v, p.x, p.y + 1.1, p.z)) v.hiz.y = 8.2;
     if (T.ziplar && v.yerde && hiz > 0) { v.zipSayac -= dt; if (v.zipSayac <= 0) { v.zipSayac = 0.45; v.hiz.y = 5.5; } }
-    if (v.lavda) { v.hiz.y = Math.min(v.hiz.y + 14 * dt, 1.2); v.hiz.x *= 0.85; v.hiz.z *= 0.85; v.lavSayac = (v.lavSayac || 0) - dt; if (v.lavSayac <= 0) { v.lavSayac = 0.5; this.hasarVer(v, 4, null, { sessiz: true }); } }
+    if (v.lavda && !T.atesBagisik) { v.hiz.y = Math.min(v.hiz.y + 14 * dt, 1.2); v.hiz.x *= 0.85; v.hiz.z *= 0.85; v.lavSayac = (v.lavSayac || 0) - dt; if (v.lavSayac <= 0) { v.lavSayac = 0.5; this.hasarVer(v, 4, null, { sessiz: true }); } }
     else if (v.suda && T.dalgic) {
       /* Boğulmuş zombi suda batar; kovalarken hedefin yüksekliğine doğru yüzer */
       const hy = kovaliyor ? Math.max(-2.5, Math.min(2.5, (op.y - p.y) * 1.5)) : -1.2;
@@ -634,6 +654,7 @@ export class Varliklar {
     else if (m.kollar.length && !T.uzak) { const t = performance.now() / 1000; m.kollar[0].rotation.x = Math.PI / 2 * 0.92 + Math.sin(t * 2 + v.id) * 0.06 - sal * 0.2; m.kollar[1].rotation.x = Math.PI / 2 * 0.92 - Math.sin(t * 2 + v.id) * 0.06 + sal * 0.2; }
     if (m.kanatlar.length) { const c = !v.yerde || v.kacZaman > 0 ? Math.sin(performance.now() / 50) * 0.6 + 0.6 : 0; m.kanatlar[0].rotation.z = -c; m.kanatlar[1].rotation.z = c; }
     if (m.kuyruk) m.kuyruk.rotation.x = -0.3 + Math.sin(performance.now() / 300 + v.id) * 0.15;
+    if (m.donen) { m.donen.rotation.y += dt * 2.6; m.donen.position.y = 0.2 + Math.sin(performance.now() / 240 + v.id) * 0.06; }
     /* Kafa oyuncuya döner */
     if (m.kafa) {
       const d = Math.hypot(dx, dz);
@@ -650,7 +671,7 @@ export class Varliklar {
     if (v.hasarZaman > 0) c.setRGB(1, 0.35, 0.35);
     else if (v.yaniyor) c.setRGB(1, 0.7 + Math.sin(performance.now() / 60) * 0.1, 0.45);
     else c.setRGB(1, 1, 1);
-    c.multiplyScalar(v.isik);
+    c.multiplyScalar(T.atesBagisik ? Math.max(v.isik, T.atesTopu ? 1 : 0.6) : v.isik);   // 0.18.0: kor ruhu kendi ışığıyla parlar
   }
 
   /* Balık, ahtapot, köpekbalığı: suda üç boyutlu yüzer, karada çırpınır */
@@ -982,7 +1003,16 @@ export class Varliklar {
     if (ctx.gunIsigi > 0.6 && this.gokAcik(p.x, p.y + 1, p.z)) { v.gunduz = (v.gunduz || 0) + dt; if (v.gunduz > 12) { v.sil = true; return; } } else v.gunduz = 0;
     let yx = 0, yy = 0, yz = 0, hiz = 0, kovaliyor = false;
     const t = performance.now() / 1000 + v.id * 1.7;
-    if (!this.barisci && !ctx.oyuncuOlu && d < T.gorus && v.kacZaman <= 0) {
+    if (T.atesTopu && !this.barisci && !ctx.oyuncuOlu && d < T.gorus) {
+      /* 0.18.0: Kor Ruhu oyuncunun 7-11 blok yakınında, biraz yukarıda süzülür; görünce art arda üç ateş topu atar */
+      kovaliyor = true;
+      const yatay = Math.hypot(dx, dz) || 1, yaklas = yatay > 11 ? 1 : yatay < 6 ? -1 : 0;
+      yx = dx / yatay * yaklas + (-dz / yatay) * Math.sin(t * 0.7) * 0.6; yz = dz / yatay * yaklas + (dx / yatay) * Math.sin(t * 0.7) * 0.6;
+      yy = (op.y + 3.5 - p.y) * 0.4 + Math.sin(t * 2.3) * 0.3; hiz = yaklas ? T.kosu : T.hiz;
+      v.seriBek = (v.seriBek || 0) - dt;
+      if (v.saldiriBek <= 0 && this.gorusVar(p.x, p.y + 1.2, p.z, op.x, op.y + 1.4, op.z)) { v.saldiriBek = 3 + Math.random() * 1.5; v.seri = 3; }
+      if (v.seri > 0 && v.seriBek <= 0) { v.seri--; v.seriBek = 0.32; this.atesTopuAt(v, ctx); }
+    } else if (!this.barisci && !ctx.oyuncuOlu && d < T.gorus && v.kacZaman <= 0) {
       kovaliyor = true;
       yx = dx / d + Math.sin(t * 3.1) * 0.55; yy = dy / d + Math.sin(t * 4.3) * 0.45; yz = dz / d + Math.cos(t * 2.7) * 0.55; hiz = T.kosu;
       if (d < T.menzil + 0.6 && v.saldiriBek <= 0) {
@@ -1012,7 +1042,7 @@ export class Varliklar {
     this.hareket(v, dt);
     v.yerde = false;
     if (v.engel && !kovaliyor) { v.hedef3 = null; v.karar = 0; }
-    if (v.lavda) this.hasarVer(v, 4, null, { sessiz: true });
+    if (v.lavda && !T.atesBagisik) this.hasarVer(v, 4, null, { sessiz: true });
     /* Yön */
     if (Math.hypot(v.hiz.x, v.hiz.z) > 0.2) v.hedefYaw = kovaliyor ? Math.atan2(-dx, -dz) : Math.atan2(-v.hiz.x, -v.hiz.z);
     let fark = v.hedefYaw - v.yaw; fark = Math.atan2(Math.sin(fark), Math.cos(fark)); v.yaw += fark * Math.min(1, dt * 8);
@@ -1076,7 +1106,7 @@ export class Varliklar {
     if (o.oyuncu && v.sahip && v.sahip === (o.vuran ? o.vuran.ad : this.yerelAd)) return false;
     v.can -= n;
     v.hasarZaman = 0.45;
-    if (o.ates) v.atesSure = 4;
+    if (o.ates && !v.tur.atesBagisik) v.atesSure = 4;
     if (o.yavas) v.yavasSure = 5;
     if (kaynak) {
       const ax = v.konum.x - kaynak.x, az = v.konum.z - kaynak.z, l = Math.hypot(ax, az) || 1;
@@ -1142,6 +1172,7 @@ export class Varliklar {
       if (y.sayac > 0) continue;
       y.sayac = 8 + Math.random() * 10;
       if (this.mesaleYakin(y.x + 0.5, y.y, y.z + 0.5, 6)) continue;
+      if (!y.tur && diyarMi(y.x)) y.tur = 'korruhu';   // 0.18.0: kül kalesi yuvası
       if (!y.tur) { const zd = zindanAt(this.uretici, y.x, y.y, y.z); y.tur = zd ? zd.tur : madenAt(this.uretici, y.x, y.y, y.z) ? 'orumcek' : YUVA_TURLERI[Math.floor(karma3(7, y.x, y.y, y.z) * 3)]; }
       let yakin = 0;
       for (const v of this.liste) if (!v.olu && v.tur.dusman && v.konum.distanceToSquared(new THREE.Vector3(y.x, y.y, y.z)) < 64) yakin++;
@@ -1198,6 +1229,14 @@ export class Varliklar {
     v.ger = 0;
     if (this.sesK(p) > 0.3) this.ses.yayAt();
   }
+  /* 0.18.0: Kor Ruhunun ateş topu: yer çekimsiz, düz gider; isabet eden oyuncuyu tutuşturur */
+  atesTopuAt(v, ctx) {
+    const op = ctx.oyuncu.konum, p = new THREE.Vector3(v.konum.x, v.konum.y + 1.1, v.konum.z);
+    const h = new THREE.Vector3(op.x - p.x + (Math.random() - 0.5) * 1.2, op.y + 1.1 - p.y + (Math.random() - 0.5) * 0.6, op.z - p.z + (Math.random() - 0.5) * 1.2).normalize();
+    p.addScaledVector(h, 0.5);
+    this.okAt(p, h.multiplyScalar(15), v.tur.hasar, v, null, { tur: 'ates' });
+    if (this.sesK(p) > 0.2) this.ses.atesTopu();
+  }
   okGuncelle(dt, C) {
     const ctx = C[0];
     for (let i = this.oklar.length - 1; i >= 0; i--) {
@@ -1205,7 +1244,8 @@ export class Varliklar {
       o.yas += dt;
       let sil = o.yas > 60;
       if (!o.saplandi) {
-        o.v.y -= 18 * dt; if (!(o.ek && o.ek.tur === 'kaya')) o.v.multiplyScalar(1 - 0.15 * dt);
+        const atesT = o.ek && o.ek.tur === 'ates';
+        if (!atesT) o.v.y -= 18 * dt; if (!(o.ek && (o.ek.tur === 'kaya' || atesT))) o.v.multiplyScalar(1 - 0.15 * dt);
         if (SIVI[this.dunya.blok(Math.floor(o.p.x), Math.floor(o.p.y), Math.floor(o.p.z))]) o.v.multiplyScalar(1 - 3 * dt);
         const adim = Math.max(1, Math.ceil(o.v.length() * dt / 0.2));
         const s = dt / adim;
@@ -1233,7 +1273,7 @@ export class Varliklar {
           }
           /* Boss mermileri (kaya, buz, lanet) bloğa çarpınca dağılır */
           if (o.ek && o.ek.tur && this.dunya.kati(Math.floor(yeni.x), Math.floor(yeni.y), Math.floor(yeni.z))) {
-            const c = o.ek.tur === 'kaya' ? [0.5, 0.5, 0.52] : o.ek.tur === 'buz' ? [0.75, 0.95, 1] : [1, 0.85, 0.3];
+            const c = o.ek.tur === 'kaya' ? [0.5, 0.5, 0.52] : o.ek.tur === 'buz' ? [0.75, 0.95, 1] : o.ek.tur === 'ates' ? [1, 0.5, 0.15] : [1, 0.85, 0.3];
             this.dusenler.renkliParcacik(c, o.p.x, o.p.y, o.p.z, o.ek.tur === 'kaya' ? 14 : 6); sil = true; break;
           }
           if (this.dunya.kati(Math.floor(yeni.x), Math.floor(yeni.y), Math.floor(yeni.z))) { o.saplandi = true; o.blok = [Math.floor(yeni.x), Math.floor(yeni.y), Math.floor(yeni.z)]; o.p.lerp(yeni, 0.5); o.v.set(0, 0, 0); if (this.sesK(o.p) > 0.3) this.ses.okSaplandi(); break; }
@@ -1250,7 +1290,7 @@ export class Varliklar {
         if (o.blok && !this.dunya.kati(o.blok[0], o.blok[1], o.blok[2])) { o.saplandi = false; o.blok = null; o.v.set(0, -1, 0); }
       }
       o.mesh.position.copy(o.p);
-      o.mesh.material.color.setScalar(ctx.isik);
+      o.mesh.material.color.setScalar(o.ek && o.ek.tur === 'ates' ? 1 : ctx.isik);
       if (sil) { this.okSil(i); }
     }
   }

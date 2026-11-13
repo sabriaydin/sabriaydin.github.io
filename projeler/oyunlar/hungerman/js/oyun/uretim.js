@@ -190,6 +190,14 @@ t(334, 1, [[331, 1], [297, 1], [299, 1]], 'simya', 'yiyecek');
 t(335, 1, [[331, 1], [257, 2], [263, 1]], 'simya', 'yiyecek');
 t(336, 1, [[331, 1], [450, 1], [296, 2]], 'simya', 'yiyecek');
 
+/* 0.18.0: Yeraltı Diyarı */
+t(473, 1, [[261, 1], [285, 1]], null, 'alet');
+t(514, 1, [[471, 4]], null, 'blok');
+t(518, 4, [[512, 4]], 'firin', 'blok');
+t(519, 1, [[518, 2]], 'masa', 'blok');
+t(474, 1, [[472, 3], [264, 1], [256, 1]], 'masa', 'savas');
+t(335, 1, [[331, 1], [472, 1]], 'simya', 'yiyecek');
+
 export const TARIFLER = R;
 
 export function girdiAdi(g) { return GRUPLAR[g] ? GRUPLAR[g].ad : (ESYALAR[g] ? ESYALAR[g].ad : '?'); }

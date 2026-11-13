@@ -206,15 +206,24 @@ export class Sahne {
     let sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : (gorus * 16 - 6) * (1 - 0.42 * hy - 0.12 * hf), sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * (0.62 - 0.3 * hy);
     /* Geliştirici: sis kapatılabilir (sisKapali), en düşük ışık en yükseğe çıkarılabilir (tamAydinlik) */
     if (this.sisKapali) { sisBas = 9000; sisSon = 10000; }
+    /* 0.18.0: Yeraltı Diyarı: gökyüzü yok; kızıl sis, sıcak ve loş ortam ışığı */
+    const diyar = !!hava.diyar && !lav && !suda;
+    if (diyar) {
+      gokRenk.setRGB(1, 0.62, 0.48);
+      sis.setRGB(0.1, 0.025, 0.018);
+      sisSon = Math.min(sisSon, Math.max(48, gorus * 16 - 10)); sisBas = sisSon * 0.25;
+      if (this.sisKapali) { sisBas = 9000; sisSon = 10000; }
+    }
     for (const m of this.malzemeler) {
       const u = m.uniforms;
-      u.gun.value = gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
+      u.gun.value = diyar ? 0 : gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
       /* Gece görüşü iksiri: en düşük ışık yükselir */
-      u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : 0.07;
-      u.islak.value = m === this.opakMalzeme && !suda ? hy : 0;
+      u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.07;
+      u.islak.value = m === this.opakMalzeme && !suda && !diyar ? hy : 0;
     }
     this.cizici.setClearColor(sis);
-    this.gokGrubu.visible = !suda; this.bulut.visible = !suda;
+    this.gokGrubu.visible = !suda && !diyar; this.bulut.visible = !suda && !diyar;
+    if (diyar) return 0.4;
     this.kamera.far = Math.max(600, gorus * 16 + 40); this.kamera.updateProjectionMatrix();
     return gun;
   }
@@ -280,7 +289,7 @@ export class Sahne {
     /* Yay (0.15.1): simge yerine dikey tutulan üç boyutlu yay; kiriş ve ok germe ile hareket eder */
     const ey = ESYALAR[id];
     if (ey && ey.tur === 'yay') { this.elYay = yayModeli(id === 459); this.elEsya = this.elYay.grup; this.el.add(this.elEsya); return; }
-    if (id < 256 && CIZIM[id] === C_KUP) {
+    if (ey && ey.tur === 'blok' && CIZIM[id] === C_KUP) {
       const g = new THREE.BoxGeometry(0.3, 0.3, 0.3);
       /* BoxGeometry yüz sırası: +x, -x, +y, -y, +z, -z */
       const uv = g.attributes.uv;

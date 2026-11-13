@@ -3,13 +3,16 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR } from '../bloklar.js';
+import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST } from '../bloklar.js';
 import { sekilKutulari } from '../sekiller.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
 /* Altına gölge düşüren biçimli bloklar (merdiven, yarım blok, tarla) */
-const GOLGE = new Uint8Array(256);
+const GOLGE = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && (b.sekil === 'merdiven' || b.sekil === 'yarim' || b.sekil === 'tarla')) GOLGE[b.id] = 1;
+/* 0.18.0: kendi ışığıyla parlayan bloklar (geçit, ışıltaş, magma): gölgelenmez, lav gibi çizilir */
+const PARLAK = new Uint8Array(BLOK_UST);
+for (const b of BLOKLAR) if (b && b.parlak) PARLAK[b.id] = 1;
 const EPS = 0.5 / 256;
 
 /* Yüzler: +x, -x, +y, -y, +z, -z (dışarıdan bakınca saat yönünün tersine) */
@@ -115,7 +118,7 @@ function kup(P, gok, i, id, x, y, z, T) {
         if (!kk && !(s1 && s2)) { g += gok[ni + o[2]]; gs++; }
       }
       ao[c] = a;
-      T.l.push(AO_D[a] * Y.g, g / gs);
+      T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : AO_D[a] * Y.g, g / gs);
     }
     T.n += 4;
     if (ao[0] + ao[2] < ao[1] + ao[3]) T.i.push(tabanN + 1, tabanN + 2, tabanN + 3, tabanN + 1, tabanN + 3, tabanN);
@@ -153,7 +156,7 @@ function sekil(P, gok, i, id, x, y, z, T) {
         T.p.push(x + px, y + py, z + pz);
         const uv = UVF[f](px, py, pz);
         dokuUV(doku, uv[0], uv[1], T.u);
-        T.l.push(Y.g * (sinirda ? 1 : 0.92), g);
+        T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : Y.g * (sinirda ? 1 : 0.92), g);
       }
       T.n += 4;
       T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);

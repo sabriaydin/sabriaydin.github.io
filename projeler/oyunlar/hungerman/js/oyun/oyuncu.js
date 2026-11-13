@@ -1,7 +1,7 @@
 /* HungerMan - oyuncu: birinci şahıs hareket, çarpışma, yüzme, eğilme, düşme */
 import { THREE } from '../grafik/sahne.js';
 import { SIVI, KATI, LAV, BLOKLAR } from '../bloklar.js';
-import { DUNYA_SINIRI } from '../sabitler.js';
+import { DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
 import { cakisma } from '../sekiller.js';
 
 const YARIM = 0.3;
@@ -183,8 +183,8 @@ export class Oyuncu {
     this.yerde = yerde;
 
     /* Dünya sınırı */
-    const S = DUNYA_SINIRI - 1;
-    p.x = Math.max(-S, Math.min(S, p.x)); p.z = Math.max(-S, Math.min(S, p.z));
+    if (diyarMi(p.x)) { const S = DIYAR_SINIR - 1; p.x = Math.max(DIYAR_X - S, Math.min(DIYAR_X + S, p.x)); p.z = Math.max(-S, Math.min(S, p.z)); }
+    else { const S = DUNYA_SINIRI - 1; p.x = Math.max(-S, Math.min(S, p.x)); p.z = Math.max(-S, Math.min(S, p.z)); }
     if (p.y < -20) { p.y = 200; v.set(0, 0, 0); }
 
     /* Adım sesi ve yürüme fazı */

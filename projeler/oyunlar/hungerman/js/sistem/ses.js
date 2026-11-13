@@ -71,6 +71,8 @@ export class Ses {
       case 'tavuk': this.ton(950 * y, 0.07, 0.08 * h, 'triangle', 720 * y); setTimeout(() => this.ton(1050 * y, 0.06, 0.07 * h, 'triangle', 800 * y), 110); break;
       case 'tavsan': this.ton(1300 * y, 0.08, 0.05 * h, 'triangle', 1000); break;
       case 'kurt': if (tip === 'normal') { this.patlama(220, 0.6, 0.12 * h, 'lowpass', 2); this.ton(95, 0.6, 0.1 * h, 'sawtooth', 80); } else this.ton(700 * y, 0.25, 0.12 * h, 'triangle', 450); break;
+      /* 0.18.0: kor ruhu çatırdar ve uğuldar */
+      case 'korruhu': this.patlama(900, 0.4, 0.12 * h, 'bandpass', 0.8, 1.6); this.ton(70 * y, 0.6, 0.1 * h, 'sawtooth', 55 * y); break;
       /* 0.16.0: köpek havlar, kedi miyavlar, at kişner */
       case 'kopek': if (tip === 'normal') { this.ton(420 * y, 0.08, 0.12 * h, 'sawtooth', 300 * y); this.patlama(700, 0.08, 0.08 * h, 'bandpass', 2); setTimeout(() => { this.ton(440 * y, 0.09, 0.12 * h, 'sawtooth', 310 * y); this.patlama(700, 0.08, 0.08 * h, 'bandpass', 2); }, 170); } else this.ton(900 * y, 0.22, 0.1 * h, 'triangle', 600); break;
       case 'kedi': this.ton(560 * y, 0.12, 0.06 * h, 'triangle', 820 * y); setTimeout(() => this.ton(820 * y, 0.28, 0.06 * h, 'triangle', 480 * y), 110); break;
@@ -101,6 +103,7 @@ export class Ses {
   /* Mağara ortam sesleri */
   damla(h = 1) { this.ton(1500 + Math.random() * 900, 0.18, 0.05 * h, 'sine', 900); }
   lav(h = 1) { this.patlama(180 + Math.random() * 120, 0.25, 0.12 * h, 'lowpass', 2, 0.5); }
+  atesTopu() { this.patlama(600, 0.45, 0.2, 'bandpass', 0.7, 0.5); this.ton(160, 0.35, 0.08, 'sawtooth', 70); }
   yanma() { this.patlama(900, 0.3, 0.12, 'bandpass', 0.8, 1.5); }
   /* Deniz: olta, tekne, dalış */
   olta(tip) {
@@ -127,6 +130,12 @@ export class Ses {
   savur(h = 1) { this.patlama(600, 0.35, 0.14 * h, 'bandpass', 1.4, 0.4); this.patlama(1400, 0.25, 0.08 * h, 'bandpass', 1.4, 0.4); }
   /* 0.17.0: mekanik sesler ve müzik kutusu ezgileri (tur: 0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
   kol(acik) { this.ton(acik ? 900 : 700, 0.04, 0.08, 'square', acik ? 1100 : 500); this.patlama(2200, 0.03, 0.08, 'highpass', 1); }
+  /* 0.18.0: Diyar Geçidi */
+  gecitAcil() { this.ton(140, 1.4, 0.16, 'sawtooth', 420); this.ton(210, 1.2, 0.08, 'sine', 630); this.patlama(500, 1.0, 0.18, 'bandpass', 1.4, 2); }
+  gecitSon() { this.ton(420, 0.8, 0.12, 'sawtooth', 120); this.patlama(700, 0.5, 0.12, 'bandpass', 1.2, 0.5); }
+  gecitUgultu() { this.ton(95 + Math.random() * 10, 1.2, 0.07, 'sine', 120); this.ton(190, 1.2, 0.03, 'triangle', 240); }
+  gecis() { this.patlama(400, 1.2, 0.3, 'bandpass', 1.0, 3); this.ton(660, 0.9, 0.1, 'sine', 110); }
+  diyarUgultu() { this.ton(48 + Math.random() * 8, 3.5, 0.05, 'sine', 40); this.patlama(160, 2.5, 0.05, 'lowpass', 0.8, 0.6); }
   dugme() { this.ton(1000, 0.03, 0.07, 'square', 800); }
   melodi(tur = 0, h = 1) {
     if (!this.ctx) return;

@@ -196,14 +196,14 @@ export class Hud {
     if (h !== this.son.gorev) { this.son.gorev = h; $('#gorevIzleyici').innerHTML = h; }
   }
   /* z: gün zamanı (0 = 06:00), konum: alt satır metni */
-  saat(z, gun, konum, firtina) {
+  saat(z, gun, konum, firtina, mevsim) {
     const saatOndalik = (z * 24 + 6) % 24;
     const dk = Math.floor(saatOndalik * 60);
     const t = String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
     if (t !== this.son.saat) { this.son.saat = t; $('#saatDeger').textContent = t; }
     const h = saatOndalik;
     const evre = h >= 5 && h < 7 ? 'Şafak' : h < 11 && h >= 7 ? 'Sabah' : h >= 11 && h < 14 ? 'Öğle' : h >= 14 && h < 17 ? 'İkindi' : h >= 17 && h < 19.5 ? 'Akşam' : 'Gece';
-    const gt = `${gun}. gün`;
+    const gt = mevsim ? `${gun}. gün · ${mevsim}` : `${gun}. gün`;   // 0.18.0: mevsim
     if (gt !== this.son.gun) { this.son.gun = gt; $('#gunDeger').textContent = gt; }
     if (evre !== this.son.evreAd) { this.son.evreAd = evre; $('#evreDeger').textContent = evre; }
     const sinif = evre === 'Gece' ? 'gece' : evre === 'Şafak' ? 'safak' : evre === 'Akşam' ? 'aksam' : 'gunduz';

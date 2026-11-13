@@ -1,7 +1,8 @@
 /* HungerMan - dünya üreticisi
    Tohumdan belirlenimli olarak üretilir: aynı tohum her bilgisayarda aynı dünyayı verir (çok oyunculu için gerekli).
    Dünya, kıyıları denizle çevrili büyük bir kara parçasıdır; iç kısımda nehirler, dağlar ve farklı biyomlar bulunur. */
-import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin } from '../sabitler.js';
+import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin, diyarMi } from '../sabitler.js';
+import { diyarUret } from './diyar-uretici.js';
 import { Gurultu, karistir, karma2, karma3, uretec, yumusak } from '../rastgele.js';
 import { yapiYaz } from './yapi-uretici.js';
 import { koyYaz, koyIcinde, enYakinKoy } from './koy-uretici.js';
@@ -120,7 +121,8 @@ export class Uretici {
 
   /* ---------- Parça üretimi ---------- */
   parcaUret(cx, cz) {
-    const v = new Uint8Array(PB * PB * PY);
+    if (diyarMi(cx * PB)) return diyarUret(this, cx, cz);   // 0.18.0: Yeraltı Diyarı
+    const v = new Uint16Array(PB * PB * PY);
     const x0 = cx * PB, z0 = cz * PB;
     const kolonlar = new Array(PB * PB);
     const ky = {};
@@ -184,7 +186,7 @@ export class Uretici {
           oy = n > 0.58 - (40 - y) * 0.004;
         }
         /* Derinlerde boşluklar lavla dolar */
-        if (oy) v[i] = y <= 10 ? 59 : 0;
+        if (oy) v[i] = y <= 10 ? (y === 10 && this.gO.g3(x / 7, 3.5, z / 7) > 0.32 ? 515 : 59) : 0;   // 0.18.0: lav göllerinin yüzeyinde obsidyen kabuklar
       }
       /* Yarıklar: yer yer yüzeye kadar açılan, kıvrılarak ilerleyen, kenarlarına doğru sığlaşan kanyonlar */
       const dip = this.yarik(x, z, o);

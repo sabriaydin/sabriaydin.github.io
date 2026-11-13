@@ -22,7 +22,7 @@ export const MESLEKLER = {
   demirci: {
     ad: 'Demirci', gomlek: '#4a4a52', pantolon: '#2e2e34', onluk: '#5a3a22',
     sabit: [tk([[257, 12]], [S, 1]), tk([[261, 4]], [S, 1])],
-    havuz: [tk([[264, 1]], [S, 5]), tk([[S, 12]], [139, 1]), tk([[S, 6]], [315, 1]), tk([[S, 5]], [312, 1]), tk([[S, 9]], [409, 1]), tk([[S, 4]], [408, 1]), tk([[S, 3]], [259, 6]), tk([[S, 14]], [264, 1])],
+    havuz: [tk([[264, 1]], [S, 5]), tk([[S, 12]], [139, 1]), tk([[S, 6]], [315, 1]), tk([[S, 5]], [312, 1]), tk([[S, 9]], [409, 1]), tk([[S, 4]], [408, 1]), tk([[S, 3]], [259, 6]), tk([[S, 14]], [264, 1]), tk([[S, 8]], [515, 2]), tk([[S, 4]], [473, 1])],
     gorev: [['getir', 261, 6], ['getir', 257, 24], ['getir', 264, 1], ['getir', 259, 10], ['getir', 61, 4], ['oldur', 'iskelet', 4]],
     soz: ['Ocak hiç sönmez; kömür her zaman gereklidir.', 'İyi bir kılıç, iyi bir dosttur.', 'Demir, bakırdan sonra gelir; aceleye gerek yoktur.']
   },

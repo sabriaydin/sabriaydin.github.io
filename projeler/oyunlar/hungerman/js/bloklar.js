@@ -35,7 +35,9 @@ export const DOKULAR = [
   /* 0.16.0: mobilya ve mutfak */
   'saksi', 'lamba', 'tablo_manzara', 'tablo_deniz', 'tablo_cicek', 'tencere', 'tencere_ust', 'minder_k',
   /* 0.17.0: mekanik bloklar */
-  'bakir_tel_k', 'bakir_tel_a', 'bakir_lamba', 'bakir_lamba_a', 'ters_ust', 'ters_ust_a', 'muzik_kutu', 'muzik_ust', 'algi_ust', 'algi_ust_a', 'algi_yan', 'kol_bas', 'kol_bas_a'
+  'bakir_tel_k', 'bakir_tel_a', 'bakir_lamba', 'bakir_lamba_a', 'ters_ust', 'ters_ust_a', 'muzik_kutu', 'muzik_ust', 'algi_ust', 'algi_ust_a', 'algi_yan', 'kol_bas', 'kol_bas_a',
+  /* 0.18.0: Yeraltı Diyarı */
+  'kor_tasi', 'kul_kumu', 'isiltas', 'obsidyen', 'gecit', 'kul_tugla', 'kul_tugla_oyma', 'kor_cev', 'magma', 'kizil_mantar'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -266,19 +268,34 @@ for (let a = 0; a < 2; a++) {
 for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(243 + f * 2 + a, { ad: 'Ters Çevirici', dok: a ? 'ters_ust_a' : 'ters_ust', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'tas', sekil: 'ters', mekanik: 'ters', yon: f, acik: a, taban: 243, gizli: f + a > 0, dusur: () => [[243, 1]], ...(a ? { mesale: true, isik: 5 } : {}) });
 blok(251, { ad: 'Müzik Kutusu', dok: ['muzik_ust', 'muzik_kutu', 'kalas'], sertlik: 1.2, alet: 'balta', ses: 'odun', mekanik: 'muzik' });
 
+/* 0.18.0: Yeraltı Diyarı blokları (512'den başlar). harita: haritada gösterildiği eski blok */
+blok(512, { ad: 'Kor Taşı', dok: 'kor_tasi', sertlik: 0.7, alet: 'kazma', seviye: 1, harita: 114 });
+blok(513, { ad: 'Kül Kumu', dok: 'kul_kumu', sertlik: 0.6, alet: 'kurek', ses: 'kum', yavaslatir: true, harita: 6 });
+blok(514, { ad: 'Işıltaş', dok: 'isiltas', sertlik: 0.4, ses: 'cam', mesale: true, isik: 15, lamba: true, parlak: true, dusur: r => [[471, 2 + Math.floor(r() * 3)]], harita: 116 });
+blok(515, { ad: 'Obsidyen', dok: 'obsidyen', sertlik: 18, alet: 'kazma', seviye: 5, harita: 120 });
+/* Diyar geçidi: 516 + eksen (0: düzlem x boyunca, 1: z boyunca); kırılmaz, çerçevesi kırılınca söner */
+for (let e = 0; e < 2; e++) blok(516 + e, { ad: 'Diyar Geçidi', dok: 'gecit', cizim: C_SEKIL, kati: false, opak: false, ayniGizle: true, sertlik: -1, ses: 'cam', sekil: 'gecit', eksen: e, gecit: true,
+  mesale: true, isik: 9, parlak: true, gizli: true, dusur: () => [], harita: 117 });
+blok(518, { ad: 'Kül Tuğlası', dok: 'kul_tugla', sertlik: 3, alet: 'kazma', seviye: 1, harita: 120 });
+blok(519, { ad: 'Oymalı Kül Tuğlası', dok: 'kul_tugla_oyma', sertlik: 3, alet: 'kazma', seviye: 1, harita: 120 });
+blok(520, { ad: 'Kor Cevheri', dok: 'kor_cev', sertlik: 3, alet: 'kazma', seviye: 4, dusur: r => [[472, 1 + (r() < 0.3 ? 1 : 0)]], harita: 114 });
+blok(521, { ad: 'Magma Bloğu', dok: 'magma', sertlik: 0.8, alet: 'kazma', seviye: 1, mesale: true, isik: 8, lamba: true, magma: true, parlak: true, harita: 59 });
+blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
+
 /* Maden deneyimi */
-for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4]]) B[id].xp = xp;
+for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4], [520, 3]]) B[id].xp = xp;
 
 export const BLOKLAR = B;
 export const BLOK_SAYISI = B.length;
 
-/* Hızlı erişim tabloları */
-export const KATI = new Uint8Array(256), OPAK = new Uint8Array(256), CIZIM = new Uint8Array(256), KESIK = new Uint8Array(256);
-export const AYNI_GIZLE = new Uint8Array(256), SIVI = new Uint8Array(256), BITKI = new Uint8Array(256), LAV = new Uint8Array(256);
+/* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
+export const BLOK_UST = 1024;
+export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
+export const AYNI_GIZLE = new Uint8Array(BLOK_UST), SIVI = new Uint8Array(BLOK_UST), BITKI = new Uint8Array(BLOK_UST), LAV = new Uint8Array(BLOK_UST);
 /* EKIN_SONRAKI: büyüyen ekinin sonraki evresi (0: büyümez) */
-export const EKIN_SONRAKI = new Uint8Array(256);
+export const EKIN_SONRAKI = new Uint16Array(BLOK_UST);
 /* Yüz dokuları: +x, -x, +y, -y, +z, -z */
-export const YUZ_DOKU = new Uint8Array(256 * 6);
+export const YUZ_DOKU = new Uint8Array(BLOK_UST * 6);
 for (const b of B) {
   if (!b) continue;
   KATI[b.id] = b.kati ? 1 : 0; OPAK[b.id] = b.opak ? 1 : 0; CIZIM[b.id] = b.cizim; KESIK[b.id] = b.kesik ? 1 : 0;
@@ -439,6 +456,14 @@ esya(460, { ad: 'Reis Baltası', tur: 'alet', yigin: 1, simge: 'balta', renk: '#
   alet: { tur: 'balta', seviye: 5, hiz: 9, dayanim: 1900, hasar: 10 } });
 esya(461, { ad: 'Muhafız Göğüslüğü', tur: 'zirh', yigin: 1, simge: 'zirh1', renk: '#7d8c96', efsane: true, ozellik: 'Taş muhafızın göğüslüğü',
   zirh: { parca: 1, puan: 9, dayanim: 900 }, alet: null });
+/* 0.18.0: Yeraltı Diyarı eşyaları */
+esya(471, { ad: 'Işıltaş Tozu', simge: 'toz', renk: '#f2c84a' });
+esya(472, { ad: 'Kor Kristali', simge: 'kor_kristal' });
+esya(473, { ad: 'Çakmak', tur: 'cakmak', yigin: 1, simge: 'cakmak2', ozellik: 'Obsidyen çerçevenin içine sağ tıklanınca Diyar Geçidi açılır',
+  alet: { tur: 'cakmak', seviye: 0, hiz: 1, dayanim: 64, hasar: 1 } });
+esya(474, { ad: 'Kor Kılıcı', tur: 'alet', yigin: 1, simge: 'kilic', renk: '#ff6a2a', yakar: true, ozellik: 'Vurulan canlıyı tutuşturur',
+  alet: { tur: 'kilic', seviye: 5, hiz: 8, dayanim: 1300, hasar: 8 } });
+
 /* Örste onarım malzemesi */
 export function onarimMalzemesi(id) {
   if (id >= 300 && id < 320) return [[14, 38, 39], [15], [259], [261], [264]][Math.floor((id - 300) / 4)];
@@ -450,6 +475,8 @@ export function onarimMalzemesi(id) {
   if (id === 458 || id === 460) return [264];
   if (id === 459) return [284];
   if (id === 461) return [261];
+  if (id === 473) return [261];
+  if (id === 474) return [472];
   return null;
 }
 export const aletId = (malzeme, tur) => 300 + malzeme * 4 + ALET_TURLERI.findIndex(t => t.tur === tur);

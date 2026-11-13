@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 
@@ -37,7 +37,7 @@ export class Etkilesim {
         if (SEKIL[id]) {
           const k = hucreKutulari(this.dunya, x, y, z, id), r = kutuIsin(goz, yon, x, y, z, k, erisim);
           if (r) return { x, y, z, id, nx: r.nx, ny: r.ny, nz: r.nz, t: r.t, py: goz.y + yon.y * r.t - y, kutu: sinirKutusu(k) };
-        } else if (!BITKI[id] && !BLOKLAR[id].mesale || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
+        } else if (!BITKI[id] && !(BLOKLAR[id].mesale && CIZIM[id] !== C_KUP) || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
       }
       if (tx < ty && tx < tz) { x += sx; t = tx; tx += tdx; nx = -sx; ny = 0; nz = 0; }
       else if (ty < tz) { y += sy; t = ty; ty += tdy; nx = 0; ny = -sy; nz = 0; }
@@ -228,7 +228,7 @@ export class Etkilesim {
     /* Savurma: geri itme seviye başına %60 artar; Yağma: ganimet artar */
     const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma'));
     /* Güneş Kılıcı vurulan canlıyı tutuşturur */
-    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma'), ates: !!(es && es.id === 458) })) {
+    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma'), ates: !!(es && (es.id === 458 || (ESYALAR[es.id] && ESYALAR[es.id].yakar))) })) {
       this.ses.vurus();
       if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       this.hayatta.yor(0.1);
@@ -279,7 +279,7 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y + 1, h.z, 0); if (BLOKLAR[d.blok(h.x, h.y + 2, h.z)].sekil === 'kapi') d.blokKoy(h.x, h.y + 2, h.z, 0);
       this.dusur(88, h.x, h.y + 1, h.z);
     }
-    if ((BITKI[ust] || (BLOKLAR[ust] && (BLOKLAR[ust].mesale || ZEMIN_MEK[BLOKLAR[ust].mekanik]))) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
+    if ((BITKI[ust] || (BLOKLAR[ust] && ((BLOKLAR[ust].mesale && CIZIM[ust] !== C_KUP && !BLOKLAR[ust].gecit) || ZEMIN_MEK[BLOKLAR[ust].mekanik]))) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
       d.blokKoy(h.x, h.y + 1, h.z, BLOKLAR[ust].suIcinde ? 7 : 0);
       this.dusur(ust, h.x, h.y + 1, h.z);
       if (ust === 28 || ust === 29) { /* çalı tamamen düşer */ }
@@ -298,6 +298,11 @@ export class Etkilesim {
     const s = env.seciliYuva(), e = s && ESYALAR[s.id];
     /* İstasyonlar */
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
+    /* 0.18.0: Çakmak: obsidyen çerçevenin içinde Diyar Geçidi açar */
+    if (h && e && e.tur === 'cakmak' && this.gecit) {
+      if (this.gecit.yak(h) && this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+      return true;
+    }
     /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
     if (h && BLOKLAR[h.id].oturak && !g.egil && !(e && e.tur === 'blok') && this.binek && this.binek.otur(h.x, h.y, h.z)) return true;
     /* Sandık */
@@ -431,7 +436,7 @@ export class Etkilesim {
       if (mevcut !== 0 && !(mb.degistirilebilir) && !(SIVI[mevcut] && !BITKI[mevcut] && !bitki)) return false;
       if (y < 1 || y >= 127) return false;
       const alt = d.blok(x, y - 1, z);
-      if (BLOKLAR[id].mesale && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
+      if (BLOKLAR[id].mesale && CIZIM[id] !== C_KUP && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
       if (ZEMIN_MEK[BLOKLAR[id].mekanik] && !(KATI[alt] && OPAK[alt])) { this.arayuz.bildirim(`${BLOKLAR[id].ad} katı bir bloğun üstüne konur.`); return true; }
       if (suBitkisi) {
         if (mevcut !== 7 || !KATI[alt]) { this.arayuz.bildirim('Bu bitki su altında katı bir zemine dikilir.'); return true; }

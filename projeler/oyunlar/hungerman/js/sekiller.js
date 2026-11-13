@@ -1,12 +1,12 @@
 /* HungerMan - biçimli bloklar: merdiven, yarım blok, kapı, tuzak kapı, çit, çit kapısı, cam bölme, tırmanma merdiveni, tarla, örs, simya masası
    Her blok, hücre içinde 0..1 aralığında kutulardan oluşur: [x0, y0, z0, x1, y1, z1, doku?].
    Aynı tanımlar meshleme (işçi), çarpışma (oyuncu ve canlılar), ışın izleme ve seçim kutusu için kullanılır. */
-import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T } from './bloklar.js';
+import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T, BLOK_UST } from './bloklar.js';
 
 const P = 1 / 16;
 /* Yönler: 0 kuzey (-z), 1 doğu (+x), 2 güney (+z), 3 batı (-x) */
 export const YONLER = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-export const SEKIL = new Uint8Array(256);
+export const SEKIL = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && b.cizim === C_SEKIL) SEKIL[b.id] = 1;
 
 /* Hücrenin bir kenarına yaslanan ince panel */
@@ -59,6 +59,7 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'tirmanma': return [panel(b.yon, carp ? 3 * P : P)];
     case 'tarla': return [[0, 0, 0, 1, 15 * P, 1]];
     case 'karKatman': return [[0, 0, 0, 1, 2 * P, 1]];
+    case 'gecit': return carp ? [] : [b.eksen ? [6 * P, 0, 0, 10 * P, 1, 1] : [0, 0, 6 * P, 1, 1, 10 * P]];
     case 'fener': return [[5 * P, 0, 5 * P, 11 * P, 8 * P, 11 * P], [6 * P, 8 * P, 6 * P, 10 * P, 9 * P, 10 * P, T.demir_cubuk], [7 * P, 9 * P, 7.5 * P, 9 * P, 13 * P, 8.5 * P, T.demir_cubuk]];
     case 'tel': return carp ? [] : [[0, P, 7 * P, 1, 1.6 * P, 9 * P], [7 * P, P, 0, 9 * P, 1.6 * P, 1]];
     case 'nilufer': return carp ? [] : [[P, 0, P, 15 * P, 0.5 * P, 15 * P]];

@@ -603,3 +603,6 @@ body:has(#bossCubuk:not([hidden])) #hedefBilgi { top: 112px; }
 #tarifTakip small { display: block; margin-top: 4px; color: var(--soluk); font-size: .72rem; }
 #tarifTakip small.hazir { color: #9be38b; }
 .tkPencere header { padding-right: 44px; }
+/* 0.18.0: Diyar Geçidi içinde mor dalgalanma */
+#gecitEfekt { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 50%, rgba(150, 60, 230, .15), rgba(110, 30, 190, .75) 75%); mix-blend-mode: screen; animation: gecitDalga 1.2s ease-in-out infinite alternate; }
+@keyframes gecitDalga { from { filter: hue-rotate(-12deg) brightness(.9); } to { filter: hue-rotate(14deg) brightness(1.2); } }

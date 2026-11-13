@@ -117,6 +117,31 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 18. aşama (0.18.0): Mevsimler ve Yeraltı Diyarı
+
+**Mevsimler**
+- Yıl 28 gündür; her mevsim 7 gün sürer: İlkbahar, Yaz, Sonbahar, Kış. Saatin yanında mevsim ve mevsimin kaçıncı günü olduğu yazar; mevsim değişince bildirilir.
+- Çimen, yaprak ve otların renkleri mevsimle değişir: ilkbaharda taze yeşil ve meşe ile huş yapraklarında çiçekler; sonbaharda turuncu, kızıl ve sarı yapraklar; kışın solgun çimen ve seyrek, kurumuş yapraklar.
+- **Kış:** çöl ve savan dışında yağış kar olarak düşer; açıktaki zemin ve ağaçlar karla örtülür (yağışta daha hızlı), göl ve nehirlerin yüzeyi donar. Karlı olmayan bölgelerde kar ve buz ilkbaharla birlikte erir. Mevsimlik kar ve buz kayıt dosyasını büyütmez.
+- **Ekin ve fidan büyümesi:** ilkbaharda 1,4 kat, yazın 1,15 kat, sonbaharda 0,85 kat, kışın 0,25 kat.
+- İlkbaharda çimenlerin üstünde yer yer gelincik ve karahindiba açar.
+
+**Yeraltı Diyarı**
+- **Obsidyen:** derin mağaralardaki lav göllerinin yüzeyinde kabuklar hâlinde bulunur; elmas kazmayla kazılır. Demirci köylüsü de sikke karşılığında satar.
+- **Çakmak** (demir külçe + çakmaktaşı): obsidyenden kurulan dikdörtgen bir çerçevenin (iç kısmı en az 2 × 3, en çok 21 × 21; köşeler gerekmez) içine sağ tıklanınca mor **Diyar Geçidi** açılır. Çerçeveden bir blok kırılınca geçit söner.
+- Geçidin içinde 2,5 saniye durulunca diyara geçilir. Diyardaki 1 blok dünyadaki 8 bloğa karşılık gelir; dönüşte de aynı oranla dünyaya çıkılır. Varılan yerin 20 blok çevresinde bir geçit varsa ona çıkılır; yoksa obsidyen platformlu yeni bir geçit kurulur.
+- Diyar, tabanı ve tavanı ana kayayla kapalı dev mağaralardan oluşur: kor taşı, 31. katmana kadar uzanan lav denizi, tavandan sarkan **Işıltaş** kümeleri, ayakları yavaşlatan **Kül Kumu** düzlükleri, eğilmeden üstünde durulunca yakan **Magma** kıyıları, **Kızıl Mantar** ve **Kor Cevheri** (demir kazmayla; Kor Kristali verir).
+- Kızıl sis, sıcak ve loş ortam ışığı, uğultu ve lav sesleri vardır; gökyüzü, hava durumu ve mini harita yoktur. Diyarda uyunamaz.
+- **Kül Kalesi:** lav denizinin üstünde, kül tuğlasından burç; dört yöne uzanan, ışıltaş fenerli ve sütunlu köprüler, köprü uçlarında gözetleme kuleleri, parmaklıklı pencereler, mazgallı dam, köşe kuleleri. Burcun ortasında bir Kor Ruhu yuvası ve ganimet sandıkları (kor kristali, ışıltaş tozu, altın, elmas, obsidyen, iksir, elmas eşyalar, Kor Kılıcı) bulunur.
+- **Canavarlar:** Kor Ruhu (süzülür, art arda üç ateş topu atar, isabet edeni tutuşturur, kendi ışığıyla parlar) ve Kül Zombisi (vuruşu tutuşturur). İkisi de ateşe ve lava dayanıklıdır; diyarda gece gündüz doğarlar.
+- **Yeni tarifler:** Işıltaş (4 ışıltaş tozu), Kül Tuğlası (kor taşı, Fırın), Oymalı Kül Tuğlası, Kor Kılıcı (3 kor kristali, elmas, çubuk; vurulan canlıyı tutuşturur), Ateşe Dayanıklılık İksiri (kor kristaliyle, Simya Masası).
+- **Başarımlar** (“Diyar ve Mevsimler”): Geçit Bekçisi, Ateşin Eşiği, Kül Kalesi, Ruh Avcısı, Işık Toplayıcı, Ateşle Oynamak, Dört Mevsim.
+
+**Teknik**
+- Blok kimlikleri 16 bite genişletildi (yeni bloklar 512'den başlar); eski kayıtlar sorunsuz açılır.
+- Kendi ışığıyla parlayan bloklar (geçit, ışıltaş, magma) karanlıkta da parlak çizilir. Bakır lamba ve ışıltaş gibi küp biçimli ışık blokları artık altındaki blok kırılınca düşmez ve tam blok olarak seçilir.
+- Dünya üretimi değiştiğinden keşif haritası önbelleği yenilenir.
+
 ## 17. aşama (0.17.0): Mekanik bloklar ve Tarif Kitabı
 
 **Güç kaynakları** (Üretim Masası, yeni “Mekanik” sekmesi)
