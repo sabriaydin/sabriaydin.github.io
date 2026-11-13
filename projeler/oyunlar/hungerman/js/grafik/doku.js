@@ -244,6 +244,8 @@ const RESSAM = {
     for (const [x, y] of isaret) p.set(x, y, p.r() < 0.3 ? ma : m);
     for (let x = 0; x < 16; x++) p.set(x, 15, hex('#16131c'));
   },
+  okatici_on: p => { tasTaban(p); p.lekeler('#6a7a5a', 8, 2, 0.05); const k = hex('#1a1a1a'), c = hex('#4a4a4a'); for (let y = 5; y < 11; y++) for (let x = 5; x < 11; x++) p.set(x, y, (x === 5 || x === 10 || y === 5 || y === 10) ? c : k); for (let x = 3; x < 13; x++) { p.set(x, 2, hex('#5a5a5a')); p.set(x, 13, hex('#5a5a5a')); } },
+  tuzak_teli: p => { p.doldur('#000000', 0, 0); const c = hex('#d8d4c8'); for (let i = 0; i < 16; i++) { p.set(i, 7, c); p.set(i, 8, karis(c, 0.8)); } },
   buyu_alt: p => { p.doldur('#1e1a24', 0.1); p.lekeler('#2a2532', 20, 2, 0.06); },
   nilufer: p => bitki(p, p => { const c = hex('#3f8a2c'); for (let y = 1; y < 15; y++) for (let x = 1; x < 15; x++) { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6.6 && !(x > 7 && Math.abs(y - 7.5) < (x - 6) * 0.35)) p.set(x, y, karis(c, 0.8 + p.r() * 0.35)); } const f = hex('#f2b6d0'); p.set(5, 6, f); p.set(6, 5, f); p.set(5, 5, [255, 230, 120]); }),
   sarmasik: p => bitki(p, p => { const c = hex('#3e7a2a'); for (let i = 0; i < 4; i++) { let x = 2 + i * 4; for (let y = 0; y < 16; y++) { if (p.r() < 0.85) p.set(x, y, karis(c, 0.75 + p.r() * 0.45)); if (y % 3 === i % 3) { p.set(x + 1, y, karis(c, 1.1)); p.set(x - 1, y + 1, karis(c, 0.9)); } if (p.r() < 0.25) x += p.r() < 0.5 ? -1 : 1; x = Math.max(1, Math.min(14, x)); } } }),
@@ -428,6 +430,7 @@ const MAL_CIZ = {
   ip: () => p => { const c = hex('#e8e0c8'); for (let a = 0; a < 40; a++) { const t = a / 40 * Math.PI * 4, r = 2 + a / 10; p.set(Math.round(8 + Math.cos(t) * r), Math.round(8 + Math.sin(t) * r * 0.8), karis(c, 0.85 + (a % 3) * 0.08)); } },
   cakmak: () => p => { cokgen(p, [[4, 4], [11, 3], [13, 9], [8, 13], [3, 10]], '#3c3c40', 0.15); p.set(8, 6, [130, 130, 140]); p.set(9, 7, [110, 110, 120]); },
   yay: () => p => { const w = hex('#8a6034'); for (let k = 0; k <= 20; k++) { const t = k / 20, x = Math.round(3 + t * 10 + Math.sin(t * Math.PI) * 3.2), y = Math.round(13 - t * 10 + Math.sin(t * Math.PI) * 3.2); p.set(x, y, w); p.set(x + 1, y, karis(w, 0.8)); } cizgi(p, 3, 13, 13, 3, [235, 235, 225]); },
+  buzyay: () => p => { const w = hex('#7fc8e8'); for (let k = 0; k <= 20; k++) { const t = k / 20, x = Math.round(3 + t * 10 + Math.sin(t * Math.PI) * 3.2), y = Math.round(13 - t * 10 + Math.sin(t * Math.PI) * 3.2); p.set(x, y, w); p.set(x + 1, y, karis(w, 0.75)); } cizgi(p, 3, 13, 13, 3, [235, 250, 255]); p.set(8, 4, [255, 255, 255]); p.set(12, 9, [255, 255, 255]); },
   ok: () => p => { kalinCizgi(p, [[3, 13], [11, 5]], '#8a6034'); cokgen(p, [[10, 3], [14, 2], [13, 6]], '#4a4a50', 0); cizgi(p, 2, 11, 4, 13, [240, 240, 235]); cizgi(p, 3, 10, 5, 12, [220, 220, 215]); },
   zirh0: e => p => { cokgen(p, [[3, 9], [3, 5], [6, 2], [10, 2], [13, 5], [13, 9], [11, 9], [11, 7], [5, 7], [5, 9]], e.renk, 0.08); },
   zirh1: e => p => { cokgen(p, [[2, 3], [6, 3], [8, 5], [10, 3], [14, 3], [14, 7], [12, 7], [12, 14], [4, 14], [4, 7], [2, 7]], e.renk, 0.08); },

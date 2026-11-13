@@ -41,6 +41,7 @@ const SETLER = {
   maden: { ad: 'Madenci', esya: [[312, 1], [313, 1], [314, 1], [46, 64], [276, 16], [408, 1], [409, 1], [410, 1], [411, 1]] },
   denizci: { ad: 'Denizci', esya: [[454, 1], [455, 1], [453, 1], [456, 1], [457, 1], [298, 16]] },
   ciftci: { ad: 'Çiftçi', esya: [[343, 1], [292, 32], [328, 16], [329, 16], [291, 32], [104, 32], [105, 2], [296, 16]] },
+  efsane: { ad: 'Boss ganimetleri', esya: [[458, 1], [459, 1], [460, 1], [461, 1], [287, 64]] },
   buyu: { ad: 'Büyü', esya: [[156, 1], [61, 32], [139, 1], [316, 1], [319, 1], [286, 1], [453, 1], [412, 1], [415, 1]] },
   simya: { ad: 'Simya ve örs', esya: [[140, 1], [139, 1], [331, 16], [61, 8], [283, 8], [265, 16], [297, 8], [299, 4], [263, 4], [450, 4], [296, 8], [328, 8], [257, 8]] },
   tuccar: { ad: 'Tüccar', esya: [[288, 64], [291, 40], [271, 12], [257, 24], [8, 24], [282, 12], [297, 12]] }
@@ -218,7 +219,7 @@ export class GelistiriciPenceresi {
     const P = o.oyuncu.konum;
     const koyler = koylerAlan(o.dunya.uretici, P.x - 1500, P.z - 1500, P.x + 1500, P.z + 1500).map(k => ({ k, d: Math.hypot(k.x - P.x, k.z - P.z) })).sort((a, b) => a.d - b.d).slice(0, 10);
     const oyuncular = o.ag && o.ag.uzak ? [...o.ag.uzak.harita.values()].filter(u => !u.ilk) : [];
-    return this.bolum('Yerler', this.dugmeler(this.dugme('isinla koy', 'En yakın köy'), this.dugme('isinla liman', 'En yakın liman'), this.dugme('isinla zindan', 'En yakın zindan'), this.dugme('isinla maden', 'En yakın maden'), this.dugme('isinla batik', 'En yakın batık'),
+    return this.bolum('Yerler', this.dugmeler(this.dugme('isinla koy', 'En yakın köy'), this.dugme('isinla liman', 'En yakın liman'), this.dugme('isinla zindan', 'En yakın zindan'), this.dugme('isinla maden', 'En yakın maden'), this.dugme('isinla tapinak', 'Çöl tapınağı'), this.dugme('isinla ormantapinak', 'Orman tapınağı'), this.dugme('isinla kule', 'Buzul kulesi'), this.dugme('isinla kamp', 'Haydut kampı'), this.dugme('boss liste', 'Boss yerleri'), this.dugme('isinla batik', 'En yakın batık'),
         this.dugme('isinla dogum', 'Doğma noktası'), o.olumNoktasi ? this.dugme('isinla olum', 'Son ölüm noktası') : '', this.dugme('isinla ~ ~', 'Yüzeye çık'), this.dugme('isinla geri', 'Önceki konuma dön'))) +
       this.bolum('Biyomlar', this.dugmeler(...BIYOMLAR.map(b => this.dugme('isinla biyom ' + b.replace(/ /g, '_'), b))), 'Seçilen biyomun en yakın noktasına ışınlar.') +
       this.bolum('Koordinat', `<div class="gelSatir gelKoord"><label>X <input type="number" id="gelX" value="${Math.round(P.x)}"></label><label>Y <input type="number" id="gelY" placeholder="zemin"></label><label>Z <input type="number" id="gelZ" value="${Math.round(P.z)}"></label><button type="button" data-git="1">Git</button></div>` +

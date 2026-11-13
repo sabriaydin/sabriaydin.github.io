@@ -31,9 +31,11 @@ import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 /* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
-const URETIM_SURUMU = 2;
+const URETIM_SURUMU = 3;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
+import { YapiOlaylari } from './oyun/yapilar.js';
+import { yapiAt } from './dunya/yapi-uretici.js';
 import { BasarimEkrani } from './arayuz/basarim-ekrani.js';
 import { zindanAt } from './dunya/zindan-uretici.js';
 import { batikAt } from './dunya/batik-uretici.js';
@@ -335,7 +337,7 @@ function oyunBaslat(v) {
     'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.',
     'İnekler ve koyunlar buğday, domuzlar havuç ya da patates, tavuklar tohum, tavşanlar havuç sever.', 'Beslenen hayvanlar ve yavruları kaybolmaz.',
     'Örs ile aletler ve zırhlar deneyim seviyesi karşılığında onarılır.', 'Simya masası yakınında hız, gece görüşü, su altında nefes, ateşe dayanıklılık ve güç iksirleri yapılır.',
-    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar ve çit kapıları sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde ileri tuşu ile çıkılır, C ile tutunulur.'];
+    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar ve çit kapıları sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde ileri tuşu ile çıkılır, C ile tutunulur.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
 
   const dunya = new Dunya(v.tohum, sahne);
@@ -384,6 +386,16 @@ function oyunBaslat(v) {
   basarimlar.kazanildi = b => basarimEkrani.goster(b);
   basarimlar.degisti = () => { if (basarimEkrani.acik) basarimEkrani.ciz(); };
   oyun.basarimlar = basarimlar; basarimEkrani.basarimlar = basarimlar; basarimEkrani.temizle(); oyun.basarimSayac = 2;
+  /* Yapılar: boss uyanması, haydutlar ve tuzaklar (tek oyunculu ve sunucu) */
+  const yapiOlaylari = new YapiOlaylari({ uretici: dunya.uretici, varliklar, dunya, ses, olay: (ad, w) => {
+    const m = ad === 'bossUyandi' ? `${w.tur.ad} uyandı!` : ad === 'bossOldu' ? `${w.tur.ad} yenildi.` : ad === 'kamp' ? 'Haydut kampına yaklaşıldı.' : null;
+    if (!m) return;
+    hud.bildirim(m);
+    if (ad !== 'kamp' && oyun && oyun.ag && oyun.ag.yay) oyun.ag.yay({ t: 'sh', s: m });
+  } });
+  yapiOlaylari.iceAktar(v.bosslar);
+  oyun.yapiOlaylari = yapiOlaylari;
+  varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
   gorevler.iceAktar(v.gorevler);
   gorevler.degisti = () => { if (gorevEkrani.acik) gorevEkrani.ciz(); };
@@ -504,7 +516,7 @@ async function oyunKaydet() {
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), tekneler: o.tekneler.disaAktar(),
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
-    hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar()
+    hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar()
   };
   try { await Kayit.kaydet(veri); } catch (e) { o.hud.bildirim('Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.'); }
 }
@@ -622,6 +634,7 @@ function adim(t) {
     if (!o.istemci) o.hava.zamanla(dt, [o.oyuncu.konum, ...(ekKonumlar || [])]);
     o.dunya.yagiyor = o.hava.yagiyor && o.hava.yogunluk > 0.5;
     o.koyler.guncelle(dt, o.oyuncu, ekKonumlar);
+    if (!o.istemci) o.yapiOlaylari.guncelle(dt, ekKonumlar ? [o.oyuncu.konum, ...ekKonumlar] : [o.oyuncu.konum]);
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
     if (o.tikSayac > 0.5 && !o.istemci) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); if (ekKonumlar) for (const q of ekKonumlar) o.dunya.rastgeleTik(q.x, q.z); o.dunya.ekinTik(); }
@@ -671,9 +684,12 @@ function adim(t) {
   sahne.elAyarla(seciliId, buyuluMu(o.envanter.seciliYuva()));
   sahne.elGuncelle(dt, o.etkilesim.vurus, o.oyuncu.adimFaz, o.isik, o.etkilesim.germe);
   const V = o.varliklar;
-  o.hud.hedef(o.etkilesim.hedefCanli || (V.sonVurulanZaman > 0 && V.sonVurulan && !V.sonVurulan.olu ? V.sonVurulan : null));
+  /* Bosslar üstteki boss çubuğunda gösterilir */
+  const hc = o.etkilesim.hedefCanli || (V.sonVurulanZaman > 0 && V.sonVurulan && !V.sonVurulan.olu ? V.sonVurulan : null);
+  o.hud.hedef(hc && hc.tur.boss ? null : hc);
   /* Gösterge */
   o.hud.durumCiz(o.oyuncu.basSuda);
+  bossCubugu(o);
   o.isaretSayac -= dt;
   if (o.isaretSayac <= 0) {
     o.isaretSayac = 0.25;
@@ -764,6 +780,7 @@ function yerelHasar(n, turAd, agu, kx, kz) {
   /* 0.14.0: mumya açlık, buz iskeleti yavaşlık etkisi verir */
   const T = TURLER[turAd];
   if (T && T.etki && !o.hayatta.olu && !o.hayatta.olumsuz) o.hayatta.etkiEkle(T.etki[0], T.etki[1]);
+  if (turAd === 'tuzak' && o.basarimlar) o.basarimlar.ver('tuzak');
   const dx = o.oyuncu.konum.x - kx, dz = o.oyuncu.konum.z - kz, l = Math.hypot(dx, dz) || 1;
   o.oyuncu.hiz.x += dx / l * 7; o.oyuncu.hiz.z += dz / l * 7; o.oyuncu.hiz.y = Math.max(o.oyuncu.hiz.y, 4.5);
 }
@@ -813,11 +830,27 @@ function simsekOlayi(x, y, z) {
   if (o.ag && !o.istemci && o.ag.simsek) o.ag.simsek(x, y, z);
 }
 
+/* Boss çubuğu: 40 blok içindeki en yakın canlı boss */
+function bossCubugu(o) {
+  const p = o.oyuncu.konum;
+  let en = null, ed = 40 * 40;
+  for (const v of o.varliklar.liste) { if (!v.tur.boss || v.olu) continue; const d = v.konum.distanceToSquared(p); if (d < ed) { ed = d; en = v; } }
+  const k = $('#bossCubuk');
+  if (!en) { if (!k.hidden) k.hidden = true; return; }
+  if (k.hidden) k.hidden = false;
+  if ($('#bossAd').textContent !== en.tur.ad) $('#bossAd').textContent = en.tur.ad;
+  const o2 = Math.max(0, en.can / en.tur.can);
+  $('#bossCan').style.width = (o2 * 100).toFixed(1) + '%';
+  k.classList.toggle('faz2', o2 < 0.5);
+}
+
 /* Zindan ve batık gemi sandıkları başarım kazandırır */
 function sandikBasarim(x, y, z) {
   const o = oyun; if (!o) return;
   const u = o.dunya.uretici;
-  if (zindanAt(u, x, y, z)) o.basarimlar.ver('zindan');
+  const Y = yapiAt(u, x, y, z);
+  if (Y) o.basarimlar.ver(Y.tur);
+  else if (zindanAt(u, x, y, z)) o.basarimlar.ver('zindan');
   else if (batikAt(u, x, y, z)) o.basarimlar.ver('batik');
 }
 

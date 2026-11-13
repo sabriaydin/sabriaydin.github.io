@@ -81,6 +81,8 @@ export class Ses {
       case 'mumya': this.ton(90 * y, 1.0, 0.12 * h, 'sawtooth', 65 * y); this.patlama(2600, 0.7, 0.06 * h, 'highpass', 0.8, 0.7); break;
       case 'bogulmus': this.ton(115 * y, 0.8, 0.12 * h, 'sawtooth', 80 * y); for (let i = 0; i < 4; i++) setTimeout(() => this.patlama(500 + Math.random() * 400, 0.12, 0.08 * h, 'lowpass', 3, 0.6), i * 120); break;
       case 'buziskelet': for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(3200 * y, 0.05, 0.11 * h, 'bandpass', 6), i * 70); this.ton(1900 * y, 0.25, 0.03 * h, 'sine', 2400); break;
+      case 'haydut': this.ton(170 * y, 0.18, 0.08 * h, 'sawtooth', 130 * y); setTimeout(() => this.ton(150 * y, 0.2, 0.06 * h, 'sawtooth', 120 * y), 160); break;
+      case 'muhafiz': this.patlama(140 * y, 0.9, 0.22 * h, 'lowpass', 1.2, 0.6); this.ton(55 * y, 0.8, 0.12 * h, 'sawtooth', 40); break;
       case 'yarasa': for (let i = 0; i < (tip === 'normal' ? 2 : 3); i++) setTimeout(() => this.ton((3400 + Math.random() * 900) * y, 0.05, 0.05 * h, 'square', 2800), i * 85); break;
     }
   }

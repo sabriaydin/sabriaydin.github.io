@@ -128,7 +128,8 @@ export class Etkilesim {
       return;
     }
     /* Yay: sağ tık basılı tutulunca gerilir, bırakılınca ok atılır */
-    if (eldeki === 286) {
+    const yayMi = !!(ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'yay');
+    if (yayMi) {
       if (g.sag) {
         if (this.envanter.say(287) > 0) { if (this.germe === 0) this.ses.yayGer(); this.germe = Math.min(1, this.germe + dt); }
         else if (this.okUyari <= 0) { this.okUyari = 2; this.arayuz.bildirim('Atılacak ok mevcut değil.'); }
@@ -162,7 +163,7 @@ export class Etkilesim {
       if (sagYeni && this.olta && this.olta.kullan()) this.vurus = 0.01;
     }
     /* Kullanma / koyma */
-    else if (g.sag && eldeki !== 286 && this.sagBekleme <= 0) {
+    else if (g.sag && !yayMi && this.sagBekleme <= 0) {
       this.acildi = false;
       if (this.kullan(g)) { this.sagBekleme = this.acildi ? 0.45 : 0.22; this.vurus = 0.01; }
       else this.sagBekleme = 0.05;
@@ -182,7 +183,8 @@ export class Etkilesim {
     if (kritik) { hasar *= 1.5; this.dusenler.renkliParcacik([1, 0.9, 0.5], v.konum.x, v.konum.y + v.tur.boy * 0.7, v.konum.z, 8); }
     /* Savurma: geri itme seviye başına %60 artar; Yağma: ganimet artar */
     const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma'));
-    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma') })) {
+    /* Güneş Kılıcı vurulan canlıyı tutuşturur */
+    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma'), ates: !!(es && es.id === 458) })) {
       this.ses.vurus();
       if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       this.hayatta.yor(0.1);
@@ -195,7 +197,9 @@ export class Etkilesim {
     const tam = g >= 1;
     /* Güç büyüsü: ok hasarı seviye başına %25 artar */
     const gb = 1 + 0.25 * buyuSeviye(this.envanter.seciliYuva(), 'guc');
-    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), (2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0)) * gb);
+    /* Buz Yayı: oklar vurduğu canlıyı yavaşlatır */
+    const ek = this.envanter.seciliId() === 459 ? { yavas: true } : null;
+    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), (2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0)) * gb, false, null, ek);
     this.envanter.harca(287, 1);
     if (this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Yayınız kırıldı.'); }
     this.ses.yayAt();

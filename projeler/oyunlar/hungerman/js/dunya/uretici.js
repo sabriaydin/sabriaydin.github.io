@@ -3,6 +3,7 @@
    Dünya, kıyıları denizle çevrili büyük bir kara parçasıdır; iç kısımda nehirler, dağlar ve farklı biyomlar bulunur. */
 import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin } from '../sabitler.js';
 import { Gurultu, karistir, karma2, karma3, uretec, yumusak } from '../rastgele.js';
+import { yapiYaz } from './yapi-uretici.js';
 import { koyYaz, koyIcinde, enYakinKoy } from './koy-uretici.js';
 import { zindanYaz } from './zindan-uretici.js';
 import { batikYaz } from './batik-uretici.js';
@@ -156,6 +157,7 @@ export class Uretici {
     this.agaclar(v, x0, z0);
     this.bitkiler(v, x0, z0, kolonlar);
     this.karKapla(v, kolonlar);
+    yapiYaz(this, v, x0, z0);
     batikYaz(this, v, x0, z0);
     koyYaz(this, v, x0, z0);
     return v;

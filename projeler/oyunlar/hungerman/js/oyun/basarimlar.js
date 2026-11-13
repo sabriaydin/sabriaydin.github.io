@@ -1,7 +1,7 @@
 /* HungerMan - başarımlar (0.14.0): oyun içi hedefler; kazanılınca bildirim ve ses, L tuşuyla açılan listede izlenir
    Kazanma iki yolla olur: olaylar (canavar yenme, uyuma, ticaret, büyüleme...) ve düzenli denetim (envanter, seviye, gün, konum).
    Durum dünya kaydında (çok oyunculuda oyuncu kaydında) saklanır. */
-import { CANAVARLAR } from '../varlik/turler.js';
+import { CANAVARLAR, BOSSLAR } from '../varlik/turler.js';
 
 /* hedef: sayaçlı başarımlarda gereken sayı; ikon: listede gösterilen eşya simgesi */
 export const BASARIMLAR = [
@@ -27,6 +27,13 @@ export const BASARIMLAR = [
   { k: 'yarasa', ad: 'Kanat Avcısı', aciklama: 'Bir yarasa yen.', ikon: 282, grup: 'Mücadele' },
   { k: 'kopekbaligi', ad: 'Deniz Kurdu', aciklama: 'Bir köpekbalığı yen.', ikon: 450, grup: 'Mücadele' },
   { k: 'okcu', ad: 'Keskin Nişancı', aciklama: 'Ok ile bir canavar yen.', ikon: 286, grup: 'Mücadele' },
+  { k: 'firavun', ad: 'Firavunun Düşüşü', aciklama: 'Çöl tapınağındaki Firavunu yen.', ikon: 458, grup: 'Bosslar' },
+  { k: 'buzbuyucu', ad: 'Buzları Eriten', aciklama: 'Buzul kulesindeki Buz Büyücüsünü yen.', ikon: 459, grup: 'Bosslar' },
+  { k: 'reis', ad: 'Kanun Adamı', aciklama: 'Haydut Reisini yen.', ikon: 460, grup: 'Bosslar' },
+  { k: 'muhafiz', ad: 'Taşları Kıran', aciklama: 'Derin bir zindandaki Taş Muhafızı yen.', ikon: 461, grup: 'Bosslar' },
+  { k: 'bossHepsi', ad: 'Efsane', aciklama: 'Dört farklı bossu yen.', ikon: 290, hedef: 4, grup: 'Bosslar' },
+  { k: 'haydut', ad: 'Yol Kesicilere Karşı', aciklama: 'Bir haydut yen.', ikon: 315, grup: 'Bosslar' },
+  { k: 'tuzak', ad: 'Dikkat!', aciklama: 'Bir ok tuzağına yakalan.', ikon: 157, grup: 'Bosslar' },
   { k: 'buyu', ad: 'Büyücü', aciklama: 'Büyü masasında bir eşyayı büyüle.', ikon: 156, grup: 'Zanaat' },
   { k: 'ors', ad: 'Demirci', aciklama: 'Örste bir eşyayı onar ya da birleştir.', ikon: 139, grup: 'Zanaat' },
   { k: 'iksir', ad: 'Simyacı', aciklama: 'Bir iksir iç.', ikon: 332, grup: 'Zanaat' },
@@ -40,6 +47,10 @@ export const BASARIMLAR = [
   { k: 'zirve', ad: 'Zirvede', aciklama: '110. seviyenin (Y) üstüne çık.', ikon: 21, grup: 'Keşif' },
   { k: 'zindan', ad: 'Zindan Kaşifi', aciklama: 'Bir zindan sandığını aç.', ikon: 60, grup: 'Keşif' },
   { k: 'batik', ad: 'Hazine Avcısı', aciklama: 'Batık bir geminin sandığını aç.', ikon: 50, grup: 'Keşif' },
+  { k: 'tapinak', ad: 'Kumların Sırrı', aciklama: 'Bir çöl tapınağı sandığını aç.', ikon: 24, grup: 'Keşif' },
+  { k: 'ormanTapinak', ad: 'Yosunlu Hazine', aciklama: 'Bir orman tapınağı sandığını aç.', ikon: 60, grup: 'Keşif' },
+  { k: 'kule', ad: 'Kule Fatihi', aciklama: 'Bir buzul kulesi sandığını aç.', ikon: 22, grup: 'Keşif' },
+  { k: 'kamp', ad: 'Ganimet', aciklama: 'Bir haydut kampı sandığını aç.', ikon: 114, grup: 'Keşif' },
   { k: 'tekne', ad: 'Denizci', aciklama: 'Bir tekneye bin.', ikon: 454, grup: 'Keşif' },
   { k: 'balik', ad: 'Balıkçı', aciklama: 'Oltayla bir şey yakala.', ikon: 453, grup: 'Keşif' },
   { k: 'ticaret', ad: 'Pazarlıkçı', aciklama: 'Bir köylüyle ticaret yap.', ikon: 288, grup: 'Köyler' },
@@ -47,7 +58,7 @@ export const BASARIMLAR = [
   { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' }
 ];
 export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
-export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Zanaat', 'Keşif', 'Köyler'];
+export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler'];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
 const ESYA_BASARIM = [['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]]];
@@ -98,6 +109,7 @@ export class Basarimlar {
     if (!CANAVARLAR.includes(turAd)) return;
     this.ver('canavar'); this.artir('canavar50'); this.artir('canavar250');
     if (BASARIM[turAd]) this.ver(turAd);
+    if (BOSSLAR.includes(turAd)) this.kumeEkle('bossHepsi', turAd);
     if (ok) this.ver('okcu');
   }
   gorevTamam() { this.ver('gorev'); this.artir('gorev10'); }

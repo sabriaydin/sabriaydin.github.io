@@ -117,6 +117,28 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 15. aşama (0.15.0): Yeni yapılar ve boss savaşları
+
+- Özel yapılar (biyoma göre; köylerden uzakta, düz arazide):
+  - **Çöl Tapınağı** (çöl): basamaklı çatılı kum taşı salon, girişte ok tuzağı, ortadaki kuyudan inilen karanlık hazine odası. Bossu **Firavun**.
+  - **Orman Tapınağı** (orman, bataklık): yosunlu taş ve sarmaşıklar; koridorda ve bodrumdaki sandıkların önünde ok tuzakları.
+  - **Buzul Kulesi** (karlı bölgeler, soğuk dağlar): 25 blok yüksekliğinde sekizgen kule, katlar arası tırmanma merdiveni, her katta sandık. Tepede **Buz Büyücüsü**.
+  - **Haydut Kampı** (çayır, savan, huş ormanı): çitle çevrili kamp, çadırlar, kamp ateşi; yaklaşınca haydutlar saldırır. Büyük çadırda **Haydut Reisi**.
+  - Derin zindanların (Y < 30) bir kısmında **Taş Muhafız**.
+- Yeni bloklar: **Ok Atıcı** ve **Tuzak Teli**. Tele basılınca 7 blok içindeki ok atıcılar ok atar; tel kırılınca tuzak etkisizleşir.
+- Bosslar oyuncu yaklaşınca uyanır; ekranın üstünde boss can çubuğu görünür. Geri itmeye dirençlidirler, canları yarıya inince hızlanırlar:
+  - Firavun: güçlü vuruş ve açlık etkisi, mumya çağırır.
+  - Buz Büyücüsü: üçlü buz oku (yavaşlık), yaklaşan oyuncudan ışınlanarak uzaklaşır.
+  - Haydut Reisi: uzaktan hamleyle atılır, canı yarıya inince haydut çağırır.
+  - Taş Muhafız: ağır vuruş, yere vurarak çevresine hasar verir.
+- Yenilen bosslar dünya kaydında saklanır ve bir daha çıkmaz. Boss uyanması ve yenilmesi çok oyunculuda tüm oyunculara duyurulur.
+- Efsanevi ganimetler: **Güneş Kılıcı** (vurulan canlıyı tutuşturur), **Buz Yayı** (okları canlıları yavaşlatır), **Reis Baltası**, **Muhafız Göğüslüğü** (Koruma III ile düşer). Örste elmas / ip / demir ile onarılır.
+- Yapı sandıklarının kendine özgü ganimetleri vardır.
+- Başarımlara “Bosslar” grubu ve yapı sandıkları eklendi (toplam 51).
+- Yeni canlı: Haydut (gündüz de saldırır, güneşte yanmaz; sikke düşürür).
+- Geliştirici: `isinla tapinak | ormantapinak | kule | kamp`, `boss [liste | sifirla]`; pencerede yapı ışınlanma düğmeleri ve “Boss ganimetleri” hazır seti.
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır; yapılar henüz değiştirilmemiş alanlarda görünür.
+
 ## 14. aşama (0.14.0): Yeni canavarlar, büyü sistemi, başarımlar
 
 - Yeni canavarlar: **Mumya** (çöl ve savan; güneşte yanmaz, vuruşu açlık etkisi verir), **Boğulmuş Zombi** (gece derin suların dibinde, çok derin sularda her zaman; suda batar ve hedefe doğru yüzer; inci ya da bakır düşürebilir), **Buz İskeleti** (karlı bölgeler; okları yavaşlık etkisi verir), **Yarasa** (mağaralarda ve gece açıkta sürüler hâlinde; dalgalı uçar, vurup uzaklaşır; gündüz açıkta kaybolur). Mumya ve boğulmuş zombi zombi görevlerine, buz iskeleti iskelet görevlerine sayılır.
@@ -237,6 +259,8 @@ js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları
 js/dunya/maden-uretici.js Terk edilmiş madenler
 js/oyun/basarimlar.js  Başarım listesi, olaylar ve düzenli denetim
+js/dunya/yapi-uretici.js Çöl ve orman tapınakları, buzul kulesi, haydut kampı
+js/oyun/yapilar.js     Boss uyanması, haydutlar, ok tuzakları, yenilen bosslar
 js/arayuz/basarim-ekrani.js Başarımlar penceresi ve kazanma kutusu
 js/dunya/batik-uretici.js Batık gemiler
 js/dunya/meshleyici.js Blokları çizilebilir geometriye çevirir

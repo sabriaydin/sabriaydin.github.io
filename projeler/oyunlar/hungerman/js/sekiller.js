@@ -49,6 +49,7 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'tirmanma': return [panel(b.yon, carp ? 3 * P : P)];
     case 'tarla': return [[0, 0, 0, 1, 15 * P, 1]];
     case 'karKatman': return [[0, 0, 0, 1, 2 * P, 1]];
+    case 'tel': return carp ? [] : [[0, P, 7 * P, 1, 1.6 * P, 9 * P], [7 * P, P, 0, 9 * P, 1.6 * P, 1]];
     case 'nilufer': return carp ? [] : [[P, 0, P, 15 * P, 0.5 * P, 15 * P]];
     /* Sandık: gövde ve kapak (dokuda kapak çizgisi), önde demir kilit */
     case 'sandik': return carp ? [[P, 0, P, 15 * P, 14 * P, 15 * P]] : [[P, 0, P, 15 * P, 14 * P, 15 * P], [7 * P, 7 * P, 15 * P, 9 * P, 11 * P, 16 * P, T.demir_cubuk]];

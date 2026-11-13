@@ -21,7 +21,9 @@ export const DOKULAR = [
   'kuru_cimen_ust', 'kuru_cimen_yan', 'bataklik_ust', 'bataklik_yan', 'akasya_yan', 'akasya_ust', 'akasya_yaprak', 'nilufer',
   'sarmasik', 'orumcek_agi', 'yosun_blok', 'sarkit', 'dikit', 'damlatasi', 'isikli_mantar', 'kar_katman', 'fidan_akasya',
   /* 0.14.0: büyü masası */
-  'buyu_ust', 'buyu_yan', 'buyu_alt'
+  'buyu_ust', 'buyu_yan', 'buyu_alt',
+  /* 0.15.0: tuzaklar */
+  'okatici_on', 'tuzak_teli'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -184,6 +186,9 @@ blok(152, { ad: 'Damlataşı', dok: 'damlatasi', sertlik: 1.5, alet: 'kazma', se
 blok(153, { ad: 'Işıklı Mantar', dok: 'isikli_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, isik: 8, mesale: true });
 /* 0.14.0: büyü masası (aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir) */
 blok(156, { ad: 'Büyü Masası', dok: { ust: 'buyu_ust', yan: 'buyu_yan', on: 'buyu_yan', alt: 'buyu_alt' }, sertlik: 5, alet: 'kazma', seviye: 1, ses: 'tas', istasyon: 'buyu' });
+/* 0.15.0: tapınak tuzakları. Tuzak teline basılınca yakındaki ok atıcılar oyuncuya ok atar; tel kırılınca tuzak etkisizleşir */
+blok(157, { ad: 'Ok Atıcı', dok: { ust: 'parke', yan: 'parke', on: 'okatici_on', alt: 'parke' }, sertlik: 3.5, alet: 'kazma', ses: 'tas', okAtici: true });
+blok(158, { ad: 'Tuzak Teli', dok: 'tuzak_teli', cizim: C_SEKIL, kati: false, opak: false, sertlik: 0, ses: 'bitki', sekil: 'tel', tel: true, dusur: () => [[284, 1]] });
 blok(155, { ad: 'Akasya Fidanı', dok: 'fidan_akasya', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, fidan: 'akasya' });
 
 /* Maden deneyimi */
@@ -332,6 +337,15 @@ MALZEMELER.forEach((m, mi) => ALET_TURLERI.forEach((t, ti) => {
 /* Çapalar: 340 + malzeme; toprak ve çimeni tarla toprağına çevirir */
 MALZEMELER.forEach((m, mi) => esya(340 + mi, { ad: m.ad + ' Çapa', tur: 'alet', yigin: 1, simge: 'capa', renk: m.renk,
   alet: { tur: 'capa', seviye: m.seviye, hiz: m.hiz, dayanim: m.dayanim, hasar: 1 + mi * 0.5 } }));
+/* 0.15.0: boss ganimetleri (efsanevi eşyalar) */
+esya(458, { ad: 'Güneş Kılıcı', tur: 'alet', yigin: 1, simge: 'kilic', renk: '#f2c43c', efsane: true, ozellik: 'Firavunun kılıcı · Vurulan canlıyı tutuşturur',
+  alet: { tur: 'kilic', seviye: 5, hiz: 8, dayanim: 2200, hasar: 9 } });
+esya(459, { ad: 'Buz Yayı', tur: 'yay', yigin: 1, simge: 'buzyay', efsane: true, ozellik: 'Buz büyücüsünün yayı · Okları canlıları yavaşlatır',
+  alet: { tur: 'yay', seviye: 0, hiz: 1, dayanim: 900, hasar: 1 } });
+esya(460, { ad: 'Reis Baltası', tur: 'alet', yigin: 1, simge: 'balta', renk: '#c0503c', efsane: true, ozellik: 'Haydut reisinin baltası',
+  alet: { tur: 'balta', seviye: 5, hiz: 9, dayanim: 1900, hasar: 10 } });
+esya(461, { ad: 'Muhafız Göğüslüğü', tur: 'zirh', yigin: 1, simge: 'zirh1', renk: '#7d8c96', efsane: true, ozellik: 'Taş muhafızın göğüslüğü',
+  zirh: { parca: 1, puan: 9, dayanim: 900 }, alet: null });
 /* Örste onarım malzemesi */
 export function onarimMalzemesi(id) {
   if (id >= 300 && id < 320) return [[14, 38, 39], [15], [259], [261], [264]][Math.floor((id - 300) / 4)];
@@ -340,6 +354,9 @@ export function onarimMalzemesi(id) {
   if (id === 286 || id === 453) return [284];
   if (id === 456) return [259];
   if (id === 457) return [282];
+  if (id === 458 || id === 460) return [264];
+  if (id === 459) return [284];
+  if (id === 461) return [261];
   return null;
 }
 export const aletId = (malzeme, tur) => 300 + malzeme * 4 + ALET_TURLERI.findIndex(t => t.tur === tur);

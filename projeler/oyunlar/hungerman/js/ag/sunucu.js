@@ -170,7 +170,7 @@ export class SunucuOyun {
         const w = o.varliklar.liste.find(v => v.id === m.i);
         if (!w || w.olu || w.konum.distanceTo(c.konum) > 9) return;
         const kaynak = m.k ? new THREE.Vector3(m.k[0], m.k[1], m.k[2]) : c.konum.clone();
-        o.varliklar.hasarVer(w, Math.min(30, +m.n || 1), kaynak, { itme: Math.min(2.4, +m.it || 1), oyuncu: true, vuran: c, yagma: Math.max(0, Math.min(3, m.yg | 0)) });
+        o.varliklar.hasarVer(w, Math.min(30, +m.n || 1), kaynak, { itme: Math.min(2.4, +m.it || 1), oyuncu: true, vuran: c, yagma: Math.max(0, Math.min(3, m.yg | 0)), ates: !!m.at });
         break;
       }
       case 'bes': { // hayvan besleme
@@ -178,7 +178,7 @@ export class SunucuOyun {
         if (w && !w.olu && w.konum.distanceTo(c.konum) < 9) o.varliklar.besle(w, c);
         break;
       }
-      case 'ok': o.varliklar.okAt(new THREE.Vector3(...m.p), new THREE.Vector3(...m.v), Math.min(12, +m.h || 2), false, c); break;
+      case 'ok': o.varliklar.okAt(new THREE.Vector3(...m.p), new THREE.Vector3(...m.v), Math.min(24, +m.h || 2), false, c, m.yv ? { yavas: true } : null); break;
       case 'sa': {  // sandık açma
         const s = m.x + ',' + m.y + ',' + m.z;
         const sahip = this.kilit.get(s);

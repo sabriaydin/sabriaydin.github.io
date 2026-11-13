@@ -9,6 +9,8 @@ import { BIYOMLAR, BY } from '../dunya/uretici.js';
 import { koylerAlan } from '../dunya/koy-uretici.js';
 import { zindanlarAlan } from '../dunya/zindan-uretici.js';
 import { madenlerAlan } from '../dunya/maden-uretici.js';
+import { yapilarAlan, YAPI_ADI } from '../dunya/yapi-uretici.js';
+import { zindanBossu } from '../oyun/yapilar.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
 import { HaritaKesif } from '../harita/kesif.js';
 import { PB, DENIZ, DUNYA_SINIRI, KITA_YARICAP } from '../sabitler.js';
@@ -178,7 +180,7 @@ export class Konsol {
       if (kucuk(p[0] || '') !== 'temizle') { this.hata('Kullanım: envanter temizle'); return; }
       o.envanter.temizle(); this.tamam('Envanter boşaltıldı.');
     }, { hile: true });
-    ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, maden, batik, dogum, olum, geri, biyom <ad>, oyuncu <ad>, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | maden | batik | dogum | olum | geri | biyom <ad> | oyuncu <ad> | isaret <ad>', (o, p) => {
+    ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, maden, batik, tapinak, ormantapinak, kule, kamp, dogum, olum, geri, biyom <ad>, oyuncu <ad>, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | maden | batik | tapinak | ormantapinak | kule | kamp | dogum | olum | geri | biyom <ad> | oyuncu <ad> | isaret <ad>', (o, p) => {
       const P = o.oyuncu.konum, a = kucuk(p[0] || ''), u = o.dunya.uretici, R = 1600;
       if (a === 'geri') {
         const e = this.oncekiKonum;
@@ -221,6 +223,15 @@ export class Konsol {
         const kr = en.koridorlar[0], t = kr ? Math.min(6, kr.L) : 0;
         this.isinla(o, (kr ? kr.x + kr.ax * t : en.x) + 0.5, en.y + 0.2, (kr ? kr.z + kr.az * t : en.z) + 0.5); return;
       }
+      /* 0.15.0: özel yapılar (bossların bulunduğu yer) */
+      const YT = { tapinak: 'tapinak', ormantapinak: 'ormanTapinak', kule: 'kule', kamp: 'kamp' }[a];
+      if (YT) {
+        const l = yapilarAlan(u, P.x - 3000, P.z - 3000, P.x + 3000, P.z + 3000).filter(y => y.tur === YT && Math.hypot(y.x - P.x, y.z - P.z) > 12);
+        const en = this.enYakin(l, P);
+        if (!en) { this.hata(`Yakında ${YAPI_ADI[YT].toLocaleLowerCase('tr')} bulunamadı.`); return; }
+        const [dx, dz] = [[0, 15], [-15, 0], [0, -15], [15, 0]][en.f];
+        this.isinla(o, en.x + dx + 0.5, null, en.z + dz + 0.5); this.yaz(`${YAPI_ADI[YT]} · ${Math.round(Math.hypot(en.x - P.x, en.z - P.z))} blok`, 'soluk'); return;
+      }
       if (a === 'batik') {
         const en = this.enYakin(batiklarAlan(u, P.x - 900, P.z - 900, P.x + 900, P.z + 900).filter(b => Math.hypot(b.x - P.x, b.z - P.z) > 8), P);
         if (!en) { this.hata('Yakında batık gemi bulunamadı.'); return; }
@@ -238,7 +249,7 @@ export class Konsol {
       else if (p.length === 2) { x = this.koord(p[0], P.x); y = null; z = this.koord(p[1], P.z); }
       if (x == null || z == null || (p.length >= 3 && y == null)) { this.hata('Kullanım: isinla <x> [y] <z> | koy | liman | zindan | maden | batik | dogum | isaret <ad>'); return; }
       this.isinla(o, x, y, z);
-    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'maden', 'batik', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
+    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'maden', 'batik', 'tapinak', 'ormantapinak', 'kule', 'kamp', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
     ekle('dogum', 'Doğma noktasını bulunulan yere ayarlar', 'dogum', o => {
       const P = o.oyuncu.konum; o.dogum = { x: P.x, y: P.y, z: P.z };
       this.tamam(`Doğma noktası: X ${Math.round(P.x)} · Y ${Math.round(P.y)} · Z ${Math.round(P.z)}`);
@@ -335,6 +346,16 @@ export class Konsol {
       if (a === 'ver') { const k = p[1] || ''; if (!BASARIM[k]) { this.hata('Anahtarlar: ' + BASARIMLAR.map(b => b.k).join(', ')); return; } if (B.ver(k)) this.tamam(`${BASARIM[k].ad} verildi.`); else this.yaz('Bu başarım zaten kazanılmış.', 'soluk'); return; }
       this.hata('Kullanım: basarim [liste | ver <anahtar> | hepsi | sifirla]');
     }, { hile: true, tamamla: () => ['liste', 'ver', 'hepsi', 'sifirla', ...BASARIMLAR.map(b => b.k)] });
+    ekle('boss', 'Yakındaki boss yerlerini listeler ya da yenilen bossları sıfırlar', 'boss [liste | sifirla]', (o, p) => {
+      const a = kucuk(p[0] || 'liste'), Y = o.yapiOlaylari, u = o.dunya.uretici, P = o.oyuncu.konum;
+      if (!Y) { this.hata('Çok oyunculu istemcide kullanılamaz.'); return; }
+      if (a === 'sifirla') { Y.yenilen.clear(); Y.kamplar.clear(); this.tamam('Yenilen bosslar sıfırlandı; yeniden ortaya çıkabilirler.'); return; }
+      const l = yapilarAlan(u, P.x - 1500, P.z - 1500, P.x + 1500, P.z + 1500).filter(y => y.boss).map(y => ({ ad: TURLER[y.boss.tur].ad + ' · ' + YAPI_ADI[y.tur], x: y.x, z: y.z, a: y.anahtar }));
+      for (const zd of zindanlarAlan(u, P.x - 600, P.z - 600, P.x + 600, P.z + 600)) if (zindanBossu(u, zd)) l.push({ ad: 'Taş Muhafız · Zindan (Y ' + zd.y + ')', x: zd.x, z: zd.z, a: 'z' + zd.x + ',' + zd.y + ',' + zd.z });
+      l.sort((m, n) => Math.hypot(m.x - P.x, m.z - P.z) - Math.hypot(n.x - P.x, n.z - P.z));
+      if (!l.length) { this.yaz('Yakında boss yeri mevcut değil.', 'soluk'); return; }
+      for (const m of l.slice(0, 8)) this.yaz(`${m.ad} · ${m.x}, ${m.z} · ${Math.round(Math.hypot(m.x - P.x, m.z - P.z))} blok${Y.yenilen.has(m.a) ? ' · yenildi' : ''}`, 'bilgi');
+    }, { hile: true, dunya: true, tamamla: () => ['liste', 'sifirla'] });
     ekle('onar', 'Envanterdeki ve giyilen tüm eşyaları onarır', 'onar', o => {
       let n = 0;
       for (const s of [...o.envanter.yuvalar, ...o.envanter.zirh]) { const md = s && maksDayanim(ESYALAR[s.id]); if (md && s.dayanim != null && s.dayanim < md) { s.dayanim = md; n++; } }

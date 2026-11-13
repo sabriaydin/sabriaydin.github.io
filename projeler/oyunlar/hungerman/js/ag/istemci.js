@@ -40,8 +40,8 @@ export class IstemciOyun {
     };
     o.varliklar.ayna = true; o.varliklar.dinleyici = o.oyuncu.konum;
     o.varliklar.ag = {
-      vur: (v, n, kaynak, op) => this.gonder({ t: 'vur', i: v.id, n, k: kaynak ? v3(kaynak) : null, it: (op && op.itme) ?? 1, yg: (op && op.yagma) || 0 }),
-      okAt: (p, h, hasar) => this.gonder({ t: 'ok', p: v3(p), v: v3(h), h: hasar }),
+      vur: (v, n, kaynak, op) => this.gonder({ t: 'vur', i: v.id, n, k: kaynak ? v3(kaynak) : null, it: (op && op.itme) ?? 1, yg: (op && op.yagma) || 0, at: op && op.ates ? 1 : 0 }),
+      okAt: (p, h, hasar, ek) => this.gonder({ t: 'ok', p: v3(p), v: v3(h), h: hasar, yv: ek && ek.yavas ? 1 : 0 }),
       besle: v => this.gonder({ t: 'bes', i: v.id })
     };
     o.tekneler.ayna = true;

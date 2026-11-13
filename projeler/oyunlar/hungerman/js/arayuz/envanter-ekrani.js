@@ -298,7 +298,7 @@ export class EnvanterEkrani {
     if (es.tur === 'blok') alt += '<span>Yerleştirilebilir blok</span>';
     const bm = buyuMetinleri(s);
     if (bm.length) alt = bm.map(m => `<span class="buyuSatir">${m}</span>`).join('') + alt;
-    ip.innerHTML = `<b${bm.length ? ' class="buyulu"' : ''}>${es.ad}</b>${alt}`;
+    ip.innerHTML = `<b${es.efsane ? ' class="efsane"' : bm.length ? ' class="buyulu"' : ''}>${es.ad}</b>${es.efsane ? '<span class="efsaneSatir">Efsanevi eşya</span>' : ''}${alt}`;
     ip.hidden = false;
     ip.style.left = Math.min(innerWidth - 270, e.clientX + 16) + 'px'; ip.style.top = (e.clientY + 16) + 'px';
   }

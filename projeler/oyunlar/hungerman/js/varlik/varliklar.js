@@ -208,8 +208,8 @@ export class Varliklar {
       }
       /* Gündüz açıkta kalan yarasalar gibi sessizce kaldırılan canlılar */
       if (v.sil) { this.modelSil(v); this.liste.splice(i, 1); continue; }
-      const uzak = v.tur.koylu || v.evcil ? 1e9 : v.tur.su ? 64 : v.tur.dusman ? ZOMBI_UZAK : HAYVAN_UZAK;
-      if (d2 > uzak * uzak || (v.olu && v.olumZaman > 0.9)) {
+      const uzak = v.tur.koylu || v.evcil || v.tur.boss ? 1e9 : v.tur.su ? 64 : v.tur.dusman ? ZOMBI_UZAK : HAYVAN_UZAK;
+      if (d2 > uzak * uzak || (v.olu && (v.olumZaman > 0.9 || !this.dunya.yuklu(v.konum.x, v.konum.z)))) {
         if (v.olu) this.dusenler.renkliParcacik([0.85, 0.85, 0.85], v.konum.x, v.konum.y + v.tur.boy * 0.5, v.konum.z, 16);
         this.modelSil(v); this.liste.splice(i, 1);
         continue;
@@ -232,6 +232,7 @@ export class Varliklar {
       return;
     }
     v.hasarZaman -= dt; v.kacZaman -= dt; v.saldiriBek -= dt; v.karar -= dt; v.sesZaman -= dt;
+    if (v.atesSure > 0) v.atesSure -= dt; if (v.yavasSure > 0) v.yavasSure -= dt;
     if (T.su) { this.suCanlisi(v, dt, ctx); return; }
     if (T.ucar) { this.ucanCanli(v, dt, ctx); return; }
     const dx = op.x - p.x, dz = op.z - p.z, dy = op.y - p.y;
@@ -322,6 +323,9 @@ export class Varliklar {
       const su = SIVI[this.dunya.blok(ix, Math.floor(p.y) - 1, iz)] || SIVI[this.dunya.blok(ix, Math.floor(p.y), iz)];
       if (dusus >= 3 || (su && !v.suda && v.kacZaman <= 0)) { hiz = 0; v.hedef = null; v.karar = Math.min(v.karar, 0.3); v.kacYon = null; }
     }
+    /* Boss yetenekleri; yavaşlık (Buz Yayı) */
+    if (T.boss) hiz = this.bossYetenek(v, dt, ctx, kovaliyor, yatay, dx, dz, hiz);
+    if (v.yavasSure > 0) hiz *= 0.5;
     /* Yön ve hız */
     /* Nişan alan okçu geri çekilirken de yüzünü hedefe döner */
     if (v.nisan && T.uzak && kovaliyor) v.hedefYaw = Math.atan2(-dx, -dz);
@@ -331,7 +335,7 @@ export class Varliklar {
     fark = Math.atan2(Math.sin(fark), Math.cos(fark));
     v.yaw += fark * Math.min(1, dt * 8);
     const k = Math.min(1, (v.yerde ? 10 : 3) * dt);
-    if (v.hasarZaman <= 0.25) { v.hiz.x += (yx * hiz - v.hiz.x) * k; v.hiz.z += (yz * hiz - v.hiz.z) * k; }
+    if (v.hasarZaman <= 0.25 && !(v.atilma > 0)) { v.hiz.x += (yx * hiz - v.hiz.x) * k; v.hiz.z += (yz * hiz - v.hiz.z) * k; }
     /* Örümcek duvara tırmanır */
     if (T.tirmanir && v.engel && hiz > 0) v.hiz.y = Math.max(v.hiz.y, 3.2);
     /* Zıplama */
@@ -361,7 +365,7 @@ export class Varliklar {
         l = Math.max(l, Math.min(1, 1.1 * (1 - en / 12.5)));
       }
       v.isikHedef = Math.max(0.08, l);
-      v.yaniyor = T.gunesteYanar && acik && ctx.gunIsigi > 0.55 && !v.suda && !ctx.yagmur;
+      v.yaniyor = (T.gunesteYanar && acik && ctx.gunIsigi > 0.55 && !v.suda && !ctx.yagmur) || (v.atesSure > 0 && !v.suda);
     }
     v.isik += ((v.isikHedef || 1) - v.isik) * Math.min(1, dt * 5);
     if (v.yaniyor) {
@@ -557,6 +561,77 @@ export class Varliklar {
     c.multiplyScalar(v.isik);
   }
 
+  /* ---------- Bosslar (0.15.0): yetenekler, yardımcı çağırma, ışınlanma ---------- */
+  bossYetenek(v, dt, ctx, kovaliyor, yatay, dx, dz, hiz) {
+    const T = v.tur, p = v.konum;
+    v.yetenek = (v.yetenek ?? 4) - dt;
+    if (v.atilma > 0) v.atilma -= dt;
+    const faz2 = v.can < T.can * 0.5;
+    if (faz2) hiz *= 1.25;
+    if (!kovaliyor) return hiz;
+    switch (T.boss) {
+      case 'firavun':
+        /* Kum fırtınası içinde mumya çağırır */
+        if (v.yetenek <= 0) { v.yetenek = faz2 ? 9 : 13; this.cagir(v, 'mumya', 2, 4); this.dusenler.renkliParcacik([0.92, 0.82, 0.55], p.x, p.y + 1, p.z, 30); }
+        break;
+      case 'reis':
+        if (faz2 && !v.cagirdi) { v.cagirdi = true; this.cagir(v, 'haydut', 2, 4); }
+        /* Hamle: uzaktaki hedefe atılır */
+        if (v.yetenek <= 0 && yatay > 4 && yatay < 12 && v.yerde) {
+          v.yetenek = faz2 ? 4 : 6; const l = yatay || 1;
+          v.hiz.x = dx / l * 13; v.hiz.z = dz / l * 13; v.hiz.y = 4; v.atilma = 0.5;
+          this.dusenler.renkliParcacik([0.55, 0.45, 0.35], p.x, p.y + 0.2, p.z, 12);
+        }
+        break;
+      case 'muhafiz':
+        /* Yere vuruş: yakındaki oyuncu hasar alır ve savrulur */
+        if (v.yetenek <= 0 && yatay < 5 && v.yerde) {
+          v.yetenek = faz2 ? 5 : 7.5;
+          for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; this.dusenler.renkliParcacik([0.5, 0.5, 0.52], p.x + Math.cos(a) * 2.5, p.y + 0.1, p.z + Math.sin(a) * 2.5, 1); }
+          const k = this.sesK(p); if (k > 0) this.ses.gokGurultusu(0.35 * k, true);
+          const op = ctx.oyuncu.konum;
+          if (!ctx.oyuncuOlu && Math.hypot(op.x - p.x, op.z - p.z) < 5.5 && Math.abs(op.y - p.y) < 2.5) ctx.oyuncuyaVur(5, v);
+        }
+        break;
+      case 'buzbuyucu':
+        /* Yaklaşan oyuncudan ışınlanarak uzaklaşır */
+        if (v.yetenek <= 0 && yatay < 7) { v.yetenek = faz2 ? 6 : 9; this.isinlan(v, 7, 11); }
+        break;
+    }
+    return hiz;
+  }
+  /* Bossun çevresinde yardımcı canavar doğurur (yakında en çok 4 tane) */
+  cagir(v, tur, n, r) {
+    const p = v.konum;
+    let yakin = 0; for (const w of this.liste) if (!w.olu && w.turAd === tur && w.konum.distanceToSquared(p) < 256) yakin++;
+    for (let i = 0, k = 0; i < n && yakin < 4 && k < 16; k++) {
+      const x = Math.floor(p.x + (Math.random() * 2 - 1) * r), z = Math.floor(p.z + (Math.random() * 2 - 1) * r);
+      if (!this.dunya.yuklu(x, z)) continue;
+      let y = Math.floor(p.y);
+      if (this.dunya.kati(x, y, z) || this.dunya.kati(x, y + 1, z)) continue;
+      while (y > 1 && !this.dunya.kati(x, y - 1, z)) y--;
+      if (Math.abs(y - p.y) > 3) continue;
+      this.ekle(tur, x + 0.5, y, z + 0.5); i++; yakin++;
+      this.dusenler.renkliParcacik([0.4, 0.38, 0.35], x + 0.5, y + 0.5, z + 0.5, 10);
+    }
+  }
+  isinlan(v, rmin, rmax) {
+    const p = v.konum;
+    for (let k = 0; k < 12; k++) {
+      const a = Math.random() * Math.PI * 2, r = rmin + Math.random() * (rmax - rmin);
+      const x = Math.floor(p.x + Math.cos(a) * r), z = Math.floor(p.z + Math.sin(a) * r);
+      if (!this.dunya.yuklu(x, z)) continue;
+      let y = Math.floor(p.y) + 3;
+      while (y > 1 && !this.dunya.kati(x, y - 1, z)) y--;
+      if (Math.abs(y - p.y) > 5 || this.dunya.kati(x, y, z) || this.dunya.kati(x, y + 1, z) || this.dunya.kati(x, y + 2, z) || SIVI[this.dunya.blok(x, y, z)]) continue;
+      this.dusenler.renkliParcacik([0.7, 0.9, 1], p.x, p.y + 1, p.z, 18);
+      p.set(x + 0.5, y, z + 0.5); v.hiz.set(0, 0, 0);
+      this.dusenler.renkliParcacik([0.7, 0.9, 1], p.x, p.y + 1, p.z, 18);
+      return true;
+    }
+    return false;
+  }
+
   /* ---------- Uçan canlılar (yarasa): yer çekimi yoktur, dalgalı uçar, vurup uzaklaşır ---------- */
   ucanCanli(v, dt, ctx) {
     const T = v.tur, p = v.konum, op = ctx.oyuncu.konum;
@@ -657,9 +732,11 @@ export class Varliklar {
     if (v.olu || (v.hasarZaman > 0 && !o.sessiz)) return false;
     v.can -= n;
     v.hasarZaman = 0.45;
+    if (o.ates) v.atesSure = 4;
+    if (o.yavas) v.yavasSure = 5;
     if (kaynak) {
       const ax = v.konum.x - kaynak.x, az = v.konum.z - kaynak.z, l = Math.hypot(ax, az) || 1;
-      const itme = o.itme ?? 1;
+      const itme = (o.itme ?? 1) * (v.tur.boss ? 0.25 : 1);
       v.hiz.x = ax / l * 7 * itme; v.hiz.z = az / l * 7 * itme; if (v.yerde || v.suda) v.hiz.y = 5.5 * itme;
       if (!v.tur.dusman) { v.kacZaman = 6; v.kacKaynak = { x: kaynak.x, z: kaynak.z }; v.karar = 0; v.kacYon = null; }
       if (v.tur.notr) for (const w of this.liste) if (w.turAd === v.turAd && w.konum.distanceToSquared(v.konum) < 400) w.ofkeli = true;
@@ -669,10 +746,11 @@ export class Varliklar {
     if (v.can <= 0) {
       v.olu = true; v.olumZaman = 0;
       if (o.oyuncu && this.olaylar.olum) this.olaylar.olum(v, o.vuran, o);
+      if (v.bossAnahtar && this.olaylar.bossOldu) this.olaylar.bossOldu(v, o);
       if (sk > 0) this.ses.canli(v.tur.ses, 'olum', sk);
       /* Yağma büyüsü: her ganimete seviyeye göre ek adet şansı */
       const yg = o.yagma || 0;
-      if (!o.dusurme) for (const [id, adet0] of v.tur.dusur(Math.random)) { const adet = adet0 + (yg && !v.tur.koylu ? Math.floor(Math.random() * (yg + 1)) : 0); if (adet > 0) this.dusenler.birak(id, adet, v.konum.x, v.konum.y + 0.4, v.konum.z); }
+      if (!o.dusurme) for (const [id, adet0, buyu] of v.tur.dusur(Math.random)) { const adet = buyu || v.tur.boss && adet0 === 1 && id >= 458 ? adet0 : adet0 + (yg && !v.tur.koylu ? Math.floor(Math.random() * (yg + 1)) : 0); if (adet > 0) this.dusenler.birak(id, adet, v.konum.x, v.konum.y + 0.4, v.konum.z, 0, 0, 0, undefined, 0.5, buyu); }
       return true;
     }
     if (sk > 0) this.ses.canli(v.tur.ses, 'acima', sk);
@@ -736,12 +814,13 @@ export class Varliklar {
 
   /* ---------- Oklar ---------- */
   /* sahip: oku atan uzak oyuncu (çok oyunculu sunucu); istemcide oyuncu okunu sunucu atar */
-  okAt(p, hiz, hasar, dusman = false, sahip = null) {
-    if (this.ayna) { if (this.ag) this.ag.okAt(p, hiz, hasar); return null; }
+  /* ek: { yavas } Buz Yayı oku */
+  okAt(p, hiz, hasar, dusman = false, sahip = null, ek = null) {
+    if (this.ayna) { if (this.ag) this.ag.okAt(p, hiz, hasar, ek); return null; }
     const mesh = okModeli();
     mesh.position.copy(p);
     this.grup.add(mesh);
-    const o = { p: p.clone(), v: hiz.clone(), hasar, yas: 0, saplandi: false, mesh, dusman, sahip, ni: ++this.okSira };
+    const o = { p: p.clone(), v: hiz.clone(), hasar, yas: 0, saplandi: false, mesh, dusman, sahip, ni: ++this.okSira, ek };
     this.oklar.push(o);
     if (this.ag && this.ag.okEklendi) this.ag.okEklendi(o);
     return o;
@@ -770,6 +849,8 @@ export class Varliklar {
     h.normalize().multiplyScalar(hizB);
     p.addScaledVector(h.clone().normalize(), 0.15);
     this.okAt(p, h, v.tur.hasar, v);
+    /* Buz Büyücüsü üç ok birden atar */
+    if (v.tur.boss === 'buzbuyucu') for (const a of [-0.14, 0.14]) { const c = Math.cos(a), sn = Math.sin(a); this.okAt(p.clone(), new THREE.Vector3(h.x * c - h.z * sn, h.y, h.x * sn + h.z * c), v.tur.hasar, v); }
     v.ger = 0;
     if (this.sesK(p) > 0.3) this.ses.yayAt();
   }
@@ -802,7 +883,7 @@ export class Varliklar {
           const vur = o.dusman || this.ayna ? null : this.isin(o.p, yon, o.v.length() * s + 0.1);
           if (vur) {
             const guc = o.v.length() / 30;
-            this.hasarVer(vur.v, Math.max(1, Math.round(o.hasar * Math.min(1.2, guc + 0.2))), o.p.clone().addScaledVector(yon, -1), { itme: 0.6, oyuncu: true, vuran: o.sahip, ok: true });
+            this.hasarVer(vur.v, Math.max(1, Math.round(o.hasar * Math.min(1.2, guc + 0.2))), o.p.clone().addScaledVector(yon, -1), { itme: 0.6, oyuncu: true, vuran: o.sahip, ok: true, yavas: !!(o.ek && o.ek.yavas) });
             if (this.sesK(o.p) > 0.3) this.ses.okIsabet();
             sil = true; break;
           }
