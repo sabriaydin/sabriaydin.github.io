@@ -57,9 +57,19 @@ export class Oyuncu {
     return bx + 1 > p.x - YARIM && bx < p.x + YARIM && bz + 1 > p.z - YARIM && bz < p.z + YARIM && by + 1 > p.y && by < p.y + this.boy;
   }
 
+  /* Kapı ya da tuzak kapı oyuncunun üzerine kapanırsa oyuncu en yakın boş konuma itilir (0.15.1) */
+  kurtul() {
+    const p = this.konum;
+    for (let k = 0.05; k <= 0.75; k += 0.05) for (const [ax, az] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]]) {
+      if (!this.carpisiyor(p.x + ax * k, p.y, p.z + az * k)) { p.x += ax * k; p.z += az * k; return true; }
+    }
+    return false;
+  }
+
   guncelle(dt, g) {
     const d = this.dunya, p = this.konum, v = this.hiz;
     if (!d.yuklu(p.x, p.z)) return;
+    if (!this.hayalet && this.carpisiyor(p.x, p.y + 0.02, p.z)) this.kurtul();
     const vucut = d.blok(Math.floor(p.x), Math.floor(p.y + 0.4), Math.floor(p.z));
     const bas = d.blok(Math.floor(p.x), Math.floor(p.y + this.goz), Math.floor(p.z));
     const oncekiSu = this.suda;
@@ -121,11 +131,15 @@ export class Oyuncu {
       if (v.y < -60) v.y = -60;
       if (g.zipla && this.yerde) { v.y = 8.6; this.yerde = false; this.olaylar.ziplad && this.olaylar.ziplad(); }
     }
-    /* Tırmanma merdiveni: ileri ya da Boşluk ile tırmanılır, C ile tutunulur, aksi hâlde yavaşça inilir */
+    /* Tırmanma merdiveni (0.15.1): W ile bakılan yöne hareket edilir; yukarı ya da düz bakılırken tırmanılır, aşağı bakılırken inilir
+       (yatay hareket de sürer, böylece merdivenden yana ya da öne kolayca çıkılır). S tersi yönde, Boşluk her zaman yukarı,
+       C ile tutunulur; tuşa basılmazsa yavaşça inilir. */
     const tir = id => BLOKLAR[id] && BLOKLAR[id].tirmanma;
     this.tirmaniyor = !this.ucus && (tir(vucut) || tir(d.blok(Math.floor(p.x), Math.floor(p.y + 0.05), Math.floor(p.z))) || tir(d.blok(Math.floor(p.x), Math.floor(p.y + 1.2), Math.floor(p.z))));
     if (this.tirmaniyor && !this.suda) {
-      if (g.ileri || g.zipla) v.y = 3.2;
+      const pt = this.pitch, yon = ileri;
+      if (g.zipla) v.y = 3.2;
+      else if (yon !== 0) v.y = yon * (pt >= -0.15 ? 3.2 * Math.min(1, 0.55 + pt * 2) : -3.2 * Math.min(1, 0.35 + (-pt - 0.15) * 2.5));
       else if (g.egil) v.y = 0;
       else v.y = Math.max(v.y, -2.4);
       this.dusus = 0;

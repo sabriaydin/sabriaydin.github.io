@@ -48,7 +48,7 @@ export class SunucuOyun {
       adet: d => this.yay({ t: 'da', i: d.ni, n: d.adet })
     };
     o.varliklar.ag = {
-      okEklendi: a => this.yay({ t: 'o+', i: a.ni, p: v3(a.p), v: v3(a.v), d: a.dusman ? 1 : 0 }),
+      okEklendi: a => this.yay({ t: 'o+', i: a.ni, p: v3(a.p), v: v3(a.v), d: a.dusman ? 1 : 0, ...(a.ek && a.ek.tur ? { k: a.ek.tur } : {}) }),
       okSilindi: a => this.yay({ t: 'o-', i: a.ni })
     };
     o.varliklar.dinleyici = o.oyuncu.konum;
@@ -295,7 +295,7 @@ export class SunucuOyun {
         if (dx * dx + dz * dz > CANLI_MENZIL * CANLI_MENZIL) continue;
         let b = 0;
         if (w.olu) b |= 1; if (w.hasarZaman > 0) b |= 2; if (w.yaniyor) b |= 4; if (w.nisan) b |= 8; if (!w.m.kok.visible) b |= 16; if (!w.yerde || w.kacZaman > 0) b |= 32;
-        if (w.yavru > 0) b |= 64; if (w.ask > 0) b |= 128; if (w.dinlen > 0) b |= 256;
+        if (w.yavru > 0) b |= 64; if (w.ask > 0) b |= 128; if (w.dinlen > 0) b |= 256; if (w.anim) b |= (w.anim & 7) << 9;
         const a = [w.id, r2(w.konum.x), r2(w.konum.y), r2(w.konum.z), r3(w.yaw), b, Math.max(0, Math.ceil(w.can))];
         if (!c.bilinen.has(w.id)) a.push(w.tur.koylu && w.koylu ? [w.turAd, w.koylu.meslek, w.koy.id, w.koylu.idx] : [w.turAd]);
         bilinen.add(w.id);

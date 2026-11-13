@@ -85,7 +85,8 @@ export class Uretici {
     const te = t - Math.max(0, h - (DENIZ + 30)) * 0.006;
     let b;
     if (h < DENIZ) b = c < 0 ? (h < DENIZ - 16 ? BY.DERIN : BY.OKYANUS) : bataklik > 0.5 ? BY.BATAKLIK : BY.NEHIR;
-    else if (h <= DENIZ + 2 && c < 0.08) b = te < SICAK.SOGUK ? BY.KARLI_KUMSAL : BY.KUMSAL;
+    /* Kıyılar: karlı bölgelere ve donmuş denize komşu kıyılar karlıdır (kumsal buz ve kar ile yan yana gelmez) */
+    else if (h <= DENIZ + 2 && c < 0.08) b = te < SICAK.SOGUK + 0.08 ? BY.KARLI_KUMSAL : BY.KUMSAL;
     else if (h > DENIZ + 44) b = BY.DAG;
     else if (bataklik > 0.5) b = BY.BATAKLIK;
     else b = iklimBiyomu(te, nem);
@@ -102,7 +103,8 @@ export class Uretici {
       case BY.TAYGA: case BY.KARLI_OVA: return 45;
       case BY.SAVAN: return 142;
       case BY.BATAKLIK: return 143;
-      case BY.COL: case BY.KUMSAL: case BY.KARLI_KUMSAL: return 5;
+      case BY.COL: case BY.KUMSAL: return 5;
+      case BY.KARLI_KUMSAL: return 21;
       case BY.DAG: {
         /* Dağların tepesi iklime göre: soğukta kar, sıcakta kum taşı; arada taş ve çimen */
         if (karliZirve(o)) return 21;
@@ -135,6 +137,7 @@ export class Uretici {
       const dolgu = 3 + Math.floor(r * 2);
       let altBlok = 3;
       if (ust === 5) altBlok = 5; else if (ust === 2 || ust === 21) altBlok = 2; else if (ust === 6 || ust === 23 || ust === 24) altBlok = ust;
+      if (o.b === BY.KARLI_KUMSAL) altBlok = 5;
       for (let y = 1; y <= h; y++) {
         const i = dizin(lx, y, lz);
         if (v[i] === 1) continue;
@@ -410,7 +413,8 @@ export function agacKur(set, x, y, z, tur, r, kisim = 'hepsi') {
     }
     if (gov) {
       for (let k = 0; k < boy - 1; k++) set(x, y + k, z, kutuk, false);
-      for (let k = 1; k <= kayma; k++) set(x + ax * k, y + boy - 2 + k, z + az * k, kutuk, false);
+      /* Eğik gövde: her basamak bir alttakine yüzeyden bağlanır (köşeden değil) */
+      for (let k = 1; k <= kayma; k++) { set(x + ax * (k - 1), y + boy - 2 + k, z + az * (k - 1), kutuk, false); set(x + ax * k, y + boy - 2 + k, z + az * k, kutuk, false); }
       set(tx, tepe - 1, tz, kutuk, false);
     }
     return;
@@ -422,7 +426,9 @@ export function agacKur(set, x, y, z, tur, r, kisim = 'hepsi') {
       for (let yy = ust - 2; yy <= ust + 1; yy++) {
         const ry = yy >= ust ? 2 : 3;
         for (let dz = -ry; dz <= ry; dz++) for (let dx = -ry; dx <= ry; dx++) {
-          if (Math.abs(dx) === ry && Math.abs(dz) === ry) continue;
+          /* Yuvarlak taç: köşeler ve dış kenarın bir kısmı boş kalır */
+          const d2 = dx * dx + dz * dz;
+          if (d2 > ry * ry + 1 || (d2 > (ry - 1) * (ry - 1) + 1 && karma3(93, x + dx, yy, z + dz) < 0.35)) continue;
           set(x + dx, yy, z + dz, 9, true);
         }
       }

@@ -8,7 +8,7 @@ import { TURLER } from '../varlik/turler.js';
 import { karma3 } from '../rastgele.js';
 
 /* Derin zindanların bir kısmında Taş Muhafız bekler */
-export function zindanBossu(u, zd) { return zd.y < 30 && karma3(u.tohum ^ 0x6d75, zd.x, zd.y, zd.z) < 0.45; }
+export function zindanBossu(u, zd) { return !!zd.boss; }
 
 export class YapiOlaylari {
   constructor(o) {
@@ -59,12 +59,12 @@ export class YapiOlaylari {
         if (!zindanBossu(u, zd)) continue;
         const a = 'z' + zd.x + ',' + zd.y + ',' + zd.z;
         if (this.yenilen.has(a) || this.bossVar(a)) continue;
-        if (Math.hypot(p.x - zd.x, p.z - zd.z) < 9 && Math.abs(p.y - zd.y - 1) < 4 && this.dunya.yuklu(zd.x, zd.z)) this.bossDogur(a, 'muhafiz', [zd.x + 1, zd.y + 1, zd.z + 1]);
+        if (Math.hypot(p.x - zd.x, p.z - zd.z) < 10 && Math.abs(p.y - zd.y - 1) < 5 && this.dunya.yuklu(zd.x, zd.z)) this.bossDogur(a, 'muhafiz', [zd.x, zd.y + 1, zd.z]);
       }
     }
   }
 
-  /* Ok tuzağı: tuzak teline basan oyuncuya 7 blok içindeki ok atıcılar (aynı ya da bir üst sıra, aynı doğrultuda) ok atar */
+  /* Ok tuzağı: tuzak teline basılınca 7 blok içindeki ok atıcılar (aynı ya da bir üst sıra, aynı doğrultuda) baktıkları yöne ok atar */
   tuzak(p) {
     const d = this.dunya, x = Math.floor(p.x), y = Math.floor(p.y + 0.05), z = Math.floor(p.z);
     if (!d.yuklu(x, z) || !(d.blok(x, y, z) === 158)) return;
@@ -75,7 +75,8 @@ export class YapiOlaylari {
       if (this.tuzakBek.has(anahtar)) continue;
       this.tuzakBek.set(anahtar, 1.3);
       const c = new THREE.Vector3(bx + 0.5 - ax * 0.65, by + 0.5, bz + 0.5 - az * 0.65);
-      const h = new THREE.Vector3(p.x - c.x, p.y + 1.1 - c.y, p.z - c.z).normalize().multiplyScalar(20);
+      /* Ok, atıcının baktığı yöne (tele dik doğrultuda) düz fırlar; oyuncuya nişan almaz (0.15.1) */
+      const h = new THREE.Vector3(-ax + (Math.random() - 0.5) * 0.04, 0.03, -az + (Math.random() - 0.5) * 0.04).normalize().multiplyScalar(22);
       this.varliklar.okAt(c, h, 3, { turAd: 'tuzak', tur: { agu: false }, konum: c });
       if (this.ses) this.ses.yayAt();
     }

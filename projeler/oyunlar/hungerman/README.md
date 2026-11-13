@@ -117,6 +117,34 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 0.15.1: Düzeltmeler, boss mekanikleri ve yapı tasarımları
+
+- **Tuşlar:** Envanter ve üretim **Q**, etkileşim (kapı, sandık, köylü, istasyon, yatak, tekne) **E**, eşya atma **G**.
+- **Liman** yalnızca deniz kıyısındaki köylerde kurulur; nehir kenarında liman oluşmaz.
+- Buzul ve karlı bölgelere komşu kıyılarda kumsal yerine **karlı kumsal** oluşur.
+- **Köy adları** birbirinden belirgin biçimde farklı seçilir (benzer kökten türeyen adlar kaldırıldı). **Köy sayısı yarıya indirildi.**
+- **Canavar doğma dengesi:** Gündüz açık arazide canavar doğmaz; yalnızca yağmurlu/fırtınalı havada seyrek doğar. Gece yüzeyde, her zaman karanlık yeraltında doğar. Gündüz sınır yarıya iner; güneşte yanmayan canavarlar gün doğunca uzaktaysa kaybolur.
+- **Ağaçlar:** Akasya gövdesi kıvrımlı ama kesintisiz; taç yaprakları gövdeye bitişik ve daha yuvarlak.
+- **Kapı:** Kapı oyuncunun üstüne kapanırsa oyuncu boş yere itilir; sıkışma giderildi.
+- **Tırmanma merdiveni:** W tuşu bakış yönüne göre çalışır (yukarı bakınca tırmanır, aşağı bakınca iner); Boşluk tuşu her zaman tırmandırır.
+- **Deniz feneri:** İçeride tırmanma merdiveni yerine orta direğin çevresinde dönen **sarmal taş merdiven**; içeride fener ışığı.
+- **Sandal:** Pruva yanları gövdeye bitişik.
+- **Ok tuzakları** oyuncuya nişan almaz; ok atıcı baktığı yöne düz ok atar.
+- **Yay:** Birinci şahıs görünümünde yay doğru yönde tutulur; gerilirken kiriş ve ok geri çekilir, yay ekranın ortasına gelir, bırakınca kiriş titrer.
+- **Boss mekanikleri:** Her yetenek bir hazırlık evresiyle (animasyon ve yerde uyarı halkası) başlar; oyuncu uyarıyı görüp kaçabilir. Canı yarıya inen boss öfkelenir: hızlanır, yetenekleri sıklaşır ve güçlenir.
+  - **Firavun:** kum fırtınası (çevresine sürekli hasar), asasından altın lanet küreleri, mumya çağırma.
+  - **Buz Büyücüsü:** oyuncunun altından yükselen buz dikenleri, çevresine buz kıymığı halkası, yaklaşan oyuncudan ışınlanma.
+  - **Haydut Reisi:** eğilip hedefe atılma, baltayla dönerek savurma, haydut çağırma.
+  - **Taş Muhafız:** hedefin üstüne sıçrayıp şok dalgası, yay çizerek düşen kaya fırlatma (sütunlar siper olur).
+  - Yeni boss sesleri ve görsel efektler; çok oyunculuda animasyon ve efektler tüm oyunculara iletilir.
+- **Boss alanları ve yapı tasarımları:**
+  - **Çöl Tapınağı:** köşe kuleleri, giriş kemeri, sütunlu ve fenerli salon, sarmal merdivenli kuyu, 19 x 19 sütunlu ve aydınlık yeraltı arenası, lahit.
+  - **Buzul Kulesi:** sekizgen gövde, buz kuşakları, mavi sancaklar, her katta fener, tepede mazgallı ve buz sivrili açık boss alanı.
+  - **Haydut Kampı:** kütük çit, iki kapı, gözetleme kulesi, dört çadır, sancak direkleri, kamp ateşi, sandıklar.
+  - **Derin zindan:** 17 x 17, 8 blok yüksekliğinde sütunlu muhafız salonu; asılı ve zemin fenerleri, duvar kristalleri.
+- Yeni blok: **Fener** (demir kafesli asılı ışık; Üretim Masasında 1 demir külçe + 1 meşale → 2 fener). Yapıların içi fener ve kristallerle aydınlatıldı.
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır; yeni yapılar ve ayarlar en iyi yeni bir dünyada görünür.
+
 ## 15. aşama (0.15.0): Yeni yapılar ve boss savaşları
 
 - Özel yapılar (biyoma göre; köylerden uzakta, düz arazide):

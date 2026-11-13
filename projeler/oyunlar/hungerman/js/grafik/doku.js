@@ -245,6 +245,7 @@ const RESSAM = {
     for (let x = 0; x < 16; x++) p.set(x, 15, hex('#16131c'));
   },
   okatici_on: p => { tasTaban(p); p.lekeler('#6a7a5a', 8, 2, 0.05); const k = hex('#1a1a1a'), c = hex('#4a4a4a'); for (let y = 5; y < 11; y++) for (let x = 5; x < 11; x++) p.set(x, y, (x === 5 || x === 10 || y === 5 || y === 10) ? c : k); for (let x = 3; x < 13; x++) { p.set(x, 2, hex('#5a5a5a')); p.set(x, 13, hex('#5a5a5a')); } },
+  fener_kafes: p => { p.doldur('#2a2622', 0.05); const s = hex('#ffd36a'), a = hex('#fff2c0'); for (let y = 2; y < 14; y++) for (let x = 2; x < 14; x++) if (x % 5 !== 1 && y % 6 !== 1) p.set(x, y, (x > 4 && x < 11 && y > 4 && y < 11) ? a : s); },
   tuzak_teli: p => { p.doldur('#000000', 0, 0); const c = hex('#d8d4c8'); for (let i = 0; i < 16; i++) { p.set(i, 7, c); p.set(i, 8, karis(c, 0.8)); } },
   buyu_alt: p => { p.doldur('#1e1a24', 0.1); p.lekeler('#2a2532', 20, 2, 0.06); },
   nilufer: p => bitki(p, p => { const c = hex('#3f8a2c'); for (let y = 1; y < 15; y++) for (let x = 1; x < 15; x++) { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6.6 && !(x > 7 && Math.abs(y - 7.5) < (x - 6) * 0.35)) p.set(x, y, karis(c, 0.8 + p.r() * 0.35)); } const f = hex('#f2b6d0'); p.set(5, 6, f); p.set(6, 5, f); p.set(5, 5, [255, 230, 120]); }),

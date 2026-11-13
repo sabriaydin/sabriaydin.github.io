@@ -31,7 +31,7 @@ import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 /* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
-const URETIM_SURUMU = 3;
+const URETIM_SURUMU = 4;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';
@@ -148,7 +148,7 @@ let kilitli = false, bilerekBirak = false, sonW = 0, kosKilit = false;
 addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (oyun && aktifEkran === 'oyun') {
-    if (['Space', 'Tab', 'F3', 'KeyQ'].includes(e.code) || (e.ctrlKey && ['KeyS', 'KeyD', 'KeyF'].includes(e.code))) e.preventDefault();
+    if (['Space', 'Tab', 'F3', 'KeyQ', 'KeyG'].includes(e.code) || (e.ctrlKey && ['KeyS', 'KeyD', 'KeyF'].includes(e.code))) e.preventDefault();
     if (e.code === 'Tab' && oyun.ag) oyuncuListesiGoster(true);
     /* Geliştirici konsolu: F8 (veya 1 tuşunun solundaki tuş) */
     if (e.code === 'F9' && !e.repeat && oyun.gelistirici) { e.preventDefault(); if (gelPencere.acik) panelKapat(true); else if (!panelAcik()) panelAc(gelPencere); return; }
@@ -156,7 +156,9 @@ addEventListener('keydown', e => {
     if (e.repeat) { tus[e.code] = true; return; }
     tus[e.code] = true;
     if (e.code === 'KeyW') { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
-    if (e.code === 'KeyE') { if (koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik) panelKapat(true); else envanterAcKapa(); return; }
+    /* 0.15.1: Q envanter ve üretim, E nesnelerle etkileşim, G eşya atma */
+    if (e.code === 'KeyE' && !e.repeat && (envEkrani.acik || koyluEkrani.acik)) { if (envEkrani.acik) envanterAcKapa(); else panelKapat(true); return; }
+    if (e.code === 'KeyQ') { if (koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik) panelKapat(true); else envanterAcKapa(); return; }
     if (e.code === 'KeyJ') { if (gorevEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(gorevEkrani); return; }
     if (e.code === 'KeyM') { if (haritaEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(haritaEkrani, oyun); return; }
     if (e.code === 'KeyL') { if (basarimEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(basarimEkrani); return; }
@@ -165,7 +167,8 @@ addEventListener('keydown', e => {
     if (e.code === 'Escape' && panelAcik()) { if (envEkrani.acik) envanterKapat(false); else panelKapat(false); return; }
     if (!kilitli) return;
     if (e.code.startsWith('Digit')) { const n = +e.code.slice(5); if (n >= 1 && n <= 9) seciliAyarla(n - 1); }
-    if (e.code === 'KeyQ') oyun.etkilesim.at(e.shiftKey);
+    if (e.code === 'KeyG') oyun.etkilesim.at(e.shiftKey);
+    if (e.code === 'KeyE' && !e.repeat) oyun.etkilesim.etkiles();
     if ((e.code === 'KeyT' || e.code === 'Enter') && oyun.ag) { e.preventDefault(); sohbetAc(); }
     if (e.code === 'F3') $('#hata').hidden = !$('#hata').hidden;
   }
@@ -337,7 +340,7 @@ function oyunBaslat(v) {
     'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.',
     'İnekler ve koyunlar buğday, domuzlar havuç ya da patates, tavuklar tohum, tavşanlar havuç sever.', 'Beslenen hayvanlar ve yavruları kaybolmaz.',
     'Örs ile aletler ve zırhlar deneyim seviyesi karşılığında onarılır.', 'Simya masası yakınında hız, gece görüşü, su altında nefes, ateşe dayanıklılık ve güç iksirleri yapılır.',
-    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar ve çit kapıları sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde ileri tuşu ile çıkılır, C ile tutunulur.'];
+    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
 
   const dunya = new Dunya(v.tohum, sahne);
@@ -892,6 +895,8 @@ async function agAc() {
     const kod = await s.baslat();
     if (oyun !== o) { s.kapat(); return; }
     o.ag = s;
+    /* Boss efektleri istemcilere de iletilir */
+    o.varliklar.efektYay = e => { if (o.ag === s) s.yay({ t: 'ef', e }); };
     o.hud.bildirim(`Dünya diğer oyunculara açıldı. Katılım kodu: ${kod}`);
     sohbetEkle(null, `Katılım kodu: ${kod} · Kod duraklatma menüsünde ve Tab tuşuyla görülür.`);
     arkaPlanAyarla();

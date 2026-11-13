@@ -279,8 +279,12 @@ export const MODELLER = {
 };
 
 /* Ok modeli */
-export function okModeli() {
+export function okModeli(tur) {
   const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+  /* Boss mermileri (0.15.1): kaya, buz kıymığı, altın lanet küresi */
+  if (tur === 'kaya') return new THREE.Mesh(birlestir([kutuGeo(0.55, 0.55, 0.55, '#7c7c80'), kutuGeo(0.4, 0.2, 0.58, '#5e5e64', 0.1, 0.1, 0), kutuGeo(0.2, 0.3, 0.3, '#4f7a3a', -0.18, -0.1, 0.12)]), malzeme);
+  if (tur === 'buz') return new THREE.Mesh(birlestir([kutuGeo(0.1, 0.1, 0.7, '#bff4ff'), kutuGeo(0.16, 0.16, 0.2, '#e8fcff', 0, 0, -0.3), kutuGeo(0.06, 0.06, 0.3, '#7fc8e8', 0, 0, 0.3)]), malzeme);
+  if (tur === 'lanet') return new THREE.Mesh(birlestir([kutuGeo(0.3, 0.3, 0.3, '#ffd24a'), kutuGeo(0.2, 0.2, 0.42, '#fff2a8'), kutuGeo(0.42, 0.2, 0.2, '#e6a82e')]), malzeme);
   const g = birlestir([kutuGeo(0.04, 0.04, 0.6, '#8a6034'), kutuGeo(0.07, 0.07, 0.1, '#55555c', 0, 0, -0.33), kutuGeo(0.01, 0.1, 0.14, '#f0f0ea', 0, 0, 0.24), kutuGeo(0.1, 0.01, 0.14, '#f0f0ea', 0, 0, 0.24)]);
   return new THREE.Mesh(g, malzeme);
 }

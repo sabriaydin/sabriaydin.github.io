@@ -59,8 +59,9 @@ void main() {
     if (L.w <= 0.0) continue;
     float d = distance(vDunya, L.xyz);
     float k = clamp(1.0 - d / (L.w * 0.9), 0.0, 1.0);
-    m = max(m, k * k);
+    m += k * k;   /* 0.15.1: birden çok ışık kaynağı toplanır (aydınlatılmış salonlar daha parlak) */
   }
+  m = min(m, 1.0);
   float ao = vAo;
   vec3 isik;
   if (ao > 1.5) { ao = ao - 1.0; isik = vec3(1.0); }   /* lav: kendi ışığıyla parlar */
@@ -263,7 +264,7 @@ export class Sahne {
     const elAtlas = this.atlasDoku.clone(); elAtlas.colorSpace = THREE.SRGBColorSpace; elAtlas.needsUpdate = true;
     this.elBlokMalzeme = new THREE.MeshBasicMaterial({ map: elAtlas, alphaTest: 0.5 });
     this.elEsyaMalzeme = new THREE.MeshBasicMaterial({ vertexColors: true });
-    this.elEsya = null; this.elId = -1;
+    this.elEsya = null; this.elId = -1; this.elYay = null; this.yayOnceki = 0; this.yayBirak = 0;
     this.el.add(this.elKol);
     this.sallanma = 0;
   }
@@ -271,9 +272,13 @@ export class Sahne {
     this.elBuyulu = buyulu;
     if (id === this.elId) return;
     this.elId = id;
-    if (this.elEsya) { this.el.remove(this.elEsya); this.elEsya.geometry.dispose(); this.elEsya = null; }
+    if (this.elEsya) { this.el.remove(this.elEsya); if (this.elEsya.geometry) this.elEsya.geometry.dispose(); this.elEsya = null; }
+    this.elYay = null;
     this.elKol.visible = !id;
     if (!id) return;
+    /* Yay (0.15.1): simge yerine dikey tutulan üç boyutlu yay; kiriş ve ok germe ile hareket eder */
+    const ey = ESYALAR[id];
+    if (ey && ey.tur === 'yay') { this.elYay = yayModeli(id === 459); this.elEsya = this.elYay.grup; this.el.add(this.elEsya); return; }
     if (id < 256 && CIZIM[id] === C_KUP) {
       const g = new THREE.BoxGeometry(0.3, 0.3, 0.3);
       /* BoxGeometry yüz sırası: +x, -x, +y, -y, +z, -z */
@@ -301,6 +306,7 @@ export class Sahne {
   elGuncelle(dt, vurus, yurume, isik, germe = 0) {
     const s = vurus > 0 ? Math.sin(vurus * Math.PI) : 0;
     const g = germe > 0 ? Math.min(1, germe) : 0;
+    if (this.elYay) { this.yayGuncelle(dt, s, yurume, isik, g); return; }
     this.el.position.set(0.42 + Math.sin(yurume) * 0.012 - g * 0.22, -0.38 - Math.abs(Math.cos(yurume)) * 0.014 - s * 0.08 + g * 0.12, -0.62 + s * 0.06 + g * 0.08);
     this.el.rotation.set(-s * 0.9, -s * 0.25 + g * 0.5, g * 0.4 + (g >= 1 ? Math.sin(performance.now() / 40) * 0.01 : 0));
     const c = this.elKol.material.color; c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
@@ -308,6 +314,28 @@ export class Sahne {
     this.elEsyaMalzeme.color.setScalar(isik);
     /* Büyülü eşya: hafif mor parıltı nabzı */
     if (this.elBuyulu) { const t = 0.5 + 0.5 * Math.sin(performance.now() / 260); this.elEsyaMalzeme.color.setRGB(isik * (1 - 0.12 * t), isik * (1 - 0.3 * t), isik * Math.min(1.25, 1 + 0.25 * t)); }
+  }
+
+  /* Birinci şahıs yay: boşta sağ altta eğik; germe ilerledikçe ortaya gelir, dikleşir, kiriş ve ok geriye çekilir;
+     bırakınca kiriş titreyerek öne fırlar ve yay hafifçe tepki verir */
+  yayGuncelle(dt, s, yurume, isik, g) {
+    const Y = this.elYay;
+    if (this.yayOnceki > 0.15 && g === 0) this.yayBirak = 1;
+    this.yayOnceki = g;
+    this.yayBirak = Math.max(0, this.yayBirak - dt * 3.2);
+    const b = this.yayBirak, titre = g >= 1 ? Math.sin(performance.now() / 35) * 0.004 : 0;
+    const e = g * g * (3 - 2 * g);
+    this.el.position.set(0.3 - e * 0.26 + Math.sin(yurume) * 0.012 * (1 - e) + titre, -0.3 + e * 0.12 - Math.abs(Math.cos(yurume)) * 0.012 * (1 - e) - s * 0.06, -0.62 + e * 0.1 - b * 0.06);
+    this.el.rotation.set(-s * 0.5 + b * 0.12, 0.25 - e * 0.25, -0.42 + e * 0.32 + titre);
+    /* Kiriş: uçlardan çekilen orta noktaya; bırakınca sönümlü titreşim */
+    const cek = e * 0.24 - (b > 0 ? Math.sin(b * 22) * b * 0.05 : 0);
+    Y.kirisAyarla(cek);
+    Y.ok.visible = g > 0.02;
+    Y.ok.position.z = 0.02 + cek;
+    Y.el.position.z = 0.02 + cek;
+    Y.el.visible = g > 0.02;
+    for (const mt of Y.malzemeler) { if (!mt.userData.temel) mt.userData.temel = mt.color.clone(); mt.color.copy(mt.userData.temel).multiplyScalar(isik); }
+    Y.elMalz.color.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
   }
 
   ciz() {
@@ -345,4 +373,43 @@ export function simgeHacmi(cv, boy) {
   g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
   HACIM.set(anahtar, g);
   return g.clone();
+}
+
+/* Birinci şahıs yay modeli (0.15.1): dikey yay gövdesi (öne doğru kavisli), kabza, iki parçalı kiriş, ok ve kirişi çeken el */
+function yayModeli(buz) {
+  const grup = new THREE.Group();
+  const ahsap = new THREE.MeshBasicMaterial({ color: buz ? 0x7fc8e8 : 0x8a5a2e }), koyu = new THREE.MeshBasicMaterial({ color: buz ? 0x4a8cb0 : 0x5a3a1e });
+  const kiris = new THREE.MeshBasicMaterial({ color: 0xece8dc }), demir = new THREE.MeshBasicMaterial({ color: 0x9a9da4 }), tuy = new THREE.MeshBasicMaterial({ color: 0xf2f2ea });
+  const elMalz = new THREE.MeshBasicMaterial({ color: 0xc89870 });
+  const H = 0.34, K = 0.075, N = 18;
+  const nokta = t => [0, t * H, -(1 - t * t) * K];
+  for (let i = 0; i < N; i++) {
+    const t0 = -1 + 2 * i / N, t1 = -1 + 2 * (i + 1) / N, a = nokta(t0), b = nokta(t1);
+    const l = Math.hypot(b[1] - a[1], b[2] - a[2]), uc = Math.abs(t0 + t1) > 1.6;
+    const m = new THREE.Mesh(new THREE.BoxGeometry(uc ? 0.022 : 0.03, l + 0.004, uc ? 0.028 : 0.036), uc ? koyu : ahsap);
+    m.position.set(0, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+    m.rotation.x = -Math.atan2(b[2] - a[2], b[1] - a[1]);
+    grup.add(m);
+  }
+  /* Kabza ve tutan el */
+  const kabza = new THREE.Mesh(new THREE.BoxGeometry(0.042, 0.1, 0.05), koyu); kabza.position.set(0, 0, -K); grup.add(kabza);
+  const tut = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.08, 0.07), elMalz); tut.position.set(0.012, -0.01, -K + 0.01); grup.add(tut);
+  /* Kiriş: üst ve alt uçtan çekilen noktaya iki ince kutu */
+  const ks = [0, 1].map(() => { const m = new THREE.Mesh(new THREE.BoxGeometry(0.006, 1, 0.006), kiris); grup.add(m); return m; });
+  const kirisAyarla = c => {
+    ks.forEach((m, i) => {
+      const uy = i ? -H : H, L = Math.hypot(uy, c);
+      m.scale.y = L; m.position.set(0, uy / 2, c / 2);
+      m.rotation.x = Math.atan2(c, -uy);
+    });
+  };
+  kirisAyarla(0);
+  /* Ok: kirişten öne uzanır */
+  const ok = new THREE.Group();
+  const sap = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.56), new THREE.MeshBasicMaterial({ color: 0x8a6034 })); sap.position.z = -0.28; ok.add(sap);
+  const uc = new THREE.Mesh(new THREE.BoxGeometry(0.024, 0.024, 0.05), demir); uc.position.z = -0.57; ok.add(uc);
+  for (const [w, h] of [[0.002, 0.04], [0.04, 0.002]]) { const t = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.07), tuy); t.position.z = -0.03; ok.add(t); }
+  ok.position.set(0.016, 0, 0.02); ok.visible = false; grup.add(ok);
+  const el = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.07, 0.07), elMalz); el.position.set(0.016, 0, 0.02); el.visible = false; grup.add(el);
+  return { grup, ok, el, kirisAyarla, malzemeler: [ahsap, koyu, kiris, demir, tuy, sap.material], elMalz };
 }

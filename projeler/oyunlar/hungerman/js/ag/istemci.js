@@ -124,7 +124,8 @@ export class IstemciOyun {
       case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
       case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;
       case 'sim': if (o.hava) o.hava.simsekGoster(m.p[0], m.p[1], m.p[2], o.oyuncu.konum, this.ses); break;
-      case 'o+': o.varliklar.aynaOk(m.i, m.p, m.v, m.d); break;
+      case 'o+': o.varliklar.aynaOk(m.i, m.p, m.v, m.d, m.k); break;
+      case 'ef': if (m.e) o.varliklar.efektOyna(m.e); break;
       case 'o-': o.varliklar.aynaOkSil(m.i); break;
       case 't+': for (const a of m.l) this.tekneEkle(a); break;
       case 't-': {

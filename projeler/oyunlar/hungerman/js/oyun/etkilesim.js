@@ -58,6 +58,23 @@ export class Etkilesim {
   }
 
   olay(k) { if (this.arayuz.olay) this.arayuz.olay(k); }
+  /* E tuşu (0.15.1): hedefteki nesneyle etkileşim (kapı, sandık, istasyon, yatak, köylü, tekne). Sağ tık da aynı işleri yapar. */
+  etkiles() {
+    if (this.tekneler.binilen) return false;
+    if (this.hedefTekne) {
+      if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) { this.olay('tekne'); this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne'); }
+      return true;
+    }
+    if (this.hedefCanli && this.hedefCanli.tur.koylu) { this.arayuz.koyluAc(this.hedefCanli); return true; }
+    const h = this.hedef;
+    if (!h) return false;
+    const b = BLOKLAR[h.id];
+    if (b.istasyon) { this.arayuz.envanterAc(b.istasyon); return true; }
+    if (b.sandik) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
+    if (b.yatak) { this.arayuz.uyu(h); return true; }
+    if (this.ac(h)) { this.vurus = 0.01; return true; }
+    return false;
+  }
   aletBilgi() {
     const s = this.envanter.seciliYuva();
     const e = s && ESYALAR[s.id];
