@@ -34,5 +34,5 @@ export function blokEfekti(o, ses, x, y, z, id, eski) {
 }
 
 /* Sandık yuvalarını ağ için diziye çevir / geri kur */
-export const sandikDizi = y => y.map(s => (s ? [s.id, s.adet, s.dayanim ?? null] : null));
-export const sandikKur = y => (y || []).map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}) } : null));
+export const sandikDizi = y => y.map(s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null));
+export const sandikKur = y => (y || []).map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}), ...(s[3] && typeof s[3] === 'object' ? { buyu: { ...s[3] } } : {}) } : null));

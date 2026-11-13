@@ -1,13 +1,18 @@
 /* HungerMan - envanter ve üretim ekranı: sürükle-bırak yerine tıkla-al / tıkla-bırak, tarif arama ve kategori */
 import { simge } from '../grafik/doku.js';
-import { ESYALAR, ZIRH_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER } from '../bloklar.js';
+import { ESYALAR, ZIRH_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER, BUYULER, buyuMetinleri, buyuluMu, uygunBuyuler, romaRakam } from '../bloklar.js';
+import { uretec } from '../rastgele.js';
+
+/* Büyü masası: seçeneklerin seviye bedeli ve parıltı kristali gereksinimi */
+const BUYU_BEDEL = [2, 5, 9];
+const KRISTAL = 61;
 import { TARIFLER, KATEGORILER, ISTASYON_ADI, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar } from '../oyun/uretim.js';
 
 const $ = s => document.querySelector(s);
 
 export class EnvanterEkrani {
   constructor(o) {
-    Object.assign(this, o); // envanter, hud, ses, istasyonlar(), birak(id, adet, dayanim), hayatta
+    Object.assign(this, o); // envanter, hud, ses, istasyonlar(), birak(id, adet, dayanim, buyu), hayatta
     this.acik = false;
     this.tasinan = null;
     this.kategori = 'hepsi';
@@ -19,6 +24,9 @@ export class EnvanterEkrani {
     $('#sandikIzgara').innerHTML = Array.from({ length: 27 }, (_, i) => `<div class="yuva" data-s="${i}"></div>`).join('');
     this.ors = [null, null];
     $('#orsIzgara').innerHTML = '<div class="yuva" data-o="0" title="Onarılacak eşya"></div><span class="orsArti">+</span><div class="yuva" data-o="1" title="Malzeme ya da aynı eşya"></div><span class="orsOk">➜</span><div class="yuva orsSonuc" data-o="2" title="Sonuç"></div>';
+    this.buyuYuva = [null, null];
+    $('#buyuIzgara').innerHTML = '<div class="yuva" data-b="0" title="Büyülenecek eşya"></div><span class="orsArti">+</span><div class="yuva" data-b="1" title="Parıltı kristali"></div>';
+    $('#buyuSecenek').addEventListener('click', e => { const b = e.target.closest('button[data-sec]'); if (b) this.buyule(+b.dataset.sec); });
     $('#envZirh').innerHTML = ZIRH_PARCALARI.map((a, z) => `<div class="yuva zirhYuva" data-z="${z}" title="${a}"></div>`).join('');
     $('#tarifSekme').innerHTML = KATEGORILER.map(([k, a]) => `<button type="button" data-k="${k}">${a}</button>`).join('');
     $('#tarifSekme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; this.kategori = b.dataset.k; this.ses.tik(); [...$('#tarifSekme').children].forEach(x => x.classList.toggle('on', x === b)); this.tarifCiz(); });
@@ -50,8 +58,8 @@ export class EnvanterEkrani {
     this.acik = true; this.istasyon = istasyon || null; this.sandik = sandik || null;
     if (istasyon) this.kategori = 'hepsi';
     /* Örs: sağ tarafta onarım bölümü */
-    const ors = istasyon === 'ors' && !this.sandik;
-    $('.envSag').hidden = !!this.sandik || ors; $('.envSandik').hidden = !this.sandik; $('.envOrs').hidden = !ors;
+    const ors = istasyon === 'ors' && !this.sandik, buyu = istasyon === 'buyu' && !this.sandik;
+    $('.envSag').hidden = !!this.sandik || ors || buyu; $('.envSandik').hidden = !this.sandik; $('.envOrs').hidden = !ors; $('.envBuyu').hidden = !buyu;
     this.kok.hidden = false;
     this.ciz();
   }
@@ -59,12 +67,12 @@ export class EnvanterEkrani {
     this.acik = false; this.kok.hidden = true;
     $('#ipucu').hidden = true;
     if (this.tasinan) {
-      const k = this.envanter.ekle(this.tasinan.id, this.tasinan.adet, this.tasinan.dayanim);
-      if (k > 0) this.birak(this.tasinan.id, k, this.tasinan.dayanim);
+      const k = this.envanter.ekle(this.tasinan.id, this.tasinan.adet, this.tasinan.dayanim, this.tasinan.buyu);
+      if (k > 0) this.birak(this.tasinan.id, k, this.tasinan.dayanim, this.tasinan.buyu);
       this.tasinan = null;
     }
     /* Örsteki eşyalar envantere döner */
-    for (let i = 0; i < 2; i++) { const o = this.ors[i]; if (!o) continue; const k = this.envanter.ekle(o.id, o.adet, o.dayanim); if (k > 0) this.birak(o.id, k, o.dayanim); this.ors[i] = null; }
+    for (const Y of [this.ors, this.buyuYuva]) for (let i = 0; i < 2; i++) { const o = Y[i]; if (!o) continue; const k = this.envanter.ekle(o.id, o.adet, o.dayanim, o.buyu); if (k > 0) this.birak(o.id, k, o.dayanim, o.buyu); Y[i] = null; }
     this.tasimaCiz();
     /* Çok oyunculu: kapanan sandığın içeriği sunucuya bildirilir */
     if (this.sandik && this.kapandi) this.kapandi(this.sandik);
@@ -85,6 +93,7 @@ export class EnvanterEkrani {
     });
     if (this.sandik) this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { el.innerHTML = this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s]); });
     if (this.istasyon === 'ors') this.orsCiz();
+    if (this.istasyon === 'buyu') this.buyuCiz();
     const zp = env.zirhPuani();
     $('#zirhPuan').innerHTML = `Zırh <b>${zp}</b> / 20<br>Hasar azaltma <b>%${zp * 4}</b>`;
     const h = this.hayatta;
@@ -124,11 +133,12 @@ export class EnvanterEkrani {
     const el = e.target.closest('.izgara .yuva');
     const env = this.envanter;
     if (el && el.dataset.o != null) { e.preventDefault(); this.orsTikla(+el.dataset.o, e); return; }
+    if (el && el.dataset.b != null) { e.preventDefault(); this.buyuTikla(+el.dataset.b, e); return; }
     if (!el) {
       /* Pencere dışına tıklanırsa taşınan eşya bırakılır */
       if (this.tasinan && !e.target.closest('.pencere')) {
         const n = e.button === 2 ? 1 : this.tasinan.adet;
-        this.birak(this.tasinan.id, n, this.tasinan.dayanim);
+        this.birak(this.tasinan.id, n, this.tasinan.dayanim, this.tasinan.buyu);
         this.tasinan.adet -= n; if (this.tasinan.adet <= 0) this.tasinan = null;
         this.tasimaCiz();
       }
@@ -143,7 +153,7 @@ export class EnvanterEkrani {
     const max = s ? env.yigin(s.id) : 64;
     if (e.shiftKey && s && !this.tasinan && this.sandik) {
       /* Sandık ile envanter arasında taşı */
-      if (sandikta) { const k = env.ekle(s.id, s.adet, s.dayanim); if (k) s.adet = k; else D[i] = null; }
+      if (sandikta) { const k = env.ekle(s.id, s.adet, s.dayanim, s.buyu); if (k) s.adet = k; else D[i] = null; }
       else {
         const S = this.sandik.yuvalar; let kalan = s.adet;
         if (s.dayanim == null) for (let j = 0; j < 27 && kalan; j++) { const t = S[j]; if (t && t.id === s.id && t.adet < max) { const k = Math.min(kalan, max - t.adet); t.adet += k; kalan -= k; } }
@@ -192,16 +202,23 @@ export class EnvanterEkrani {
     if (!A) return { hata: 'Onarılacak eşyayı sol yuvaya koyunuz.' };
     const md = maksDayanim(ESYALAR[A.id]);
     if (!md || A.dayanim == null) return { hata: 'Bu eşya onarılamaz.' };
+    const ab = A.buyu ? { buyu: { ...A.buyu } } : {};
     if (!B) return { hata: A.dayanim >= md ? 'Eşyanın dayanımı tam.' : 'Sağ yuvaya onarım malzemesi ya da aynı eşyadan koyunuz.' };
-    if (A.dayanim >= md) return { hata: 'Eşyanın dayanımı tam.' };
+    /* Aynı türden iki eşya: dayanım toplanır, büyüler birleşir (eşit seviyeler bir üst seviyeye çıkar) */
     if (B.id === A.id) {
+      const bb = buyuluMu(B);
+      if (A.dayanim >= md && !bb) return { hata: 'Eşyanın dayanımı tam.' };
       const d = Math.min(md, A.dayanim + (B.dayanim ?? md) + Math.floor(md * 0.12));
-      return { sonuc: { id: A.id, adet: 1, dayanim: d }, maliyet: 2, harca: 1 };
+      const buyu = { ...(A.buyu || {}) };
+      let ek = 0;
+      if (bb) for (const [k, n] of Object.entries(B.buyu)) { if (!BUYULER[k]) continue; const a = buyu[k] || 0, y = a === n ? Math.min(BUYULER[k].maks, n + 1) : Math.max(a, n); if (y > a) ek += y - a; buyu[k] = y; }
+      return { sonuc: { id: A.id, adet: 1, dayanim: d, ...(Object.keys(buyu).length ? { buyu } : {}) }, maliyet: 2 + ek, harca: 1 };
     }
+    if (A.dayanim >= md) return { hata: 'Eşyanın dayanımı tam.' };
     const mal = onarimMalzemesi(A.id);
     if (!mal || !mal.includes(B.id)) return { hata: `${ESYALAR[B.id].ad} bu eşyayı onarmaz.` };
     const parca = Math.ceil(md / 4), n = Math.min(B.adet, Math.ceil((md - A.dayanim) / parca));
-    return { sonuc: { id: A.id, adet: 1, dayanim: Math.min(md, A.dayanim + n * parca) }, maliyet: n, harca: n };
+    return { sonuc: { id: A.id, adet: 1, dayanim: Math.min(md, A.dayanim + n * parca), ...ab }, maliyet: n, harca: n };
   }
   orsCiz() {
     const H = this.orsHesap();
@@ -221,11 +238,12 @@ export class EnvanterEkrani {
       this.ors[0] = null;
       const B = this.ors[1]; B.adet -= H.harca; if (B.adet <= 0) this.ors[1] = null;
       this.tasinan = H.sonuc;
+      if (this.olay) this.olay('ors');
       this.ses.ors(); this.envanter.bildir(); this.ciz(); this.hareket(e);
       return;
     }
     const s = this.ors[i];
-    if (e.shiftKey && s && !T) { const k = this.envanter.ekle(s.id, s.adet, s.dayanim); if (k) s.adet = k; else this.ors[i] = null; }
+    if (e.shiftKey && s && !T) { const k = this.envanter.ekle(s.id, s.adet, s.dayanim, s.buyu); if (k) s.adet = k; else this.ors[i] = null; }
     else if (T && !s) {
       if (i === 0 || e.button === 2) { this.ors[i] = { ...T, adet: i === 0 || e.button === 2 ? 1 : T.adet }; T.adet -= this.ors[i].adet; if (!T.adet) this.tasinan = null; }
       else { this.ors[i] = T; this.tasinan = null; }
@@ -239,7 +257,7 @@ export class EnvanterEkrani {
 
   zirhTikla(z, e) {
     const env = this.envanter, T = this.tasinan, s = env.zirh[z];
-    if (e.shiftKey && s && !T) { const k = env.ekle(s.id, 1, s.dayanim); if (!k) env.zirh[z] = null; }
+    if (e.shiftKey && s && !T) { const k = env.ekle(s.id, 1, s.dayanim, s.buyu); if (!k) env.zirh[z] = null; }
     else if (T) {
       const ze = ESYALAR[T.id].zirh;
       if (!ze || ze.parca !== z) { this.hud.bildirim(`Bu yuvaya yalnızca ${ZIRH_PARCALARI[z].toLocaleLowerCase('tr')} takılabilir.`); return; }
@@ -253,7 +271,7 @@ export class EnvanterEkrani {
     t.style.left = e.clientX + 'px'; t.style.top = e.clientY + 'px';
     const ip = $('#ipucu');
     const el = e.target.closest && e.target.closest('.izgara .yuva');
-    const s = el && (el.dataset.o != null ? (+el.dataset.o < 2 ? this.ors[+el.dataset.o] : this.orsHesap().sonuc) : el.dataset.z != null ? this.envanter.zirh[+el.dataset.z] : el.dataset.s != null ? this.sandik && this.sandik.yuvalar[+el.dataset.s] : this.envanter.yuvalar[+el.dataset.i]);
+    const s = el && (el.dataset.o != null ? (+el.dataset.o < 2 ? this.ors[+el.dataset.o] : this.orsHesap().sonuc) : el.dataset.b != null ? this.buyuYuva[+el.dataset.b] : el.dataset.z != null ? this.envanter.zirh[+el.dataset.z] : el.dataset.s != null ? this.sandik && this.sandik.yuvalar[+el.dataset.s] : this.envanter.yuvalar[+el.dataset.i]);
     if (!s || this.tasinan) { ip.hidden = true; return; }
     const es = ESYALAR[s.id];
     let alt = '';
@@ -272,13 +290,76 @@ export class EnvanterEkrani {
     if (es.alet && es.alet.tur === 'capa') alt = `<span>Toprağa sağ tıklanınca tarla toprağı açar</span><span>Dayanım: ${s.dayanim} / ${es.alet.dayanim}</span>`;
     if (es.tur === 'iksir') alt += '<span>Sağ tıkla içilir</span>';
     if (s.id === 139) alt += '<span>Sağ tıkla açılır: eşya onarımı ve birleştirme</span>';
+    if (s.id === 156) alt += '<span>Sağ tıkla açılır: alet, silah ve zırh büyüleme</span>';
+    if (s.id === 61) alt += '<span>Büyü masasında büyüleme malzemesi</span>';
     if (s.id === 140) alt += '<span>Yakınında iksir üretilir</span>';
     if (s.id === 88 || s.id === 105 || s.id === 121) alt += '<span>Sağ tıkla açılıp kapanır</span>';
     if (s.id === 288) alt += '<span>Köylülerle ticarette kullanılır</span>';
     if (es.tur === 'blok') alt += '<span>Yerleştirilebilir blok</span>';
-    ip.innerHTML = `<b>${es.ad}</b>${alt}`;
+    const bm = buyuMetinleri(s);
+    if (bm.length) alt = bm.map(m => `<span class="buyuSatir">${m}</span>`).join('') + alt;
+    ip.innerHTML = `<b${bm.length ? ' class="buyulu"' : ''}>${es.ad}</b>${alt}`;
     ip.hidden = false;
     ip.style.left = Math.min(innerWidth - 270, e.clientX + 16) + 'px'; ip.style.top = (e.clientY + 16) + 'px';
+  }
+
+  /* ---------- Büyü masası (0.14.0) ---------- */
+  /* Seçenekler: eşya türü, oyuncunun büyü tohumu ve seçenek sırasına göre belirlenir; tohum her büyülemeden sonra değişir */
+  buyuSecenekleri() {
+    const A = this.buyuYuva[0];
+    if (!A) return { hata: 'Büyülenecek eşyayı sol yuvaya koyunuz.' };
+    const uygun = uygunBuyuler(A.id);
+    if (!uygun.length) return { hata: 'Bu eşya büyülenemez.' };
+    if (buyuluMu(A)) return { hata: 'Bu eşya zaten büyülü. Büyüler örste birleştirilebilir.' };
+    const h = this.hayatta, tohum = ((h.buyuTohum || 1) * 2654435761 + A.id * 97) >>> 0;
+    const l = BUYU_BEDEL.map((bedel, i) => {
+      const r = uretec(tohum + i * 7919);
+      const k1 = uygun[Math.floor(r() * uygun.length)], B = BUYULER[k1];
+      const sev = n => Math.max(1, Math.min(n, Math.round(n * (i + 1) / 3 * (0.7 + r() * 0.55))));
+      const buyu = { [k1]: sev(B.maks) };
+      if (i === 2 && uygun.length > 1 && r() < 0.6) { const kal = uygun.filter(k => k !== k1); const k2 = kal[Math.floor(r() * kal.length)]; buyu[k2] = Math.max(1, sev(BUYULER[k2].maks) - 1); }
+      return { bedel, kristal: i + 1, buyu };
+    });
+    return { secenekler: l };
+  }
+  buyuCiz() {
+    this.kok.querySelectorAll('.yuva[data-b]').forEach(el => { el.innerHTML = this.hud.yuvaIc(this.buyuYuva[+el.dataset.b]); });
+    const H = this.buyuSecenekleri(), sv = this.hayatta.seviye, kr = this.buyuYuva[1] ? this.buyuYuva[1].adet : 0, sinir = this.sinirsiz();
+    if (H.hata) { $('#buyuSecenek').innerHTML = `<p class="soluk">${H.hata}</p>`; return; }
+    $('#buyuSecenek').innerHTML = H.secenekler.map((o, i) => {
+      const ok = sinir || (sv >= o.bedel && kr >= o.kristal);
+      const ad = Object.entries(o.buyu).map(([k, n]) => `${BUYULER[k].ad} ${romaRakam(n)}`).join(' · ');
+      return `<button type="button" class="buyuSecim${ok ? '' : ' olmaz'}" data-sec="${i}"><b>${ad}</b><span><em class="${sinir || sv >= o.bedel ? 'ok' : 'eksik'}">${o.bedel} seviye</em> · <em class="${sinir || kr >= o.kristal ? 'ok' : 'eksik'}">${o.kristal} parıltı kristali</em></span></button>`;
+    }).join('') + `<p class="soluk">Seviyeniz: ${sv}</p>`;
+  }
+  buyule(i) {
+    const H = this.buyuSecenekleri(); if (H.hata || this.tasinan) return;
+    const o = H.secenekler[i], A = this.buyuYuva[0], K = this.buyuYuva[1], sinir = this.sinirsiz();
+    if (!sinir && this.hayatta.seviye < o.bedel) { this.hud.bildirim('Deneyim seviyeniz yetersiz.'); return; }
+    if (!sinir && (!K || K.adet < o.kristal)) { this.hud.bildirim(`${o.kristal} parıltı kristali gerekli.`); return; }
+    if (!sinir) { this.hayatta.seviyeHarca(o.bedel); K.adet -= o.kristal; if (K.adet <= 0) this.buyuYuva[1] = null; }
+    A.buyu = { ...o.buyu };
+    this.hayatta.buyuTohum = ((this.hayatta.buyuTohum || 1) * 1103515245 + 12345 + i) >>> 0 || 1;
+    if (this.ses.buyu) this.ses.buyu(); else this.ses.ors();
+    this.hud.bildirim(`${ESYALAR[A.id].ad} büyülendi: ${buyuMetinleri(A).join(', ')}`, A.id);
+    if (this.olay) this.olay('buyu', A);
+    this.envanter.bildir(); this.ciz();
+  }
+  buyuTikla(i, e) {
+    const T = this.tasinan, s = this.buyuYuva[i];
+    if (T && !s) {
+      if (i === 1 && T.id !== KRISTAL) { this.hud.bildirim('Bu yuvaya yalnızca parıltı kristali konur.'); return; }
+      if (i === 0 && !uygunBuyuler(T.id).length) { this.hud.bildirim('Bu eşya büyülenemez.'); return; }
+      if (i === 0 || e.button === 2) { this.buyuYuva[i] = { ...T, adet: 1 }; T.adet--; if (!T.adet) this.tasinan = null; }
+      else { this.buyuYuva[i] = T; this.tasinan = null; }
+    } else if (!T && s) {
+      if (e.shiftKey) { const k = this.envanter.ekle(s.id, s.adet, s.dayanim, s.buyu); if (k) s.adet = k; else this.buyuYuva[i] = null; }
+      else { this.tasinan = s; this.buyuYuva[i] = null; }
+    } else if (T && s) {
+      if (i === 1 && T.id === KRISTAL) { const k = Math.min(T.adet, this.envanter.yigin(KRISTAL) - s.adet); s.adet += k; T.adet -= k; if (!T.adet) this.tasinan = null; }
+      else if (i === 0 && T.adet === 1 && uygunBuyuler(T.id).length) { this.buyuYuva[0] = T; this.tasinan = s; }
+    }
+    this.ses.tik(); this.envanter.bildir(); this.ciz(); this.hareket(e);
   }
 
   tasimaCiz() {

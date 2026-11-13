@@ -22,6 +22,15 @@ export const TURLER = {
     dusur: r => [[295, ar(r, 0, 2)], [287, ar(r, 0, 2)]], ses: 'iskelet', xp: 5 },
   orumcek: { ad: 'Mağara Örümceği', model: 'orumcek', gen: 0.55, boy: 0.8, can: 16, hiz: 1.4, kosu: 4.6, dusman: true, karanlikta: true, hasar: 2, agu: true, menzil: 0.9, gorus: 18, tirmanir: true,
     dusur: r => [[284, ar(r, 0, 2)], ...(r() < 0.25 ? [[295, 1]] : [])], ses: 'orumcek', xp: 5 },
+  /* 0.14.0: biyoma özgü canavarlar ve yarasa */
+  mumya: { ad: 'Mumya', model: 'mumya', aile: 'zombi', gen: 0.3, boy: 1.95, can: 20, hiz: 0.95, kosu: 2.5, dusman: true, hasar: 3, menzil: 1.0, gorus: 26, etki: ['aclik', 10],
+    dusur: r => { const o = [[281, ar(r, 0, 2)]]; if (r() < 0.35) o.push([5, 1]); if (r() < 0.03) o.push([263, 1]); return o; }, ses: 'mumya', xp: 5 },
+  bogulmus: { ad: 'Boğulmuş Zombi', model: 'bogulmus', aile: 'zombi', gen: 0.3, boy: 1.95, can: 20, hiz: 1.0, kosu: 2.6, dusman: true, hasar: 3, menzil: 1.0, gorus: 24, gunesteYanar: true, dalgic: true,
+    dusur: r => { const o = [[281, ar(r, 0, 2)]]; const s = r(); if (s < 0.06) o.push([299, 1]); else if (s < 0.14) o.push([259, 1]); return o; }, ses: 'bogulmus', xp: 5 },
+  buziskelet: { ad: 'Buz İskeleti', model: 'buziskelet', aile: 'iskelet', gen: 0.3, boy: 1.95, can: 20, hiz: 1.0, kosu: 2.4, dusman: true, uzak: true, hasar: 3, menzil: 15, gorus: 22, gunesteYanar: true, etki: ['yavas', 6],
+    dusur: r => [[295, ar(r, 0, 2)], [287, ar(r, 0, 2)], ...(r() < 0.2 ? [[22, 1]] : [])], ses: 'buziskelet', xp: 5 },
+  yarasa: { ad: 'Yarasa', model: 'yarasa', gen: 0.22, boy: 0.5, can: 6, hiz: 2.4, kosu: 5.2, dusman: true, ucar: true, hasar: 1, menzil: 0.8, gorus: 14, grup: [3, 6],
+    dusur: r => (r() < 0.3 ? [[282, 1]] : []), ses: 'yarasa', xp: 2 },
   hamsi: { ad: 'Hamsi', model: 'hamsi', gen: 0.12, boy: 0.25, can: 2, hiz: 2.0, kosu: 4.8, su: true, grup: [4, 8], dusur: () => [[297, 1]], ses: 'balik', xp: 1 },
   cipura: { ad: 'Çipura', model: 'cipura', gen: 0.18, boy: 0.4, can: 4, hiz: 1.5, kosu: 4.2, su: true, grup: [1, 2], dusur: r => [[297, ar(r, 1, 2)]], ses: 'balik', xp: 1 },
   ahtapot: { ad: 'Ahtapot', model: 'ahtapot', gen: 0.32, boy: 0.9, can: 8, hiz: 0.9, kosu: 3.6, su: true, grup: [1, 1], dusur: r => [[451, ar(r, 1, 2)]], ses: 'ahtapot', xp: 2 },
@@ -32,3 +41,5 @@ export const TURLER = {
 export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt'];
 export const DENIZ_CANLILARI = ['hamsi', 'cipura', 'ahtapot', 'kopekbaligi'];
 export const OLUM_KAYNAK = { zombi: 'zombi', kurt: 'kurt' };
+/* Dünyada doğan düşman canavarlar (görev, başarım ve sayım için) */
+export const CANAVARLAR = ['zombi', 'iskelet', 'orumcek', 'mumya', 'bogulmus', 'buziskelet', 'yarasa', 'kopekbaligi'];

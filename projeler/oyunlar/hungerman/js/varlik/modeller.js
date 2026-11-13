@@ -89,6 +89,41 @@ function balik(s, renk, karin, ek = []) {
   return { kok, malzeme, govde, kafa: null, bacaklar: [], kollar: [], kanatlar: yuzgec, kuyruk, balik: true };
 }
 
+/* İskelet kalıbı: kemik ve göz renkleri; pelerin: buz iskeleti için yırtık giysi */
+function iskeletKalibi(kemik, koyu, pelerin = false) {
+  const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+  const kok = new THREE.Group();
+  const P = '#4a5e6a', P2 = '#3a4c58';
+  const govde = parca(kok, malzeme, [0, 1.12, 0], [[0.12, 0.72, 0.12, kemik], [0.46, 0.08, 0.2, kemik, 0, 0.3, 0], [0.42, 0.06, 0.18, kemik, 0, 0.14, 0], [0.38, 0.06, 0.16, kemik, 0, -0.02, 0], [0.3, 0.06, 0.14, kemik, 0, -0.18, 0], [0.4, 0.1, 0.18, kemik, 0, -0.34, 0],
+    ...(pelerin ? [[0.5, 0.42, 0.24, P, 0, 0.14, 0.02], [0.14, 0.24, 0.24, P2, -0.18, -0.2, 0.02], [0.12, 0.16, 0.24, P2, 0.18, -0.16, 0.02], [0.5, 0.06, 0.26, '#cfe6f2', 0, 0.36, 0.02]] : [])]);
+  const kafa = parca(kok, malzeme, [0, 1.5, 0], [[0.46, 0.46, 0.46, kemik, 0, 0.23, 0], [0.12, 0.1, 0.02, koyu, -0.11, 0.26, -0.235], [0.12, 0.1, 0.02, koyu, 0.11, 0.26, -0.235], [0.06, 0.06, 0.02, koyu, 0, 0.16, -0.235], [0.3, 0.04, 0.02, koyu, 0, 0.06, -0.235],
+    ...(pelerin ? [[0.5, 0.16, 0.5, P, 0, 0.42, 0.02], [0.5, 0.3, 0.06, P2, 0, 0.3, 0.24], [0.06, 0.06, 0.02, '#9fe8ff', -0.11, 0.26, -0.24], [0.06, 0.06, 0.02, '#9fe8ff', 0.11, 0.26, -0.24]] : [])]);
+  /* Yay sağ elde, kola dik (kol ileri uzatıldığında dikey durur); kiriş ve ok ayrı parçalardır, germe sırasında hareket eder */
+  const yay = '#7a5532';
+  const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.3, 1.45, 0], [[0.1, 0.72, 0.1, kemik, 0, -0.32, 0],
+    ...(s > 0 ? [[0.07, 0.08, 0.14, yay, 0, -0.72, 0], [0.05, 0.06, 0.2, yay, 0, -0.68, 0.16], [0.05, 0.06, 0.2, yay, 0, -0.68, -0.16], [0.04, 0.06, 0.1, yay, 0, -0.61, 0.31], [0.04, 0.06, 0.1, yay, 0, -0.61, -0.31]] : [])]));
+  const sag = kollar[1];
+  const kirisMalzeme = new THREE.MeshBasicMaterial({ color: 0xe8e8e0 });
+  const kiris = [1, -1].map(() => { const k = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 1), kirisMalzeme); sag.add(k); return k; });
+  const ok = new THREE.Mesh(birlestir([kutuGeo(0.025, 0.62, 0.025, '#8a6a42', 0, -0.31, 0), kutuGeo(0.05, 0.08, 0.05, '#9a9da4', 0, -0.64, 0), kutuGeo(0.06, 0.1, 0.012, '#e8e8e0', 0, -0.03, 0)]), malzeme);
+  ok.visible = false; sag.add(ok);
+  const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.12, 0.75, 0], [[0.1, 0.75, 0.1, kemik, 0, -0.375, 0], ...(pelerin ? [[0.16, 0.3, 0.16, P2, 0, -0.18, 0]] : [])]));
+  return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null, yay: { kiris, ok } };
+}
+
+/* İnsansı canavar kalıbı (zombi, mumya, boğulmuş zombi): R renkler, R.ek parça başına ek kutular */
+function zombiKalibi(R) {
+  const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+  const kok = new THREE.Group();
+  const E = R.ek || {};
+  const govde = parca(kok, malzeme, [0, 1.12, 0], [[0.5, 0.75, 0.26, R.gomlek], [0.52, 0.12, 0.28, R.gomlekKoyu, 0, -0.32, 0], ...(E.govde || [])]);
+  const kafa = parca(kok, malzeme, [0, 1.5, 0], [[0.5, 0.5, 0.5, R.ten, 0, 0.25, 0], [0.1, 0.06, 0.02, R.goz, -0.12, 0.3, -0.255], [0.1, 0.06, 0.02, R.goz, 0.12, 0.3, -0.255], [0.18, 0.05, 0.02, R.agiz, 0, 0.12, -0.255],
+    ...(R.sac ? [[0.52, 0.14, 0.52, R.sac, 0, 0.48, 0]] : []), ...(E.kafa || [])]);
+  const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.375, 1.45, 0], [[0.24, 0.72, 0.24, R.ten, 0, -0.3, 0], [0.26, 0.3, 0.26, R.gomlek, 0, -0.05, 0], ...(E.kol || [])]));
+  const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.125, 0.75, 0], [[0.24, 0.75, 0.24, R.pantolon, 0, -0.375, 0], [0.25, 0.12, 0.26, R.ayakkabi, 0, -0.69, -0.01], ...(E.bacak || [])]));
+  return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null };
+}
+
 export const MODELLER = {
   hamsi: () => balik(0.55, '#5a7f9a', '#d8e4ea'),
   cipura: () => balik(1, '#9aa8b0', '#e8ecee', [[0.23, 0.04, 0.3, '#d8b04a', 0, 0.08, -0.1]]),
@@ -171,24 +206,9 @@ export const MODELLER = {
     const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.125, 0.75, 0], [[0.24, 0.75, 0.24, M.pantolon, 0, -0.375, 0], [0.25, 0.12, 0.27, '#3a2a1e', 0, -0.69, -0.01]]));
     return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null, insan: true };
   },
-  iskelet: () => {
-    const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
-    const kok = new THREE.Group();
-    const kemik = '#dcd8cc', koyu = '#4a4640';
-    const govde = parca(kok, malzeme, [0, 1.12, 0], [[0.12, 0.72, 0.12, kemik], [0.46, 0.08, 0.2, kemik, 0, 0.3, 0], [0.42, 0.06, 0.18, kemik, 0, 0.14, 0], [0.38, 0.06, 0.16, kemik, 0, -0.02, 0], [0.3, 0.06, 0.14, kemik, 0, -0.18, 0], [0.4, 0.1, 0.18, kemik, 0, -0.34, 0]]);
-    const kafa = parca(kok, malzeme, [0, 1.5, 0], [[0.46, 0.46, 0.46, kemik, 0, 0.23, 0], [0.12, 0.1, 0.02, koyu, -0.11, 0.26, -0.235], [0.12, 0.1, 0.02, koyu, 0.11, 0.26, -0.235], [0.06, 0.06, 0.02, koyu, 0, 0.16, -0.235], [0.3, 0.04, 0.02, koyu, 0, 0.06, -0.235]]);
-    /* Yay sağ elde, kola dik (kol ileri uzatıldığında dikey durur); kiriş ve ok ayrı parçalardır, germe sırasında hareket eder */
-    const yay = '#7a5532';
-    const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.3, 1.45, 0], [[0.1, 0.72, 0.1, kemik, 0, -0.32, 0],
-      ...(s > 0 ? [[0.07, 0.08, 0.14, yay, 0, -0.72, 0], [0.05, 0.06, 0.2, yay, 0, -0.68, 0.16], [0.05, 0.06, 0.2, yay, 0, -0.68, -0.16], [0.04, 0.06, 0.1, yay, 0, -0.61, 0.31], [0.04, 0.06, 0.1, yay, 0, -0.61, -0.31]] : [])]));
-    const sag = kollar[1];
-    const kirisMalzeme = new THREE.MeshBasicMaterial({ color: 0xe8e8e0 });
-    const kiris = [1, -1].map(() => { const k = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 1), kirisMalzeme); sag.add(k); return k; });
-    const ok = new THREE.Mesh(birlestir([kutuGeo(0.025, 0.62, 0.025, '#8a6a42', 0, -0.31, 0), kutuGeo(0.05, 0.08, 0.05, '#9a9da4', 0, -0.64, 0), kutuGeo(0.06, 0.1, 0.012, '#e8e8e0', 0, -0.03, 0)]), malzeme);
-    ok.visible = false; sag.add(ok);
-    const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.12, 0.75, 0], [[0.1, 0.75, 0.1, kemik, 0, -0.375, 0]]));
-    return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null, yay: { kiris, ok } };
-  },
+  iskelet: () => iskeletKalibi('#dcd8cc', '#4a4640'),
+  /* Buz İskeleti: buzlu mavi kemik, yırtık pelerin ve parlayan gözler */
+  buziskelet: () => iskeletKalibi('#c6dbe6', '#2a5a7a', true),
   orumcek: () => {
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
     const kok = new THREE.Group();
@@ -203,15 +223,24 @@ export const MODELLER = {
     }
     return { kok, malzeme, govde, kafa, bacaklar, kollar: [], kanatlar: [], kuyruk: null, orumcek: true };
   },
-  zombi: () => {
+  zombi: () => zombiKalibi({ ten: '#5f9450', gomlek: '#2f6f9a', gomlekKoyu: '#285e82', pantolon: '#3a3a86', ayakkabi: '#2a2420', sac: '#3e5a30', goz: '#141414', agiz: '#2d4a26' }),
+  /* Mumya: sargı bezleri, koyu göz boşlukları */
+  mumya: () => zombiKalibi({ ten: '#cdbf98', gomlek: '#d9cca6', gomlekKoyu: '#b5a67e', pantolon: '#cbbd94', ayakkabi: '#a89a72', sac: null, goz: '#2a1c10', agiz: '#6a5a40',
+    ek: { govde: [[0.52, 0.04, 0.28, '#a8996f', 0, 0.12, 0], [0.52, 0.04, 0.28, '#a8996f', 0, -0.1, 0]], kafa: [[0.52, 0.04, 0.52, '#a8996f', 0, 0.38, 0], [0.52, 0.04, 0.52, '#a8996f', 0, 0.06, 0], [0.06, 0.06, 0.02, '#e8c860', -0.12, 0.3, -0.262], [0.06, 0.06, 0.02, '#e8c860', 0.12, 0.3, -0.262]],
+      kol: [[0.26, 0.04, 0.26, '#a8996f', 0, -0.25, 0], [0.26, 0.04, 0.26, '#a8996f', 0, -0.48, 0]], bacak: [[0.26, 0.04, 0.26, '#a8996f', 0, -0.3, 0]] } }),
+  /* Boğulmuş zombi: yeşilimsi mavi ten, yırtık giysi, yosun parçaları */
+  bogulmus: () => zombiKalibi({ ten: '#5a9a92', gomlek: '#3f7a72', gomlekKoyu: '#2e5e58', pantolon: '#5a4e8a', ayakkabi: '#2a3a36', sac: '#2e5a3a', goz: '#7fe8ff', agiz: '#24443e',
+    ek: { govde: [[0.08, 0.3, 0.02, '#3a8a3a', 0.12, -0.1, -0.14], [0.06, 0.2, 0.02, '#3a8a3a', -0.16, 0.05, -0.14]], kafa: [[0.08, 0.2, 0.06, '#3a8a3a', -0.2, 0.34, -0.22]], kol: [], bacak: [[0.26, 0.2, 0.26, '#3f7a72', 0, -0.62, 0]] } }),
+  /* Yarasa: küçük gövde, büyük kulaklar, zarlı kanatlar (kanatlar.rotation.z ile çırpılır) */
+  yarasa: () => {
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
     const kok = new THREE.Group();
-    const ten = '#5f9450';
-    const govde = parca(kok, malzeme, [0, 1.12, 0], [[0.5, 0.75, 0.26, '#2f6f9a'], [0.52, 0.12, 0.28, '#285e82', 0, -0.32, 0]]);
-    const kafa = parca(kok, malzeme, [0, 1.5, 0], [[0.5, 0.5, 0.5, ten, 0, 0.25, 0], [0.1, 0.06, 0.02, '#141414', -0.12, 0.3, -0.255], [0.1, 0.06, 0.02, '#141414', 0.12, 0.3, -0.255], [0.18, 0.05, 0.02, '#2d4a26', 0, 0.12, -0.255], [0.52, 0.14, 0.52, '#3e5a30', 0, 0.48, 0]]);
-    const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.375, 1.45, 0], [[0.24, 0.72, 0.24, ten, 0, -0.3, 0], [0.26, 0.3, 0.26, '#2f6f9a', 0, -0.05, 0]]));
-    const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.125, 0.75, 0], [[0.24, 0.75, 0.24, '#3a3a86', 0, -0.375, 0], [0.25, 0.12, 0.26, '#2a2420', 0, -0.69, -0.01]]));
-    return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null };
+    const r = '#3d302a', k = '#2a201c';
+    const govde = parca(kok, malzeme, [0, 0.26, 0], [[0.22, 0.26, 0.2, r], [0.16, 0.08, 0.16, k, 0, -0.16, 0]]);
+    const kafa = parca(kok, malzeme, [0, 0.42, -0.02], [[0.22, 0.2, 0.2, r, 0, 0.05, -0.04], [0.06, 0.12, 0.04, k, -0.07, 0.2, -0.04], [0.06, 0.12, 0.04, k, 0.07, 0.2, -0.04],
+      [0.04, 0.04, 0.02, '#ffcf4a', -0.05, 0.08, -0.145], [0.04, 0.04, 0.02, '#ffcf4a', 0.05, 0.08, -0.145]]);
+    const kanatlar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.1, 0.32, 0], [[0.36, 0.02, 0.26, k, s * 0.18, 0, 0.02], [0.2, 0.02, 0.14, r, s * 0.42, -0.01, 0.06], [0.04, 0.04, 0.3, '#1e1714', s * 0.02, 0.01, 0]]));
+    return { kok, malzeme, govde, kafa, bacaklar: [], kollar: [], kanatlar, kuyruk: null, yarasa: true };
   }
 };
 

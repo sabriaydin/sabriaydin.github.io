@@ -28,17 +28,18 @@ export class Dusenler {
     sahne.sahne.add(this.noktalar);
   }
 
-  birak(id, adet, x, y, z, vx = 0, vy = 0, vz = 0, dayanim, gecikme = 0.5) {
+  /* buyu: alet ve zırhların büyüleri (0.14.0) */
+  birak(id, adet, x, y, z, vx = 0, vy = 0, vz = 0, dayanim, gecikme = 0.5, buyu) {
     /* Çok oyunculu istemcide eşyayı sunucu bırakır ve herkese bildirir */
-    if (this.ag && this.ag.birakIste) { this.ag.birakIste(id, adet, dayanim, x, y, z, vx || (Math.random() - 0.5) * 2, vy || 3.2, vz || (Math.random() - 0.5) * 2, gecikme); return null; }
-    const d = this.olustur(id, adet, x, y, z, vx, vy, vz, dayanim, gecikme);
+    if (this.ag && this.ag.birakIste) { this.ag.birakIste(id, adet, dayanim, x, y, z, vx || (Math.random() - 0.5) * 2, vy || 3.2, vz || (Math.random() - 0.5) * 2, gecikme, buyu); return null; }
+    const d = this.olustur(id, adet, x, y, z, vx, vy, vz, dayanim, gecikme, buyu);
     if (this.ag && this.ag.eklendi) { d.ni = ++this.sira; this.ag.eklendi(d); }
     return d;
   }
-  olustur(id, adet, x, y, z, vx = 0, vy = 0, vz = 0, dayanim, gecikme = 0.5) {
+  olustur(id, adet, x, y, z, vx = 0, vy = 0, vz = 0, dayanim, gecikme = 0.5, buyu) {
     const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: doku(id), alphaTest: 0.3 }));
     m.scale.setScalar(0.32);
-    const d = { id, adet, dayanim, p: new THREE.Vector3(x, y, z), v: new THREE.Vector3(vx || (Math.random() - 0.5) * 2, vy || 3.2, vz || (Math.random() - 0.5) * 2), yas: 0, gecikme, m, faz: Math.random() * 6 };
+    const d = { id, adet, dayanim, buyu: buyu && Object.keys(buyu).length ? { ...buyu } : undefined, p: new THREE.Vector3(x, y, z), v: new THREE.Vector3(vx || (Math.random() - 0.5) * 2, vy || 3.2, vz || (Math.random() - 0.5) * 2), yas: 0, gecikme, m, faz: Math.random() * 6 };
     m.position.copy(d.p);
     this.grup.add(m);
     this.liste.push(d);
@@ -47,8 +48,8 @@ export class Dusenler {
   sil(d) { this.grup.remove(d.m); d.m.material.dispose(); }
   agSil(d) { if (this.ag && this.ag.silindi && d.ni) this.ag.silindi(d); }
   agAdet(d) { if (this.ag && this.ag.adet && d.ni) this.ag.adet(d); }
-  /* İstemci: sunucudan gelen eşya; a: [ni, id, adet, dayanım, x, y, z, vx, vy, vz, gecikme] */
-  aynaEkle(a) { const d = this.olustur(a[1], a[2], a[4], a[5], a[6], a[7], a[8], a[9], a[3] ?? undefined, a[10]); d.ni = a[0]; return d; }
+  /* İstemci: sunucudan gelen eşya; a: [ni, id, adet, dayanım, x, y, z, vx, vy, vz, gecikme, büyü] */
+  aynaEkle(a) { const d = this.olustur(a[1], a[2], a[4], a[5], a[6], a[7], a[8], a[9], a[3] ?? undefined, a[10], a[11] || undefined); d.ni = a[0]; return d; }
   aynaSil(ni) { const i = this.liste.findIndex(d => d.ni === ni); if (i >= 0) { this.sil(this.liste[i]); this.liste.splice(i, 1); } }
   aynaAdet(ni, adet) { const d = this.liste.find(d => d.ni === ni); if (d) { d.adet = adet; d.istek = 0; d.m.visible = true; } }
   temizle() { for (const d of this.liste) this.sil(d); this.liste = []; this.pk = []; }
@@ -62,7 +63,7 @@ export class Dusenler {
     }
   }
 
-  /* al: (id, adet, dayanim) => kalan adet */
+  /* al: (id, adet, dayanim, buyu) => kalan adet */
   guncelle(dt, oyuncuKonum, al, isik) {
     const op = oyuncuKonum;
     /* İstemcide (ayna) eşyaların kaybolmasına ve birleşmesine sunucu karar verir; alma isteği sunucuya gider */
@@ -81,7 +82,7 @@ export class Dusenler {
             d.m.visible = !(d.istek > simdi - 1500);
             continue;
           }
-          const kalan = al(d.id, d.adet, d.dayanim);
+          const kalan = al(d.id, d.adet, d.dayanim, d.buyu);
           if (kalan <= 0) { this.sil(d); this.liste.splice(i, 1); this.agSil(d); continue; }
           if (kalan !== d.adet) { d.adet = kalan; this.agAdet(d); }
         } else { d.v.x = dx / mes * 7; d.v.y = dy / mes * 7; d.v.z = dz / mes * 7; d.p.addScaledVector(d.v, dt); d.m.position.copy(d.p); continue; }
@@ -117,6 +118,6 @@ export class Dusenler {
     pos.needsUpdate = true; col.needsUpdate = true;
     this.noktalar.geometry.setDrawRange(0, n);
   }
-  disaAktar() { return this.liste.map(d => [d.id, d.adet, d.dayanim ?? null, +d.p.x.toFixed(2), +d.p.y.toFixed(2), +d.p.z.toFixed(2)]); }
-  iceAktar(l) { this.temizle(); for (const a of l || []) this.birak(a[0], a[1], a[3], a[4], a[5], 0.001, 0.001, 0.001, a[2] ?? undefined, 0.5); }
+  disaAktar() { return this.liste.map(d => { const a = [d.id, d.adet, d.dayanim ?? null, +d.p.x.toFixed(2), +d.p.y.toFixed(2), +d.p.z.toFixed(2)]; if (d.buyu) a.push(d.buyu); return a; }); }
+  iceAktar(l) { this.temizle(); for (const a of l || []) this.birak(a[0], a[1], a[3], a[4], a[5], 0.001, 0.001, 0.001, a[2] ?? undefined, 0.5, a[6]); }
 }

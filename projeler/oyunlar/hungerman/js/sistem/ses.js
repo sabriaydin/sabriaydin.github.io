@@ -78,6 +78,10 @@ export class Ses {
       case 'balik': this.patlama(1400 * y, 0.08, 0.14 * h, 'bandpass', 2); if (tip !== 'normal') this.patlama(700, 0.15, 0.1 * h, 'lowpass', 1); break;
       case 'kopekbaligi': if (tip === 'normal') this.patlama(160, 0.6, 0.08 * h, 'lowpass', 1.5, 0.7); else { this.patlama(500, 0.2, 0.2 * h, 'lowpass', 1); this.ton(120 * y, 0.25, 0.1 * h, 'sawtooth', 80); } break;
       case 'ahtapot': this.patlama(800 * y, 0.18, 0.1 * h, 'lowpass', 2, 0.6); break;
+      case 'mumya': this.ton(90 * y, 1.0, 0.12 * h, 'sawtooth', 65 * y); this.patlama(2600, 0.7, 0.06 * h, 'highpass', 0.8, 0.7); break;
+      case 'bogulmus': this.ton(115 * y, 0.8, 0.12 * h, 'sawtooth', 80 * y); for (let i = 0; i < 4; i++) setTimeout(() => this.patlama(500 + Math.random() * 400, 0.12, 0.08 * h, 'lowpass', 3, 0.6), i * 120); break;
+      case 'buziskelet': for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(3200 * y, 0.05, 0.11 * h, 'bandpass', 6), i * 70); this.ton(1900 * y, 0.25, 0.03 * h, 'sine', 2400); break;
+      case 'yarasa': for (let i = 0; i < (tip === 'normal' ? 2 : 3); i++) setTimeout(() => this.ton((3400 + Math.random() * 900) * y, 0.05, 0.05 * h, 'square', 2800), i * 85); break;
     }
   }
   yayGer() { this.patlama(900, 0.25, 0.08, 'bandpass', 3, 1.4); }
@@ -108,6 +112,9 @@ export class Ses {
   seviye() { [660, 880, 1320].forEach((f, i) => setTimeout(() => this.ton(f, 0.22, 0.07, 'triangle', f * 1.01), i * 80)); }
   ic() { for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(900, 0.08, 0.18, 'lowpass', 2, 0.6), i * 130); }
   ors() { this.ton(1250, 0.5, 0.12, 'triangle', 1180); this.ton(1890, 0.4, 0.05, 'sine', 1850); this.patlama(3000, 0.1, 0.25, 'highpass', 1); }
+  /* 0.14.0: büyüleme ve başarım */
+  buyu() { [784, 1175, 1568, 2093].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.05, 'sine', f * 1.02), i * 70)); this.patlama(4000, 0.6, 0.06, 'highpass', 0.6, 1.4); }
+  basarim() { [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.28, 0.07, 'triangle', f), i * 85)); }
   kalp() { this.ton(880, 0.12, 0.05, 'sine', 1100); }
   /* Yağmur: sürekli çalan süzülmüş gürültü; hacim 0..1, boguk: çatı altında */
   yagmurAyarla(hacim, boguk) {

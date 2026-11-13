@@ -173,7 +173,7 @@ export class Sahne {
     /* Yağmurda gökyüzü griye döner, şimşekte aydınlanır */
     if (hy > 0) {
       const gri = new THREE.Color(0x6c747f).multiplyScalar(0.12 + 0.88 * k * (1 - 0.35 * hf));
-      ust.lerp(gri, hy * 0.85); ufuk.lerp(gri.clone().multiplyScalar(1.15), hy * 0.8);
+      ust.lerp(gri, hy * 0.93); ufuk.lerp(gri.clone().multiplyScalar(1.12), hy * 0.88);
     }
     if (sm > 0) { ust.lerp(new THREE.Color(0xdfe6ff), sm * 0.8); ufuk.lerp(new THREE.Color(0xeef1ff), sm * 0.8); }
     const gm = this.gokMalzeme.uniforms;
@@ -193,7 +193,7 @@ export class Sahne {
     bk.offset.set((konum.x + zamanSn * 1.2) / 768 % 1, -(konum.z) / 768 % 1);
     this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
     /* Yağışta bulutlar gökyüzünün biraz koyu tonunu alır (gece kapkara lekeler oluşmaz) */
-    if (hy > 0) this.bulutMalzeme.color.lerp(ust.clone().multiplyScalar(0.8).convertSRGBToLinear(), hy * 0.9);
+    if (hy > 0) this.bulutMalzeme.color.lerp(ust.clone().multiplyScalar(0.62).convertSRGBToLinear(), hy * 0.95);
     this.bulutMalzeme.opacity = 0.82 + 0.16 * hy;
     /* Blok aydınlatması */
     const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.82, 0.68), alacakaranlik * 0.5);
@@ -267,7 +267,8 @@ export class Sahne {
     this.el.add(this.elKol);
     this.sallanma = 0;
   }
-  elAyarla(id) {
+  elAyarla(id, buyulu = false) {
+    this.elBuyulu = buyulu;
     if (id === this.elId) return;
     this.elId = id;
     if (this.elEsya) { this.el.remove(this.elEsya); this.elEsya.geometry.dispose(); this.elEsya = null; }
@@ -305,6 +306,8 @@ export class Sahne {
     const c = this.elKol.material.color; c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
     this.elBlokMalzeme.color.setScalar(isik);
     this.elEsyaMalzeme.color.setScalar(isik);
+    /* Büyülü eşya: hafif mor parıltı nabzı */
+    if (this.elBuyulu) { const t = 0.5 + 0.5 * Math.sin(performance.now() / 260); this.elEsyaMalzeme.color.setRGB(isik * (1 - 0.12 * t), isik * (1 - 0.3 * t), isik * Math.min(1.25, 1 + 0.25 * t)); }
   }
 
   ciz() {

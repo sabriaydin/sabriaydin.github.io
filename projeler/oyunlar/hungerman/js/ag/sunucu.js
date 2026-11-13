@@ -60,7 +60,7 @@ export class SunucuOyun {
     };
   }
 
-  dusenVeri(d) { return [d.ni, d.id, d.adet, d.dayanim ?? null, r2(d.p.x), r2(d.p.y), r2(d.p.z), r2(d.v.x), r2(d.v.y), r2(d.v.z), Math.max(0, r2(d.gecikme - d.yas))]; }
+  dusenVeri(d) { const a = [d.ni, d.id, d.adet, d.dayanim ?? null, r2(d.p.x), r2(d.p.y), r2(d.p.z), r2(d.v.x), r2(d.v.y), r2(d.v.z), Math.max(0, r2(d.gecikme - d.yas))]; if (d.buyu) a.push(d.buyu); return a; }
   tekneVeri(t) { return [t.ni, t.tur, r2(t.p.x), r2(t.p.y), r2(t.p.z), r3(t.yaw), t.can]; }
   oyuncuListesi() { return [[0, this.ad, 0, 1], ...[...this.istemciler.values()].map(c => [c.id, c.ad, c.renk, 0])]; }
   konumlar() { const l = []; for (const c of this.istemciler.values()) if (c.durum) l.push(c.konum); return l; }
@@ -152,7 +152,7 @@ export class SunucuOyun {
       case 'bk': {  // eşya bırakma
         const a = m.a;
         if (!ESYALAR[a[0]] || !(a[1] > 0)) return;
-        o.dusenler.birak(a[0], Math.min(64 * 36, a[1] | 0), a[3], a[4], a[5], a[6], a[7], a[8], a[2] ?? undefined, a[9]);
+        o.dusenler.birak(a[0], Math.min(64 * 36, a[1] | 0), a[3], a[4], a[5], a[6], a[7], a[8], a[2] ?? undefined, a[9], a[10] && typeof a[10] === 'object' ? a[10] : undefined);
         break;
       }
       case 'al': {  // eşya alma isteği
@@ -160,7 +160,7 @@ export class SunucuOyun {
         if (!d) return;
         const n = Math.max(0, Math.min(m.n | 0, d.adet));
         if (!n) return;
-        k.gonder({ t: 'ver', id: d.id, n, dy: d.dayanim ?? null });
+        k.gonder({ t: 'ver', id: d.id, n, dy: d.dayanim ?? null, ...(d.buyu ? { b: d.buyu } : {}) });
         d.adet -= n;
         if (d.adet <= 0) { const i = o.dusenler.liste.indexOf(d); o.dusenler.sil(d); o.dusenler.liste.splice(i, 1); this.yay({ t: 'd-', i: d.ni }); }
         else this.yay({ t: 'da', i: d.ni, n: d.adet });
@@ -170,7 +170,7 @@ export class SunucuOyun {
         const w = o.varliklar.liste.find(v => v.id === m.i);
         if (!w || w.olu || w.konum.distanceTo(c.konum) > 9) return;
         const kaynak = m.k ? new THREE.Vector3(m.k[0], m.k[1], m.k[2]) : c.konum.clone();
-        o.varliklar.hasarVer(w, Math.min(30, +m.n || 1), kaynak, { itme: Math.min(2, +m.it || 1), oyuncu: true, vuran: c });
+        o.varliklar.hasarVer(w, Math.min(30, +m.n || 1), kaynak, { itme: Math.min(2.4, +m.it || 1), oyuncu: true, vuran: c, yagma: Math.max(0, Math.min(3, m.yg | 0)) });
         break;
       }
       case 'bes': { // hayvan besleme
@@ -195,7 +195,7 @@ export class SunucuOyun {
         const [x, y, z] = m.k.split(',').map(Number);
         const yuvalar = sandikKur(m.y).slice(0, 27);
         while (yuvalar.length < 27) yuvalar.push(null);
-        if (o.dunya.yuklu(x, z) && !BLOKLAR[o.dunya.blok(x, y, z)].sandik) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim); return; }
+        if (o.dunya.yuklu(x, z) && !BLOKLAR[o.dunya.blok(x, y, z)].sandik) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
         o.dunya.sandiklar.set(m.k, yuvalar);
         break;
       }
@@ -204,7 +204,7 @@ export class SunucuOyun {
         const d = o.dunya.sandiklar.get(s) || o.koyler.sandikGanimeti(m.x, m.y, m.z);
         this.sandikKirildi(s);
         o.dunya.sandiklar.delete(s);
-        for (const e of d) if (e) o.dusenler.birak(e.id, e.adet, m.x + 0.5, m.y + 0.5, m.z + 0.5, 0, 0, 0, e.dayanim);
+        for (const e of d) if (e) o.dusenler.birak(e.id, e.adet, m.x + 0.5, m.y + 0.5, m.z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu);
         break;
       }
       case 'tk': if (m.tur === 'sandal' || m.tur === 'yelkenli') o.tekneler.ekle(m.tur, m.p[0], m.p[1], m.p[2], m.y); break;
@@ -245,8 +245,8 @@ export class SunucuOyun {
   }
   /* Uzak oyuncunun bir canlıya vurması / öldürmesi: görev ve itibar o oyuncuda işlenir */
   vurusOlayi(w, c) { if (w.tur.koylu && w.koy) c.k.gonder({ t: 'kv', k: w.koy.id }); }
-  olumOlayi(w, c) {
-    c.k.gonder({ t: 'ol', tur: w.turAd, k: w.tur.koylu && w.koy ? w.koy.id : null });
+  olumOlayi(w, c, op) {
+    c.k.gonder({ t: 'ol', tur: w.turAd, k: w.tur.koylu && w.koy ? w.koy.id : null, ok: op && op.ok ? 1 : 0 });
     if (w.tur.koylu && w.koy) this.oyun.koyler.koyluOldu(w, true);
   }
   sohbetGonder(s) { this.yay({ t: 'sh', a: this.ad, r: 0, m: s }); this.arayuz.sohbet(this.ad, s, 0); }

@@ -219,6 +219,32 @@ const RESSAM = {
   akasya_ust: p => halka(p, '#5f5751', '#c06a35', '#a2552a'),
   akasya_yaprak: p => yaprak(p, '#6f8a2c', 0.2),
   fidan_akasya: p => bitki(p, p => { const k = hex('#6d655d'), y = hex('#6f8a2c'); cizgi(p, 8, 15, 8, 8, k); cizgi(p, 8, 10, 5, 7, k); for (let x = 3; x < 13; x++) for (let yy = 4; yy < 8; yy++) if (p.r() < 0.7 && Math.abs(x - 8) + Math.abs(yy - 5.5) < 6) p.set(x, yy, karis(y, 0.8 + p.r() * 0.4)); }),
+  /* 0.14.0: büyü masası: üstte kırmızı örtü ve açık kitap, yanlarda koyu taş üzerinde parlayan mor işaretler */
+  buyu_ust: p => {
+    p.doldur('#8a1f2a', 0.08);
+    const k = hex('#5a1018'), a = hex('#b8323e'), elmas = hex('#5ee8e0');
+    for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); }
+    for (const [x, y] of [[1, 1], [14, 1], [1, 14], [14, 14]]) { p.set(x, y, elmas); }
+    for (let i = 2; i < 14; i++) { p.set(i, 1, a); p.set(1, i, a); }
+    /* Açık kitap */
+    const s = hex('#efe6cc'), sk = hex('#c9bc98'), cl = hex('#5a3a22');
+    for (let y = 5; y < 12; y++) for (let x = 3; x < 13; x++) p.set(x, y, x === 7 || x === 8 ? sk : s);
+    for (let x = 3; x < 13; x++) { p.set(x, 4, cl); p.set(x, 12, cl); }
+    for (let y = 6; y < 11; y += 2) for (let x = 4; x < 7; x++) if (p.r() < 0.8) p.set(x, y, hex('#6a5a8a'));
+    for (let y = 6; y < 11; y += 2) for (let x = 9; x < 12; x++) if (p.r() < 0.8) p.set(x, y, hex('#6a5a8a'));
+  },
+  buyu_yan: p => {
+    p.doldur('#24202c', 0.1); p.lekeler('#2f2938', 18, 2, 0.06);
+    /* Üstte sarkan örtü kenarı */
+    const r = hex('#8a1f2a'), rk = hex('#5a1018');
+    for (let x = 0; x < 16; x++) { p.set(x, 0, r); p.set(x, 1, r); p.set(x, 2, x % 3 === 1 ? r : rk); }
+    /* Parlayan işaretler */
+    const m = hex('#b48cff'), ma = hex('#e2d0ff');
+    const isaret = [[3, 6], [4, 6], [3, 7], [3, 8], [4, 8], [7, 5], [8, 6], [7, 7], [8, 8], [7, 9], [11, 6], [12, 6], [12, 7], [11, 8], [12, 9], [5, 11], [6, 12], [7, 11], [10, 12], [11, 11], [12, 12]];
+    for (const [x, y] of isaret) p.set(x, y, p.r() < 0.3 ? ma : m);
+    for (let x = 0; x < 16; x++) p.set(x, 15, hex('#16131c'));
+  },
+  buyu_alt: p => { p.doldur('#1e1a24', 0.1); p.lekeler('#2a2532', 20, 2, 0.06); },
   nilufer: p => bitki(p, p => { const c = hex('#3f8a2c'); for (let y = 1; y < 15; y++) for (let x = 1; x < 15; x++) { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6.6 && !(x > 7 && Math.abs(y - 7.5) < (x - 6) * 0.35)) p.set(x, y, karis(c, 0.8 + p.r() * 0.35)); } const f = hex('#f2b6d0'); p.set(5, 6, f); p.set(6, 5, f); p.set(5, 5, [255, 230, 120]); }),
   sarmasik: p => bitki(p, p => { const c = hex('#3e7a2a'); for (let i = 0; i < 4; i++) { let x = 2 + i * 4; for (let y = 0; y < 16; y++) { if (p.r() < 0.85) p.set(x, y, karis(c, 0.75 + p.r() * 0.45)); if (y % 3 === i % 3) { p.set(x + 1, y, karis(c, 1.1)); p.set(x - 1, y + 1, karis(c, 0.9)); } if (p.r() < 0.25) x += p.r() < 0.5 ? -1 : 1; x = Math.max(1, Math.min(14, x)); } } }),
   orumcek_agi: p => bitki(p, p => { const c = [235, 235, 240]; cizgi(p, 0, 0, 15, 15, c); cizgi(p, 15, 0, 0, 15, c); cizgi(p, 8, 0, 8, 15, c); cizgi(p, 0, 8, 15, 8, c); for (const r of [3, 6]) for (let a = 0; a < 32; a++) { const t = a / 32 * Math.PI * 2; p.set(Math.round(7.5 + Math.cos(t) * r), Math.round(7.5 + Math.sin(t) * r), c, 200); } }),

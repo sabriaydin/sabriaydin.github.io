@@ -1,7 +1,8 @@
 /* HungerMan - geliştirici konsolu (F8): test için komutlar, canlı bilgi satırı, komut geçmişi ve Tab ile tamamlama
    Hile niteliğindeki komutlar yalnızca "Komutlara izin ver" seçeneğiyle oluşturulan dünyalarda (ya da geliştirici kodu
    girildikten sonra) çalışır. Çok oyunculu istemcide yalnızca oyuncunun kendisini etkileyen komutlar çalışır. */
-import { ESYALAR, BLOKLAR, ETKILER, EKIN_SONRAKI, KATI, maksDayanim } from '../bloklar.js';
+import { ESYALAR, BLOKLAR, ETKILER, EKIN_SONRAKI, KATI, maksDayanim, BUYULER, uygunBuyuler, buyuMetinleri } from '../bloklar.js';
+import { BASARIMLAR, BASARIM } from '../oyun/basarimlar.js';
 import { HAVA, HAVA_ADI } from '../grafik/hava.js';
 import { TURLER } from '../varlik/turler.js';
 import { BIYOMLAR, BY } from '../dunya/uretici.js';
@@ -274,10 +275,10 @@ export class Konsol {
       if (n >= 0) h.xpEkle(n); else h.xp = Math.max(0, h.xp + n);
       this.tamam(`Deneyim: ${Math.floor(h.xp)} puan · ${h.seviye}. seviye.`);
     }, { hile: true, tamamla: () => ['seviye', 'sifirla'] });
-    ekle('etki', 'İksir etkisi verir ya da etkileri kaldırır', 'etki <hiz | gece | nefes | ates | guc> [süre sn] | etki temizle', (o, p) => {
+    ekle('etki', 'İksir ya da canavar etkisi verir, etkileri kaldırır', 'etki <hiz | gece | nefes | ates | guc | yavas | aclik> [süre sn] | etki temizle', (o, p) => {
       const a = kucuk(p[0] || '');
       if (a === 'temizle') { o.hayatta.etkiler = {}; this.tamam('Tüm etkiler kaldırıldı.'); return; }
-      if (!ETKILER[a]) { this.hata('Kullanım: etki <hiz | gece | nefes | ates | guc> [süre sn] | etki temizle'); return; }
+      if (!ETKILER[a]) { this.hata('Kullanım: etki <hiz | gece | nefes | ates | guc | yavas | aclik> [süre sn] | etki temizle'); return; }
       const sure = Math.max(1, this.sayi(p[1], 180));
       o.hayatta.etkiEkle(a, sure);
       this.tamam(`${ETKILER[a].ad} etkisi: ${Math.round(sure)} sn.`);
@@ -310,6 +311,30 @@ export class Konsol {
     ekle('erisim', 'Blok erişim mesafesini ayarlar (5-40 blok)', 'erisim <5-40>', (o, p) => {
       const n = Math.max(5, Math.min(40, Math.round(this.sayi(p[0], 5)))); o.etkilesim.erisim = n === 5 ? 0 : n; this.tamam(`Erişim ${n} blok.`);
     }, { hile: true });
+    /* 0.14.0: büyüler ve başarımlar */
+    ekle('buyu', 'Eldeki eşyayı büyüler ya da büyülerini kaldırır', 'buyu <büyü> [seviye] | buyu hepsi | buyu temizle | buyu liste', (o, p) => {
+      const a = kucuk(p[0] || 'liste'), E = o.envanter, s = E.seciliYuva();
+      if (a === 'liste') { this.yaz(Object.entries(BUYULER).map(([k, b]) => `${k} (${b.ad}, en çok ${b.maks})`).join(' · '), 'bilgi'); return; }
+      if (!s) { this.hata('Elde eşya yok.'); return; }
+      const e = ESYALAR[s.id], uygun = uygunBuyuler(s.id);
+      if (a === 'temizle') { delete s.buyu; E.bildir(); this.tamam(`${e.ad}: büyüler kaldırıldı.`); return; }
+      if (!uygun.length) { this.hata(`${e.ad} büyülenemez.`); return; }
+      if (a === 'hepsi') { s.buyu = Object.fromEntries(uygun.map(k => [k, BUYULER[k].maks])); E.bildir(); this.tamam(`${e.ad}: ${buyuMetinleri(s).join(', ')}.`); return; }
+      if (!BUYULER[a]) { this.hata('Büyüler: ' + Object.keys(BUYULER).join(', ')); return; }
+      if (!uygun.includes(a)) { this.hata(`${BUYULER[a].ad} bu eşyaya uygulanamaz. Uygun: ${uygun.join(', ')}`); return; }
+      const n = Math.max(1, Math.min(10, Math.floor(this.sayi(p[1], BUYULER[a].maks))));
+      s.buyu = { ...(s.buyu || {}), [a]: n }; E.bildir();
+      this.tamam(`${e.ad}: ${buyuMetinleri(s).join(', ')}.`);
+    }, { hile: true, tamamla: () => [...Object.keys(BUYULER), 'hepsi', 'temizle', 'liste'] });
+    ekle('basarim', 'Başarımları listeler, verir ya da sıfırlar', 'basarim [liste | ver <anahtar> | hepsi | sifirla]', (o, p) => {
+      const a = kucuk(p[0] || 'liste'), B = o.basarimlar;
+      if (!B) { this.hata('Başarımlar kullanılamıyor.'); return; }
+      if (a === 'liste') { this.yaz(`${B.kazanilan} / ${BASARIMLAR.length} kazanıldı. ` + BASARIMLAR.map(b => `${B.var(b.k) ? '✓' : '·'} ${b.k}`).join('  '), 'bilgi'); return; }
+      if (a === 'hepsi') { for (const b of BASARIMLAR) B.ver(b.k); this.tamam('Tüm başarımlar verildi.'); return; }
+      if (a === 'sifirla') { B.iceAktar(null); if (B.degisti) B.degisti(); this.tamam('Başarımlar sıfırlandı.'); return; }
+      if (a === 'ver') { const k = p[1] || ''; if (!BASARIM[k]) { this.hata('Anahtarlar: ' + BASARIMLAR.map(b => b.k).join(', ')); return; } if (B.ver(k)) this.tamam(`${BASARIM[k].ad} verildi.`); else this.yaz('Bu başarım zaten kazanılmış.', 'soluk'); return; }
+      this.hata('Kullanım: basarim [liste | ver <anahtar> | hepsi | sifirla]');
+    }, { hile: true, tamamla: () => ['liste', 'ver', 'hepsi', 'sifirla', ...BASARIMLAR.map(b => b.k)] });
     ekle('onar', 'Envanterdeki ve giyilen tüm eşyaları onarır', 'onar', o => {
       let n = 0;
       for (const s of [...o.envanter.yuvalar, ...o.envanter.zirh]) { const md = s && maksDayanim(ESYALAR[s.id]); if (md && s.dayanim != null && s.dayanim < md) { s.dayanim = md; n++; } }
@@ -321,7 +346,7 @@ export class Konsol {
       const e = ESYALAR[s.id];
       if (a === 'doldur') { s.adet = E.yigin(s.id); E.bildir(); this.tamam(`${e.ad} × ${s.adet}.`); }
       else if (a === 'sil') { E.yuvalar[E.secili] = null; E.bildir(); this.tamam(`${e.ad} silindi.`); }
-      else this.yaz(`${e.ad} (${s.id}) × ${s.adet}${s.dayanim != null ? ` · dayanım ${s.dayanim}/${maksDayanim(e)}` : ''} · tür ${e.tur}`, 'bilgi');
+      else this.yaz(`${e.ad} (${s.id}) × ${s.adet}${s.dayanim != null ? ` · dayanım ${s.dayanim}/${maksDayanim(e)}` : ''} · tür ${e.tur}${s.buyu ? ' · ' + buyuMetinleri(s).join(', ') : ''}`, 'bilgi');
     }, { hile: true, tamamla: () => ['doldur', 'sil', 'bilgi'] });
     ekle('baris', 'Canlıların oyunculara saldırmasını açar / kapatır', 'baris', o => {
       o.varliklar.barisci = !o.varliklar.barisci; this.tamam(`Barış ${o.varliklar.barisci ? 'açık: canlılar saldırmaz' : 'kapalı'}.`);

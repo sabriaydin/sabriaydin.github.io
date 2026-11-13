@@ -117,6 +117,18 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 14. aşama (0.14.0): Yeni canavarlar, büyü sistemi, başarımlar
+
+- Yeni canavarlar: **Mumya** (çöl ve savan; güneşte yanmaz, vuruşu açlık etkisi verir), **Boğulmuş Zombi** (gece derin suların dibinde, çok derin sularda her zaman; suda batar ve hedefe doğru yüzer; inci ya da bakır düşürebilir), **Buz İskeleti** (karlı bölgeler; okları yavaşlık etkisi verir), **Yarasa** (mağaralarda ve gece açıkta sürüler hâlinde; dalgalı uçar, vurup uzaklaşır; gündüz açıkta kaybolur). Mumya ve boğulmuş zombi zombi görevlerine, buz iskeleti iskelet görevlerine sayılır.
+- Olumsuz etkiler: Yavaşlık (hareket %40 yavaş) ve Açlık (açlık hızla azalır); göstergede kırmızı kenarla gösterilir.
+- **Büyü Masası** (2 elmas, 2 parıltı kristali, 4 kesme taş; üretim masasında): aletler, silahlar ve zırhlar deneyim seviyesi (2 / 5 / 9) ve parıltı kristali (1 / 2 / 3) karşılığında büyülenir. Seçenekler her büyülemeden sonra yenilenir.
+- Büyüler: Keskinlik (hasar), Savurma (geri itme), Yağma (ganimet), Verimlilik (kazma hızı), Servet (cevher ürünü), Güç (ok hasarı), Cazibe (balık bekleme süresi), Koruma (hasar azaltma, toplam en çok %64), Solunum (oksijen), Tüy Düşüşü (düşme hasarı), Kırılmazlık (yıpranma).
+- Örs: aynı türden iki eşya birleştirilirken büyüler de birleşir (eşit seviyeli iki büyü bir seviye yükselir); onarımda büyüler korunur.
+- Büyülü eşyalar envanterde mor parıltıyla, elde hafif mor ışıltıyla gösterilir; ipucunda büyüler listelenir. Büyüler kayıtta, sandıklarda, yere düşen eşyalarda ve çok oyunculuda korunur.
+- **Başarımlar**: 40 başarım (Başlangıç, Madencilik, Mücadele, Zanaat, Keşif, Köyler). L tuşu ya da duraklatma menüsündeki “Başarımlar” ile açılır; kazanılan başarım sağ üstte gösterilir. Çok oyunculuda her oyuncunun başarımları sunucuda oyuncu adıyla saklanır.
+- Yağmurda gökyüzü daha belirgin griye döner, bulutlar koyulaşır.
+- Geliştirici: `buyu <büyü> [seviye] | hepsi | temizle | liste`, `basarim [liste | ver | hepsi | sifirla]`; `etki` komutuna yavas ve aclik eklendi. Pencerede “Büyü” hazır seti, Eşyalar sekmesinde Büyü ve Başarımlar bölümleri.
+
 ## 13. aşama (0.13.0): Düzeltmeler, biyomlar ve mağaralar
 
 - Biyomlar yeniden düzenlendi: iklim (sıcaklık ve nem) geniş ölçekli ve yumuşak geçişlidir; çöl ile karlı bölgeler yan yana gelmez, aralarında ılıman kuşak bulunur. Sıcak dağlarda kar zirvesi oluşmaz. Yeni biyomlar: Savan (akasya ağaçları, kuru çimen), Bataklık (bataklık ağaçları, sarmaşık, nilüfer), Karlı Ova (seyrek ladinler).
@@ -224,6 +236,8 @@ js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
 js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları
 js/dunya/maden-uretici.js Terk edilmiş madenler
+js/oyun/basarimlar.js  Başarım listesi, olaylar ve düzenli denetim
+js/arayuz/basarim-ekrani.js Başarımlar penceresi ve kazanma kutusu
 js/dunya/batik-uretici.js Batık gemiler
 js/dunya/meshleyici.js Blokları çizilebilir geometriye çevirir
 js/dunya/isci.js      Arka plan işçisi (üretim ve meshleme)

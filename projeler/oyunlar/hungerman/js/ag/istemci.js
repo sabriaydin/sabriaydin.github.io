@@ -35,12 +35,12 @@ export class IstemciOyun {
     this.dinle = (x, y, z, id, eski, kaynak) => { if (kaynak !== 'ag') this.gonder({ t: 'b', b: [x, y, z, id], e: kaynak === 'yerel' ? 1 : 0 }); };
     o.dunya.dinleyiciler.push(this.dinle);
     o.dusenler.ag = {
-      birakIste: (id, adet, dayanim, x, y, z, vx, vy, vz, gecikme) => this.gonder({ t: 'bk', a: [id, adet, dayanim ?? null, r2(x), r2(y), r2(z), r2(vx), r2(vy), r2(vz), gecikme] }),
+      birakIste: (id, adet, dayanim, x, y, z, vx, vy, vz, gecikme, buyu) => this.gonder({ t: 'bk', a: [id, adet, dayanim ?? null, r2(x), r2(y), r2(z), r2(vx), r2(vy), r2(vz), gecikme, buyu || null] }),
       alIste: d => { const n = sigar(o.envanter, d.id, d.adet); if (n <= 0) return false; this.gonder({ t: 'al', i: d.ni, n }); return true; }
     };
     o.varliklar.ayna = true; o.varliklar.dinleyici = o.oyuncu.konum;
     o.varliklar.ag = {
-      vur: (v, n, kaynak, op) => this.gonder({ t: 'vur', i: v.id, n, k: kaynak ? v3(kaynak) : null, it: (op && op.itme) ?? 1 }),
+      vur: (v, n, kaynak, op) => this.gonder({ t: 'vur', i: v.id, n, k: kaynak ? v3(kaynak) : null, it: (op && op.itme) ?? 1, yg: (op && op.yagma) || 0 }),
       okAt: (p, h, hasar) => this.gonder({ t: 'ok', p: v3(p), v: v3(h), h: hasar }),
       besle: v => this.gonder({ t: 'bes', i: v.id })
     };
@@ -114,14 +114,14 @@ export class IstemciOyun {
       case 'da': o.dusenler.aynaAdet(m.i, m.n); break;
       case 'ver': {
         if (!ESYALAR[m.id]) return;
-        const k = o.envanter.ekle(m.id, m.n, m.dy ?? undefined);
+        const k = o.envanter.ekle(m.id, m.n, m.dy ?? undefined, m.b || undefined);
         this.ses.topla();
-        if (k > 0) { const p = o.oyuncu.konum; o.dusenler.birak(m.id, k, p.x, p.y + 1, p.z, 0.001, 2, 0.001, m.dy ?? undefined, 1.5); }
+        if (k > 0) { const p = o.oyuncu.konum; o.dusenler.birak(m.id, k, p.x, p.y + 1, p.z, 0.001, 2, 0.001, m.dy ?? undefined, 1.5, m.b || undefined); }
         break;
       }
       case 'h': this.arayuz.hasar(m.n, m.s, m.k[0], m.k[1], m.a); break;
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
-      case 'ol': o.gorevler.oldurme(m.tur); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
+      case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
       case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;
       case 'sim': if (o.hava) o.hava.simsekGoster(m.p[0], m.p[1], m.p[2], o.oyuncu.konum, this.ses); break;
       case 'o+': o.varliklar.aynaOk(m.i, m.p, m.v, m.d); break;
@@ -169,7 +169,7 @@ export class IstemciOyun {
     this.gonder({ t: 'ky', v: {
       oyuncu: { x: r3(p.x), y: r3(p.y), z: r3(p.z), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
       envanter: o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, olumNoktasi: o.olumNoktasi,
-      gorevler: o.gorevler.disaAktar(), koyler: o.koyler.disaAktar(), yerler: o.yerler
+      gorevler: o.gorevler.disaAktar(), koyler: o.koyler.disaAktar(), yerler: o.yerler, basarimlar: o.basarimlar ? o.basarimlar.disaAktar() : undefined
     } });
   }
 

@@ -112,13 +112,16 @@ export class Gorevler {
     d.gorevNo[q.idx] = (d.gorevNo[q.idx] || 0) + 1;
     this.aktif = this.aktif.filter(g => g !== q);
     this.tamamlanan++;
+    if (this.tamamlandi) this.tamamlandi(q);
     this.bildir();
   }
 
   /* Oyuncunun öldürdüğü canlıları say */
   oldurme(turAd) {
     let d = false;
-    for (const q of this.aktif) if (q.tur === 'oldur' && q.hedefTur === turAd && q.sayac < q.adet) { q.sayac++; d = true; }
+    /* Biyoma özgü türler (mumya, boğulmuş zombi, buz iskeleti) ana türün görevine sayılır */
+    const aile = TURLER[turAd] && TURLER[turAd].aile;
+    for (const q of this.aktif) if (q.tur === 'oldur' && (q.hedefTur === turAd || q.hedefTur === aile) && q.sayac < q.adet) { q.sayac++; d = true; }
     if (d) this.bildir();
   }
 

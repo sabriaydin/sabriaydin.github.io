@@ -41,6 +41,7 @@ const SETLER = {
   maden: { ad: 'Madenci', esya: [[312, 1], [313, 1], [314, 1], [46, 64], [276, 16], [408, 1], [409, 1], [410, 1], [411, 1]] },
   denizci: { ad: 'Denizci', esya: [[454, 1], [455, 1], [453, 1], [456, 1], [457, 1], [298, 16]] },
   ciftci: { ad: 'Çiftçi', esya: [[343, 1], [292, 32], [328, 16], [329, 16], [291, 32], [104, 32], [105, 2], [296, 16]] },
+  buyu: { ad: 'Büyü', esya: [[156, 1], [61, 32], [139, 1], [316, 1], [319, 1], [286, 1], [453, 1], [412, 1], [415, 1]] },
   simya: { ad: 'Simya ve örs', esya: [[140, 1], [139, 1], [331, 16], [61, 8], [283, 8], [265, 16], [297, 8], [299, 4], [263, 4], [450, 4], [296, 8], [328, 8], [257, 8]] },
   tuccar: { ad: 'Tüccar', esya: [[288, 64], [291, 40], [271, 12], [257, 24], [8, 24], [282, 12], [297, 12]] }
 };
@@ -153,6 +154,9 @@ export class GelistiriciPenceresi {
     const l = Object.entries(ESYALAR).filter(([, e]) => e && e.ad && !e.gizli && (this.kat === 'hepsi' || kategori(e) === this.kat) && (!a || kucuk(e.ad).includes(a) || String(e.id) === a));
     return this.bolum('Hazır setler', `<div class="gelDugmeler">${Object.entries(SETLER).map(([k, s]) => `<button type="button" data-set="${k}" title="${esc(s.esya.map(([i, n]) => `${ESYALAR[i] ? ESYALAR[i].ad : i} × ${n}`).join(', '))}">${s.ad}</button>`).join('')}</div>`) +
       this.bolum('Envanter işlemleri', this.dugmeler(this.dugme('onar', 'Tüm eşyaları onar'), this.dugme('eldeki doldur', 'Eldeki yığını doldur'), this.dugme('eldeki sil', 'Eldekini sil'), this.onay('envanter temizle', 'Envanteri boşalt'))) +
+      this.bolum('Büyü', this.dugmeler(this.dugme('buyu hepsi', 'Eldekini en yüksek büyülerle büyüle'), this.dugme('buyu temizle', 'Eldekinin büyülerini kaldır'), this.dugme('buyu liste', 'Büyüleri listele')),
+        'Tek büyü için konsolda: buyu <büyü> [seviye]') +
+      this.bolum('Başarımlar', this.dugmeler(this.dugme('basarim liste', 'Durumu göster'), this.dugme('basarim hepsi', 'Tümünü ver'), this.onay('basarim sifirla', 'Sıfırla'))) +
       this.bolum('Eşya ver', `
         <div class="gelSatir"><input type="search" id="gelAra" placeholder="Eşya adı ya da numarası" value="${esc(this.arama)}" autocomplete="off">
           <span class="gelAdet" title="Tıklamada verilecek adet">${[1, 8, 16, 64].map(n => `<button type="button" data-adet="${n}" class="${this.adet === n ? 'on' : ''}">${n}</button>`).join('')}</span></div>

@@ -19,7 +19,9 @@ export const DOKULAR = [
   'ors', 'simya_ust', 'simya_sise', 'demir_cubuk',
   /* 0.13.0: yeni biyomlar, mağara içerikleri */
   'kuru_cimen_ust', 'kuru_cimen_yan', 'bataklik_ust', 'bataklik_yan', 'akasya_yan', 'akasya_ust', 'akasya_yaprak', 'nilufer',
-  'sarmasik', 'orumcek_agi', 'yosun_blok', 'sarkit', 'dikit', 'damlatasi', 'isikli_mantar', 'kar_katman', 'fidan_akasya'
+  'sarmasik', 'orumcek_agi', 'yosun_blok', 'sarkit', 'dikit', 'damlatasi', 'isikli_mantar', 'kar_katman', 'fidan_akasya',
+  /* 0.14.0: büyü masası */
+  'buyu_ust', 'buyu_yan', 'buyu_alt'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -180,6 +182,8 @@ blok(150, { ad: 'Sarkıt', dok: 'sarkit', cizim: C_CAPRAZ, kati: false, opak: fa
 blok(151, { ad: 'Dikit', dok: 'dikit', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.8, alet: 'kazma', ses: 'tas', bitki: true, dusur: () => [[150, 1]] });
 blok(152, { ad: 'Damlataşı', dok: 'damlatasi', sertlik: 1.5, alet: 'kazma', seviye: 1, ses: 'tas' });
 blok(153, { ad: 'Işıklı Mantar', dok: 'isikli_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, isik: 8, mesale: true });
+/* 0.14.0: büyü masası (aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir) */
+blok(156, { ad: 'Büyü Masası', dok: { ust: 'buyu_ust', yan: 'buyu_yan', on: 'buyu_yan', alt: 'buyu_alt' }, sertlik: 5, alet: 'kazma', seviye: 1, ses: 'tas', istasyon: 'buyu' });
 blok(155, { ad: 'Akasya Fidanı', dok: 'fidan_akasya', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, fidan: 'akasya' });
 
 /* Maden deneyimi */
@@ -295,7 +299,10 @@ export const ETKILER = {
   gece: { ad: 'Gece Görüşü', renk: '#5a7aff', aciklama: 'Karanlıkta görüş açılır' },
   nefes: { ad: 'Su Altında Nefes', renk: '#3ac0c0', aciklama: 'Su altında oksijen azalmaz' },
   ates: { ad: 'Ateşe Dayanıklılık', renk: '#ff8a2a', aciklama: 'Lav ve yanma hasar vermez' },
-  guc: { ad: 'Güç', renk: '#d83a3a', aciklama: 'Yakın dövüş hasarı %50 artar' }
+  guc: { ad: 'Güç', renk: '#d83a3a', aciklama: 'Yakın dövüş hasarı %50 artar' },
+  /* 0.14.0: canavarların verdiği olumsuz etkiler */
+  yavas: { ad: 'Yavaşlık', renk: '#7a8fa8', aciklama: 'Hareket hızı %40 azalır', kotu: true },
+  aclik: { ad: 'Açlık', renk: '#8a7a3a', aciklama: 'Açlık hızla azalır', kotu: true }
 };
 [['hiz', 'Hız İksiri'], ['gece', 'Gece Görüşü İksiri'], ['nefes', 'Su Altında Nefes İksiri'], ['ates', 'Ateşe Dayanıklılık İksiri'], ['guc', 'Güç İksiri']].forEach(([k, ad], i) =>
   esya(332 + i, { ad, simge: 'iksir', renk: ETKILER[k].renk, tur: 'iksir', etki: { tur: k, sure: 180 }, yigin: 16, ozellik: `${ETKILER[k].aciklama} (3 dakika)` }));
@@ -336,6 +343,32 @@ export function onarimMalzemesi(id) {
   return null;
 }
 export const aletId = (malzeme, tur) => 300 + malzeme * 4 + ALET_TURLERI.findIndex(t => t.tur === tur);
+
+/* ---------- Büyüler (0.14.0) ----------
+   Eşya yığınında buyu: { anahtar: seviye } olarak saklanır. uygun: eşya bilgisine göre büyünün uygulanabildiği eşyalar */
+const ALET_TUR = (e, ...l) => !!(e && e.alet && l.includes(e.alet.tur));
+const ZIRH_P = (e, ...l) => !!(e && e.zirh && (!l.length || l.includes(e.zirh.parca)));
+export const BUYULER = {
+  keskin: { ad: 'Keskinlik', maks: 5, uygun: e => ALET_TUR(e, 'kilic', 'balta'), aciklama: 'Yakın dövüş hasarı artar' },
+  savurma: { ad: 'Savurma', maks: 2, uygun: e => ALET_TUR(e, 'kilic'), aciklama: 'Vurulan canlı daha uzağa savrulur' },
+  yagma: { ad: 'Yağma', maks: 3, uygun: e => ALET_TUR(e, 'kilic'), aciklama: 'Canlılar daha çok ganimet düşürür' },
+  verim: { ad: 'Verimlilik', maks: 5, uygun: e => ALET_TUR(e, 'kazma', 'balta', 'kurek', 'capa'), aciklama: 'Kazma hızı artar' },
+  servet: { ad: 'Servet', maks: 3, uygun: e => ALET_TUR(e, 'kazma'), aciklama: 'Cevherlerden daha çok ürün düşer' },
+  guc: { ad: 'Güç', maks: 5, uygun: e => ALET_TUR(e, 'yay'), aciklama: 'Ok hasarı artar' },
+  cazibe: { ad: 'Cazibe', maks: 3, uygun: e => ALET_TUR(e, 'olta'), aciklama: 'Balıklar daha çabuk oltaya gelir' },
+  koruma: { ad: 'Koruma', maks: 4, uygun: e => ZIRH_P(e), aciklama: 'Alınan hasar azalır' },
+  solunum: { ad: 'Solunum', maks: 3, uygun: e => ZIRH_P(e, 0), aciklama: 'Su altında oksijen daha yavaş azalır' },
+  tuy: { ad: 'Tüy Düşüşü', maks: 4, uygun: e => ZIRH_P(e, 3), aciklama: 'Düşme hasarı azalır' },
+  kirilmaz: { ad: 'Kırılmazlık', maks: 3, uygun: e => !!(e && (e.alet || e.zirh)), aciklama: 'Eşya daha geç yıpranır' }
+};
+const ROMA = ['', 'I', 'II', 'III', 'IV', 'V'];
+export const romaRakam = n => ROMA[n] || String(n);
+export const buyuSeviye = (s, k) => (s && s.buyu ? s.buyu[k] || 0 : 0);
+export const buyuluMu = s => !!(s && s.buyu && Object.keys(s.buyu).length);
+export const buyuMetinleri = s => (buyuluMu(s) ? Object.entries(s.buyu).filter(([k]) => BUYULER[k]).map(([k, n]) => `${BUYULER[k].ad} ${romaRakam(n)}`) : []);
+export const uygunBuyuler = id => Object.keys(BUYULER).filter(k => BUYULER[k].uygun(E[id]));
+/* Yığın kopyası için büyü nesnesi (boşsa undefined) */
+export const buyuKopya = b => (b && typeof b === 'object' && Object.keys(b).length ? { ...b } : undefined);
 
 export const ESYALAR = E;
 export const maksDayanim = e => (e ? (e.alet ? e.alet.dayanim : e.zirh ? e.zirh.dayanim : null) : null);

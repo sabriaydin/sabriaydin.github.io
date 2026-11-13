@@ -1,6 +1,6 @@
 /* HungerMan - oyun içi gösterge: hızlı erişim çubuğu, can / açlık / oksijen, pusula, saat, bildirimler */
 import { simge } from '../grafik/doku.js';
-import { ESYALAR, maksDayanim, ETKILER } from '../bloklar.js';
+import { ESYALAR, maksDayanim, ETKILER, buyuluMu } from '../bloklar.js';
 import { ikon, IKON_RENK } from './ikonlar.js';
 
 /* Pusula yazı tipleri: okunaklı, düz bir yazı tipi (piksel yazı tipi küçük boyutta zor okunur) */
@@ -50,6 +50,7 @@ export class Hud {
     if (!s) return '';
     const e = ESYALAR[s.id];
     let h = `<img src="${simge(s.id).url}" alt="">`;
+    if (buyuluMu(s)) h += '<span class="parilti"></span>';
     if (s.adet > 1) h += `<span class="adet">${s.adet}</span>`;
     const md = maksDayanim(e);
     if (s.dayanim != null && md && s.dayanim < md) {
@@ -242,7 +243,7 @@ export class Hud {
   etkilerCiz(etkiler) {
     const h = Object.entries(etkiler).filter(([k, v]) => ETKILER[k] && v > 0).map(([k, v]) => {
       const s = Math.ceil(v), t = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-      return `<div class="etki${s <= 15 ? ' az' : ''}" style="--r:${ETKILER[k].renk}"><i></i><span>${ETKILER[k].ad}</span><b>${t}</b></div>`;
+      return `<div class="etki${s <= 15 ? ' az' : ''}${ETKILER[k].kotu ? ' kotu' : ''}" style="--r:${ETKILER[k].renk}"><i></i><span>${ETKILER[k].ad}</span><b>${t}</b></div>`;
     }).join('');
     if (h !== this.son.etki) { this.son.etki = h; $('#etkiler').innerHTML = h; }
   }

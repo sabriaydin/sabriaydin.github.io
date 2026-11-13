@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 
 const ERISIM = 5;
@@ -57,6 +57,7 @@ export class Etkilesim {
     return true;
   }
 
+  olay(k) { if (this.arayuz.olay) this.arayuz.olay(k); }
   aletBilgi() {
     const s = this.envanter.seciliYuva();
     const e = s && ESYALAR[s.id];
@@ -71,6 +72,8 @@ export class Etkilesim {
     const alabilir = b.seviye === 0 || (dogru && a.seviye >= b.seviye);
     let hiz = dogru ? a.hiz : 1;
     if (a && a.tur === 'kilic' && b.ses === 'bitki') hiz = 2;
+    /* Verimlilik büyüsü: doğru aletle kazma hızı seviye başına %30 artar */
+    if (dogru) hiz *= 1 + 0.3 * buyuSeviye(this.envanter.seciliYuva(), 'verim');
     let s = b.sertlik * (alabilir ? 1.5 : 5) / hiz;
     if (this.oyuncu.basSuda) s *= 3;
     else if (!this.oyuncu.yerde && !this.oyuncu.suda) s *= 2;
@@ -103,7 +106,7 @@ export class Etkilesim {
       if (g.sag && this.sagBekleme <= 0 && !this.tekneler.binilen) {
         this.sagBekleme = 0.4;
         if (this.olta && this.olta.aktif) this.olta.kaldir();
-        if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne');
+        if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) { this.olay('tekne'); this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne'); }
       } else if (g.sol && this.saldiriBekleme <= 0) { this.saldiriBekleme = 0.3; this.vurus = 0.01; this.tekneler.vur(this.hedefTekne); }
       this.sahne.secimGoster(null, 0);
       return;
@@ -170,11 +173,16 @@ export class Etkilesim {
   saldir(v) {
     const a = this.aletBilgi();
     let hasar = a && a.tur !== 'yay' ? a.hasar : 1;
+    const es = this.envanter.seciliYuva();
+    /* Keskinlik: seviye başına +1 hasar (yarım kalp) */
+    if (a && a.tur !== 'yay') hasar += buyuSeviye(es, 'keskin');
     if (this.hayatta.etki('guc')) hasar *= 1.5;
     const o = this.oyuncu;
     const kritik = !o.yerde && !o.suda && o.hiz.y < 0;
     if (kritik) { hasar *= 1.5; this.dusenler.renkliParcacik([1, 0.9, 0.5], v.konum.x, v.konum.y + v.tur.boy * 0.7, v.konum.z, 8); }
-    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme: o.kosuyor ? 1.5 : 1, oyuncu: true })) {
+    /* Savurma: geri itme seviye başına %60 artar; Yağma: ganimet artar */
+    const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma'));
+    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma') })) {
       this.ses.vurus();
       if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       this.hayatta.yor(0.1);
@@ -185,7 +193,9 @@ export class Etkilesim {
     const g = this.germe;
     const p = goz.clone().addScaledVector(yon, 0.5);
     const tam = g >= 1;
-    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), 2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0));
+    /* Güç büyüsü: ok hasarı seviye başına %25 artar */
+    const gb = 1 + 0.25 * buyuSeviye(this.envanter.seciliYuva(), 'guc');
+    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), (2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0)) * gb);
     this.envanter.harca(287, 1);
     if (this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Yayınız kırıldı.'); }
     this.ses.yayAt();
@@ -205,10 +215,11 @@ export class Etkilesim {
     /* Kapının diğer yarısı da kaldırılır */
     if (b.sekil === 'kapi') { const oy = h.y + (b.ust ? -1 : 1), ob = d.blok(h.x, oy, h.z); if (BLOKLAR[ob] && BLOKLAR[ob].sekil === 'kapi') d.blokKoy(h.x, oy, h.z, 0); }
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
-    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim);
+    if (b.ekin === 3) this.olay('hasat');
+    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
-    if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z);
+    if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z, b.xp ? buyuSeviye(this.envanter.seciliYuva(), 'servet') : 0);
     const a = this.aletBilgi();
     if (a && b.sertlik > 0) {
       if (this.envanter.aletYipran(a.tur === 'kilic' ? 2 : 1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
@@ -227,10 +238,11 @@ export class Etkilesim {
     }
   }
 
-  dusur(id, x, y, z) {
+  /* servet: Servet büyüsü seviyesi (cevherlerde blok dışındaki ürünler çoğalır) */
+  dusur(id, x, y, z, servet = 0) {
     const b = BLOKLAR[id];
     const liste = b.dusur ? b.dusur(Math.random) : [[id, 1]];
-    for (const [e, n] of liste) if (n > 0) this.dusenler.birak(e, n, x + 0.5, y + 0.4, z + 0.5);
+    for (const [e, n0] of liste) { const n = servet && e !== id ? n0 * (1 + Math.floor(Math.random() * (servet + 1))) : n0; if (n > 0) this.dusenler.birak(e, n, x + 0.5, y + 0.4, z + 0.5); }
   }
 
   kullan(g) {
@@ -297,7 +309,7 @@ export class Etkilesim {
     if (e.ekin && !e.yemek) return false;
     /* İksir: etkisi süre boyunca devam eder, boş şişe geri kalır */
     if (e.tur === 'iksir' && e.etki) {
-      this.hayatta.etkiEkle(e.etki.tur, e.etki.sure);
+      this.hayatta.etkiEkle(e.etki.tur, e.etki.sure); this.olay('iksir');
       env.seciliAzalt(1); env.ekle(331, 1); this.ses.ic();
       this.arayuz.bildirim(`${ETKILER[e.etki.tur].ad} etkisi başladı: 3 dakika.`, s.id);
       return true;
@@ -306,6 +318,7 @@ export class Etkilesim {
       if (this.hayatta.aclik >= 20 && !e.iyilestirme) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
       if (e.iyilestirme) this.hayatta.iyiles(e.iyilestirme);
       if (this.hayatta.ye(e.yemek, e.zehir || 0)) this.arayuz.bildirim('Mide bulantısı: açlık bir süre daha hızlı azalır.');
+      if (e.pismis) this.olay('pisir');
       env.seciliAzalt(1); this.ses.ye();
       if (s.id === 269) env.ekle(270, 1);
       return true;
@@ -412,7 +425,7 @@ export class Etkilesim {
     if (!s) return;
     const n = hepsi ? s.adet : 1;
     const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu();
-    this.dusenler.birak(s.id, n, goz.x + yon.x * 0.5, goz.y - 0.3 + yon.y * 0.5, goz.z + yon.z * 0.5, yon.x * 5, yon.y * 5 + 2, yon.z * 5, s.dayanim, 1.5);
+    this.dusenler.birak(s.id, n, goz.x + yon.x * 0.5, goz.y - 0.3 + yon.y * 0.5, goz.z + yon.z * 0.5, yon.x * 5, yon.y * 5 + 2, yon.z * 5, s.dayanim, 1.5, s.buyu);
     this.envanter.seciliAzalt(n);
     this.vurus = 0.01;
   }

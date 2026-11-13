@@ -1,5 +1,5 @@
 /* HungerMan - envanter: 36 yuva (ilk 9 yuva hızlı erişim çubuğu), yığınlama, alet dayanımı */
-import { ESYALAR, maksDayanim } from '../bloklar.js';
+import { ESYALAR, maksDayanim, buyuKopya, buyuSeviye } from '../bloklar.js';
 
 export const YUVA = 36;
 
@@ -12,15 +12,17 @@ export class Envanter {
   }
   bildir() { this.degisti && this.degisti(); }
   yigin(id) { return (ESYALAR[id] && ESYALAR[id].yigin) || 64; }
-  yeni(id, adet, dayanim) {
+  /* buyu: alet ve zırhların büyüleri ({ anahtar: seviye }) */
+  yeni(id, adet, dayanim, buyu) {
     const e = ESYALAR[id];
     const s = { id, adet };
     const m = maksDayanim(e);
     if (m != null) s.dayanim = dayanim != null ? dayanim : m;
+    const b = buyuKopya(buyu); if (b) s.buyu = b;
     return s;
   }
   /* Eşya ekler; sığmayan miktarı döndürür */
-  ekle(id, adet = 1, dayanim) {
+  ekle(id, adet = 1, dayanim, buyu) {
     const max = this.yigin(id);
     const sira = [...Array(YUVA).keys()];
     if (max > 1) for (const i of sira) {
@@ -29,7 +31,7 @@ export class Envanter {
     }
     for (const i of sira) {
       if (!adet) break;
-      if (!this.yuvalar[i]) { const k = Math.min(adet, max); this.yuvalar[i] = this.yeni(id, k, dayanim); adet -= k; }
+      if (!this.yuvalar[i]) { const k = Math.min(adet, max); this.yuvalar[i] = this.yeni(id, k, dayanim, buyu); adet -= k; }
     }
     this.bildir();
     return adet;
@@ -58,11 +60,13 @@ export class Envanter {
     s.adet -= n; if (s.adet <= 0) this.yuvalar[this.secili] = null;
     this.bildir();
   }
-  /* Elde tutulan aletin dayanımını azaltır; kırılırsa true döner */
+  /* Elde tutulan aletin dayanımını azaltır; kırılırsa true döner (Kırılmazlık büyüsü yıpranmayı olasılıkla önler) */
   aletYipran(n = 1) {
     if (this.sinirsiz) return false;
     const s = this.yuvalar[this.secili];
     if (!s || s.dayanim == null) return false;
+    const k = buyuSeviye(s, 'kirilmaz');
+    if (k && Math.random() < k / (k + 1)) return false;
     s.dayanim -= n;
     if (s.dayanim <= 0) { this.yuvalar[this.secili] = null; this.bildir(); return true; }
     this.bildir();
@@ -73,7 +77,7 @@ export class Envanter {
   /* Hasar alınınca giyilen zırhlar yıpranır */
   zirhYipran(n = 1) {
     let kirildi = false;
-    for (let i = 0; i < 4; i++) { const z = this.zirh[i]; if (!z) continue; z.dayanim -= n; if (z.dayanim <= 0) { this.zirh[i] = null; kirildi = true; } }
+    for (let i = 0; i < 4; i++) { const z = this.zirh[i]; if (!z) continue; const k = buyuSeviye(z, 'kirilmaz'); if (k && Math.random() < k / (k + 1) * 0.6) continue; z.dayanim -= n; if (z.dayanim <= 0) { this.zirh[i] = null; kirildi = true; } }
     this.bildir();
     return kirildi;
   }
@@ -86,14 +90,16 @@ export class Envanter {
     this.bildir();
     return true;
   }
+  /* Giyilen zırhlardaki bir büyünün toplam seviyesi */
+  zirhBuyu(k) { let n = 0; for (const z of this.zirh) n += buyuSeviye(z, k); return n; }
   temizle() { this.yuvalar.fill(null); this.zirh = [null, null, null, null]; this.bildir(); }
   tumEsyalar() { return [...this.yuvalar, ...this.zirh].filter(Boolean); }
-  disaAktar() { const f = s => (s ? [s.id, s.adet, s.dayanim ?? null] : null); return { yuvalar: this.yuvalar.map(f), zirh: this.zirh.map(f), secili: this.secili }; }
+  disaAktar() { const f = s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null); return { yuvalar: this.yuvalar.map(f), zirh: this.zirh.map(f), secili: this.secili }; }
   iceAktar(o) {
     this.yuvalar = new Array(YUVA).fill(null);
     this.zirh = [null, null, null, null];
-    if (o && o.yuvalar) o.yuvalar.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < YUVA) this.yuvalar[i] = this.yeni(s[0], s[1], s[2] ?? undefined); });
-    if (o && o.zirh) o.zirh.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < 4) this.zirh[i] = this.yeni(s[0], s[1], s[2] ?? undefined); });
+    if (o && o.yuvalar) o.yuvalar.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < YUVA) this.yuvalar[i] = this.yeni(s[0], s[1], s[2] ?? undefined, s[3]); });
+    if (o && o.zirh) o.zirh.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < 4) this.zirh[i] = this.yeni(s[0], s[1], s[2] ?? undefined, s[3]); });
     this.secili = (o && o.secili) || 0;
     this.bildir();
   }

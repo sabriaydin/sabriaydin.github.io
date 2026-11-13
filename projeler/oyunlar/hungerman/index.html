@@ -52,6 +52,7 @@
   <div id="etkiler"></div>
   <div id="esyaAdi"></div>
   <div id="bildirimler"></div>
+  <div id="basarimKutu" hidden><img alt=""><div><small>Başarım kazanıldı</small><b></b><span></span></div></div>
   <pre id="hata" hidden></pre>
   <div id="fps" hidden></div>
   <div id="tikla" hidden><b>Devam etmek için tıklayın</b><span>Duraklatmak için Esc</span></div>
@@ -86,7 +87,13 @@
       <header><h2>Örs</h2><span class="ipucuMetin">Eşyalar, malzemesiyle ya da aynı türden ikinci bir eşyayla onarılır</span></header>
       <div id="orsIzgara" class="izgara"></div>
       <div id="orsBilgi"></div>
-      <p class="ipucuMetin">Her malzeme dayanımın dörtte birini onarır ve 1 deneyim seviyesi tutar. İki aynı eşyanın birleştirilmesi 2 seviye tutar.</p>
+      <p class="ipucuMetin">Her malzeme dayanımın dörtte birini onarır ve 1 deneyim seviyesi tutar. İki aynı eşyanın birleştirilmesi 2 seviye tutar; büyüler birleşir (aynı seviyedeki iki büyü bir seviye yükselir).</p>
+    </section>
+    <section class="envBuyu" hidden>
+      <header><h2>Büyü Masası</h2><span class="ipucuMetin">Alet, silah ya da zırh deneyim seviyesi ve parıltı kristali karşılığında büyülenir</span></header>
+      <div id="buyuIzgara" class="izgara"></div>
+      <div id="buyuSecenek"></div>
+      <p class="ipucuMetin">Sol yuvaya büyülenecek eşya, sağ yuvaya parıltı kristali konur. Seçenekler her büyülemeden sonra yenilenir. Büyülü bir eşya yeniden büyülenemez; büyüler örste aynı türden eşyalarla birleştirilebilir.</p>
     </section>
     <button class="kapat" id="envKapat" aria-label="Kapat">✕</button>
   </div>
@@ -140,6 +147,15 @@
     <input id="yerAd" maxlength="24" autocomplete="off" spellcheck="false" aria-label="İşaret adı">
     <div id="yerRenkler"></div>
     <div class="yerDugmeler"><button type="button" class="dugme kucuk ana" id="yerKaydet">Kaydet</button><button type="button" class="dugme kucuk tehlike" id="yerSil">Sil</button><button type="button" class="dugme kucuk" id="yerVazgec">Vazgeç</button></div>
+  </div>
+</div>
+
+<!-- Başarımlar (0.14.0) -->
+<div id="basarimEkrani" class="kaplama" hidden>
+  <div class="pencere orta">
+    <header><h2>Başarımlar</h2><span id="basarimSayi" class="rozet"></span></header>
+    <div id="basarimListe"></div>
+    <button class="kapat" id="bKapat" aria-label="Kapat">✕</button>
   </div>
 </div>
 
@@ -258,6 +274,7 @@
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
           <dt>E</dt><dd>Envanter ve üretim</dd>
           <dt>J</dt><dd>Görev günlüğü</dd>
+          <dt>L</dt><dd>Başarımlar</dd>
           <dt>M</dt><dd>Büyük harita</dd>
           <dt>Q / Shift + Q</dt><dd>Elindekini at / yığını at</dd>
           <dt>T / Enter</dt><dd>Sohbet (çok oyunculu)</dd>
@@ -289,6 +306,9 @@
           <li>Derin mağaralarda lav gölleri bulunur; lav yakar ve içine düşen eşyaları yok eder. Su içine girmek yanmayı söndürür.</li>
           <li>Zindanlar, canavar yuvası ve ganimet sandıkları içeren taş odalardır. Yuvanın çevresine meşale koymak canavar çıkışını durdurur; yuva kazmayla kırılabilir.</li>
           <li>İskeletler uzaktan ok atar, mağara örümcekleri duvara tırmanır ve zehirler. Kemikten elde edilen kemik tozu ekinleri hızla büyütür.</li>
+          <li>Çöl ve savanda güneşte yanmayan mumyalar dolaşır; vuruşları açlığı hızlandırır. Karlı bölgelerdeki buz iskeletlerinin okları yavaşlatır. Derin sularda boğulmuş zombiler bulunur. Mağaralarda ve gece açıkta yarasa sürüleri saldırabilir.</li>
+          <li><b>Büyü Masası</b> (elmas, parıltı kristali ve kesme taş) ile aletler, silahlar ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir: Keskinlik, Savurma, Yağma, Verimlilik, Servet, Güç, Cazibe, Koruma, Solunum, Tüy Düşüşü ve Kırılmazlık. Büyüler örste aynı türden eşyalarla birleştirilir.</li>
+          <li>Başarımlar L tuşuyla ya da duraklatma menüsünden görüntülenir; kazanılan başarım sağ üstte gösterilir.</li>
           <li>Pusulada ★ doğma noktasını, ✖ son ölüm noktasını gösterir; işaretlerin yanındaki sayı blok cinsinden uzaklıktır.</li>
           <li>Harita, görülen yerlerden kendiliğinden çizilir ve kaydedilir. Sağ üstteki mini harita çevreyi, M tuşuyla açılan büyük harita keşfedilen tüm bölgeleri gösterir. Büyük haritada sürükleyerek kaydırılır, tekerlekle yakınlaştırılır; sol tıkla işaret eklenir veya düzenlenir, sağ tıkla silinir. İşaretler pusulada da görünür.</li>
           <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
@@ -319,6 +339,7 @@
     <div class="menuDugmeler">
       <button class="dugme ana" id="devamEt">Oyuna Dön</button>
       <button class="dugme" id="agAc">Dünyayı Arkadaşlara Aç</button>
+      <button class="dugme" id="basarimAc">Başarımlar</button>
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
       <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
       <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>

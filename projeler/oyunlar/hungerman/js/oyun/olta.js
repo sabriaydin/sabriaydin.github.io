@@ -2,7 +2,7 @@
    Sağ tık oltayı atar; şamandıra suya düşünce bir süre sonra balık vurur. Şamandıra suya daldığında
    tekrar sağ tıklanırsa av çekilir. Erken ya da geç çekilen oltadan bir şey çıkmaz. */
 import { THREE } from '../grafik/sahne.js';
-import { SIVI, LAV, KATI, ESYALAR, maksDayanim } from '../bloklar.js';
+import { SIVI, LAV, KATI, ESYALAR, maksDayanim, buyuSeviye } from '../bloklar.js';
 import { DENIZ } from '../sabitler.js';
 
 const MENZIL = 30;
@@ -64,6 +64,8 @@ export class Olta {
     for (let y = Math.floor(p.y); y > 0 && SIVI[this.dunya.blok(Math.floor(p.x), y, Math.floor(p.z))]; y--) derin++;
     if (derin < 2) s *= 1.8;
     if (this.dunya.ustKati(Math.floor(p.x), Math.floor(p.z)) > p.y + 1) s *= 1.5;  // üstü kapalı su
+    /* Cazibe büyüsü: bekleme seviye başına %18 kısalır */
+    s *= 1 - 0.18 * Math.min(3, buyuSeviye(this.envanter.seciliYuva(), 'cazibe'));
     return s;
   }
 

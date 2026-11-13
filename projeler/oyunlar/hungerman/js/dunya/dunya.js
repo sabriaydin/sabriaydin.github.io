@@ -336,8 +336,8 @@ export class Dunya {
   }
 
   /* ---------- Kayıt ---------- */
-  sandiklariAl() { return [...this.sandiklar].map(([k, y]) => [k, y.map(s => (s ? [s.id, s.adet, s.dayanim ?? null] : null))]); }
-  sandiklariYukle(l) { this.sandiklar.clear(); for (const [k, y] of l || []) this.sandiklar.set(k, y.map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}) } : null))); }
+  sandiklariAl() { return [...this.sandiklar].map(([k, y]) => [k, y.map(s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null))]); }
+  sandiklariYukle(l) { this.sandiklar.clear(); for (const [k, y] of l || []) this.sandiklar.set(k, y.map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}), ...(s[3] && typeof s[3] === 'object' ? { buyu: { ...s[3] } } : {}) } : null))); }
 
   degisiklikleriAl() {
     const o = [];

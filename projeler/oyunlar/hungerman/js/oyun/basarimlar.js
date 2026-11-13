@@ -1,0 +1,131 @@
+/* HungerMan - başarımlar (0.14.0): oyun içi hedefler; kazanılınca bildirim ve ses, L tuşuyla açılan listede izlenir
+   Kazanma iki yolla olur: olaylar (canavar yenme, uyuma, ticaret, büyüleme...) ve düzenli denetim (envanter, seviye, gün, konum).
+   Durum dünya kaydında (çok oyunculuda oyuncu kaydında) saklanır. */
+import { CANAVARLAR } from '../varlik/turler.js';
+
+/* hedef: sayaçlı başarımlarda gereken sayı; ikon: listede gösterilen eşya simgesi */
+export const BASARIMLAR = [
+  { k: 'odun', ad: 'Ağaç Kesici', aciklama: 'İlk kütüğü topla.', ikon: 8, grup: 'Başlangıç' },
+  { k: 'masa', ad: 'Zanaatkâr', aciklama: 'Bir üretim masası yap.', ikon: 32, grup: 'Başlangıç' },
+  { k: 'kazma', ad: 'Kazmaya Başla', aciklama: 'İlk kazmanı üret.', ikon: 300, grup: 'Başlangıç' },
+  { k: 'tasKazma', ad: 'Taş Devri', aciklama: 'Taş kazma üret.', ikon: 304, grup: 'Başlangıç' },
+  { k: 'pisir', ad: 'Sıcak Yemek', aciklama: 'Pişmiş bir yiyecek ye.', ikon: 272, grup: 'Başlangıç' },
+  { k: 'uyku', ad: 'Tatlı Rüyalar', aciklama: 'Yatakta uyu.', ikon: 47, grup: 'Başlangıç' },
+  { k: 'gun10', ad: 'Hayatta Kalan', aciklama: '10. güne ulaş.', ikon: 266, grup: 'Başlangıç' },
+  { k: 'demir', ad: 'Demir Çağı', aciklama: 'Demir külçe elde et.', ikon: 261, grup: 'Madencilik' },
+  { k: 'elmas', ad: 'Elmaslar!', aciklama: 'Elmas elde et.', ikon: 264, grup: 'Madencilik' },
+  { k: 'derin', ad: 'Derinlere', aciklama: '12. seviyenin (Y) altına in.', ikon: 20, grup: 'Madencilik' },
+  { k: 'maden', ad: 'Terk Edilmiş', aciklama: 'Terk edilmiş bir maden keşfet.', ikon: 104, grup: 'Madencilik' },
+  { k: 'zirh', ad: 'Zırhlı', aciklama: 'Tam takım demir zırh giy.', ikon: 409, grup: 'Madencilik' },
+  { k: 'elmasZirh', ad: 'Pırıl Pırıl', aciklama: 'Bir elmas zırh parçası giy.', ikon: 413, grup: 'Madencilik' },
+  { k: 'canavar', ad: 'Canavar Avcısı', aciklama: 'Bir canavar yen.', ikon: 303, grup: 'Mücadele' },
+  { k: 'canavar50', ad: 'Gece Bekçisi', aciklama: '50 canavar yen.', ikon: 311, hedef: 50, grup: 'Mücadele' },
+  { k: 'canavar250', ad: 'Efsane Avcı', aciklama: '250 canavar yen.', ikon: 319, hedef: 250, grup: 'Mücadele' },
+  { k: 'mumya', ad: 'Kumların Laneti', aciklama: 'Bir mumya yen.', ikon: 5, grup: 'Mücadele' },
+  { k: 'bogulmus', ad: 'Derinlerden Gelen', aciklama: 'Bir boğulmuş zombi yen.', ikon: 299, grup: 'Mücadele' },
+  { k: 'buziskelet', ad: 'Soğuk Nişancı', aciklama: 'Bir buz iskeleti yen.', ikon: 22, grup: 'Mücadele' },
+  { k: 'yarasa', ad: 'Kanat Avcısı', aciklama: 'Bir yarasa yen.', ikon: 282, grup: 'Mücadele' },
+  { k: 'kopekbaligi', ad: 'Deniz Kurdu', aciklama: 'Bir köpekbalığı yen.', ikon: 450, grup: 'Mücadele' },
+  { k: 'okcu', ad: 'Keskin Nişancı', aciklama: 'Ok ile bir canavar yen.', ikon: 286, grup: 'Mücadele' },
+  { k: 'buyu', ad: 'Büyücü', aciklama: 'Büyü masasında bir eşyayı büyüle.', ikon: 156, grup: 'Zanaat' },
+  { k: 'ors', ad: 'Demirci', aciklama: 'Örste bir eşyayı onar ya da birleştir.', ikon: 139, grup: 'Zanaat' },
+  { k: 'iksir', ad: 'Simyacı', aciklama: 'Bir iksir iç.', ikon: 332, grup: 'Zanaat' },
+  { k: 'hasat', ad: 'Hasat Zamanı', aciklama: 'Olgun bir ekin hasat et.', ikon: 291, grup: 'Zanaat' },
+  { k: 'yavru', ad: 'Çiftçi', aciklama: 'İki hayvanı besleyerek yavru elde et.', ikon: 291, grup: 'Zanaat' },
+  { k: 'seviye10', ad: 'Tecrübeli', aciklama: '10. deneyim seviyesine ulaş.', ikon: 290, grup: 'Zanaat' },
+  { k: 'seviye30', ad: 'Usta', aciklama: '30. deneyim seviyesine ulaş.', ikon: 290, grup: 'Zanaat' },
+  { k: 'koy', ad: 'Yolcu', aciklama: 'Bir köye ulaş.', ikon: 51, grup: 'Keşif' },
+  { k: 'koy5', ad: 'Gezgin', aciklama: '5 farklı köy ziyaret et.', ikon: 51, hedef: 5, grup: 'Keşif' },
+  { k: 'biyom', ad: 'Dünya Turu', aciklama: '10 farklı biyom gör.', ikon: 4, hedef: 10, grup: 'Keşif' },
+  { k: 'zirve', ad: 'Zirvede', aciklama: '110. seviyenin (Y) üstüne çık.', ikon: 21, grup: 'Keşif' },
+  { k: 'zindan', ad: 'Zindan Kaşifi', aciklama: 'Bir zindan sandığını aç.', ikon: 60, grup: 'Keşif' },
+  { k: 'batik', ad: 'Hazine Avcısı', aciklama: 'Batık bir geminin sandığını aç.', ikon: 50, grup: 'Keşif' },
+  { k: 'tekne', ad: 'Denizci', aciklama: 'Bir tekneye bin.', ikon: 454, grup: 'Keşif' },
+  { k: 'balik', ad: 'Balıkçı', aciklama: 'Oltayla bir şey yakala.', ikon: 453, grup: 'Keşif' },
+  { k: 'ticaret', ad: 'Pazarlıkçı', aciklama: 'Bir köylüyle ticaret yap.', ikon: 288, grup: 'Köyler' },
+  { k: 'gorev', ad: 'Yardımsever', aciklama: 'Bir köy görevini tamamla.', ikon: 294, grup: 'Köyler' },
+  { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' }
+];
+export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
+export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Zanaat', 'Keşif', 'Köyler'];
+
+/* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
+const ESYA_BASARIM = [['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]]];
+
+export class Basarimlar {
+  constructor() {
+    this.acik = {};     // anahtar -> kazanma zamanı
+    this.sayac = {};    // sayaçlı başarımlar
+    this.kume = {};     // farklı köyler / biyomlar
+    this.kazanildi = null;   // (b) => bildirim ve ses
+    this.degisti = null;
+  }
+  var(k) { return !!this.acik[k]; }
+  ver(k) {
+    if (!BASARIM[k] || this.acik[k]) return false;
+    this.acik[k] = Date.now();
+    if (this.kazanildi) this.kazanildi(BASARIM[k]);
+    if (this.degisti) this.degisti();
+    return true;
+  }
+  /* Sayaçlı başarım: hedefe ulaşınca kazanılır */
+  artir(k, n = 1) {
+    const b = BASARIM[k]; if (!b) return;
+    this.sayac[k] = (this.sayac[k] || 0) + n;
+    if (b.hedef && this.sayac[k] >= b.hedef) this.ver(k);
+    else if (this.degisti) this.degisti();
+  }
+  /* Farklı değerler kümesi (köy kimliği, biyom) */
+  kumeEkle(k, deger) {
+    const l = this.kume[k] || (this.kume[k] = []);
+    if (l.includes(deger)) return;
+    l.push(deger);
+    const b = BASARIM[k];
+    if (b && b.hedef && l.length >= b.hedef) this.ver(k);
+    else if (this.degisti) this.degisti();
+  }
+  ilerleme(k) {
+    const b = BASARIM[k];
+    if (!b || !b.hedef) return null;
+    const n = this.kume[k] ? this.kume[k].length : this.sayac[k] || 0;
+    return [Math.min(n, b.hedef), b.hedef];
+  }
+  get kazanilan() { return BASARIMLAR.filter(b => this.acik[b.k]).length; }
+
+  /* ---------- Olaylar ---------- */
+  /* Yerel oyuncunun yendiği canlı; ok: ok ile mi */
+  oldurme(turAd, ok = false) {
+    if (!CANAVARLAR.includes(turAd)) return;
+    this.ver('canavar'); this.artir('canavar50'); this.artir('canavar250');
+    if (BASARIM[turAd]) this.ver(turAd);
+    if (ok) this.ver('okcu');
+  }
+  gorevTamam() { this.ver('gorev'); this.artir('gorev10'); }
+
+  /* ---------- Düzenli denetim (saniyede bir) ---------- */
+  denetle(o) {
+    const env = o.envanter;
+    for (const [k, idler] of ESYA_BASARIM) if (!this.acik[k] && idler.some(id => env.say(id) > 0)) this.ver(k);
+    const z = env.zirh;
+    if (!this.acik.zirh && z.every((s, i) => s && s.id === 408 + i)) this.ver('zirh');
+    if (!this.acik.elmasZirh && z.some(s => s && s.id >= 412 && s.id <= 415)) this.ver('elmasZirh');
+    const L = o.hayatta.seviye;
+    if (L >= 10) this.ver('seviye10');
+    if (L >= 30) this.ver('seviye30');
+    if (o.gun >= 10) this.ver('gun10');
+    const p = o.oyuncu.konum;
+    if (p.y < 12) this.ver('derin');
+    if (p.y > 110) this.ver('zirve');
+    if (o.koyler.icindeki) { this.ver('koy'); this.kumeEkle('koy5', o.koyler.icindeki.id); }
+    if (o.biyom != null) this.kumeEkle('biyom', o.biyom);
+  }
+
+  disaAktar() { return { a: { ...this.acik }, s: { ...this.sayac }, k: Object.fromEntries(Object.entries(this.kume).map(([k, l]) => [k, [...l]])) }; }
+  iceAktar(v) {
+    this.acik = {}; this.sayac = {}; this.kume = {};
+    if (!v || typeof v !== 'object') return;
+    for (const [k, t] of Object.entries(v.a || {})) if (BASARIM[k]) this.acik[k] = +t || 1;
+    for (const [k, n] of Object.entries(v.s || {})) if (BASARIM[k]) this.sayac[k] = +n || 0;
+    for (const [k, l] of Object.entries(v.k || {})) if (BASARIM[k] && Array.isArray(l)) this.kume[k] = l.slice(0, 200);
+  }
+}
