@@ -191,7 +191,9 @@ export class Sahne {
     this.bulut.position.set(konum.x, PY + 4, konum.z);
     const bk = this.bulutMalzeme.map;
     bk.offset.set((konum.x + zamanSn * 1.2) / 768 % 1, -(konum.z) / 768 % 1);
-    this.bulutMalzeme.color.setScalar((0.1 + gun * 0.9) * (1 - 0.5 * hy)).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
+    this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
+    /* Yağışta bulutlar gökyüzünün biraz koyu tonunu alır (gece kapkara lekeler oluşmaz) */
+    if (hy > 0) this.bulutMalzeme.color.lerp(ust.clone().multiplyScalar(0.8).convertSRGBToLinear(), hy * 0.9);
     this.bulutMalzeme.opacity = 0.82 + 0.16 * hy;
     /* Blok aydınlatması */
     const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.82, 0.68), alacakaranlik * 0.5);
@@ -257,7 +259,10 @@ export class Sahne {
     this.elKamera.add(this.el);
     this.elKol = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.14, 0.5), new THREE.MeshBasicMaterial({ color: 0xc89870 }));
     this.elKol.rotation.set(-0.25, 0.2, 0); this.elKol.position.set(0.04, -0.04, 0.1);
-    this.elBlokMalzeme = new THREE.MeshBasicMaterial({ map: this.atlasDoku, alphaTest: 0.5 });
+    /* El katmanı standart malzeme kullanır: doku sRGB olarak işaretlenmezse renkler soluk görünür */
+    const elAtlas = this.atlasDoku.clone(); elAtlas.colorSpace = THREE.SRGBColorSpace; elAtlas.needsUpdate = true;
+    this.elBlokMalzeme = new THREE.MeshBasicMaterial({ map: elAtlas, alphaTest: 0.5 });
+    this.elEsyaMalzeme = new THREE.MeshBasicMaterial({ vertexColors: true });
     this.elEsya = null; this.elId = -1;
     this.el.add(this.elKol);
     this.sallanma = 0;
@@ -265,7 +270,7 @@ export class Sahne {
   elAyarla(id) {
     if (id === this.elId) return;
     this.elId = id;
-    if (this.elEsya) { this.el.remove(this.elEsya); this.elEsya.geometry.dispose(); if (this.elEsya.material !== this.elBlokMalzeme) { this.elEsya.material.map && this.elEsya.material.map.dispose(); this.elEsya.material.dispose(); } this.elEsya = null; }
+    if (this.elEsya) { this.el.remove(this.elEsya); this.elEsya.geometry.dispose(); this.elEsya = null; }
     this.elKol.visible = !id;
     if (!id) return;
     if (id < 256 && CIZIM[id] === C_KUP) {
@@ -283,11 +288,11 @@ export class Sahne {
       this.elEsya.rotation.set(0.1, 0.75, 0);
       this.elEsya.position.set(0, 0.02, 0);
     } else {
-      const t = new THREE.CanvasTexture(simge(id).cv); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter;
-      this.elEsya = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.3), new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide }));
-      const alet = ESYALAR[id] && ESYALAR[id].tur === 'alet';
-      this.elEsya.rotation.set(0, alet ? -1.1 : -0.6, alet ? 0.35 : 0);
-      this.elEsya.position.set(0.06, 0.06, 0);
+      /* Eşyalar simgelerinden kalınlık verilerek üç boyutlu (piksel piksel çıkıntılı) çizilir */
+      this.elEsya = new THREE.Mesh(simgeHacmi(simge(id).cv, 0.36), this.elEsyaMalzeme);
+      const e = ESYALAR[id], alet = e && (e.tur === 'alet' || e.tur === 'yay' || e.tur === 'olta');
+      if (alet) { this.elEsya.rotation.set(0.05, -1.35, 0.42); this.elEsya.position.set(0.02, 0.1, -0.02); }
+      else { this.elEsya.rotation.set(0.12, -0.55, 0); this.elEsya.position.set(0.04, 0.06, 0); }
     }
     this.el.add(this.elEsya);
   }
@@ -299,7 +304,7 @@ export class Sahne {
     this.el.rotation.set(-s * 0.9, -s * 0.25 + g * 0.5, g * 0.4 + (g >= 1 ? Math.sin(performance.now() / 40) * 0.01 : 0));
     const c = this.elKol.material.color; c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
     this.elBlokMalzeme.color.setScalar(isik);
-    if (this.elEsya && this.elEsya.material !== this.elBlokMalzeme) this.elEsya.material.color.setScalar(isik);
+    this.elEsyaMalzeme.color.setScalar(isik);
   }
 
   ciz() {
@@ -308,4 +313,33 @@ export class Sahne {
     c.render(this.sahne, this.kamera);
     if (this.el.visible) { c.autoClear = false; c.clearDepth(); c.render(this.elSahne, this.elKamera); c.autoClear = true; }
   }
+}
+
+/* Simge tuvalinden kalın piksel geometrisi: her dolu piksel öne ve arkaya yüz, boş komşusuna bakan kenarlara yan yüz verir.
+   Renkler sRGB'den doğrusal renk uzayına çevrilir; yüzler yönlerine göre gölgelenir. */
+const HACIM = new Map();
+export function simgeHacmi(cv, boy) {
+  const anahtar = cv;
+  if (HACIM.has(anahtar)) return HACIM.get(anahtar).clone();
+  const S = cv.width, d = cv.getContext('2d').getImageData(0, 0, S, S).data;
+  const dolu = (x, y) => x >= 0 && y >= 0 && x < S && y < S && d[(y * S + x) * 4 + 3] > 100;
+  const p = [], c = [], u = boy / S, k = boy / 16 * 0.55, renk = new THREE.Color();
+  const yuz = (a, b, cc, e, g) => { p.push(...a, ...b, ...cc, ...a, ...cc, ...e); for (let i = 0; i < 6; i++) c.push(renk.r * g, renk.g * g, renk.b * g); };
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    if (!dolu(x, y)) continue;
+    const i = (y * S + x) * 4;
+    renk.setRGB(d[i] / 255, d[i + 1] / 255, d[i + 2] / 255, THREE.SRGBColorSpace);
+    const x0 = (x - S / 2) * u, x1 = x0 + u, y1 = (S / 2 - y) * u, y0 = y1 - u;
+    yuz([x0, y0, k], [x1, y0, k], [x1, y1, k], [x0, y1, k], 1);
+    yuz([x1, y0, -k], [x0, y0, -k], [x0, y1, -k], [x1, y1, -k], 0.78);
+    if (!dolu(x, y - 1)) yuz([x0, y1, k], [x1, y1, k], [x1, y1, -k], [x0, y1, -k], 0.92);
+    if (!dolu(x, y + 1)) yuz([x0, y0, -k], [x1, y0, -k], [x1, y0, k], [x0, y0, k], 0.6);
+    if (!dolu(x - 1, y)) yuz([x0, y0, -k], [x0, y0, k], [x0, y1, k], [x0, y1, -k], 0.72);
+    if (!dolu(x + 1, y)) yuz([x1, y0, k], [x1, y0, -k], [x1, y1, -k], [x1, y1, k], 0.84);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
+  HACIM.set(anahtar, g);
+  return g.clone();
 }

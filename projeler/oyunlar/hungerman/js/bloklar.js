@@ -16,7 +16,10 @@ export const DOKULAR = [
   /* 0.11.0: inşa blokları, tarım, örs ve simya */
   'kapi_alt', 'kapi_ust', 'tuzak_kapi', 'tirmanma', 'yun_k', 'yun_t', 'yun_s', 'yun_y', 'yun_m', 'yun_mo', 'yun_si',
   'havuc0', 'havuc1', 'havuc2', 'havuc3', 'patates0', 'patates1', 'patates2', 'patates3', 'tarla', 'tarla_islak',
-  'ors', 'simya_ust', 'simya_sise', 'demir_cubuk'
+  'ors', 'simya_ust', 'simya_sise', 'demir_cubuk',
+  /* 0.13.0: yeni biyomlar, mağara içerikleri */
+  'kuru_cimen_ust', 'kuru_cimen_yan', 'bataklik_ust', 'bataklik_yan', 'akasya_yan', 'akasya_ust', 'akasya_yaprak', 'nilufer',
+  'sarmasik', 'orumcek_agi', 'yosun_blok', 'sarkit', 'dikit', 'damlatasi', 'isikli_mantar', 'kar_katman', 'fidan_akasya'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -88,7 +91,7 @@ blok(46, { ad: 'Meşale', dok: 'mesale', cizim: C_CAPRAZ, kati: false, opak: fal
 blok(47, { ad: 'Yatak', dok: { ust: 'yatak_ust', yan: 'yatak_yan', on: 'yatak_yan', alt: 'kalas' }, sertlik: 0.4, alet: 'balta', ses: 'yun', yatak: true });
 blok(48, { ad: 'Kamp Ateşi', dok: 'kamp_atesi', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1, alet: 'balta', ses: 'odun', isik: 15, mesale: true, istasyon: 'ates' });
 blok(49, { ad: 'Yün', dok: 'yun', sertlik: 0.8, ses: 'yun' });
-blok(50, { ad: 'Sandık', dok: { ust: 'sandik_ust', yan: 'sandik_yan', on: 'sandik_on', alt: 'sandik_ust' }, sertlik: 2.5, alet: 'balta', ses: 'odun', sandik: true });
+blok(50, { ad: 'Sandık', dok: { ust: 'sandik_ust', yan: 'sandik_yan', on: 'sandik_on', alt: 'sandik_ust' }, cizim: 5, opak: false, sertlik: 2.5, alet: 'balta', ses: 'odun', sandik: true, sekil: 'sandik' });
 blok(51, { ad: 'Kiremit', dok: 'kiremit', sertlik: 1.5, alet: 'kazma', seviye: 1 });
 blok(52, { ad: 'Saman Balyası', dok: ['saman_ust', 'saman_yan', 'saman_ust'], sertlik: 0.5, ses: 'bitki' });
 for (let e = 0; e < 4; e++) blok(53 + e, { ad: e === 3 ? 'Olgun Buğday' : 'Buğday Fidesi', dok: 'bugday' + e, cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, ekin: e, sonraki: e < 3 ? 54 + e : 0,
@@ -161,6 +164,24 @@ blok(137, { ad: 'Tarla Toprağı', dok: ['tarla', 'toprak', 'toprak'], cizim: C_
 blok(138, { ad: 'Islak Tarla Toprağı', dok: ['tarla_islak', 'toprak', 'toprak'], cizim: C_SEKIL, opak: false, sertlik: 0.6, alet: 'kurek', ses: 'toprak', sekil: 'tarla', tarla: true, islak: true, gizli: true, dusur: () => [[3, 1]] });
 blok(139, { ad: 'Örs', dok: 'ors', cizim: C_SEKIL, opak: false, sertlik: 5, alet: 'kazma', seviye: 1, ses: 'tas', sekil: 'ors', istasyon: 'ors' });
 blok(140, { ad: 'Simya Masası', dok: { ust: 'simya_ust', yan: 'parke', on: 'parke', alt: 'parke' }, cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'kazma', ses: 'tas', sekil: 'simya', istasyon: 'simya' });
+/* ---------- 0.13.0: yeni biyomların ve mağaraların blokları ---------- */
+/* Kar katmanı: karlı bölgelerde yaprakların ve zeminin üstünde ince kar */
+blok(141, { ad: 'Kar Katmanı', dok: 'kar_katman', cizim: C_SEKIL, kati: false, opak: false, sertlik: 0.1, alet: 'kurek', ses: 'kar', sekil: 'karKatman', bitki: true, degistirilebilir: true, dusur: () => [] });
+blok(142, { ad: 'Kuru Çimenli Toprak', dok: ['kuru_cimen_ust', 'kuru_cimen_yan', 'toprak'], sertlik: 0.6, alet: 'kurek', ses: 'cimen', dusur: () => [[3, 1]] });
+blok(143, { ad: 'Bataklık Çimeni', dok: ['bataklik_ust', 'bataklik_yan', 'toprak'], sertlik: 0.6, alet: 'kurek', ses: 'cimen', dusur: () => [[3, 1]] });
+blok(144, { ad: 'Akasya Kütüğü', dok: ['akasya_ust', 'akasya_yan', 'akasya_ust'], sertlik: 2, alet: 'balta', ses: 'odun' });
+blok(145, { ad: 'Akasya Yaprağı', dok: 'akasya_yaprak', opak: false, kesik: true, sertlik: 0.2, alet: 'makas', ses: 'bitki',
+  dusur: r => { const o = []; if (r() < 1 / 16) o.push([155, 1]); if (r() < 1 / 30) o.push([256, 1]); return o; } });
+blok(146, { ad: 'Nilüfer', dok: 'nilufer', cizim: C_SEKIL, kati: false, opak: false, sertlik: 0, ses: 'bitki', sekil: 'nilufer', bitki: true });
+blok(147, { ad: 'Sarmaşık', dok: 'sarmasik', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.2, alet: 'makas', ses: 'bitki', tirmanma: true, dusur: () => [] });
+blok(148, { ad: 'Örümcek Ağı', dok: 'orumcek_agi', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1.2, alet: 'kilic', ses: 'bitki', ag: true, dusur: r => (r() < 0.6 ? [[284, 1]] : []) });
+blok(149, { ad: 'Yosun Bloğu', dok: 'yosun_blok', sertlik: 0.4, alet: 'kurek', ses: 'bitki' });
+blok(150, { ad: 'Sarkıt', dok: 'sarkit', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.8, alet: 'kazma', ses: 'tas', dusur: () => [[150, 1]] });
+blok(151, { ad: 'Dikit', dok: 'dikit', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.8, alet: 'kazma', ses: 'tas', bitki: true, dusur: () => [[150, 1]] });
+blok(152, { ad: 'Damlataşı', dok: 'damlatasi', sertlik: 1.5, alet: 'kazma', seviye: 1, ses: 'tas' });
+blok(153, { ad: 'Işıklı Mantar', dok: 'isikli_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, isik: 8, mesale: true });
+blok(155, { ad: 'Akasya Fidanı', dok: 'fidan_akasya', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, fidan: 'akasya' });
+
 /* Maden deneyimi */
 for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4]]) B[id].xp = xp;
 

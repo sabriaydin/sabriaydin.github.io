@@ -101,7 +101,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Yarıklar yeniden tasarlandı: tek blokluk düz çatlak yerine 8-18 blok genişliğinde, kıvrılarak ilerleyen, kenarlara doğru sığlaşan doğal kanyonlar. Tabanı lav seviyesinin üstündedir; su kenarında, köylerde ve ağaçların altında oluşmaz. (Dünya tohumdan üretildiği için mevcut dünyalardaki yarıklar da yeni biçimde görünür; oyuncunun yaptığı değişiklikler korunur.)
 - Tekneler artık suyun üstünde yüzer; taban tahtası su yüzeyinin üstünde kalır, teknenin içi su dolu görünmez.
 - Teknedeyken ekranda inme tuşu (C) için kısa bir hatırlatma görünür.
-- Geliştirici konsolu (F8 veya 1 tuşunun solundaki tuş; Ayarlar'dan kapatılabilir): canlı bilgi satırı (FPS, konum, biyom, canlı ve parça sayısı, açık modlar), komut geçmişi (↑/↓), Tab ile komut ve ad tamamlama. Komutlar: yardim, ver, esyalar, envanter temizle, isinla (koordinat, ~ göreli, koy, liman, zindan, batik, dogum, isaret), zaman (saat, sabah/ogle/aksam/gece, hiz), gun, can, doy, iyiles, olumsuz, ucus, hiz, dogur, oldur, esya temizle, tekne, blok, bloklar, konum, tohum, gorus, kesfet, harita, kaydet, fps, hata, ag, sayac, temizle. Çok oyunculu istemcide dünyayı değiştiren komutlar kapalıdır.
+- Geliştirici konsolu (F8 veya 1 tuşunun solundaki tuş; Ayarlar'dan kapatılabilir): canlı bilgi satırı (FPS, konum, biyom, canlı ve parça sayısı, açık modlar), komut geçmişi (↑/↓), Tab ile komut ve ad tamamlama. Komutlar: yardim, ver, esyalar, envanter temizle, isinla (koordinat, ~ göreli, koy, liman, zindan, maden, batik, dogum, isaret), zaman (saat, sabah/ogle/aksam/gece, hiz), gun, can, doy, iyiles, olumsuz, ucus, hiz, dogur, oldur, esya temizle, tekne, blok, bloklar, konum, tohum, gorus, kesfet, harita, kaydet, fps, hata, ag, sayac, temizle. Çok oyunculu istemcide dünyayı değiştiren komutlar kapalıdır.
 
 ## 9. aşama (0.9.0): Geliştirici modu
 
@@ -116,6 +116,24 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Işınlanma: en yakın köy, liman, zindan, batık, doğma noktası; X / Y / Z ile gitme; dört yöne 100 blok; haritadaki işaretlere gitme.
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
+
+## 13. aşama (0.13.0): Düzeltmeler, biyomlar ve mağaralar
+
+- Biyomlar yeniden düzenlendi: iklim (sıcaklık ve nem) geniş ölçekli ve yumuşak geçişlidir; çöl ile karlı bölgeler yan yana gelmez, aralarında ılıman kuşak bulunur. Sıcak dağlarda kar zirvesi oluşmaz. Yeni biyomlar: Savan (akasya ağaçları, kuru çimen), Bataklık (bataklık ağaçları, sarmaşık, nilüfer), Karlı Ova (seyrek ladinler).
+- Karlı bölgelerdeki ve soğuk dağlardaki ağaçların ve yaprakların üstünde ince kar katmanı bulunur.
+- Köy adları her köy için ayrı üretilir; aynı dünyada aynı ad tekrar etmez. Köy karşılama bildirimi yalnızca köy zemini seviyesinde çıkar (mağaralarda ya da çok yüksekte çıkmaz).
+- Oyuncu köyde değil, rastgele seçilen düz ve boş bir arazide (çayır, orman, huş ormanı, savan) başlar.
+- Sudan karaya çıkış: Boşluk ile birlikte karaya doğru yüzülünce bir blok yüksekliğindeki kıyıya çıkılır.
+- Deniz feneri: içeride arka duvarda zeminden ışık odasına kadar tırmanma merdiveni; giriş kapısı; ışık odasının tabanında merdiven boşluğu. Köy evlerinin giriş boşluklarına kapı takıldı.
+- Eldeki eşyalar: aletler ve eşyalar üç boyutlu (hacimli piksel) olarak ve doğru renklerle çizilir; soluk görünüm giderildi.
+- Yağmur her yerde yağar (yalnızca karlı bölgelerde kar yağar); yağmur alanı genişletildi, bulutlar yağmurda koyulaşır.
+- Mağaralar: yosunlu bölgeler (yosun bloğu, sarmaşık, eğrelti, ışıklı mantar), damlataşı bölgeleri (sarkıt, dikit), derinlerde mantar ve örümcek ağları.
+- Terk edilmiş madenler (yeni): yeraltında ahşap direkli koridorlar, kalas köprüler, meşaleler, örümcek ağları, ganimet sandıkları ve örümcek yuvası.
+- Yeni bloklar: kar katmanı, kuru çimenli toprak, bataklık çimeni, akasya kütüğü / yaprağı / fidanı, nilüfer, sarmaşık (tırmanılabilir), örümcek ağı (yavaşlatır, kılıçla kesilince ip düşürür), yosun bloğu, sarkıt, dikit, damlataşı, ışıklı mantar (ışık verir).
+- İskelet: yay elde, iki kolla nişan alır; kiriş germe ve ok animasyonu; ok yaydan çıkar; nişan alırken yüzü hedefe döner.
+- Sandık: kapak çizgisi, demir köşeler ve kilitli yeni model.
+- Geliştirici modu: `kesfet tumu` haritadaki kesik çizgili karenin (dünya sınırı) tamamını doldurur; açık deniz hızlı işlenir; büyük haritada bellek kullanımı azaltıldı. Yeni komut: `isinla maden` (pencerede "En yakın maden").
+- Eski kayıtlar: üretim değiştiği için harita kaydı otomatik sıfırlanır; değiştirilmemiş alanlarda arazi ve biyomlar yeni üretime göre değişir. Yeni dünya önerilir.
 
 ## 12. aşama (0.12.0): Geliştirici penceresi yenilendi
 
@@ -205,6 +223,7 @@ js/sekiller.js        Biçimli bloklar (merdiven, yarım blok, kapı, çit...): 
 js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
 js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları
+js/dunya/maden-uretici.js Terk edilmiş madenler
 js/dunya/batik-uretici.js Batık gemiler
 js/dunya/meshleyici.js Blokları çizilebilir geometriye çevirir
 js/dunya/isci.js      Arka plan işçisi (üretim ve meshleme)

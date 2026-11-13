@@ -29,6 +29,8 @@ import { katil, kodDuzelt } from './ag/baglanti.js';
 import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
+/* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
+const URETIM_SURUMU = 2;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Konsol } from './arayuz/konsol.js';
 import { GelistiriciPenceresi } from './arayuz/gelistirici.js';
@@ -335,7 +337,9 @@ function oyunBaslat(v) {
   const dogum = v.dogum || dunya.uretici.dogumNoktasi();
   /* Keşif haritası: kayıtlı bölgeler arka planda yüklenir */
   const harita = new Harita(dunya), haritaKimlik = v.haritaKimlik || v.id;
-  HaritaKayit.yukle(haritaKimlik).then(l => { if (oyun && oyun.harita === harita) harita.iceAktar(l); }).catch(() => {});
+  /* Dünya üretimi değiştiyse (0.13.0: iklim ve biyomlar) eski harita kaydı geçersizdir; silinir ve yeniden keşfedilir */
+  if (!v.istemci && (v.uretimSurumu || 1) < URETIM_SURUMU && v.oyuncu) HaritaKayit.sil(haritaKimlik).catch(() => {});
+  else HaritaKayit.yukle(haritaKimlik).then(l => { if (oyun && oyun.harita === harita) harita.iceAktar(l); }).catch(() => {});
   if (v.oyuncu) { oyuncu.konum.set(v.oyuncu.x, v.oyuncu.y, v.oyuncu.z); oyuncu.yaw = v.oyuncu.yaw || 0; oyuncu.pitch = v.oyuncu.pitch || 0; }
   else oyuncu.konum.set(dogum.x, dogum.y, dogum.z);
   envanter.iceAktar(v.envanter);
@@ -475,7 +479,7 @@ async function oyunKaydet() {
     hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), tekneler: o.tekneler.disaAktar(),
-    oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, gelistirici: !!o.gelistirici,
+    oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
     hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa()
   };
   try { await Kayit.kaydet(veri); } catch (e) { o.hud.bildirim('Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.'); }

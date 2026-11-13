@@ -53,7 +53,7 @@ export class Harita {
     let b = this.bolgeler.get(k);
     if (!b && olustur) {
       const cv = document.createElement('canvas'); cv.width = cv.height = BOLGE_BLOK;
-      const ctx = cv.getContext('2d');
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
       b = { k, rx, rz, cv, ctx, img: ctx.createImageData(BOLGE_BLOK, BOLGE_BLOK), boyaBekliyor: false, kirli: false, kayitKirli: false };
       this.bolgeler.set(k, b);
     }
@@ -64,7 +64,11 @@ export class Harita {
     const b = this.bolgeler.get(rx + ',' + rz);
     if (!b) return null;
     if (b.boyaBekliyor) this.bolgeBoya(b);
-    if (b.kirli) { b.ctx.putImageData(b.img, 0, 0); b.kirli = false; }
+    if (b.kirli) {
+      b.ctx.putImageData(b.img, 0, 0); b.kirli = false;
+      /* Büyük haritalarda bellek: piksel verisi tuvale aktarıldıktan sonra bırakılır, gerektiğinde tuvalden geri okunur */
+      if (this.bolgeler.size > 96) b.img = null;
+    }
     return b.cv;
   }
 
@@ -155,6 +159,7 @@ export class Harita {
   }
   boya(b, t, x, z, i) {
     const id = t[i], hh = t[PB * PB + i];
+    if (!b.img) b.img = b.ctx.getImageData(0, 0, BOLGE_BLOK, BOLGE_BLOK);
     const o = ((z - b.rz * BOLGE_BLOK) * BOLGE_BLOK + (x - b.rx * BOLGE_BLOK)) * 4, d = b.img.data;
     b.kirli = true;
     if (!id && !hh) { d[o] = 10; d[o + 1] = 9; d[o + 2] = 8; d[o + 3] = 255; return; }

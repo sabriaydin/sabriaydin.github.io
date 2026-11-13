@@ -7,6 +7,7 @@ import { TURLER, HAYVANLAR } from './turler.js';
 import { BY } from '../dunya/uretici.js';
 import { KATI, SIVI, KESIK, BITKI, LAV } from '../bloklar.js';
 import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
+import { madenAt } from '../dunya/maden-uretici.js';
 import { karma3 } from '../rastgele.js';
 import { PY, DENIZ } from '../sabitler.js';
 import { cakisma } from '../sekiller.js';
@@ -252,6 +253,8 @@ export class Varliklar {
         else if (yatay < 13 && gor) hiz = 0;
         if (gor && yatay < T.menzil && v.saldiriBek <= 0) { v.saldiriBek = 1.6 + Math.random() * 1.2; this.mobOkAt(v, ctx); }
         v.nisan = gor && yatay < T.menzil;
+        /* Germe: atıştan önceki 1,2 saniyede yay gerilir */
+        v.ger = v.nisan ? Math.max(0, Math.min(1, 1 - v.saldiriBek / 1.2)) : 0;
       } else {
         const temas = yatay < T.menzil + T.gen + 0.3 && op.y < p.y + T.boy && op.y + 1.8 > p.y;
         if (temas && v.saldiriBek <= 0) { v.saldiriBek = 1.0; ctx.oyuncuyaVur(T.hasar, v); }
@@ -293,7 +296,9 @@ export class Varliklar {
       if (dusus >= 3 || (su && !v.suda && v.kacZaman <= 0)) { hiz = 0; v.hedef = null; v.karar = Math.min(v.karar, 0.3); v.kacYon = null; }
     }
     /* Yön ve hız */
-    if (hiz > 0) v.hedefYaw = Math.atan2(-yx, -yz);
+    /* Nişan alan okçu geri çekilirken de yüzünü hedefe döner */
+    if (v.nisan && T.uzak && kovaliyor) v.hedefYaw = Math.atan2(-dx, -dz);
+    else if (hiz > 0) v.hedefYaw = Math.atan2(-yx, -yz);
     else if (kovaliyor) v.hedefYaw = Math.atan2(-dx, -dz);
     let fark = v.hedefYaw - v.yaw;
     fark = Math.atan2(Math.sin(fark), Math.cos(fark));
@@ -414,7 +419,15 @@ export class Varliklar {
     if (B.length === 8) { for (let i = 0; i < 8; i++) B[i].rotation.y = B[i].userData.tabanY + Math.sin(v.faz * 1.6 + i * 1.7) * Math.min(0.35, yh * 0.12); }
     else if (B.length === 4) { B[0].rotation.x = sal; B[3].rotation.x = sal; B[1].rotation.x = -sal; B[2].rotation.x = -sal; }
     else if (B.length === 2) { B[0].rotation.x = sal; B[1].rotation.x = -sal; }
-    if (T.uzak) { const h = v.nisan ? Math.PI / 2 * 0.95 : 0; m.kollar[0].rotation.x += (h - sal * 0.6 - m.kollar[0].rotation.x) * Math.min(1, dt * 8); m.kollar[1].rotation.x += (h + sal * 0.6 - m.kollar[1].rotation.x) * Math.min(1, dt * 8); }
+    if (T.uzak) {
+      /* Okçu: nişan alırken iki kol ileri uzanır; sol el kirişi çeker, ok yaya yerleşir ve germe ilerledikçe geri gelir */
+      const k = Math.min(1, dt * 8), h = v.nisan ? Math.PI / 2 * 0.97 : 0, g = v.nisan ? (v.ger || 0) : 0;
+      m.kollar[1].rotation.x += (h + sal * 0.6 - m.kollar[1].rotation.x) * k;
+      m.kollar[0].rotation.x += (h - sal * 0.6 - m.kollar[0].rotation.x) * k;
+      m.kollar[0].rotation.z += ((v.nisan ? 0.55 + g * 0.25 : 0) - m.kollar[0].rotation.z) * k;
+      m.kollar[0].position.z += ((v.nisan ? 0.06 + g * 0.22 : 0) - m.kollar[0].position.z) * k;
+      if (m.yay) this.yayGer(m.yay, v.nisan ? g : 0);
+    }
     else if (m.insan) { m.kollar[0].rotation.x = -sal * 0.8; m.kollar[1].rotation.x = sal * 0.8; }
     else if (m.kollar.length && !T.uzak) { const t = performance.now() / 1000; m.kollar[0].rotation.x = Math.PI / 2 * 0.92 + Math.sin(t * 2 + v.id) * 0.06 - sal * 0.2; m.kollar[1].rotation.x = Math.PI / 2 * 0.92 - Math.sin(t * 2 + v.id) * 0.06 + sal * 0.2; }
     if (m.kanatlar.length) { const c = !v.yerde || v.kacZaman > 0 ? Math.sin(performance.now() / 50) * 0.6 + 0.6 : 0; m.kanatlar[0].rotation.z = -c; m.kanatlar[1].rotation.z = c; }
@@ -617,7 +630,7 @@ export class Varliklar {
       if (y.sayac > 0) continue;
       y.sayac = 8 + Math.random() * 10;
       if (this.mesaleYakin(y.x + 0.5, y.y, y.z + 0.5, 6)) continue;
-      if (!y.tur) { const zd = zindanAt(this.uretici, y.x, y.y, y.z); y.tur = zd ? zd.tur : YUVA_TURLERI[Math.floor(karma3(7, y.x, y.y, y.z) * 3)]; }
+      if (!y.tur) { const zd = zindanAt(this.uretici, y.x, y.y, y.z); y.tur = zd ? zd.tur : madenAt(this.uretici, y.x, y.y, y.z) ? 'orumcek' : YUVA_TURLERI[Math.floor(karma3(7, y.x, y.y, y.z) * 3)]; }
       let yakin = 0;
       for (const v of this.liste) if (!v.olu && v.tur.dusman && v.konum.distanceToSquared(new THREE.Vector3(y.x, y.y, y.z)) < 64) yakin++;
       if (yakin >= 4) continue;
@@ -643,17 +656,31 @@ export class Varliklar {
     if (this.ag && this.ag.okEklendi) this.ag.okEklendi(o);
     return o;
   }
-  /* İskeletin oyuncuya ok atışı: yer çekimine göre biraz yukarı nişan alınır */
+  /* Yay kirişi ve ok: g 0 (gevşek) .. 1 (tam gerili). Kiriş iki parçadır; uçlardan geri çekilen noktaya uzanır */
+  yayGer(Y, g) {
+    const uY = -0.61, uZ = 0.36, cek = -0.6 + g * 0.24;   // uç noktaları ve kirişin çekilen orta noktası (kol ekseninde)
+    Y.kiris.forEach((k, i) => {
+      const s = i ? -1 : 1, dy = cek - uY, dz = -s * uZ, L = Math.hypot(dy, dz);
+      k.position.set(0, uY + dy / 2, s * uZ + dz / 2);
+      k.scale.set(1, 1, L);
+      k.rotation.set(Math.atan2(-dy, dz), 0, 0);
+    });
+    Y.ok.visible = g > 0.02;
+    Y.ok.position.set(0, cek + 0.0, 0);
+  }
+  /* İskeletin oyuncuya ok atışı: ok yayın bulunduğu elden çıkar; yer çekimine göre biraz yukarı nişan alınır */
   mobOkAt(v, ctx) {
     const op = ctx.oyuncu.konum;
-    const p = new THREE.Vector3(v.konum.x, v.konum.y + 1.5, v.konum.z);
+    let p = new THREE.Vector3(v.konum.x, v.konum.y + 1.45, v.konum.z);
+    if (v.m && v.m.kollar[1]) { v.m.kok.updateMatrixWorld(true); p = v.m.kollar[1].localToWorld(new THREE.Vector3(0, -0.8, 0)); }
     const h = new THREE.Vector3(op.x - p.x, op.y + 1.2 - p.y, op.z - p.z);
     const d = h.length(), hizB = 22, t = d / hizB;
     h.y += 0.5 * 18 * t * t;
     h.x += (Math.random() - 0.5) * d * 0.06; h.z += (Math.random() - 0.5) * d * 0.06;
     h.normalize().multiplyScalar(hizB);
-    p.addScaledVector(h.clone().normalize(), 0.6);
+    p.addScaledVector(h.clone().normalize(), 0.15);
     this.okAt(p, h, v.tur.hasar, v);
+    v.ger = 0;
     if (this.sesK(p) > 0.3) this.ses.yayAt();
   }
   okGuncelle(dt, C) {
@@ -773,6 +800,7 @@ export class Varliklar {
       const b = v.agBayrak;
       v.yaniyor = !!(b & 4); v.nisan = !!(b & 8); v.hasarZaman = b & 2 ? 0.2 : 0; v.kacZaman = b & 32 ? 1 : 0; v.yerde = !(b & 32);
       m.kok.visible = !(b & 16);
+      if (T.uzak) v.ger = v.nisan ? Math.min(1, (v.ger || 0) + dt / 1.4) : 0;
       if (T.su) {
         const bl = this.dunya.blok(Math.floor(p.x), Math.floor(p.y + T.boy * 0.5), Math.floor(p.z));
         this.suCanlandir(v, dt, ctx, SIVI[bl] === 1 && !LAV[bl]);
@@ -803,6 +831,8 @@ export class Varliklar {
   }
   /* Sunucunun attığı oku göster (isabeti sunucu hesaplar) */
   aynaOk(ni, p, v, dusman) {
+    /* Oku atan iskeletin yay germesi sıfırlanır */
+    for (const w of this.liste) if (w.tur.uzak && (w.konum.x - p[0]) ** 2 + (w.konum.z - p[2]) ** 2 < 4) w.ger = 0;
     const mesh = okModeli();
     mesh.position.set(p[0], p[1], p[2]);
     this.grup.add(mesh);

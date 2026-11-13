@@ -177,9 +177,17 @@ export const MODELLER = {
     const kemik = '#dcd8cc', koyu = '#4a4640';
     const govde = parca(kok, malzeme, [0, 1.12, 0], [[0.12, 0.72, 0.12, kemik], [0.46, 0.08, 0.2, kemik, 0, 0.3, 0], [0.42, 0.06, 0.18, kemik, 0, 0.14, 0], [0.38, 0.06, 0.16, kemik, 0, -0.02, 0], [0.3, 0.06, 0.14, kemik, 0, -0.18, 0], [0.4, 0.1, 0.18, kemik, 0, -0.34, 0]]);
     const kafa = parca(kok, malzeme, [0, 1.5, 0], [[0.46, 0.46, 0.46, kemik, 0, 0.23, 0], [0.12, 0.1, 0.02, koyu, -0.11, 0.26, -0.235], [0.12, 0.1, 0.02, koyu, 0.11, 0.26, -0.235], [0.06, 0.06, 0.02, koyu, 0, 0.16, -0.235], [0.3, 0.04, 0.02, koyu, 0, 0.06, -0.235]]);
-    const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.3, 1.45, 0], [[0.1, 0.72, 0.1, kemik, 0, -0.32, 0], ...(s > 0 ? [[0.06, 0.7, 0.06, '#7a5532', 0, -0.62, -0.06], [0.02, 0.62, 0.02, '#e8e8e0', 0, -0.62, 0.0]] : [])]));
+    /* Yay sağ elde, kola dik (kol ileri uzatıldığında dikey durur); kiriş ve ok ayrı parçalardır, germe sırasında hareket eder */
+    const yay = '#7a5532';
+    const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.3, 1.45, 0], [[0.1, 0.72, 0.1, kemik, 0, -0.32, 0],
+      ...(s > 0 ? [[0.07, 0.08, 0.14, yay, 0, -0.72, 0], [0.05, 0.06, 0.2, yay, 0, -0.68, 0.16], [0.05, 0.06, 0.2, yay, 0, -0.68, -0.16], [0.04, 0.06, 0.1, yay, 0, -0.61, 0.31], [0.04, 0.06, 0.1, yay, 0, -0.61, -0.31]] : [])]));
+    const sag = kollar[1];
+    const kirisMalzeme = new THREE.MeshBasicMaterial({ color: 0xe8e8e0 });
+    const kiris = [1, -1].map(() => { const k = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.015, 1), kirisMalzeme); sag.add(k); return k; });
+    const ok = new THREE.Mesh(birlestir([kutuGeo(0.025, 0.62, 0.025, '#8a6a42', 0, -0.31, 0), kutuGeo(0.05, 0.08, 0.05, '#9a9da4', 0, -0.64, 0), kutuGeo(0.06, 0.1, 0.012, '#e8e8e0', 0, -0.03, 0)]), malzeme);
+    ok.visible = false; sag.add(ok);
     const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.12, 0.75, 0], [[0.1, 0.75, 0.1, kemik, 0, -0.375, 0]]));
-    return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null };
+    return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null, yay: { kiris, ok } };
   },
   orumcek: () => {
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });

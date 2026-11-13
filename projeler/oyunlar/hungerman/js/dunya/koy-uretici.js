@@ -3,15 +3,31 @@
    Köyün yerleşimi (kuyu, yollar, binalar, köylüler) yalnızca tohumdan hesaplanır; bu yüzden işçide
    parça parça yazılan yapılar ile ana iş parçacığında bilinen köy bilgisi her zaman aynıdır.
    Kıyıya yakın köylerde iskele, deniz feneri, balıkçı kulübesi ve tekneleriyle bir liman bulunur. */
-import { PB, PY, DENIZ, dizin } from '../sabitler.js';
+import { PB, PY, DENIZ, DUNYA_SINIRI, dizin } from '../sabitler.js';
 import { karistir, uretec } from '../rastgele.js';
 
 export const KOY_BOLGE = 384;
 const KENAR = 80;
-const UYGUN = new Set([10, 8, 9, 7, 6]); // çayır, orman, huş, çöl, tayga (BY değerleri)
+const UYGUN = new Set([10, 8, 9, 7, 6, 11, 13]); // çayır, orman, huş, çöl, tayga, savan, karlı ova (BY değerleri)
 
-const ON_EK = ['Kara', 'Ak', 'Yeşil', 'Taş', 'Çam', 'Kum', 'Güneş', 'Ilık', 'Değirmen', 'Göl', 'Kızıl', 'Bayır', 'Elma', 'Söğüt', 'Çınar', 'Pınar', 'Sarı', 'Yel', 'Ova', 'Kaya'];
-const SON_EK = ['köy', 'ova', 'dere', 'tepe', 'pınar', 'yayla', 'bük', 'kaya', 'yurt', 'bağ', 'alan', 'kent'];
+/* Köy adları (0.13.0): ön ek ve son ek birleşimlerinden oluşan havuz, tohuma göre karıştırılır ve her köy bölgesine
+   havuzdan ayrı bir ad verilir; böylece dünyadaki köy adları birbirini tekrar etmez. */
+const ON_EK = ['Kara', 'Ak', 'Yeşil', 'Taş', 'Çam', 'Kum', 'Güneş', 'Ilık', 'Değirmen', 'Göl', 'Kızıl', 'Bayır', 'Elma', 'Söğüt', 'Çınar', 'Pınar', 'Sarı', 'Yel', 'Ova', 'Kaya',
+  'Ceviz', 'Dut', 'Kartal', 'Gök', 'Ay', 'Yıldız', 'Doğan', 'Kestane', 'Armut', 'Kiraz', 'Meşe', 'Ardıç', 'Karaca', 'Bulut', 'Yaz', 'Kır'];
+const SON_EK = ['köy', 'ova', 'dere', 'tepe', 'pınar', 'yayla', 'bük', 'kaya', 'yurt', 'bağ', 'alan', 'kent', 'yaka', 'belen', 'kuyu', 'su', 'ören', 'çay'];
+const ADSIZ_BOLGE = Math.ceil(DUNYA_SINIRI / 384) + 1;   // dünya sınırı içindeki bölge sayısı (yarım kenar)
+function koyAdi(u, rx, rz) {
+  if (!u.koyAdlari) {
+    const havuz = [];
+    for (const on of ON_EK) for (const son of SON_EK) { if (on.toLocaleLowerCase('tr') === son) continue; const ad = on + son; if (!havuz.includes(ad)) havuz.push(ad); }
+    const r = uretec(karistir(u.tohum ^ 0x6164));
+    for (let i = havuz.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [havuz[i], havuz[j]] = [havuz[j], havuz[i]]; }
+    u.koyAdlari = havuz;
+  }
+  const n = ADSIZ_BOLGE * 2, i = ((rx + ADSIZ_BOLGE) * n + (rz + ADSIZ_BOLGE));
+  const H = u.koyAdlari;
+  return i >= 0 && i < H.length ? H[i] : H[((i % H.length) + H.length) % H.length] + ' ' + (Math.abs(rx) + Math.abs(rz));
+}
 const ERKEK = ['Ahmet', 'Mehmet', 'Hasan', 'Ali', 'Mustafa', 'Hüseyin', 'İbrahim', 'Osman', 'Yusuf', 'Murat', 'Kemal', 'Halil', 'Ramazan', 'Selim', 'Kadir', 'Recep', 'Emin', 'Cemal', 'Rıza', 'Şükrü'];
 const KADIN = ['Ayşe', 'Fatma', 'Emine', 'Hatice', 'Zeynep', 'Elif', 'Meryem', 'Şerife', 'Zehra', 'Hacer', 'Esra', 'Selin', 'Derya', 'Gülsüm', 'Nuriye', 'Saadet', 'Havva', 'Sevim', 'Nazlı', 'Dilek'];
 export const MESLEK_ADI = { ciftci: 'Çiftçi', kasap: 'Kasap', demirci: 'Demirci', oduncu: 'Oduncu', sifaci: 'Şifacı', avci: 'Avcı', balikci: 'Balıkçı' };
@@ -67,11 +83,9 @@ function koyKur0(u, rx, rz, yer) {
   const o = u.kolon(x, z, {});
   if (!UYGUN.has(o.b) || o.h < DENIZ + 2 || o.h > DENIZ + 30 || o.c < 0.07) return null;
   for (const [dx, dz] of [[24, 0], [-24, 0], [0, 24], [0, -24]]) { const q = u.kolon(x + dx, z + dz, {}); if (q.h < DENIZ || Math.abs(q.h - o.h) > 14) return null; }
-  const stil = o.b === 7 ? 'col' : o.b === 6 ? 'tayga' : 'mese';
-  const on = ON_EK[Math.floor(r() * ON_EK.length)];
-  let son = SON_EK[Math.floor(r() * SON_EK.length)];
-  if (on.toLocaleLowerCase('tr') === son) son = 'köy';
-  const ad = on + son;
+  const stil = o.b === 7 ? 'col' : o.b === 6 || o.b === 13 ? 'tayga' : 'mese';
+  r(); r();   // eski ad seçiminin rastgele sırası korunur (köy yerleşimi değişmez)
+  const ad = koyAdi(u, rx, rz);
   const koy = { id: rx + ',' + rz, rx, rz, x, z, y: o.h, ad, stil, binalar: [], yollar: [], lambalar: [], koylular: [], yaricap: 0 };
   /* Kuyu ve meydan */
   koy.binalar.push({ tur: 'kuyu', x, z, w: 5, d: 5, f: 0, y: o.h });
@@ -327,7 +341,7 @@ function binaYaz(b, M, set, al, k) {
     L(1, 1, 2, 32); L(2, 1, 1, 52);
     return;
   }
-  if (b.tur === 'fener') { fenerYaz(L, M); return; }
+  if (b.tur === 'fener') { fenerYaz(L, M, b); return; }
   /* Ev, balıkçı kulübesi ve demirci: duvarlar */
   const duvar = b.tur === 'demirci' ? 35 : M.kalas;
   const kose = b.tur === 'demirci' ? 15 : M.kutuk;
@@ -339,7 +353,7 @@ function binaYaz(b, M, set, al, k) {
       if (b.tur === 'demirci' && lz === 0 && !koseMi) continue; // demircinin önü açık
       let id = koseMi ? kose : duvar;
       if (ly === 2 && !koseMi && ((lx === 0 || lx === w - 1) && lz === (d - 1) / 2 || lz === d - 1 && lx === ox) && b.tur !== 'demirci') id = 34;
-      if (lz === 0 && lx === ox && ly <= 2) id = 0;
+      if (lz === 0 && lx === ox && ly <= 2) id = b.tur === 'demirci' ? 0 : kapiId(b, ly === 2);
       L(lx, ly, lz, id);
     }
   }
@@ -357,22 +371,32 @@ function binaYaz(b, M, set, al, k) {
   else if (b.tur === 'kulube') { L(1, 1, d - 2, 47); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 46); L(1, 1, 1, 52); L(1, 2, 1, 52); }
 }
 
-/* Deniz feneri: beyaz-kırmızı bantlı kule, içinde döner merdiven, tepede camlı ışık odası */
-function fenerYaz(L, M) {
-  for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) for (let ly = 10; ly <= 17; ly++) L(lx, ly, lz, 0);
+/* Yerel yönden dünya yönüne (0 -z, 1 +x, 2 +z, 3 -x) */
+function dunyaYonu(b, ldx, ldz) {
+  const [ax, az] = donustur(b, 2, 2), [bx, bz] = donustur(b, 2 + ldx, 2 + ldz);
+  return yonF(bx - ax, bz - az);
+}
+/* Binanın ön kapısı: açık ahşap kapı (köylüler geçebilir); panel kapı boşluğunun yan duvarına yaslanır */
+function kapiId(b, ust) { return 88 + dunyaYonu(b, 0, -1) * 4 + 2 + (ust ? 1 : 0); }
+
+/* Deniz feneri (0.13.0): beyaz-kırmızı bantlı kule; içeride arka duvarda tırmanma merdiveni, ışık odasına açılan kapak boşluğu */
+function fenerYaz(L, M, b) {
+  for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) for (let ly = 1; ly <= 17; ly++) L(lx, ly, lz, 0);
   const kenarMi = (lx, lz) => lx === 0 || lz === 0 || lx === 4 || lz === 4;
   const koseMi = (lx, lz) => (lx === 0 || lx === 4) && (lz === 0 || lz === 4);
   for (let ly = 1; ly <= 11; ly++) for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) {
     if (!kenarMi(lx, lz)) continue;
     let id = koseMi(lx, lz) ? 37 : (Math.floor((ly - 1) / 3) % 2 ? 51 : 49);
-    if (!koseMi(lx, lz) && (ly === 5 || ly === 9) && (lx === 2 || lz === 2)) id = 34;
-    if (lz === 0 && lx === 2 && ly <= 2) id = 0;
+    if (!koseMi(lx, lz) && (ly === 5 || ly === 9) && (lx === 2 || lz === 2) && !(lz === 4 && lx === 2)) id = 34;
+    if (lz === 0 && lx === 2 && ly <= 2) id = kapiId(b, ly === 2);
     L(lx, ly, lz, id);
   }
-  const hucre = [[3, 1], [3, 2], [3, 3], [2, 3], [1, 3], [1, 2], [1, 1], [2, 1]];
-  for (let i = 0; i <= 10; i++) { const [lx, lz] = hucre[i % 8]; L(lx, 1 + i, lz, M.kalas); }
-  for (let ly = 1; ly <= 12; ly++) L(2, ly, 2, 37);
-  for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) if (!(lx === 3 && lz === 3)) L(lx, 12, lz, 37);
+  /* Tırmanma merdiveni arka duvarda (yerel +z), 1. kattan ışık odasının tabanına kadar */
+  const merdiven = 110 + dunyaYonu(b, 0, 1);
+  for (let ly = 1; ly <= 12; ly++) L(2, ly, 3, merdiven);
+  /* İç ışık: merdivenin iki yanında, zeminde meşaleler */
+  L(1, 1, 3, 46); L(3, 1, 3, 46);
+  for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) if (!(lx === 2 && lz === 3)) L(lx, 12, lz, 37);
   for (let ly = 13; ly <= 14; ly++) for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) if (kenarMi(lx, lz)) L(lx, ly, lz, koseMi(lx, lz) ? M.kutuk : 34);
   for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) L(lx, 15, lz, 51);
   for (let lz = 1; lz < 4; lz++) for (let lx = 1; lx < 4; lx++) L(lx, 16, lz, 51);

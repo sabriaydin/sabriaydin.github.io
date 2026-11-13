@@ -7,6 +7,10 @@ import { Uretici, agacKur } from './uretici.js';
 import { BLOKLAR, KATI, SIVI, BITKI, EKIN_SONRAKI } from '../bloklar.js';
 import { uretec } from '../rastgele.js';
 
+/* Işık kaynağı sayılan bloklar (meşale niteliği taşıyanlar, örümcek yuvası ve lav) */
+const KAYNAK = new Uint8Array(256);
+for (const b of BLOKLAR) if (b && (b.mesale || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
+
 const SINIR_ICIN = DUNYA_SINIRI;
 
 export class Dunya {
@@ -234,7 +238,7 @@ export class Dunya {
     const v = p.v;
     for (let i = 0; i < v.length; i++) {
       const id = v[i];
-      if (id !== 46 && id !== 48 && id !== 61 && id !== 58 && id !== 59 && !EKIN_SONRAKI[id]) continue;
+      if (!KAYNAK[id] && !EKIN_SONRAKI[id]) continue;
       const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
       /* Lav gölleri: her 4 x 4 alanda yüzeydeki bir blok ışık kaynağı sayılır */
       if (id === 59 && (lx % 4 !== 1 || lz % 4 !== 1 || (y < 127 && v[i + PB * PB] === 59))) continue;

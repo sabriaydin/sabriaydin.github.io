@@ -188,7 +188,7 @@ export class GelistiriciPenceresi {
       this.bolum('Haritayı aç',
         this.kaydirici('kesif', 'Keşfedilecek yarıçap', 64, 2048, 64, this.kesifR, v => v + ' blok') +
         this.dugmeler(`<button type="button" data-kesfet="1">Çevreyi keşfet</button>`, this.onay('kesfet tumu', 'Tüm haritayı görünür yap')),
-        'Keşif arka planda yapılır; oyun sürerken harita dolar. Tüm haritanın açılması birkaç dakika sürer ve belleği yoğun kullanır.') +
+        'Keşif arka planda yapılır; oyun sürerken harita dolar. Tüm harita, dünya sınırına (haritadaki kesik çizgili kare) kadar açılır; birkaç dakika sürer ve belleği yoğun kullanır.') +
       this.bolum('Harita ekranı', this.dugmeler(`<button type="button" data-harita="1">Büyük haritayı aç</button>`, this.onay('harita temizle', 'Haritayı sıfırla')) + this.anahtarGrubu(o, 'mini'),
         'Büyük haritada Ctrl + tık ile tıklanan yere ışınlanılır.') +
       this.bolum('İşaretler', `<div class="gelListe">${(o.yerler || []).map((y, i) => `<div><i style="background:${esc(y.renk)}"></i><b>${esc(y.ad)}</b><span>X ${y.x} · Z ${y.z}</span><button type="button" data-yer="${i}">Git</button><button type="button" data-yersil="${i}" aria-label="Sil">✕</button></div>`).join('') || '<p class="gelNot">İşaret eklenmemiş.</p>'}</div>` +
@@ -214,7 +214,7 @@ export class GelistiriciPenceresi {
     const P = o.oyuncu.konum;
     const koyler = koylerAlan(o.dunya.uretici, P.x - 1500, P.z - 1500, P.x + 1500, P.z + 1500).map(k => ({ k, d: Math.hypot(k.x - P.x, k.z - P.z) })).sort((a, b) => a.d - b.d).slice(0, 10);
     const oyuncular = o.ag && o.ag.uzak ? [...o.ag.uzak.harita.values()].filter(u => !u.ilk) : [];
-    return this.bolum('Yerler', this.dugmeler(this.dugme('isinla koy', 'En yakın köy'), this.dugme('isinla liman', 'En yakın liman'), this.dugme('isinla zindan', 'En yakın zindan'), this.dugme('isinla batik', 'En yakın batık'),
+    return this.bolum('Yerler', this.dugmeler(this.dugme('isinla koy', 'En yakın köy'), this.dugme('isinla liman', 'En yakın liman'), this.dugme('isinla zindan', 'En yakın zindan'), this.dugme('isinla maden', 'En yakın maden'), this.dugme('isinla batik', 'En yakın batık'),
         this.dugme('isinla dogum', 'Doğma noktası'), o.olumNoktasi ? this.dugme('isinla olum', 'Son ölüm noktası') : '', this.dugme('isinla ~ ~', 'Yüzeye çık'), this.dugme('isinla geri', 'Önceki konuma dön'))) +
       this.bolum('Biyomlar', this.dugmeler(...BIYOMLAR.map(b => this.dugme('isinla biyom ' + b.replace(/ /g, '_'), b))), 'Seçilen biyomun en yakın noktasına ışınlar.') +
       this.bolum('Koordinat', `<div class="gelSatir gelKoord"><label>X <input type="number" id="gelX" value="${Math.round(P.x)}"></label><label>Y <input type="number" id="gelY" placeholder="zemin"></label><label>Z <input type="number" id="gelZ" value="${Math.round(P.z)}"></label><button type="button" data-git="1">Git</button></div>` +

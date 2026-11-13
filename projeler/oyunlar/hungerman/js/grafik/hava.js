@@ -1,17 +1,17 @@
 /* HungerMan - hava durumu: açık, yağmurlu, fırtınalı
    Yağmur ve kar parçacıkları kameranın çevresinde, her sütunun en üst bloğuna kadar düşer (çatı altına yağmaz).
-   Soğuk biyomlarda (tayga, dağlar, karlı kumsal) kar yağar, çölde yağış olmaz. Fırtınada şimşek çakar ve gök gürler.
+   Soğuk yerlerde (karlı biyomlar, soğuk iklimdeki yüksek dağlar) kar, diğer her yerde yağmur yağar. Fırtınada şimşek çakar ve gök gürler.
    Durum tek oyunculuda ve sunucuda yürütülür; çok oyunculu istemciye anlık durum ile gelir. */
 import { THREE } from './sahne.js';
-import { BY } from '../dunya/uretici.js';
+import { BY, KARLI, karliZirve } from '../dunya/uretici.js';
 import { KATI, SIVI } from '../bloklar.js';
 import { PY } from '../sabitler.js';
 
 export const HAVA = ['acik', 'yagmur', 'firtina'];
 export const HAVA_ADI = { acik: 'Açık', yagmur: 'Yağmurlu', firtina: 'Fırtınalı' };
-const SOGUK = new Set([BY.TAYGA, BY.DAG, BY.KARLI_KUMSAL]);
-const KURU = new Set([BY.COL]);
-const YAGMUR_N = 1600, KAR_N = 900, R = 22;
+/* Sütunun yağış türü: 2 kar, 1 yağmur */
+const karMi = k => KARLI.has(k.b) || k.te < -0.27 || (k.b === BY.DAG && karliZirve(k));
+const YAGMUR_N = 2800, KAR_N = 1500, R = 30;
 /* Durum süreleri (saniye) */
 const SURE = { acik: [420, 1100], yagmur: [150, 420], firtina: [110, 280] };
 const rastSure = d => SURE[d][0] + Math.random() * (SURE[d][1] - SURE[d][0]);
@@ -73,7 +73,7 @@ export class Hava {
         if (m) {
           const a = Math.random() * Math.PI * 2, r = 12 + Math.random() * 70;
           const x = Math.floor(m.x + Math.cos(a) * r), z = Math.floor(m.z + Math.sin(a) * r);
-          if (this.dunya.yuklu(x, z) && !KURU.has(this.dunya.uretici.kolon(x, z, {}).b)) {
+          if (this.dunya.yuklu(x, z)) {
             const y = this.ustBlok(x, z) + 1;
             if (this.olaylar.simsek) this.olaylar.simsek(x + 0.5, y, z + 0.5);
           }
@@ -91,8 +91,8 @@ export class Hava {
     const k = x + ',' + z;
     let c = this.kolonlar.get(k);
     if (!c) {
-      const b = this.dunya.yuklu(x, z) ? this.dunya.uretici.kolon(x, z, {}).b : BY.COL;
-      c = { u: this.dunya.yuklu(x, z) ? this.ustBlok(x, z) : PY, tur: KURU.has(b) ? 0 : SOGUK.has(b) ? 2 : 1 };
+      const yuklu = this.dunya.yuklu(x, z);
+      c = { u: yuklu ? this.ustBlok(x, z) : PY, tur: yuklu ? (karMi(this.dunya.uretici.kolon(x, z, {})) ? 2 : 1) : 0 };
       this.kolonlar.set(k, c);
     }
     return c;

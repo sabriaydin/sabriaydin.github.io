@@ -5,6 +5,7 @@ import { MESLEKLER } from './meslekler.js';
 import { karistir, uretec } from '../rastgele.js';
 import { ESYALAR } from '../bloklar.js';
 import { zindanAt } from '../dunya/zindan-uretici.js';
+import { madenAt } from '../dunya/maden-uretici.js';
 import { batikAt } from '../dunya/batik-uretici.js';
 import { DENIZ } from '../sabitler.js';
 
@@ -31,7 +32,8 @@ export class Koyler {
     const p = oyuncu.konum;
     /* Köye giriş */
     const k = koyBul(this.uretici, Math.floor(p.x / KOY_BOLGE), Math.floor(p.z / KOY_BOLGE));
-    const icinde = k && Math.max(Math.abs(p.x - k.x), Math.abs(p.z - k.z)) < k.yaricap ? k : null;
+    /* Köyün altındaki mağaralarda ya da çok yukarıda köyde sayılmaz: köy zemininin 8 blok altı ile 24 blok üstü arası */
+    const icinde = k && Math.max(Math.abs(p.x - k.x), Math.abs(p.z - k.z)) < k.yaricap && p.y > k.y - 8 && p.y < k.y + 24 ? k : null;
     if (icinde && icinde !== this.icindeki) this.bildirim(`${icinde.ad} köyüne hoş geldiniz. ${this.itibarMetni(icinde.id)}`);
     this.icindeki = icinde;
     if (this.ayna) return;
@@ -129,11 +131,14 @@ export class Koyler {
     let tur = 'ev';
     if (k) for (const b of k.binalar) if (Math.abs(b.x - x) <= b.w && Math.abs(b.z - z) <= b.w) tur = b.tur;
     if (zindanAt(this.uretici, x, y, z)) tur = 'zindan';
+    else if (madenAt(this.uretici, x, y, z)) tur = 'maden';
     if (batikAt(this.uretici, x, y, z)) tur = 'batik';
     const tablo = tur === 'batik'
       ? [[288, 5, 16], [299, 1, 3, 0.65], [264, 1, 2, 0.3], [263, 2, 5, 0.5], [261, 2, 6, 0.5], [290, 1, 1, 0.2], [456, 1, 1, 0.25], [457, 1, 1, 0.25], [453, 1, 1, 0.3], [293, 1, 3, 0.4], [287, 4, 12, 0.4], [319, 1, 1, 0.05], [410, 1, 1, 0.08]]
       : tur === 'kulube'
       ? [[297, 2, 6], [298, 1, 4, 0.6], [453, 1, 1, 0.45], [284, 1, 4, 0.5], [288, 1, 4], [299, 1, 1, 0.15], [46, 2, 6, 0.5], [293, 1, 2, 0.4]]
+      : tur === 'maden'
+      ? [[257, 3, 10], [261, 1, 5, 0.6], [262, 1, 4, 0.45], [264, 1, 2, 0.15], [46, 4, 12], [293, 1, 3, 0.6], [284, 1, 4, 0.5], [295, 2, 5, 0.4], [312, 1, 1, 0.12], [290, 1, 1, 0.1], [61, 1, 3, 0.3], [288, 1, 6, 0.6], [331, 1, 3, 0.25]]
       : tur === 'zindan'
       ? [[261, 2, 6], [263, 1, 4], [264, 1, 2, 0.35], [290, 1, 1, 0.25], [286, 1, 1, 0.25], [287, 6, 16], [289, 1, 2, 0.35], [288, 3, 10], [409, 1, 1, 0.12], [410, 1, 1, 0.12], [315, 1, 1, 0.12], [319, 1, 1, 0.04], [295, 2, 6], [61, 1, 3, 0.3], [293, 1, 3, 0.5]]
       : tur === 'demirci'

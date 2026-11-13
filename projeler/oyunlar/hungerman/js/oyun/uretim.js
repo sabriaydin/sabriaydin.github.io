@@ -5,7 +5,7 @@ import { aletId, ESYALAR, ZIRH_MALZEME, YUN_RENKLERI } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39] },
-  kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12] }
+  kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144] }
 };
 export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası' };
 export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140 };
@@ -23,6 +23,7 @@ const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, gird
 t(14, 4, [[8, 1]], null, 'blok');
 t(38, 4, [[10, 1]], null, 'blok');
 t(39, 4, [[12, 1]], null, 'blok');
+t(14, 4, [[144, 1]], null, 'blok');
 t(32, 1, [['kalas', 4]], null, 'blok');
 t(46, 4, [[256, 1], [257, 1]], null, 'blok');
 t(33, 1, [[15, 8]], 'masa', 'blok');

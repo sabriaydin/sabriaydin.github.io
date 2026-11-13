@@ -363,7 +363,7 @@ export class Etkilesim {
       if (suBitkisi) {
         if (mevcut !== 7 || !KATI[alt]) { this.arayuz.bildirim('Bu bitki su altında katı bir zemine dikilir.'); return true; }
       } else if (BITKI[id]) {
-        if (id === 36 ? !KATI[alt] : !TOPRAK.has(alt)) { this.arayuz.bildirim('Bu bitki toprak veya çimen üstüne dikilir.'); return true; }
+        if (id === 36 || id === 153 ? !KATI[alt] : !TOPRAK.has(alt)) { this.arayuz.bildirim('Bu bitki toprak veya çimen üstüne dikilir.'); return true; }
         if (SIVI[mevcut]) return false;
       }
       if (KATI[id] && this.oyuncu.hucreyiKapliyor(x, y, z)) return false;

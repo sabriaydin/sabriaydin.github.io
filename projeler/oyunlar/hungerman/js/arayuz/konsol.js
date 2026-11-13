@@ -7,6 +7,7 @@ import { TURLER } from '../varlik/turler.js';
 import { BIYOMLAR, BY } from '../dunya/uretici.js';
 import { koylerAlan } from '../dunya/koy-uretici.js';
 import { zindanlarAlan } from '../dunya/zindan-uretici.js';
+import { madenlerAlan } from '../dunya/maden-uretici.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
 import { HaritaKesif } from '../harita/kesif.js';
 import { PB, DENIZ, DUNYA_SINIRI, KITA_YARICAP } from '../sabitler.js';
@@ -176,7 +177,7 @@ export class Konsol {
       if (kucuk(p[0] || '') !== 'temizle') { this.hata('Kullanım: envanter temizle'); return; }
       o.envanter.temizle(); this.tamam('Envanter boşaltıldı.');
     }, { hile: true });
-    ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, batik, dogum, olum, geri, biyom <ad>, oyuncu <ad>, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | batik | dogum | olum | geri | biyom <ad> | oyuncu <ad> | isaret <ad>', (o, p) => {
+    ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, maden, batik, dogum, olum, geri, biyom <ad>, oyuncu <ad>, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | maden | batik | dogum | olum | geri | biyom <ad> | oyuncu <ad> | isaret <ad>', (o, p) => {
       const P = o.oyuncu.konum, a = kucuk(p[0] || ''), u = o.dunya.uretici, R = 1600;
       if (a === 'geri') {
         const e = this.oncekiKonum;
@@ -212,6 +213,13 @@ export class Konsol {
         if (!en) { this.hata('Yakında zindan bulunamadı.'); return; }
         this.isinla(o, en.x + 0.5, en.y + 1, en.z + 0.5); return;
       }
+      if (a === 'maden') {
+        const en = this.enYakin(madenlerAlan(u, P.x - 500, P.z - 500, P.x + 500, P.z + 500).filter(m => Math.hypot(m.x - P.x, m.z - P.z) > 8), P);
+        if (!en) { this.hata('Yakında terk edilmiş maden bulunamadı.'); return; }
+        /* Merkezdeki örümcek yuvasının ağlarına düşmemek için ilk koridorun içine */
+        const kr = en.koridorlar[0], t = kr ? Math.min(6, kr.L) : 0;
+        this.isinla(o, (kr ? kr.x + kr.ax * t : en.x) + 0.5, en.y + 0.2, (kr ? kr.z + kr.az * t : en.z) + 0.5); return;
+      }
       if (a === 'batik') {
         const en = this.enYakin(batiklarAlan(u, P.x - 900, P.z - 900, P.x + 900, P.z + 900).filter(b => Math.hypot(b.x - P.x, b.z - P.z) > 8), P);
         if (!en) { this.hata('Yakında batık gemi bulunamadı.'); return; }
@@ -227,9 +235,9 @@ export class Konsol {
       let x, y, z;
       if (p.length >= 3) { x = this.koord(p[0], P.x); y = this.koord(p[1], P.y); z = this.koord(p[2], P.z); }
       else if (p.length === 2) { x = this.koord(p[0], P.x); y = null; z = this.koord(p[1], P.z); }
-      if (x == null || z == null || (p.length >= 3 && y == null)) { this.hata('Kullanım: isinla <x> [y] <z> | koy | liman | zindan | batik | dogum | isaret <ad>'); return; }
+      if (x == null || z == null || (p.length >= 3 && y == null)) { this.hata('Kullanım: isinla <x> [y] <z> | koy | liman | zindan | maden | batik | dogum | isaret <ad>'); return; }
       this.isinla(o, x, y, z);
-    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'batik', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
+    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'maden', 'batik', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
     ekle('dogum', 'Doğma noktasını bulunulan yere ayarlar', 'dogum', o => {
       const P = o.oyuncu.konum; o.dogum = { x: P.x, y: P.y, z: P.z };
       this.tamam(`Doğma noktası: X ${Math.round(P.x)} · Y ${Math.round(P.y)} · Z ${Math.round(P.z)}`);
@@ -459,7 +467,7 @@ export class Konsol {
     });
     ekle('tohum', 'Dünya tohumunu yazar', 'tohum', o => this.yaz(`Tohum: ${o.tohum}`, 'bilgi'));
     ekle('gorus', 'Görüş mesafesini ayarlar (4-16 parça)', 'gorus <4-16>', (o, p) => { const n = Math.max(4, Math.min(16, Math.round(this.sayi(p[0], 8)))); this.arayuz.gorusAyarla(n); this.tamam(`Görüş ${n} parça.`); });
-    ekle('kesfet', 'Haritada çevreyi ya da tüm kıtayı keşfedilmiş yapar (arka planda); dur: sürmekte olan keşfi durdurur', 'kesfet [yarıçap blok] | kesfet tumu | kesfet dur', (o, p) => {
+    ekle('kesfet', 'Haritada çevreyi ya da dünya sınırına kadar tüm haritayı keşfedilmiş yapar (arka planda); dur: sürmekte olan keşfi durdurur', 'kesfet [yarıçap blok] | kesfet tumu | kesfet dur', (o, p) => {
       const a = kucuk(p[0] || '');
       if (a === 'dur') { if (!this.kesif) { this.hata('Süren bir keşif yok.'); return; } const k = this.kesif.k; this.kesifBitir(); this.tamam(`Keşif durduruldu: ${k.eklenen} parça işlendi.`); return; }
       const tumu = a === 'tumu' || a === 'hepsi';
@@ -467,9 +475,11 @@ export class Konsol {
       const r = tumu ? KITA_YARICAP + 160 : Math.max(32, Math.min(KITA_YARICAP + 160, Math.round(this.sayi(p[0], 160))));
       const c0x = Math.floor((mx - r) / PB), c1x = Math.floor((mx + r) / PB), c0z = Math.floor((mz - r) / PB), c1z = Math.floor((mz + r) / PB), S = DUNYA_SINIRI / PB;
       const l = [];
-      for (let cz = c0z; cz <= c1z; cz++) for (let cx = c0x; cx <= c1x; cx++) {
-        if (Math.abs(cx) > S || Math.abs(cz) > S || o.harita.parcalar.has(cx + ',' + cz)) continue;
-        if (Math.hypot((cx + 0.5) * PB - mx, (cz + 0.5) * PB - mz) <= r) l.push([cx, cz, Math.hypot((cx + 0.5) * PB - P.x, (cz + 0.5) * PB - P.z)]);
+      /* tumu: dünya sınırının (haritadaki kesik çizgili kare) içindeki her parça */
+      const Sx0 = tumu ? -S : c0x, Sx1 = tumu ? S - 1 : c1x, Sz0 = tumu ? -S : c0z, Sz1 = tumu ? S - 1 : c1z;
+      for (let cz = Sz0; cz <= Sz1; cz++) for (let cx = Sx0; cx <= Sx1; cx++) {
+        if (cx < -S || cx >= S || cz < -S || cz >= S || o.harita.parcalar.has(cx + ',' + cz)) continue;
+        if (tumu || Math.hypot((cx + 0.5) * PB - mx, (cz + 0.5) * PB - mz) <= r) l.push([cx, cz, Math.hypot((cx + 0.5) * PB - P.x, (cz + 0.5) * PB - P.z)]);
       }
       if (!l.length) { this.tamam('Bu alanın tamamı zaten keşfedilmiş.'); return; }
       l.sort((x, y) => x[2] - y[2]);

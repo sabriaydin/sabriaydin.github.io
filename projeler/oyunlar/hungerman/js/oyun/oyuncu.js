@@ -82,6 +82,9 @@ export class Oyuncu {
     if (this.suda) hizMax = (this.kosuyor ? 3.2 : 2.3) * (g.palet ? 1.65 : 1);
     else if (g.palet) hizMax *= 0.85;
     if (this.lavda) hizMax = 1.1;
+    /* Örümcek ağı: içindeyken hareket çok yavaşlar */
+    this.agda = !this.ucus && (BLOKLAR[vucut] && BLOKLAR[vucut].ag || BLOKLAR[d.blok(Math.floor(p.x), Math.floor(p.y + 1.3), Math.floor(p.z))]?.ag);
+    if (this.agda) hizMax = 0.6;
     if (this.ucus) hizMax = (this.kosuyor || g.kos ? 16 : 9);
     hizMax *= this.hizCarpani;
     if (!this.ucus && !this.suda) hizMax *= this.etkiHiz;
@@ -103,8 +106,15 @@ export class Oyuncu {
       if (g.zipla) v.y += (g.palet ? 26 : 22) * dt;
       else if (g.palet && g.egil) v.y -= 10 * dt;
       v.y = Math.max(g.palet ? -4.5 : -3.5, Math.min(v.y, g.palet ? 4 : 3.2));
-      /* Su yüzeyinde kıyıya tırmanmak için hafif itiş */
-      if (g.zipla && (Math.abs(v.x) > 0.5 || Math.abs(v.z) > 0.5) && this.carpisiyor(p.x + ix * 0.4, p.y + 0.3, p.z + iz * 0.4)) v.y = Math.max(v.y, 4.5);
+      /* Sudan karaya çıkış: Boşluk basılıyken hareket yönündeki engelin üst yüzü erişilebilir yükseklikteyse (en çok ~1,9 blok)
+         ve üstü boşsa, o yüksekliğe çıkacak kadar yukarı itilir. Sudan çıkınca tam yer çekimi başladığı için hız ona göre hesaplanır
+         (çarpışmada hız sıfırlandığı için engel, hız değil girdi yönüyle aranır) */
+      if (g.zipla && (ix || iz)) {
+        const nx = p.x + ix * 0.5, nz = p.z + iz * 0.5;
+        const ust = this.carpanUst(nx, p.y + 0.05, nz);
+        if (ust != null && ust > p.y && ust - p.y <= 1.9 && !this.carpisiyor(nx, ust + 1e-3, nz) && !this.carpisiyor(p.x, ust + 1e-3, p.z))
+          v.y = Math.max(v.y, Math.min(10.5, Math.sqrt(2 * YER_CEKIMI * (ust - p.y + 0.2))));
+      }
       this.dusus = 0;
     } else {
       v.y -= YER_CEKIMI * dt;
@@ -121,6 +131,7 @@ export class Oyuncu {
       this.dusus = 0;
     }
 
+    if (this.agda) { v.y = Math.max(-1.2, Math.min(v.y, 1)); this.dusus = 0; }
     /* Eksen eksen hareket ve çarpışma (alt adımlar ile) */
     const adim = Math.max(1, Math.ceil(Math.max(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z)) * dt / 0.35));
     const h = dt / adim;
