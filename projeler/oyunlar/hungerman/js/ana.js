@@ -31,7 +31,7 @@ import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 /* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
-const URETIM_SURUMU = 6;
+const URETIM_SURUMU = 7;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';
@@ -664,7 +664,7 @@ function adim(t) {
   const liste = [];
   const titre = 13.5 + Math.sin(o.sure * 9) * 0.35 + Math.sin(o.sure * 23) * 0.2;
   if (seciliId === 46) liste.push([goz.x, goz.y - 0.3, goz.z, 11]);
-  for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, 31)) liste.push([m[0], m[1], m[2], (m[3] || 14) * titre / 13.5]);
+  for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, 31)) liste.push([m[0], m[1], m[2], (m[3] || 14) * titre / 13.5 * (m[4] ? -1 : 1)]);   // eksi: soğuk (buz) ışık
   sahne.isiklariAyarla(liste);
   /* El ve düşen eşyaların ışığı */
   o.isikSayac -= dt;

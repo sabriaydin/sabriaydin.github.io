@@ -29,7 +29,9 @@ export const DOKULAR = [
   /* 0.15.2: çöl tapınağı */
   'kumtasi_duz', 'kumtasi_oyma', 'hiyeroglif', 'pismis_turuncu', 'cini_mavi', 'altin_blok', 'sutun_yan', 'nemes_yan', 'nemes_ust', 'firavun_yuz',
   /* 0.15.3: haydut kampı */
-  'cadir_bezi', 'cadir_cizgili', 'fici_yan', 'fici_ust', 'demir_parmaklik', 'hedef_on'
+  'cadir_bezi', 'cadir_cizgili', 'fici_yan', 'fici_ust', 'demir_parmaklik', 'hedef_on',
+  /* 0.15.4: buzul kulesi */
+  'buz_tugla', 'mavi_buz', 'kitaplik', 'vitray_mavi', 'buz_fener', 'buz_oyma', 'buz_kristal', 'buz_sarkit'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -222,6 +224,20 @@ blok(181, { ad: 'Fıçı', dok: ['fici_ust', 'fici_yan', 'fici_ust'], sertlik: 2
 blok(182, { ad: 'Demir Parmaklık', dok: 'demir_parmaklik', cizim: C_SEKIL, opak: false, sertlik: 5, alet: 'kazma', seviye: 1, ses: 'tas', sekil: 'bolme' });
 blok(183, { ad: 'Hedef', dok: ['saman_ust', 'hedef_on', 'saman_ust'], sertlik: 0.5, ses: 'bitki' });
 blok(184, { ad: 'Sivri Kazık', dok: ['mese_ust', 'mese_yan', 'mese_ust'], cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'balta', ses: 'odun', sekil: 'kazik' });
+/* 0.15.4: buzul kulesi blokları */
+blok(185, { ad: 'Buz Tuğla', dok: 'buz_tugla', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
+blok(186, { ad: 'Sıkışmış Buz', dok: 'mavi_buz', sertlik: 1, alet: 'kazma', ses: 'cam' });
+blok(187, { ad: 'Kitaplık', dok: ['kalas', 'kitaplik', 'kalas'], sertlik: 1.5, alet: 'balta', ses: 'odun' });
+blok(188, { ad: 'Mavi Vitray', dok: 'vitray_mavi', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'cam', sekil: 'bolme', dusur: () => [] });
+blok(189, { ad: 'Buz Feneri', dok: 'buz_fener', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'cam', sekil: 'fener', mesale: true, isik: 15, soguk: true });
+{
+  const ortak = { dok: 'buz_tugla', cizim: C_SEKIL, opak: false, sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' };
+  for (let f = 0; f < 4; f++) blok(190 + f, { ...ortak, ad: 'Buz Tuğla Merdiven', sekil: 'merdiven', yon: f, taban: 190, gizli: f > 0, dusur: () => [[190, 1]] });
+  for (let u = 0; u < 2; u++) blok(194 + u, { ...ortak, ad: 'Buz Tuğla Yarım Blok', sekil: 'yarim', ust: u, taban: 194, cift: 185, gizli: u > 0, dusur: () => [[194, 1]] });
+}
+blok(196, { ad: 'Oymalı Buz Tuğla', dok: 'buz_oyma', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
+blok(197, { ad: 'Buz Kristali', dok: 'buz_kristal', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1, alet: 'kazma', ses: 'cam', isik: 12, mesale: true, soguk: true });
+blok(198, { ad: 'Buz Sarkıtı', dok: 'buz_sarkit', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.5, ses: 'cam' });
 
 /* Maden deneyimi */
 for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4]]) B[id].xp = xp;

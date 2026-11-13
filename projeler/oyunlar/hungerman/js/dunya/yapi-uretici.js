@@ -11,7 +11,7 @@ export const YAPI_HUCRE = 288;
 const YAYILMA = 14;
 export const YAPI_ADI = { tapinak: 'Çöl Tapınağı', ormanTapinak: 'Orman Tapınağı', kule: 'Buzul Kulesi', kamp: 'Haydut Kampı' };
 /* Yapı türüne göre yarıçap (yerleşim ve düzlük denetimi için) */
-const YARICAP = { tapinak: 25, ormanTapinak: 7, kule: 6, kamp: 18 };
+const YARICAP = { tapinak: 25, ormanTapinak: 7, kule: 14, kamp: 18 };
 const YONLER = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 
 function turSec(o) {
@@ -37,7 +37,7 @@ export function yapiBul(u, gx, gz) {
       const tur = turSec(o);
       if (!tur || o.h < DENIZ + 1 || o.c < 0.05) continue;
       const R = YARICAP[tur];
-      if (o.h + (tur === 'kule' ? 26 : tur === 'tapinak' ? 30 : 15) >= PY - 1 || (tur === 'tapinak' && o.h < 24)) continue;
+      if (o.h + (tur === 'kule' ? 46 : tur === 'tapinak' ? 30 : 15) >= PY - 1 || (tur === 'tapinak' && o.h < 24)) continue;
       /* Düzlük ve su denetimi */
       let mn = o.h, mx = o.h, su = false;
       for (const [a, b] of [[-R, -R], [R, -R], [-R, R], [R, R], [0, -R], [0, R], [-R, 0], [R, 0], [-R / 2, -R / 2], [R / 2, R / 2], [-R / 2, R / 2], [R / 2, -R / 2]]) {
@@ -78,9 +78,9 @@ function yapiAyrinti(Y) {
     Y.sandiklar.push(n(-3, -5, 3), n(3, -5, 3), n(0, -5, 3), n(-5, 1, -4));
     Y.altY = b - 7; Y.ustY = b + 11;
   } else if (Y.tur === 'kule') {
-    Y.sandiklar.push(n(3, 1, 3), n(-3, 8, 3), n(3, 15, 3), n(-2, 22, 5), n(2, 22, 5));
-    Y.boss = { tur: 'buzbuyucu', p: n(0, 22, 0), yakin: 10, alt: b + 19, ust: b + 30 };
-    Y.altY = b - 1; Y.ustY = b + 25;
+    Y.sandiklar.push(n(4, 1, -3), n(-3, 9, 3), n(3, 17, 3), n(-4, 25, -1), n(4, 25, 1));
+    Y.boss = { tur: 'buzbuyucu', p: n(0, 33, 0), yakin: 10, alt: b + 31, ust: b + 42 };
+    Y.altY = b - 1; Y.ustY = b + 45;
   } else if (Y.tur === 'kamp') {
     Y.sandiklar.push(n(-4, 2, -11), n(4, 2, -11), n(8, 1, -4), n(-8, 1, 9), n(9, 1, 2), n(-10, 1, 5), n(11, 9, -10));
     Y.boss = { tur: 'reis', p: n(0, 1, -2), yakin: 18, alt: b - 4, ust: b + 10 };
@@ -121,10 +121,10 @@ export function yapiYaz(u, v, x0, z0) {
     const temel = (dx, dz, id, derin = 12) => { for (let dy = 0; dy >= -derin; dy--) { const a = A(dx, dy, dz); if (a === -1) return; if (dy < 0 && !BOS.has(a)) return; L(dx, dy, dz, id); } };
     const r = (dx, dy, dz) => karma3(Y.tohum, dx, dy, dz);
     const merdiven = (dx, dz, yon, y0, y1) => { for (let dy = y0; dy <= y1; dy++) L(dx, dy, dz, 110 + yonDon(Y, yon)); };
-    for (let dz = -Y.R - 3; dz <= Y.R + 3; dz++) for (let dx = -Y.R - 3; dx <= Y.R + 3; dx++) for (let dy = 1; dy <= 16; dy++) if (AGAC.has(A(dx, dy, dz))) L(dx, dy, dz, 0);
+    for (let dz = -Y.R - 3; dz <= Y.R + 3; dz++) for (let dx = -Y.R - 3; dx <= Y.R + 3; dx++) for (let dy = 1; dy <= 30; dy++) if (AGAC.has(A(dx, dy, dz))) L(dx, dy, dz, 0);
     if (Y.tur === 'tapinak') tapinakYaz(L, temel, r, merdiven, Y);
     else if (Y.tur === 'ormanTapinak') ormanYaz(L, A, temel, r, merdiven);
-    else if (Y.tur === 'kule') kuleYaz(L, temel, r, merdiven, A);
+    else if (Y.tur === 'kule') kuleYaz(L, temel, r, merdiven, A, Y);
     else if (Y.tur === 'kamp') kampYaz(L, temel, r, merdiven, Y);
     for (const [x, y, z] of Y.sandiklar) if (ic(x, z)) v[dizin(x - x0, y, z - z0)] = 50;
   }
@@ -494,37 +494,195 @@ function ormanYaz(L, A, temel, r, merdiven) {
   L(-4, -5, -4, 46); L(4, -5, -4, 46);
 }
 
-/* Buzul kulesi (0.15.1): 13 blok genişliğinde sekizgen kule; buz bantları ve pencereler, her katta fenerler ve mavi sancaklar.
-   Katlar arası tırmanma merdiveni; tepede mazgallı, açık hava savaş alanı (Buz Büyücüsü) ve köşelerde buz sivrileri. */
-function kuleYaz(L, temel, r, merdiven, A) {
-  const icMi = (dx, dz) => Math.abs(dx) <= 6 && Math.abs(dz) <= 6 && Math.abs(dx) + Math.abs(dz) <= 9;
-  const kenarMi = (dx, dz) => icMi(dx, dz) && (!icMi(dx + 1, dz) || !icMi(dx - 1, dz) || !icMi(dx, dz + 1) || !icMi(dx, dz - 1));
-  const KATLAR = [0, 7, 14, 21];
-  for (let dz = -8; dz <= 8; dz++) for (let dx = -8; dx <= 8; dx++) {
-    if (!icMi(dx, dz)) { if (Math.abs(dx) + Math.abs(dz) <= 11) for (let dy = 1; dy <= 3; dy++) L(dx, dy, dz, 0); continue; }
-    temel(dx, dz, 35, 14);
-    const k = kenarMi(dx, dz);
-    for (let dy = 0; dy <= 24; dy++) {
-      let id = 0;
-      if (KATLAR.includes(dy)) id = dy === 21 ? ((dx + dz) % 2 ? 37 : 35) : 35;
-      if (k && dy <= 22) id = dy % 7 === 6 ? 22 : 35;
-      if (k && dy % 7 === 3 && dy < 21 && (dx === 0 || dz === 0)) id = 22;           // pencereler
-      if (k && dy % 7 === 2 && dy < 21 && ((Math.abs(dx) === 6 && Math.abs(dz) === 2) || (Math.abs(dz) === 6 && Math.abs(dx) === 2))) id = 118;   // mavi sancak
-      if (k && dy === 23) id = (dx + dz) % 2 === 0 ? 35 : 0;                          // mazgallar
-      if (k && dy === 24 && (dx + dz) % 2 === 0) id = 141;
-      if (!k && dy === 22) id = r(dx, 22, dz) < 0.3 ? 141 : 0;                         // tepede ince kar
+/* Buzul kulesi (0.15.4): Buz Büyücüsü'nün yuvarlak kulesi.
+   - Taş teras: buz fenerli alçak duvar, buz kemerli kapı, kristal uçlu buz kümeleri, yer yer kar.
+   - Gövde: 15 blok çapında, buz tuğladan; her katta sıkışmış buz ve oymalı buz bantları, mavi vitray pencereler,
+     dışta sekiz kademeli payanda ve uçlarında buz fenerleri.
+   - İçeride duvar boyunca dolanan tek parça sarmal buz tuğla merdiven; dört kat:
+     giriş salonu (donmuş çeşme, kristal kandiller), kütüphane (kitaplıklar, büyü masası), simya odası ve yatak, gözlem ve hazine odası.
+   - Tepe: kademeli taşma (altında sarkıtlar) üzerinde 23 blok çapında açık savaş alanı; büyü çemberi, mazgallı korkuluk,
+     sekiz buz sivrisi, buz fenerleri ve üzerinde süzülen Buz Kalbi kristali. */
+function kuleYaz(L, temel, r, merdiven, A, Y) {
+  const BT = 185, MB = 186, KT = 187, VT = 188, BF = 189, BYB = 194, BO = 196, BUZ = 22, KAR = 21, KK = 141, TT = 35, KS = 37, KR = 197, SRK = 198, PAR = 182, PK = 61;
+  const BM = yon => 190 + ((yon + Y.f) % 4);
+  const derece = (dx, dz) => ((Math.atan2(dz, dx) * 180 / Math.PI) + 360) % 360;
+  const fark = (a, b) => { const x = Math.abs(a - b) % 360; return Math.min(x, 360 - x); };
+  const hucre = [];
+  for (let dz = -14; dz <= 14; dz++) for (let dx = -14; dx <= 14; dx++) hucre.push([dx, dz, Math.hypot(dx, dz), derece(dx, dz)]);
+  const KATLAR = [0, 8, 16, 24], UST = 32;
+
+  /* ---------- 1. Arazi ve teras ---------- */
+  for (const [dx, dz, d] of hucre) {
+    if (d > 13.5) continue;
+    temel(dx, dz, 2, 14);
+    for (let dy = 1; dy <= 24; dy++) L(dx, dy, dz, 0);
+    const yol = Math.abs(dx) <= 1 && dz > 6;
+    let z = d >= 12.5 ? KAR : d >= 11.5 ? KS : yol ? (dx === 0 ? BO : KS) : r(dx, 0, dz) < 0.22 ? KAR : TT;
+    L(dx, 0, dz, z);
+    if (!yol && d >= 8 && d < 11.4 && r(dx, 1, dz) < 0.14) L(dx, 1, dz, KK);
+    if (d >= 12.5) L(dx, 1, dz, r(dx, 2, dz) < 0.6 ? KK : 0);
+  }
+  /* Alçak teras duvarı, direklerde buz fenerleri */
+  for (const [dx, dz, d, a] of hucre) {
+    if (d < 11.6 || d >= 12.5 || (Math.abs(dx) <= 1 && dz > 0)) continue;
+    const direk = Math.round(a) % 30 < 4;
+    L(dx, 1, dz, direk ? BT : BYB);
+    if (direk) { L(dx, 2, dz, BT); L(dx, 3, dz, BF); }
+  }
+  /* Kapı kemeri */
+  for (const s of [-1, 1]) { for (let dy = 1; dy <= 4; dy++) L(s * 2, dy, 12, dy === 1 ? KS : BT); L(s * 2, 5, 12, BO); L(s * 2, 6, 12, BYB); }
+  for (let dx = -1; dx <= 1; dx++) L(dx, 5, 12, BO);
+  L(0, 6, 12, MB); L(0, 7, 12, KR); L(0, 4, 12, BF);
+  /* Kristal uçlu buz kümeleri */
+  for (const [cx, cz] of [[7, 7], [-7, 7], [-7, -7], [7, -7]]) {
+    const h = 4 + Math.floor(r(cx, 3, cz) * 2);
+    for (let dy = 1; dy <= h; dy++) L(cx, dy, cz, BUZ);
+    L(cx, h + 1, cz, KR);
+    const sx = Math.sign(cx), sz = Math.sign(cz);
+    for (let dy = 1; dy <= h - 2; dy++) L(cx + sx, dy, cz, MB);
+    for (let dy = 1; dy <= h - 1; dy++) L(cx, dy, cz + sz, BUZ);
+    L(cx - sx, 1, cz, MB); L(cx - sx, 2, cz, BUZ); L(cx + sx, 1, cz + sz, BUZ); L(cx, 1, cz - sz, MB);
+  }
+
+  /* ---------- 2. Gövde: duvar, katlar, iç boşluk ---------- */
+  for (const [dx, dz, d, a] of hucre) {
+    if (d >= 7.5) continue;
+    const duvar = d >= 6.5;
+    for (let dy = 1; dy < UST; dy++) {
+      let id;
+      if (duvar) {
+        if (dy <= 2) id = KS;
+        else if (KATLAR.includes(dy)) id = MB;
+        else if (KATLAR.includes(dy + 1)) id = BO;
+        else id = r(dx, dy, dz) < 0.1 ? MB : BT;
+      } else if (KATLAR.includes(dy)) {
+        const k = KATLAR.indexOf(dy);
+        if (k === 1) id = d < 2.5 ? 118 : d >= 5.5 ? BT : 14;                                   // kütüphane: ahşap ve halı
+        else if (k === 2) id = d >= 5.5 ? BT : (Math.abs(dx) + Math.abs(dz)) % 2 ? KS : MB;     // simya odası
+        else id = d < 1.5 ? BO : (dx === 0 || dz === 0 || Math.abs(dx) === Math.abs(dz)) ? MB : BT;   // gözlem odası
+      } else id = 0;
       L(dx, dy, dz, id);
     }
+    /* Giriş katı zemini: kar tanesi deseni */
+    if (!duvar) L(dx, 0, dz, d < 1.5 ? MB : d >= 5.5 ? BT : (dx === 0 || dz === 0 || Math.abs(dx) === Math.abs(dz)) ? MB : KS);
+    /* Pencereler */
+    if (duvar) for (const F of KATLAR) for (const w of [0, 45, 90, 135, 180, 225, 270, 315]) {
+      if ((F === 0 && w === 90) || fark(a, w) > 6.5) continue;
+      for (let dy = F + 3; dy <= F + 5; dy++) L(dx, dy, dz, VT);
+      L(dx, F + 6, dz, BO);
+    }
   }
-  /* Giriş, merdiven boşlukları ve merdiven */
-  for (let dy = 1; dy <= 3; dy++) for (const dx of [-1, 0, 1]) L(dx, dy, 6, 0);
-  for (const dy of [7, 14, 21]) L(0, dy, -5, 0);
-  merdiven(0, -5, 0, 1, 21);
-  /* Katlarda fenerler (zeminde) */
-  for (const y0 of [1, 8, 15]) for (const [a, c] of [[-4, -2], [4, -2], [-4, 2], [4, 2]]) L(a, y0, c, 159);
-  /* Tepe: köşelerde buz sivrileri ve fenerler */
-  for (const [a, c] of [[-4, -4], [4, -4], [-4, 4], [4, 4]]) { for (let dy = 22; dy <= 24; dy++) L(a, dy, c, 22); L(a, 25, c, 61); }
-  for (const [a, c] of [[-5, 0], [5, 0], [0, 5]]) L(a, 22, c, 159);
+  /* Kapı */
+  for (let dz = 5; dz <= 8; dz++) for (let dx = -1; dx <= 1; dx++) { if (Math.hypot(dx, dz) < 6.5) continue; for (let dy = 1; dy <= 3; dy++) L(dx, dy, dz, 0); L(dx, 4, dz, BO); }
+  L(0, 5, 7, MB); L(0, 5, 8, BF);
+  /* Payandalar (sekiz, kademeli) ve uçlarında buz fenerleri */
+  for (let k = 0; k < 8; k++) {
+    const a = (22.5 + 45 * k) * Math.PI / 180;
+    [[8, 18], [9, 12], [10, 6]].forEach(([rr, h], n) => {
+      const x = Math.round(rr * Math.cos(a)), z = Math.round(rr * Math.sin(a));
+      for (let dy = 1; dy <= h; dy++) L(x, dy, z, dy <= 2 ? KS : BT);
+      L(x, h + 1, z, n === 2 ? BF : BYB);
+    });
+  }
+
+  /* ---------- 3. Sarmal merdiven: duvar boyunca 4 yönlü bitişik tek sıra basamak, katlar arasında kesintisiz ---------- */
+  const yolH = [];
+  {
+    let son = null;
+    const e = q => Math.abs(Math.hypot(q[0], q[1]) - 6);
+    for (let s = 0; s < 3600; s++) {
+      const a = (135 + s * 0.1) * Math.PI / 180, c = [Math.round(6 * Math.cos(a)), Math.round(6 * Math.sin(a))];
+      if (son && c[0] === son[0] && c[1] === son[1]) continue;
+      if (son && Math.abs(c[0] - son[0]) + Math.abs(c[1] - son[1]) === 2) { const a1 = [c[0], son[1]], a2 = [son[0], c[1]]; yolH.push(e(a1) <= e(a2) ? a1 : a2); }
+      if (yolH.length > 2 && c[0] === yolH[0][0] && c[1] === yolH[0][1]) break;
+      yolH.push(c); son = c;
+    }
+  }
+  const yonBul = (a, b) => (b[0] > a[0] ? 1 : b[0] < a[0] ? 3 : b[1] > a[1] ? 2 : 0);
+  const basamak = new Map();   // "dx,dz" -> [kol, k]
+  for (let i = 0; i < 4; i++) {
+    const F = KATLAR[i];
+    for (let k = 0; k < 8; k++) {
+      const j = 8 * i + k, c = yolH[j], yon = j ? yonBul(yolH[j - 1], c) : yonBul(c, yolH[1]);
+      basamak.set(c[0] + ',' + c[1], [i, k]);
+      for (let y = F + 1; y < F + 1 + k; y++) L(c[0], y, c[1], BT);
+      L(c[0], F + 1 + k, c[1], BM(yon));
+      if (k >= 4 && k <= 6) L(c[0], F + 8, c[1], 0);   // üst katta baş boşluğu
+    }
+  }
+  const bas = (dx, dz) => basamak.get(dx + ',' + dz);
+  const komsuBas = (dx, dz, kol) => [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, c]) => { const q = bas(dx + a, dz + c); return q && q[0] === kol; });
+
+  /* ---------- 4. Taşma ve tepe savaş alanı ---------- */
+  for (const [dx, dz, d] of hucre) {
+    if (d < 7.5 || d >= 11.5) continue;
+    if (d < 8.5) L(dx, 29, dz, BT);
+    if (d < 9.5) L(dx, 30, dz, d >= 8.5 ? MB : BT);
+    if (d < 10.5) L(dx, 31, dz, BT);
+    /* Kademelerin altında sarkıtlar */
+    const alt = d < 8.5 ? 28 : d < 9.5 ? 29 : d < 10.5 ? 30 : 31;
+    if (r(dx, 28, dz) < 0.35) L(dx, alt, dz, SRK);
+  }
+  for (const [dx, dz, d, a] of hucre) {
+    if (d >= 11.5) continue;
+    const q = bas(dx, dz);
+    if (q && q[0] === 3 && q[1] >= 4) continue;   // merdiven boşluğu ve son basamak
+    let id = d < 1.5 ? MB : d >= 3.5 && d < 4.5 ? BO : d >= 7.5 && d < 8.5 ? MB : d >= 10.5 ? KS
+      : (d >= 4.5 && d < 7.5 && (dx === 0 || dz === 0 || Math.abs(dx) === Math.abs(dz))) ? MB : BT;
+    L(dx, UST, dz, id);
+    if (d >= 10.5) {
+      const dis = Math.floor(a / 10) % 2 === 0;
+      L(dx, UST + 1, dz, dis ? BT : BYB);
+      if (dis) L(dx, UST + 2, dz, BYB);
+    } else if (d >= 2 && d < 10 && r(dx, UST + 1, dz) < 0.08) L(dx, UST + 1, dz, KK);
+    /* Merdiven boşluğunun çevresinde demir parmaklık */
+    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a2, c2]) => { const w = bas(dx + a2, dz + c2); return w && w[0] === 3 && w[1] >= 4 && w[1] <= 6; })
+      && ![[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a2, c2]) => { const w = bas(dx + a2, dz + c2); return w && w[0] === 3 && w[1] === 7; })) L(dx, UST + 1, dz, PAR);
+  }
+  /* Buz sivrileri ve fener direkleri */
+  for (let k = 0; k < 8; k++) {
+    const a = 45 * k * Math.PI / 180, x = Math.round(9.6 * Math.cos(a)), z = Math.round(9.6 * Math.sin(a)), h = 5 + (k % 2) * 2;
+    for (let dy = 1; dy <= h; dy++) L(x, UST + dy, z, dy <= 1 ? MB : BUZ);
+    L(x, UST + h + 1, z, KR);
+    for (const [a2, c2] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (Math.hypot(x + a2, z + c2) < 10.5) { L(x + a2, UST + 1, z + c2, BUZ); }
+    const b = (22.5 + 45 * k) * Math.PI / 180, px = Math.round(8.6 * Math.cos(b)), pz = Math.round(8.6 * Math.sin(b));
+    L(px, UST + 1, pz, BT); L(px, UST + 2, pz, BF);
+  }
+  /* Süzülen Buz Kalbi ve yörüngedeki parçalar */
+  for (let a = -3; a <= 3; a++) for (let b = -3; b <= 3; b++) for (let c = -3; c <= 3; c++) {
+    const m = Math.abs(a) + Math.abs(b) + Math.abs(c);
+    if (m <= 3) L(a, 41 + b, c, m === 3 ? BUZ : m === 2 ? MB : KR);
+  }
+  for (const [a, c] of [[6, 0], [-6, 0], [0, 6], [0, -6]]) { L(a, 38, c, BUZ); L(a, 39, c, MB); L(a, 37, c, KR); }
+
+  /* ---------- 5. Kat döşemeleri ---------- */
+  /* Giriş salonu: donmuş çeşme, kristal kandiller, buz fenerleri */
+  for (let a = -1; a <= 1; a++) for (let c = -1; c <= 1; c++) L(a, 1, c, a || c ? BUZ : MB);
+  for (const [dx, dz, d] of hucre) if (d >= 1.5 && d < 2.5) L(dx, 1, dz, BYB);
+  L(0, 2, 0, MB); L(0, 3, 0, MB); L(0, 4, 0, BO); L(0, 5, 0, KR);
+  for (const [a, c] of [[0, 0], [2, 0], [-2, 0], [0, 2], [0, -2]]) L(a, 7, c, BF);
+  for (const s of [-1, 1]) { L(s * 3, 1, 5, KS); L(s * 3, 2, 5, MB); L(s * 3, 3, 5, BO); L(s * 3, 4, 5, KR); }
+  for (const [a, c] of [[5, 0], [4, -3], [0, -5], [-3, -4]]) L(a, 5, c, BF);
+  /* Kütüphane: duvar boyunca kitaplıklar, ortada büyü masası, okuma kürsüleri */
+  for (const [dx, dz, d, a] of hucre) {
+    if (d < 5.5 || d >= 6.5 || komsuBas(dx, dz, 1) || komsuBas(dx, dz, 0)) continue;
+    if ([0, 45, 90, 135, 180, 225, 270, 315].some(w => fark(a, w) <= 8)) continue;
+    for (let dy = 9; dy <= 11; dy++) L(dx, dy, dz, KT);
+    L(dx, 12, dz, BYB);
+  }
+  L(0, 9, 0, 156);
+  for (const [a, c] of [[3, -3], [-3, -2]]) { L(a, 9, c, 104); L(a, 10, c, 82); }
+  for (const [a, c] of [[0, 0], [3, 3], [-3, 3], [3, -3], [-3, -3]]) L(a, 15, c, BF);
+  /* Simya odası ve yatak */
+  L(2, 17, -3, 140); L(-2, 17, -3, 140); L(0, 17, -3, 181); L(0, 18, -3, PK);
+  L(-3, 17, 2, 47); L(-3, 17, 3, 47); L(-4, 17, 2, KT); L(-4, 18, 2, KT);
+  L(0, 17, 0, KS); L(0, 18, 0, KR);
+  L(3, 17, -1, 181); L(3, 18, -1, 181); L(4, 17, 0, 181);
+  for (const [a, c] of [[0, 0], [3, 2], [-3, -2], [-2, 3]]) L(a, 23, c, BF);
+  /* Gözlem ve hazine odası: ortada kristal küre, yıldızlı tavan altında fenerler */
+  L(0, 25, 0, BO); L(0, 26, 0, KR);
+  for (const [a, c] of [[2, 0], [-2, 0], [0, 2], [0, -2]]) L(a, 25, c, BYB);
+  for (const [a, c] of [[0, 0], [3, 3], [-3, 3], [3, -3], [-3, -3]]) L(a, 31, c, BF);
 }
 
 /* Haydut kampı (0.15.3): Kızıl Pençe haydutlarının tahkimli yuvası.

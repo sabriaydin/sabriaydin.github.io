@@ -52,22 +52,23 @@ void main() {
   #ifndef SU
     if (t.a < 0.5) discard;
   #endif
-  float m = 0.0;
+  float m = 0.0, mc = 0.0;
   for (int i = 0; i < ${ISIK_SAYISI}; i++) {
     if (float(i) >= isikAdet) break;
     vec4 L = isiklar[i];
-    if (L.w <= 0.0) continue;
+    if (L.w == 0.0) continue;
     float d = distance(vDunya, L.xyz);
-    float k = clamp(1.0 - d / (L.w * 0.9), 0.0, 1.0);
-    m += k * k;   /* 0.15.1: birden çok ışık kaynağı toplanır (aydınlatılmış salonlar daha parlak) */
+    float k = clamp(1.0 - d / (abs(L.w) * 0.9), 0.0, 1.0);
+    /* 0.15.1: birden çok ışık kaynağı toplanır; 0.15.4: eksi güç soğuk (buz) ışığıdır */
+    if (L.w > 0.0) m += k * k; else mc += k * k;
   }
-  m = min(m, 1.0);
+  m = min(m, 1.0); mc = min(mc, 1.0);
   float ao = vAo;
   vec3 isik;
   if (ao > 1.5) { ao = ao - 1.0; isik = vec3(1.0); }   /* lav: kendi ışığıyla parlar */
   else {
     vec3 gokIsik = gokRenk * max(vGok * gun, magara);
-    isik = max(gokIsik, vec3(1.0, 0.8, 0.55) * m * 1.05);
+    isik = max(gokIsik, min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc, vec3(1.08)));
   }
   vec3 renk = t.rgb * ao * isik;
   /* Yağmur: açıktaki yüzeyler ıslak ve koyu görünür */

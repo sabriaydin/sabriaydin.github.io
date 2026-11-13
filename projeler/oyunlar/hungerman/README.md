@@ -117,6 +117,25 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 0.15.4: Buzul Kulesi yeniden tasarlandı
+
+Buzul Kulesi, Buz Büyücüsü'nün yuvarlak kulesi olarak baştan tasarlandı (taban 27 blok çapında, tepe 45 blok yüksekliğinde).
+
+- **Teras:** taş döşeme, yer yer kar; buz fenerli alçak duvar, buz kemerli giriş kapısı, uçlarında buz kristali parlayan dört buz kümesi.
+- **Gövde:** 15 blok çapında, buz tuğladan; her katta sıkışmış buz ve kar taneli oymalı buz bantları, mavi vitray pencereler; dışta sekiz kademeli payanda ve uçlarında buz fenerleri.
+- **Sarmal merdiven:** duvar boyunca dolanan, katlar arasında kesintisiz buz tuğla merdiven; zeminden tepeye zıplamadan çıkılır.
+- **Katlar:**
+  - Giriş salonu: donmuş çeşme, kristal kandiller, buz fenerli avize.
+  - Kütüphane: duvar boyunca kitaplıklar, mavi halı üzerinde büyü masası, okuma kürsüleri.
+  - Simya odası: iki simya masası, malzeme fıçıları, kristal sergisi, yatak.
+  - Gözlem ve hazine odası: kristal küre, iki sandık.
+- **Tepe (boss alanı):** kademeli taşmalar (altlarında buz sarkıtları) üzerinde 23 blok çapında açık savaş alanı; büyü çemberi deseni, mazgallı korkuluk, sekiz buz sivrisi, buz fenerleri; üstünde süzülen **Buz Kalbi** kristali ve çevresinde dönen buz parçaları. Merdiven boşluğu demir parmaklıkla çevrilidir.
+- Toplam 5 sandık.
+- **Soğuk ışık:** Buz Feneri ve Buz Kristali mavi-beyaz ışık verir; meşale, fener ve ateşin sıcak ışığıyla birlikte toplanır.
+- **Yeni bloklar** (tümü üretilebilir): Buz Tuğla, Sıkışmış Buz, Oymalı Buz Tuğla, Buz Tuğla Merdiven, Buz Tuğla Yarım Blok, Kitaplık, Mavi Vitray, Buz Feneri, Buz Kristali, Buz Sarkıtı.
+- Yapıların çevresindeki ağaçlar artık 30 blok yüksekliğe kadar temizlenir (havada asılı ağaç tepesi kalmaz).
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır.
+
 ## 0.15.3: Haydut Kampı yeniden tasarlandı
 
 Haydut Kampı, Kızıl Pençe haydutlarının tahkimli yuvası olarak baştan tasarlandı (yaklaşık 37 blok çapında, halka biçimli).

@@ -307,6 +307,49 @@ const RESSAM = {
   },
   nemes_yan: p => { const m = hex('#2a4ea6'), g = hex('#e2b53a'); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis((y >> 1) % 2 ? m : g, 1 + (p.r() * 2 - 1) * 0.05)); },
   nemes_ust: p => { const m = hex('#2a4ea6'), g = hex('#e2b53a'); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis((x >> 1) % 2 ? m : g, 1 + (p.r() * 2 - 1) * 0.05)); },
+  /* 0.15.4: buzul kulesi */
+  buz_tugla: p => {
+    p.doldur('#8cc0f2', 0.05);
+    const h = hex('#5d93cc'), a = hex('#cfe9fe');
+    for (let x = 0; x < D; x++) { p.set(x, 7, h); p.set(x, 15, h); p.set(x, 0, a); p.set(x, 8, a); }
+    for (let y = 0; y < 7; y++) { p.set(7, y, h); p.set(8, y, a); }
+    for (let y = 8; y < 15; y++) { p.set(15, y, h); p.set(0, y, a); }
+    for (let n = 0; n < 5; n++) { const x = Math.floor(p.r() * 14) + 1, y = Math.floor(p.r() * 14) + 1; p.set(x, y, a); }
+  },
+  mavi_buz: p => {
+    p.doldur('#5a96e4', 0.05);
+    const a = hex('#9cc8f4'), k = hex('#3f74ba');
+    for (let i = 0; i < 6; i++) { const x = Math.floor(p.r() * 12), y = Math.floor(p.r() * 12); cizgi(p, x, y, x + 3, y + 3, a); }
+    for (let i = 0; i < 4; i++) { const x = Math.floor(p.r() * 14), y = Math.floor(p.r() * 14); cizgi(p, x, y + 2, x + 2, y, k); }
+  },
+  kitaplik: p => {
+    kalas(p, '#9a6e3a');
+    const k = hex('#5a3d1f'), renk = ['#7a2a24', '#2e4f8a', '#3c6a2c', '#7a5a1c', '#5a2a6a', '#8a8070'].map(hex);
+    for (const y0 of [1, 9]) {
+      for (let x = 0; x < D; x++) { p.set(x, y0 - 1, k); p.set(x, y0 + 6, k); }
+      let x = 1;
+      while (x < 15) { const w = 1 + Math.floor(p.r() * 2), h = 4 + Math.floor(p.r() * 3), c = renk[Math.floor(p.r() * renk.length)]; for (let i = 0; i < w && x < 15; i++, x++) for (let y = y0 + 6 - h; y < y0 + 6; y++) p.set(x, y, karis(c, i ? 0.85 : 1)); if (p.r() < 0.25) x++; }
+    }
+  },
+  vitray_mavi: p => {
+    const k = hex('#2a3540'), renk = ['#3e6fd0', '#5a9ae8', '#2c4fa8', '#8cc4f4', '#e8c84a'].map(hex);
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis(renk[(Math.floor(x / 4) + Math.floor(y / 5) * 2 + (x > 7 ? 1 : 0)) % 4], 1 + (p.r() - 0.5) * 0.1));
+    for (let y = 5; y < 11; y++) for (let x = 5; x < 11; x++) if (Math.hypot(x - 7.5, y - 7.5) < 2.6) p.set(x, y, renk[4]);
+    for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); p.set(7, i, k); }
+    for (const y of [5, 10]) for (let x = 0; x < D; x++) p.set(x, y, k);
+  },
+  buz_fener: p => { p.doldur('#3a4a5e', 0.05); const s = hex('#8fd8ff'), a = hex('#e6f8ff'); for (let y = 2; y < 14; y++) for (let x = 2; x < 14; x++) if (x % 5 !== 1 && y % 6 !== 1) p.set(x, y, (x > 4 && x < 11 && y > 4 && y < 11) ? a : s); },
+  buz_kristal: p => bitki(p, p => { const renk = [hex('#bfeaff'), hex('#7fd0ff'), hex('#e8f8ff')]; for (const [cx, h, w, ri] of [[4, 9, 2, 0], [8, 14, 3, 1], [12, 8, 2, 2], [6, 6, 1, 2], [10, 7, 1, 0]]) { const c = renk[ri]; for (let y = 15; y > 15 - h; y--) { const t = (15 - y) / h, ww = Math.max(0, Math.round(w * (1 - t * 0.8))); for (let x = cx - ww; x <= cx + ww; x++) p.set(x, y, karis(c, 0.85 + (x < cx ? 0.2 : 0) + p.r() * 0.08)); } } }),
+  buz_sarkit: p => bitki(p, p => { const c = hex('#cdeaff'); for (let y = 0; y < 16; y++) { const w = Math.max(0, Math.round((15 - y) * 0.3)); for (let x = 8 - w; x <= 7 + w; x++) p.set(x, y, karis(c, 0.82 + p.r() * 0.2 + (x < 8 ? 0.12 : 0))); } }),
+  buz_oyma: p => {
+    p.doldur('#8cc0f2', 0.04);
+    const h = hex('#4f86c0'), a = hex('#d8eefe');
+    for (let i = 1; i < 15; i++) { p.set(i, 1, h); p.set(1, i, h); p.set(i, 14, a); p.set(14, i, a); }
+    /* Kar tanesi */
+    for (let i = -4; i <= 4; i++) { p.set(8 + i, 8, h); p.set(8, 8 + i, h); if (Math.abs(i) <= 3) { p.set(8 + i, 8 + i, h); p.set(8 + i, 8 - i, h); } }
+    for (const [x, y] of [[6, 4], [10, 4], [6, 12], [10, 12], [4, 6], [4, 10], [12, 6], [12, 10]]) p.set(x, y, h);
+    p.set(8, 8, a);
+  },
   /* 0.15.3: haydut kampı */
   cadir_bezi: p => {
     p.doldur('#d4c49c', 0.05);

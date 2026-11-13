@@ -20,7 +20,7 @@ function panel(f, k, y0 = 0, y1 = 1) {
 }
 
 const CIT_AILE = id => id === 104 || (id >= 105 && id <= 108);
-const BOLME_AILE = id => id === 109 || id === 34 || id === 182;
+const BOLME_AILE = id => id === 109 || id === 34 || id === 182 || id === 188;
 /* Çit ve cam bölme komşuya bağlanır mı */
 function baglanir(id, n, f) {
   if (!n) return false;

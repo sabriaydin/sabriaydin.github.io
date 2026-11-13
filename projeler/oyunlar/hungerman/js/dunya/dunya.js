@@ -96,7 +96,7 @@ export class Dunya {
     if (!d) { d = new Map(); this.degisiklikler.set(k, d); }
     d.set(i, id);
     const mk = x + ',' + y + ',' + z;
-    if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14]);
+    if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14, BLOKLAR[id].soguk ? 1 : 0]);
     else this.mesaleler.delete(mk);
     if (EKIN_SONRAKI[id]) this.ekinler.add(mk); else this.ekinler.delete(mk);
     if (id === 58) this.yuvalar.set(mk, { x, y, z, sayac: 5 }); else this.yuvalar.delete(mk);
@@ -246,7 +246,7 @@ export class Dunya {
       const k = x + ',' + y + ',' + z;
       if (id === 58) this.yuvalar.set(k, { x, y, z, sayac: 5 });
       else if (EKIN_SONRAKI[id]) this.ekinler.add(k);
-      else this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14)]);
+      else this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14), BLOKLAR[id].soguk ? 1 : 0]);
       p.kaynaklar.push(k);
     }
   }
