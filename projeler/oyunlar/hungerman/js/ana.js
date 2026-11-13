@@ -31,7 +31,7 @@ import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 /* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
-const URETIM_SURUMU = 5;
+const URETIM_SURUMU = 6;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';

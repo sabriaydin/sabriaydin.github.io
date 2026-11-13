@@ -11,7 +11,7 @@ export const YAPI_HUCRE = 288;
 const YAYILMA = 14;
 export const YAPI_ADI = { tapinak: 'Çöl Tapınağı', ormanTapinak: 'Orman Tapınağı', kule: 'Buzul Kulesi', kamp: 'Haydut Kampı' };
 /* Yapı türüne göre yarıçap (yerleşim ve düzlük denetimi için) */
-const YARICAP = { tapinak: 25, ormanTapinak: 7, kule: 6, kamp: 11 };
+const YARICAP = { tapinak: 25, ormanTapinak: 7, kule: 6, kamp: 18 };
 const YONLER = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 
 function turSec(o) {
@@ -45,7 +45,7 @@ export function yapiBul(u, gx, gz) {
         mn = Math.min(mn, q.h); mx = Math.max(mx, q.h);
         if (q.h < DENIZ) su = true;
       }
-      if (su || mx - mn > (tur === 'kule' ? 9 : tur === 'tapinak' ? 10 : tur === 'kamp' ? 3 : 6)) continue;
+      if (su || mx - mn > (tur === 'kule' ? 9 : tur === 'tapinak' ? 10 : tur === 'kamp' ? 5 : 6)) continue;
       if (koyIcinde(u, x, z, R + 24)) continue;
       Y = { tur, x, z, y: o.h, f, R, anahtar: 'y' + gx + ',' + gz, tohum: (r() * 1e9) | 0 };
       yapiAyrinti(Y);
@@ -82,10 +82,10 @@ function yapiAyrinti(Y) {
     Y.boss = { tur: 'buzbuyucu', p: n(0, 22, 0), yakin: 10, alt: b + 19, ust: b + 30 };
     Y.altY = b - 1; Y.ustY = b + 25;
   } else if (Y.tur === 'kamp') {
-    Y.sandiklar.push(n(0, 1, -8), n(-6, 1, 5), n(-9, 7, -9));
-    Y.boss = { tur: 'reis', p: n(0, 1, -3), yakin: 18, alt: b - 4, ust: b + 8 };
-    Y.haydutlar = [n(3, 1, 3), n(-3, 1, 3), n(4, 1, -2), n(-4, 1, -2)];
-    Y.altY = b - 2; Y.ustY = b + 9;
+    Y.sandiklar.push(n(-4, 2, -11), n(4, 2, -11), n(8, 1, -4), n(-8, 1, 9), n(9, 1, 2), n(-10, 1, 5), n(11, 9, -10));
+    Y.boss = { tur: 'reis', p: n(0, 1, -2), yakin: 18, alt: b - 4, ust: b + 10 };
+    Y.haydutlar = [n(3, 1, 4), n(-2, 1, 6), n(-11, 9, -10), n(9, 9, -10), n(0, 7, 14), n(9, 1, -3)];
+    Y.altY = b - 2; Y.ustY = b + 16;
   }
 }
 
@@ -125,7 +125,7 @@ export function yapiYaz(u, v, x0, z0) {
     if (Y.tur === 'tapinak') tapinakYaz(L, temel, r, merdiven, Y);
     else if (Y.tur === 'ormanTapinak') ormanYaz(L, A, temel, r, merdiven);
     else if (Y.tur === 'kule') kuleYaz(L, temel, r, merdiven, A);
-    else if (Y.tur === 'kamp') kampYaz(L, temel, r, merdiven);
+    else if (Y.tur === 'kamp') kampYaz(L, temel, r, merdiven, Y);
     for (const [x, y, z] of Y.sandiklar) if (ic(x, z)) v[dizin(x - x0, y, z - z0)] = 50;
   }
 }
@@ -527,45 +527,201 @@ function kuleYaz(L, temel, r, merdiven, A) {
   for (const [a, c] of [[-5, 0], [5, 0], [0, 5]]) L(a, 22, c, 159);
 }
 
-/* Haydut kampı (0.15.1): kütük çit (kapılı), gözetleme kulesi, çadırlar, kamp ateşi, masa ve fenerler, saman hedefler, sandık yığınları.
-   Haydut Reisi kuzeydeki büyük kırmızı çadırın önünde bekler. */
-function kampYaz(L, temel, r, merdiven) {
-  const R = 11;
-  for (let dz = -R; dz <= R; dz++) for (let dx = -R; dx <= R; dx++) {
-    temel(dx, dz, 3, 6);
-    for (let dy = 1; dy <= 9; dy++) L(dx, dy, dz, 0);
-    const d = Math.hypot(dx, dz);
-    L(dx, 0, dz, d < 4.5 ? 57 : (Math.abs(dx) <= 1 && dz > 0) ? 57 : r(dx, 0, dz) < 0.25 ? 3 : 4);
-    /* Kütük çit: güneyde ve doğuda kapı */
-    const kenar = Math.abs(dx) === R || Math.abs(dz) === R;
-    const kapi = (dz === R && Math.abs(dx) <= 1) || (dx === R && Math.abs(dz) <= 1);
-    if (kenar && !kapi) { const h = 2 + (r(dx, 5, dz) < 0.5 ? 1 : 0); for (let dy = 1; dy <= h; dy++) L(dx, dy, dz, 8); }
-  }
-  for (const [a, c] of [[2, R], [-2, R], [R, 2], [R, -2]]) { L(a, 3, c, 8); L(a, 4, c, 46); }
-  /* Kamp ateşi, kütük oturaklar */
-  L(0, 1, 0, 48);
-  for (const [a, c] of [[2, 0], [-2, 0], [0, 2], [2, 2], [-2, -2]]) L(a, 1, c, a && c ? 52 : 8);
-  /* Çadır: x boyunca A biçimli yün çatı, arka yüz kapalı */
-  const cadir = (cx, cz, renk, gen = 2, derin = 2) => {
-    for (let tz = -derin; tz <= derin - 1; tz++) for (let x = -gen; x <= gen; x++) {
-      const h = gen + 1 - Math.abs(x);
-      L(cx + x, h, cz + tz, renk);
-      if (tz === -derin) for (let y = 1; y < h; y++) L(cx + x, y, cz + tz, renk);
+/* Haydut kampı (0.15.3): Kızıl Pençe haydutlarının tahkimli yuvası.
+   - Dış savunma: sivri kazıklı hendek, köprü; uçları sivriltilmiş kütüklerden halka biçimli çit, çit üstünde meşaleler.
+   - Kapı kulesi: iki kule, kapının üstünden geçen mazgallı yürüyüş yolu, sancaklar, fenerler.
+   - Arka köşelerde iki gözetleme kulesi: dikmeler, çapraz parmaklık, tırmanma merdiveni, çatılı nöbet yeri ve flama.
+   - Reis otağı: ahşap kürsü üzerinde kırmızı-krem çizgili büyük çadır, saçak, taht, halı, ganimet sandıkları.
+   - Meydan: taş halkalı büyük kamp ateşi ve şiş, oturaklar, fener direkleri.
+   - Yatakhane çadırları, demirci tezgâhı, ganimet ambarı, demir parmaklıklı hazine kafesi, okçuluk alanı, odun yığını.
+   Haydut Reisi meydanda bekler; nöbetçiler kulelerde ve kapı yolunda durur. */
+function kampYaz(L, temel, r, merdiven, Y) {
+  const R = 18, KUT = 8, KAL = 14, CIT = 104, KZ = 184, BEZ = 179, CBEZ = 180, FIC = 181, PAR = 182, HED = 183, SAM = 52, F = 159, MS = 46, YB = 82;
+  const AH = yon => 70 + ((yon + Y.f) % 4);              // meşe merdiven; yon: yerel yükselme yönü
+  const YV = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  const kutu = (x0, x1, y0, y1, z0, z1, id) => {
+    if (x0 > x1) [x0, x1] = [x1, x0];
+    if (z0 > z1) [z0, z1] = [z1, z0];
+    for (let dz = z0; dz <= z1; dz++) for (let dx = x0; dx <= x1; dx++) for (let dy = y0; dy <= y1; dy++)
+      L(dx, dy, dz, typeof id === 'function' ? id(dx, dy, dz) : id);
+  };
+  const fenerDirek = (x, z, h = 2) => { kutu(x, x, 1, h, z, z, CIT); L(x, h + 1, z, F); };
+  /* Küçük piramit çatı (merdivenlerle); n: yarı genişlik */
+  const cati = (cx, cz, y, n) => {
+    for (let i = 0; i <= n; i++) {
+      const w = n - i;
+      for (let a = -w; a <= w; a++) for (let c = -w; c <= w; c++) {
+        let id = KAL;
+        if (w > 0) { if (c === -w) id = AH(2); else if (c === w) id = AH(0); else if (a === -w) id = AH(1); else if (a === w) id = AH(3); }
+        else id = YB;
+        L(cx + a, y + i, cz + c, id);
+      }
     }
   };
-  cadir(0, -7, 114, 3, 3);
-  cadir(-6, 6, 120); cadir(6, 6, 115); cadir(7, -4, 117);
-  /* Reis çadırının önünde sancak direkleri */
-  for (const a of [-4, 4]) { for (let dy = 1; dy <= 4; dy++) L(a, dy, -4, 104); L(a, 4, -3, 114); L(a, 3, -3, 114); L(a, 5, -4, 46); }
-  /* Gözetleme kulesi (kuzeybatı köşe): dört ayak, platform, korkuluk, merdiven */
-  for (const [a, c] of [[-10, -10], [-8, -10], [-10, -8], [-8, -8], [-9, -8]]) for (let dy = 1; dy <= 5; dy++) L(a, dy, c, 8);
-  for (let a = -10; a <= -8; a++) for (let c = -10; c <= -8; c++) L(a, 6, c, 14);
-  for (let a = -10; a <= -8; a++) for (let c = -10; c <= -8; c++) if (a !== -9 || c !== -9) { if (!(a === -9 && c === -8)) L(a, 7, c, 104); }
-  merdiven(-9, -7, 0, 1, 6);
-  L(-10, 7, -10, 159);
-  /* Masa, fenerler, sandık yığınları ve saman hedefler */
-  L(4, 1, 2, 14); L(5, 1, 2, 14); L(4, 2, 2, 159); L(-4, 1, 6, 159); L(6, 1, -1, 159); L(-3, 1, -8, 159);
-  for (const [a, c] of [[8, 8], [9, 8], [8, 9]]) L(a, 1, c, 14);
-  L(9, 2, 8, 14);
-  for (const [a, c] of [[-8, 2], [-8, 4]]) { L(a, 1, c, 52); L(a, 2, c, 52); }
+
+  /* ---------- 1. Arazi: tesviye, çimen, hendek ---------- */
+  for (let dz = -R; dz <= R; dz++) for (let dx = -R; dx <= R; dx++) {
+    const d = Math.hypot(dx, dz);
+    if (d > R + 0.5) continue;
+    temel(dx, dz, 3, 8);
+    for (let dy = 1; dy <= 14; dy++) L(dx, dy, dz, 0);
+    if (d >= 14.5 && d < 16.5 && !(Math.abs(dx) <= 1 && dz > 0)) {
+      /* Hendek: bir blok derin, dibinde sivri kazıklar */
+      L(dx, 0, dz, r(dx, 1, dz) < 0.2 ? KZ : 0);
+      L(dx, -1, dz, r(dx, 2, dz) < 0.4 ? 6 : 3);
+    } else {
+      const q = r(dx, 0, dz);
+      L(dx, 0, dz, d < 13.5 ? (q < 0.18 ? 3 : q < 0.24 ? 6 : 4) : 4);
+    }
+  }
+  /* Yollar: kapıdan meydana, meydandan otağa ve iki yana */
+  const yol = (dx, dz) => L(dx, 0, dz, r(dx, 3, dz) < 0.15 ? 6 : 57);
+  for (let dz = -4; dz <= 13; dz++) for (let dx = -1; dx <= 1; dx++) yol(dx, dz);
+  for (let dx = -8; dx <= 8; dx++) if (Math.abs(dx) >= 4) yol(dx, 1);
+  for (let dz = -5; dz <= 7; dz++) for (let dx = -14; dx <= 14; dx++) if (Math.hypot(dx, dz - 1) <= 4.5) yol(dx, dz);
+
+  /* ---------- 2. Kazıklı çit ve meşaleler ---------- */
+  for (let dz = -R; dz <= R; dz++) for (let dx = -R; dx <= R; dx++) {
+    const d = Math.hypot(dx, dz);
+    if (d < 13.5 || d >= 14.5 || (Math.abs(dx) <= 1 && dz > 0)) continue;
+    const h = 3 + (r(dx, 5, dz) < 0.35 ? 1 : 0), aci = Math.atan2(dz, dx), mesale = Math.abs(((aci * 180 / Math.PI) + 360) % 30) < 2.2;
+    kutu(dx, dx, 1, h, dz, dz, KUT);
+    L(dx, h + 1, dz, mesale ? MS : KZ);
+  }
+
+  /* ---------- 3. Kapı kulesi ve köprü ---------- */
+  for (let dx = -1; dx <= 1; dx++) for (let dz = 14; dz <= 17; dz++) { L(dx, 0, dz, KAL); L(dx, -1, dz, KUT); }
+  for (const s of [-1, 1]) {
+    const cx = s * 3, cz = 14;
+    kutu(cx - 1, cx + 1, -1, 0, cz - 1, cz + 1, KUT);
+    for (let a = -1; a <= 1; a++) for (let c = -1; c <= 1; c++) {
+      const kose = a && c;
+      for (let dy = 1; dy <= 5; dy++) L(cx + a, dy, cz + c, kose ? KUT : (a === 0 && c === 0) ? 0 : (dy === 3 && (a === 0 || c === 0) && c !== -1 && !(a === 0 && c === 1)) ? CIT : KAL);
+    }
+    kutu(cx, cx, 1, 2, cz - 1, cz - 1, 0);                 // içeriden giriş
+    merdiven(cx, cz, 2, 1, 6);                            // tırmanma merdiveni (güney duvarına)
+    kutu(cx, cx, 2, 4, cz + 2, cz + 2, (x, y) => (y === 3 ? 114 : 120));   // kara-kızıl sancak
+  }
+  for (let dx = -1; dx <= 1; dx++) L(dx, 5, 14, KUT);      // kapı lentosu
+  /* Yürüyüş yolu ve mazgallar */
+  for (let dx = -5; dx <= 5; dx++) for (let dz = 12; dz <= 16; dz++) {
+    if (!(Math.abs(dx) === 3 && dz === 14)) L(dx, 6, dz, KAL);
+    const kenar = Math.abs(dx) === 5 || dz === 12 || dz === 16;
+    if (!kenar) continue;
+    if (dz === 16 && dx % 2 === 0) { L(dx, 7, dz, KUT); L(dx, 8, dz, Math.abs(dx) === 4 ? F : KZ); }
+    else if (Math.abs(dx) === 5 && (dz === 12 || dz === 16)) { L(dx, 7, dz, KUT); L(dx, 8, dz, KZ); }
+    else L(dx, 7, dz, CIT);
+  }
+  L(0, 5, 16, F); L(0, 5, 12, F);
+
+  /* ---------- 4. Gözetleme kuleleri (kuzeybatı, kuzeydoğu) ---------- */
+  const gozetleme = (cx, cz, renk) => {
+    for (let a = -1; a <= 1; a++) for (let c = -1; c <= 1; c++) {
+      if (a && c) kutu(cx + a, cx + a, 1, 8, cz + c, cz + c, KUT);
+      else if (!a && !c) kutu(cx, cx, 1, 7, cz, cz, KUT);
+      else if (!(a === 0 && c === 1)) { L(cx + a, 4, cz + c, CIT); L(cx + a, 7, cz + c, CIT); }
+    }
+    for (let a = -2; a <= 2; a++) for (let c = -2; c <= 2; c++) {
+      L(cx + a, 8, cz + c, KAL);
+      if (Math.abs(a) === 2 || Math.abs(c) === 2) {
+        if (Math.abs(a) === 2 && Math.abs(c) === 2) kutu(cx + a, cx + a, 9, 10, cz + c, cz + c, KUT);
+        else L(cx + a, 9, cz + c, CIT);
+      }
+    }
+    merdiven(cx, cz + 1, 0, 1, 8);
+    cati(cx, cz, 11, 2);
+    kutu(cx, cx, 13, 15, cz, cz, CIT); L(cx + 1, 15, cz, renk); L(cx + 1, 14, cz, 120);
+    L(cx, 10, cz, F);
+  };
+  gozetleme(-10, -9, 114); gozetleme(10, -9, 114);
+
+  /* ---------- 5. Reis otağı ---------- */
+  for (let dx = -5; dx <= 5; dx++) for (let dz = -12; dz <= -5; dz++) L(dx, 1, dz, KAL);
+  for (let dx = -2; dx <= 2; dx++) L(dx, 1, -4, AH(0));
+  const cH = x => 8 - Math.abs(x);
+  for (let dz = -12; dz <= -6; dz++) for (let dx = -5; dx <= 5; dx++) {
+    const h = cH(dx);
+    L(dx, h, dz, dx === 0 ? KUT : CBEZ);
+    for (let dy = 2; dy < h; dy++) {
+      if (dz === -12 || Math.abs(dx) === 5) L(dx, dy, dz, CBEZ);
+      else if (dz === -6) L(dx, dy, dz, Math.abs(dx) <= 2 && dy <= 4 ? 0 : CBEZ);
+      else L(dx, dy, dz, 0);
+    }
+  }
+  L(0, 8, -13, KUT); L(0, 8, -5, KUT);                       // mertek uçları
+  /* Saçak ve direkleri */
+  for (let dx = -3; dx <= 3; dx++) for (let dz = -5; dz <= -4; dz++) L(dx, 5, dz, CBEZ);
+  for (const a of [-3, 3]) kutu(a, a, 1, 4, -4, -4, CIT);
+  /* Sancak direkleri */
+  for (const a of [-7, 7]) { kutu(a, a, 1, 7, -5, -5, CIT); kutu(a + Math.sign(a), a + Math.sign(a), 4, 6, -5, -5, (x, y) => (y === 5 ? 114 : 120)); L(a, 8, -5, MS); }
+  /* İç: halı, taht, sandıklar, masa, fıçı, fenerler */
+  for (let dx = -2; dx <= 2; dx++) for (let dz = -11; dz <= -7; dz++) L(dx, 1, dz, Math.abs(dx) === 2 || dz === -11 || dz === -7 ? 120 : 114);
+  L(0, 2, -10, AH(0)); L(0, 2, -11, KAL); L(0, 3, -11, 114); L(-1, 2, -10, YB); L(1, 2, -10, YB);
+  L(-1, 2, -11, 165); L(1, 2, -11, FIC);
+  L(-3, 2, -8, CIT); L(-3, 3, -8, YB); L(-3, 2, -7, 32);
+  L(4, 2, -7, FIC); L(4, 2, -8, FIC); L(4, 3, -8, FIC); L(3, 2, -7, SAM);
+  for (const z of [-8, -11]) L(0, 7, z, F);
+  L(-4, 3, -9, F); L(4, 3, -10, F);
+
+  /* ---------- 6. Meydan: büyük kamp ateşi, şiş, oturaklar ---------- */
+  const MX = 0, MZ = 1;
+  L(MX, 1, MZ, 48);
+  for (let a = -1; a <= 1; a++) for (let c = -1; c <= 1; c++) if (a || c) L(MX + a, 1, MZ + c, 84);
+  for (const a of [-2, 2]) kutu(MX + a, MX + a, 1, 3, MZ, MZ, CIT);
+  for (const a of [-1, 0, 1]) L(MX + a, 3, MZ, CIT);
+  for (let c = -1; c <= 1; c++) { L(MX - 4, 1, MZ + c, AH(3)); L(MX + 4, 1, MZ + c, AH(1)); }
+  for (const [a, c] of [[-3, -2], [3, -2], [-3, 4], [3, 4]]) L(MX + a, 1, MZ + c, KUT);
+  for (const [a, c] of [[-5, -3], [5, -3], [-5, 5], [5, 5]]) fenerDirek(MX + a, MZ + c);
+
+  /* ---------- 7. Yatakhane çadırları (batı) ---------- */
+  const cadir = (cx, cz, yon, sandik) => {
+    const [fx, fz] = YV[yon], rx = -fz, rz = fx;
+    const C2 = (u, v, dy, id) => L(cx + u * rx + v * fx, dy, cz + u * rz + v * fz, id);
+    for (let u = -2; u <= 2; u++) for (let v = -2; v <= 1; v++) {
+      const h = 3 - Math.abs(u);
+      C2(u, v, h, u === 0 ? KUT : BEZ);
+      for (let dy = 1; dy < h; dy++) C2(u, v, dy, v === -2 || (v === 1 && u !== 0) ? BEZ : 0);
+    }
+    C2(-1, -1, 1, 47); C2(1, -1, 1, sandik ? 0 : 47); C2(-1, 0, 1, 47); C2(1, 0, 1, sandik ? FIC : 47);
+    C2(0, -2, 4, CIT); C2(0, 1, 4, CIT);
+    C2(2, 2, 1, CIT); C2(2, 2, 2, CIT); C2(2, 2, 3, F);
+    C2(-2, 2, 1, SAM);
+  };
+  cadir(-9, -3, 1, false); cadir(-9, 4, 1, true);
+  /* Odun yığını ve kütük */
+  for (const [a, c, h] of [[-12, -7, 2], [-12, -6, 1], [-11, -7, 1]]) kutu(a, a, 1, h, c, c, KUT);
+
+  /* ---------- 8. Demirci tezgâhı (güneybatı) ---------- */
+  for (const [a, c] of [[-9, 8], [-5, 8], [-9, 10], [-5, 10]]) kutu(a, a, 1, 3, c, c, KUT);
+  kutu(-8, -6, 1, 3, 10, 10, KAL);
+  kutu(-9, -5, 4, 4, 8, 10, YB);
+  L(-8, 1, 10, 33); L(-6, 1, 10, 32); L(-7, 1, 9, 139); L(-6, 1, 8, FIC); L(-7, 3, 9, F);
+  L(-9, 1, 9, 0);
+
+  /* ---------- 9. Ganimet ambarı (doğu) ---------- */
+  for (const [a, c] of [[7, -5], [11, -5], [7, -2], [11, -2]]) kutu(a, a, 1, 3, c, c, KUT);
+  kutu(11, 11, 1, 3, -4, -3, KAL); kutu(8, 10, 1, 3, -5, -5, KAL);
+  kutu(7, 11, 4, 4, -5, -2, YB);
+  L(10, 1, -4, FIC); L(10, 2, -4, FIC); L(10, 1, -3, FIC); L(9, 1, -4, SAM); L(9, 2, -4, SAM); L(10, 2, -3, YB);
+  L(9, 3, -3, F);
+
+  /* ---------- 10. Hazine kafesi (doğu) ---------- */
+  for (let a = 8; a <= 10; a++) for (let c = 1; c <= 3; c++) {
+    const ic = a === 9 && c === 2;
+    for (let dy = 1; dy <= 3; dy++) L(a, dy, c, ic ? 0 : (a !== 9 && c !== 2) ? KUT : PAR);
+    L(a, 4, c, YB);
+  }
+  L(9, 2, 2, 165);
+  fenerDirek(7, 4);
+
+  /* ---------- 11. Okçuluk alanı (güneydoğu) ---------- */
+  for (const c of [6, 9]) { L(10, 1, c, HED); L(10, 2, c, HED); }
+  L(9, 1, 7, SAM); L(9, 1, 8, SAM);
+  for (let c = 5; c <= 10; c++) if (c !== 7) L(4, 1, c, CIT);
+  L(5, 1, 10, FIC); L(5, 2, 10, CIT); L(5, 3, 10, F);
+
+  /* ---------- 12. Dağınık ayrıntılar ---------- */
+  for (const [a, c] of [[-6, -6], [6, -7], [-2, 9], [3, 11]]) L(a, 1, c, SAM);
+  for (const [a, c] of [[2, 11], [-6, -4]]) L(a, 1, c, FIC);
+  fenerDirek(-2, 12); fenerDirek(2, 12);
 }

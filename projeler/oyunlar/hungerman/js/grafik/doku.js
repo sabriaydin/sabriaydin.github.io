@@ -307,6 +307,50 @@ const RESSAM = {
   },
   nemes_yan: p => { const m = hex('#2a4ea6'), g = hex('#e2b53a'); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis((y >> 1) % 2 ? m : g, 1 + (p.r() * 2 - 1) * 0.05)); },
   nemes_ust: p => { const m = hex('#2a4ea6'), g = hex('#e2b53a'); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis((x >> 1) % 2 ? m : g, 1 + (p.r() * 2 - 1) * 0.05)); },
+  /* 0.15.3: haydut kampı */
+  cadir_bezi: p => {
+    p.doldur('#d4c49c', 0.05);
+    const k = hex('#ad9a6c'), a = hex('#e4d6b2');
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) if ((x + y) % 4 === 0) p.set(x, y, karis(hex('#d4c49c'), 0.95));
+    for (let x = 0; x < D; x++) { p.set(x, 7, k); p.set(x, 8, a); }
+    for (let x = 0; x < D; x += 3) p.set(x, 7, karis(k, 0.8));   // dikiş
+    const px = 2 + Math.floor(p.r() * 8), py = 10 + Math.floor(p.r() * 3);
+    for (let y = py; y < py + 3; y++) for (let x = px; x < px + 4; x++) p.set(x, y, karis(hex('#9c8458'), 1 + (p.r() - 0.5) * 0.1));   // yama
+  },
+  cadir_cizgili: p => {
+    const kir = hex('#a8302a'), kr = hex('#e2d4b0');
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis(Math.floor(x / 4) % 2 ? kr : kir, 1 + (p.r() * 2 - 1) * 0.05));
+    for (let x = 0; x < D; x++) { p.set(x, 0, karis(kir, 0.7)); p.set(x, 15, karis(kir, 0.7)); }
+  },
+  fici_yan: p => {
+    p.doldur('#8e5c2c', 0.06);
+    const k = hex('#5e3a18'), d = hex('#4b4d54'), a = hex('#9a9ca4');
+    for (let y = 0; y < D; y++) for (const x of [0, 4, 8, 12]) p.set(x, y, k);
+    for (const y0 of [2, 12]) for (let x = 0; x < D; x++) { p.set(x, y0, d); p.set(x, y0 + 1, karis(d, 0.8)); if (x % 5 === 2) p.set(x, y0, a); }
+  },
+  fici_ust: p => {
+    p.doldur('#9a6634', 0.06);
+    const k = hex('#5e3a18'), d = hex('#4b4d54');
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) {
+      const r = Math.hypot(x - 7.5, y - 7.5);
+      if (r > 7.2) p.set(x, y, karis(hex('#6e4520'), 0.9)); else if (r > 6) p.set(x, y, d); else if (y % 4 === 0) p.set(x, y, k);
+    }
+  },
+  demir_parmaklik: p => {
+    for (let i = 0; i < D * D * 4; i++) p.d[i] = 0;
+    const c = hex('#5c5f66'), a = hex('#8e929a'), k = hex('#3c3e44');
+    for (const x of [1, 6, 11]) for (let y = 0; y < D; y++) { p.set(x, y, a); p.set(x + 1, y, c); p.set(x + 2, y, k); }
+    for (const y of [1, 14]) for (let x = 0; x < D; x++) { p.set(x, y, c); p.set(x, y + 1, k); }
+  },
+  hedef_on: p => {
+    p.doldur('#c8a646', 0.08);
+    const s = hex('#9c7e2c');
+    for (let y = 1; y < D; y += 3) for (let x = 0; x < D; x++) if (p.r() < 0.6) p.set(x, y, s);
+    for (let y = 1; y < 15; y++) for (let x = 1; x < 15; x++) {
+      const r = Math.hypot(x - 7.5, y - 7.5);
+      if (r < 6.6) p.set(x, y, r < 1.6 ? hex('#c22a22') : r < 3.1 ? hex('#efe8d8') : r < 4.6 ? hex('#c22a22') : r < 5.7 ? hex('#efe8d8') : hex('#c22a22'));
+    }
+  },
   firavun_yuz: p => {
     const m = hex('#2a4ea6'), g = hex('#e2b53a'), ten = '#c48a52';
     p.doldur(ten, 0.04);
@@ -553,8 +597,9 @@ const BLOK_SIMGE = {
   yarim: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 8, 15, 14]]),
   cit: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[2, 2, 5, 15], [11, 2, 14, 15], [5, 5, 11, 7, 0.85], [5, 10, 11, 12, 0.85]]),
   citKapi: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 4, 3, 14], [13, 4, 15, 14], [3, 5, 13, 7, 0.85], [3, 10, 13, 12, 0.85], [7, 7, 9, 10, 0.85]]),
-  bolme: (p, id) => { dokuBoya(p, YUZ_DOKU[id * 6], [[2, 1, 14, 15]]); for (let y = 1; y < 15; y++) { p.set(2, y, [210, 235, 245]); p.set(13, y, [210, 235, 245]); } },
+  bolme: (p, id) => { dokuBoya(p, YUZ_DOKU[id * 6], [[2, 1, 14, 15]]); if (id === 109) for (let y = 1; y < 15; y++) { p.set(2, y, [210, 235, 245]); p.set(13, y, [210, 235, 245]); } },
   tuzak: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 1, 15, 15]]),
+  kazik: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[3, 6, 13, 15], [4, 3, 12, 6], [6, 1, 10, 3]]),
   korkuluk: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 3, 5, 15], [11, 3, 15, 15], [5, 6, 11, 14, 0.85]]),
   tirmanma: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[0, 0, 16, 16]]),
   ors: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 3, 15, 7], [6, 7, 10, 10, 0.85], [4, 10, 12, 11, 0.8], [3, 11, 13, 14, 0.9]]),

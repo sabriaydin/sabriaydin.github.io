@@ -20,7 +20,7 @@ function panel(f, k, y0 = 0, y1 = 1) {
 }
 
 const CIT_AILE = id => id === 104 || (id >= 105 && id <= 108);
-const BOLME_AILE = id => id === 109 || id === 34;
+const BOLME_AILE = id => id === 109 || id === 34 || id === 182;
 /* Çit ve cam bölme komşuya bağlanır mı */
 function baglanir(id, n, f) {
   if (!n) return false;
@@ -67,6 +67,10 @@ export function sekilKutulari(id, komsu, carp = false) {
       }
       return l;
     }
+    case 'kazik':
+      /* Sivri kazık: kütük gövde, daralan uç */
+      if (carp) return [[0, 0, 0, 1, 1, 1]];
+      return [[0, 0, 0, 1, 10 * P, 1], [2 * P, 10 * P, 2 * P, 14 * P, 13 * P, 14 * P], [5 * P, 13 * P, 5 * P, 11 * P, 1, 11 * P]];
     case 'korkuluk': {
       /* Kum taşı korkuluk: kalın direk ve komşuya uzanan alçak duvar (çarpışma 1,5 blok) */
       const l = [], h = carp ? 1.5 : 1;

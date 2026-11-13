@@ -117,6 +117,24 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 0.15.3: Haydut Kampı yeniden tasarlandı
+
+Haydut Kampı, Kızıl Pençe haydutlarının tahkimli yuvası olarak baştan tasarlandı (yaklaşık 37 blok çapında, halka biçimli).
+
+- **Dış savunma:** dibinde sivri kazıklar bulunan hendek, kapı önünde ahşap köprü; uçları sivriltilmiş kütüklerden halka biçimli çit ve çit üstünde aralıklı meşaleler.
+- **Kapı kulesi:** iki ahşap kule (içinden tırmanma merdiveni), kapının üstünden geçen mazgallı yürüyüş yolu, kara-kızıl sancaklar, fenerler.
+- **Gözetleme kuleleri:** arka köşelerde iki kule; dikmeler, çapraz parmaklıklar, tırmanma merdiveni, korkuluklu nöbet yeri, piramit çatı ve flama.
+- **Reis otağı:** ahşap kürsü üzerinde kırmızı-krem çizgili büyük çadır, saçak ve direkleri, sancaklar; içeride taht, halı, altın, fıçılar, masa ve iki ganimet sandığı.
+- **Meydan:** taş halkalı büyük kamp ateşi ve şiş, oturaklar, kütük tabureler, fener direkleri. Haydut Reisi burada bekler.
+- **Yatakhane çadırları:** yataklı iki bez çadır (birinde sandık), odun yığını.
+- **Demirci tezgâhı:** örs, fırın, üretim masası, su fıçısı, sandık.
+- **Ganimet ambarı:** fıçı ve saman yığınları, sandık.
+- **Hazine kafesi:** demir parmaklıklar ardında sandık ve altın blok.
+- **Okçuluk alanı:** hedef tahtaları, atış çizgisi.
+- Toplam 7 sandık; 6 haydut (meydanda, kulelerde, kapı yolunda ve ambarda).
+- **Yeni bloklar** (tümü üretilebilir): Çadır Bezi, Çizgili Çadır Bezi, Fıçı, Demir Parmaklık, Hedef, Sivri Kazık.
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır.
+
 ## 0.15.2: Çöl Tapınağı yeniden tasarlandı
 
 Çöl Tapınağı, Mısır tapınaklarının düzeninde güneyden kuzeye ilerleyen bir yapı topluluğu olarak baştan tasarlandı (yaklaşık 29 x 50 blokluk tapınak alanı, 18 blok derinlikte mezar salonu).
