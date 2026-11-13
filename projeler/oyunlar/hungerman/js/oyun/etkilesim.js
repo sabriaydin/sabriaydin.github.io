@@ -2,6 +2,9 @@
 import { THREE } from '../grafik/sahne.js';
 import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
+import { ezgiTuru } from './mekanik.js';
+
+const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
 const ERISIM = 5;
 const TOPRAK = new Set([3, 4, 45, 137, 138]);
@@ -276,7 +279,7 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y + 1, h.z, 0); if (BLOKLAR[d.blok(h.x, h.y + 2, h.z)].sekil === 'kapi') d.blokKoy(h.x, h.y + 2, h.z, 0);
       this.dusur(88, h.x, h.y + 1, h.z);
     }
-    if ((BITKI[ust] || (BLOKLAR[ust] && BLOKLAR[ust].mesale)) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
+    if ((BITKI[ust] || (BLOKLAR[ust] && (BLOKLAR[ust].mesale || ZEMIN_MEK[BLOKLAR[ust].mekanik]))) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
       d.blokKoy(h.x, h.y + 1, h.z, BLOKLAR[ust].suIcinde ? 7 : 0);
       this.dusur(ust, h.x, h.y + 1, h.z);
       if (ust === 28 || ust === 29) { /* çalı tamamen düşer */ }
@@ -406,6 +409,7 @@ export class Etkilesim {
       else if (eb.yuzlu) id = eb.taban + f;   // heykel başı: yüzü oyuncuya döner
       else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
       else if (eb.sekil === 'tuzak') id = 121 + f * 2;
+      else if (eb.mekanik === 'ters') id = 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir
       else if (eb.sekil === 'tirmanma') {
         const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
         if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tırmanma merdiveni katı bir duvarın yan yüzüne konur.'); return true; }
@@ -428,6 +432,7 @@ export class Etkilesim {
       if (y < 1 || y >= 127) return false;
       const alt = d.blok(x, y - 1, z);
       if (BLOKLAR[id].mesale && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
+      if (ZEMIN_MEK[BLOKLAR[id].mekanik] && !(KATI[alt] && OPAK[alt])) { this.arayuz.bildirim(`${BLOKLAR[id].ad} katı bir bloğun üstüne konur.`); return true; }
       if (suBitkisi) {
         if (mevcut !== 7 || !KATI[alt]) { this.arayuz.bildirim('Bu bitki su altında katı bir zemine dikilir.'); return true; }
       } else if (BITKI[id]) {
@@ -466,6 +471,15 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y, h.z, 105 + b.eksen * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true;
     }
     if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
+    /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
+    if (b.mekanik === 'kol') { d.blokKoy(h.x, h.y, h.z, b.acik ? 233 : 234); this.ses.kol(!b.acik); return true; }
+    if (b.mekanik === 'dugme') { if (!b.acik) { d.blokKoy(h.x, h.y, h.z, 236); this.ses.dugme(); } return true; }
+    if (b.mekanik === 'muzik') {
+      const m = ezgiTuru(d.blok(h.x, h.y - 1, h.z)), V = this.varliklar;
+      if (V && !V.ayna) V.efekt({ t: 'patlama', x: h.x + 0.5, y: h.y + 1.2, z: h.z + 0.5, c: [0.95, 0.5, 0.75], n: 6, ses: 'nota', m });
+      else { this.ses.melodi(m, 1); this.dusenler.parcacik(251, h.x, h.y + 0.6, h.z, 4); }
+      return true;
+    }
     return false;
   }
   /* Tarlanın 4 blok çevresinde su var mı */

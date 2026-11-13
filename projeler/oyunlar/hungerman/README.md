@@ -117,6 +117,32 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 17. aşama (0.17.0): Mekanik bloklar ve Tarif Kitabı
+
+**Güç kaynakları** (Üretim Masası, yeni “Mekanik” sekmesi)
+- **Kol** (çubuk + parke taş): sağ tık ya da E ile açılıp kapanır.
+- **Düğme** (taş): basılınca bir saniye güç verir, sonra kendiliğinden kalkar.
+- **Basınç Plakası** (2 kalas): üstünde oyuncu ya da canlı durdukça güç verir.
+- **Işık Algılayıcı** (3 cam, 3 kalas, bakır külçe): gündüz, üstü açıkken güç verir.
+
+**İletim**
+- **Bakır Tel** (1 bakır külçeden 8): gücü 15 bloğa kadar taşır; yanlardaki tellere bağlanır, bir blok yukarı ve aşağı basamaklanır. Güçlüyken parlak turuncu görünür. Katı bir bloğun üstüne konur.
+- Kaynağın ve telin altındaki katı blok da güç alır; bu blokların yanındaki makineler çalışır.
+- **Ters Çevirici** (3 taş, 2 tel, meşale): arkasından güç gelmezse önüne güç verir; çıkışı koyarken bakılan yöndedir. Bir adım gecikmeyle çalışır: arka arkaya iki tane geciktirici, kendi arkasına bağlanan tel halkası **saat devresi** olur.
+
+**Güçle çalışanlar**
+- **Bakır Lamba** (4 bakır külçe, cam, meşale): güç aldıkça yanar (en parlak ışık).
+- **Kapı, çit kapısı, tuzak kapı:** güç gelince açılır, gidince kapanır; yalnızca güç değiştiğinde etkilenir, elle de kullanılabilir.
+- **Ok Atıcı:** güç geldiği anda, gücün geldiği yönün tersine ok atar.
+- **Müzik Kutusu** (8 kalas, bakır tel): güç gelince ya da sağ tıklanınca ezgi çalar. Çalgı altındaki bloğa göre değişir: ahşap ve diğerleri piyano, taş bas, cam ve buz zil, yün flüt, kum, çakıl, toprak ve kil davul.
+- Devreler tek oyunculuda ve sunucuda hesaplanır; blok değişiklikleri bütün oyunculara iletilir. Basınç plakaları bütün oyuncuları algılar.
+
+**Tarif Kitabı (B)**
+- Bütün eşyalar arama kutusu ve sekmelerle (Aletler, Savaş, Bloklar, Malzemeler, Yiyecek, Mobilya, Mekanik, Doğada) süzülür. Malzemesi envanterde olan eşyalar yeşil noktayla işaretlenir.
+- Seçilen eşyanın tarifleri (istasyonu, envanterdeki malzeme durumu ve kaç kez yapılabileceği), **kullanıldığı tarifler** (tıklanınca o eşyaya geçilir, geri düğmesiyle dönülür), **nereden bulunduğu** (kırılan bloklar, canavar ve hayvan düşüşleri, köylü takasları, olta) ve yiyecek, alet ve zırh bilgileri gösterilir.
+- Kitap açılınca eldeki eşya seçili gelir.
+- **Takip et:** seçilen tarifin malzemeleri ekranın solunda envanterle birlikte güncellenir; hepsi tamamlanınca “Hazır” yazar. Takip ayarlarla saklanır.
+
 ## 16. aşama (0.16.0): Evcil hayvanlar, binekler, yemek pişirme, mobilyalar
 
 **Evcil hayvanlar**

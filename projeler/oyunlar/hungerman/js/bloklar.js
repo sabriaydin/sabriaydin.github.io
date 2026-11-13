@@ -33,7 +33,9 @@ export const DOKULAR = [
   /* 0.15.4: buzul kulesi */
   'buz_tugla', 'mavi_buz', 'kitaplik', 'vitray_mavi', 'buz_fener', 'buz_oyma', 'buz_kristal', 'buz_sarkit',
   /* 0.16.0: mobilya ve mutfak */
-  'saksi', 'lamba', 'tablo_manzara', 'tablo_deniz', 'tablo_cicek', 'tencere', 'tencere_ust', 'minder_k'
+  'saksi', 'lamba', 'tablo_manzara', 'tablo_deniz', 'tablo_cicek', 'tencere', 'tencere_ust', 'minder_k',
+  /* 0.17.0: mekanik bloklar */
+  'bakir_tel_k', 'bakir_tel_a', 'bakir_lamba', 'bakir_lamba_a', 'ters_ust', 'ters_ust_a', 'muzik_kutu', 'muzik_ust', 'algi_ust', 'algi_ust_a', 'algi_yan', 'kol_bas', 'kol_bas_a'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -251,6 +253,18 @@ blok(219, { ad: 'Masa Lambası', dok: 'lamba', cizim: C_SEKIL, opak: false, sert
   for (let f = 0; f < 4; f++) blok(220 + k * 4 + f, { ad: `Tablo (${ad})`, dok, cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'odun', sekil: 'tablo', yon: f, taban: 220 + k * 4, gizli: f > 0, dusur: () => [[220 + k * 4, 1]] });
 });
 blok(232, { ad: 'Tencere', dok: 'tencere', cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'kazma', ses: 'tas', sekil: 'tencere', istasyon: 'tencere' });
+/* 0.17.0: mekanik bloklar. mekanik: tür; kaynak: güç verir; tuketici: güçle çalışır. Durumlar ayrı kimliklerdir. */
+for (let a = 0; a < 2; a++) {
+  blok(233 + a, { ad: 'Kol', dok: 'parke', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'tas', sekil: 'kol', mekanik: 'kol', acik: a, taban: 233, gizli: a > 0, dusur: () => [[233, 1]] });
+  blok(235 + a, { ad: 'Düğme', dok: 'tas', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'tas', sekil: 'dugme', mekanik: 'dugme', acik: a, taban: 235, gizli: a > 0, dusur: () => [[235, 1]] });
+  blok(237 + a, { ad: 'Basınç Plakası', dok: 'kalas', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'odun', sekil: 'plaka', mekanik: 'plaka', acik: a, taban: 237, gizli: a > 0, dusur: () => [[237, 1]] });
+  blok(239 + a, { ad: 'Bakır Tel', dok: a ? 'bakir_tel_a' : 'bakir_tel_k', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0, ses: 'tas', sekil: 'kablo', mekanik: 'tel', acik: a, taban: 239, gizli: a > 0, dusur: () => [[239, 1]] });
+  blok(241 + a, { ad: 'Bakır Lamba', dok: a ? 'bakir_lamba_a' : 'bakir_lamba', sertlik: 1.5, alet: 'kazma', ses: 'cam', mekanik: 'lamba', acik: a, taban: 241, gizli: a > 0, dusur: () => [[241, 1]], ...(a ? { mesale: true, isik: 15 } : {}) });
+  blok(252 + a, { ad: 'Işık Algılayıcı', dok: [a ? 'algi_ust_a' : 'algi_ust', 'algi_yan', 'kalas'], cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'balta', ses: 'odun', sekil: 'algi', mekanik: 'algi', acik: a, taban: 252, gizli: a > 0, dusur: () => [[252, 1]] });
+}
+/* Ters çevirici: yon çıkış yönüdür; arkasından (karşı taraftan) güç gelmezse önüne güç verir; 243 + yon * 2 + yanık */
+for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(243 + f * 2 + a, { ad: 'Ters Çevirici', dok: a ? 'ters_ust_a' : 'ters_ust', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'tas', sekil: 'ters', mekanik: 'ters', yon: f, acik: a, taban: 243, gizli: f + a > 0, dusur: () => [[243, 1]], ...(a ? { mesale: true, isik: 5 } : {}) });
+blok(251, { ad: 'Müzik Kutusu', dok: ['muzik_ust', 'muzik_kutu', 'kalas'], sertlik: 1.2, alet: 'balta', ses: 'odun', mekanik: 'muzik' });
 
 /* Maden deneyimi */
 for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4]]) B[id].xp = xp;

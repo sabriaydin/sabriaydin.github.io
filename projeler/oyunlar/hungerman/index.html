@@ -51,6 +51,7 @@
     <div id="cubuk"></div>
   </div>
   <div id="etkiler"></div>
+  <div id="tarifTakip" hidden></div>
   <div id="esyaAdi"></div>
   <div id="bildirimler"></div>
   <div id="basarimKutu" hidden><img alt=""><div><small>Başarım kazanıldı</small><b></b><span></span></div></div>
@@ -157,6 +158,23 @@
     <header><h2>Başarımlar</h2><span id="basarimSayi" class="rozet"></span></header>
     <div id="basarimListe"></div>
     <button class="kapat" id="bKapat" aria-label="Kapat">✕</button>
+  </div>
+</div>
+
+<!-- Tarif Kitabı (0.17.0) -->
+<div id="tarifKitabi" class="kaplama" hidden>
+  <div class="pencere genis tkPencere">
+    <header><h2>Tarif Kitabı</h2><span id="tkSayi" class="rozet"></span></header>
+    <div class="tkGovde">
+      <div class="tkSol">
+        <input type="search" id="tkAra" placeholder="Eşya ara…" autocomplete="off">
+        <div id="tkSekme" class="tkSekme"></div>
+        <div id="tkIzgara"></div>
+        <div id="tkIpucu"></div>
+      </div>
+      <div id="tkAyrinti"></div>
+    </div>
+    <button class="kapat" id="tkKapat" aria-label="Kapat">✕</button>
   </div>
 </div>
 
@@ -272,11 +290,12 @@
           <dt>C</dt><dd>Eğilme (kenardan düşmez), tekneden inme, paletle suda dalma, tırmanma merdiveninde tutunma</dd>
           <dt>Sol tık (basılı)</dt><dd>Kazma, kesme, kırma</dd>
           <dt>Sağ tık</dt><dd>Blok koyma, yeme, içme, toplama, masa ve fırını açma, kapı açma, hayvan besleme</dd>
-          <dt>E</dt><dd>Etkileşim: kapı, sandık, masa, fırın, örs, tencere, yatak, köylü, tekne, sandalye; evcil hayvanı oturtma, ata binme / inme</dd>
+          <dt>E</dt><dd>Etkileşim: kapı, sandık, masa, fırın, örs, tencere, yatak, köylü, tekne, sandalye, kol, düğme, müzik kutusu; evcil hayvanı oturtma, ata binme / inme</dd>
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
           <dt>Q</dt><dd>Envanter ve üretim</dd>
           <dt>J</dt><dd>Görev günlüğü</dd>
           <dt>L</dt><dd>Başarımlar</dd>
+          <dt>B</dt><dd>Tarif Kitabı: bütün tarifler, eşyaların bulunduğu yerler, tarif takibi</dd>
           <dt>M</dt><dd>Büyük harita</dd>
           <dt>G / Shift + G</dt><dd>Elindekini at / yığını at</dd>
           <dt>T / Enter</dt><dd>Sohbet (çok oyunculu)</dd>
@@ -314,6 +333,8 @@
           <li>Dünyada özel yapılar bulunur: çöl tapınakları, orman tapınakları, buzul kuleleri ve haydut kampları. Tapınaklardaki tuzak tellerine basmak yakındaki ok atıcıları tetikler; tel kırılarak tuzak etkisizleştirilir.</li>
           <li>Bosslar yaklaşınca uyanır: çöl tapınağının hazine odasında Firavun, buzul kulesinin tepesinde Buz Büyücüsü, haydut kampında Haydut Reisi, derin zindanlarda Taş Muhafız. Yenilen bosslar efsanevi eşyalar düşürür ve bir daha çıkmaz.</li>
           <li>Pusulada ★ doğma noktasını, ✖ son ölüm noktasını gösterir; işaretlerin yanındaki sayı blok cinsinden uzaklıktır.</li>
+          <li><b>Mekanik bloklar</b>: kol, düğme, basınç plakası ve ışık algılayıcı güç verir. <b>Bakır tel</b> gücü 15 bloğa kadar taşır, bir basamak yukarı ve aşağı çıkar. Güç alan bakır lamba yanar; kapı, çit kapısı ve tuzak kapı açılır; ok atıcı ok atar; müzik kutusu altındaki bloğa göre (ahşap, taş, cam, yün, kum) farklı çalgıyla ezgi çalar. <b>Ters çevirici</b> arkasından güç gelmediğinde önüne güç verir; çıkışı konulurken bakılan yöndedir. Tel ve ters çeviriciden saat ve kapı kilidi gibi devreler kurulur.</li>
+          <li><b>Tarif Kitabı</b> (B) bütün eşyaların tariflerini, kullanıldığı tarifleri ve nereden bulunduklarını gösterir. Takibe alınan tarifin malzemeleri ekranın solunda izlenir.</li>
           <li>Harita, görülen yerlerden kendiliğinden çizilir ve kaydedilir. Sağ üstteki mini harita çevreyi, M tuşuyla açılan büyük harita keşfedilen tüm bölgeleri gösterir. Büyük haritada sürükleyerek kaydırılır, tekerlekle yakınlaştırılır; sol tıkla işaret eklenir veya düzenlenir, sağ tıkla silinir. İşaretler pusulada da görünür.</li>
           <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
           <li>Sularda hamsi sürüleri, çipura ve ahtapot yaşar. Derin açık denizlerde dolaşan köpekbalıkları sudaki oyuncuya saldırır.</li>

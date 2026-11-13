@@ -533,3 +533,73 @@ body.gostergesiz #hud { visibility: hidden; }
 body:has(#bossCubuk:not([hidden])) #hedefBilgi { top: 112px; }
 #ipucu b.efsane { color: #ffcf5a; }
 #ipucu span.efsaneSatir { color: #e0a83a; font-style: italic; }
+/* 0.17.0: Tarif Kitabı */
+.tkPencere { width: min(980px, calc(100vw - 32px)); }
+.tkPencere header .rozet { color: var(--vurgu2); border-color: var(--cizgi2); }
+.tkGovde { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 18px; height: min(560px, calc(100vh - 150px)); }
+.tkSol { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+#tkAra { width: 100%; box-sizing: border-box; padding: 8px 12px; border: 2px solid #000; border-radius: 4px; background: #14110d; color: var(--yazi); font: 500 .92rem var(--govde); }
+.tkSekme { display: flex; flex-wrap: wrap; gap: 4px; }
+.tkSekme button { padding: 3px 10px; border: 1px solid var(--cizgi); border-radius: 99px; background: #1d1914; color: var(--soluk); font: 600 .76rem var(--govde); cursor: pointer; }
+.tkSekme button:hover { color: var(--yazi); border-color: var(--cizgi2); }
+.tkSekme button.on { background: var(--vurgu); border-color: #000; color: #1a1209; }
+#tkIzgara { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, 44px); grid-auto-rows: 44px; gap: 4px; align-content: start; padding: 6px; background: #120f0b; border: 2px solid #000; border-radius: 4px; }
+#tkIzgara button { position: relative; padding: 0; border: 2px solid #2c261e; border-radius: 3px; background: #2a251e; cursor: pointer; display: grid; place-items: center; }
+#tkIzgara button img { width: 30px; height: 30px; image-rendering: pixelated; }
+#tkIzgara button:hover { border-color: var(--cizgi2); background: #352e25; }
+#tkIzgara button.yapilir::after { content: ''; position: absolute; right: 2px; bottom: 2px; width: 6px; height: 6px; border-radius: 50%; background: var(--yesil); box-shadow: 0 0 0 1px #000; }
+#tkIzgara button.secili { border-color: var(--vurgu2); background: #4a3c26; box-shadow: 0 0 0 1px #000; }
+.tkBos { grid-column: 1 / -1; color: var(--soluk); font-size: .88rem; margin: 8px; }
+#tkIpucu { min-height: 1.3em; font-size: .8rem; color: var(--soluk); }
+#tkAyrinti { min-height: 0; overflow: auto; padding: 4px 6px 4px 2px; }
+.tkBas { display: flex; align-items: center; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--cizgi); }
+.tkBas > img { width: 52px; height: 52px; image-rendering: pixelated; padding: 6px; background: #120f0b; border: 2px solid #000; border-radius: 4px; flex: none; }
+.tkBas h3 { font-size: 1.3rem; color: #f6efe4; }
+.tkGeri { flex: none; width: 28px; height: 28px; border: 2px solid #000; border-radius: 4px; background: #3a3229; color: var(--vurgu2); font: 700 1.1rem var(--baslik); cursor: pointer; }
+.tkEtiket { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.tkEtiket span { padding: 1px 8px; border-radius: 99px; background: #2a251e; border: 1px solid var(--cizgi); font-size: .72rem; color: #e6dccb; }
+.tkVar { display: block; margin-top: 4px; color: var(--yesil); font-size: .76rem; }
+#tkAyrinti h4 { margin: 14px 0 6px; font: 700 .9rem var(--baslik); color: var(--vurgu2); letter-spacing: .02em; }
+#tkAyrinti h4 small { color: var(--soluk); font: 600 .72rem var(--govde); margin-left: 4px; }
+.tkNot { margin: 0; color: var(--soluk); font-size: .85rem; }
+.tkTarif { padding: 8px 10px; margin-bottom: 6px; background: #1d1914; border: 2px solid #000; border-radius: 4px; }
+.tkGirdiler { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.tkGirdiler i { font-style: normal; color: var(--soluk); font: 700 .9rem var(--baslik); padding: 0 1px; }
+.tkGirdiler i.ok { color: var(--vurgu2); padding: 0 4px; }
+.tkGirdi { position: relative; display: grid; place-items: center; width: 40px; height: 40px; background: #2a251e; border: 2px solid #3d352b; border-radius: 3px; }
+.tkGirdi[data-git] { cursor: pointer; }
+.tkGirdi[data-git]:hover { border-color: var(--cizgi2); }
+.tkGirdi img { width: 28px; height: 28px; image-rendering: pixelated; }
+.tkGirdi b { position: absolute; right: 2px; bottom: 0; font: 700 .78rem var(--baslik); color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+.tkGirdi small { display: none; }
+.tkGirdi.eksik { border-color: #6a2a24; }
+.tkGirdi.eksik b { color: #ff8a7a; }
+.tkGirdi.tamam { border-color: #3e6a32; }
+.tkGirdi.cikti { border-color: var(--vurgu); background: #3a2f20; }
+.tkTarifAlt { display: flex; align-items: center; gap: 10px; margin-top: 7px; font-size: .78rem; }
+.tkIst { padding: 1px 8px; border-radius: 99px; background: #2e2a22; color: #e6dccb; border: 1px solid var(--cizgi); }
+.tkIst.uzak { color: #e3b48a; }
+.tkKez { color: var(--yesil); } .tkKez.eksik { color: var(--soluk); }
+.tkTarifAlt .dugme { margin-left: auto; min-height: 28px; padding: 3px 12px; font-size: .8rem; }
+.tkTarifAlt .dugme.ana { background: linear-gradient(#d9932e, #b5741c); color: #1a1209; text-shadow: none; }
+.tkKaynak { margin: 0; padding-left: 18px; font-size: .84rem; color: #e6dccb; columns: 2; column-gap: 18px; }
+.tkKaynak li { break-inside: avoid; margin-bottom: 2px; }
+.tkKullanim { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px; }
+.tkKullanim button { display: flex; align-items: center; gap: 6px; padding: 3px 8px 3px 4px; border: 1px solid #000; border-radius: 3px; background: #241f19; color: #e6dccb; font: 500 .78rem var(--govde); text-align: left; cursor: pointer; }
+.tkKullanim button:hover { background: #352e25; }
+.tkKullanim img { width: 24px; height: 24px; image-rendering: pixelated; flex: none; }
+.tkKullanim span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 760px) { .tkGovde { grid-template-columns: 1fr; height: auto; } #tkIzgara { max-height: 220px; } .tkKaynak { columns: 1; } }
+/* Takip edilen tarif (ekranın solu) */
+#tarifTakip { position: absolute; left: 12px; top: 34%; min-width: 180px; max-width: 240px; padding: 7px 10px 8px; background: rgba(12, 14, 18, .58); border: 2px solid #000; border-radius: 4px; pointer-events: none; font-size: .78rem; color: #e6dccb; }
+#tarifTakip header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+#tarifTakip header img { width: 22px; height: 22px; image-rendering: pixelated; }
+#tarifTakip header b { font: 700 .86rem var(--baslik); color: var(--vurgu2); }
+#tarifTakip div { display: flex; align-items: center; gap: 6px; line-height: 1.5; }
+#tarifTakip div img { width: 16px; height: 16px; image-rendering: pixelated; }
+#tarifTakip div span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#tarifTakip div b { font-variant-numeric: tabular-nums; color: #ff9a8a; }
+#tarifTakip div.tamam b { color: #9be38b; }
+#tarifTakip small { display: block; margin-top: 4px; color: var(--soluk); font-size: .72rem; }
+#tarifTakip small.hazir { color: #9be38b; }
+.tkPencere header { padding-right: 44px; }

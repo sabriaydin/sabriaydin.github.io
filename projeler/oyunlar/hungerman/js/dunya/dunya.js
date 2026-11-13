@@ -9,7 +9,7 @@ import { uretec } from '../rastgele.js';
 
 /* Işık kaynağı sayılan bloklar (meşale niteliği taşıyanlar, örümcek yuvası ve lav) */
 const KAYNAK = new Uint8Array(256);
-for (const b of BLOKLAR) if (b && (b.mesale || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
+for (const b of BLOKLAR) if (b && (b.mesale || b.mekanik || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
 
 const SINIR_ICIN = DUNYA_SINIRI;
 
@@ -23,6 +23,7 @@ export class Dunya {
     this.mesaleler = new Map();       // "x,y,z" -> [x, y, z, güç]
     this.ekinler = new Set();         // büyümekte olan ekinlerin "x,y,z" anahtarları
     this.sandiklar = new Map();       // "x,y,z" -> 27 yuvalık dizi
+    this.mekanikler = new Map();      // 0.17.0: mekanik bloklar "x,y,z" -> [x, y, z]
     this.yuvalar = new Map();         // canavar yuvaları "x,y,z" -> { x, y, z, sayac }
     this.gorus = 8;
     this.dinleyiciler = [];
@@ -100,6 +101,7 @@ export class Dunya {
     else this.mesaleler.delete(mk);
     if (EKIN_SONRAKI[id]) this.ekinler.add(mk); else this.ekinler.delete(mk);
     if (id === 58) this.yuvalar.set(mk, { x, y, z, sayac: 5 }); else this.yuvalar.delete(mk);
+    if (BLOKLAR[id] && BLOKLAR[id].mekanik) this.mekanikler.set(mk, [x, y, z]); else this.mekanikler.delete(mk);
     if (eski === 59 || id === 59) this.lavIsikGuncelle(x, y, z);
     this.kirlet(p, true);
     if (lx === 0) this.kirletK(cx - 1, cz); if (lx === PB - 1) this.kirletK(cx + 1, cz);
@@ -143,7 +145,7 @@ export class Dunya {
         /* Başka bir oyuncunun yakınındaysa veri kalır, yalnızca çizim kaldırılır */
         if (this.ekMerkezler.length && this.ekYakin(p.cx, p.cz, this.EK_R + 2)) { if (p.mesh || p.suMesh) { this.meshSil(p); p.kirli = true; } continue; }
         this.meshSil(p); this.parcalar.delete(p.k);
-        if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); }
+        if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); this.mekanikler.delete(k); }
       }
     }
     this.isDagit();
@@ -244,9 +246,10 @@ export class Dunya {
       if (id === 59 && (lx % 4 !== 1 || lz % 4 !== 1 || (y < 127 && v[i + PB * PB] === 59))) continue;
       const x = p.cx * PB + lx, z = p.cz * PB + lz;
       const k = x + ',' + y + ',' + z;
+      if (BLOKLAR[id].mekanik) this.mekanikler.set(k, [x, y, z]);
       if (id === 58) this.yuvalar.set(k, { x, y, z, sayac: 5 });
       else if (EKIN_SONRAKI[id]) this.ekinler.add(k);
-      else this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14), BLOKLAR[id].soguk ? 1 : 0]);
+      else if (BLOKLAR[id].mesale || id === 59) this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14), BLOKLAR[id].soguk ? 1 : 0]);
       p.kaynaklar.push(k);
     }
   }
@@ -345,7 +348,7 @@ export class Dunya {
     return o;
   }
   degisiklikleriYukle(liste) {
-    this.degisiklikler.clear(); this.mesaleler.clear(); this.ekinler.clear();
+    this.degisiklikler.clear(); this.mesaleler.clear(); this.ekinler.clear(); this.mekanikler.clear();
     for (const [k, a] of liste || []) {
       const d = new Map();
       const [cx, cz] = k.split(',').map(Number);

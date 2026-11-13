@@ -14,7 +14,7 @@ export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? 
 export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
 export const istasyonMetni = t => istasyonlar(t).map(k => ISTASYON_ADI[k]).join(' veya ');
 
-export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['mobilya', 'Mobilya']];
+export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['mobilya', 'Mobilya'], ['mekanik', 'Mekanik']];
 
 const R = [];
 const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, girdi, istasyon: istasyon || null, kategori });
@@ -161,6 +161,15 @@ t(219, 1, [[261, 1], [46, 1], [49, 1]], 'masa', 'mobilya');
 t(220, 1, [['kalas', 1], [49, 2], [324, 1]], 'masa', 'mobilya');
 t(224, 1, [['kalas', 1], [49, 2], [325, 1]], 'masa', 'mobilya');
 t(228, 1, [['kalas', 1], [49, 2], [321, 1]], 'masa', 'mobilya');
+/* 0.17.0: mekanik bloklar */
+t(233, 1, [[256, 1], [15, 1]], 'masa', 'mekanik');
+t(235, 1, [[2, 1]], 'masa', 'mekanik');
+t(237, 1, [['kalas', 2]], 'masa', 'mekanik');
+t(239, 8, [[259, 1]], 'masa', 'mekanik');
+t(241, 1, [[259, 4], [34, 1], [46, 1]], 'masa', 'mekanik');
+t(243, 1, [[2, 3], [239, 2], [46, 1]], 'masa', 'mekanik');
+t(251, 1, [['kalas', 8], [239, 1]], 'masa', 'mekanik');
+t(252, 1, [[34, 3], ['kalas', 3], [259, 1]], 'masa', 'mekanik');
 /* 0.16.0: mutfak, yemekler ve eyer */
 t(232, 1, [[261, 5]], 'masa', 'mobilya');
 t(462, 1, [[282, 5], [261, 1], [284, 2]], 'masa', 'malzeme');

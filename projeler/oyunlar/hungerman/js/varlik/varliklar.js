@@ -939,6 +939,7 @@ export class Varliklar {
       else if (e.ses === 'buz' && this.ses.cam) this.ses.cam(k);
       else if (e.ses === 'bagir') this.ses.canli('haydut', 'normal', k);
       else if (e.ses === 'savur' && this.ses.savur) this.ses.savur(k);
+      else if (e.ses === 'nota' && this.ses.melodi) this.ses.melodi(e.m | 0, k);   // 0.17.0: müzik kutusu
     }
   }
   /* Bossun çevresinde yardımcı canavar doğurur (yakında en çok 4 tane) */

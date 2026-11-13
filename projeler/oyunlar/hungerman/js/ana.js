@@ -21,6 +21,7 @@ import { koylerAlan } from './dunya/koy-uretici.js';
 import { KoyluEkrani, GorevEkrani } from './arayuz/koylu-ekrani.js';
 import { ISTASYON_BLOK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
+import { Mekanik } from './oyun/mekanik.js';
 import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
 import { Ses } from './sistem/ses.js';
@@ -38,6 +39,7 @@ import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';
 import { yapiAt } from './dunya/yapi-uretici.js';
 import { BasarimEkrani } from './arayuz/basarim-ekrani.js';
+import { TarifKitabi } from './arayuz/tarif-kitabi.js';
 import { zindanAt } from './dunya/zindan-uretici.js';
 import { batikAt } from './dunya/batik-uretici.js';
 import { madenAt } from './dunya/maden-uretici.js';
@@ -163,6 +165,7 @@ addEventListener('keydown', e => {
     if (e.code === 'KeyJ') { if (gorevEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(gorevEkrani); return; }
     if (e.code === 'KeyM') { if (haritaEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(haritaEkrani, oyun); return; }
     if (e.code === 'KeyL') { if (basarimEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(basarimEkrani); return; }
+    if (e.code === 'KeyB') { if (tarifKitabi.acik) panelKapat(true); else if (!panelAcik()) panelAc(tarifKitabi, oyun.envanter, yakinIstasyonlar(), eldekiTarif()); return; }
     if (e.code === 'Escape' && haritaEkrani.acik && haritaEkrani.formAcik) { haritaEkrani.formKapat(); return; }
     if (haritaEkrani.acik && (e.code === 'Equal' || e.code === 'NumpadAdd' || e.code === 'Minus' || e.code === 'NumpadSubtract')) { haritaEkrani.yakinlas(e.code === 'Equal' || e.code === 'NumpadAdd' ? 1 : -1); return; }
     if (e.code === 'Escape' && panelAcik()) { if (envEkrani.acik) envanterKapat(false); else panelKapat(false); return; }
@@ -212,7 +215,7 @@ document.addEventListener('pointerlockchange', () => {
   tiklaGuncelle();
 });
 function tiklaGuncelle() { $('#tikla').hidden = !(oyun && aktifEkran === 'oyun' && !kilitli && !panelAcik() && !sohbetAcik); }
-function panelAcik() { return envEkrani.acik || koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik || konsol.acik || gelPencere.acik || basarimEkrani.acik; }
+function panelAcik() { return envEkrani.acik || koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik || konsol.acik || gelPencere.acik || basarimEkrani.acik || tarifKitabi.acik; }
 function seciliAyarla(n) { oyun.envanter.secili = n; oyun.hud.cubukCiz(); oyun.hud.esyaAdiGoster(); ses.tik(); }
 
 /* ---------- Envanter ekranı ---------- */
@@ -237,6 +240,10 @@ const koyluEkrani = new KoyluEkrani({ ses, kapatIste: () => panelKapat(true) });
 const gorevEkrani = new GorevEkrani({ ses, kapatIste: () => panelKapat(true) });
 /* Başarımlar: L tuşu ya da duraklatma menüsü */
 const basarimEkrani = new BasarimEkrani({ ses, kapatIste: () => { if (basarimEkrani.menudenAcildi) { basarimEkrani.menudenAcildi = false; basarimEkrani.kapat(); ses.kapa(); ekran('duraklat'); } else panelKapat(true); } });
+/* 0.17.0: Tarif Kitabı (B); takip edilen tarif ayarlarda saklanır */
+const tarifKitabi = new TarifKitabi({ ses, kapatIste: () => panelKapat(true), takipDegisti: i => { ayar.tarifTakip = i; ayarlariKaydet(ayar); } });
+/* Kitap açılınca eldeki eşya seçili gelir */
+function eldekiTarif() { const id = oyun && oyun.envanter.seciliId(); return id && ESYALAR[id] && !ESYALAR[id].gizli ? id : null; }
 /* Büyüleme ve örs: başarım olayları */
 envEkrani.olay = k => { if (oyun && oyun.basarimlar) oyun.basarimlar.ver(k); };
 /* Harita: M ile açılan büyük harita ve sağ üstteki mini harita */
@@ -290,6 +297,7 @@ function panelKapat(kilitlensin) {
   if (konsol.acik) konsol.kapat();
   if (gelPencere.acik) gelPencere.kapat();
   if (basarimEkrani.acik) basarimEkrani.kapat();
+  if (tarifKitabi.acik) tarifKitabi.kapat();
   ses.kapa();
   if (kilitlensin) kilitle();
   tiklaGuncelle();
@@ -338,7 +346,7 @@ function oyunBaslat(v) {
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.',
     'Fırtınalı havalarda canavarlar gündüz de ortaya çıkar.', 'Yağmur, açıktaki zombilerin güneşte yanmasını önler.', 'Fırtınada yatakta uyunarak hava açtırılabilir.',
-    'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.', 'Kurt kemikle evcilleşip sadık bir köpeğe dönüşür; kedi balıkla evcilleşir. Sağ tık ile oturtulur ya da kaldırılır.', 'Vahşi at boş elle sağ tıklanarak ehlileştirilir; elma, buğday ya da havuç güvenini artırır. Eyer takılan ata binilir, C ile inilir.', 'Tencerede pişen yemekler açlığı doyurmanın yanında yenilenme, tokluk ve nefes gibi etkiler verir.', 'Sandalye ve koltuğa sağ tık ile oturulur; hareket edince kalkılır.',
+    'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.', 'Kurt kemikle evcilleşip sadık bir köpeğe dönüşür; kedi balıkla evcilleşir. Sağ tık ile oturtulur ya da kaldırılır.', 'Vahşi at boş elle sağ tıklanarak ehlileştirilir; elma, buğday ya da havuç güvenini artırır. Eyer takılan ata binilir, C ile inilir.', 'Tencerede pişen yemekler açlığı doyurmanın yanında yenilenme, tokluk ve nefes gibi etkiler verir.', 'Sandalye ve koltuğa sağ tık ile oturulur; hareket edince kalkılır.', 'Tarif Kitabı B tuşuyla açılır; bir tarifi takibe alınca malzemeleri ekranın solunda izlenir.', 'Kol ve bakır telle kapılar uzaktan açılır; basınç plakası üstüne basılınca güç verir.', 'Ters çevirici, arkasından güç gelmediğinde önüne güç verir; kendine bağlanınca saat devresi olur.', 'Müzik kutusu altındaki bloğa göre farklı çalgı sesi çıkarır.',
     'İnekler ve koyunlar buğday, domuzlar havuç ya da patates, tavuklar tohum, tavşanlar havuç sever.', 'Beslenen hayvanlar ve yavruları kaybolmaz.',
     'Örs ile aletler ve zırhlar deneyim seviyesi karşılığında onarılır.', 'Simya masası yakınında hız, gece görüşü, su altında nefes, ateşe dayanıklılık ve güç iksirleri yapılır.',
     'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.'];
@@ -393,6 +401,7 @@ function oyunBaslat(v) {
   basarimlar.kazanildi = b => basarimEkrani.goster(b);
   basarimlar.degisti = () => { if (basarimEkrani.acik) basarimEkrani.ciz(); };
   oyun.basarimlar = basarimlar; basarimEkrani.basarimlar = basarimlar; basarimEkrani.temizle(); oyun.basarimSayac = 2;
+  tarifKitabi.env = envanter; tarifKitabi.takip = Number.isInteger(ayar.tarifTakip) ? ayar.tarifTakip : -1; tarifKitabi.takipCiz(true);
   /* Yapılar: boss uyanması, haydutlar ve tuzaklar (tek oyunculu ve sunucu) */
   const yapiOlaylari = new YapiOlaylari({ uretici: dunya.uretici, varliklar, dunya, ses, olay: (ad, w) => {
     const m = ad === 'bossUyandi' ? `${w.tur.ad} uyandı!` : ad === 'bossOldu' ? `${w.tur.ad} yenildi.` : ad === 'kamp' ? 'Haydut kampına yaklaşıldı.' : null;
@@ -402,6 +411,9 @@ function oyunBaslat(v) {
   } });
   yapiOlaylari.iceAktar(v.bosslar);
   oyun.yapiOlaylari = yapiOlaylari;
+  /* 0.17.0: mekanik devreler tek oyunculuda ve sunucuda hesaplanır */
+  if (!v.istemci) oyun.mekanik = new Mekanik({ dunya, varliklar, ses, gunIsigi: () => oyun.gunIsigi, yerel: () => oyun.oyuncu.konum,
+    konumlar: () => { const l = oyun.hayatta.olu ? [] : [oyun.oyuncu.konum]; if (oyun.ag && oyun.ag.konumlar) l.push(...oyun.ag.konumlar()); return l; } });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
   gorevler.iceAktar(v.gorevler);
@@ -541,6 +553,7 @@ function oyunBitir() {
   if (gorevEkrani.acik) gorevEkrani.kapat();
   if (haritaEkrani.acik) haritaEkrani.kapat();
   if (basarimEkrani.acik) basarimEkrani.kapat();
+  if (tarifKitabi.acik) tarifKitabi.kapat();
   basarimEkrani.temizle();
   oyun.harita.temizle();
   oyun.dusenler.temizle();
@@ -647,6 +660,7 @@ function adim(t) {
     o.dunya.yagiyor = o.hava.yagiyor && o.hava.yogunluk > 0.5;
     o.koyler.guncelle(dt, o.oyuncu, ekKonumlar);
     if (!o.istemci) o.yapiOlaylari.guncelle(dt, ekKonumlar ? [o.oyuncu.konum, ...ekKonumlar] : [o.oyuncu.konum]);
+    if (o.mekanik) o.mekanik.guncelle(dt);
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
     if (o.tikSayac > 0.5 && !o.istemci) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); if (ekKonumlar) for (const q of ekKonumlar) o.dunya.rastgeleTik(q.x, q.z); o.dunya.ekinTik(); }
@@ -747,6 +761,7 @@ function adim(t) {
     const kol = o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {});
     /* Başarımlar: saniyede bir denetim */
     o.basarimSayac -= 0.25;
+    tarifKitabi.takipCiz();
     if (o.basarimSayac <= 0 && !o.hayatta.olu) {
       o.basarimSayac = 1; o.biyom = kol.b;
       o.basarimlar.denetle(o);
@@ -1059,5 +1074,5 @@ $('#bilgiTamam').onclick = () => { ses.tik(); ekran('ana'); };
 requestAnimationFrame(dongu);
 ekran('ana');
 /* Konsoldan inceleme için (oyun mantığını değiştirmez) */
-window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani };
+window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi };
 export { ESYALAR };

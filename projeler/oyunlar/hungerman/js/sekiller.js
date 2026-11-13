@@ -115,6 +115,28 @@ export function sekilKutulari(id, komsu, carp = false) {
       if (carp) return [[2 * P, 0, 2 * P, 14 * P, 9 * P, 14 * P]];
       return [[3 * P, 0, 3 * P, 13 * P, 8 * P, 13 * P], [2 * P, 8 * P, 2 * P, 14 * P, 9 * P, 14 * P, T.tencere_ust],
         [0, 6 * P, 7 * P, 2 * P, 7 * P, 9 * P, T.demir_cubuk], [14 * P, 6 * P, 7 * P, 1, 7 * P, 9 * P, T.demir_cubuk]];
+    /* 0.17.0: mekanik bloklar */
+    case 'kol': {
+      if (carp) return [];
+      const l = [[5 * P, 0, 4 * P, 11 * P, 2 * P, 12 * P], [7 * P, 2 * P, 6 * P, 9 * P, 6 * P, 8 * P, T.kalas], [7 * P, 6 * P, 4.5 * P, 9 * P, 9 * P, 6.5 * P, T.kalas], [6.5 * P, 9 * P, 3.5 * P, 9.5 * P, 11 * P, 5.5 * P, b.acik ? T.kol_bas_a : T.kol_bas]];
+      return b.acik ? dondur(l, 2) : l;
+    }
+    case 'dugme': return carp ? [] : [[5 * P, 0, 6 * P, 11 * P, (b.acik ? 1 : 2) * P, 10 * P]];
+    case 'plaka': return carp ? [] : [[P, 0, P, 15 * P, (b.acik ? 0.5 : 1) * P, 15 * P]];
+    case 'kablo': {
+      if (carp) return [];
+      const h = 0.6 * P, l = [[6 * P, 0, 6 * P, 10 * P, h, 10 * P]];
+      for (let f = 0; f < 4; f++) {
+        const n = komsu(f), nb = BLOKLAR[n];
+        if (!nb || !(nb.mekanik || nb.sekil === 'kapi' || nb.sekil === 'citKapi' || nb.sekil === 'tuzak' || n === 157)) continue;
+        l.push(f === 0 ? [7 * P, 0, 0, 9 * P, h, 7 * P] : f === 1 ? [9 * P, 0, 7 * P, 1, h, 9 * P] : f === 2 ? [7 * P, 0, 9 * P, 9 * P, h, 1] : [0, 0, 7 * P, 7 * P, h, 9 * P]);
+      }
+      return l;
+    }
+    case 'ters':
+      if (carp) return [[0, 0, 0, 1, 2 * P, 1]];
+      return dondur([[0, 0, 0, 1, 2 * P, 1], [7 * P, 2 * P, 3 * P, 9 * P, 6 * P, 5 * P, T.kalas], [6.5 * P, 6 * P, 2.5 * P, 9.5 * P, 8 * P, 5.5 * P, b.acik ? T.bakir_lamba_a : T.kol_bas], [7 * P, 2 * P, 11 * P, 9 * P, 4 * P, 13 * P, T.kalas]], b.yon);
+    case 'algi': return [[0, 0, 0, 1, 6 * P, 1]];
     case 'kazik':
       /* Sivri kazık: kütük gövde, daralan uç */
       if (carp) return [[0, 0, 0, 1, 1, 1]];

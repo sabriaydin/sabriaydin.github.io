@@ -125,6 +125,15 @@ export class Ses {
   ruzgar(h = 1) { this.patlama(900, 1.4, 0.12 * h, 'bandpass', 0.7, 0.9); this.patlama(2400, 1.0, 0.05 * h, 'highpass', 0.6, 0.8); }
   cam(h = 1) { for (let i = 0; i < 4; i++) setTimeout(() => this.ton(2600 + Math.random() * 1400, 0.18, 0.05 * h, 'triangle', 3400), i * 45); this.patlama(5000, 0.25, 0.07 * h, 'highpass', 1.2); }
   savur(h = 1) { this.patlama(600, 0.35, 0.14 * h, 'bandpass', 1.4, 0.4); this.patlama(1400, 0.25, 0.08 * h, 'bandpass', 1.4, 0.4); }
+  /* 0.17.0: mekanik sesler ve müzik kutusu ezgileri (tur: 0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
+  kol(acik) { this.ton(acik ? 900 : 700, 0.04, 0.08, 'square', acik ? 1100 : 500); this.patlama(2200, 0.03, 0.08, 'highpass', 1); }
+  dugme() { this.ton(1000, 0.03, 0.07, 'square', 800); }
+  melodi(tur = 0, h = 1) {
+    if (!this.ctx) return;
+    const notalar = [[523, 659, 784, 1047], [131, 165, 196, 262], [1047, 1319, 1568, 2093], [587, 740, 880, 1175], [0, 0, 0, 0]][tur] || [523, 659, 784, 1047];
+    const dalga = ['triangle', 'sawtooth', 'sine', 'sine', 'square'][tur] || 'triangle';
+    notalar.forEach((n, i) => setTimeout(() => { if (tur === 4) this.patlama(i % 2 ? 1800 : 160, 0.12, 0.3 * h, i % 2 ? 'highpass' : 'lowpass', 1); else this.ton(n, tur === 2 ? 0.5 : 0.22, (tur === 1 ? 0.16 : 0.1) * h, dalga, n); }, i * 150));
+  }
   /* Nal sesi: iki vuruş; h hıza göre */
   nal(h = 1) { this.patlama(900, 0.05, 0.12 * h + 0.04, 'bandpass', 3); setTimeout(() => this.patlama(760, 0.05, 0.1 * h + 0.03, 'bandpass', 3), 110); }
   kalp() { this.ton(880, 0.12, 0.05, 'sine', 1100); }
