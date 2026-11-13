@@ -53,15 +53,22 @@ export const BASARIMLAR = [
   { k: 'kamp', ad: 'Ganimet', aciklama: 'Bir haydut kampı sandığını aç.', ikon: 114, grup: 'Keşif' },
   { k: 'tekne', ad: 'Denizci', aciklama: 'Bir tekneye bin.', ikon: 454, grup: 'Keşif' },
   { k: 'balik', ad: 'Balıkçı', aciklama: 'Oltayla bir şey yakala.', ikon: 453, grup: 'Keşif' },
+  { k: 'kopek', ad: 'Sadık Dost', aciklama: 'Bir kurdu kemikle evcilleştir.', ikon: 295, grup: 'Yuva ve Dostlar' },
+  { k: 'kedi', ad: 'Mırnav', aciklama: 'Bir kediyi balıkla evcilleştir.', ikon: 297, grup: 'Yuva ve Dostlar' },
+  { k: 'at', ad: 'Seyis', aciklama: 'Bir atı ehlileştir.', ikon: 291, grup: 'Yuva ve Dostlar' },
+  { k: 'binici', ad: 'Atlı', aciklama: 'Eyerli bir ata bin.', ikon: 462, grup: 'Yuva ve Dostlar' },
+  { k: 'asci', ad: 'Aşçı', aciklama: 'Tencerede bir yemek pişir.', ikon: 232, grup: 'Yuva ve Dostlar' },
+  { k: 'gurme', ad: 'Gurme', aciklama: 'Etkisi olan bir yemek ye.', ikon: 464, grup: 'Yuva ve Dostlar' },
+  { k: 'ev', ad: 'Ev Sahibi', aciklama: 'Bir sandalyeye ya da koltuğa otur.', ikon: 199, grup: 'Yuva ve Dostlar' },
   { k: 'ticaret', ad: 'Pazarlıkçı', aciklama: 'Bir köylüyle ticaret yap.', ikon: 288, grup: 'Köyler' },
   { k: 'gorev', ad: 'Yardımsever', aciklama: 'Bir köy görevini tamamla.', ikon: 294, grup: 'Köyler' },
   { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' }
 ];
 export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
-export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler'];
+export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar'];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
-const ESYA_BASARIM = [['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]]];
+const ESYA_BASARIM = [['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]]];
 
 export class Basarimlar {
   constructor() {

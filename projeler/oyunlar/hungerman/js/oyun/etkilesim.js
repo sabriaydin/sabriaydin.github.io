@@ -61,6 +61,10 @@ export class Etkilesim {
   /* E tuşu (0.15.1): hedefteki nesneyle etkileşim (kapı, sandık, istasyon, yatak, köylü, tekne). Sağ tık da aynı işleri yapar. */
   etkiles() {
     if (this.tekneler.binilen) return false;
+    /* 0.16.0: attan inme, oturaktan kalkma */
+    if (this.binek && this.binek.biniyor) { this.binek.in(); return true; }
+    if (this.binek && this.binek.oturak) { this.binek.kalk(); return true; }
+    if (this.hedefCanli && this.varliklar.etkilesimVar(this.hedefCanli, this.envanter.seciliId())) { this.canliEtkiles(this.hedefCanli); return true; }
     if (this.hedefTekne) {
       if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) { this.olay('tekne'); this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne'); }
       return true;
@@ -69,11 +73,24 @@ export class Etkilesim {
     const h = this.hedef;
     if (!h) return false;
     const b = BLOKLAR[h.id];
+    if (b.oturak && this.binek) return this.binek.otur(h.x, h.y, h.z);
     if (b.istasyon) { this.arayuz.envanterAc(b.istasyon); return true; }
     if (b.sandik) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
     if (b.yatak) { this.arayuz.uyu(h); return true; }
     if (this.ac(h)) { this.vurus = 0.01; return true; }
     return false;
+  }
+  /* Evcil hayvan / at etkileşimi: tek oyunculuda ve sunucuda burada, istemcide sunucuda işlenir */
+  canliEtkiles(v) {
+    const eldeki = this.envanter.seciliId();
+    if (this.varliklar.ayna) { if (this.agCanli) this.agCanli(v, eldeki); return; }
+    this.canliSonuc(this.varliklar.canliEtkilesim(v, eldeki, this.oyuncuAdi), v);
+  }
+  canliSonuc(S, v) {
+    if (S.tuket) { this.envanter.seciliAzalt(1); this.ses.ye(); this.vurus = 0.01; }
+    if (S.mesaj) this.arayuz.bildirim(S.mesaj);
+    if (S.olay) this.olay(S.olay);
+    if (S.bin && v && this.binek) { this.binek.bin(v); this.olay('binici'); }
   }
   aletBilgi() {
     const s = this.envanter.seciliYuva();
@@ -125,6 +142,13 @@ export class Etkilesim {
         if (this.olta && this.olta.aktif) this.olta.kaldir();
         if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) { this.olay('tekne'); this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne'); }
       } else if (g.sol && this.saldiriBekleme <= 0) { this.saldiriBekleme = 0.3; this.vurus = 0.01; this.tekneler.vur(this.hedefTekne); }
+      this.sahne.secimGoster(null, 0);
+      return;
+    }
+    /* 0.16.0: evcil hayvan ve at etkileşimi (evcilleştirme, oturtma, eyer, binme) */
+    if (g.sag && this.hedefCanli && this.sagBekleme <= 0 && this.varliklar.etkilesimVar(this.hedefCanli, eldeki)) {
+      this.sagBekleme = 0.4; this.germe = 0;
+      this.canliEtkiles(this.hedefCanli);
       this.sahne.secimGoster(null, 0);
       return;
     }
@@ -271,6 +295,8 @@ export class Etkilesim {
     const s = env.seciliYuva(), e = s && ESYALAR[s.id];
     /* İstasyonlar */
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
+    /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
+    if (h && BLOKLAR[h.id].oturak && !g.egil && !(e && e.tur === 'blok') && this.binek && this.binek.otur(h.x, h.y, h.z)) return true;
     /* Sandık */
     if (h && BLOKLAR[h.id].sandik && !g.egil) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
     /* Yatak */
@@ -336,12 +362,14 @@ export class Etkilesim {
       return true;
     }
     if ((e.tur === 'yiyecek' || e.yenir) && e.yemek) {
-      if (this.hayatta.aclik >= 20 && !e.iyilestirme) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      if (this.hayatta.aclik >= 20 && !e.iyilestirme && !e.etki) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      if (e.etki) { this.hayatta.etkiEkle(e.etki.tur, e.etki.sure); this.arayuz.bildirim(`${ETKILER[e.etki.tur].ad} etkisi: ${e.etki.sure} saniye.`, s.id); }
       if (e.iyilestirme) this.hayatta.iyiles(e.iyilestirme);
       if (this.hayatta.ye(e.yemek, e.zehir || 0)) this.arayuz.bildirim('Mide bulantısı: açlık bir süre daha hızlı azalır.');
       if (e.pismis) this.olay('pisir');
       env.seciliAzalt(1); this.ses.ye();
-      if (s.id === 269) env.ekle(270, 1);
+      if (s.id === 269 || e.kase) env.ekle(270, 1);
+      if (s.id >= 463 && s.id <= 470) this.olay('gurme');
       return true;
     }
     if (e.tur === 'iyilestir') {
@@ -368,7 +396,12 @@ export class Etkilesim {
       }
       /* Biçimli blokların yönü ve durumu */
       const f = this.bakisYonu4();
-      if (eb.sekil === 'merdiven') id = eb.taban + f;
+      if (eb.sekil === 'merdiven' || eb.sekil === 'sandalye' || eb.sekil === 'koltuk') id = eb.taban + f;
+      else if (eb.sekil === 'tablo') {
+        const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
+        if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tablo katı bir duvarın yan yüzüne asılır.'); return true; }
+        id = eb.taban + yi;
+      }
       else if (eb.sekil === 'yarim') id = eb.taban + (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? 1 : 0);
       else if (eb.yuzlu) id = eb.taban + f;   // heykel başı: yüzü oyuncuya döner
       else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
@@ -394,7 +427,7 @@ export class Etkilesim {
       if (mevcut !== 0 && !(mb.degistirilebilir) && !(SIVI[mevcut] && !BITKI[mevcut] && !bitki)) return false;
       if (y < 1 || y >= 127) return false;
       const alt = d.blok(x, y - 1, z);
-      if (BLOKLAR[id].mesale && !(KATI[alt] && OPAK[alt])) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
+      if (BLOKLAR[id].mesale && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
       if (suBitkisi) {
         if (mevcut !== 7 || !KATI[alt]) { this.arayuz.bildirim('Bu bitki su altında katı bir zemine dikilir.'); return true; }
       } else if (BITKI[id]) {

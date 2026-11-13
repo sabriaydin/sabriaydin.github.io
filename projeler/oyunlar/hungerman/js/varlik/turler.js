@@ -47,9 +47,14 @@ export const TURLER = {
   ahtapot: { ad: 'Ahtapot', model: 'ahtapot', gen: 0.32, boy: 0.9, can: 8, hiz: 0.9, kosu: 3.6, su: true, grup: [1, 1], dusur: r => [[451, ar(r, 1, 2)]], ses: 'ahtapot', xp: 2 },
   kopekbaligi: { ad: 'Köpekbalığı', model: 'kopekbaligi', gen: 0.55, boy: 0.8, can: 24, hiz: 1.8, kosu: 5.4, su: true, dusman: true, hasar: 4, menzil: 1.3, gorus: 16, grup: [1, 1],
     dusur: r => [[297, ar(r, 1, 3)], ...(r() < 0.6 ? [[450, 1]] : [])], ses: 'kopekbaligi', xp: 6 },
+  /* 0.16.0: evcil hayvanlar ve binek (sadik: sahibini izler, oturtulabilir; binek: ehlileştirilip eyerle binilir) */
+  kopek: { ad: 'Köpek', model: 'kopek', gen: 0.3, boy: 0.85, can: 20, hiz: 1.6, kosu: 5.6, sadik: true, hasar: 4, menzil: 1.1, dusur: () => [], ses: 'kopek', mama: [271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281], xp: 0 },
+  kedi: { ad: 'Kedi', model: 'kedi', gen: 0.22, boy: 0.6, can: 10, hiz: 1.3, kosu: 5.2, sadik: true, renkler: 5, biyom: [BY.CAYIR, BY.ORMAN, BY.HUS], grup: [1, 1], dusur: () => [], ses: 'kedi', mama: [297, 298], xp: 1 },
+  at: { ad: 'At', model: 'at', gen: 0.55, boy: 1.6, can: 30, hiz: 1.4, kosu: 5.6, binek: true, renkler: 5, biyom: [BY.CAYIR, BY.SAVAN], grup: [2, 4],
+    dusur: r => [[282, ar(r, 0, 2)]], ses: 'at', mama: [291, 266, 328, 290], xp: 2 },
   koylu: { ad: 'Köylü', model: 'koylu', gen: 0.3, boy: 1.9, can: 20, hiz: 1.0, kosu: 3.2, koylu: true, dusur: () => [], ses: 'koylu' }
 };
-export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt'];
+export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt', 'at', 'kedi'];
 export const DENIZ_CANLILARI = ['hamsi', 'cipura', 'ahtapot', 'kopekbaligi'];
 export const OLUM_KAYNAK = { zombi: 'zombi', kurt: 'kurt' };
 /* Dünyada doğan düşman canavarlar (görev, başarım ve sayım için) */

@@ -20,6 +20,7 @@ import { Gorevler, yonAci } from './koy/gorevler.js';
 import { koylerAlan } from './dunya/koy-uretici.js';
 import { KoyluEkrani, GorevEkrani } from './arayuz/koylu-ekrani.js';
 import { ISTASYON_BLOK } from './oyun/uretim.js';
+import { Binek } from './oyun/binek.js';
 import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
 import { Ses } from './sistem/ses.js';
@@ -337,7 +338,7 @@ function oyunBaslat(v) {
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.',
     'Fırtınalı havalarda canavarlar gündüz de ortaya çıkar.', 'Yağmur, açıktaki zombilerin güneşte yanmasını önler.', 'Fırtınada yatakta uyunarak hava açtırılabilir.',
-    'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.',
+    'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.', 'Kurt kemikle evcilleşip sadık bir köpeğe dönüşür; kedi balıkla evcilleşir. Sağ tık ile oturtulur ya da kaldırılır.', 'Vahşi at boş elle sağ tıklanarak ehlileştirilir; elma, buğday ya da havuç güvenini artırır. Eyer takılan ata binilir, C ile inilir.', 'Tencerede pişen yemekler açlığı doyurmanın yanında yenilenme, tokluk ve nefes gibi etkiler verir.', 'Sandalye ve koltuğa sağ tık ile oturulur; hareket edince kalkılır.',
     'İnekler ve koyunlar buğday, domuzlar havuç ya da patates, tavuklar tohum, tavşanlar havuç sever.', 'Beslenen hayvanlar ve yavruları kaybolmaz.',
     'Örs ile aletler ve zırhlar deneyim seviyesi karşılığında onarılır.', 'Simya masası yakınında hız, gece görüşü, su altında nefes, ateşe dayanıklılık ve güç iksirleri yapılır.',
     'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.'];
@@ -371,6 +372,9 @@ function oyunBaslat(v) {
   const yereBirak = (id, adet) => { const p = oyuncu.konum; dusenler.birak(id, adet, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1); };
   const tekneler = new Tekneler({ sahne, dunya, dusenler, ses, varliklar });
   oyun.tekneler = tekneler;
+  /* 0.16.0: at binme ve oturma; evcil hayvanların sahibi oyuncu adıyla tanınır */
+  varliklar.yerelAd = ayar.ad;
+  oyun.binek = new Binek({ varliklar, oyuncu, dunya, ses, dusenler, bildirim: m => hud.bildirim(m), olay: k => oyun.basarimlar && oyun.basarimlar.ver(k) });
   oyun.fenerler = new FenerIsiklari(sahne, dunya); oyun.yakinKoyler = [];
   const olta = new Olta({ sahne, dunya, oyuncu, envanter, dusenler, ses, arayuz: { bildirim: m => hud.bildirim(m) },
     olaylar: { yakala: (id, n, hazine) => { if (hazine) hud.bildirim(`Oltaya ${ESYALAR[id].ad} takıldı.`); hayatta.xpEkle(1 + Math.floor(Math.random() * 3)); if (oyun.basarimlar) oyun.basarimlar.ver('balik'); } } });
@@ -410,7 +414,7 @@ function oyunBaslat(v) {
   /* vuran: çok oyunculuda canlıya vuran uzak oyuncu (görev ve itibar onun oyununda işlenir) */
   varliklar.olaylar.vurus = (w, vuran) => { if (vuran) { if (oyun.ag && oyun.ag.vurusOlayi) oyun.ag.vurusOlayi(w, vuran); return; } if (w.tur.koylu) koyler.koyluVuruldu(w); };
   varliklar.olaylar.olum = (w, vuran, op) => { if (vuran) { if (oyun.ag && oyun.ag.olumOlayi) oyun.ag.olumOlayi(w, vuran, op); return; } gorevler.oldurme(w.turAd); oyun.basarimlar.oldurme(w.turAd, !!(op && op.ok)); if (w.tur.koylu) koyler.koyluOldu(w); if (w.tur.xp) hayatta.xpEkle(w.tur.xp); };
-  oyun.etkilesim = new Etkilesim({ dunya, oyuncu, envanter, hayatta, dusenler, ses, sahne, varliklar, olta, tekneler, arayuz: {
+  oyun.etkilesim = new Etkilesim({ dunya, oyuncu, envanter, hayatta, dusenler, ses, sahne, varliklar, olta, tekneler, binek: oyun.binek, oyuncuAdi: ayar.ad, arayuz: {
     bildirim: (m, id) => hud.bildirim(m, id), envanterAc: ist => envanterAcKapa(ist), uyu: h => uyu(h),
     olay: k => basarimlar.ver(k),
     koyluAc: w => panelAc(koyluEkrani, w),
@@ -603,11 +607,16 @@ function adim(t) {
     /* Tekne: binilirken oyuncu fiziği yerine tekne sürülür; C ile inilir */
     /* Tekneden inme: C */
     if (o.tekneler.binilen && (g.egil || o.hayatta.olu)) { o.tekneler.in(o.oyuncu); o.inisBekle = 0.4; }
+    /* At: C ile inilir; oturak: hareket edince kalkılır */
+    const BN = o.binek;
+    if (BN.biniyor && (g.egil || o.hayatta.olu)) { BN.in(); o.inisBekle = 0.4; }
+    if (BN.oturak && (g.ileri || g.geri || g.sol || g.sag || g.zipla || g.egil || o.hayatta.olu)) { BN.kalk(); o.inisBekle = 0.3; }
+    BN.guncelle(dt, g);
     $('#tekneIpucu').hidden = !o.tekneler.binilen;
     o.inisBekle = (o.inisBekle || 0) - dt;
     o.tekneler.guncelle(dt, { oyuncu: o.oyuncu, girdi: g, gunIsigi: o.gunIsigi });
     let mesafe = 0;
-    if (o.tekneler.binilen) { const P = o.oyuncu; P.hiz.set(0, 0, 0); P.dusus = 0; P.suda = P.basSuda = P.lavda = P.basLavda = false; P.yerde = true; P.kosuyor = false; P.egiliyor = false; }
+    if (o.tekneler.binilen || BN.biniyor || BN.oturak) { const P = o.oyuncu; P.hiz.set(0, 0, 0); P.dusus = 0; P.suda = P.basSuda = P.lavda = P.basLavda = false; P.yerde = true; P.kosuyor = false; P.egiliyor = false; }
     else { o.oyuncu.etkiHiz = (o.hayatta.etki('hiz') ? 1.3 : 1) * (o.hayatta.etki('yavas') ? 0.6 : 1); mesafe = o.oyuncu.guncelle(dt, o.inisBekle > 0 ? { ...g, egil: false } : g) || 0; }
     o.hayatta.yor(mesafe * (o.oyuncu.kosuyor ? 0.1 : 0.01));
     o.hayatta.guncelle(dt, o.oyuncu.basSuda, { lavda: o.oyuncu.lavda, suda: o.oyuncu.suda && !o.oyuncu.lavda, maske: !!(zirh[0] && zirh[0].id === 456), solunum: o.envanter.zirhBuyu('solunum') });
@@ -627,7 +636,7 @@ function adim(t) {
     const eldeki = o.envanter.seciliId();
     o.olta.guncelle(dt, !!ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'olta' && !o.hayatta.olu, o.isik);
     varlikGuncelle(o, dt, {
-      oyuncu: o.oyuncu, oyuncuOlu: o.hayatta.olu, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
+      oyuncu: o.oyuncu, ad: ayar.ad, oyuncuOlu: o.hayatta.olu, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
       firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(),
       oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n, v.turAd, v.tur.agu, k.x, k.z); },
       okTopla: () => { const k = o.envanter.ekle(287, 1); if (!k) ses.topla(); return !k; }

@@ -71,6 +71,10 @@ export class Ses {
       case 'tavuk': this.ton(950 * y, 0.07, 0.08 * h, 'triangle', 720 * y); setTimeout(() => this.ton(1050 * y, 0.06, 0.07 * h, 'triangle', 800 * y), 110); break;
       case 'tavsan': this.ton(1300 * y, 0.08, 0.05 * h, 'triangle', 1000); break;
       case 'kurt': if (tip === 'normal') { this.patlama(220, 0.6, 0.12 * h, 'lowpass', 2); this.ton(95, 0.6, 0.1 * h, 'sawtooth', 80); } else this.ton(700 * y, 0.25, 0.12 * h, 'triangle', 450); break;
+      /* 0.16.0: köpek havlar, kedi miyavlar, at kişner */
+      case 'kopek': if (tip === 'normal') { this.ton(420 * y, 0.08, 0.12 * h, 'sawtooth', 300 * y); this.patlama(700, 0.08, 0.08 * h, 'bandpass', 2); setTimeout(() => { this.ton(440 * y, 0.09, 0.12 * h, 'sawtooth', 310 * y); this.patlama(700, 0.08, 0.08 * h, 'bandpass', 2); }, 170); } else this.ton(900 * y, 0.22, 0.1 * h, 'triangle', 600); break;
+      case 'kedi': this.ton(560 * y, 0.12, 0.06 * h, 'triangle', 820 * y); setTimeout(() => this.ton(820 * y, 0.28, 0.06 * h, 'triangle', 480 * y), 110); break;
+      case 'at': { const n = tip === 'normal' ? 6 : 4; for (let i = 0; i < n; i++) setTimeout(() => this.ton((620 - i * 55) * y, 0.09, 0.08 * h, 'sawtooth', (560 - i * 55) * y), i * 70); setTimeout(() => this.patlama(380, 0.3, 0.07 * h, 'lowpass', 1.5, 0.6), n * 70); break; }
       case 'koylu': this.ton(210 * y, 0.16, 0.07 * h, 'triangle', 170 * y); setTimeout(() => this.ton(190 * y, 0.2, 0.06 * h, 'triangle', 230 * y), 170); break;
       case 'iskelet': for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(2400 * y, 0.04, 0.12 * h, 'bandpass', 6), i * 70); break;
       case 'orumcek': this.patlama(5200 * y, tip === 'normal' ? 0.5 : 0.25, 0.08 * h, 'highpass', 1, 0.7); break;
@@ -121,6 +125,8 @@ export class Ses {
   ruzgar(h = 1) { this.patlama(900, 1.4, 0.12 * h, 'bandpass', 0.7, 0.9); this.patlama(2400, 1.0, 0.05 * h, 'highpass', 0.6, 0.8); }
   cam(h = 1) { for (let i = 0; i < 4; i++) setTimeout(() => this.ton(2600 + Math.random() * 1400, 0.18, 0.05 * h, 'triangle', 3400), i * 45); this.patlama(5000, 0.25, 0.07 * h, 'highpass', 1.2); }
   savur(h = 1) { this.patlama(600, 0.35, 0.14 * h, 'bandpass', 1.4, 0.4); this.patlama(1400, 0.25, 0.08 * h, 'bandpass', 1.4, 0.4); }
+  /* Nal sesi: iki vuruş; h hıza göre */
+  nal(h = 1) { this.patlama(900, 0.05, 0.12 * h + 0.04, 'bandpass', 3); setTimeout(() => this.patlama(760, 0.05, 0.1 * h + 0.03, 'bandpass', 3), 110); }
   kalp() { this.ton(880, 0.12, 0.05, 'sine', 1100); }
   /* Yağmur: sürekli çalan süzülmüş gürültü; hacim 0..1, boguk: çatı altında */
   yagmurAyarla(hacim, boguk) {

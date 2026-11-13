@@ -36,6 +36,15 @@ function baglanir(id, n, f) {
 }
 
 /* komsu(f): yatay komşu blok (f: 0..3); carp: çarpışma kutuları (çitler 1,5 blok yüksekliğindedir) */
+/* 0.16.0: kuzeye (yon 0) göre tanımlanan kutuları blok merkezi çevresinde döndürür */
+function dondur(l, f) {
+  if (!f) return l;
+  const n = ([x, z]) => (f === 1 ? [1 - z, x] : f === 2 ? [1 - x, 1 - z] : [z, 1 - x]);
+  return l.map(k => {
+    const [ax, az] = n([k[0], k[2]]), [bx, bz] = n([k[3], k[5]]);
+    return [Math.min(ax, bx), k[1], Math.min(az, bz), Math.max(ax, bx), k[4], Math.max(az, bz), ...k.slice(6)];
+  });
+}
 export function sekilKutulari(id, komsu, carp = false) {
   const b = BLOKLAR[id];
   if (!b) return [];
@@ -67,6 +76,45 @@ export function sekilKutulari(id, komsu, carp = false) {
       }
       return l;
     }
+    /* 0.16.0: mobilyalar (yon: arkalığın / duvarın bulunduğu taraf) */
+    case 'sandalye': {
+      if (carp) return dondur([[P, 0, P, 15 * P, 9 * P, 15 * P], [P, 0, P, 15 * P, 1, 4 * P]], b.yon);
+      return dondur([
+        [2 * P, 0, 2 * P, 4 * P, 7 * P, 4 * P], [12 * P, 0, 2 * P, 14 * P, 7 * P, 4 * P], [2 * P, 0, 12 * P, 4 * P, 7 * P, 14 * P], [12 * P, 0, 12 * P, 14 * P, 7 * P, 14 * P],
+        [P, 7 * P, P, 15 * P, 9 * P, 15 * P],
+        [2 * P, 9 * P, 2 * P, 4 * P, 1, 4 * P], [12 * P, 9 * P, 2 * P, 14 * P, 1, 4 * P],
+        [4 * P, 13 * P, 2.5 * P, 12 * P, 15 * P, 3.5 * P], [4 * P, 10 * P, 2.5 * P, 12 * P, 11.5 * P, 3.5 * P]
+      ], b.yon);
+    }
+    case 'masa':
+      if (carp) return [[0, 0, 0, 1, 1, 1]];
+      return [[0, 13 * P, 0, 1, 1, 1], [P, 0, P, 3 * P, 13 * P, 3 * P], [13 * P, 0, P, 15 * P, 13 * P, 3 * P], [P, 0, 13 * P, 3 * P, 13 * P, 15 * P], [13 * P, 0, 13 * P, 15 * P, 13 * P, 15 * P]];
+    case 'koltuk': {
+      if (carp) return dondur([[0, 0, 0, 1, 10 * P, 1], [0, 0, 0, 1, 1, 4 * P]], b.yon);
+      const M = T.minder_k;
+      return dondur([
+        [P, 0, P, 3 * P, 2 * P, 3 * P], [13 * P, 0, P, 15 * P, 2 * P, 3 * P], [P, 0, 13 * P, 3 * P, 2 * P, 15 * P], [13 * P, 0, 13 * P, 15 * P, 2 * P, 15 * P],
+        [0, 2 * P, 0, 1, 7 * P, 1],
+        [2 * P, 7 * P, 3 * P, 14 * P, 10 * P, 15 * P, M], [2 * P, 7 * P, P, 14 * P, 18 * P, 4 * P, M],
+        [0, 7 * P, 0, 2 * P, 13 * P, 1], [14 * P, 7 * P, 0, 1, 13 * P, 1], [0, 7 * P, 0, 1, 18 * P, P]
+      ], b.yon);
+    }
+    case 'hali': return [[0, 0, 0, 1, P, 1]];
+    case 'saksi': {
+      if (carp) return [[5 * P, 0, 5 * P, 11 * P, 6 * P, 11 * P]];
+      const Y = T.yun_y, C = T[b.cicek];
+      return [[5 * P, 0, 5 * P, 11 * P, 6 * P, 11 * P], [6 * P, 6 * P, 6 * P, 10 * P, 6.4 * P, 10 * P, T.toprak],
+        [7.5 * P, 6 * P, 7.5 * P, 8.5 * P, 11 * P, 8.5 * P, Y], [5.5 * P, 8 * P, 7.5 * P, 10.5 * P, 9 * P, 8.5 * P, Y],
+        [6.5 * P, 11 * P, 6.5 * P, 9.5 * P, 13 * P, 9.5 * P, C], [7.25 * P, 12.5 * P, 7.25 * P, 8.75 * P, 13.5 * P, 8.75 * P, b.cicek === 'yun_s' ? T.yun_t : T.yun_s]];
+    }
+    case 'lamba':
+      if (carp) return [[4.5 * P, 0, 4.5 * P, 11.5 * P, 12 * P, 11.5 * P]];
+      return [[5 * P, 0, 5 * P, 11 * P, P, 11 * P, T.demir_cubuk], [7.5 * P, P, 7.5 * P, 8.5 * P, 7 * P, 8.5 * P, T.demir_cubuk], [4.5 * P, 7 * P, 4.5 * P, 11.5 * P, 12 * P, 11.5 * P]];
+    case 'tablo': return carp ? [] : dondur([[P, P, 0, 15 * P, 15 * P, P]], b.yon);
+    case 'tencere':
+      if (carp) return [[2 * P, 0, 2 * P, 14 * P, 9 * P, 14 * P]];
+      return [[3 * P, 0, 3 * P, 13 * P, 8 * P, 13 * P], [2 * P, 8 * P, 2 * P, 14 * P, 9 * P, 14 * P, T.tencere_ust],
+        [0, 6 * P, 7 * P, 2 * P, 7 * P, 9 * P, T.demir_cubuk], [14 * P, 6 * P, 7 * P, 1, 7 * P, 9 * P, T.demir_cubuk]];
     case 'kazik':
       /* Sivri kazık: kütük gövde, daralan uç */
       if (carp) return [[0, 0, 0, 1, 1, 1]];

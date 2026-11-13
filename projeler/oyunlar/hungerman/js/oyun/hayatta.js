@@ -28,7 +28,7 @@ export class Hayatta {
     this.yorgunluk = 0; this.iyiSayac = 0; this.acSayac = 0; this.oksSayac = 0; this.bogSayac = 0;
     this.olu = false; this.sonHasar = 0; this.zehir = 0; this.agu = 0; this.aguSayac = 0; this.yanma = 0; this.yanmaSayac = 0; this.lavSayac = 0;
   }
-  yor(n) { if (!this.tok) this.yorgunluk += n; }   // tok: geliştirici modunda açlık azalmaz
+  yor(n) { if (!this.tok && !this.etki('tokluk')) this.yorgunluk += n; }   // tok: geliştirici modunda açlık azalmaz; tokluk: yemek etkisi
   /* zehirOlasilik: çürük et gibi yiyeceklerde mide bulantısı olasılığı; true dönerse bulantı başladı */
   ye(n, zehirOlasilik = 0) {
     this.aclik = Math.min(20, this.aclik + n);
@@ -67,6 +67,8 @@ export class Hayatta {
     if (this.zehir > 0) { this.zehir -= dt; this.yor(dt * 1.2); }
     if (this.etki('aclik')) this.yor(dt * 1.4);   // mumyanın verdiği açlık etkisi
     while (this.yorgunluk >= 4) { this.yorgunluk -= 4; if (this.aclik > 0) this.aclik--; }
+    /* Yenilenme (yemek etkisi): can her 2,5 saniyede 1 artar */
+    if (this.etki('yenilenme') && this.can < 20) { this.yenSayac = (this.yenSayac || 0) + dt; if (this.yenSayac >= 2.5) { this.yenSayac = 0; this.can = Math.min(20, this.can + 1); } }
     /* Tok iken can yenilenir */
     if (this.aclik >= 17 && this.can < 20) {
       this.iyiSayac += dt;

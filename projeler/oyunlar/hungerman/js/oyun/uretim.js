@@ -1,5 +1,5 @@
 /* HungerMan - üretim tarifleri
-   istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası)
+   istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
 import { aletId, ESYALAR, ZIRH_MALZEME, YUN_RENKLERI } from '../bloklar.js';
 
@@ -7,14 +7,14 @@ export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39] },
   kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144] }
 };
-export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası' };
-export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140 };
+export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere' };
+export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencere: 232 };
 /* Tarifin istasyon koşulu: yok, tek istasyon ya da istasyonlardan biri */
 export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? t.istasyon : [t.istasyon]);
 export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
 export const istasyonMetni = t => istasyonlar(t).map(k => ISTASYON_ADI[k]).join(' veya ');
 
-export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım']];
+export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['mobilya', 'Mobilya']];
 
 const R = [];
 const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, girdi, istasyon: istasyon || null, kategori });
@@ -150,6 +150,29 @@ t(187, 1, [[14, 6], [282, 3]], 'masa', 'blok');
 t(188, 16, [[34, 6], [325, 1]], 'masa', 'blok');
 t(189, 2, [[261, 1], [61, 1]], 'masa', 'blok');
 t(197, 1, [[61, 1], [22, 1]], 'masa', 'blok');
+/* 0.16.0: mobilyalar */
+t(199, 2, [['kalas', 4], [256, 2]], 'masa', 'mobilya');
+t(203, 1, [['kalas', 3], [256, 4]], 'masa', 'mobilya');
+t(204, 1, [['kalas', 4], [114, 3]], 'masa', 'mobilya');
+t(208, 3, [[49, 2]], 'masa', 'mobilya');
+for (let i = 0; i < 7; i++) t(209 + i, 3, [[114 + i, 2]], 'masa', 'mobilya');
+for (const [id, cicek] of [[216, 26], [217, 27], [218, 44]]) t(id, 1, [[23, 3], [cicek, 1]], 'masa', 'mobilya');
+t(219, 1, [[261, 1], [46, 1], [49, 1]], 'masa', 'mobilya');
+t(220, 1, [['kalas', 1], [49, 2], [324, 1]], 'masa', 'mobilya');
+t(224, 1, [['kalas', 1], [49, 2], [325, 1]], 'masa', 'mobilya');
+t(228, 1, [['kalas', 1], [49, 2], [321, 1]], 'masa', 'mobilya');
+/* 0.16.0: mutfak, yemekler ve eyer */
+t(232, 1, [[261, 5]], 'masa', 'mobilya');
+t(462, 1, [[282, 5], [261, 1], [284, 2]], 'masa', 'malzeme');
+t(463, 1, [[297, 1], [329, 1], [270, 1]], 'tencere', 'yiyecek');
+t(464, 1, [[271, 1], [329, 1], [328, 1], [270, 1]], 'tencere', 'yiyecek');
+t(465, 1, [[275, 1], [328, 1], [270, 1]], 'tencere', 'yiyecek');
+t(466, 1, [[277, 1], [329, 1], [270, 1]], 'tencere', 'yiyecek');
+t(470, 1, [[328, 1], [329, 1], [36, 1], [270, 1]], 'tencere', 'yiyecek');
+t(467, 1, [[271, 1], [256, 1]], 'ates', 'yiyecek');
+t(467, 1, [[277, 2], [256, 1]], 'ates', 'yiyecek');
+t(468, 1, [[272, 1], [293, 1]], ['ates', 'tencere'], 'yiyecek');
+t(469, 1, [[293, 1], [265, 3]], null, 'yiyecek');
 t(198, 2, [[22, 1]], 'masa', 'blok');
 t(331, 3, [[34, 3]], null, 'malzeme');
 t(332, 1, [[331, 1], [283, 1], [265, 2]], 'simya', 'yiyecek');

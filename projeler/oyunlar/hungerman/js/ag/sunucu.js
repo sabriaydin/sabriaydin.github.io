@@ -7,6 +7,7 @@ import { UzakOyuncular, RENKLER, B } from './uzak-oyuncular.js';
 import { r2, r3, v3, durumDizisi, blokEfekti, sandikDizi, sandikKur } from './ortak.js';
 import { SURUM, PB } from '../sabitler.js';
 import { BLOKLAR, ESYALAR } from '../bloklar.js';
+import { OTURMA } from '../oyun/binek.js';
 
 const MAKS = 8;                 // sunucu dahil en çok oyuncu
 const ANLIK = 0.1;              // anlık durum gönderim aralığı (sn)
@@ -116,6 +117,7 @@ export class SunucuOyun {
     if (this.uzak) this.uzak.sil(c.id);
     for (const [s, sahip] of this.kilit) if (sahip === c.id) this.kilit.delete(s);
     for (const t of o.tekneler.liste) if (t.binen === c.id) { t.binen = null; t.hedef = null; t.hiz = 0; t.vy = 0; }
+    for (const w of o.varliklar.liste) if (w.binen === c.id) { w.binen = null; w.binenHiz = 0; }
     if (this.kapali) return;
     this.yay({ t: 'oy', l: this.oyuncuListesi() });
     this.yay({ t: 'sh', s: `${c.ad} oyundan ayrıldı.` });
@@ -137,6 +139,15 @@ export class SunucuOyun {
         c.olu = !!(a[6] & B.OLU); c.suda = !!(a[6] & B.SUDA); c.yatakta = !!(a[6] & B.YATAK);
         this.uzak.durum(c.id, a);
         if (m.tk && a[7] >= 0) { const t = this.bul(o.tekneler.liste, a[7]); if (t && t.binen === c.id) t.hedef = m.tk; }
+        /* 0.16.0: istemcinin sürdüğü at, binicinin konumuyla taşınır */
+        if (a.length > 8 && a[8] >= 0) {
+          const w = o.varliklar.liste.find(x => x.id === a[8]);
+          if (w && w.binen === c.id) {
+            const s = performance.now(), gecen = Math.max(0.03, (s - (w.binenZaman || s - 100)) / 1000);
+            w.binenHiz = Math.min(12, Math.hypot(a[0] - w.konum.x, a[2] - w.konum.z) / gecen); w.binenZaman = s;
+            w.konum.set(a[0], a[1] - OTURMA, a[2]); w.yaw = a[3]; w.hedefYaw = a[3];
+          }
+        }
         break;
       }
       case 'b': {   // blok değişikliği
@@ -171,6 +182,19 @@ export class SunucuOyun {
         if (!w || w.olu || w.konum.distanceTo(c.konum) > 9) return;
         const kaynak = m.k ? new THREE.Vector3(m.k[0], m.k[1], m.k[2]) : c.konum.clone();
         o.varliklar.hasarVer(w, Math.min(30, +m.n || 1), kaynak, { itme: Math.min(2.4, +m.it || 1), oyuncu: true, vuran: c, yagma: Math.max(0, Math.min(3, m.yg | 0)), ates: !!m.at });
+        break;
+      }
+      case 'ce': { // 0.16.0: evcil hayvan / at etkileşimi
+        const w = o.varliklar.liste.find(x => x.id === m.i);
+        if (!w || w.olu || w.konum.distanceTo(c.konum) > 9) { c.k.gonder({ t: 'ce', i: m.i }); break; }
+        const S = o.varliklar.canliEtkilesim(w, m.e | 0, c.ad);
+        if (S.bin) w.binen = c.id;
+        c.k.gonder({ t: 'ce', i: w.id, tk: S.tuket ? 1 : 0, m: S.mesaj, o: S.olay, b: S.bin ? 1 : 0 });
+        break;
+      }
+      case 'ati': { // attan inme
+        const w = o.varliklar.liste.find(x => x.id === m.i);
+        if (w && w.binen === c.id && Array.isArray(m.p)) { w.binen = null; w.binenHiz = 0; w.konum.set(m.p[0], m.p[1], m.p[2]); w.yaw = m.p[3]; w.hiz.set(0, 0, 0); }
         break;
       }
       case 'bes': { // hayvan besleme
@@ -256,7 +280,7 @@ export class SunucuOyun {
     const l = [ctx];
     for (const c of this.istemciler.values()) {
       if (!c.durum) continue;
-      if (!c.ctx) c.ctx = { oyuncu: { konum: c.konum }, oyuncuyaVur: (n, v, kaynak) => this.vur(c, n, v, kaynak), okTopla: () => { c.k.gonder({ t: 'ver', id: 287, n: 1 }); return true; } };
+      if (!c.ctx) c.ctx = { ad: c.ad, oyuncu: { konum: c.konum }, oyuncuyaVur: (n, v, kaynak) => this.vur(c, n, v, kaynak), okTopla: () => { c.k.gonder({ t: 'ver', id: 287, n: 1 }); return true; } };
       Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik, firtina: ctx.firtina, yagmur: ctx.yagmur, eldeki: c.durum[5] | 0 });
       l.push(c.ctx);
     }
@@ -296,8 +320,9 @@ export class SunucuOyun {
         let b = 0;
         if (w.olu) b |= 1; if (w.hasarZaman > 0) b |= 2; if (w.yaniyor) b |= 4; if (w.nisan) b |= 8; if (!w.m.kok.visible) b |= 16; if (!w.yerde || w.kacZaman > 0) b |= 32;
         if (w.yavru > 0) b |= 64; if (w.ask > 0) b |= 128; if (w.dinlen > 0) b |= 256; if (w.anim) b |= (w.anim & 7) << 9;
+        if (w.oturuyor) b |= 4096; if (w.sahip) b |= 8192; if (w.eyer) b |= 16384; if (w.sahlan > 0) b |= 32768;
         const a = [w.id, r2(w.konum.x), r2(w.konum.y), r2(w.konum.z), r3(w.yaw), b, Math.max(0, Math.ceil(w.can))];
-        if (!c.bilinen.has(w.id)) a.push(w.tur.koylu && w.koylu ? [w.turAd, w.koylu.meslek, w.koy.id, w.koylu.idx] : [w.turAd]);
+        if (!c.bilinen.has(w.id)) a.push(w.tur.koylu && w.koylu ? [w.turAd, w.koylu.meslek, w.koy.id, w.koylu.idx] : w.renk ? [w.turAd, 0, 0, 0, w.renk] : [w.turAd]);
         bilinen.add(w.id);
         v.push(a);
       }

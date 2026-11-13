@@ -117,6 +117,39 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 16. aşama (0.16.0): Evcil hayvanlar, binekler, yemek pişirme, mobilyalar
+
+**Evcil hayvanlar**
+- **Köpek:** Kurda kemik verilir; her denemede yaklaşık üçte bir olasılıkla evcilleşir ve kırmızı tasmalı bir köpeğe dönüşür. Sahibini izler, uzaklaşınca yanına ışınlanır, sahibine yaklaşan canavarlara saldırır.
+- **Kedi:** Çayır, orman ve huş ormanlarında seyrek görülür (beş renk). Çiğ ya da pişmiş balıkla evcilleşir, mavi tasma takar ve sahibini izler.
+- Evcil hayvana sağ tık ya da **E**: oturur / kalkar. Mamasıyla (köpek: et, kedi: balık) iyileşir. Sahibi kendi hayvanına zarar veremez.
+
+**At**
+- Çayır ve savanda sürüler hâlinde (beş renk: doru, yağız, kır, al, alaca).
+- **Ehlileştirme:** Boş elle sağ tık; at şahlanıp reddedebilir. Elma, buğday, havuç ya da altın elma güvenini artırır ve başarı olasılığını yükseltir.
+- **Eyer** (5 deri + 1 demir külçe + 2 ip, Üretim Masası) takılan ata sağ tık ya da E ile binilir; **C** ya da E ile inilir.
+- **Sürüş:** At binicinin baktığı yöne döner; W ileri, S geri, A/D yana, **Shift dörtnala**, **Boşluk zıplama** (yaklaşık iki blok). Bir bloklu basamakları kendiliğinden aşar; yüzebilir; nal sesleri vardır.
+- Çok oyunculuda her oyuncu kendi atını sürer; at ve binicinin duruşu diğer oyunculara görünür.
+- Evcil hayvanlar ve atlar (sahibi, rengi, eyeri, oturma durumu) dünya ile kaydedilir.
+
+**Yemek pişirme**
+- **Tencere** (5 demir külçe): yeni üretim istasyonu. Kâseli yemekler yenince kâse geri kalır.
+- **Balık Çorbası** (balık, patates, kâse): Su Altında Nefes 60 sn.
+- **Etli Güveç** (sığır eti, patates, havuç, kâse): Yenilenme 20 sn.
+- **Tavuk Çorbası** (tavuk, havuç, kâse): Yenilenme 10 sn.
+- **Kuzu Haşlama** (koyun eti, patates, kâse): Tokluk 90 sn.
+- **Sebze Çorbası** (havuç, patates, mantar, kâse): Yenilenme 12 sn.
+- **Şiş Kebap** (çiğ et ve çubuk, Kamp Ateşi): Güç 30 sn.
+- **Köfte Ekmek** (biftek ve ekmek, Kamp Ateşi ya da Tencere): Tokluk 120 sn.
+- **Reçelli Ekmek** (ekmek ve 3 böğürtlen): Hız 30 sn.
+- Yeni etkiler: **Yenilenme** (can her 2,5 saniyede 1 artar), **Tokluk** (açlık azalmaz). Etkili yemekler açlık doluyken de yenebilir.
+
+**Mobilyalar** (Üretim Masası, yeni “Mobilya” sekmesi)
+- **Sandalye** ve **Koltuk**: sağ tık ya da E ile oturulur; hareket edince ya da C ile kalkılır. Arkalık, koyan oyuncunun karşısına gelir.
+- **Masa**, **Masa Lambası** (masanın üstüne konabilen ışık kaynağı), sekiz renkte **Halı**, üç çeşit **Saksı** (gelincik, karahindiba, peygamber çiçeği), duvara asılan üç **Tablo** (manzara, deniz, çiçekler).
+
+**Başarımlar:** yeni “Yuva ve Dostlar” grubu: Sadık Dost, Mırnav, Seyis, Atlı, Aşçı, Gurme, Ev Sahibi.
+
 ## 0.15.4: Buzul Kulesi yeniden tasarlandı
 
 Buzul Kulesi, Buz Büyücüsü'nün yuvarlak kulesi olarak baştan tasarlandı (taban 27 blok çapında, tepe 45 blok yüksekliğinde).
