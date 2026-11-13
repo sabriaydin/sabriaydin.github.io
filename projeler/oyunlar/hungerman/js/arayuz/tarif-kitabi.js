@@ -105,7 +105,7 @@ export class TarifKitabi {
   sec(id, gecmisKorunsun) {
     if (!ESYALAR[id]) return;
     if (!gecmisKorunsun) this.gecmis = [];
-    this.secili = id; this.ses.tik();
+    this.secili = id; this.ses.sayfa();
     [...$('#tkIzgara').children].forEach(b => b.classList && b.classList.toggle('secili', +b.dataset.id === id));
     this.ayrintiCiz();
   }

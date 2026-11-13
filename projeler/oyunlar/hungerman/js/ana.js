@@ -2,7 +2,7 @@
 import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl } from './sabitler.js';
 import { Sahne, THREE } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
-import { BIYOMLAR } from './dunya/uretici.js';
+import { BIYOMLAR, BY } from './dunya/uretici.js';
 import { BLOKLAR, ESYALAR, buyuluMu } from './bloklar.js';
 import { metinTohum } from './rastgele.js';
 import { Oyuncu } from './oyun/oyuncu.js';
@@ -27,6 +27,7 @@ import { kaleAt } from './dunya/diyar-uretici.js';
 import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
 import { Ses } from './sistem/ses.js';
+import { Muzik } from './sistem/muzik.js';
 import { Kayit, ayarlariYukle, ayarlariKaydet } from './sistem/kayit.js';
 import { SunucuOyun } from './ag/sunucu.js';
 import { IstemciOyun } from './ag/istemci.js';
@@ -42,6 +43,7 @@ import { YapiOlaylari } from './oyun/yapilar.js';
 import { yapiAt } from './dunya/yapi-uretici.js';
 import { BasarimEkrani } from './arayuz/basarim-ekrani.js';
 import { TarifKitabi } from './arayuz/tarif-kitabi.js';
+import { Dokunmatik, dokunmatikCihaz } from './arayuz/dokunmatik.js';
 import { zindanAt } from './dunya/zindan-uretici.js';
 import { batikAt } from './dunya/batik-uretici.js';
 import { madenAt } from './dunya/maden-uretici.js';
@@ -64,6 +66,10 @@ if (!ayar.ad) { ayar.ad = 'Oyuncu' + (100 + Math.floor(Math.random() * 900)); ay
 if (ayar.miniHarita === undefined) ayar.miniHarita = true;
 if (ayar.konsol === undefined) ayar.konsol = true;
 const ses = new Ses(); ses.duzeyAyarla(ayar.ses);
+/* 0.19.0: müzik; tarayıcılar sesi ilk dokunuş ya da tıklamadan sonra açar */
+const muzik = new Muzik(); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
+addEventListener('pointerdown', () => { ses.baslat(); muzik.izinVer(); }, true);
+addEventListener('keydown', () => { ses.baslat(); muzik.izinVer(); }, true);
 let sahne;
 try { sahne = new Sahne(tuval); } catch (e) { hataGoster('WebGL başlatılamadı. Tarayıcınız veya ekran kartı sürücünüz WebGL desteklemiyor olabilir.'); throw e; }
 sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
@@ -104,15 +110,21 @@ function ayarFormu() {
   bag('#aFov', 'fov', v => v + '°');
   bag('#aHas', 'hassasiyet', v => v.toFixed(2) + '×');
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb');
+  bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
+  bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb');
 }
+/* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
+const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
 function ayarUygula() {
   ayarlariKaydet(ayar);
   sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
-  ses.duzeyAyarla(ayar.ses);
+  ses.duzeyAyarla(ayar.ses); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
+  { const c = COZUNURLUK[ayar.cozunurluk | 0] || COZUNURLUK[0]; if (c[1]) sahne.olcekAyarla(c[1]); }
   if (oyun && oyun.dunya.gorus !== ayar.gorus) oyun.dunya.gorusAyarla(ayar.gorus);
   $('#fps').hidden = !ayar.fps;
   $('#miniHarita').hidden = !ayar.miniHarita;
+  dokun.ayarla(ayar.dokunmatik);
 }
 
 /* ---------- Dünya listesi ---------- */
@@ -205,7 +217,35 @@ document.addEventListener('mousemove', e => {
   o.pitch -= e.movementY * k * (ayar.tersY ? -1 : 1);
   o.pitch = Math.max(-1.56, Math.min(1.56, o.pitch));
 });
+/* 0.19.0: dokunmatik kontroller: fare kilidi yerine oyun kendi kilit durumunu tutar */
+const dokun = new Dokunmatik({ tus, fare, kilitle: () => kilitle(), kosKilit: v => { kosKilit = v; },
+  oyunda: () => !!(oyun && aktifEkran === 'oyun' && kilitli && !panelAcik() && !oyun.hayatta.olu),
+  bak: (dx, dy) => { const o = oyun.oyuncu, k = 0.0048 * ayar.hassasiyet; o.yaw -= dx * k; o.pitch = Math.max(-1.56, Math.min(1.56, o.pitch - dy * k * (ayar.tersY ? -1 : 1))); },
+  eylem: (ad, n) => {
+    if (!oyun) return;
+    if (ad === 'yuva') { if (n >= 0 && n < 9) seciliAyarla(n); return; }
+    if (ad === 'menu') { if (panelAcik()) panelKapat(true); else { bilerekBirak = true; kilitBirak(); duraklat(); } return; }
+    if (ad === 'envanter') envanterAcKapa();
+    else if (ad === 'etkiles') oyun.etkilesim.etkiles();
+    else if (ad === 'at') oyun.etkilesim.at(false);
+    else if (ad === 'harita') panelAc(haritaEkrani, oyun);
+    else if (ad === 'kitap') panelAc(tarifKitabi, oyun.envanter, yakinIstasyonlar(), eldekiTarif());
+  } });
+if (ayar.dokunmatik === undefined) ayar.dokunmatik = dokunmatikCihaz();
+/* Telefon ve tabletlerde ilk açılışta görüş mesafesi düşük başlar */
+if (ayar.mobilVarsayilan === undefined) { ayar.mobilVarsayilan = true; if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5); ayarlariKaydet(ayar); }
+dokun.ayarla(ayar.dokunmatik);
+function kilitBirak() {
+  if (dokun.aktif) { kilitli = false; fare.sol = fare.sag = false; dokun.sifirla(); if (oyun && aktifEkran === 'oyun' && !bilerekBirak && !panelAcik() && !oyun.hayatta.olu) duraklat(); bilerekBirak = false; tiklaGuncelle(); return; }
+  document.exitPointerLock();
+}
 function kilitle() {
+  if (dokun.aktif) {
+    kilitli = true; tiklaGuncelle();
+    /* Telefonlarda tam ekran ve yatay yön denenir (desteklenmezse sessizce geçilir) */
+    try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {})).catch(() => {}); } catch (e) { /* desteklenmiyor */ }
+    return;
+  }
   try { const p = tuval.requestPointerLock(); if (p && p.catch) p.catch(() => tiklaGuncelle()); } catch (e) { /* tarayıcı reddetti */ }
 }
 document.addEventListener('pointerlockchange', () => {
@@ -236,7 +276,7 @@ envEkrani.kapandi = s => {
 function envanterAcKapa(istasyon, sandik) {
   if (!oyun || oyun.hayatta.olu) return;
   if (envEkrani.acik) envanterKapat(true);
-  else { if (kilitli) { bilerekBirak = true; document.exitPointerLock(); } envEkrani.ac(istasyon, sandik); ses.ac(); tiklaGuncelle(); }
+  else { if (kilitli) { bilerekBirak = true; kilitBirak(); } envEkrani.ac(istasyon, sandik); if (sandik) ses.sandik(); else if (istasyon === 'tencere') ses.tencere(); else ses.ac(); tiklaGuncelle(); }
 }
 /* Köylü ve görev pencereleri */
 const koyluEkrani = new KoyluEkrani({ ses, kapatIste: () => panelKapat(true) });
@@ -289,9 +329,9 @@ const gelPencere = new GelistiriciPenceresi({ ses, konsol, sahne, oyun: () => oy
 haritaEkrani.isinla = (x, z) => { panelKapat(true); konsol.calistir(`isinla ${x} ${z}`); };
 function panelAc(panel, ...a) {
   if (!oyun || oyun.hayatta.olu || panelAcik()) return;
-  if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
+  if (kilitli) { bilerekBirak = true; kilitBirak(); }
   fare.sol = fare.sag = false;
-  panel.ac(...a); ses.ac(); tiklaGuncelle();
+  panel.ac(...a); if (panel === tarifKitabi || panel === gorevEkrani) ses.kitap(true); else ses.ac(); tiklaGuncelle();
 }
 function panelKapat(kilitlensin) {
   if (koyluEkrani.acik) koyluEkrani.kapat();
@@ -441,7 +481,7 @@ function oyunBaslat(v) {
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
       if (oyun.istemci) { oyun.ag.sandikIste(x, y, z); return; }
       if (oyun.ag && !oyun.ag.sandikKilitle(k)) { hud.bildirim('Bu sandığı başka bir oyuncu kullanıyor.'); return; }
-      let d = dunya.sandiklar.get(k); if (!d) { d = koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k }); ses.ac();
+      let d = dunya.sandiklar.get(k); if (!d) { d = koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
       sandikBasarim(x, y, z);
     },
     sandikYerlesti: (x, y, z) => { if (!oyun.istemci) dunya.sandiklar.set(x + ',' + y + ',' + z, new Array(27).fill(null)); },
@@ -515,7 +555,7 @@ function gecitGec(h) {
   o.gecitHedef = h;
   o.oyuncu.konum.set(h.x + 0.5, 70, h.z + 0.5); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0; o.oyuncu.ucus = false;
   o.hazir = false;
-  if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
+  if (kilitli) { bilerekBirak = true; kilitBirak(); }
   ekran('yukleme'); $('#yukleBaslik').textContent = h.diyara ? 'Yeraltı Diyarı’na geçiliyor' : 'Dünyaya dönülüyor';
   $('#yukleIpucu').textContent = h.diyara ? 'Diyardaki 1 blok, dünyadaki 8 bloğa karşılık gelir.' : '';
   $('#gecitEfekt').style.opacity = 0;
@@ -524,7 +564,8 @@ function gecitGec(h) {
 
 function olum(sebep) {
   const o = oyun;
-  if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
+  ses.olum();
+  if (kilitli) { bilerekBirak = true; kilitBirak(); }
   if (envEkrani.acik) envEkrani.kapat();
   if (koyluEkrani.acik) koyluEkrani.kapat();
   if (gorevEkrani.acik) gorevEkrani.kapat();
@@ -596,11 +637,23 @@ function oyunBitir() {
   sahne.secimGoster(null);
   oyun = null;
   $('#hud').hidden = true;
-  if (document.pointerLockElement) { bilerekBirak = true; document.exitPointerLock(); }
+  if (document.pointerLockElement || (dokun.aktif && kilitli)) { bilerekBirak = true; kilitBirak(); }
 }
 
 /* ---------- Döngü ---------- */
 let onceki = performance.now(), fpsSayac = 0, fpsZaman = 0;
+/* 0.19.0: otomatik çözünürlük: oyun sırasında kare hızı 2 saniye boyunca 45'in altında kalırsa çizim çözünürlüğü düşer, 57'nin üstüne çıkınca yükselir */
+const oto = { t0: 0, kare: 0 };
+function otoCozunurluk(t) {
+  if ((ayar.cozunurluk | 0) !== 0 || !oyun || !oyun.hazir || aktifEkran !== 'oyun' || document.hidden) { oto.t0 = t; oto.kare = 0; return; }
+  oto.kare++;
+  const s = (t - oto.t0) / 1000;
+  if (s < 2) return;
+  const fps = oto.kare / s;
+  if (fps < 45) sahne.olcekAyarla(sahne.olcek - 0.1);
+  else if (fps > 57) sahne.olcekAyarla(sahne.olcek + 0.05);
+  oto.t0 = t; oto.kare = 0;
+}
 const gecici = new THREE.Vector3();
 function dongu(t) {
   requestAnimationFrame(dongu);
@@ -611,9 +664,11 @@ function adim(t) {
   if (dt < 0) return;
   if (dt > 0.05) dt = 0.05;
   fpsSayac++; fpsZaman += dt;
+  dokun.guncelle();
+  otoCozunurluk(t);
   if (fpsZaman >= 0.5) { $('#fps').textContent = Math.round(fpsSayac / fpsZaman) + ' FPS'; fpsSayac = 0; fpsZaman = 0; }
   const o = oyun;
-  if (!o) { menuKamera(dt); return; }
+  if (!o) { menuKamera(dt); muzik.guncelle(dt, 'menu'); return; }
   if (!o.hazir) { yuklemeKontrol(); if (o.ag) o.ag.guncelle(dt); if (oyun) sahne.ciz(); return; }
   /* Çok oyunculuda dünya duraklatılmaz (menüdeyken de oyun sürer) */
   const calisiyor = aktifEkran === 'oyun' || (!!o.ag && aktifEkran !== 'yukleme');
@@ -729,6 +784,9 @@ function adim(t) {
     diyar ? { diyar: true, gece: o.hayatta.etki('gece') } : { y: H.yogunluk * (yagisTur === 0 ? 0.45 : 1), f: H.firtinaK, simsek: H.simsekParla, gece: o.hayatta.etki('gece') });
   o.gunIsigi = gun;
   o.fenerler.guncelle(dt, o.yakinKoyler, gun);
+  /* 0.19.0: duruma göre müzik */
+  muzik.guncelle(dt, o.bossVar ? 'boss' : diyar ? 'diyar' : p.y < DENIZ - 6 && o.dunya.ustKati(Math.floor(p.x), Math.floor(p.z)) > p.y + 6 ? 'magara'
+    : gun < 0.35 ? 'gece' : (o.biyom === BY.COL || o.biyom === BY.SAVAN) ? 'col' : 'gunduz');
   /* Meşale ışıkları */
   const seciliId = o.envanter.seciliId();
   const goz = o.oyuncu.gozKonumu(gecici);
@@ -917,6 +975,7 @@ function bossCubugu(o) {
   let en = null, ed = 40 * 40;
   for (const v of o.varliklar.liste) { if (!v.tur.boss || v.olu) continue; const d = v.konum.distanceToSquared(p); if (d < ed) { ed = d; en = v; } }
   const k = $('#bossCubuk');
+  o.bossVar = !!en;
   if (!en) { if (!k.hidden) k.hidden = true; return; }
   if (k.hidden) k.hidden = false;
   if ($('#bossAd').textContent !== en.tur.ad) $('#bossAd').textContent = en.tur.ad;
@@ -954,7 +1013,7 @@ function agArayuz() {
     sandikAc: (k, yuvalar) => {
       const o = oyun;
       if (!o || o.hayatta.olu || panelAcik() || envEkrani.acik) { if (o && o.ag) o.ag.sandikKapat(k, yuvalar); return; }
-      envanterAcKapa(null, { yuvalar, k }); ses.ac();
+      envanterAcKapa(null, { yuvalar, k });
       const [x, y, z] = String(k).split(',').map(Number); sandikBasarim(x, y, z);
     },
     sandikKapat: k => { if (envEkrani.acik && envEkrani.sandik && (k == null || envEkrani.sandik.k === k)) { envanterKapat(aktifEkran === 'oyun'); if (oyun) oyun.hud.bildirim('Sandık kırıldı.'); } }
@@ -1016,7 +1075,7 @@ function sohbetAc() {
   sohbetAcik = true;
   for (const k in tus) tus[k] = false;
   fare.sol = fare.sag = false;
-  if (kilitli) { bilerekBirak = true; document.exitPointerLock(); }
+  if (kilitli) { bilerekBirak = true; kilitBirak(); }
   const g = $('#sohbetGiris');
   g.hidden = false; g.value = '';
   $('#sohbet').classList.add('acik');
@@ -1128,5 +1187,5 @@ $('#bilgiTamam').onclick = () => { ses.tik(); ekran('ana'); };
 requestAnimationFrame(dongu);
 ekran('ana');
 /* Konsoldan inceleme için (oyun mantığını değiştirmez) */
-window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi };
+window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi, ses, muzik, dokun };
 export { ESYALAR };

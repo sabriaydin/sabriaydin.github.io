@@ -117,6 +117,33 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 19. aşama (0.19.0): Gerçek sesler ve müzik, dokunmatik kontroller, performans
+
+**Ses efektleri (gerçek kayıtlar)**
+- Kenney ses paketlerinden (Impact Sounds, RPG Audio, Interface Sounds, Music Jingles; CC0) 118 kayıt `ses/efekt` klasöründedir.
+- Adımlar zemine göre (çimen ve toprak, taş, ahşap, kar, kum ve yün), kazma, kırma ve koyma bloğun türüne göre (taş, ahşap, toprak, cam), vuruş, hasar, kapı açılıp kapanma, sandık gıcırtısı, para (takas), kumaş (zırh giyme), kitap (Tarif Kitabı ve görev günlüğü), tencere, kol, metal kırılması, arayüz tıklamaları ve pencereler, başarım, görev, seviye atlama, büyüleme ve ölüm ezgileri gerçek kayıtlardır.
+- Her ses birkaç değişkeden rastgele seçilir ve perdesi hafifçe oynatılır; böylece tekrar eden sesler mekanik duyulmaz.
+- Kayıtlar arka planda yüklenir; yüklenene kadar ya da yüklenemezse aynı ses Web Audio ile üretilir.
+- Hayvan, canavar, yağmur, gök gürültüsü, rüzgâr, su, lav, büyü, geçit ve mekanik blok sesleri oyun içinde üretilmeye devam eder.
+
+**Müzik**
+- Tanner Helland'ın (CC BY 4.0) dokuz parçası `ses/muzik` klasöründedir: gündüz (The Forest Awakes, Familiar Roads), gece (A Memory Away, From Here), mağara (Deeper), çöl ve savan (King of the Desert), Yeraltı Diyarı (Dark Knight), boss savaşı (Retribution), ana menü (Daybreak).
+- Oyunda müzik sürekli çalmaz: bir parça bitince 1-3 dakika sessizlik olur, ardından o anki duruma uyan parça yavaşça açılır. Boss savaşında ve Yeraltı Diyarı'nda kendi parçası hemen başlar ve döner; durumdan çıkınca yavaşça susar.
+- Parçalar akış hâlinde çalınır (belleğe tümüyle yüklenmez); sekme gizlenince müzik duraklar.
+- Ayarlar'a ayrı **Müzik düzeyi** kaydırıcısı eklendi. Lisanslar `ses/LISANS.md` dosyasında ve Nasıl Oynanır › Emeği geçenler bölümündedir.
+
+**Dokunmatik kontroller**
+- Telefon ve tabletlerde kendiliğinden açılır (Ayarlar › Dokunmatik kontroller ile açılıp kapatılır).
+- Sol altta sanal kol: yürüme; sonuna kadar ileri itilince koşu. Ekranın geri kalanında parmak kaydırılarak bakılır (iki parmak aynı anda kullanılabilir).
+- Ekrana kısa dokunma kullanır ya da blok koyar; parmağı basılı tutma kırar ve saldırır.
+- Sağ altta Kır, Kullan, Eğil ve Zıpla; sol üstte Çanta, Etkileşim (E), At, Harita, Kitap ve Duraklat düğmeleri. Alt çubuktaki yuvalara dokunarak eşya seçilir.
+- Oyuna girişte tam ekran ve yatay yön denenir; dikey tutulunca yatay çevirme uyarısı gösterilir. Mini harita, saat ve etkiler küçük ekranlara göre yerleşir.
+
+**Performans**
+- **Çözünürlük** ayarı: Otomatik, %50, %67, %85, %100. Otomatikte kare hızı 2 saniye boyunca 45'in altında kalırsa çizim çözünürlüğü düşer, 57'nin üstüne çıkınca yeniden yükselir.
+- En yakın ışık kaynakları listesi önbelleğe alındı: oyuncu kımıldamadıkça ve ışıklar değişmedikçe yeniden sıralanmaz (Yeraltı Diyarı'nın lav denizi binlerce ışık kaynağı içerir).
+- Telefon ve tabletlerde ilk açılışta görüş mesafesi en çok 5 parça olarak başlar.
+
 ## 18. aşama (0.18.0): Mevsimler ve Yeraltı Diyarı
 
 **Mevsimler**
@@ -415,6 +442,9 @@ Yeni aşamalar istek üzerine belirlenir.
 index.html            Menüler ve oyun ekranı
 css/oyun.css          Arayüz stilleri
 lib/                  Three.js (r169, MIT lisansı), PeerJS (1.5.4, MIT lisansı; yalnız çok oyunculuda yüklenir)
+ses/efekt/            Ses efekti kayıtları (Kenney, CC0)
+ses/muzik/            Müzik parçaları (Tanner Helland, CC BY 4.0)
+ses/LISANS.md         Ses ve müzik lisansları
 js/ana.js             Giriş noktası: menüler, girdi, oyun döngüsü, kayıt
 js/sabitler.js        Ortak sabitler (parça boyutu, deniz seviyesi, gün süresi)
 js/rastgele.js        Tohumlu rastgele sayı ve gürültü fonksiyonları

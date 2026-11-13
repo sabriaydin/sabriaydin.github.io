@@ -606,3 +606,31 @@ body:has(#bossCubuk:not([hidden])) #hedefBilgi { top: 112px; }
 /* 0.18.0: Diyar Geçidi içinde mor dalgalanma */
 #gecitEfekt { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at 50% 50%, rgba(150, 60, 230, .15), rgba(110, 30, 190, .75) 75%); mix-blend-mode: screen; animation: gecitDalga 1.2s ease-in-out infinite alternate; }
 @keyframes gecitDalga { from { filter: hue-rotate(-12deg) brightness(.9); } to { filter: hue-rotate(14deg) brightness(1.2); } }
+/* 0.19.0: Dokunmatik kontroller */
+body.dokunmatik, body.dokunmatik #oyun { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#dokun { position: absolute; inset: 0; pointer-events: none; }
+#dokun button { pointer-events: auto; -webkit-tap-highlight-color: transparent; border: 2px solid rgba(0, 0, 0, .7); background: rgba(20, 18, 14, .42); color: rgba(255, 255, 255, .9); font: 700 .8rem var(--baslik); border-radius: 10px; touch-action: none; }
+#dokun button.basili { background: rgba(217, 147, 46, .6); color: #1a1209; }
+#dkKol { position: absolute; left: calc(18px + env(safe-area-inset-left)); bottom: 22px; width: 132px; height: 132px; border-radius: 50%; background: rgba(0, 0, 0, .22); border: 2px solid rgba(255, 255, 255, .22); pointer-events: auto; touch-action: none; }
+#dkTopuz { position: absolute; left: 50%; top: 50%; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: rgba(255, 255, 255, .32); border: 2px solid rgba(0, 0, 0, .5); pointer-events: none; }
+#dkUst { position: absolute; top: calc(8px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); display: flex; flex-wrap: wrap; gap: 5px; max-width: 46vw; }
+#dkUst button { min-width: 40px; height: 34px; padding: 0 8px; font-size: .74rem; }
+body.dokunmatik #etkiler { top: 52px; }
+body.dokunmatik #tarifTakip { top: 46%; }
+body.dokunmatik #sagUst { top: calc(8px + env(safe-area-inset-top)); bottom: auto; }
+body.dokunmatik #miniHarita { width: 104px; height: 104px; }
+#dkSag { position: absolute; right: calc(16px + env(safe-area-inset-right)); bottom: 24px; display: grid; grid-template-columns: 74px 74px; gap: 10px; }
+#dkSag button { height: 56px; }
+#dkSag .dkBuyuk { height: 66px; font-size: .95rem; }
+#dkYatay { display: none; position: absolute; left: 50%; top: 40%; transform: translateX(-50%); padding: 10px 16px; background: rgba(0, 0, 0, .75); border-radius: 6px; font-size: .9rem; text-align: center; }
+@media (orientation: portrait) { body.dokunmatik #dkYatay { display: block; } }
+body.dokunmatik #cubuk { pointer-events: auto; }
+body.dokunmatik #cubuk .yuva { touch-action: none; }
+body.dokunmatik #tikla span { display: none; }
+body.dokunmatik #tikla b::after { content: ''; }
+/* Küçük ekranlarda alt çubuk ve paneller sığar */
+@media (max-width: 760px), (max-height: 500px) {
+  body.dokunmatik .yuva img { width: 28px; height: 28px; }
+  body.dokunmatik #pusulaTuval { width: 260px; }
+  body.dokunmatik .pencere { max-height: calc(100vh - 20px); overflow: auto; }
+}

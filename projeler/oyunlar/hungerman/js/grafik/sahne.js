@@ -86,6 +86,7 @@ float g = max(dot(vY, gunesYon), 0.0); c += gunesHale * pow(g, 12.0) * 0.6; gl_F
 export class Sahne {
   constructor(tuval) {
     this.cizici = new THREE.WebGLRenderer({ canvas: tuval, antialias: false, powerPreference: 'high-performance' });
+    this.olcek = 1;   // 0.19.0: çözünürlük ölçeği (performans)
     this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.cizici.info.autoReset = false;
     this.sahne = new THREE.Scene();
@@ -113,6 +114,14 @@ export class Sahne {
     addEventListener('resize', () => this.boyut());
   }
 
+  /* 0.19.0: çizim çözünürlüğü ölçeği (0,5 - 1) */
+  olcekAyarla(k) {
+    k = Math.max(0.5, Math.min(1, k));
+    if (Math.abs(k - this.olcek) < 0.01) return;
+    this.olcek = k;
+    this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5) * k);
+    this.boyut();
+  }
   boyut() {
     const w = innerWidth, h = innerHeight;
     this.cizici.setSize(w, h, false);

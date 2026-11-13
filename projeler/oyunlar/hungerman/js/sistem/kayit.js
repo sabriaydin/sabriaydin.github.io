@@ -30,7 +30,7 @@ export const Kayit = {
 };
 
 const AYAR_ANAHTAR = 'hungerman_ayarlar';
-export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, tersY: false, fps: false, sallanma: true };
+export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true };
 export function ayarlariYukle() {
   try { return Object.assign({}, VARSAYILAN_AYAR, JSON.parse(localStorage.getItem(AYAR_ANAHTAR) || '{}')); }
   catch (e) { return Object.assign({}, VARSAYILAN_AYAR); }

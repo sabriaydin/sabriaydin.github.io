@@ -1,6 +1,18 @@
-/* HungerMan - sesler: tümü Web Audio ile anlık sentezlenir (ses dosyası yoktur) */
+/* HungerMan - sesler
+   0.19.0: adım, kazma, kırma, koyma, vuruş, kapı, sandık, para, kumaş, kitap, arayüz ve ödül sesleri gerçek kayıtlardır
+   (Kenney ses paketleri, CC0; ses/efekt). Kayıt yüklenemezse ya da henüz yüklenmediyse aynı ses Web Audio ile üretilir.
+   Hayvan, canavar, hava, su, lav, büyü ve mekanik sesler Web Audio ile anlık sentezlenir. */
+/* Kayıt grupları ve her grubun değişke sayısı (ses/efekt/<grup>_<n>.mp3) */
+const ORNEK = { adim_cim: 5, adim_tas: 5, adim_odun: 5, adim_kar: 5, adim_kum: 5, kaz_tas: 5, kaz_odun: 4, kaz_toprak: 4, kaz_cam: 3, kaz_metal: 3, kir_odun: 3, kir_toprak: 3,
+  kir_cam: 3, kir_metal: 2, koy_odun: 3, koy_tas: 3, koy_metal: 3, vurus: 3, hasar: 3, kapi_ac: 2, kapi_kapa: 4, sandik: 3, para: 2, kumas: 4, kitap_ac: 1, kitap_kapa: 1,
+  sayfa: 3, tencere: 3, balta: 1, kol: 2, kilic: 3, deri: 2, tik: 3, sec: 2, pencere_ac: 2, pencere_kapa: 2, onay: 2, hata: 1, basarim: 1, gorev: 1, seviye: 1, buyu: 1, olum: 1 };
+/* Blok ses türlerinin kayıt grupları */
+const ADIM = { cimen: 'adim_cim', toprak: 'adim_cim', bitki: 'adim_cim', tas: 'adim_tas', cam: 'adim_tas', odun: 'adim_odun', kar: 'adim_kar', kum: 'adim_kum', yun: 'adim_kum' };
+const KAZ = { tas: 'kaz_tas', odun: 'kaz_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', cam: 'kaz_cam' };
+const KIR = { tas: 'kaz_tas', odun: 'kir_odun', toprak: 'kir_toprak', cimen: 'kir_toprak', kum: 'kir_toprak', kar: 'kir_toprak', yun: 'kir_toprak', cam: 'kir_cam' };
+const KOY = { tas: 'koy_tas', odun: 'koy_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', bitki: 'kaz_toprak', cam: 'koy_tas' };
 export class Ses {
-  constructor() { this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; }
+  constructor() { this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; this.ornekler = {}; }
   baslat() {
     if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
     try {
@@ -10,7 +22,26 @@ export class Ses {
       this.gurultu = this.ctx.createBuffer(1, n, n);
       const d = this.gurultu.getChannelData(0);
       for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      this.ornekleriYukle();
     } catch (e) { this.ctx = null; }
+  }
+  /* Kayıtlar arka planda yüklenir; yüklenene kadar sentez sesler çalar */
+  ornekleriYukle() {
+    for (const [g, n] of Object.entries(ORNEK)) for (let i = 0; i < n; i++) {
+      fetch(`ses/efekt/${g}_${i}.mp3`).then(r => (r.ok ? r.arrayBuffer() : null))
+        .then(b => b && new Promise((tamam, hata) => this.ctx.decodeAudioData(b, tamam, hata)))
+        .then(buf => { if (buf) (this.ornekler[g] = this.ornekler[g] || []).push(buf); }).catch(() => {});
+    }
+  }
+  /* Kayıttan çalar (rastgele değişke, hafif perde oynaması); kayıt yoksa false */
+  cal(g, ses = 1, hiz = 1) {
+    const c = this.ctx, l = g && this.ornekler[g];
+    if (!c || !l || !l.length) return false;
+    const k = c.createBufferSource(); k.buffer = l[Math.floor(Math.random() * l.length)];
+    k.playbackRate.value = hiz * (0.93 + Math.random() * 0.14);
+    const s = c.createGain(); s.gain.value = ses;
+    k.connect(s); s.connect(this.ana); k.start();
+    return true;
   }
   duzeyAyarla(v) { this.duzey = v; if (this.ana) this.ana.gain.value = v; }
 
@@ -44,21 +75,22 @@ export class Ses {
       default: return [900, 0.09, 1];
     }
   }
-  kaz(tur) { const [f, s, q] = this.malzeme(tur); this.patlama(f, s, 0.32, 'bandpass', q); if (tur === 'odun') this.ton(180, 0.06, 0.12, 'triangle', 120); }
+  kaz(tur) { if (this.cal(KAZ[tur], 0.5)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f, s, 0.32, 'bandpass', q); if (tur === 'odun') this.ton(180, 0.06, 0.12, 'triangle', 120); }
   kir(tur) {
+    if (this.cal(KIR[tur], 0.85, tur === 'tas' ? 0.8 : 1)) { if (tur === 'tas') this.patlama(300, 0.12, 0.22, 'lowpass', 1); return; }
     const [f, s, q] = this.malzeme(tur);
     this.patlama(f, s * 2.4, 0.55, 'bandpass', q, 0.6);
     if (tur === 'cam') { this.ton(2400, 0.15, 0.08, 'triangle', 3200); this.ton(3100, 0.2, 0.06, 'triangle', 1800); }
     if (tur === 'tas') this.patlama(300, 0.12, 0.3, 'lowpass', 1);
   }
-  koy(tur) { const [f, s, q] = this.malzeme(tur); this.patlama(f * 0.8, s * 1.4, 0.45, 'bandpass', q, 0.7); }
-  adim(tur) { const [f, , q] = this.malzeme(tur); this.patlama(f * 0.7, 0.07, 0.14, 'bandpass', q); }
+  koy(tur) { if (this.cal(KOY[tur], 0.6)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f * 0.8, s * 1.4, 0.45, 'bandpass', q, 0.7); }
+  adim(tur) { if (this.cal(ADIM[tur], 0.3)) return; const [f, , q] = this.malzeme(tur); this.patlama(f * 0.7, 0.07, 0.14, 'bandpass', q); }
   topla() { this.ton(780 + Math.random() * 120, 0.08, 0.1, 'sine', 1300); }
   ye() { for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(1800, 0.06, 0.25, 'bandpass', 1.4), i * 110); }
-  hasar() { this.ton(220, 0.18, 0.25, 'sawtooth', 110); this.patlama(500, 0.12, 0.3, 'lowpass', 1); }
+  hasar() { if (this.cal('hasar', 0.7)) { this.ton(200, 0.12, 0.1, 'sawtooth', 120); return; } this.ton(220, 0.18, 0.25, 'sawtooth', 110); this.patlama(500, 0.12, 0.3, 'lowpass', 1); }
   zipla() { this.patlama(600, 0.05, 0.08, 'lowpass', 1); }
   sicrama(g = 1) { this.patlama(1200, 0.4 * g, 0.4, 'lowpass', 0.7, 0.4); }
-  aletKirildi() { this.ton(900, 0.12, 0.2, 'square', 300); this.patlama(2500, 0.2, 0.3, 'highpass', 1); }
+  aletKirildi() { this.cal('kir_metal', 0.5); this.ton(900, 0.12, 0.2, 'square', 300); this.patlama(2500, 0.2, 0.3, 'highpass', 1); }
   uretim() { this.ton(520, 0.06, 0.1, 'triangle', 700); setTimeout(() => this.ton(780, 0.08, 0.1, 'triangle', 1040), 60); }
   /* Canlı sesleri: tip 'normal' | 'acima' | 'olum'; hacim 0..1 (uzaklığa göre) */
   canli(tur, tip = 'normal', hacim = 1) {
@@ -96,10 +128,10 @@ export class Ses {
   yayAt() { this.ton(180, 0.18, 0.18, 'triangle', 90); this.patlama(2000, 0.12, 0.15, 'highpass', 1); }
   okIsabet() { this.patlama(700, 0.12, 0.3, 'bandpass', 1.5); }
   okSaplandi() { this.patlama(450, 0.1, 0.22, 'bandpass', 2); this.ton(160, 0.08, 0.1, 'triangle', 120); }
-  vurus() { this.patlama(800, 0.08, 0.25, 'bandpass', 1); }
-  zirhGiy() { this.patlama(1800, 0.15, 0.2, 'bandpass', 2); }
-  takas() { this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }
-  gorev() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.ton(f, 0.16, 0.07, 'triangle', f), i * 90)); }
+  vurus() { if (this.cal('vurus', 0.6)) return; this.patlama(800, 0.08, 0.25, 'bandpass', 1); }
+  zirhGiy() { if (this.cal('kumas', 0.6)) return; this.patlama(1800, 0.15, 0.2, 'bandpass', 2); }
+  takas() { if (this.cal('para', 0.6)) return; this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }
+  gorev() { if (this.cal('gorev', 0.5)) return; [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.ton(f, 0.16, 0.07, 'triangle', f), i * 90)); }
   /* Mağara ortam sesleri */
   damla(h = 1) { this.ton(1500 + Math.random() * 900, 0.18, 0.05 * h, 'sine', 900); }
   lav(h = 1) { this.patlama(180 + Math.random() * 120, 0.25, 0.12 * h, 'lowpass', 2, 0.5); }
@@ -116,20 +148,20 @@ export class Ses {
   kurek(h = 1) { this.patlama(700 + Math.random() * 200, 0.32, 0.16 * h, 'lowpass', 0.9, 0.45); }
   dalga(h = 1) { this.patlama(420 + Math.random() * 120, 1.2, 0.07 * h, 'lowpass', 0.6, 0.6); }
   /* 0.11.0: kapı, deneyim, iksir, örs, hava */
-  kapi(acik) { this.patlama(acik ? 700 : 520, 0.14, 0.3, 'bandpass', 2.2, acik ? 1.3 : 0.7); this.ton(acik ? 200 : 150, 0.08, 0.12, 'triangle', acik ? 260 : 110); }
+  kapi(acik) { if (this.cal(acik ? 'kapi_ac' : 'kapi_kapa', 0.55)) return; this.patlama(acik ? 700 : 520, 0.14, 0.3, 'bandpass', 2.2, acik ? 1.3 : 0.7); this.ton(acik ? 200 : 150, 0.08, 0.12, 'triangle', acik ? 260 : 110); }
   xp() { this.ton(1600 + Math.random() * 500, 0.09, 0.05, 'sine', 2300); }
-  seviye() { [660, 880, 1320].forEach((f, i) => setTimeout(() => this.ton(f, 0.22, 0.07, 'triangle', f * 1.01), i * 80)); }
+  seviye() { if (this.cal('seviye', 0.45)) return; [660, 880, 1320].forEach((f, i) => setTimeout(() => this.ton(f, 0.22, 0.07, 'triangle', f * 1.01), i * 80)); }
   ic() { for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(900, 0.08, 0.18, 'lowpass', 2, 0.6), i * 130); }
   ors() { this.ton(1250, 0.5, 0.12, 'triangle', 1180); this.ton(1890, 0.4, 0.05, 'sine', 1850); this.patlama(3000, 0.1, 0.25, 'highpass', 1); }
   /* 0.14.0: büyüleme ve başarım */
-  buyu() { [784, 1175, 1568, 2093].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.05, 'sine', f * 1.02), i * 70)); this.patlama(4000, 0.6, 0.06, 'highpass', 0.6, 1.4); }
-  basarim() { [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.28, 0.07, 'triangle', f), i * 85)); }
+  buyu() { if (this.cal('buyu', 0.4)) { this.patlama(4000, 0.6, 0.05, 'highpass', 0.6, 1.4); return; } [784, 1175, 1568, 2093].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.05, 'sine', f * 1.02), i * 70)); this.patlama(4000, 0.6, 0.06, 'highpass', 0.6, 1.4); }
+  basarim() { if (this.cal('basarim', 0.5)) return; [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.28, 0.07, 'triangle', f), i * 85)); }
   /* 0.15.1: boss efektleri */
   ruzgar(h = 1) { this.patlama(900, 1.4, 0.12 * h, 'bandpass', 0.7, 0.9); this.patlama(2400, 1.0, 0.05 * h, 'highpass', 0.6, 0.8); }
   cam(h = 1) { for (let i = 0; i < 4; i++) setTimeout(() => this.ton(2600 + Math.random() * 1400, 0.18, 0.05 * h, 'triangle', 3400), i * 45); this.patlama(5000, 0.25, 0.07 * h, 'highpass', 1.2); }
   savur(h = 1) { this.patlama(600, 0.35, 0.14 * h, 'bandpass', 1.4, 0.4); this.patlama(1400, 0.25, 0.08 * h, 'bandpass', 1.4, 0.4); }
   /* 0.17.0: mekanik sesler ve müzik kutusu ezgileri (tur: 0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
-  kol(acik) { this.ton(acik ? 900 : 700, 0.04, 0.08, 'square', acik ? 1100 : 500); this.patlama(2200, 0.03, 0.08, 'highpass', 1); }
+  kol(acik) { if (this.cal('kol', 0.5, acik ? 1.1 : 0.9)) return; this.ton(acik ? 900 : 700, 0.04, 0.08, 'square', acik ? 1100 : 500); this.patlama(2200, 0.03, 0.08, 'highpass', 1); }
   /* 0.18.0: Diyar Geçidi */
   gecitAcil() { this.ton(140, 1.4, 0.16, 'sawtooth', 420); this.ton(210, 1.2, 0.08, 'sine', 630); this.patlama(500, 1.0, 0.18, 'bandpass', 1.4, 2); }
   gecitSon() { this.ton(420, 0.8, 0.12, 'sawtooth', 120); this.patlama(700, 0.5, 0.12, 'bandpass', 1.2, 0.5); }
@@ -169,7 +201,14 @@ export class Ses {
     this.patlama(160, 2.8, 0.55 * h, 'lowpass', 1.4, 0.5);
     setTimeout(() => this.patlama(110, 2.2, 0.35 * h, 'lowpass', 1.2, 0.6), 350);
   }
-  tik() { this.ton(1200, 0.03, 0.06, 'square', 900); }
-  ac() { this.ton(440, 0.06, 0.06, 'triangle', 660); }
-  kapa() { this.ton(660, 0.06, 0.06, 'triangle', 440); }
+  tik() { if (this.cal('tik', 0.35)) return; this.ton(1200, 0.03, 0.06, 'square', 900); }
+  ac() { if (this.cal('pencere_ac', 0.35)) return; this.ton(440, 0.06, 0.06, 'triangle', 660); }
+  kapa() { if (this.cal('pencere_kapa', 0.35)) return; this.ton(660, 0.06, 0.06, 'triangle', 440); }
+  /* 0.19.0: yalnızca kayıtla çalan sesler (kayıt yoksa en yakın sentez ses) */
+  sandik() { if (!this.cal('sandik', 0.55)) this.ac(); }
+  kitap(acik = true) { if (!this.cal(acik ? 'kitap_ac' : 'kitap_kapa', 0.5)) (acik ? this.ac() : this.kapa()); }
+  sayfa() { if (!this.cal('sayfa', 0.45)) this.tik(); }
+  tencere() { this.cal('tencere', 0.45); }
+  olum() { this.cal('olum', 0.5); }
+  hataSes() { if (!this.cal('hata', 0.4)) this.ton(220, 0.12, 0.06, 'square', 180); }
 }

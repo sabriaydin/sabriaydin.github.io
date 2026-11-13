@@ -25,6 +25,10 @@ export class Dunya {
     this.parcalar = new Map();
     this.degisiklikler = new Map();   // anahtar -> Map(dizin -> blok)
     this.mesaleler = new Map();       // "x,y,z" -> [x, y, z, güç]
+    /* 0.19.0: ışık listesi her değiştiğinde sürüm artar (yakın ışık önbelleği için) */
+    this.mesaleSurum = 0;
+    { const M = this.mesaleler, set = M.set.bind(M), sil = M.delete.bind(M), temizle = M.clear.bind(M);
+      M.set = (k, v) => { this.mesaleSurum++; return set(k, v); }; M.delete = k => { this.mesaleSurum++; return sil(k); }; M.clear = () => { this.mesaleSurum++; temizle(); }; }
     this.ekinler = new Set();         // büyümekte olan ekinlerin "x,y,z" anahtarları
     this.sandiklar = new Map();       // "x,y,z" -> 27 yuvalık dizi
     this.mekanikler = new Map();      // 0.17.0: mekanik bloklar "x,y,z" -> [x, y, z]
@@ -398,7 +402,16 @@ export class Dunya {
   }
 
   /* Yakındaki meşaleler (ışık için) */
+  /* 0.19.0: sonuç önbelleğe alınır; oyuncu 1 bloktan fazla kımıldamadıkça ve ışık listesi değişmedikçe 0,25 saniye yeniden hesaplanmaz
+     (lav denizleri binlerce ışık kaynağı içerir) */
   yakinMesaleler(x, y, z, adet) {
+    const o = this._ym, n = performance.now();
+    if (o && o.adet === adet && o.surum === this.mesaleSurum && n - o.t < 250 && (o.x - x) ** 2 + (o.y - y) ** 2 + (o.z - z) ** 2 < 1) return o.l;
+    const sonuc = this.yakinMesalelerHesapla(x, y, z, adet);
+    this._ym = { x, y, z, adet, t: n, surum: this.mesaleSurum, l: sonuc };
+    return sonuc;
+  }
+  yakinMesalelerHesapla(x, y, z, adet) {
     const l = [];
     for (const m of this.mesaleler.values()) { const d = (m[0] - x) ** 2 + (m[1] - y) ** 2 + (m[2] - z) ** 2; if (d < 48 * 48) l.push([m, d]); }
     l.sort((a, b) => a[1] - b[1]);

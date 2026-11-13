@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>HungerMan</title>
 <meta name="description" content="HungerMan: tarayıcıda oynanan, her seferinde rastgele oluşan açık dünya hayatta kalma oyunu.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,6 +59,18 @@
   <pre id="hata" hidden></pre>
   <div id="fps" hidden></div>
   <div id="tikla" hidden><b>Devam etmek için tıklayın</b><span>Duraklatmak için Esc</span></div>
+  <!-- 0.19.0: dokunmatik kontroller -->
+  <div id="dokun" hidden>
+    <div id="dkKol"><div id="dkTopuz"></div></div>
+    <div id="dkUst">
+      <button type="button" data-dk="envanter" aria-label="Çanta">Çanta</button><button type="button" data-dk="etkiles" aria-label="Etkileşim">E</button><button type="button" data-dk="at" aria-label="Eşya at">At</button><button type="button" data-dk="harita" aria-label="Harita">Harita</button><button type="button" data-dk="kitap" aria-label="Tarif Kitabı">Kitap</button><button type="button" data-dk="menu" aria-label="Duraklat">❚❚</button>
+    </div>
+    <div id="dkSag">
+      <button type="button" data-dk="kir" class="dkBuyuk" aria-label="Kır">Kır</button><button type="button" data-dk="kullan" class="dkBuyuk" aria-label="Kullan">Kullan</button>
+      <button type="button" data-dk="egil" aria-label="Eğil">Eğil</button><button type="button" data-dk="zipla" class="dkBuyuk" aria-label="Zıpla">Zıpla</button>
+    </div>
+    <div id="dkYatay">Daha rahat oynamak için cihazı yatay çeviriniz.</div>
+  </div>
   <div id="sohbet"><div id="sohbetListe"></div><input id="sohbetGiris" maxlength="200" placeholder="Mesaj yazınız · Enter: gönder · Esc: vazgeç" autocomplete="off" hidden></div>
   <div id="oyuncuListesi" hidden></div>
 </div>
@@ -268,10 +280,13 @@
     <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
     <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
     <label class="kaydir">Ses düzeyi <b id="aSesD"></b><input type="range" id="aSes" min="0" max="1" step="0.05"></label>
+    <label class="kaydir">Müzik düzeyi <b id="aMuzikD"></b><input type="range" id="aMuzik" min="0" max="1" step="0.05"></label>
     <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
     <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
     <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
     <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
+    <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
+    <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
     <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
     <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
   </div>
@@ -347,7 +362,17 @@
           <li>Kıyı köylerinde iskele, deniz feneri, balıkçı kulübesi ve demirli tekneler bulunan limanlar vardır. Balıkçı balık alır; olta, tekne, maske ve palet satar. Pusuladaki ⚓ limanı, ⛵ en yakın tekneyi gösterir.</li>
           <li>Çok oyunculu: bir oyuncu dünyasını “Dünyayı Arkadaşlara Aç” ile açar ve 6 karakterlik katılım kodunu paylaşır; diğerleri ana menüdeki Çok Oyunculu ekranından bu kodla katılır (en çok 8 oyuncu). Bloklar, canlılar, yere düşen eşyalar, sandıklar, tekneler ve zaman herkes için ortaktır; envanter, görevler ve köy itibarı her oyuncunun kendisinedir ve sunucuda oyuncu adıyla saklanır.</li>
           <li>Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır. Pusuladaki renkli nokta diğer oyuncuları gösterir.</li>
+          <li><b>Dokunmatik ekranlarda</b> sol alttaki kolla yürünür (sonuna kadar ileri itince koşulur), ekranda parmak kaydırılarak bakılır. Ekrana kısa dokunmak kullanır ya da blok koyar, parmağı basılı tutmak kırar ve saldırır. Sağ alttaki düğmeler Kır, Kullan, Eğil ve Zıpla; üstteki düğmeler Çanta, Etkileşim, At, Harita, Kitap ve Duraklat içindir. Alt çubuktaki yuvalara dokunarak eşya seçilir. Ayarlardan açılıp kapatılabilir.</li>
+          <li>Müzik sürekli çalmaz; parçalar arasında sessizlik olur. Gündüz, gece, mağara, çöl, Yeraltı Diyarı ve boss savaşlarının kendi parçaları vardır. Müzik ve ses düzeyi Ayarlar’dan ayrı ayrı değiştirilir. Kare hızı düşerse çözünürlük kendiliğinden azalır (Ayarlar › Çözünürlük).</li>
           <li>Oyun otomatik olarak kaydedilir.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Emeği geçenler</h3>
+        <ul>
+          <li>Müzikler: <b>Tanner Helland</b> — “The Forest Awakes”, “Familiar Roads”, “A Memory Away”, “From Here”, “Deeper”, “King of the Desert”, “Dark Knight”, “Retribution”, “Daybreak”. Lisans: Creative Commons Attribution 4.0 (CC BY 4.0). Kaynak: github.com/tannerhelland/free-music</li>
+          <li>Ses efektleri: <b>Kenney</b> (kenney.nl) — Impact Sounds, RPG Audio, Interface Sounds, Music Jingles. Lisans: CC0 (kamu malı).</li>
+          <li>3B çizim: three.js (MIT lisansı). Çok oyunculu bağlantı: PeerJS (MIT lisansı).</li>
         </ul>
       </div>
     </div>
