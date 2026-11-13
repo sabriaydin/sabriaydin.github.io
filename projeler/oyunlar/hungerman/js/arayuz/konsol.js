@@ -229,7 +229,7 @@ export class Konsol {
         const l = yapilarAlan(u, P.x - 3000, P.z - 3000, P.x + 3000, P.z + 3000).filter(y => y.tur === YT && Math.hypot(y.x - P.x, y.z - P.z) > 12);
         const en = this.enYakin(l, P);
         if (!en) { this.hata(`Yakında ${YAPI_ADI[YT].toLocaleLowerCase('tr')} bulunamadı.`); return; }
-        const [dx, dz] = [[0, 15], [-15, 0], [0, -15], [15, 0]][en.f];
+        const m = Math.max(15, en.R + 3), [dx, dz] = [[0, m], [-m, 0], [0, -m], [m, 0]][en.f];
         this.isinla(o, en.x + dx + 0.5, null, en.z + dz + 0.5); this.yaz(`${YAPI_ADI[YT]} · ${Math.round(Math.hypot(en.x - P.x, en.z - P.z))} blok`, 'soluk'); return;
       }
       if (a === 'batik') {

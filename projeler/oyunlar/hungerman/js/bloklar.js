@@ -25,7 +25,9 @@ export const DOKULAR = [
   /* 0.15.0: tuzaklar */
   'okatici_on', 'tuzak_teli',
   /* 0.15.1: asılı fener */
-  'fener_kafes'
+  'fener_kafes',
+  /* 0.15.2: çöl tapınağı */
+  'kumtasi_duz', 'kumtasi_oyma', 'hiyeroglif', 'pismis_turuncu', 'cini_mavi', 'altin_blok', 'sutun_yan', 'nemes_yan', 'nemes_ust', 'firavun_yuz'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -194,6 +196,23 @@ blok(158, { ad: 'Tuzak Teli', dok: 'tuzak_teli', cizim: C_SEKIL, kati: false, op
 /* 0.15.1: fener (tavana asılır ya da zemine konur; yapıları aydınlatır) */
 blok(159, { ad: 'Fener', dok: 'fener_kafes', cizim: C_SEKIL, kati: false, opak: false, sertlik: 0.6, ses: 'tas', sekil: 'fener', mesale: true, isik: 15 });
 blok(155, { ad: 'Akasya Fidanı', dok: 'fidan_akasya', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, fidan: 'akasya' });
+/* 0.15.2: çöl tapınağı blokları */
+blok(160, { ad: 'Oymalı Kum Taşı', dok: ['kumtasi_duz', 'kumtasi_oyma', 'kumtasi_duz'], sertlik: 0.8, alet: 'kazma', seviye: 1 });
+blok(161, { ad: 'Düz Kum Taşı', dok: 'kumtasi_duz', sertlik: 0.8, alet: 'kazma', seviye: 1 });
+blok(162, { ad: 'Hiyeroglifli Kum Taşı', dok: ['kumtasi_duz', 'hiyeroglif', 'kumtasi_duz'], sertlik: 0.8, alet: 'kazma', seviye: 1 });
+blok(163, { ad: 'Turuncu Pişmiş Toprak', dok: 'pismis_turuncu', sertlik: 1.2, alet: 'kazma', seviye: 1 });
+blok(164, { ad: 'Mavi Çini', dok: 'cini_mavi', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
+blok(165, { ad: 'Altın Blok', dok: 'altin_blok', sertlik: 3, alet: 'kazma', seviye: 4 });
+{
+  const t = B[24], ortak = { dok: 'kumtasi_duz', cizim: C_SEKIL, opak: false, sertlik: t.sertlik, alet: t.alet, seviye: t.seviye, ses: t.ses };
+  for (let f = 0; f < 4; f++) blok(166 + f, { ...ortak, ad: 'Kum Taşı Merdiven', sekil: 'merdiven', yon: f, taban: 166, gizli: f > 0, dusur: () => [[166, 1]] });
+  for (let u = 0; u < 2; u++) blok(170 + u, { ...ortak, ad: 'Kum Taşı Yarım Blok', sekil: 'yarim', ust: u, taban: 170, cift: 161, gizli: u > 0, dusur: () => [[170, 1]] });
+}
+/* Firavun heykeli başı: yüzü 172 güneye, 172 + k ise (k + 2) % 4 yönüne bakar (konunca oyuncuya döner) */
+for (let k = 0; k < 4; k++) blok(172 + k, { ad: 'Firavun Heykeli Başı', dok: { ust: 'nemes_ust', yan: 'nemes_yan', alt: 'kumtasi_duz', on: 'firavun_yuz' }, onYon: (k + 2) % 4, yuzlu: true, taban: 172, gizli: k > 0, sertlik: 0.8, alet: 'kazma', seviye: 1, dusur: () => [[172, 1]] });
+blok(176, { ad: 'Kum Taşı Sütun', dok: ['kumtasi_duz', 'sutun_yan', 'kumtasi_duz'], sertlik: 0.8, alet: 'kazma', seviye: 1 });
+blok(177, { ad: 'Kum Taşı Korkuluk', dok: 'kumtasi_duz', cizim: C_SEKIL, opak: false, sertlik: 0.8, alet: 'kazma', seviye: 1, sekil: 'korkuluk' });
+blok(178, { ad: 'Çizgili Çini', dok: 'nemes_yan', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
 
 /* Maden deneyimi */
 for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4]]) B[id].xp = xp;
@@ -218,7 +237,10 @@ for (const b of B) {
   else if (typeof b.dok === 'string') u = y = a = o = T[b.dok];
   else if (Array.isArray(b.dok)) { u = T[b.dok[0]]; y = T[b.dok[1]]; a = T[b.dok[2]]; o = y; }
   else { u = T[b.dok.ust]; y = T[b.dok.yan]; a = T[b.dok.alt]; o = T[b.dok.on]; }
-  YUZ_DOKU.set([y, y, u, a, o, y], b.id * 6);
+  /* onYon: ön yüz dokusu verilen yöne (0 kuzey -z, 1 doğu +x, 2 güney +z, 3 batı -x) bakar; yoksa +z */
+  const yuz = [y, y, u, a, b.onYon == null ? o : y, y];
+  if (b.onYon != null) yuz[[5, 0, 4, 1][b.onYon]] = o;
+  YUZ_DOKU.set(yuz, b.id * 6);
 }
 
 /* ---------- Eşyalar ---------- */

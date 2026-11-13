@@ -6,7 +6,7 @@ import { PY } from '../sabitler.js';
 import { uretec } from '../rastgele.js';
 
 export { THREE };
-export const ISIK_SAYISI = 16;
+export const ISIK_SAYISI = 32;   // 0.15.2: aydınlatılmış büyük salonlar için 16'dan 32'ye
 
 const BLOK_VS = `
 attribute vec2 isik;

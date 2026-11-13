@@ -370,6 +370,7 @@ export class Etkilesim {
       const f = this.bakisYonu4();
       if (eb.sekil === 'merdiven') id = eb.taban + f;
       else if (eb.sekil === 'yarim') id = eb.taban + (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? 1 : 0);
+      else if (eb.yuzlu) id = eb.taban + f;   // heykel başı: yüzü oyuncuya döner
       else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
       else if (eb.sekil === 'tuzak') id = 121 + f * 2;
       else if (eb.sekil === 'tirmanma') {

@@ -117,6 +117,23 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 0.15.2: Çöl Tapınağı yeniden tasarlandı
+
+Çöl Tapınağı, Mısır tapınaklarının düzeninde güneyden kuzeye ilerleyen bir yapı topluluğu olarak baştan tasarlandı (yaklaşık 29 x 50 blokluk tapınak alanı, 18 blok derinlikte mezar salonu).
+
+- **Ön avlu:** firavun başlı iki sfenks, hiyeroglifli ve altın tepeli iki dikilitaş, kum taşı tören yolu.
+- **Pilon (anıtsal giriş):** eğimli kenarlı iki kule, ön ve arka yüzde kanatlı güneş kursu, dört sancak direği ve flamalar. Giriş geçidinde ok tuzağı. Batı kulesinin içinden iki kollu merdivenle korkuluklu terasa çıkılır; doğu kulesinde nöbetçi odası bulunur.
+- **Açık avlu:** iki yanda revaklar, nilüferli iki havuz, dört hurma ağacı, ateş kapları.
+- **Sütunlu salon:** yüksek orta nef ve alçak yan nefler, papirüs başlıklı sütunlar, ışık pencereleri, altın yıldızlı mavi tavan, kapının iki yanında bekçi heykelleri.
+- **Kutsal oda:** piramit biçimli çatı ve altın tepelik, tahtında oturan dev firavun heykeli, ortada ateşli sunak. Sunağın çevresindeki korkuluklu kuyudan sarmal merdivenle aşağı inilir.
+- **Mezar salonu (boss alanı):** 21 x 21 ve 10 blok yüksekliğinde; altı büyük sütun, güneş mozaikli zemin, duvar ocakları, ateş kapları ve fenerlerle aydınlık. Güneyde lahitli kürsü, bekçi heykelleri ve altın çerçeveli kabartma; Firavun burada uyanır.
+- **Hazine odaları:** mezar salonunun iki yanında altın yığınları ve sandıklar; doğudakinin girişinde ok tuzağı.
+- Toplam 10 sandık (teras, nöbetçi odası, kutsal oda, hazine odaları, kürsü).
+- **Yeni bloklar** (tümü üretilebilir): Oymalı Kum Taşı, Düz Kum Taşı, Hiyeroglifli Kum Taşı, Kum Taşı Sütun, Kum Taşı Merdiven, Kum Taşı Yarım Blok, Kum Taşı Korkuluk, Turuncu Pişmiş Toprak, Mavi Çini, Çizgili Çini, Altın Blok (9 altın külçe), Firavun Heykeli Başı (konunca yüzü oyuncuya döner).
+- Işık: bir anda kullanılan ışık kaynağı sayısı 16'dan 32'ye çıkarıldı; çok sayıda fener ve ateşle aydınlatılan büyük salonlar artık bütünüyle aydınlık görünür.
+- `isinla tapinak` komutu oyuncuyu tapınak alanının önüne ışınlar.
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır; yeni tapınak henüz değiştirilmemiş alanlarda ve yeni dünyalarda görünür.
+
 ## 0.15.1: Düzeltmeler, boss mekanikleri ve yapı tasarımları
 
 - **Tuşlar:** Envanter ve üretim **Q**, etkileşim (kapı, sandık, köylü, istasyon, yatak, tekne) **E**, eşya atma **G**.

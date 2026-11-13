@@ -25,6 +25,7 @@ const BOLME_AILE = id => id === 109 || id === 34;
 function baglanir(id, n, f) {
   if (!n) return false;
   if (OPAK[n] && CIZIM[n] === C_KUP) return true;
+  if (id === 177) return n === 177;
   if (id === 104) {
     if (n === 104) return true;
     /* Çit kapısı yalnızca kendi doğrultusundaki çitlere bağlanır */
@@ -63,6 +64,17 @@ export function sekilKutulari(id, komsu, carp = false) {
         for (const [y0, y1] of [[6 * P, 9 * P], [12 * P, 15 * P]]) {
           l.push(f === 0 ? [7 * P, y0, 0, 9 * P, y1, 6 * P] : f === 1 ? [10 * P, y0, 7 * P, 1, y1, 9 * P] : f === 2 ? [7 * P, y0, 10 * P, 9 * P, y1, 1] : [0, y0, 7 * P, 6 * P, y1, 9 * P]);
         }
+      }
+      return l;
+    }
+    case 'korkuluk': {
+      /* Kum taşı korkuluk: kalın direk ve komşuya uzanan alçak duvar (çarpışma 1,5 blok) */
+      const l = [], h = carp ? 1.5 : 1;
+      l.push([4 * P, 0, 4 * P, 12 * P, h, 12 * P]);
+      for (let f = 0; f < 4; f++) {
+        if (!baglanir(id, komsu(f), f)) continue;
+        const y1 = carp ? h : 13 * P;
+        l.push(f === 0 ? [5 * P, 0, 0, 11 * P, y1, 4 * P] : f === 1 ? [12 * P, 0, 5 * P, 1, y1, 11 * P] : f === 2 ? [5 * P, 0, 12 * P, 11 * P, y1, 1] : [0, 0, 5 * P, 4 * P, y1, 11 * P]);
       }
       return l;
     }
