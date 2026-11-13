@@ -127,16 +127,28 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'kablo': {
       if (carp) return [];
       const h = 0.6 * P, l = [[6 * P, 0, 6 * P, 10 * P, h, 10 * P]];
+      const tel = n => BLOKLAR[n] && BLOKLAR[n].mekanik === 'tel', dolu = n => KATI[n] && OPAK[n];
+      const ustAcik = !dolu(komsu(12));
       for (let f = 0; f < 4; f++) {
         const n = komsu(f), nb = BLOKLAR[n];
-        if (!nb || !(nb.mekanik || nb.sekil === 'kapi' || nb.sekil === 'citKapi' || nb.sekil === 'tuzak' || n === 157)) continue;
+        /* 0.20.0: bir basamak yukarıdaki tele yandaki bloğun yüzünden tırmanır; aşağıdaki tele kenara kadar uzanır */
+        const yukari = ustAcik && tel(komsu(4 + f)) && dolu(n), asagi = !dolu(n) && tel(komsu(8 + f));
+        if (!yukari && !asagi && !(nb && (nb.mekanik || nb.sekil === 'kapi' || nb.sekil === 'citKapi' || nb.sekil === 'tuzak' || n === 157))) continue;
         l.push(f === 0 ? [7 * P, 0, 0, 9 * P, h, 7 * P] : f === 1 ? [9 * P, 0, 7 * P, 1, h, 9 * P] : f === 2 ? [7 * P, 0, 9 * P, 9 * P, h, 1] : [0, 0, 7 * P, 7 * P, h, 9 * P]);
+        if (yukari) l.push(f === 0 ? [7 * P, 0, 0, 9 * P, 1, h] : f === 1 ? [1 - h, 0, 7 * P, 1, 1, 9 * P] : f === 2 ? [7 * P, 0, 1 - h, 9 * P, 1, 1] : [0, 0, 7 * P, h, 1, 9 * P]);
       }
       return l;
     }
     case 'ters':
       if (carp) return [[0, 0, 0, 1, 2 * P, 1]];
       return dondur([[0, 0, 0, 1, 2 * P, 1], [7 * P, 2 * P, 3 * P, 9 * P, 6 * P, 5 * P, T.kalas], [6.5 * P, 6 * P, 2.5 * P, 9.5 * P, 8 * P, 5.5 * P, b.acik ? T.bakir_lamba_a : T.kol_bas], [7 * P, 2 * P, 11 * P, 9 * P, 4 * P, 13 * P, T.kalas]], b.yon);
+    /* 0.20.0: Geciktirici: önde sabit çıkış ucu, arkada gecikmeye göre kayan ikinci uç */
+    case 'gecik': {
+      if (carp) return [[0, 0, 0, 1, 2 * P, 1]];
+      const ba = b.acik ? T.bakir_lamba_a : T.kol_bas, z = (7 + 2 * b.gecikme) * P;
+      return dondur([[0, 0, 0, 1, 2 * P, 1], [7 * P, 2 * P, 3 * P, 9 * P, 5 * P, 5 * P, T.kalas], [6.5 * P, 5 * P, 2.5 * P, 9.5 * P, 7 * P, 5.5 * P, ba],
+        [7 * P, 2 * P, z, 9 * P, 5 * P, z + 2 * P, T.kalas], [6.5 * P, 5 * P, z - 0.5 * P, 9.5 * P, 7 * P, z + 2.5 * P, ba]], b.yon);
+    }
     case 'algi': return [[0, 0, 0, 1, 6 * P, 1]];
     case 'kazik':
       /* Sivri kazık: kütük gövde, daralan uç */
@@ -198,7 +210,7 @@ export function sekilKutulari(id, komsu, carp = false) {
 
 /* Dünyadaki bir hücrenin kutuları (dünya koordinatında değil, hücre içinde) */
 export function hucreKutulari(dunya, x, y, z, id, carp = false) {
-  return sekilKutulari(id, f => dunya.blok(x + YONLER[f][0], y, z + YONLER[f][1]), carp);
+  return sekilKutulari(id, f => (f >= 12 ? dunya.blok(x, y + (f === 12 ? 1 : -1), z) : dunya.blok(x + YONLER[f & 3][0], y + (f < 4 ? 0 : f < 8 ? 1 : -1), z + YONLER[f & 3][1])), carp);
 }
 
 /* Seçim ve çatlak için kutuların sınırı */

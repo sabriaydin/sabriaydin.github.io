@@ -37,7 +37,9 @@ export const DOKULAR = [
   /* 0.17.0: mekanik bloklar */
   'bakir_tel_k', 'bakir_tel_a', 'bakir_lamba', 'bakir_lamba_a', 'ters_ust', 'ters_ust_a', 'muzik_kutu', 'muzik_ust', 'algi_ust', 'algi_ust_a', 'algi_yan', 'kol_bas', 'kol_bas_a',
   /* 0.18.0: Yeraltı Diyarı */
-  'kor_tasi', 'kul_kumu', 'isiltas', 'obsidyen', 'gecit', 'kul_tugla', 'kul_tugla_oyma', 'kor_cev', 'magma', 'kizil_mantar'
+  'kor_tasi', 'kul_kumu', 'isiltas', 'obsidyen', 'gecit', 'kul_tugla', 'kul_tugla_oyma', 'kor_cev', 'magma', 'kizil_mantar',
+  /* 0.20.0 */
+  'gecik_ust', 'gecik_ust_a'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -280,6 +282,10 @@ blok(518, { ad: 'Kül Tuğlası', dok: 'kul_tugla', sertlik: 3, alet: 'kazma', s
 blok(519, { ad: 'Oymalı Kül Tuğlası', dok: 'kul_tugla_oyma', sertlik: 3, alet: 'kazma', seviye: 1, harita: 120 });
 blok(520, { ad: 'Kor Cevheri', dok: 'kor_cev', sertlik: 3, alet: 'kazma', seviye: 4, dusur: r => [[472, 1 + (r() < 0.3 ? 1 : 0)]], harita: 114 });
 blok(521, { ad: 'Magma Bloğu', dok: 'magma', sertlik: 0.8, alet: 'kazma', seviye: 1, mesale: true, isik: 8, lamba: true, magma: true, parlak: true, harita: 59 });
+/* 0.20.0: Geciktirici: arkasından gelen gücü önüne 1-4 adım (0,1-0,4 sn) gecikmeyle geçirir; sağ tıkla gecikme değişir.
+   523 + yön * 8 + gecikme * 2 + açık (yön: çıkış yönü) */
+for (let f = 0; f < 4; f++) for (let g = 0; g < 4; g++) for (let a = 0; a < 2; a++) blok(523 + f * 8 + g * 2 + a, { ad: 'Geciktirici', dok: a ? 'gecik_ust_a' : 'gecik_ust', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'tas',
+  sekil: 'gecik', mekanik: 'gecik', yon: f, gecikme: g, acik: a, taban: 523, gizli: f + g + a > 0, dusur: () => [[523, 1]], harita: 2, ...(a ? { mesale: true, isik: 4 } : {}) });
 blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
 
 /* Maden deneyimi */

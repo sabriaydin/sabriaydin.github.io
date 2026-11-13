@@ -1,5 +1,5 @@
 /* HungerMan - giriş noktası: menüler, oyun döngüsü, girdi, kayıt */
-import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl } from './sabitler.js';
+import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl, zamanHizi } from './sabitler.js';
 import { Sahne, THREE } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
 import { BIYOMLAR, BY } from './dunya/uretici.js';
@@ -300,6 +300,7 @@ const konsol = new Konsol({ ses, oyun: () => oyun, kapatIste: () => panelKapat(t
   kaydet: () => oyunKaydet(),
   gorusAyarla: n => { ayar.gorus = n; ayarlariKaydet(ayar); if (oyun) oyun.dunya.gorusAyarla(n); },
   haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); },
+  gecitGec: h => { panelKapat(false); gecitGec(h); },
   gelistiriciAc: () => { panelKapat(false); if (oyun) panelAc(gelPencere); },
   sahne: () => sahne,
   /* Keşfedilen harita bellekten ve tarayıcı deposundan silinir */
@@ -319,6 +320,7 @@ function ekranGoruntusu() {
 /* Geliştirici modu penceresi (F9): konsolda geliştirici kodu girildikten sonra kullanılır */
 const gelPencere = new GelistiriciPenceresi({ ses, konsol, sahne, oyun: () => oyun, kapatIste: () => panelKapat(true), arayuz: {
   haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); },
+  gecitGec: h => { panelKapat(false); gecitGec(h); },
   konsolAc: () => { panelKapat(false); if (oyun) panelAc(konsol); },
   fovAyarla: v => { ayar.fov = v; ayarlariKaydet(ayar); },
   fpsAc: v => { ayar.fps = v; ayarlariKaydet(ayar); $('#fps').hidden = !v; },
@@ -688,9 +690,9 @@ function adim(t) {
     o.sure += dt;
     const oncekiZaman = o.zaman;
     /* İstemcide gün değişimi sunucudan gelir */
-    if (o.istemci) o.zaman = Math.min(0.99999, o.zaman + dt / GUN_SURESI);
+    if (o.istemci) o.zaman = Math.min(0.99999, o.zaman + dt * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI);
     else {
-      o.zaman += dt * (o.zamanHizi || 1) / GUN_SURESI;
+      o.zaman += dt * (o.zamanHizi || 1) * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI;
       if (o.zaman >= 1) { o.zaman -= 1; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı`); }
     }
     if (oncekiZaman < 0.46 && o.zaman >= 0.46) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');

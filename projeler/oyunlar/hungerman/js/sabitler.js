@@ -1,5 +1,5 @@
 /* HungerMan - genel sabitler (ana iş parçacığı ve işçiler ortak kullanır) */
-export const SURUM = '0.19.0';
+export const SURUM = '0.20.0';
 
 /* Parça (chunk) boyutları: 16 x 16 taban, 128 yükseklik */
 export const PB = 16;            // parça kenarı
@@ -21,6 +21,10 @@ export const diyarMi = x => x > 10000;
 export const MEVSIM_GUN = 7;
 export const MEVSIMLER = ['İlkbahar', 'Yaz', 'Sonbahar', 'Kış'];
 export const mevsimAl = gun => Math.floor(((gun || 1) - 1) / MEVSIM_GUN) % 4;
+/* 0.20.0: mevsime göre gün uzunluğu: zamanın gündüz (0-0,5) ve gece (0,5-1) akış hızları; bir tam günün süresi değişmez.
+   Yazın gündüz %62,5, kışın %37,5 sürer; ilkbahar ve sonbaharda gece ile gündüz eşittir. */
+const ZAMAN_HIZI = [[1, 1], [0.8, 4 / 3], [1, 1], [4 / 3, 0.8]];
+export const zamanHizi = (zaman, mevsim) => ZAMAN_HIZI[mevsim || 0][zaman < 0.5 ? 0 : 1];
 
 /* Gün uzunluğu (saniye): 20 dakika */
 export const GUN_SURESI = 1200;

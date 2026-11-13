@@ -36,6 +36,27 @@ export class EnvanterEkrani {
     this.kok.addEventListener('contextmenu', e => e.preventDefault());
     this.kok.addEventListener('mousedown', e => this.fare(e));
     this.kok.addEventListener('mousemove', e => this.hareket(e));
+    /* 0.20.0: dokunmatik: yuvaya kısa dokunuş sol tıklama, basılı tutma (0,4 sn) sağ tıklamadır (yığın bölme, tek tek bırakma) */
+    const sahte = (el, t, button) => ({ target: el, button, shiftKey: false, clientX: t.clientX, clientY: t.clientY, preventDefault() {} });
+    this.kok.addEventListener('touchstart', e => {
+      const el = e.target.closest('.izgara .yuva');
+      if (!el) return;
+      e.preventDefault();
+      const t = e.changedTouches[0];
+      this.hareket(sahte(el, t, 0));
+      if (this.dokunus) clearTimeout(this.dokunus.zaman);
+      const d = this.dokunus = { el, uzun: false };
+      d.zaman = setTimeout(() => { d.uzun = true; this.fare(sahte(el, t, 2)); if (navigator.vibrate) navigator.vibrate(15); }, 400);
+    }, { passive: false });
+    const bitir = e => {
+      const d = this.dokunus;
+      if (!d) return;
+      clearTimeout(d.zaman); this.dokunus = null;
+      const t = e.changedTouches[0];
+      if (!d.uzun && e.type === 'touchend') this.fare(sahte(d.el, t, 0));
+      this.hareket(sahte(d.el, t, 0));
+    };
+    this.kok.addEventListener('touchend', bitir); this.kok.addEventListener('touchcancel', bitir);
     this.kok.addEventListener('mouseleave', () => { $('#ipucu').hidden = true; });
     $('#tarifListe').addEventListener('click', e => {
       const b = e.target.closest('button[data-t]'); if (!b) return;

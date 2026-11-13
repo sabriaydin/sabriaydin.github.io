@@ -4,7 +4,7 @@ import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, O
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 
-const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
+const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
 const ERISIM = 5;
 const TOPRAK = new Set([3, 4, 45, 137, 138]);
@@ -415,6 +415,7 @@ export class Etkilesim {
       else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
       else if (eb.sekil === 'tuzak') id = 121 + f * 2;
       else if (eb.mekanik === 'ters') id = 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir
+      else if (eb.mekanik === 'gecik') id = 523 + f * 8;   // 0.20.0
       else if (eb.sekil === 'tirmanma') {
         const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
         if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tırmanma merdiveni katı bir duvarın yan yüzüne konur.'); return true; }
@@ -478,6 +479,8 @@ export class Etkilesim {
     if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
     /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
     if (b.mekanik === 'kol') { d.blokKoy(h.x, h.y, h.z, b.acik ? 233 : 234); this.ses.kol(!b.acik); return true; }
+    /* 0.20.0: Geciktiricinin gecikmesi sağ tıkla 1-4 adım arasında döner */
+    if (b.mekanik === 'gecik') { d.blokKoy(h.x, h.y, h.z, 523 + b.yon * 8 + ((b.gecikme + 1) % 4) * 2 + b.acik); this.ses.kol(true); this.arayuz.bildirim(`Gecikme: ${((b.gecikme + 1) % 4) + 1} adım (${(((b.gecikme + 1) % 4) + 1) / 10} sn)`.replace('.', ',')); return true; }
     if (b.mekanik === 'dugme') { if (!b.acik) { d.blokKoy(h.x, h.y, h.z, 236); this.ses.dugme(); } return true; }
     if (b.mekanik === 'muzik') {
       const m = ezgiTuru(d.blok(h.x, h.y - 1, h.z)), V = this.varliklar;

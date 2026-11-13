@@ -117,6 +117,15 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 20. aşama (0.20.0): Bilinen eksiklerin giderilmesi
+
+- **Geciktirici** (3 taş, bakır tel, 2 meşale; Üretim Masası, Mekanik): arkasından gelen gücü önüne 1-4 adım (0,1-0,4 saniye) gecikmeyle geçirir, gücü tersine çevirmez. Sağ tıklanınca gecikme bir adım artar (4'ten sonra 1'e döner); arkadaki uç gecikmeye göre kayar. Çıkışı, konulurken bakılan yöndedir. Ters çevirici ile birlikte kurulan saat devrelerinin hızı artık ayarlanabilir; arka arkaya geciktiriciler uzun gecikmeler verir.
+- **Bakır tel görünümü:** bir basamak yukarıdaki tele, yandaki bloğun yüzünden tırmanan dikey bir iz çizilir; aşağıdaki tele uzanan kol da gösterilir. Güç iletimi değişmedi.
+- **Mevsime göre gün uzunluğu:** bir günün toplam süresi aynı kalır; yazın gündüz %62,5, kışın %37,5 sürer, ilkbahar ve sonbaharda gece ile gündüz eşittir. Çok oyunculuda istemci de aynı hızla ilerler.
+- **Diyar Geçidi dokusu** artık boşluksuzdur; geçidin arkası görünmez.
+- **Dokunmatik çanta:** yuvaya kısa dokunuş eşyayı alır ya da bırakır (sol tık); basılı tutma (0,4 saniye) yığını ikiye böler ya da taşınan yığından bir tane bırakır (sağ tık). Destekleyen cihazlarda kısa titreşim verilir.
+- **Geliştirici konsolu:** `diyar` komutu dünya ile Yeraltı Diyarı arasında geçirir (karşı tarafta 8:1 oranlı konuma; yakında geçit yoksa kurulur). `isinla` komutu diyardayken diyarın sınırlarını kullanır.
+
 ## 19. aşama (0.19.0): Gerçek sesler ve müzik, dokunmatik kontroller, performans
 
 **Ses efektleri (gerçek kayıtlar)**

@@ -314,6 +314,9 @@ const RESSAM = {
   bakir_lamba: p => { p.doldur('#b8683a', 0.06); const k = hex('#7a3e1e'), c = hex('#3a3430'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let y = 3; y < 13; y++) for (let x = 3; x < 13; x++) p.set(x, y, karis(c, 0.9 + p.r() * 0.2)); for (let i = 3; i < 13; i++) { p.set(i, 7, hex('#7a3e1e')); p.set(7, i, hex('#7a3e1e')); } },
   bakir_lamba_a: p => { p.doldur('#d07a40', 0.05); const k = hex('#8a4a22'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let y = 3; y < 13; y++) for (let x = 3; x < 13; x++) p.set(x, y, karis(hex('#ffe08a'), 0.92 + p.r() * 0.12)); for (let i = 3; i < 13; i++) { p.set(i, 7, hex('#e8a050')); p.set(7, i, hex('#e8a050')); } },
   ters_ust: p => { p.doldur('#8e8e8e', 0.04); const k = hex('#6a6a6a'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let i = 3; i < 13; i++) p.set(7, i, hex('#7a3e1e')); },
+  /* 0.20.0: Geciktirici: ok biçimli bakır iz */
+  gecik_ust: p => { p.doldur('#8e8e8e', 0.04); const k = hex('#6a6a6a'), c = hex('#7a3e1e'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let i = 2; i < 14; i++) p.set(7, i, c); for (let i = 0; i < 3; i++) { p.set(7 - i, 3 + i, c); p.set(7 + i, 3 + i, c); } },
+  gecik_ust_a: p => { p.doldur('#8e8e8e', 0.04); const k = hex('#6a6a6a'), c = hex('#f0783a'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let i = 2; i < 14; i++) p.set(7, i, c); for (let i = 0; i < 3; i++) { p.set(7 - i, 3 + i, c); p.set(7 + i, 3 + i, c); } },
   ters_ust_a: p => { p.doldur('#8e8e8e', 0.04); const k = hex('#6a6a6a'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let i = 3; i < 13; i++) p.set(7, i, hex('#f0783a')); },
   muzik_kutu: p => { kalas(p, '#8a5a32'); const k = hex('#3a2414'); for (let y = 4; y < 12; y++) for (let x = 4; x < 12; x++) if ((x + y) % 2 === 0) p.set(x, y, k); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); } },
   muzik_ust: p => { kalas(p, '#9a6a3a'); const k = hex('#2a1a10'); for (let y = 4; y < 12; y++) p.set(9, y, k); p.set(10, 4, k); p.set(11, 5, k); for (const [x, y] of [[7, 10], [8, 10], [7, 11], [8, 11], [8, 9]]) p.set(x, y, k); },
@@ -331,7 +334,7 @@ const RESSAM = {
     for (let i = 0; i < 26; i++) p.set(Math.floor(p.r() * 16), Math.floor(p.r() * 16), karis(k, 0.9 + p.r() * 0.2)); },
   obsidyen: p => { p.doldur('#16101e', 0.12); p.lekeler('#2c1f3e', 18, 2, 0.08); p.lekeler('#3e2a5a', 8, 1, 0.05); p.lekeler('#0a0810', 10, 1, 0.05); },
   gecit: p => { for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const v = Math.sin(x * 0.9 + y * 0.35) + Math.sin(y * 0.8 - x * 0.3) * 0.8 + p.r() * 0.5;
-    if (v < -0.9) p.set(x, y, [0, 0, 0], 0); else p.set(x, y, karis(v > 0.6 ? [214, 120, 255] : v > -0.2 ? [150, 60, 220] : [96, 30, 160], 0.9 + p.r() * 0.2)); } },
+    p.set(x, y, karis(v > 0.6 ? [214, 120, 255] : v > -0.2 ? [150, 60, 220] : v > -0.9 ? [96, 30, 160] : [62, 16, 112], 0.9 + p.r() * 0.2)); } },   // 0.20.0: boşluksuz
   kul_tugla: p => tugla(p, '#3a2224', '#1e1214'),
   kul_tugla_oyma: p => { tugla(p, '#3a2224', '#1e1214'); const k = hex('#1e1214'), a = hex('#5a3436'); for (let y = 3; y < 13; y++) for (let x = 3; x < 13; x++) p.set(x, y, (x === 3 || y === 3 || x === 12 || y === 12) ? k : (Math.abs(x - 7.5) + Math.abs(y - 7.5) < 3.2 ? karis(hex('#ff7a2a'), 0.85 + p.r() * 0.2) : karis(a, 0.9 + p.r() * 0.2))); },
   kor_cev: p => { RESSAM.kor_tasi(p); const c = hex('#ff8a2a'); for (let n = 0; n < 5; n++) { const x = 1 + Math.floor(p.r() * 13), y = 1 + Math.floor(p.r() * 13); for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) p.set(x + dx, y + dy, karis(c, 0.85 + p.r() * 0.3)); p.set(x, y, [255, 230, 150]); } },
@@ -748,6 +751,7 @@ const BLOK_SIMGE = {
   dugme: (p, id) => dokuBoya(p, T.tas, [[4, 6, 12, 11], [4, 10, 12, 12, 0.75]]),
   plaka: (p, id) => dokuBoya(p, T.kalas, [[1, 10, 15, 13], [1, 12, 15, 14, 0.75]]),
   kablo: (p, id) => { dokuBoya(p, T.bakir_tel_a, [[2, 7, 14, 9]]); dokuBoya(p, T.bakir_tel_k, [[5, 5, 11, 11, 0.9]]); },
+  gecik: (p, id) => { dokuBoya(p, T.gecik_ust, [[1, 10, 15, 14]]); dokuBoya(p, T.kalas, [[4, 6, 6, 10], [10, 6, 12, 10]]); dokuBoya(p, T.kol_bas, [[3, 4, 7, 6], [9, 4, 13, 6]]); },
   ters: (p, id) => { dokuBoya(p, T.ters_ust, [[1, 10, 15, 14]]); dokuBoya(p, T.kalas, [[7, 5, 9, 10]]); dokuBoya(p, T.bakir_lamba_a, [[6, 3, 10, 6]]); },
   algi: (p, id) => { dokuBoya(p, T.algi_ust_a, [[1, 6, 15, 10]]); dokuBoya(p, T.algi_yan, [[1, 10, 15, 13, 0.85]]); },
   sandalye: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[3, 2, 6, 15], [3, 8, 13, 10], [3, 2, 13, 4, 0.85], [11, 9, 13, 15]]),

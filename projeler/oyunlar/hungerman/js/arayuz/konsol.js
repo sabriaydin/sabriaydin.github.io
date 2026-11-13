@@ -13,7 +13,7 @@ import { yapilarAlan, YAPI_ADI } from '../dunya/yapi-uretici.js';
 import { zindanBossu } from '../oyun/yapilar.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
 import { HaritaKesif } from '../harita/kesif.js';
-import { PB, DENIZ, DUNYA_SINIRI, KITA_YARICAP } from '../sabitler.js';
+import { PB, DENIZ, DUNYA_SINIRI, KITA_YARICAP, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -111,7 +111,9 @@ export class Konsol {
     return l.filter(([, e]) => kucuk(e.ad).includes(a)).map(([i]) => +i);
   }
   isinla(o, x, y, z) {
-    x = Math.max(-DUNYA_SINIRI + 2, Math.min(DUNYA_SINIRI - 2, x)); z = Math.max(-DUNYA_SINIRI + 2, Math.min(DUNYA_SINIRI - 2, z));
+    /* 0.20.0: Yeraltı Diyarı içinde diyarın sınırları geçerlidir */
+    if (diyarMi(x)) { x = Math.max(DIYAR_X - DIYAR_SINIR + 2, Math.min(DIYAR_X + DIYAR_SINIR - 2, x)); z = Math.max(-DIYAR_SINIR + 2, Math.min(DIYAR_SINIR - 2, z)); if (y == null) y = o.oyuncu.konum.y; }
+    else { x = Math.max(-DUNYA_SINIRI + 2, Math.min(DUNYA_SINIRI - 2, x)); z = Math.max(-DUNYA_SINIRI + 2, Math.min(DUNYA_SINIRI - 2, z)); }
     if (y == null) y = Math.max(DENIZ + 1, o.dunya.uretici.kolon(Math.floor(x), Math.floor(z), {}).h + 1);
     if (o.tekneler.binilen) o.tekneler.in(o.oyuncu);
     const E = o.oyuncu.konum;
@@ -146,6 +148,12 @@ export class Konsol {
   komutlariKur() {
     const K = {};
     const ekle = (ad, aciklama, kullanim, f, ek = {}) => { K[ad] = { aciklama, kullanim, f, ...ek }; };
+    /* 0.20.0: Yeraltı Diyarı ile dünya arasında geçiş */
+    ekle('diyar', 'Yeraltı Diyarı ile dünya arasında geçer (karşı tarafta 8:1 oranlı konuma; yakında geçit yoksa kurulur)', 'diyar', o => {
+      const P = o.oyuncu.konum, ic = diyarMi(P.x);
+      this.arayuz.gecitGec(ic ? { x: Math.floor((P.x - DIYAR_X) * 8), z: Math.floor(P.z * 8), diyara: false } : { x: DIYAR_X + Math.floor(P.x / 8), z: Math.floor(P.z / 8), diyara: true });
+      this.tamam(ic ? 'Dünyaya dönülüyor.' : 'Yeraltı Diyarı’na geçiliyor.');
+    }, { hile: true });
     ekle('yardim', 'Komutları listeler', 'yardim [komut]', (o, p) => {
       if (p[0] && K[kucuk(p[0])]) { const k = K[kucuk(p[0])]; this.yaz(`${k.kullanim} — ${k.aciklama}`, 'bilgi'); return; }
       this.yaz(Object.entries(K).map(([a, k]) => `<b>${esc(k.kullanim)}</b> <span>${esc(k.aciklama)}</span>`).join('<br>'), 'liste', true);

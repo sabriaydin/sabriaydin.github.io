@@ -15,6 +15,7 @@ const A = (x, y, z) => x + ',' + y + ',' + z;
 const C = k => k.split(',').map(Number);
 const KAYNAK_TUR = { kol: 1, dugme: 1, plaka: 1, algi: 1 };
 const ADIM = 0.1;
+const GECIK = 523;   // 0.20.0: Geciktirici: 523 + yön * 8 + gecikme * 2 + açık
 
 /* Müzik kutusunun çaldığı ezgi, altındaki bloğa göre: 0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul */
 export function ezgiTuru(id) {
@@ -32,6 +33,7 @@ export class Mekanik {
     Object.assign(this, o);   // dunya, varliklar, ses, konumlar(): oyuncu ayak konumları, gunIsigi(), yerel(): yerel oyuncu konumu
     this.kirli = true; this.saat = false; this.sayac = 0; this.algiSayac = 0; this.sonBoyut = -1;
     this.dugmeler = new Map();     // basılı düğme -> kalan süre
+    this.gecikmeler = new Map();   // 0.20.0: geciktirici -> { hedef, kalan }
     this.tuketici = new Map();     // güç alan tüketiciler -> true
     this.dinle = (x, y, z, id, eski, kaynak) => { if (kaynak !== 'mekanik' && (this.ilgili(id) || this.ilgili(eski) || this.yakinda(x, y, z))) this.kirli = true; };
     this.dunya.dinleyiciler.push(this.dinle);
@@ -92,7 +94,7 @@ export class Mekanik {
       const b = BLOKLAR[d.blok(x, y, z)];
       if (!b || !b.mekanik) { M.delete(k); continue; }
       if (b.mekanik === 'tel') teller.add(k);
-      else if (b.mekanik === 'ters') ters.push([x, y, z, b.yon, b.acik]);
+      else if (b.mekanik === 'ters' || b.mekanik === 'gecik') ters.push([x, y, z, b.yon, b.acik, b.mekanik === 'gecik' ? b.gecikme : -1, k]);
       else if (b.mekanik === 'lamba') lambalar.push([k, x, y, z, b.acik]);
       else if (KAYNAK_TUR[b.mekanik] && b.acik) kaynak.add(k);
     }
@@ -146,12 +148,22 @@ export class Mekanik {
     /* Lambalar her hesapta güç durumuna eşitlenir (yüklenen parçalardaki yanık kalmış lambalar dahil) */
     for (const [k, x, y, z, acik] of lambalar) if (adaylar.has(k) !== !!acik) this.koy(x, y, z, acik ? 241 : 242);
     /* Ters çeviriciler bir adım gecikmeyle durum değiştirir (saat devreleri böyle çalışır) */
-    for (const [x, y, z, yon, acik] of ters) {
+    for (const [x, y, z, yon, acik, g, k] of ters) {
       const [a, c] = YATAY[yon], bx = x - a, bz = z - c, bk = A(bx, y, bz);
       const arka = BLOKLAR[d.blok(bx, y, bz)];
-      const arkaTers = arka && arka.mekanik === 'ters' && arka.acik && arka.yon === yon;
-      const yeni = !(gucVar(bk) || arkaTers);
-      if (yeni !== !!acik) { this.koy(x, y, z, 243 + yon * 2 + (yeni ? 1 : 0)); this.saat = true; }
+      const arkaTers = arka && (arka.mekanik === 'ters' || arka.mekanik === 'gecik') && arka.acik && arka.yon === yon;
+      const girdi = gucVar(bk) || arkaTers;
+      if (g < 0) {
+        const yeni = !girdi;
+        if (yeni !== !!acik) { this.koy(x, y, z, 243 + yon * 2 + (yeni ? 1 : 0)); this.saat = true; }
+        continue;
+      }
+      /* 0.20.0: Geciktirici: girdi, (gecikme + 1) adım (0,1-0,4 saniye) sonra çıkışa geçer; tersine çevirmez */
+      let s = this.gecikmeler.get(k);
+      if (girdi === !!acik) { if (s) this.gecikmeler.delete(k); continue; }
+      if (!s || s.hedef !== girdi) { s = { hedef: girdi, kalan: g + 1 }; this.gecikmeler.set(k, s); }
+      if (--s.kalan <= 0) { this.gecikmeler.delete(k); this.koy(x, y, z, GECIK + yon * 8 + g * 2 + (girdi ? 1 : 0)); }
+      this.saat = true;
     }
   }
 

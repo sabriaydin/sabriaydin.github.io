@@ -128,7 +128,8 @@ function kup(P, gok, i, id, x, y, z, T) {
 
 /* Biçimli bloklar: her kutunun yüzleri; hücre sınırındaki yüzler opak komşu varsa çizilmez.
    Doku koordinatı kutunun hücredeki konumundan alınır (yarım blokta dokunun yarısı görünür). */
-const KOMSU_OFS = [-DZ, DX, DZ, -DX];
+/* Komşular: 0-3 yanlar, 4-7 yanların bir üstü, 8-11 yanların bir altı, 12 üst, 13 alt (0.20.0: basamaklanan tel için) */
+const KOMSU_OFS = [-DZ, DX, DZ, -DX, -DZ + DY, DX + DY, DZ + DY, -DX + DY, -DZ - DY, DX - DY, DZ - DY, -DX - DY, DY, -DY];
 const UVF = [
   (x, y, z) => [1 - z, y], (x, y, z) => [z, y], (x, y, z) => [x, 1 - z],
   (x, y, z) => [x, z], (x, y, z) => [x, y], (x, y, z) => [1 - x, y]
