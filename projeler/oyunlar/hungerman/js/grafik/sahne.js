@@ -8,16 +8,30 @@ import { uretec } from '../rastgele.js';
 export { THREE };
 export const ISIK_SAYISI = 32;   // 0.15.2: aydınlatılmış büyük salonlar için 16'dan 32'ye
 
+/* 0.23.0: rüzgâr: bitkilerin üst köşeleri (ışık değeri -1'in altında) ve yapraklar (-1 ile 0 arası) salınır; su yüzeyi dalgalanır */
 const BLOK_VS = `
 attribute vec2 isik;
+uniform float zaman;
+uniform float ruzgar;
 varying vec2 vUv;
 varying float vAo;
 varying float vGok;
 varying vec3 vDunya;
 varying float vUzak;
 void main() {
-  vUv = uv; vAo = isik.x; vGok = isik.y;
+  float a = isik.x, sal = 0.0;
+  if (a < -1.0) { sal = 1.0; a = -a - 1.0; } else if (a < 0.0) { sal = 0.3; a = -a; }
+  vUv = uv; vAo = a; vGok = isik.y;
   vec4 d = modelMatrix * vec4(position, 1.0);
+  if (sal > 0.0) {
+    float t = zaman * (1.3 + ruzgar * 1.2), g = (0.55 + ruzgar) * sal;
+    d.x += (sin(t + d.x * 0.7 + d.z * 0.35) * 0.06 + sin(t * 2.3 + d.z) * 0.015) * g;
+    d.z += cos(t * 0.9 + d.z * 0.6 + d.x * 0.3) * 0.05 * g;
+  }
+  #ifdef SU
+    float fy = fract(position.y);
+    if (fy > 0.5) d.y += (sin(zaman * 1.6 + d.x * 0.9 + d.z * 0.4) * 0.03 + cos(zaman * 1.1 + d.z * 0.8) * 0.02) * (0.6 + ruzgar) - 0.05;
+  #endif
   vDunya = d.xyz;
   vec4 mv = viewMatrix * d;
   vUzak = length(mv.xyz);
@@ -123,7 +137,7 @@ export class Sahne {
     this.atlasDoku = doku;
     const ortak = () => ({
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
-      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 },
+      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, magara: { value: 0.07 }, islak: { value: 0 },
       isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 }
     });
     this.opakMalzeme = new THREE.ShaderMaterial({ uniforms: ortak(), vertexShader: BLOK_VS, fragmentShader: BLOK_FS });
@@ -278,6 +292,7 @@ export class Sahne {
     for (const m of this.malzemeler) {
       const u = m.uniforms;
       u.gun.value = diyar ? 0 : gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
+      u.ruzgar.value += ((diyar ? 0 : 0.25 + hy * 0.5 + hf * 1.0) - u.ruzgar.value) * 0.01;
       /* Gece görüşü iksiri: en düşük ışık yükselir */
       u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.07;
       u.islak.value = m === this.opakMalzeme && !suda && !diyar ? hy : 0;
@@ -388,10 +403,13 @@ export class Sahne {
   elAyarla(id, buyulu = false) {
     this.elBuyulu = buyulu;
     if (id === this.elId) return;
+    if (this.elId !== -1) this.elDegis = 1;   // 0.23.0: eşya değişince el aşağı inip yeniden kalkar
     this.elId = id;
     if (this.elEsya) { this.el.remove(this.elEsya); if (this.elEsya.geometry) this.elEsya.geometry.dispose(); this.elEsya = null; }
     this.elYay = null;
-    this.elKol.visible = !id;
+    this.elTur = !id ? 'bos' : 'esya';
+    this.elKol.visible = !id;   // kol yalnızca boş elde görünür (eşya tutarken savurmada kameraya giriyordu)
+    this.elKol.position.set(0.04, -0.04, 0.1); this.elKol.rotation.set(-0.25, 0.2, 0);
     if (!id) return;
     /* Yay (0.15.1): simge yerine dikey tutulan üç boyutlu yay; kiriş ve ok germe ile hareket eder */
     const ey = ESYALAR[id];
@@ -409,23 +427,37 @@ export class Sahne {
       }
       this.elEsya = new THREE.Mesh(g, this.elBlokMalzeme);
       this.elEsya.rotation.set(0.1, 0.75, 0);
-      this.elEsya.position.set(0, 0.02, 0);
+      this.elEsya.position.set(0, 0.04, -0.02);
+      this.elTur = 'blok';
     } else {
       /* Eşyalar simgelerinden kalınlık verilerek üç boyutlu (piksel piksel çıkıntılı) çizilir */
       this.elEsya = new THREE.Mesh(simgeHacmi(simge(id).cv, 0.36), this.elEsyaMalzeme);
       const e = ESYALAR[id], alet = e && (e.tur === 'alet' || e.tur === 'yay' || e.tur === 'olta');
-      if (alet) { this.elEsya.rotation.set(0.05, -1.35, 0.42); this.elEsya.position.set(0.02, 0.1, -0.02); }
-      else { this.elEsya.rotation.set(0.12, -0.55, 0); this.elEsya.position.set(0.04, 0.06, 0); }
+      /* 0.23.0: aletler sapından kavranmış gibi, ucu öne ve yukarı bakar */
+      if (alet) { this.elEsya.rotation.set(0.15, -1.45, 0.62); this.elEsya.position.set(0.0, 0.13, -0.04); this.elTur = 'alet'; }
+      else { this.elEsya.rotation.set(0.12, -0.55, 0); this.elEsya.position.set(0.02, 0.07, -0.02); }
     }
     this.el.add(this.elEsya);
   }
   /* sallanma: 0..1 vuruş animasyonu, yurume: adım fazı */
-  elGuncelle(dt, vurus, yurume, isik, germe = 0) {
+  /* 0.23.0: el animasyonları: nefes salınımı, eşya değiştirme, alet için çapraz savurma, blok için öne itme, yemek yerken ağza götürme */
+  elGuncelle(dt, vurus, yurume, isik, germe = 0, ek = {}) {
     const s = vurus > 0 ? Math.sin(vurus * Math.PI) : 0;
     const g = germe > 0 ? Math.min(1, germe) : 0;
-    if (this.elYay) { this.yayGuncelle(dt, s, yurume, isik, g); return; }
-    this.el.position.set(0.42 + Math.sin(yurume) * 0.012 - g * 0.22, -0.38 - Math.abs(Math.cos(yurume)) * 0.014 - s * 0.08 + g * 0.12, -0.62 + s * 0.06 + g * 0.08);
-    this.el.rotation.set(-s * 0.9, -s * 0.25 + g * 0.5, g * 0.4 + (g >= 1 ? Math.sin(performance.now() / 40) * 0.01 : 0));
+    this.elDegis = Math.max(0, (this.elDegis || 0) - dt * 4.5);
+    this.elYeme = Math.max(0, (ek.yeme || 0));
+    if (this.elYay) { this.yayGuncelle(dt, s, yurume, isik, g); this.el.position.y -= this.elDegis * 0.35; return; }
+    const t = performance.now() / 1000, nefes = Math.sin(t * 1.6) * 0.006, d = this.elDegis * this.elDegis * (3 - 2 * this.elDegis);
+    const v = vurus > 0 ? vurus : 0, ileri = v < 0.35 ? v / 0.35 : 1 - (v - 0.35) / 0.65, ke = ileri * ileri * (3 - 2 * ileri);
+    const kos = ek.kos ? 1.6 : 1, yx = Math.sin(yurume) * 0.012 * kos, yy = Math.abs(Math.cos(yurume)) * 0.014 * kos;
+    const y = this.elYeme, ym = y > 0 ? Math.sin(t * 22) * 0.02 : 0;
+    let px = 0.42 + yx - g * 0.22 - y * 0.3, py = -0.38 - yy + nefes - g * -0.12 - d * 0.35 + y * 0.12 + ym, pz = -0.62 + g * 0.08 + y * 0.12;
+    let rx = g >= 1 ? Math.sin(t * 25) * 0.01 : 0, ry = g * 0.5 + y * 0.6, rz = g * 0.4 - y * 0.3;
+    if (this.elTur === 'alet') { px -= ke * 0.12; py += ke * 0.06 - s * 0.05; pz -= ke * 0.12; rx -= ke * 1.25; ry -= ke * 0.35; rz += ke * 0.5; }
+    else if (this.elTur === 'blok' || this.elTur === 'esya') { px -= ke * 0.06; py -= s * 0.06; pz -= ke * 0.16; rx -= ke * 0.55; ry -= ke * 0.2; }
+    else { px -= ke * 0.05; py -= s * 0.05; pz -= ke * 0.2; rx -= ke * 0.7; }
+    this.el.position.set(px, py, pz);
+    this.el.rotation.set(rx, ry, rz);
     const c = this.elKol.material.color; c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
     this.elBlokMalzeme.color.setScalar(isik);
     this.elEsyaMalzeme.color.setScalar(isik);

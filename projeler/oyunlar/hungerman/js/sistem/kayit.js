@@ -23,10 +23,12 @@ function islem(mod, f) {
 }
 
 export const Kayit = {
-  listele: () => islem('readonly', s => s.getAll()).then(l => (l || []).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar })).sort((a, b) => b.son - a.son)),
+  /* 0.23.0: "~yedek" ile biten kayıtlar, dünyanın bir önceki oturumdaki kopyasıdır; listede ayrı gösterilmez */
+  listele: () => islem('readonly', s => s.getAll()).then(l => { l = l || []; const yedek = new Set(l.filter(d => String(d.id).endsWith('~yedek')).map(d => String(d.id).slice(0, -6)));
+    return l.filter(d => !String(d.id).endsWith('~yedek')).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar, zorluk: d.zorluk || 'normal', bitti: !!d.hardcoreBitti, yedek: yedek.has(d.id) })).sort((a, b) => b.son - a.son); }),
   yukle: id => islem('readonly', s => s.get(id)),
   kaydet: veri => islem('readwrite', s => s.put(veri)),
-  sil: id => islem('readwrite', s => s.delete(id))
+  sil: id => islem('readwrite', s => { s.delete(id + '~yedek'); return s.delete(id); })
 };
 
 const AYAR_ANAHTAR = 'hungerman_ayarlar';
@@ -43,3 +45,20 @@ export function ayarlariYukle() {
   catch (e) { return Object.assign({}, VARSAYILAN_AYAR); }
 }
 export function ayarlariKaydet(a) { try { localStorage.setItem(AYAR_ANAHTAR, JSON.stringify(a)); } catch (e) { /* depolama kapalı olabilir */ } }
+
+/* 0.23.0: dünya yedeği dosyası: Map, Set ve sayı dizileri JSON'a çevrilir; tarayıcı destekliyorsa gzip ile sıkıştırılır */
+const kodla = (k, x) => x instanceof Map ? { __t: 'Map', v: [...x] } : x instanceof Set ? { __t: 'Set', v: [...x] } : ArrayBuffer.isView(x) ? { __t: x.constructor.name, v: Array.from(x) } : x;
+const coz = (k, x) => x && typeof x === 'object' && x.__t ? (x.__t === 'Map' ? new Map(x.v) : x.__t === 'Set' ? new Set(x.v) : /^(Uint|Int|Float)(8|16|32|64)(Clamped)?Array$/.test(x.__t) ? new globalThis[x.__t](x.v) : x) : x;
+export async function yedekDosyasi(veri) {
+  const metin = JSON.stringify({ hungerman: 1, surum: veri.surum || '', tarih: Date.now(), dunya: veri }, kodla);
+  let blob = new Blob([metin], { type: 'application/json' });
+  if (typeof CompressionStream === 'function') blob = await new Response(blob.stream().pipeThrough(new CompressionStream('gzip'))).blob();
+  return blob;
+}
+export async function yedekOku(dosya) {
+  const b = new Uint8Array(await dosya.slice(0, 2).arrayBuffer());
+  const metin = b[0] === 0x1f && b[1] === 0x8b ? await new Response(dosya.stream().pipeThrough(new DecompressionStream('gzip'))).text() : await dosya.text();
+  const v = JSON.parse(metin, coz);
+  if (!v || !v.hungerman || !v.dunya || typeof v.dunya !== 'object' || v.dunya.tohum == null) throw new Error('Bu dosya bir HungerMan dünya yedeği değil.');
+  return v.dunya;
+}

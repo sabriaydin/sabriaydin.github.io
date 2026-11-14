@@ -42,8 +42,11 @@
   <div id="gokParla"></div>
   <div id="hasarYon"></div>
   <div id="tilsimHalka" hidden></div>
+  <div id="olumPerde"></div>
   <div id="gecitEfekt"></div>
   <div id="bossCubuk" hidden><b id="bossAd"></b><div class="bossDis"><i id="bossCan"></i></div></div>
+  <div id="bakilanAd" hidden><b></b><small></small></div>
+  <div id="ogretici" hidden><b></b><p></p><button type="button">Gizle</button></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
   <div id="uyku"></div>
   <div id="nisan"></div>
@@ -85,7 +88,7 @@
 <div id="envanterEkrani" class="kaplama" hidden>
   <div class="pencere envPencere">
     <section class="envSol">
-      <header><h2>Envanter</h2></header>
+      <header><h2>Envanter</h2><button type="button" class="envIslem" id="envSirala" title="Çantadaki eşyaları birleştirir ve türüne göre sıralar">Sırala</button></header>
       <div class="zirhSatir"><div id="envZirh" class="izgara zirhIzgara"></div><div id="zirhPuan"></div></div>
       <div id="envIzgara" class="izgara"></div>
       <div id="envCubuk" class="izgara cubukIzgara"></div>
@@ -102,6 +105,7 @@
     </section>
     <section class="envSandik" hidden>
       <header><h2>Sandık</h2><span class="ipucuMetin">Shift + tık: sandık ile envanter arasında taşı</span></header>
+      <div class="sandikIslem"><button type="button" class="envIslem" data-sandik="al">Tümünü al</button><button type="button" class="envIslem" data-sandik="koy">Çantayı boşalt</button><button type="button" class="envIslem" data-sandik="benzer">Benzerlerini koy</button><button type="button" class="envIslem" data-sandik="sirala">Sırala</button></div>
       <div id="sandikIzgara" class="izgara"></div>
     </section>
     <section class="envOrs" hidden>
@@ -144,7 +148,8 @@
 <!-- Geliştirici modu penceresi -->
 <div id="gelistirici" class="kaplama" hidden>
   <div class="pencere gelPencere">
-    <header><h2>Geliştirici Modu</h2><span id="gelDurum" class="kAlt"></span></header>
+    <header><h2>Geliştirici Modu</h2><span id="gelDurum" class="kAlt"></span><input type="search" id="gelGenelAra" placeholder="Tüm işlemlerde ara… (Ctrl + F)" autocomplete="off"></header>
+    <div id="gelCanliSerit" class="gelCanliSerit"></div>
     <nav class="gelSekmeler" id="gelSekme" aria-label="Geliştirici sekmeleri"></nav>
     <div id="gelIcerik"></div>
     <div id="gelMesaj" class="gelMesaj"></div>
@@ -229,6 +234,7 @@
     <div id="dunyaListe" class="liste"></div>
     <div class="altDugmeler">
       <button class="dugme ana" data-git="yeni">Yeni Dünya</button>
+      <button class="dugme" id="yedekYukle">Yedekten Yükle</button><input type="file" id="yedekDosya" accept=".hmdunya,.json,.gz,application/json,application/gzip" hidden>
       <button class="dugme" data-git="ana">Geri</button>
     </div>
   </div>
@@ -259,7 +265,7 @@
   <div class="pencere orta dar">
     <header><h2 id="bilgiBaslik">Bilgi</h2></header>
     <p id="bilgiMetin" class="bilgiMetin"></p>
-    <div class="altDugmeler"><button class="dugme ana" id="bilgiTamam">Ana Menü</button></div>
+    <div class="altDugmeler"><button class="dugme ana" id="yenidenBaglan" hidden>Yeniden Bağlan</button><button class="dugme" id="bilgiTamam">Ana Menü</button></div>
   </div>
 </div>
 
@@ -269,6 +275,12 @@
     <header><h2>Yeni Dünya</h2></header>
     <label class="alan">Dünya adı<input id="yeniAd" maxlength="32" value="Yeni Dünya"></label>
     <label class="alan">Tohum <small>(boş bırakılırsa rastgele)</small><input id="yeniTohum" maxlength="40" placeholder="Rastgele"></label>
+    <div class="zorlukSec" id="yeniZorluk"></div>
+    <details class="gelismis"><summary>Denge ayarları</summary>
+      <label class="alan">Kanlı Ay<select id="yeniKanli" data-denge="kanliAy"></select></label>
+      <label class="alan">Meteor<select id="yeniMeteor" data-denge="meteor"></select></label>
+      <label class="alan">Vücut ısısı değişimi<select id="yeniIsi" data-denge="isiHizi"></select></label>
+    </details>
     <label class="secim"><input type="checkbox" id="yeniKomut"><span>Komutlara izin ver<small>Geliştirici konsolundaki (F8) eşya verme, ışınlanma, zaman ve uçma gibi komutlar bu dünyada kullanılabilir.</small></span></label>
     <p class="aciklama">Her dünya, tohum değerinden üretilir. Aynı tohum aynı haritayı verir.</p>
     <div class="altDugmeler">
@@ -282,6 +294,7 @@
 <div id="ayarlarEkrani" class="ekran" hidden>
   <div class="pencere orta dar">
     <header><h2>Ayarlar</h2></header>
+    <div class="onAyar" id="grafikOnAyar"><span>Grafik ön ayarı</span><button type="button" data-on="dusuk">Düşük</button><button type="button" data-on="orta">Orta</button><button type="button" data-on="yuksek">Yüksek</button><button type="button" data-on="ultra">Ultra</button></div>
     <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
     <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
     <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
@@ -293,6 +306,8 @@
     <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
     <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
     <label class="secim"><input type="checkbox" id="aIsi"> Vücut ısısı (soğuk ve sıcak etkileri)</label>
+    <label class="secim"><input type="checkbox" id="aBakilan"> Bakılan nesnenin adını göster</label>
+    <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
     <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
     <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
     <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
@@ -367,6 +382,12 @@
           <li><b>Kanlı Ay</b>: her mevsimin son gecesi (7, 14, 21... gün) ay kızarır. Canavarlar iki kat kalabalık, daha güçlü ve kızıldır; meşaleler daha az korur, uyunamaz. Sabaha kadar hayatta kalana deneyim ve başarım verilir; Kanlı Ay canavarları iki kat ganimet bırakır.</li>
           <li><b>Gök olayları</b>: açık gecelerde yıldız kayar; bazı geceler yıldız yağmuru olur. Meteorlar krater açar; kraterin dibindeki <b>Gök Taşı</b> (demir kazmayla) <b>Yıldız Parçası</b> verir. Yıldız parçasından <b>Eve Dönüş Tılsımı</b> (sağ tık 3 saniye basılı tutulunca doğma noktasına ışınlar) ve <b>Yıldız Feneri</b> yapılır. Karlı bölgelerde, dağlarda ve kışın açık gecelerde kuzey ışıkları görülür.</li>
           <li><b>İstatistikler</b>: oynama süresi, hayatta kalınan gün, yenilen canavar, yürünen yol ve diğerleri Başarımlar penceresinin (L) başında gösterilir.</li>
+          <li><b>Zorluk</b>: yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir; Kanlı Ay, meteor sıklığı ve vücut ısısı hızı "Denge ayarları"ndan düzenlenir. Duraklatma menüsündeki <b>Dünya Ayarları</b> ile sonradan değiştirilebilir. Hardcore'da tek can vardır: ölünce dünya sona erer ve yalnızca izleyici olarak dolaşılır.</li>
+          <li><b>Bakılan nesne</b>: bakılan bloğun adı ekranın üstünde görünür (ekin olgunluğu, kovandaki bal, gereken alet gibi bilgilerle). Ayarlardan kapatılabilir.</li>
+          <li><b>Fotoğraf modu</b>: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü PNG olarak kaydeder.</li>
+          <li><b>Envanter</b>: "Sırala" çantayı birleştirip türüne göre dizer. Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri bulunur.</li>
+          <li><b>Çok oyunculu sohbet komutları</b>: /f &lt;ad&gt; &lt;mesaj&gt; özel mesaj, /oyuncular, /konum, /ben, /zar; sunucu /at &lt;ad&gt; ile oyuncu çıkarabilir. Bağlantı koparsa oyun 5 saniye sonra kendiliğinden yeniden bağlanmayı dener.</li>
+          <li><b>Dünya yedeği</b>: Dünyalar listesinde "Yedekle" dünyayı dosya (.hmdunya) olarak indirir, "Yedekten Yükle" geri yükler. Her açılışta dünyanın önceki hâli saklanır; "Önceki oturum" ile ona dönülebilir.</li>
           <li><b>Tarif Kitabı</b> (B) bütün eşyaların tariflerini, kullanıldığı tarifleri ve nereden bulunduklarını gösterir. Takibe alınan tarifin malzemeleri ekranın solunda izlenir.</li>
           <li>Harita, görülen yerlerden kendiliğinden çizilir ve kaydedilir. Sağ üstteki mini harita çevreyi, M tuşuyla açılan büyük harita keşfedilen tüm bölgeleri gösterir. Büyük haritada sürükleyerek kaydırılır, tekerlekle yakınlaştırılır; sol tıkla işaret eklenir veya düzenlenir, sağ tıkla silinir. İşaretler pusulada da görünür.</li>
           <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
@@ -396,6 +417,19 @@
 </div>
 
 <!-- Duraklatma -->
+<!-- 0.23.0: Dünya ayarları (zorluk ve denge) -->
+<div id="dunyaAyarEkrani" class="ekran yari" hidden>
+  <div class="pencere orta dar">
+    <header><h2>Dünya Ayarları</h2></header>
+    <div class="zorlukSec" id="daZorluk"></div>
+    <label class="alan">Kanlı Ay<select id="daKanli" data-denge="kanliAy"></select></label>
+    <label class="alan">Meteor<select id="daMeteor" data-denge="meteor"></select></label>
+    <label class="alan">Vücut ısısı değişimi<select id="daIsi" data-denge="isiHizi"></select></label>
+    <p class="aciklama" id="daNot"></p>
+    <div class="altDugmeler"><button class="dugme ana" id="daTamam">Tamam</button></div>
+  </div>
+</div>
+
 <div id="duraklatEkrani" class="ekran yari" hidden>
   <div class="pencere orta dar">
     <header><h2>Oyun Duraklatıldı</h2></header>
@@ -409,6 +443,7 @@
       <button class="dugme" id="agAc">Dünyayı Arkadaşlara Aç</button>
       <button class="dugme" id="basarimAc">Başarımlar</button>
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
+      <button class="dugme" data-git="dunyaAyar">Dünya Ayarları</button>
       <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
       <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>
     </div>
@@ -422,7 +457,7 @@
     <p id="olumSebep"></p>
     <p class="aciklama" id="olumMezar">Eşyalarınız öldüğünüz yere düştü.</p>
     <p class="olumIstat" id="olumIstat"></p>
-    <div class="menuDugmeler"><button class="dugme ana" id="yenidenDog">Yeniden Doğ</button><button class="dugme" id="olumCik">Ana Menü</button></div>
+    <div class="menuDugmeler"><button class="dugme ana" id="yenidenDog">Yeniden Doğ</button><button class="dugme ana" id="izleyiciOl" hidden>İzleyici Olarak Dolaş</button><button class="dugme" id="olumCik">Ana Menü</button></div>
   </div>
 </div>
 

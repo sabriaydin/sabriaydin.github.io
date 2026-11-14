@@ -264,6 +264,14 @@ export class Hud {
     el.hidden = false;
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
+  /* 0.23.0: bakılan blok ya da tekne adı (ekranın üst ortasında) */
+  bakilan(ad, alt) {
+    const el = $('#bakilanAd'), a = ad ? ad + '|' + (alt || '') : '';
+    if (a === this.son.bakilan) return;
+    this.son.bakilan = a;
+    if (!ad) { el.hidden = true; return; }
+    el.hidden = false; el.querySelector('b').textContent = ad; const s = el.querySelector('small'); s.textContent = alt || ''; s.hidden = !alt;
+  }
   /* 0.22.0: hasarın geldiği yön: dx, dz saldırana doğru dünya vektörü, yaw oyuncunun bakışı */
   hasarYonu(dx, dz, yaw) {
     const f = -dx * Math.sin(yaw) - dz * Math.cos(yaw), r = dx * Math.cos(yaw) - dz * Math.sin(yaw);

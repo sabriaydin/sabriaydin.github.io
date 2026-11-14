@@ -141,6 +141,12 @@ function koyKur0(u, rx, rz, yer) {
     for (const m of meslekler) if (koy.koylular.length < 12 || m === 'demirci' || m === 'balikci') koy.koylular.push({ idx: koy.koylular.length, meslek: m, ad: isim(), bina: bi, kapi: b.kapi });
   });
   if (koy.koylular.length < 3) return null;
+  /* 0.23.0: köyler kalabalık görünüyordu: her binada bir köylü, demirci ve balıkçı her zaman; köye göre en çok 4-7 */
+  const binada = new Set(), secilen = [];
+  for (const kl of koy.koylular) if (kl.meslek === 'demirci' || kl.meslek === 'balikci') { secilen.push(kl); binada.add(kl.bina); }
+  const sinir = 4 + (koy.binalar.length + koy.rx * 3 + koy.rz * 7 & 3);
+  for (const kl of koy.koylular) if (secilen.length < sinir && !binada.has(kl.bina) && !secilen.includes(kl)) { secilen.push(kl); binada.add(kl.bina); }
+  koy.koylular = secilen.sort((a, b) => a.idx - b.idx).map((kl, i) => ({ ...kl, idx: i }));
   koy.bbox = [x - koy.yaricap, z - koy.yaricap, x + koy.yaricap, z + koy.yaricap];
   if (koy.liman) { const L = koy.liman.kutu; koy.bbox = [Math.min(koy.bbox[0], L[0]), Math.min(koy.bbox[1], L[1]), Math.max(koy.bbox[2], L[2]), Math.max(koy.bbox[3], L[3])]; }
   return koy;

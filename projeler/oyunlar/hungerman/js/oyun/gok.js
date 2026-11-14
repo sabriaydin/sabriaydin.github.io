@@ -9,8 +9,9 @@ import { karma2 } from '../rastgele.js';
 import { KARLI, BY } from '../dunya/uretici.js';
 import { DENIZ, PY, diyarMi } from '../sabitler.js';
 
-export const kanliAyGunu = gun => gun >= 7 && gun % 7 === 0;
-export const yildizYagmuruGunu = (gun, tohum) => gun >= 2 && !kanliAyGunu(gun) && karma2((tohum ^ 0x51a7) >>> 0, gun, 7) < 0.16;
+/* 0.23.0: sıklık dünyanın denge ayarından gelir (0: kapalı) */
+export const kanliAyGunu = (gun, n = 7) => n > 0 && gun >= n && gun % n === 0;
+export const yildizYagmuruGunu = (gun, tohum, n = 7) => gun >= 2 && !kanliAyGunu(gun, n) && karma2((tohum ^ 0x51a7) >>> 0, gun, 7) < 0.16;
 const KORUNAN = new Set([1, 515]);   // ana kaya, obsidyen
 const AGAC = new Set([8, 9, 10, 11, 12, 13, 144, 145]);   // kütük ve yapraklar
 
@@ -20,13 +21,13 @@ export class GokOlaylari {
     this.kanli = 0; this.aurora = 0; this.kayanSayac = 3; this.meteorlar = []; this.meteorGece = -1; this.meteorZaman = 2; this.uyari = -1;
   }
   /* Bu an Kanlı Ay gecesi mi (gün batımından sabaha) */
-  kanliAyMi(o) { return kanliAyGunu(o.gun) && o.zaman >= 0.5 && !diyarMi(o.oyuncu.konum.x); }
+  kanliAyMi(o) { return kanliAyGunu(o.gun, o.denge ? o.denge.kanliAy : 7) && o.zaman >= 0.5 && !diyarMi(o.oyuncu.konum.x); }
   guncelle(dt) {
     const o = this.oyun(); if (!o) return;
     const p = o.oyuncu.konum, diyar = diyarMi(p.x), H = o.hava;
     const acik = !diyar && H.yogunluk < 0.25, gece = o.zaman > 0.53 && o.zaman < 0.97;
     /* Kanlı Ay: yaklaşınca uyarı, gece boyunca kızıl gökyüzü */
-    const kanliGun = kanliAyGunu(o.gun);
+    const kanliGun = kanliAyGunu(o.gun, o.denge ? o.denge.kanliAy : 7);
     if (kanliGun && o.zaman >= 0.38 && o.zaman < 0.5 && this.uyari !== o.gun) {
       this.uyari = o.gun;
       this.bildirim('Kanlı Ay yükseliyor! Bu gece canavarlar daha kalabalık ve güçlü olacak; uyunamaz.');
@@ -45,7 +46,7 @@ export class GokOlaylari {
     this.aurora += (ah - this.aurora) * Math.min(1, dt * 0.25);
     if (this.aurora > 0.5) this.olay('aurora');
     /* Kayan yıldızlar */
-    const yagmur = yildizYagmuruGunu(o.gun, o.tohum);
+    const yagmur = yildizYagmuruGunu(o.gun, o.tohum, o.denge ? o.denge.kanliAy : 7);
     if (acik && gece && !o.oyuncu.basSuda) {
       this.kayanSayac -= dt;
       if (this.kayanSayac <= 0) {
@@ -57,7 +58,7 @@ export class GokOlaylari {
     if (yagmur && gece && acik && this.yagmurBildirim !== o.gun) { this.yagmurBildirim = o.gun; this.bildirim('Bu gece yıldız yağmuru var! Meteor düşebilir.'); }
     /* Meteor: tek oyunculuda ve sunucuda, açık bir gecede bir kez denenir */
     if (!o.istemci && !diyar && gece && acik) {
-      if (this.meteorGece !== o.gun) { this.meteorGece = o.gun; this.meteorZaman = Math.random() < (yagmur ? 0.9 : 0.3) ? 0.56 + Math.random() * 0.36 : 2; }
+      if (this.meteorGece !== o.gun) { this.meteorGece = o.gun; this.meteorZaman = Math.random() < Math.min(1, (yagmur ? 0.9 : 0.3) * (o.denge ? o.denge.meteor : 1)) ? 0.56 + Math.random() * 0.36 : 2; }
       if (o.zaman >= this.meteorZaman) { this.meteorZaman = 2; this.meteorDusur(o); }
     }
     /* Düşmekte olan meteorlar */

@@ -13,6 +13,15 @@ import { PY, DENIZ, diyarMi } from '../sabitler.js';
 import { cakisma } from '../sekiller.js';
 
 let SIRA = 1;
+/* 0.23.0: canlıların altındaki yumuşak gölge (zemine yatırılmış, kenarı silinen koyu daire) */
+const GOLGE_GEO = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+const GOLGE_MALZ = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const x = cv.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.55, 'rgba(0,0,0,.6)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, opacity: 0.4, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+})();
 const CICEK = new Set([26, 27, 44]);   // 0.21.0: arıların polen topladığı çiçekler
 const MAX_HAYVAN = 18, HAYVAN_UZAK = 120, ZOMBI_UZAK = 72;
 
@@ -42,7 +51,7 @@ export class Varliklar {
     this.liste = []; this.oklar = [];
     this.sahne.sahne.remove(this.grup);
   }
-  modelSil(v) { this.grup.remove(v.m.kok); v.m.kok.traverse(n => { if (n.geometry) n.geometry.dispose(); }); v.m.malzeme.dispose(); }
+  modelSil(v) { if (v.golge) this.grup.remove(v.golge); this.grup.remove(v.m.kok); v.m.kok.traverse(n => { if (n.geometry) n.geometry.dispose(); }); v.m.malzeme.dispose(); }
 
   ekle(turAd, x, y, z, ek) {
     const tur = TURLER[turAd];
@@ -166,7 +175,8 @@ export class Varliklar {
     const yagis = !!(ctx.yagmur || ctx.firtina);
     /* 0.22.0: Kanlı Ay: iki kat canavar, meşaleler daha az korur */
     const kanli = !!ctx.kanliAy;
-    const sinir = kanli ? Math.min(32, 2 * (5 + ctx.gunSayisi)) : Math.min(18, 5 + ctx.gunSayisi);
+    const zc = ctx.zorlukCanavar || 1;   // 0.23.0: zorluk
+    const sinir = Math.round((kanli ? Math.min(32, 2 * (5 + ctx.gunSayisi)) : Math.min(18, 5 + ctx.gunSayisi)) * zc);
     if (zombi < (gece ? sinir : Math.ceil(sinir / 2))) {
       for (let deneme = 0; deneme < 6; deneme++) {
         const a = Math.random() * Math.PI * 2, r = 20 + Math.random() * 26;
@@ -227,6 +237,7 @@ export class Varliklar {
   /* ctx.oyuncular verilirse (çok oyunculu sunucu) her oyuncu için ayrı bağlam bulunur */
   guncelle(dt, ctx) {
     if (this.ayna) { this.aynaGuncelle(dt, ctx); return; }
+    GOLGE_MALZ.opacity = 0.15 + 0.25 * (ctx.gunIsigi ?? 1);
     const C = ctx.oyuncular || [ctx];
     this._C = C;
     this.dogurSayac -= dt;
@@ -658,6 +669,7 @@ export class Varliklar {
   /* Model ve canlandırma (sunucu ve ayna ortak) */
   canlandir(v, dt, dx, dy, dz, kovaliyor, yh = Math.hypot(v.hiz.x, v.hiz.z)) {
     const T = v.tur, m = v.m, p = v.konum;
+    this.golgeGuncelle(v);
     v.faz += yh * dt * 5.5;
     const sal = Math.sin(v.faz) * Math.min(0.8, yh * 0.35);
     const B = m.bacaklar;
@@ -1261,6 +1273,21 @@ export class Varliklar {
     v.ger = 0;
     if (this.sesK(p) > 0.3) this.ses.yayAt();
   }
+  /* 0.23.0: gölge: altındaki ilk katı bloğun üstüne konur; yükseldikçe küçülür, suda ve görünmezken gizlenir */
+  golgeGuncelle(v) {
+    const T = v.tur, p = v.konum;
+    if (T.su || T.atesTopu) return;
+    if (!v.golge) { v.golge = new THREE.Mesh(GOLGE_GEO, GOLGE_MALZ); v.golge.renderOrder = 1; this.grup.add(v.golge); }
+    const g = v.golge;
+    if (!v.m.kok.visible || v.suda || v.olu) { g.visible = false; return; }
+    let y = Math.floor(p.y + 0.3), n = 0;
+    while (n < 6 && !this.kati(p.x, y - 0.5, p.z)) { y--; n++; }
+    if (n >= 6) { g.visible = false; return; }
+    const yuk = Math.max(0, p.y - y), k = Math.max(0, 1 - yuk / 6) * (v.m.kok.scale.x || 1);
+    g.visible = k > 0.05;
+    g.position.set(p.x, y + 0.02, p.z);
+    g.scale.setScalar(Math.max(0.35, (T.gen || 0.6) * 2.4) * k);
+  }
   /* 0.22.0: Kanlı Ay canavarı: %50 fazla can, +1 hasar (oyuncuyaVur içinde), iki kat ganimet ve deneyim */
   kanliYap(v) { v.kanli = true; v.can = Math.round(v.can * 1.5); }
   /* ---------- 0.21.0: Arıcılık (tek oyunculu ve sunucu) ---------- */
@@ -1460,6 +1487,7 @@ export class Varliklar {
   }
   aynaGuncelle(dt, ctx) {
     const op = ctx.oyuncu.konum;
+    GOLGE_MALZ.opacity = 0.15 + 0.25 * (ctx.gunIsigi ?? 1);
     for (const v of this.liste) {
       const T = v.tur, p = v.konum, m = v.m;
       v.agHasar = (v.agHasar || 0) - dt;

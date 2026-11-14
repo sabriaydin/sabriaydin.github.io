@@ -15,8 +15,12 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const kucuk = s => String(s).toLocaleLowerCase('tr');
 const sure = sn => { const s = Math.ceil(sn); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+/* 0.23.0: sekmeler yeniden düzenlendi; tekrar eden bölümler kaldırıldı. Sık kullanılan işlemler sağ tıkla sabitlenir,
+   üstteki arama kutusu tüm sekmelerdeki işlemleri bulur. */
 const SEKMELER = [
+  ['sik', '★ Sık kullanılan', 'Sağ tıkla sabitlenen işlemler'],
   ['oyuncu', 'Oyuncu', 'Yetenekler, can ve açlık, deneyim, iksir etkileri'],
+  ['hayatta', 'Hayatta Kalma', 'Hasar ve durumlar, vücut ısısı, gök olayları, başarımlar'],
   ['esya', 'Eşyalar', 'Eşya verme, hazır setler, envanter işlemleri'],
   ['dunya', 'Dünya', 'Zaman, hava, arazi, bakılan blok, tekneler'],
   ['harita', 'Harita', 'Keşif, tüm haritayı açma, işaretler'],
@@ -26,7 +30,7 @@ const SEKMELER = [
   ['gorsel', 'Görüntü', 'Görünüm seçenekleri, göstergeler, ekran görüntüsü'],
   ['bilgi', 'Bilgi', 'Performans grafiği ve teknik bilgiler']
 ];
-const SAKLA = 'hungerman_gelistirici_sekme';
+const SAKLA = 'hungerman_gelistirici_sekme', SIK = 'hungerman_gelistirici_sik';
 
 /* Eşya kategorileri */
 const KATEGORI = [['hepsi', 'Hepsi'], ['blok', 'Bloklar'], ['alet', 'Aletler'], ['zirh', 'Zırh'], ['yiyecek', 'Yiyecek ve iksir'], ['diger', 'Diğer']];
@@ -57,6 +61,25 @@ export class GelistiriciPenceresi {
     this.kareler = new Float32Array(180); this.kareSira = 0;
     this.sinir = null;   // parça sınırı çizgileri
     this.kok = $('#gelistirici');
+    try { this.sik = JSON.parse(localStorage.getItem(SIK) || '[]'); } catch (e) { this.sik = []; }
+    if (!Array.isArray(this.sik)) this.sik = [];
+    this.genelArama = '';
+    const ga = $('#gelGenelAra');
+    ga.addEventListener('input', () => { this.genelArama = ga.value; this.ciz(); });
+    ga.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { if (ga.value) { ga.value = ''; this.genelArama = ''; this.ciz(); } else this.kapatIste(); } });
+    this.kok.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); ga.focus(); ga.select(); } });
+    /* Sağ tık: işlemi sık kullanılanlara ekle / çıkar */
+    $('#gelIcerik').addEventListener('contextmenu', e => {
+      const b = e.target.closest('button[data-k], button[data-onay], button[data-etki], button[data-dogur], button[data-set], label.gelAnahtar');
+      if (!b) return;
+      e.preventDefault();
+      const html = b.outerHTML.replace(/ checked=""/g, '').replace(/ class="on"/g, ''), anahtar = b.dataset.k || b.dataset.onay || b.dataset.etki || b.dataset.dogur || b.dataset.set || (b.querySelector('[data-a]') || {}).dataset?.a;
+      const i = this.sik.findIndex(s => s.a === anahtar);
+      if (i >= 0) { this.sik.splice(i, 1); this.mesaj('Sık kullanılanlardan çıkarıldı.', 'soluk'); }
+      else { if (this.sik.length >= 40) { this.mesaj('En çok 40 işlem sabitlenebilir.', 'hata'); return; } this.sik.push({ a: anahtar, h: html }); this.mesaj('Sık kullanılanlara eklendi (★ sekmesi).', 'tamam'); }
+      try { localStorage.setItem(SIK, JSON.stringify(this.sik)); } catch (x) { /* depolama kapalı */ }
+      this.ses.tik(); if (this.sekme === 'sik') this.ciz();
+    });
     $('#gelSekme').innerHTML = SEKMELER.map(([k, a]) => `<button type="button" data-s="${k}">${a}</button>`).join('');
     $('#gelSekme').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; this.sekme = b.dataset.s; try { localStorage.setItem(SAKLA, this.sekme); } catch (x) { /* depolama kapalı */ } this.ses.tik(); this.ciz(); $('#gelIcerik').scrollTop = 0; });
     $('#gelKapat').addEventListener('click', () => this.kapatIste());
@@ -122,7 +145,9 @@ export class GelistiriciPenceresi {
     [...$('#gelSekme').children].forEach(b => b.classList.toggle('on', b.dataset.s === this.sekme));
     $('#gelDurum').textContent = `${o.ad} · ${o.istemci ? 'çok oyunculu istemci (yalnız kişisel işlemler)' : o.ag ? 'çok oyunculu sunucu' : 'tek oyunculu'}`;
     const S = SEKMELER.find(s => s[0] === this.sekme);
-    const f = { oyuncu: this.oyuncuSekmesi, esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, gorsel: this.gorselSekmesi, bilgi: this.bilgiSekmesi }[this.sekme];
+    this.son = {};
+    if (this.genelArama.trim()) { $('#gelIcerik').innerHTML = this.aramaSonucu(o, this.genelArama); this.canliYaz(o); return; }
+    const f = { sik: this.sikSekmesi, hayatta: this.hayattaSekmesi, oyuncu: this.oyuncuSekmesi, esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, gorsel: this.gorselSekmesi, bilgi: this.bilgiSekmesi }[this.sekme];
     this.son = {};
     $('#gelIcerik').innerHTML = `<div class="gelBaslik"><h3>${S[1]}</h3><span>${S[2]}</span></div>` + f.call(this, o);
     this.canliYaz(o);
@@ -138,18 +163,49 @@ export class GelistiriciPenceresi {
         this.kaydirici('hiz', 'Hareket hızı', 0.2, 5, 0.1, P.hizCarpani, v => v.toFixed(1) + '×') +
         this.kaydirici('erisim', 'Blok erişim mesafesi', 5, 40, 1, o.etkilesim.erisim || 5, v => v + ' blok') +
         this.dugmeler(this.dugme('iyiles', 'Tamamen iyileş'), this.dugme('doy', 'Doyur'))) +
-      this.bolum('Hasar ve durum sınaması',
-        this.dugmeler(this.dugme('hasar 4', '2 kalp hasar ver'), this.dugme('durum zehir', 'Mide bulantısı'), this.dugme('durum agu', 'Örümcek zehri'), this.dugme('durum yanma', 'Yanma'), this.dugme('durum kanama', 'Kanama'), this.dugme('durum kirik', 'Kırık bacak'), this.dugme('durum temizle', 'Durumları kaldır'), this.onay('hasar 99', 'Oyuncuyu öldür')),
-        'Hasar düğmeleri ölümsüzlük açıkken de etki eder.') +
-      this.bolum('Gök olayları ve vücut ısısı',
-        this.dugmeler(this.dugme('kanliay', 'Kanlı Ay'), this.dugme('meteor', 'Meteor düşür'), this.dugme('isi 33.5', 'Dondur'), this.dugme('isi 40', 'Sıcak çarpması'), this.dugme('isi 37', 'Normal ısı'))) +
       this.bolum('Deneyim', `<p class="gelDeger" id="gelXp"></p>` +
         this.dugmeler(this.dugme('xp seviye 1', '+1 seviye'), this.dugme('xp seviye 5', '+5 seviye'), this.dugme('xp seviye 10', '+10 seviye'), this.dugme('xp sifirla', 'Sıfırla'))) +
       this.bolum('İksir etkileri',
         this.kaydirici('etkiSure', 'Verilecek etkinin süresi', 30, 900, 30, this.etkiSure, v => sure(v)) +
         `<div class="gelDugmeler" id="gelEtkiler">${Object.entries(ETKILER).map(([k, e]) => `<button type="button" data-etki="${k}"><i style="background:${e.renk}"></i>${e.ad}<em></em></button>`).join('')}${this.dugme('etki temizle', 'Etkileri kaldır')}</div>`) +
       this.bolum('Doğma noktası', `<p class="gelDeger">X ${Math.round(d.x)} · Y ${Math.round(d.y)} · Z ${Math.round(d.z)}</p>` +
-        this.dugmeler(this.dugme('dogum', 'Bulunulan yere ayarla'), this.dugme('isinla dogum', 'Doğma noktasına git')));
+        this.dugmeler(this.dugme('dogum', 'Bulunulan yere ayarla')), 'Doğma noktasına gitmek için Işınlanma sekmesi kullanılır.');
+  }
+  /* 0.23.0: hayatta kalma sınamaları */
+  hayattaSekmesi(o) {
+    const h = o.hayatta;
+    return this.bolum('Hasar ve durumlar',
+        this.dugmeler(this.dugme('hasar 4', '2 kalp hasar ver'), this.dugme('durum zehir', 'Mide bulantısı'), this.dugme('durum agu', 'Örümcek zehri'), this.dugme('durum yanma', 'Yanma'), this.dugme('durum kanama', 'Kanama'), this.dugme('durum kirik', 'Kırık bacak'), this.dugme('durum temizle', 'Durumları kaldır'), this.onay('hasar 99', 'Oyuncuyu öldür')),
+        'Hasar düğmeleri ölümsüzlük açıkken de etki eder.') +
+      this.bolum('Vücut ısısı', `<p class="gelDeger" id="gelIsi"></p>` +
+        this.kaydirici('vucut', 'Vücut ısısı', 30, 42, 0.5, Math.round(h.vucut * 2) / 2, v => v.toFixed(1).replace('.', ',') + ' °C') +
+        this.dugmeler(this.dugme('isi 33.5', 'Dondur'), this.dugme('isi 40', 'Sıcak çarpması'), this.dugme('isi 37', 'Normale döndür')),
+        h.isiAcik ? 'Ayarlardan kapatılabilir.' : 'Vücut ısısı ayarlardan kapatılmış; değerler etkisizdir.') +
+      this.bolum('Gök olayları', this.dugmeler(this.dugme('kanliay', 'Kanlı Ay başlat'), this.dugme('meteor', 'Meteor düşür'), this.dugme('zaman gece', 'Geceye geç'))) +
+      this.bolum('Başarımlar', this.dugmeler(this.dugme('basarim liste', 'Durumu göster'), this.dugme('basarim hepsi', 'Tümünü ver'), this.onay('basarim sifirla', 'Sıfırla')));
+  }
+  /* 0.23.0: sık kullanılanlar */
+  sikSekmesi(o) {
+    if (!this.sik.length) return '<p class="gelNot">Henüz sabitlenen işlem yok. Herhangi bir sekmedeki düğmeye ya da anahtara <b>sağ tıklanarak</b> buraya eklenir; tekrar sağ tıklanınca çıkarılır.</p>';
+    const anahtarlar = this.sik.filter(s => s.h.startsWith('<label')), dugmeler = this.sik.filter(s => !s.h.startsWith('<label'));
+    const tazele = s => { const a = /data-a="([^"]+)"/.exec(s.h); return a && this.anahtarlar[a[1]] ? this.anahtar(a[1], o) : s.h; };
+    return (anahtarlar.length ? this.bolum('Anahtarlar', `<div class="gelIzgara">${anahtarlar.map(tazele).join('')}</div>`) : '') +
+      (dugmeler.length ? this.bolum('İşlemler', `<div class="gelDugmeler">${dugmeler.map(s => s.h).join('')}</div>`, 'Sağ tık: listeden çıkar.') : '');
+  }
+  /* 0.23.0: tüm sekmelerde arama: eşleşen düğme ve anahtarlar bulundukları sekmeyle listelenir */
+  aramaSonucu(o, a) {
+    const q = kucuk(a.trim()), kap = document.createElement('div'), sonuc = [];
+    for (const [k, ad] of SEKMELER) {
+      if (k === 'sik' || k === 'bilgi') continue;
+      const f = this[k + 'Sekmesi'] || { esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, gorsel: this.gorselSekmesi }[k];
+      if (!f) continue;
+      const kayit = this.arama; this.arama = '';
+      kap.innerHTML = f.call(this, o); this.arama = kayit;
+      const l = [...kap.querySelectorAll('button[data-k], button[data-onay], button[data-etki], button[data-dogur], button[data-set], label.gelAnahtar')]
+        .filter(b => kucuk(b.textContent).includes(q) || kucuk(b.title || '').includes(q) || kucuk(b.closest('section')?.querySelector('h4')?.textContent || '').includes(q));
+      if (l.length) sonuc.push(this.bolum(`${ad}`, `<div class="gelDugmeler gelAramaSonuc">${l.map(b => b.outerHTML).join('')}</div>`));
+    }
+    return `<div class="gelBaslik"><h3>Arama: “${esc(a.trim())}”</h3><span>Sağ tık: sık kullanılanlara ekle</span></div>` + (sonuc.join('') || '<p class="gelNot">Eşleşen işlem yok.</p>');
   }
 
   esyaSekmesi(o) {
@@ -159,7 +215,6 @@ export class GelistiriciPenceresi {
       this.bolum('Envanter işlemleri', this.dugmeler(this.dugme('onar', 'Tüm eşyaları onar'), this.dugme('eldeki doldur', 'Eldeki yığını doldur'), this.dugme('eldeki sil', 'Eldekini sil'), this.onay('envanter temizle', 'Envanteri boşalt'))) +
       this.bolum('Büyü', this.dugmeler(this.dugme('buyu hepsi', 'Eldekini en yüksek büyülerle büyüle'), this.dugme('buyu temizle', 'Eldekinin büyülerini kaldır'), this.dugme('buyu liste', 'Büyüleri listele')),
         'Tek büyü için konsolda: buyu <büyü> [seviye]') +
-      this.bolum('Başarımlar', this.dugmeler(this.dugme('basarim liste', 'Durumu göster'), this.dugme('basarim hepsi', 'Tümünü ver'), this.onay('basarim sifirla', 'Sıfırla'))) +
       this.bolum('Eşya ver', `
         <div class="gelSatir"><input type="search" id="gelAra" placeholder="Eşya adı ya da numarası" value="${esc(this.arama)}" autocomplete="off">
           <span class="gelAdet" title="Tıklamada verilecek adet">${[1, 8, 16, 64].map(n => `<button type="button" data-adet="${n}" class="${this.adet === n ? 'on' : ''}">${n}</button>`).join('')}</span></div>
@@ -196,7 +251,7 @@ export class GelistiriciPenceresi {
         this.kaydirici('kesif', 'Keşfedilecek yarıçap', 64, 2048, 64, this.kesifR, v => v + ' blok') +
         this.dugmeler(`<button type="button" data-kesfet="1">Çevreyi keşfet</button>`, this.onay('kesfet tumu', 'Tüm haritayı görünür yap')),
         'Keşif arka planda yapılır; oyun sürerken harita dolar. Tüm harita, dünya sınırına (haritadaki kesik çizgili kare) kadar açılır; birkaç dakika sürer ve belleği yoğun kullanır.') +
-      this.bolum('Harita ekranı', this.dugmeler(`<button type="button" data-harita="1">Büyük haritayı aç</button>`, this.onay('harita temizle', 'Haritayı sıfırla')) + this.anahtarGrubu(o, 'mini'),
+      this.bolum('Harita ekranı', this.dugmeler(`<button type="button" data-harita="1">Büyük haritayı aç</button>`, this.onay('harita temizle', 'Haritayı sıfırla')),
         'Büyük haritada Ctrl + tık ile tıklanan yere ışınlanılır.') +
       this.bolum('İşaretler', `<div class="gelListe">${(o.yerler || []).map((y, i) => `<div><i style="background:${esc(y.renk)}"></i><b>${esc(y.ad)}</b><span>X ${y.x} · Z ${y.z}</span><button type="button" data-yer="${i}">Git</button><button type="button" data-yersil="${i}" aria-label="Sil">✕</button></div>`).join('') || '<p class="gelNot">İşaret eklenmemiş.</p>'}</div>` +
         this.dugmeler(`<button type="button" data-yerekle="1">Bulunulan yere işaret ekle</button>`, (o.yerler || []).length ? `<button type="button" data-yertemizle="1" class="tehlike">Tüm işaretleri sil</button>` : ''));
@@ -227,8 +282,7 @@ export class GelistiriciPenceresi {
       this.bolum('Koordinat', `<div class="gelSatir gelKoord"><label>X <input type="number" id="gelX" value="${Math.round(P.x)}"></label><label>Y <input type="number" id="gelY" placeholder="zemin"></label><label>Z <input type="number" id="gelZ" value="${Math.round(P.z)}"></label><button type="button" data-git="1">Git</button></div>` +
         this.dugmeler(...[['Kuzey', '~ ~-100'], ['Güney', '~ ~100'], ['Doğu', '~100 ~'], ['Batı', '~-100 ~']].map(([a, k]) => this.dugme('isinla ' + k, a + ' 100 blok')), this.dugme('isinla ~ ~40 ~', '40 blok yukarı'), `<button type="button" data-harita="1">Haritadan seç (Ctrl + tık)</button>`)) +
       this.bolum('Yakındaki köyler', koyler.length ? this.dugmeler(...koyler.map(({ k, d }) => this.dugme(`isinla ${k.x + 7} ${k.z}`, `${esc(k.ad)}${k.liman ? ' ⚓' : ''} <em>${Math.round(d)} blok</em>`))) : '<p class="gelNot">1500 blok içinde köy yok.</p>') +
-      (oyuncular.length ? this.bolum('Oyuncular', this.dugmeler(...oyuncular.map(u => this.dugme('isinla oyuncu ' + u.ad, esc(u.ad) + ` <em>${Math.round(Math.hypot(u.p.x - P.x, u.p.z - P.z))} blok</em>`)))) : '') +
-      this.bolum('Harita işaretleri', (o.yerler || []).length ? `<div class="gelDugmeler">${o.yerler.map((y, i) => `<button type="button" data-yer="${i}"><i style="background:${esc(y.renk)}"></i>${esc(y.ad)}</button>`).join('')}</div>` : '<p class="gelNot">Büyük haritada (M) ya da Harita sekmesinde işaret eklenmemiş.</p>');
+      (oyuncular.length ? this.bolum('Oyuncular', this.dugmeler(...oyuncular.map(u => this.dugme('isinla oyuncu ' + u.ad, esc(u.ad) + ` <em>${Math.round(Math.hypot(u.p.x - P.x, u.p.z - P.z))} blok</em>`)))) : '');
   }
 
   koySekmesi(o) {
@@ -243,8 +297,7 @@ export class GelistiriciPenceresi {
     const gorevler = G.aktif.length ? `<div class="gelListe">${G.aktif.map(q => `<div><b>${esc(q.kisa)}</b><span>${q.tur === 'mektup' ? 'mektup teslimi' : G.ilerleme(q, o.envanter) + ' / ' + q.adet} · ${esc(q.koyluAd || '')}</span></div>`).join('')}</div>` : '<p class="gelNot">Etkin görev yok.</p>';
     return this.bolum('En yakın köy', koy, 'İtibar ve takas işlemleri en yakın köye uygulanır.') +
       this.bolum('Görevler', `<p class="gelDeger">Tamamlanan görev: <b>${G.tamamlanan}</b></p>` + gorevler +
-        this.dugmeler(this.dugme('gorev tamamla', 'Görevleri teslime hazır yap'), this.onay('gorev birak', 'Görevleri bırak')), 'Teslime hazır yapılan görevlerin ödülü, görevi veren köylüden alınır. Mektup görevleri hedef köye götürülmelidir.') +
-      this.bolum('Ticaret', this.dugmeler(this.dugme('ver 288 16', 'Sikke × 16'), this.dugme('ver 288 64', 'Sikke × 64')));
+        this.dugmeler(this.dugme('gorev tamamla', 'Görevleri teslime hazır yap'), this.onay('gorev birak', 'Görevleri bırak'), this.dugme('ver 288 64', 'Sikke × 64')), 'Teslime hazır yapılan görevlerin ödülü, görevi veren köylüden alınır. Mektup görevleri hedef köye götürülmelidir.');
   }
 
   gorselSekmesi(o) {
@@ -332,6 +385,7 @@ export class GelistiriciPenceresi {
     else if (r === 'zhiz') { this.k(`zaman hiz ${v}`); this.esitle(o); }
     else if (r === 'gorus') this.k(`gorus ${v}`);
     else if (r === 'erisim') this.k(`erisim ${v}`);
+    else if (r === 'vucut') this.k(`isi ${v}`);
     if (!a) return;
     const A = this.anahtarlar[a], acik = t.checked;
     if (A.komut || A.komutFn) { if (A.al(o) !== acik) this.k(A.komutFn ? A.komutFn(acik) : A.komut); }
@@ -386,6 +440,10 @@ export class GelistiriciPenceresi {
   canliYaz(o) {
     const S = this.sekme, son = this.son || (this.son = {});
     const yaz = (id, m, html) => { if (son[id] === m) return; const el = $(id); if (!el) return; son[id] = m; if (html) el.innerHTML = m; else el.textContent = m; };
+    /* 0.23.0: üst şerit: konum, biyom, saat, kare hızı, can ve vücut ısısı */
+    const P = o.oyuncu.konum, kb = o.biyom != null ? BIYOMLAR[o.biyom] : '';
+    yaz('#gelCanliSerit', `<span>X ${Math.round(P.x)} · Y ${Math.round(P.y)} · Z ${Math.round(P.z)}</span><span>${esc(kb || '')}</span><span>${o.gun}. gün · ${$('#saatDeger').textContent}</span><span>${$('#fps').textContent || '—'}</span><span>Can ${o.hayatta.can / 2} · Açlık ${o.hayatta.aclik / 2}</span><span>${o.hayatta.vucut.toFixed(1).replace('.', ',')} °C</span>`, true);
+    if (S === 'hayatta') yaz('#gelIsi', `Vücut ${o.hayatta.vucut.toFixed(1).replace('.', ',')} °C · hissedilen ${o.hayatta.hissedilen.toFixed(1).replace('.', ',')} °C · Kanlı Ay ${o.gok && o.gok.kanliAyMi(o) ? 'sürüyor' : 'yok'}`);
     if (S === 'bilgi') { this.tabloYaz(o); this.grafikCiz(); }
     else if (S === 'canli') this.sayimYaz(o);
     else if (S === 'oyuncu') {

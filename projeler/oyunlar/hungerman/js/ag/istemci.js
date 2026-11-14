@@ -2,6 +2,7 @@
    Dünya aynı tohumdan yerelde üretilir; blok değişiklikleri, canlılar, yere düşen eşyalar, tekneler ve zaman sunucudan gelir.
    Hareket, envanter, can, görevler ve köy itibarı yerelde yürütülür ve düzenli olarak sunucuya kaydedilir. */
 import { UzakOyuncular } from './uzak-oyuncular.js';
+import { zorlukUygula } from '../oyun/zorluk.js';
 import { r2, r3, v3, durumDizisi, blokEfekti, sandikDizi, sandikKur } from './ortak.js';
 import { koyBul, MESLEK_ADI } from '../dunya/koy-uretici.js';
 import { BLOKLAR, ESYALAR } from '../bloklar.js';
@@ -124,6 +125,7 @@ export class IstemciOyun {
       }
       case 'h': this.arayuz.hasar(m.n, m.s, m.k[0], m.k[1], m.a); break;
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
+      case 'za': o.zorluk = m.z; o.denge = m.d; zorlukUygula(o); break;   // 0.23.0: dünya ayarları değişti
       case 'met': if (o.gok && Array.isArray(m.p)) o.gok.meteorBaslat({ x: +m.p[0], y: +m.p[1], z: +m.p[2], aci: +m.a || 0 }); break;   // 0.22.0: meteor
       case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
       case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;
@@ -159,7 +161,8 @@ export class IstemciOyun {
       case 'sh': if (m.s) this.arayuz.sohbet(null, m.s); else this.arayuz.sohbet(m.a, m.m, m.r); break;
       case 'uy': this.arayuz.uykuBaslat(); break;
       case 'ub': this.arayuz.bildirim(`Uyuyan oyuncular: ${m.n}/${m.a}. Gece, herkes yattığında atlanır.`); break;
-      case 'kapandi': if (!this.kapali) { this.kapali = true; this.arayuz.koptu('Sunucu, dünyayı kapattı.'); } break;
+      case 'kapandi': if (!this.kapali) { this.kapali = true; this.arayuz.koptu('Sunucu, dünyayı kapattı.', true); } break;
+      case 'atildi': if (!this.kapali) { this.kapali = true; this.arayuz.koptu(m.s || 'Sunucu sizi oyundan çıkardı.', true); } break;   // 0.23.0
     }
   }
 
@@ -169,6 +172,7 @@ export class IstemciOyun {
   sandikKir(x, y, z) { this.gonder({ t: 'skr', x, y, z }); }
   mezarIste(x, y, z, esyalar) { this.gonder({ t: 'mz', p: [r2(x), r2(y), r2(z)], y: sandikDizi(esyalar) }); }   // 0.22.0
   sohbetGonder(s) { this.gonder({ t: 'sh', m: s }); }
+  fisilda(ad, s) { this.gonder({ t: 'fs', h: ad, m: s }); }   // 0.23.0: özel mesaj
   kayitGonder() {
     const o = this.oyun;
     if (!o || this.kapali) return;

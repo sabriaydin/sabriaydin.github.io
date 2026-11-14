@@ -43,16 +43,16 @@ export class Hayatta {
     if (o.kosuyor) hedef += 0.4;
     /* Normale dönüş hızlı, soğuma ve ısınma yavaştır */
     const k = hedef < this.vucut ? (this.vucut > 37 ? 1 / 25 : 1 / 240) : (this.vucut < 37 ? 1 / 25 : 1 / 160);
-    this.vucut += (hedef - this.vucut) * Math.min(1, dt * k);
+    this.vucut += (hedef - this.vucut) * Math.min(1, dt * k * (hedef > 36 && hedef < 38 ? 1 : (this.isiHizi || 1)));
     const d = this.isiDurum;
     if (d === -1 || d === -2) this.yor(dt * 0.06);   // titreme açlığı hızlandırır
     if (d === 1 || d === 2) this.yor(dt * 0.08);
-    if (d === -2 || d === 2) {
+    if ((d === -2 || d === 2) && this.isiHasar !== false) {
       this.isiSayac -= dt;
       if (this.isiSayac <= 0) { this.isiSayac = (this.vucut < 33.5 || this.vucut > 40.5) ? 2.5 : 5; this.hasar(1, d < 0 ? 'donma' : 'sicak'); }
     } else this.isiSayac = 2;
   }
-  yor(n) { if (!this.tok && !this.etki('tokluk')) this.yorgunluk += n; }   // tok: geliştirici modunda açlık azalmaz; tokluk: yemek etkisi
+  yor(n) { if (!this.tok && !this.etki('tokluk')) this.yorgunluk += n * (this.yorCarpani || 1); }   // 0.23.0: zorluğa göre açlık hızı   // tok: geliştirici modunda açlık azalmaz; tokluk: yemek etkisi
   /* zehirOlasilik: çürük et gibi yiyeceklerde mide bulantısı olasılığı; true dönerse bulantı başladı */
   ye(n, zehirOlasilik = 0) {
     this.aclik = Math.min(20, this.aclik + n);

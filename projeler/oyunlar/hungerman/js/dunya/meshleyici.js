@@ -118,7 +118,7 @@ function kup(P, gok, i, id, x, y, z, T) {
         if (!kk && !(s1 && s2)) { g += gok[ni + o[2]]; gs++; }
       }
       ao[c] = a;
-      T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : AO_D[a] * Y.g, g / gs);
+      T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : YAPRAK[id] ? -AO_D[a] * Y.g : AO_D[a] * Y.g, g / gs);
     }
     T.n += 4;
     if (ao[0] + ao[2] < ao[1] + ao[3]) T.i.push(tabanN + 1, tabanN + 2, tabanN + 3, tabanN + 1, tabanN + 3, tabanN);
@@ -165,6 +165,13 @@ function sekil(P, gok, i, id, x, y, z, T) {
   }
 }
 
+/* 0.23.0: rüzgârda salınan bloklar: yapraklar ve çapraz çizilen bitkiler (meşale ve ateş hariç) */
+const YAPRAK = new Uint8Array(BLOK_UST), SALLANIR = new Uint8Array(BLOK_UST);
+for (const b of BLOKLAR) if (b) {
+  const d = Array.isArray(b.dok) ? b.dok.join(' ') : typeof b.dok === 'object' && b.dok ? Object.values(b.dok).join(' ') : String(b.dok || '');
+  if (/yaprak/.test(d) && b.cizim === C_KUP) YAPRAK[b.id] = 1;
+  if (b.cizim === C_CAPRAZ && !b.mesale && !b.sivi) SALLANIR[b.id] = 1;
+}
 const CAPRAZ = [
   [[0.15, 0, 0.15], [0.15, 1, 0.15], [0.85, 1, 0.85], [0.85, 0, 0.85]],
   [[0.15, 0, 0.85], [0.15, 1, 0.85], [0.85, 1, 0.15], [0.85, 0, 0.15]]
@@ -180,7 +187,7 @@ function capraz(gok, i, id, x, y, z, T) {
         const k = q[c];
         T.p.push(x + k[0], y + k[1], z + k[2]);
         dokuUV(doku, CAPRAZ_UV[c][0], CAPRAZ_UV[c][1], T.u);
-        T.l.push(0.92, g);
+        T.l.push(k[1] && SALLANIR[id] ? -1.92 : 0.92, g);
       }
       T.n += 4;
       if (yon === 0) T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);

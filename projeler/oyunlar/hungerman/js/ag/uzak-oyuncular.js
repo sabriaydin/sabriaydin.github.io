@@ -99,8 +99,11 @@ export class UzakOyuncular {
     for (const o of this.harita.values()) {
       const m = o.m, b = o.bayrak;
       o.yeni += dt;
-      m.kok.visible = !o.ilk && !(b & B.OLU);
+      /* 0.23.0: ölen oyuncu yana devrilir, 3 saniye sonra kaybolur */
+      o.oluZaman = b & B.OLU ? (o.oluZaman || 0) + dt : 0;
+      m.kok.visible = !o.ilk && o.oluZaman < 3;
       if (!m.kok.visible) continue;
+      if (o.oluZaman > 0) { m.kok.rotation.set(0, o.yaw, -Math.min(1, o.oluZaman * 2.2) * Math.PI / 2); o.et.material.opacity = 1; continue; }
       const ox = o.p.x, oz = o.p.z;
       if (o.p.distanceToSquared(o.hedef) > 64) o.p.copy(o.hedef); else o.p.lerp(o.hedef, Math.min(1, dt * 12));
       let f = o.hedefYaw - o.yaw; f = Math.atan2(Math.sin(f), Math.cos(f)); o.yaw += f * Math.min(1, dt * 12);

@@ -309,7 +309,7 @@ for (let f = 0; f < 4; f++) for (let s = 0; s < 6; s++) blok(569 + f * 6 + s, { 
 /* 0.22.0: Mezar taşı: ölen oyuncunun eşyalarını saklar (sandık gibi açılır, boşalınca kaybolur) */
 blok(593, { ad: 'Mezar Taşı', dok: 'mezar', cizim: 5, opak: false, sertlik: 1.5, alet: 'kazma', ses: 'tas', sandik: true, mezar: true, sekil: 'mezar', gizli: true, dusur: () => [], harita: 2 });
 /* 0.22.0: Gök taşı: düşen meteorların çekirdeği; demir kazmayla kazılır, yıldız parçası verir */
-blok(594, { ad: 'Gök Taşı', dok: 'gok_tasi', sertlik: 5, alet: 'kazma', seviye: 2, ses: 'tas', mesale: true, isik: 7, parlak: true, dusur: r => [[492, 1 + (r() < 0.45 ? 1 : 0)]], xp: 6, harita: 117 });
+blok(594, { ad: 'Gök Taşı', dok: 'gok_tasi', sertlik: 5, alet: 'kazma', seviye: 4, ses: 'tas', mesale: true, isik: 7, parlak: true, dusur: r => [[492, 1 + (r() < 0.45 ? 1 : 0)]], xp: 6, harita: 117 });
 blok(595, { ad: 'Yıldız Feneri', dok: 'yildiz_feneri', sertlik: 0.4, ses: 'cam', mesale: true, isik: 15, lamba: true, parlak: true, harita: 116 });
 blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
 

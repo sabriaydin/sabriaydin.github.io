@@ -58,6 +58,9 @@ export class EnvanterEkrani {
     };
     this.kok.addEventListener('touchend', bitir); this.kok.addEventListener('touchcancel', bitir);
     this.kok.addEventListener('mouseleave', () => { $('#ipucu').hidden = true; });
+    /* 0.23.0: sıralama ve sandık toplu aktarımı */
+    $('#envSirala').addEventListener('click', () => { this.sirala(this.envanter.yuvalar, 9, 36); this.ses.tik(); this.envanter.bildir(); this.ciz(); });
+    this.kok.querySelector('.sandikIslem').addEventListener('click', e => { const b = e.target.closest('button[data-sandik]'); if (b) this.sandikIslem(b.dataset.sandik); });
     $('#tarifListe').addEventListener('click', e => {
       const b = e.target.closest('button[data-t]'); if (!b) return;
       const t = TARIFLER[+b.dataset.t];
@@ -97,6 +100,36 @@ export class EnvanterEkrani {
     this.tasimaCiz();
     /* Çok oyunculu: kapanan sandığın içeriği sunucuya bildirilir */
     if (this.sandik && this.kapandi) this.kapandi(this.sandik);
+  }
+
+  /* 0.23.0: l[bas..son) aralığındaki yığınları birleştirir ve türe, sonra numaraya göre sıralar */
+  sirala(l, bas, son) {
+    const esyalar = l.slice(bas, son).filter(Boolean), birlesik = [];
+    for (const s of esyalar) {
+      const y = this.envanter.yigin(s.id);
+      if (s.dayanim == null && !s.buyu) { let kalan = s.adet; for (const b of birlesik) { if (b.id === s.id && b.dayanim == null && !b.buyu && b.adet < y) { const n = Math.min(kalan, y - b.adet); b.adet += n; kalan -= n; if (!kalan) break; } } if (kalan) birlesik.push({ ...s, adet: kalan }); }
+      else birlesik.push({ ...s });
+    }
+    const sira = e => { const E = ESYALAR[e.id]; return E.alet || E.tur === 'yay' || E.tur === 'olta' ? 0 : E.zirh ? 1 : E.yemek || E.tur === 'iksir' || E.iyilestir ? 2 : E.tur === 'blok' ? 4 : 3; };
+    birlesik.sort((a, b) => sira(a) - sira(b) || a.id - b.id || b.adet - a.adet);
+    for (let i = bas; i < son; i++) l[i] = birlesik[i - bas] || null;
+  }
+  sandikIslem(tur) {
+    const S = this.sandik; if (!S) return;
+    const env = this.envanter, Y = S.yuvalar;
+    if (tur === 'al') { for (let i = 0; i < Y.length; i++) { const s = Y[i]; if (!s) continue; const k = env.ekle(s.id, s.adet, s.dayanim, s.buyu); Y[i] = k > 0 ? { ...s, adet: k } : null; } }
+    else if (tur === 'koy' || tur === 'benzer') {
+      const varolan = new Set(Y.filter(Boolean).map(s => s.id));
+      for (let i = 9; i < 36; i++) {
+        const s = env.yuvalar[i]; if (!s || (tur === 'benzer' && !varolan.has(s.id))) continue;
+        let kalan = s.adet;
+        if (s.dayanim == null && !s.buyu) for (const b of Y) if (b && b.id === s.id && b.dayanim == null && !b.buyu && b.adet < env.yigin(s.id)) { const n = Math.min(kalan, env.yigin(s.id) - b.adet); b.adet += n; kalan -= n; if (!kalan) break; }
+        if (kalan) { const j = Y.indexOf(null); if (j >= 0) { Y[j] = { ...s, adet: kalan }; kalan = 0; } }
+        env.yuvalar[i] = kalan ? { ...s, adet: kalan } : null;
+      }
+    }
+    else if (tur === 'sirala') this.sirala(Y, 0, Y.length);
+    this.ses.tik(); env.bildir(); this.ciz();
   }
 
   ciz() {
@@ -317,6 +350,13 @@ export class EnvanterEkrani {
     if (s.id === 88 || s.id === 105 || s.id === 121) alt += '<span>Sağ tıkla açılıp kapanır</span>';
     if (s.id === 288) alt += '<span>Köylülerle ticarette kullanılır</span>';
     if (es.tur === 'blok') alt += '<span>Yerleştirilebilir blok</span>';
+    /* 0.23.0: ayrıntılı ipuçları: etki, ışık, yığın, malzeme seviyesi, dayanım çubuğu */
+    if (es.etki && ETKILER[es.etki.tur]) alt += `<span class="etkiSatir">Etki: ${ETKILER[es.etki.tur].ad} · ${Math.round(es.etki.sure / 60) || 1} dk</span>`;
+    if (es.isik) alt += `<span>Işık düzeyi ${es.isik}</span>`;
+    if (es.alet && es.alet.seviye) alt += `<span>Kazabildiği: ${['', 'taş', 'bakır ve demir madeni', 'demir madeni', 'elmas ve gök taşı', 'her şey'][es.alet.seviye] || ''}</span>`;
+    const md = es.alet ? es.alet.dayanim : es.zirh ? es.zirh.dayanim : 0;
+    if (md && s.dayanim != null) { const o = Math.max(0, Math.min(1, s.dayanim / md)); alt += `<span class="dayanimCubuk"><i style="width:${(o * 100).toFixed(0)}%;background:hsl(${Math.round(o * 120)},70%,50%)"></i></span>`; }
+    if (this.envanter.yigin(s.id) > 1) alt += `<span class="soluk">Yığın: ${s.adet} / ${this.envanter.yigin(s.id)} · No ${s.id}</span>`;
     const bm = buyuMetinleri(s);
     if (bm.length) alt = bm.map(m => `<span class="buyuSatir">${m}</span>`).join('') + alt;
     ip.innerHTML = `<b${es.efsane ? ' class="efsane"' : bm.length ? ' class="buyulu"' : ''}>${es.ad}</b>${es.efsane ? '<span class="efsaneSatir">Efsanevi eşya</span>' : ''}${alt}`;

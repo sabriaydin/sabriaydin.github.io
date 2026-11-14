@@ -117,6 +117,59 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 23. aşama (0.23.0): Sorun giderme ve büyük iyileştirme
+
+**Bildirilen sorunlar**
+- **Ateş ve meşale animasyonu:** kamp ateşi ve meşale alevi saniyede 8 kare titrer; lav yavaşça akar, magma nabız gibi parlar. Kamp ateşinden kıvılcım ve duman, meşalelerden ara sıra kıvılcım yükselir.
+- **Soluk yer eşyaları:** yere düşen eşyaların dokusu doğru renk uzayında işaretlenmediği için soluk görünüyordu. Eşyalar artık düz resim yerine üç boyutlu çizilir (küp bloklar küçük küp, diğerleri kalınlaştırılmış model), yavaşça döner.
+- **Elde tutulan eşyalar:** aletler sapından kavranmış duruşta; vuruşta çapraz savurma, blok ve eşyalarda öne itme, eşya değiştirirken aşağı inip kalkma, yemek yerken ağza götürme, nefes salınımı ve koşarken daha belirgin sallanma eklendi.
+- **Geliştirici Modu:** tekrar eden bölümler kaldırıldı (Işınlanma sekmesindeki harita işaretleri, Harita sekmesindeki mini harita anahtarı, Eşyalar sekmesindeki başarımlar, Köy sekmesindeki ticaret). Yeni "Hayatta Kalma" sekmesi (hasar ve durumlar, vücut ısısı kaydırıcısı, gök olayları, başarımlar), "★ Sık kullanılan" sekmesi (her düğme ve anahtar sağ tıkla sabitlenir), tüm sekmelerde arama (Ctrl + F) ve konum, biyom, saat, kare hızı, can ve vücut ısısını gösteren canlı bilgi şeridi eklendi.
+- **Köylü sayısı:** her binada en çok bir köylü; demirci ve balıkçı her zaman bulunur; köye göre toplam 4-7 köylü.
+- **Belirsiz nesneler:** bakılan bloğun adı ekranın üstünde gösterilir (ekin olgunluğu, kovandaki bal, gereken alet, sağ tık işlevi). Üretim Masası yeniden çizildi: üstte 3×3 üretim ızgarası, yanlarda çekiç, testere, kerpeten ve gönye. Üç haneli renk kodlarının yanlış çözülmesi giderildi (üretim masasındaki ve ana kayadaki kırmızı lekeler bu hatadandı).
+- **Ölüm:** karakter yere yığılır: kamera yere iner ve yana devrilir, görüntü kızarıp kararır, ölüm ekranı 1,8 saniye sonra açılır. Ölüyken yerdeki eşyalar oyuncuya çekilmez (eski sürümde ölüm ekranında eşyalar geri toplanıyordu). Eşyalar mezar taşında saklanır. Çok oyunculuda ölen oyuncu diğerlerinin ekranında yere devrilir.
+
+**Zorluk ve denge**
+- Yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir:
+
+| Zorluk | Canavar hasarı | Açlık hızı | Canavar sayısı | Kanama olasılığı | Soğuk/sıcak hasarı |
+|---|---|---|---|---|---|
+| Kolay | ×0,6 | ×0,7 | ×0,6 | ×0,5 | Yok |
+| Normal | ×1 | ×1 | ×1 | ×1 | Var |
+| Zor | ×1,4 | ×1,25 | ×1,35 | ×1,5 | Var |
+| Hardcore | Zor ile aynı, tek can | | | | |
+
+- Denge ayarları: Kanlı Ay sıklığı (kapalı, 3, 5, 7, 10, 14 günde bir), meteor sıklığı (kapalı, az, normal, sık), vücut ısısı değişim hızı (yavaş, normal, hızlı).
+- Duraklatma menüsündeki **Dünya Ayarları** ile sonradan değiştirilir (Hardcore'a geçilemez, Hardcore'dan çıkılamaz). Çok oyunculuda sunucunun ayarları geçerlidir ve değişiklik istemcilere iletilir.
+- Hardcore: ölünce dünya sona erer; "İzleyici Olarak Dolaş" ile uçarak ve duvarlardan geçerek dolaşılır, hiçbir şeye dokunulamaz. Dünya yeniden açılınca da izleyici kipinde açılır. Dünyalar listesinde Hardcore dünyalar işaretlenir.
+
+**Görsel kalite**
+- Rüzgâr: otlar, çiçekler, ekinler ve fidanlar ile yapraklar rüzgârda salınır; yağmurda ve fırtınada salınım güçlenir.
+- Su yüzeyi dalgalanır.
+- Canlıların altında yumuşak gölge (yükseldikçe küçülür; geceleri soluklaşır).
+- Koşarken ayak tozu; ateşlerden kıvılcım ve duman.
+- Fotoğraf modu: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü kaydeder.
+- Grafik ön ayarları (Düşük, Orta, Yüksek, Ultra): görüş mesafesi ve çizim çözünürlüğünü birlikte ayarlar.
+
+**Arayüz**
+- Envanterde "Sırala": çantadaki yığınlar birleşir; aletler, zırhlar, yiyecekler, malzemeler ve bloklar sırayla dizilir.
+- Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri (mezar taşında da çalışır).
+- Ayrıntılı ipuçları: iksir ve yemek etkisi, ışık düzeyi, aletin kazabildiği madenler, renkli dayanım çubuğu, yığın bilgisi.
+- Öğretici: yeni dünyada 7 adımlık rehber (hareket, odun, üretim masası, ilk alet, meşale, yemek, ilk gece); adım tamamlanınca kendiliğinden geçer. Ayarlardan kapatılabilir.
+
+**Çok oyunculu**
+- Sohbet komutları: /f <ad> <mesaj> (özel mesaj), /oyuncular, /konum, /ben <eylem>, /zar, /yardim; sunucu /at <ad> ile ya da duraklatma menüsündeki düğmeyle oyuncu çıkarabilir.
+- Bağlantı beklenmedik biçimde koparsa 5 saniye sonra kendiliğinden yeniden bağlanılır (en çok 3 deneme); "Yeniden Bağlan" düğmesi de bulunur. Oyuncu bilgileri sunucuda saklandığından kalınan yerden devam edilir.
+
+**Kalıcılık**
+- Dünyalar listesinde "Yedekle": dünya, sıkıştırılmış tek bir dosya (.hmdunya) olarak indirilir. "Yedekten Yükle" dosyayı yeni bir dünya olarak ekler.
+- Her açılışta dünyanın bir önceki hâli ayrıca saklanır; "Önceki oturum" düğmesiyle (iki tıkla onaylanarak) o hâle dönülür.
+
+**Diğer düzeltmeler**
+- Ölüm animasyonu ve ölüm ekranı süresi gerçek zamana göre ölçülür.
+- Gök Taşı demir kazma gerektirir (önceki sürümde taş kazma yetiyordu; yardım metni demir diyordu).
+
+**Bu sürümde yapılmayanlar:** gerçek gölge haritası (dinamik gölge yerine canlı gölgeleri eklendi), uzak parçalarda düşük ayrıntılı çizim, takım ve oyuncular arası ticaret sistemi. Dünya üretimi ve parça çizimi (meshleme) zaten arka plan işçilerinde (Web Worker) yapılmaktadır.
+
 ## 22. aşama (0.22.0): Büyük hayatta kalma güncellemesi
 
 **Vücut ısısı**

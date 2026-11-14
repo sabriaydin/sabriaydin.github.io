@@ -98,7 +98,7 @@ export class SunucuOyun {
     this.istemciler.set(id, c);
     this.uzak.ekle(id, ad, renk);
     k.gonder({
-      t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, zaman: o.zaman, gun: o.gun, komutlar: !!o.komutlar,
+      t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, zaman: o.zaman, gun: o.gun, komutlar: !!o.komutlar, zorluk: o.zorluk, denge: o.denge,
       degisiklikler: o.dunya.degisiklikleriAl(), kayit, dogum,
       dusenler: o.dusenler.liste.map(x => this.dusenVeri(x)),
       tekneler: o.tekneler.liste.map(t => this.tekneVeri(t)),
@@ -255,6 +255,15 @@ export class SunucuOyun {
       }
       case 'tv': { const t = this.bul(o.tekneler.liste, m.i); if (t && !t.binen && o.tekneler.binilen !== t) o.tekneler.vur(t); break; }
       case 'ky': if (m.v && typeof m.v === 'object') this.kayitlar[c.ad.toLocaleLowerCase('tr')] = m.v; break;
+      case 'fs': {   // 0.23.0: özel mesaj: yalnızca alıcıya (sunucu oyuncusuysa sunucuya) iletilir
+        const s = String(m.m || '').trim().slice(0, 200), h = String(m.h || '').toLocaleLowerCase('tr');
+        if (!s) return;
+        if (h === this.ad.toLocaleLowerCase('tr')) { this.arayuz.sohbet(`${c.ad} → size`, s, c.renk); c.k.gonder({ t: 'sh', a: `Siz → ${this.ad}`, r: c.renk, m: s }); break; }
+        const hedef = [...this.istemciler.values()].find(x => x.ad.toLocaleLowerCase('tr') === h);
+        if (hedef) { hedef.k.gonder({ t: 'sh', a: `${c.ad} → size`, r: c.renk, m: s }); c.k.gonder({ t: 'sh', a: `Siz → ${hedef.ad}`, r: c.renk, m: s }); }
+        else c.k.gonder({ t: 'sh', s: `"${m.h}" adlı oyuncu bulunamadı.` });
+        break;
+      }
       case 'sh': {
         const s = String(m.m || '').trim().slice(0, 200);
         if (!s) return;
@@ -283,6 +292,18 @@ export class SunucuOyun {
     if (w.tur.koylu && w.koy) this.oyun.koyler.koyluOldu(w, true);
   }
   sohbetGonder(s) { this.yay({ t: 'sh', a: this.ad, r: 0, m: s }); this.arayuz.sohbet(this.ad, s, 0); }
+  /* 0.23.0: sunucu oyuncusunun özel mesajı ve oyuncu atma */
+  fisilda(ad, s) {
+    const h = [...this.istemciler.values()].find(x => x.ad.toLocaleLowerCase('tr') === String(ad).toLocaleLowerCase('tr'));
+    if (!h) { this.arayuz.sohbet(null, `"${ad}" adlı oyuncu bulunamadı.`); return; }
+    h.k.gonder({ t: 'sh', a: `${this.ad} → size`, r: 0, m: s }); this.arayuz.sohbet(`Siz → ${h.ad}`, s, 0);
+  }
+  at(ad) {
+    const h = [...this.istemciler.values()].find(x => x.ad.toLocaleLowerCase('tr') === String(ad).toLocaleLowerCase('tr'));
+    if (!h) return false;
+    h.k.gonder({ t: 'atildi', s: 'Sunucu sizi oyundan çıkardı.' }); setTimeout(() => h.k.kapat(), 400);
+    return true;
+  }
 
   /* Canlılar için her oyuncunun bağlamı (ilk öğe sunucu oyuncusu) */
   ctxler(ctx) {
@@ -290,7 +311,7 @@ export class SunucuOyun {
     for (const c of this.istemciler.values()) {
       if (!c.durum) continue;
       if (!c.ctx) c.ctx = { ad: c.ad, oyuncu: { konum: c.konum }, oyuncuyaVur: (n, v, kaynak) => this.vur(c, n, v, kaynak), okTopla: () => { c.k.gonder({ t: 'ver', id: 287, n: 1 }); return true; } };
-      Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik, firtina: ctx.firtina, yagmur: ctx.yagmur, kanliAy: ctx.kanliAy, eldeki: c.durum[5] | 0 });
+      Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik, firtina: ctx.firtina, yagmur: ctx.yagmur, kanliAy: ctx.kanliAy, zorlukCanavar: ctx.zorlukCanavar, eldeki: c.durum[5] | 0 });
       l.push(c.ctx);
     }
     ctx.oyuncular = l;

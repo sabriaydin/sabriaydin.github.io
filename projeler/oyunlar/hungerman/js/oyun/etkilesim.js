@@ -137,6 +137,7 @@ export class Etkilesim {
     const tb = this.tekneler ? this.tekneler.isin(goz, yon, 4.5) : null;
     this.hedefTekne = null;
     if (tb && (!this.hedef || tb.t < this.hedef.t) && (!this.hedefCanli || tb.t < vb.t)) { this.hedefTekne = tb.tekne; this.hedef = null; this.hedefCanli = null; }
+    if (this.izleyici) { this.hedefCanli = null; this.hedefTekne = null; this.ilerleme = 0; this.germe = 0; return; }   // 0.23.0: Hardcore izleyici kipi
     const sagYeni = g.sag && !this.sagOnceki;
     this.sagOnceki = g.sag;
     this.sagBekleme -= dt; this.solBekleme -= dt; this.saldiriBekleme -= dt; this.okUyari -= dt;
@@ -458,6 +459,7 @@ export class Etkilesim {
       this.istat('yemek');
       env.seciliAzalt(1);
       if (e.kap) { env.ekle(e.kap, 1); this.ses.ic(); } else this.ses.ye();
+      this.yemeAnim = 1;   // 0.23.0: el ağza götürülür
       if (s.id === 269 || e.kase) env.ekle(270, 1);
       /* 0.21.0: süt olumsuz etkileri ve zehri, bal zehri giderir */
       if (e.temizle || e.zehirGider) { const H = this.hayatta; H.zehir = 0; H.agu = 0; if (e.temizle) for (const k in H.etkiler) if (ETKILER[k] && ETKILER[k].kotu && k !== 'kanama' && k !== 'kirik') delete H.etkiler[k]; this.arayuz.bildirim(e.temizle ? 'Olumsuz etkiler geçti.' : 'Zehir geçti.'); }

@@ -5,7 +5,8 @@ import { uretec } from '../rastgele.js';
 const D = 16;
 
 /* ---------- Renk yardımcıları ---------- */
-function hex(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+/* 0.23.0: üç haneli renk kodları (#888) da çözülür; önceden kırmızımsı yanlış renk veriyordu (üretim masasındaki kırmızı lekeler) */
+function hex(h) { h = h.replace('#', ''); if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]; return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
 function karis(c, k) { return [c[0] * k, c[1] * k, c[2] * k]; }
 function rgba(c, a = 1) { return `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`; }
 
@@ -139,9 +140,17 @@ const RESSAM = {
   cali_bos: p => bitki(p, p => { const c = hex('#3e7a2c'); for (let y = 3; y < 16; y++) for (let x = 1; x < 15; x++) { const d = ((x - 7.5) / 7) ** 2 + ((y - 9.5) / 6.5) ** 2; if (d < 1 && p.r() < 0.78) p.set(x, y, karis(c, 0.7 + p.r() * 0.5)); } cizgi(p, 7, 15, 7, 12, hex('#5a4024')); }),
   kuru_cali: p => bitki(p, p => { const c = hex('#8a6a3d'); cizgi(p, 8, 15, 8, 9, c); cizgi(p, 8, 11, 4, 6, c); cizgi(p, 8, 10, 12, 5, c); cizgi(p, 6, 8, 7, 4, c); cizgi(p, 10, 7, 13, 8, c); }),
   yosun: p => bitki(p, p => { const c = hex('#3f8f4a'); for (let i = 0; i < 3; i++) { let x = 4 + i * 4; for (let y = 15; y >= 0; y--) { p.set(x, y, karis(c, 0.75 + p.r() * 0.45)); if (y % 3 === 0) p.set(x + (i % 2 ? 1 : -1), y, karis(c, 1.1)); if (p.r() < 0.3) x += p.r() < 0.5 ? -1 : 1; x = Math.max(1, Math.min(14, x)); } } }),
-  masa_ust: p => { kalas(p, '#b48a52'); const k = hex('#5a3d1f'); for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); } cizgi(p, 3, 3, 12, 3, k); cizgi(p, 3, 7, 12, 7, k); },
-  masa_yan: p => { kalas(p, '#a07a46'); const k = hex('#5a3d1f'); for (let i = 0; i < 16; i++) p.set(i, 0, k); const m = hex('#888'); cizgi(p, 3, 5, 6, 5, m); cizgi(p, 4, 5, 4, 10, hex('#6b4a28')); cizgi(p, 10, 4, 12, 6, m); cizgi(p, 11, 6, 11, 11, hex('#6b4a28')); },
-  masa_on: p => { RESSAM.masa_yan(p); const m = hex('#9a9a9a'); for (let y = 4; y < 8; y++) cizgi(p, 8, y, 13, y, m); cizgi(p, 7, 5, 7, 11, hex('#6b4a28')); },
+  /* 0.23.0: üretim masası: üstte 3×3 üretim ızgarası, yanlarda asılı çekiç, testere, kerpeten ve gönye */
+  masa_ust: p => { kalas(p, '#b48a52'); const k = hex('#5a3d1f'), a = hex('#d2aa6e'); for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); }
+    for (let y = 3; y < 13; y++) for (let x = 3; x < 13; x++) p.set(x, y, karis(a, 0.92 + p.r() * 0.1)); for (const t of [3, 6, 9, 12]) { cizgi(p, 3, t, 12, t, k); cizgi(p, t, 3, t, 12, k); } p.set(4, 4, hex('#9a9a9a')); p.set(5, 4, hex('#9a9a9a')); p.set(10, 10, hex('#7a5a32')); p.set(11, 11, hex('#7a5a32')); },
+  masa_yan: p => { kalas(p, '#a07a46'); const k = hex('#5a3d1f'), m = hex('#a8acb4'), md = hex('#6e727a'), s = hex('#6b4a28');
+    for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 1, karis(k, 1.2)); }
+    for (let y = 6; y < 14; y++) p.set(4, y, s); for (let x = 2; x < 7; x++) { p.set(x, 4, m); p.set(x, 5, md); } p.set(2, 6, md);   // çekiç
+    for (let y = 4; y < 11; y++) for (let x = 9; x < 13; x++) p.set(x, y, (x + y) % 5 ? m : md); for (let y = 5; y < 11; y += 2) p.set(8, y, md); for (let y = 4; y < 8; y++) { p.set(13, y, s); p.set(14, y, s); } },   // testere
+  masa_on: p => { kalas(p, '#a07a46'); const k = hex('#5a3d1f'), m = hex('#a8acb4'), md = hex('#6e727a'), s = hex('#6b4a28');
+    for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 1, karis(k, 1.2)); }
+    cizgi(p, 3, 4, 3, 12, m); cizgi(p, 3, 12, 8, 12, m); cizgi(p, 4, 4, 4, 11, md);   // gönye
+    cizgi(p, 10, 4, 12, 9, md); cizgi(p, 13, 4, 11, 9, m); cizgi(p, 11, 9, 10, 13, s); cizgi(p, 12, 9, 13, 13, s); },   // kerpeten
   firin_yan: p => parke(p, '#7c7c7c'),
   firin_ust: p => { p.doldur('#8f8f8f', 0.04); const k = hex('#6c6c6c'); for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); } },
   firin_on: p => { parke(p, '#7c7c7c'); const k = hex('#1c1c1c'); for (let y = 8; y < 14; y++) for (let x = 4; x < 12; x++) p.set(x, y, k); const a = hex('#c45a1c'); for (let x = 5; x < 11; x++) p.set(x, 13, karis(a, 0.8 + p.r() * 0.4)); for (let x = 3; x < 13; x++) p.set(x, 7, hex('#5a5a5a')); },
@@ -564,6 +573,51 @@ export function atlas() {
   return cv;
 }
 export const doseme = i => (atlas(), DOSEME[i]);
+
+/* 0.23.0: hareketli dokular: kamp ateşi ve meşale alevi saniyede 8 kare titrer, lav ve magma yavaşça akar.
+   Kareler atlasın ilgili döşemesine yeniden çizilir; çizildiyse true döner (doku yeniden yüklenmeli). */
+const h1 = (a, b) => { const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); };
+const ALEV = ['#fff1a8', '#ffd24a', '#ff9a1f', '#e8541a'];
+const CANLI = {
+  kamp_atesi: (p, k) => bitki(p, p => {
+    const o = hex('#6b4a28'), kk = hex('#3a2a18');
+    for (let x = 2; x < 14; x++) {
+      const m = 1 - Math.abs(x - 7.5) / 6.5, h = Math.round(1.5 + m * 9 + Math.sin(k * 1.9 + x * 1.3) * 1.4 + (h1(x, k) - 0.5) * 2.2);
+      for (let y = 12; y > 12 - h && y >= 1; y--) {
+        const rel = (12 - y) / Math.max(1, h);
+        if (rel > 0.7 && h1(x * 7 + y, k) < 0.35) continue;
+        p.set(x, y, hex(ALEV[Math.min(3, Math.floor((rel * 0.85 + (1 - m) * 0.7) * 2.4))]));
+      }
+    }
+    for (let i = 0; i < 2; i++) if (h1(i * 13, k) < 0.7) p.set(4 + Math.floor(h1(i * 29, k) * 8), Math.floor(h1(i * 31, k + 1) * 5), hex('#ffd24a'));
+    for (let x = 1; x < 15; x++) { p.set(x, 14, karis(o, 1.05)); p.set(x, 15, kk); }
+    cizgi(p, 2, 12, 13, 15, o); cizgi(p, 2, 15, 13, 12, karis(o, 0.85));
+  }),
+  mesale: (p, k) => bitki(p, p => {
+    const c = hex('#7b5a32');
+    for (let y = 6; y < 16; y++) { p.set(7, y, karis(c, 1.05)); p.set(8, y, karis(c, 0.8)); }
+    const h = 3 + Math.floor(h1(3, k) * 2.6);
+    for (let i = 0; i < h; i++) { const y = 5 - i, rel = i / h; for (const x of [7, 8]) if (!(rel > 0.6 && h1(x + i, k) < 0.4)) p.set(x, y, hex(ALEV[Math.min(3, Math.floor((1 - rel) * 1.2 + (x === 8 ? 0.8 : 0) + h1(x * 5 + i, k) * 0.8))].replace('#e8541a', '#ffe680'))); }
+    if (h1(9, k) < 0.5) p.set(h1(11, k) < 0.5 ? 6 : 9, 4 - Math.floor(h1(5, k) * 2), hex('#ffcf4a'));
+  }),
+  lav: (p, k) => { RESSAM.lav(p); kaydir(p, Math.floor(k / 4) % 16, Math.floor(k / 8) % 16); },
+  magma: (p, k) => { RESSAM.magma(p); const t = (Math.sin(k * 0.4) + 1) * 0.08; for (let i = 0; i < D * D; i++) { const j = i * 4; if (p.d[j] > 180) { p.d[j + 1] = Math.min(255, p.d[j + 1] * (1 + t)); } } }
+};
+function kaydir(p, dx, dy) { const e = p.d.slice(); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const a = (y * D + x) * 4, b = (((y + dy) % D) * D + (x + dx) % D) * 4; p.d[b] = e[a]; p.d[b + 1] = e[a + 1]; p.d[b + 2] = e[a + 2]; p.d[b + 3] = e[a + 3]; } }
+let sonKare = -1;
+export function canliDokular(t) {
+  const kare = Math.floor(t * 8);
+  if (kare === sonKare) return false;
+  sonKare = kare;
+  const ctx = atlas().getContext('2d');
+  for (const [ad, f] of Object.entries(CANLI)) {
+    const i = DOKULAR.indexOf(ad); if (i < 0) continue;
+    const p = new Piksel(1000 + i * 31); f(p, kare);
+    ctx.clearRect((i & 15) * 16, (i >> 4) * 16, 16, 16);
+    ctx.drawImage(p.tuval(), (i & 15) * 16, (i >> 4) * 16);
+  }
+  return true;
+}
 
 /* ---------- 0.18.0: Mevsim dokuları ----------
    Çimen, yaprak ve otların renkleri mevsime göre yeniden boyanır (0 ilkbahar, 1 yaz: özgün dokular, 2 sonbahar, 3 kış).
