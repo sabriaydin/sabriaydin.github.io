@@ -117,6 +117,51 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 22. aşama (0.22.0): Büyük hayatta kalma güncellemesi
+
+**Vücut ısısı**
+- Sağ alttaki gösterge vücut sıcaklığını (°C), eğilimini (▲ ▼) ve hissedilen hava sıcaklığını gösterir.
+- Hissedilen sıcaklık; biyom, mevsim, gün saati (çölde geceler çok soğuk), yükseklik, mağara derinliği, yağış ve kar, suda olma ve ıslaklık (sudan çıktıktan sonra 40 saniye), çatı altı ve ısı kaynaklarından hesaplanır.
+- Isı kaynakları: kamp ateşi, meşale, lav, magma, fener, balkabağı feneri, ışıltaş, yıldız feneri, gök taşı; buz feneri ve buz kristali soğutur.
+- Deri zırh parça başına 3, diğer zırhlar 1 derece yalıtım sağlar. Sıcak çorbalar 150 saniye **Isınma**, ayran 150 saniye **Serinlik** etkisi verir; ateşe dayanıklılık iksiri sıcağı keser.
+- 36 °C altında **üşüme** (titreme, açlık hızlanır, ekran kenarı buzlanır), 34,5 °C altında **donma** (yavaşlama, can kaybı); 38 °C üstünde **bunalma**, 39,5 °C üstünde **sıcak çarpması** (can kaybı).
+- Ayarlar › Vücut ısısı ile kapatılabilir. Geliştirici konsolu: `isi [derece]`.
+
+**Yaralanma**
+- Zombi, kurt, örümcek, haydut, mumya, köpekbalığı ve bossların saldırıları kanatabilir (zırh olasılığı azaltır): 40 saniye boyunca 4 saniyede bir 1 can; can 1 kalbin altına düşmez. Bandaj ya da şifa iksiri durdurur.
+- 6 kalp ve üstü düşüş hasarı bacağı kırabilir (9 ve üstünde kesin): 3 dakika yavaş yürünür, koşulamaz. **Atel** (3 çubuk, 1 ip) sarılınca kemik 30 saniyede kaynar ve yavaşlık azalır.
+- Hasarın geldiği yön ekranın ortasında kırmızı bir yayla gösterilir.
+
+**Mezar taşı**
+- Ölünce eşyalar yere saçılmaz; ölüm yerindeki mezar taşında (27 yuva; fazlası için yanına ikinci mezar) saklanır. Lavda ya da suda ölünürse mezar ilk güvenli yere konur.
+- Pusuladaki ✖ mezarı gösterir; mezara sağ tıklanarak eşyalar alınır, boşalan mezar kaybolur. Çok oyunculuda da çalışır.
+- Ölüm ekranında bu hayatın süresi, en uzun hayat ve yenilen canavar sayısı yazar.
+
+**Kanlı Ay**
+- Her mevsimin son gecesi (7, 14, 21... gün) ay kızarır, gökyüzü ve sis kızıla döner; akşamdan önce uyarı ve korna sesi duyulur.
+- Canavarlar iki kat kalabalık ve sık doğar, %50 fazla canlı ve 1 fazla hasarlıdır, kızıl görünür; meşaleler 6 blok içinde korur. Uyunamaz; boss müziği çalar.
+- Kanlı Ay canavarları iki kat ganimet ve deneyim, %6 olasılıkla yıldız parçası bırakır. Sabaha kadar hayatta kalana 25 deneyim ve başarım verilir.
+
+**Gök olayları**
+- Açık gecelerde yıldız kayar; bazı geceler **yıldız yağmuru** olur (bildirilir).
+- **Meteor**: açık gecelerin bir kısmında (yıldız yağmurunda çoğunda) 35-80 blok uzağa ateş topu düşer: uğultu, çarpma sesi, sarsıntı ve parlama. Krater açar; dibinde **Gök Taşı** (demir kazma; 1-2 Yıldız Parçası) ve magma bulunur. Düşüş yeri pusulada 15 dakika ✦ ile gösterilir. Köylere düşmez.
+- **Kuzey ışıkları**: karlı biyomlarda, dağlarda, çok yüksekte ve kışın açık gecelerde kuzey göğünde dalgalanır.
+- **Eve Dönüş Tılsımı** (3 yıldız parçası, 2 altın külçe, 1 ip; 8 kullanım): sağ tık 3 saniye basılı tutulup kımıldanmazsa doğma noktasına ışınlar (diyarda çalışmaz). **Yıldız Feneri** (4 yıldız parçası, cam): ışık düzeyi 15.
+- Geliştirici konsolu: `kanliay`, `meteor`.
+
+**İstatistikler**: oynama süresi, bu hayat, en uzun hayat, ölüm, yenilen canavar, yürünen yol, kırılan ve konulan blok, yenen yemek, atlatılan Kanlı Ay, görülen meteor, alınan hasar. Başarımlar penceresinin (L) başında gösterilir.
+
+**Başarımlar** (“Hayatta Kalma”): Kızıl Gece, Ay Avcısı, Gökten Gelen, Eve Dönüş, Kutup Işıkları, Ateş Başında, İlk Yardım, Sağlam Adım, Geri Dönüş, Ölümsüz Gibi.
+
+**Hata düzeltmeleri ve iyileştirmeler**
+- Köy verisi olmayan köylü (örneğin konsolla doğurulan) canlı güncellemesini durduruyordu; düzeltildi.
+- Kare hızı göstergesi 20'nin altını gösteremiyordu (yavaş cihazlarda yanlış değer); gerçek süreyle ölçülür.
+- Ayar kaydındaki geçersiz değerler (örneğin 4'ten küçük görüş mesafesi) dünyanın yüklenmesini engelliyordu; değerler geçerli aralığa çekilir.
+- Doku ve simge çiziminde tuvalden piksel geri okuması kaldırıldı (daha hızlı açılış, tarayıcı uyarıları giderildi).
+- Süt kovası kanamayı ve kırığı iyileştirmez (yalnızca zehir ve olumsuz etkiler).
+- Gece bulutları gökyüzünün tonunu alır; gri lekeler görünmez.
+- Sistemli tarama: 482 eşya simgesi, 218 tarif, 334 blok, 29 canlı türü, tüm konsol komutları, pencereler ve kayıt/yükleme sınandı.
+
 ## 21. aşama (0.21.0): Tarım ve hayvancılık
 
 **Yeni ekinler**

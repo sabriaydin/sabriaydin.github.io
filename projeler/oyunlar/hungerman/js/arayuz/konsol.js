@@ -306,9 +306,22 @@ export class Konsol {
       const n = Math.max(1, Math.floor(this.sayi(p[0], NaN))); if (!Number.isFinite(n)) { this.hata('Kullanım: gun <sayı>'); return; }
       o.gun = n; this.tamam(`${n}. gün.`);
     }, { hile: true, dunya: true });
+    /* 0.22.0: gök olayları ve vücut ısısı */
+    ekle('kanliay', 'Kanlı Ay gecesini başlatır (gün, Kanlı Ay gününe ve gün batımına ayarlanır)', 'kanliay', o => {
+      o.gun = Math.max(7, Math.ceil(o.gun / 7) * 7); o.zaman = 0.505; this.tamam(`${o.gun}. gün: Kanlı Ay yükseldi.`);
+    }, { hile: true, dunya: true });
+    ekle('meteor', 'Yakına bir meteor düşürür (dünya sahibinde)', 'meteor', o => {
+      if (o.istemci) { this.hata('Meteoru dünyayı açan oyuncu düşürür.'); return; }
+      if (o.gok.meteorDusur(o, true)) this.tamam('Meteor düşüyor.'); else this.hata('Uygun bir düşüş yeri bulunamadı.');
+    }, { hile: true, dunya: true });
+    ekle('isi', 'Vücut ısısını ve hissedilen sıcaklığı gösterir ya da vücut ısısını ayarlar (30-42)', 'isi [derece]', (o, p) => {
+      const h = o.hayatta;
+      if (p[0] != null) { const n = this.sayi(p[0], NaN); if (!Number.isFinite(n)) { this.hata('Kullanım: isi [30-42]'); return; } h.vucut = Math.min(42, Math.max(30, n)); }
+      this.tamam(`Vücut ${h.vucut.toFixed(1)} °C · Hissedilen ${h.hissedilen.toFixed(1)} °C · Ortam ${(o.ortamIsi ?? 0).toFixed(1)} °C${h.isiAcik ? '' : ' (vücut ısısı kapalı)'}`);
+    }, { hile: true });
     ekle('can', 'Canı ayarlar (0-20)', 'can <0-20>', (o, p) => { const n = Math.max(1, Math.min(20, Math.round(this.sayi(p[0], 20)))); o.hayatta.can = n; this.tamam(`Can ${n}.`); }, { hile: true });
     ekle('doy', 'Açlığı ve oksijeni doldurur', 'doy', o => { const h = o.hayatta; h.aclik = 20; h.oksijen = 10; h.yorgunluk = 0; h.zehir = 0; this.tamam('Açlık dolduruldu.'); }, { hile: true });
-    ekle('iyiles', 'Canı, açlığı doldurur; zehir ve yanmayı kaldırır', 'iyiles', o => { const h = o.hayatta; h.can = 20; h.aclik = 20; h.oksijen = 10; h.zehir = 0; h.agu = 0; h.yanma = 0; this.tamam('Tamamen iyileşildi.'); }, { hile: true });
+    ekle('iyiles', 'Canı, açlığı doldurur; zehir ve yanmayı kaldırır', 'iyiles', o => { const h = o.hayatta; h.can = 20; h.aclik = 20; h.oksijen = 10; h.zehir = 0; h.agu = 0; h.yanma = 0; delete h.etkiler.kanama; delete h.etkiler.kirik; h.atel = false; h.vucut = 37; this.tamam('Tamamen iyileşildi.'); }, { hile: true });
     ekle('olumsuz', 'Ölümsüzlüğü açar / kapatır (hiç hasar alınmaz)', 'olumsuz', o => { o.hayatta.olumsuz = !o.hayatta.olumsuz; this.tamam(`Ölümsüzlük ${o.hayatta.olumsuz ? 'açık' : 'kapalı'}.`); }, { hile: true });
     ekle('ucus', 'Uçmayı açar / kapatır (Boşluk: yüksel, C: alçal)', 'ucus', o => { o.oyuncu.ucus = !o.oyuncu.ucus; this.tamam(`Uçma ${o.oyuncu.ucus ? 'açık' : 'kapalı'}.`); }, { hile: true });
     ekle('hiz', 'Hareket hızı çarpanı (0,2 - 5)', 'hiz <çarpan>', (o, p) => { const h = Math.max(0.2, Math.min(5, this.sayi(p[0], 1))); o.oyuncu.hizCarpani = h; this.tamam(`Hız ${h}×.`); }, { hile: true });
@@ -319,14 +332,16 @@ export class Konsol {
       o.hayatta.olumsuz = false; o.hayatta.hasar(n, 'komut'); o.hayatta.olumsuz = eski;
       this.tamam(`${n} hasar verildi.`);
     }, { hile: true });
-    ekle('durum', 'Sınama için durum etkisi verir ya da hepsini kaldırır', 'durum <zehir | agu | yanma | temizle>', (o, p) => {
+    ekle('durum', 'Sınama için durum etkisi verir ya da hepsini kaldırır', 'durum <zehir | agu | yanma | kanama | kirik | temizle>', (o, p) => {
       const a = kucuk(p[0] || ''), h = o.hayatta;
+      if (a === 'kanama') { h.etkiEkle('kanama', 40); this.tamam('Kanama: 40 sn.'); return; }
+      if (a === 'kirik') { h.etkiEkle('kirik', 180); h.atel = false; this.tamam('Kırık bacak: 180 sn.'); return; }
       if (a === 'zehir') { h.zehir = 20; this.tamam('Mide bulantısı: 20 sn.'); }
       else if (a === 'agu') { h.agu = 8; this.tamam('Örümcek zehri: 8 sn.'); }
       else if (a === 'yanma') { h.yanma = 5; this.tamam('Yanma: 5 sn.'); }
-      else if (a === 'temizle') { h.zehir = 0; h.agu = 0; h.yanma = 0; this.tamam('Durum etkileri kaldırıldı.'); }
-      else this.hata('Kullanım: durum <zehir | agu | yanma | temizle>');
-    }, { hile: true, tamamla: () => ['zehir', 'agu', 'yanma', 'temizle'] });
+      else if (a === 'temizle') { h.zehir = 0; h.agu = 0; h.yanma = 0; delete h.etkiler.kanama; delete h.etkiler.kirik; h.atel = false; h.vucut = 37; this.tamam('Durum etkileri kaldırıldı.'); }
+      else this.hata('Kullanım: durum <zehir | agu | yanma | kanama | kirik | temizle>');
+    }, { hile: true, tamamla: () => ['zehir', 'agu', 'yanma', 'kanama', 'kirik', 'temizle'] });
     ekle('erisim', 'Blok erişim mesafesini ayarlar (5-40 blok)', 'erisim <5-40>', (o, p) => {
       const n = Math.max(5, Math.min(40, Math.round(this.sayi(p[0], 5)))); o.etkilesim.erisim = n === 5 ? 0 : n; this.tamam(`Erişim ${n} blok.`);
     }, { hile: true });

@@ -58,6 +58,8 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'tuzak': return [b.acik ? panel(b.yon, 3 * P) : [0, 0, 0, 1, 3 * P, 1]];
     case 'tirmanma': return [panel(b.yon, carp ? 3 * P : P)];
     case 'tarla': return [[0, 0, 0, 1, 15 * P, 1]];
+    /* 0.22.0: mezar taşı: toprak taban, dikili taş */
+    case 'mezar': return carp ? [[P, 0, 2 * P, 15 * P, 15 * P, 14 * P]] : [[P, 0, 2 * P, 15 * P, 2 * P, 14 * P, T.toprak], [3 * P, 2 * P, 6 * P, 13 * P, 14 * P, 10 * P], [4 * P, 14 * P, 6 * P, 12 * P, 15 * P, 10 * P]];
     case 'karKatman': return [[0, 0, 0, 1, 2 * P, 1]];
     case 'gecit': return carp ? [] : [b.eksen ? [6 * P, 0, 0, 10 * P, 1, 1] : [0, 0, 6 * P, 1, 1, 10 * P]];
     case 'fener': return [[5 * P, 0, 5 * P, 11 * P, 8 * P, 11 * P], [6 * P, 8 * P, 6 * P, 10 * P, 9 * P, 10 * P, T.demir_cubuk], [7 * P, 9 * P, 7.5 * P, 9 * P, 13 * P, 8.5 * P, T.demir_cubuk]];

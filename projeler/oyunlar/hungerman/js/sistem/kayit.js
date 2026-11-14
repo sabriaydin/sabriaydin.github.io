@@ -30,9 +30,16 @@ export const Kayit = {
 };
 
 const AYAR_ANAHTAR = 'hungerman_ayarlar';
-export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true };
+export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true };
+/* 0.22.0: sayısal ayarlar geçerli aralığa çekilir (bozuk ya da elle değiştirilmiş kayıtta dünya yüklenemiyordu) */
+const AYAR_ARALIK = { gorus: [4, 16], fov: [60, 100], hassasiyet: [0.2, 2.5], ses: [0, 1], muzik: [0, 1], cozunurluk: [0, 4] };
+function ayarDuzelt(a) {
+  for (const [k, [en, eb]] of Object.entries(AYAR_ARALIK)) { const v = Number(a[k]); a[k] = Number.isFinite(v) ? Math.min(eb, Math.max(en, v)) : VARSAYILAN_AYAR[k]; }
+  a.gorus = Math.round(a.gorus);
+  return a;
+}
 export function ayarlariYukle() {
-  try { return Object.assign({}, VARSAYILAN_AYAR, JSON.parse(localStorage.getItem(AYAR_ANAHTAR) || '{}')); }
+  try { return ayarDuzelt(Object.assign({}, VARSAYILAN_AYAR, JSON.parse(localStorage.getItem(AYAR_ANAHTAR) || '{}'))); }
   catch (e) { return Object.assign({}, VARSAYILAN_AYAR); }
 }
 export function ayarlariKaydet(a) { try { localStorage.setItem(AYAR_ANAHTAR, JSON.stringify(a)); } catch (e) { /* depolama kapalı olabilir */ } }

@@ -83,6 +83,31 @@ const GOK_FS = `uniform vec3 ust; uniform vec3 ufuk; uniform vec3 gunesYon; unif
 void main(){ float h = clamp(vY.y, -1.0, 1.0); vec3 c = mix(ufuk, ust, pow(clamp(h, 0.0, 1.0), 0.55)); if (h < 0.0) c = mix(ufuk, ufuk * 0.6, clamp(-h * 3.0, 0.0, 1.0));
 float g = max(dot(vY, gunesYon), 0.0); c += gunesHale * pow(g, 12.0) * 0.6; gl_FragColor = vec4(c, 1.0); }`;
 
+/* 0.22.0: kuzey ışıkları: silindir perdede dalgalanan yeşil-mor ışık şeritleri (toplamalı karışım) */
+const AURORA_VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+const AURORA_FS = `uniform float z; uniform float guc; varying vec2 vUv;
+float h1(float n){ return fract(sin(n) * 43758.5453); }
+float gr(float x){ float i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f); return mix(h1(i), h1(i + 1.0), f); }
+void main(){
+  float x = vUv.x * 48.0;
+  float dalga = gr(x * 0.3 + z * 0.12) * 0.6 + gr(x * 1.1 - z * 0.35) * 0.4;
+  float bant = smoothstep(0.0, 0.22, vUv.y) * (1.0 - smoothstep(0.3 + dalga * 0.55, 1.0, vUv.y));
+  float cizgi = 0.5 + 0.5 * sin(x * 5.0 + gr(x * 1.7 + z * 0.6) * 7.0 + z * 0.7);
+  float kuzey = 0.3 + 0.7 * smoothstep(-0.3, 0.9, cos(vUv.x * 6.2832));
+  float yogun = bant * (0.35 + 0.65 * cizgi) * (0.3 + 0.7 * gr(x * 0.18 - z * 0.05)) * kuzey * guc;
+  vec3 renk = mix(vec3(0.15, 1.0, 0.5), vec3(0.55, 0.3, 1.0), smoothstep(0.3, 0.95, vUv.y));
+  renk = mix(renk, vec3(0.2, 0.85, 1.0), gr(x * 0.45 + z * 0.2) * 0.45);
+  gl_FragColor = vec4(renk * 1.8, clamp(yogun * 1.3, 0.0, 1.0));
+}`;
+/* Yumuşak ışık lekesi dokusu (meteor ateş topu ve izi) */
+function isikDokusu() {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const x = cv.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  g.addColorStop(0, 'rgba(255,255,240,1)'); g.addColorStop(0.25, 'rgba(255,220,120,0.9)'); g.addColorStop(0.55, 'rgba(255,120,30,0.45)'); g.addColorStop(1, 'rgba(255,60,0,0)');
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(cv);
+}
+
 export class Sahne {
   constructor(tuval) {
     this.cizici = new THREE.WebGLRenderer({ canvas: tuval, antialias: false, powerPreference: 'high-performance' });
@@ -149,7 +174,26 @@ export class Sahne {
     this.gunes = kare(0xfff3b8, 42); this.ay = kare(0xe6ecf5, 30);
     const hale = kare(0xffd27a, 90); hale.material.opacity = 0.18; this.gunes.add(hale); hale.position.z = -1;
     g.add(this.gunes, this.ay);
+    /* 0.22.0: kuzey ışıkları ve kayan yıldızlar (oyuncuyu izleyen gök grubunda) */
+    this.auroraMalzeme = new THREE.ShaderMaterial({ uniforms: { z: { value: 0 }, guc: { value: 0 } }, vertexShader: AURORA_VS, fragmentShader: AURORA_FS,
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false });
+    this.aurora = new THREE.Mesh(new THREE.CylinderGeometry(380, 380, 160, 72, 1, true), this.auroraMalzeme);
+    this.aurora.position.y = 190; this.aurora.renderOrder = -7; this.aurora.visible = false; this.aurora.frustumCulled = false; g.add(this.aurora);
+    this.kayanlar = [];
+    for (let i = 0; i < 8; i++) {
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(6), 3));
+      geo.setAttribute('color', new THREE.Float32BufferAttribute([1, 1, 1, 0, 0, 0], 3));
+      const l = new THREE.Line(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));
+      l.visible = false; l.renderOrder = -7; l.frustumCulled = false; l.yas = 1; g.add(l); this.kayanlar.push(l);
+    }
     this.gokGrubu = g;
+    /* Meteor: ateş topu ve kıvılcım izi (dünya koordinatlarında) */
+    const idok = isikDokusu();
+    this.meteorTopu = new THREE.Sprite(new THREE.SpriteMaterial({ map: idok, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false }));
+    this.meteorTopu.visible = false; this.sahne.add(this.meteorTopu);
+    this.meteorIzi = [];
+    for (let i = 0; i < 48; i++) { const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: idok, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, fog: false, color: 0xffa040 })); s.visible = false; s.yas = 9; this.sahne.add(s); this.meteorIzi.push(s); }
+    this.izSira = 0; this.kanliK = 0;
     this.sahne.add(g);
     /* Bulutlar */
     const cv = document.createElement('canvas'); cv.width = cv.height = 64;
@@ -187,6 +231,11 @@ export class Sahne {
       ust.lerp(gri, hy * 0.93); ufuk.lerp(gri.clone().multiplyScalar(1.12), hy * 0.88);
     }
     if (sm > 0) { ust.lerp(new THREE.Color(0xdfe6ff), sm * 0.8); ufuk.lerp(new THREE.Color(0xeef1ff), sm * 0.8); }
+    /* 0.22.0: Kanlı Ay: kızıl gece göğü ve sis, kocaman kızıl ay */
+    const kn = (this.kanliK || 0) * (1 - k);
+    if (kn > 0.001) { ust.lerp(new THREE.Color(0x2a0306), kn * 0.9); ufuk.lerp(new THREE.Color(0x7a120a), kn * 0.9); }
+    this.ay.material.color.setHex(0xe6ecf5).lerp(new THREE.Color(0xff2a14), Math.min(1, (this.kanliK || 0) * 1.2)); this.ay.scale.setScalar(1 + (this.kanliK || 0) * 0.7);
+    this.yildizMalzeme.color.setHex(0xffffff).lerp(new THREE.Color(0xff7060), kn);
     const gm = this.gokMalzeme.uniforms;
     gm.ust.value.copy(ust); gm.ufuk.value.copy(ufuk);
     const gy = new THREE.Vector3(Math.cos(a), yuks, 0.25).normalize();
@@ -203,11 +252,14 @@ export class Sahne {
     const bk = this.bulutMalzeme.map;
     bk.offset.set((konum.x + zamanSn * 1.2) / 768 % 1, -(konum.z) / 768 % 1);
     this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
+    /* 0.22.0: geceleri bulutlar gökyüzünün tonunu alır (gri lekeler oluşmaz; Kanlı Ay'da kızarır) */
+    this.bulutMalzeme.color.lerp(ufuk.clone().multiplyScalar(1.5).convertSRGBToLinear(), (1 - k) * 0.9);
     /* Yağışta bulutlar gökyüzünün biraz koyu tonunu alır (gece kapkara lekeler oluşmaz) */
     if (hy > 0) this.bulutMalzeme.color.lerp(ust.clone().multiplyScalar(0.62).convertSRGBToLinear(), hy * 0.95);
     this.bulutMalzeme.opacity = 0.82 + 0.16 * hy;
     /* Blok aydınlatması */
     const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.82, 0.68), alacakaranlik * 0.5);
+    if (kn > 0.001) gokRenk.lerp(new THREE.Color(1, 0.45, 0.4), kn * 0.75);
     const lav = suda === 'lav';
     /* suda === 'maske': dalış maskesi su altında görüşü uzatır */
     const maske = suda === 'maske';
@@ -235,6 +287,52 @@ export class Sahne {
     if (diyar) return 0.4;
     this.kamera.far = Math.max(600, gorus * 16 + 40); this.kamera.updateProjectionMatrix();
     return gun;
+  }
+
+  /* 0.22.0: kayan yıldız: gökyüzünün üst yarısında, ufka doğru kısa bir iz */
+  kayanYildiz() {
+    const l = this.kayanlar.find(k => !k.visible); if (!l) return;
+    const a = Math.random() * Math.PI * 2, e = 0.45 + Math.random() * 0.7;
+    l.bas = new THREE.Vector3(Math.cos(a) * Math.cos(e), Math.sin(e), Math.sin(a) * Math.cos(e)).multiplyScalar(430);
+    const b = a + (Math.random() < 0.5 ? 1 : -1) * (0.6 + Math.random() * 0.5);
+    l.yon = new THREE.Vector3(Math.cos(b) * 0.8, -0.55 - Math.random() * 0.3, Math.sin(b) * 0.8).normalize();
+    l.boy = 30 + Math.random() * 45; l.hiz = 160 + Math.random() * 120; l.omur = 0.55 + Math.random() * 0.5; l.yas = 0; l.visible = true;
+  }
+  /* Ekran parlaması (meteor çarpması) */
+  parlama(k) { const el = document.getElementById('gokParla'); if (!el) return; el.style.transition = 'none'; el.style.opacity = String(Math.min(0.9, k)); void el.offsetWidth; el.style.transition = 'opacity 1.6s ease-out'; el.style.opacity = '0'; }
+  /* Her kare: s = { kanli, aurora, meteorlar, sure } */
+  gokOlaylari(dt, s) {
+    this.kanliK = s.kanli;
+    const au = this.auroraMalzeme.uniforms;
+    au.z.value += dt; au.guc.value = s.aurora;
+    this.aurora.visible = s.aurora > 0.01 && this.gokGrubu.visible;
+    for (const l of this.kayanlar) {
+      if (!l.visible) continue;
+      l.yas += dt;
+      if (l.yas > l.omur) { l.visible = false; continue; }
+      const bas = l.bas.clone().addScaledVector(l.yon, l.yas * l.hiz), uzun = l.boy * Math.min(1, l.yas * 4), son = bas.clone().addScaledVector(l.yon, -uzun);
+      const pa = l.geometry.attributes.position; pa.setXYZ(0, bas.x, bas.y, bas.z); pa.setXYZ(1, son.x, son.y, son.z); pa.needsUpdate = true;
+      l.material.opacity = Math.min(1, (l.omur - l.yas) * 4) * this.yildizMalzeme.opacity * 1.1;
+    }
+    /* Meteor: gökten çarpma noktasına doğru hızlanarak iner, arkasında kıvılcım bırakır */
+    const m = s.meteorlar.find(q => !q.carpti);
+    if (m) {
+      const k = Math.min(1, m.t / m.sure), kk = k * k;
+      const yuks = 320, yatay = 260;
+      const x = m.x + Math.cos(m.aci) * yatay * (1 - kk), y = m.y + yuks * (1 - kk), z = m.z + Math.sin(m.aci) * yatay * (1 - kk);
+      this.meteorTopu.visible = true; this.meteorTopu.position.set(x, y, z); this.meteorTopu.scale.setScalar(6 + 10 * k);
+      for (let i = 0; i < 2; i++) {
+        const iz = this.meteorIzi[this.izSira++ % this.meteorIzi.length];
+        iz.visible = true; iz.yas = 0; iz.position.set(x + (Math.random() - 0.5) * 2, y + (Math.random() - 0.5) * 2, z + (Math.random() - 0.5) * 2); iz.boy = 2.5 + 4 * k;
+      }
+    } else this.meteorTopu.visible = false;
+    for (const iz of this.meteorIzi) {
+      if (!iz.visible) continue;
+      iz.yas += dt;
+      if (iz.yas > 1.4) { iz.visible = false; continue; }
+      iz.scale.setScalar(iz.boy * (1 + iz.yas * 0.8)); iz.material.opacity = 0.85 * (1 - iz.yas / 1.4);
+      iz.material.color.setRGB(1, 0.6 - iz.yas * 0.3, 0.25 - iz.yas * 0.15);
+    }
   }
 
   isiklariAyarla(liste) {

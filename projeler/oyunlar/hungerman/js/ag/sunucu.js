@@ -8,6 +8,7 @@ import { r2, r3, v3, durumDizisi, blokEfekti, sandikDizi, sandikKur } from './or
 import { SURUM, PB } from '../sabitler.js';
 import { BLOKLAR, ESYALAR } from '../bloklar.js';
 import { OTURMA } from '../oyun/binek.js';
+import { mezarKoy, mezarBosalt } from '../oyun/mezar.js';
 
 const MAKS = 8;                 // sunucu dahil en çok oyuncu
 const ANLIK = 0.1;              // anlık durum gönderim aralığı (sn)
@@ -208,7 +209,7 @@ export class SunucuOyun {
         const sahip = this.kilit.get(s);
         if (sahip != null && sahip !== c.id) { k.gonder({ t: 'sandik', k: s, kilitli: 1 }); return; }
         let d = o.dunya.sandiklar.get(s);
-        if (!d) { d = o.koyler.sandikGanimeti(m.x, m.y, m.z); o.dunya.sandiklar.set(s, d); }
+        if (!d) { d = BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].mezar ? new Array(27).fill(null) : o.koyler.sandikGanimeti(m.x, m.y, m.z); o.dunya.sandiklar.set(s, d); }
         this.kilit.set(s, c.id);
         k.gonder({ t: 'sandik', k: s, y: sandikDizi(d) });
         break;
@@ -221,6 +222,14 @@ export class SunucuOyun {
         while (yuvalar.length < 27) yuvalar.push(null);
         if (o.dunya.yuklu(x, z) && !BLOKLAR[o.dunya.blok(x, y, z)].sandik) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
         o.dunya.sandiklar.set(m.k, yuvalar);
+        mezarBosalt(o.dunya, m.k);   // 0.22.0: boşaltılan mezar kaybolur
+        break;
+      }
+      case 'mz': {  // 0.22.0: ölen istemcinin eşyaları mezar taşına
+        const l = sandikKur(m.y).filter(Boolean).slice(0, 81), [x, y, z] = (m.p || []).map(Number);
+        if (!l.length || ![x, y, z].every(Number.isFinite)) break;
+        const r = mezarKoy(o.dunya, x, y, z, l);
+        for (const e of r.kalan) o.dusenler.birak(e.id, e.adet, x, y + 1, z, 0, 2, 0, e.dayanim, 0.5, e.buyu);
         break;
       }
       case 'skr': { // sandık kırıldı: içindekiler yere düşer
@@ -281,13 +290,13 @@ export class SunucuOyun {
     for (const c of this.istemciler.values()) {
       if (!c.durum) continue;
       if (!c.ctx) c.ctx = { ad: c.ad, oyuncu: { konum: c.konum }, oyuncuyaVur: (n, v, kaynak) => this.vur(c, n, v, kaynak), okTopla: () => { c.k.gonder({ t: 'ver', id: 287, n: 1 }); return true; } };
-      Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik, firtina: ctx.firtina, yagmur: ctx.yagmur, eldeki: c.durum[5] | 0 });
+      Object.assign(c.ctx, { oyuncuOlu: c.olu, oyuncuSuda: c.suda, gunIsigi: ctx.gunIsigi, gunSayisi: ctx.gunSayisi, isik: ctx.isik, firtina: ctx.firtina, yagmur: ctx.yagmur, kanliAy: ctx.kanliAy, eldeki: c.durum[5] | 0 });
       l.push(c.ctx);
     }
     ctx.oyuncular = l;
     return ctx;
   }
-  vur(c, n, v, kaynak) { const k = kaynak || v.konum; c.k.gonder({ t: 'h', n, s: v.turAd, k: [r2(k.x), r2(k.z)], a: v.tur.agu ? 1 : 0 }); }
+  vur(c, n, v, kaynak) { const k = kaynak || v.konum; if (v.kanli) n += 1; c.k.gonder({ t: 'h', n, s: v.turAd, k: [r2(k.x), r2(k.z)], a: v.tur.agu ? 1 : 0 }); }
   /* Deneyim: uzak oyuncunun beslediği hayvan yavruladığında */
   xpVer(c, n) { c.k.gonder({ t: 'xp', n }); }
   /* Yıldırım: tüm oyunculara gösterilir, yakındaki oyuncular hasar alır */
@@ -320,7 +329,7 @@ export class SunucuOyun {
         let b = 0;
         if (w.olu) b |= 1; if (w.hasarZaman > 0) b |= 2; if (w.yaniyor) b |= 4; if (w.nisan) b |= 8; if (!w.m.kok.visible) b |= 16; if (!w.yerde || w.kacZaman > 0) b |= 32;
         if (w.yavru > 0) b |= 64; if (w.ask > 0) b |= 128; if (w.dinlen > 0) b |= 256; if (w.anim) b |= (w.anim & 7) << 9;
-        if (w.oturuyor) b |= 4096; if (w.sahip) b |= 8192; if (w.eyer) b |= 16384; if (w.sahlan > 0) b |= 32768; if (w.kirkildi) b |= 65536;
+        if (w.oturuyor) b |= 4096; if (w.sahip) b |= 8192; if (w.eyer) b |= 16384; if (w.sahlan > 0) b |= 32768; if (w.kirkildi) b |= 65536; if (w.kanli) b |= 131072;
         const a = [w.id, r2(w.konum.x), r2(w.konum.y), r2(w.konum.z), r3(w.yaw), b, Math.max(0, Math.ceil(w.can))];
         if (!c.bilinen.has(w.id)) a.push(w.tur.koylu && w.koylu ? [w.turAd, w.koylu.meslek, w.koy.id, w.koylu.idx] : w.renk ? [w.turAd, 0, 0, 0, w.renk] : [w.turAd]);
         bilinen.add(w.id);

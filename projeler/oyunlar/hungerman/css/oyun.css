@@ -634,3 +634,36 @@ body.dokunmatik #tikla b::after { content: ''; }
   body.dokunmatik #pusulaTuval { width: 260px; }
   body.dokunmatik .pencere { max-height: calc(100vh - 20px); overflow: auto; }
 }
+
+/* 0.22.0: vücut ısısı göstergesi, soğuk ve sıcak kenar efektleri, hasar yönü, gök parlaması, tılsım halkası, Kanlı Ay uyarısı */
+#isiGosterge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 7px; border-radius: 99px; background: rgba(12, 14, 18, .48); border: 1px solid rgba(255, 255, 255, .08); font: 600 .78rem/1.5 var(--govde); color: #fff; pointer-events: auto; cursor: default; }
+#isiGosterge[hidden] { display: none; }
+#isiGosterge i { position: relative; width: 6px; height: 14px; border-radius: 3px; background: rgba(255, 255, 255, .25); }
+#isiGosterge i::after { content: ""; position: absolute; left: -2px; bottom: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--t, #7ad87a); box-shadow: 0 0 6px var(--t, #7ad87a); }
+#isiGosterge i::before { content: ""; position: absolute; left: 1.5px; bottom: 2px; width: 3px; height: 8px; border-radius: 2px; background: var(--t, #7ad87a); }
+#isiGosterge b { font-variant-numeric: tabular-nums; }
+#isiGosterge small { color: rgba(255, 255, 255, .62); font-size: .7rem; }
+#isiGosterge.usume { --t: #8ac8ff; color: #cfe8ff; }
+#isiGosterge.donma { --t: #3a9aff; color: #9ad0ff; animation: isiNabiz 1s ease-in-out infinite alternate; }
+#isiGosterge.bunalma { --t: #ffb04a; color: #ffe0b0; }
+#isiGosterge.carpma { --t: #ff5a2a; color: #ffb89a; animation: isiNabiz 1s ease-in-out infinite alternate; }
+@keyframes isiNabiz { from { box-shadow: 0 0 0 rgba(0, 0, 0, 0); } to { box-shadow: 0 0 12px var(--t); } }
+#ayazEfekt, #sicakEfekt, #gokParla, #hasarYon, #tilsimHalka { position: absolute; pointer-events: none; }
+#ayazEfekt { inset: 0; opacity: 0; transition: opacity .6s; background: radial-gradient(ellipse at center, transparent 52%, rgba(170, 215, 255, .38) 78%, rgba(225, 245, 255, .82));
+  box-shadow: inset 0 0 70px rgba(200, 235, 255, .55); }
+#sicakEfekt { inset: 0; opacity: 0; transition: opacity .6s; background: radial-gradient(ellipse at center, transparent 55%, rgba(255, 150, 40, .28) 82%, rgba(255, 90, 20, .5)); animation: sicakDalga 2.4s ease-in-out infinite alternate; }
+@keyframes sicakDalga { from { filter: blur(0); } to { filter: blur(2px); } }
+#gokParla { inset: 0; opacity: 0; background: radial-gradient(circle, rgba(255, 250, 230, .95), rgba(255, 200, 120, .6)); }
+#hasarYon { left: 50%; top: 50%; width: 230px; height: 230px; margin: -115px 0 0 -115px; opacity: 0; transform: rotate(var(--a, 0deg));
+  background: radial-gradient(ellipse 34% 9% at 50% 4%, rgba(230, 20, 20, .85), transparent 100%); }
+#hasarYon.acik { animation: hasarYon 1.1s ease-out forwards; }
+@keyframes hasarYon { 0% { opacity: 1; } 100% { opacity: 0; } }
+#tilsimHalka { left: 50%; top: 50%; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%;
+  background: conic-gradient(rgba(140, 220, 255, .95) calc(var(--o, 0) * 360deg), rgba(255, 255, 255, .12) 0); -webkit-mask: radial-gradient(circle, transparent 54%, #000 56%); mask: radial-gradient(circle, transparent 54%, #000 56%); filter: drop-shadow(0 0 6px rgba(120, 210, 255, .9)); }
+#tilsimHalka[hidden] { display: none; }
+#geceUyari.kanli { color: #ff4a3a; background: rgba(60, 4, 4, .7); animation: isiNabiz 1.2s ease-in-out infinite alternate; --t: #ff2a1a; }
+.olumIstat { color: rgba(255, 255, 255, .7); font: 500 .9rem var(--govde); margin-top: -4px; }
+.istIzgara { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.istKart { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: 10px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); }
+.istKart small { color: rgba(255, 255, 255, .6); font: 600 .72rem var(--govde); text-transform: uppercase; letter-spacing: .04em; }
+.istKart b { font: 700 1.05rem var(--govde); color: #fff; font-variant-numeric: tabular-nums; }

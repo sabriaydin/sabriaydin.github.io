@@ -21,7 +21,7 @@ function ustRenk(id) {
   if (c) return c;
   c = [120, 120, 120];
   try {
-    const d = doseme(YUZ_DOKU[id * 6 + 2]).getContext('2d').getImageData(0, 0, 16, 16).data;
+    const d = doseme(YUZ_DOKU[id * 6 + 2]).veri;
     let r = 0, g = 0, b = 0, n = 0;
     for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 128) { r += d[i]; g += d[i + 1]; b += d[i + 2]; n++; }
     if (n) c = [r / n, g / n, b / n];

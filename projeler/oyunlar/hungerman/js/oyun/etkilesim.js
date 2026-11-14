@@ -61,6 +61,7 @@ export class Etkilesim {
   }
 
   olay(k) { if (this.arayuz.olay) this.arayuz.olay(k); }
+  istat(k, n = 1) { if (this.arayuz.istat) this.arayuz.istat(k, n); }   // 0.22.0
   /* E tuşu (0.15.1): hedefteki nesneyle etkileşim (kapı, sandık, istasyon, yatak, köylü, tekne). Sağ tık da aynı işleri yapar. */
   etkiles() {
     if (this.tekneler.binilen) return false;
@@ -268,6 +269,7 @@ export class Etkilesim {
     if (b.sekil === 'kapi') { const oy = h.y + (b.ust ? -1 : 1), ob = d.blok(h.x, oy, h.z); if (BLOKLAR[ob] && BLOKLAR[ob].sekil === 'kapi') d.blokKoy(h.x, oy, h.z, 0); }
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
     if (b.ekin === 3) this.olay('hasat');
+    this.istat('kirilan');
     if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
@@ -450,20 +452,39 @@ export class Etkilesim {
       if (e.iyilestirme) this.hayatta.iyiles(e.iyilestirme);
       if (this.hayatta.ye(e.yemek, e.zehir || 0)) this.arayuz.bildirim('Mide bulantısı: açlık bir süre daha hızlı azalır.');
       if (e.pismis) this.olay('pisir');
+      /* 0.22.0: sıcak çorba ısıtır, ayran serinletir */
+      if (e.sicak) { this.hayatta.etkiEkle('sicak', e.sicak); if (this.hayatta.vucut < 36) this.arayuz.bildirim('Sıcak çorba içinizi ısıttı.'); }
+      if (e.serin) this.hayatta.etkiEkle('serin', e.serin);
+      this.istat('yemek');
       env.seciliAzalt(1);
       if (e.kap) { env.ekle(e.kap, 1); this.ses.ic(); } else this.ses.ye();
       if (s.id === 269 || e.kase) env.ekle(270, 1);
       /* 0.21.0: süt olumsuz etkileri ve zehri, bal zehri giderir */
-      if (e.temizle || e.zehirGider) { const H = this.hayatta; H.zehir = 0; H.agu = 0; if (e.temizle) for (const k in H.etkiler) if (ETKILER[k] && ETKILER[k].kotu) delete H.etkiler[k]; this.arayuz.bildirim(e.temizle ? 'Olumsuz etkiler geçti.' : 'Zehir geçti.'); }
+      if (e.temizle || e.zehirGider) { const H = this.hayatta; H.zehir = 0; H.agu = 0; if (e.temizle) for (const k in H.etkiler) if (ETKILER[k] && ETKILER[k].kotu && k !== 'kanama' && k !== 'kirik') delete H.etkiler[k]; this.arayuz.bildirim(e.temizle ? 'Olumsuz etkiler geçti.' : 'Zehir geçti.'); }
       if (s.id >= 484 && s.id <= 491) this.olay('ciftci');
       if (s.id >= 463 && s.id <= 470) this.olay('gurme');
       return true;
     }
     if (e.tur === 'iyilestir') {
-      if (this.hayatta.can >= 20) { this.arayuz.bildirim('Canınız dolu.'); return true; }
+      /* 0.22.0: bandaj ve şifa iksiri kanamayı durdurur */
+      const kanama = this.hayatta.etki('kanama');
+      if (this.hayatta.can >= 20 && !kanama) { this.arayuz.bildirim('Canınız dolu.'); return true; }
       this.hayatta.iyiles(e.iyilestir); env.seciliAzalt(1); this.ses.topla();
+      if (kanama) { delete this.hayatta.etkiler.kanama; this.arayuz.bildirim('Kanama durdu.'); if (s.id === 268) this.olay('ilkYardim'); }
       return true;
     }
+    /* 0.22.0: atel kırık bacağı sarar */
+    if (e.tur === 'atel') {
+      const H = this.hayatta;
+      if (!H.etki('kirik')) { this.arayuz.bildirim('Kırık bir kemik yok.'); return true; }
+      if (H.atel) { this.arayuz.bildirim('Bacak zaten atelle sarılı.'); return true; }
+      H.etkiler.kirik = Math.min(H.etkiler.kirik, 30); H.atel = true;
+      env.seciliAzalt(1); this.ses.zirhGiy(); this.olay('atel');
+      this.arayuz.bildirim('Atel sarıldı: kemik 30 saniyede kaynar.');
+      return true;
+    }
+    /* 0.22.0: Eve Dönüş Tılsımı */
+    if (e.alet && e.alet.tur === 'tilsim') { if (this.arayuz.tilsim) this.arayuz.tilsim(); return true; }
     /* Blok koyma */
     if (e.tur === 'blok' && h) {
       let id = e.blok;
@@ -529,7 +550,7 @@ export class Etkilesim {
       if (KATI[id] && this.oyuncu.hucreyiKapliyor(x, y, z)) return false;
       if (!d.blokKoy(x, y, z, id)) return false;
       if (BLOKLAR[id].sandik) this.arayuz.sandikYerlesti(x, y, z);
-      env.seciliAzalt(1);
+      env.seciliAzalt(1); this.istat('konulan');
       this.ses.koy(BLOKLAR[id].ses);
       return true;
     }

@@ -42,7 +42,9 @@ export const DOKULAR = [
   'gecik_ust', 'gecik_ust_a',
   /* 0.21.0: tarım ve hayvancılık */
   'kabak_sap0', 'kabak_sap1', 'kabak_sap2', 'kabak_sap3', 'balkabagi_ust', 'balkabagi_yan', 'balkabagi_yuz', 'balkabagi_fener', 'seker_kamisi',
-  'kovan_ust', 'kovan_yan', 'kovan_on', 'kovan_on_bal'
+  'kovan_ust', 'kovan_yan', 'kovan_on', 'kovan_on_bal',
+  /* 0.22.0: hayatta kalma */
+  'mezar', 'gok_tasi', 'yildiz_feneri'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -304,6 +306,11 @@ blok(568, { ad: 'Şeker Kamışı', dok: 'seker_kamisi', cizim: C_CAPRAZ, kati: 
 /* Arı kovanı: 569 + yön * 6 + bal seviyesi (0-5); ön yüzü yön tarafına bakar; dolu kovandan şişeyle bal, makasla petek alınır */
 for (let f = 0; f < 4; f++) for (let s = 0; s < 6; s++) blok(569 + f * 6 + s, { ad: 'Arı Kovanı', dok: { ust: 'kovan_ust', yan: 'kovan_yan', alt: 'kovan_ust', on: s === 5 ? 'kovan_on_bal' : 'kovan_on' },
   onYon: f, kovan: true, yon: f, bal: s, taban: 569, gizli: f + s > 0, sertlik: 0.6, alet: 'balta', ses: 'odun', dusur: () => [[569, 1]], harita: 116 });
+/* 0.22.0: Mezar taşı: ölen oyuncunun eşyalarını saklar (sandık gibi açılır, boşalınca kaybolur) */
+blok(593, { ad: 'Mezar Taşı', dok: 'mezar', cizim: 5, opak: false, sertlik: 1.5, alet: 'kazma', ses: 'tas', sandik: true, mezar: true, sekil: 'mezar', gizli: true, dusur: () => [], harita: 2 });
+/* 0.22.0: Gök taşı: düşen meteorların çekirdeği; demir kazmayla kazılır, yıldız parçası verir */
+blok(594, { ad: 'Gök Taşı', dok: 'gok_tasi', sertlik: 5, alet: 'kazma', seviye: 2, ses: 'tas', mesale: true, isik: 7, parlak: true, dusur: r => [[492, 1 + (r() < 0.45 ? 1 : 0)]], xp: 6, harita: 117 });
+blok(595, { ad: 'Yıldız Feneri', dok: 'yildiz_feneri', sertlik: 0.4, ses: 'cam', mesale: true, isik: 15, lamba: true, parlak: true, harita: 116 });
 blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
 
 /* Maden deneyimi */
@@ -429,7 +436,12 @@ export const ETKILER = {
   yenilenme: { ad: 'Yenilenme', renk: '#e8668a', aciklama: 'Can her 2,5 saniyede 1 artar' },
   tokluk: { ad: 'Tokluk', renk: '#d8a24a', aciklama: 'Açlık azalmaz' },
   yavas: { ad: 'Yavaşlık', renk: '#7a8fa8', aciklama: 'Hareket hızı %40 azalır', kotu: true },
-  aclik: { ad: 'Açlık', renk: '#8a7a3a', aciklama: 'Açlık hızla azalır', kotu: true }
+  aclik: { ad: 'Açlık', renk: '#8a7a3a', aciklama: 'Açlık hızla azalır', kotu: true },
+  /* 0.22.0: yaralanma ve vücut ısısı */
+  kanama: { ad: 'Kanama', renk: '#c81e1e', aciklama: 'Can azalır; bandaj durdurur', kotu: true },
+  kirik: { ad: 'Kırık Bacak', renk: '#b8a890', aciklama: 'Yavaş yürünür, koşulamaz; atel iyileşmeyi hızlandırır', kotu: true },
+  sicak: { ad: 'Isınma', renk: '#ff9a4a', aciklama: 'Soğuğa karşı korur' },
+  serin: { ad: 'Serinlik', renk: '#8ad8f0', aciklama: 'Sıcağa karşı korur' }
 };
 [['hiz', 'Hız İksiri'], ['gece', 'Gece Görüşü İksiri'], ['nefes', 'Su Altında Nefes İksiri'], ['ates', 'Ateşe Dayanıklılık İksiri'], ['guc', 'Güç İksiri']].forEach(([k, ad], i) =>
   esya(332 + i, { ad, simge: 'iksir', renk: ETKILER[k].renk, tur: 'iksir', etki: { tur: k, sure: 180 }, yigin: 16, ozellik: `${ETKILER[k].aciklama} (3 dakika)` }));
@@ -506,6 +518,13 @@ yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });
 yemek(489, 'Omlet', { simge: 'omlet', yemek: 7 }, 'guc', 20);
 yemek(490, 'Baklava', { simge: 'baklava', yemek: 9 }, 'hiz', 45);
 yemek(491, 'Haşlanmış Yumurta', { simge: 'yumurta', renk: '#f6f2e6', yemek: 4 });
+/* 0.22.0: hayatta kalma */
+esya(492, { ad: 'Yıldız Parçası', simge: 'yildiz', ozellik: 'Düşen meteorlardan elde edilir' });
+esya(493, { ad: 'Eve Dönüş Tılsımı', tur: 'alet', yigin: 1, simge: 'tilsim', ozellik: 'Sağ tık basılı tutulunca doğma noktasına ışınlar', alet: { tur: 'tilsim', seviye: 0, hiz: 1, dayanim: 8, hasar: 1 } });
+esya(494, { ad: 'Atel', simge: 'atel', yigin: 16, tur: 'atel', ozellik: 'Kırık bacağı sarar: iyileşme hızlanır, yavaşlık azalır' });
+/* Sıcak çorbalar soğuğa karşı ısıtır; ayran serinletir */
+for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
+E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
 
 /* Örste onarım malzemesi */
 export function onarimMalzemesi(id) {

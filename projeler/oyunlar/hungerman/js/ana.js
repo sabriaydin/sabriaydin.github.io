@@ -24,6 +24,9 @@ import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
+import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
+import { hissedilenSicaklik } from './oyun/sicaklik.js';
+import { mezarKoy, mezarBosalt } from './oyun/mezar.js';
 import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
 import { Ses } from './sistem/ses.js';
@@ -112,7 +115,7 @@ function ayarFormu() {
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
   bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb');
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb'); bag('#aIsi', 'vucutIsisi', null, 'cb');
 }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
@@ -125,6 +128,7 @@ function ayarUygula() {
   $('#fps').hidden = !ayar.fps;
   $('#miniHarita').hidden = !ayar.miniHarita;
   dokun.ayarla(ayar.dokunmatik);
+  if (oyun) oyun.hayatta.isiAcik = ayar.vucutIsisi !== false;
 }
 
 /* ---------- Dünya listesi ---------- */
@@ -270,8 +274,11 @@ const envEkrani = new EnvanterEkrani({
 envEkrani.kapatIste = () => envanterKapat(true);
 /* Çok oyunculu: sandık kapanınca içerik sunucuya gider (sunucuda kilit kalkar) */
 envEkrani.kapandi = s => {
-  if (!oyun || !oyun.ag || !s.k) return;
-  if (oyun.istemci) oyun.ag.sandikKapat(s.k, s.yuvalar); else oyun.ag.sandikBirak(s.k);
+  if (!oyun || !s.k) return;
+  if (oyun.ag) { if (oyun.istemci) oyun.ag.sandikKapat(s.k, s.yuvalar); else oyun.ag.sandikBirak(s.k); }
+  /* 0.22.0: boşaltılan mezar taşı kaybolur */
+  const [x, y, z] = String(s.k).split(',').map(Number), b = BLOKLAR[oyun.dunya.blok(x, y, z)];
+  if (b && b.mezar && s.yuvalar.every(e => !e)) { oyun.basarimlar.ver('mezar'); oyun.hud.bildirim('Mezar taşı boşaltıldı.'); if (!oyun.istemci) mezarBosalt(oyun.dunya, s.k); }
 };
 function envanterAcKapa(istasyon, sandik) {
   if (!oyun || oyun.hayatta.olu) return;
@@ -386,7 +393,7 @@ function oyunBaslat(v) {
   ekran('yukleme');
   $('#yukleBaslik').textContent = v.istemci ? 'Dünyaya katılınıyor' : v.yeni ? 'Dünya oluşturuluyor' : 'Dünya yükleniyor';
   $('#yukleCubuk').style.width = '0%';
-  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır ve doğma noktasını belirler.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.', 'Arı kovanının altına kamp ateşi yakılırsa bal toplarken arılar kızmaz.', 'Süt kovası içilince zehir ve olumsuz etkiler geçer.', 'Kırkılan koyunun yünü zamanla yeniden uzar.', 'Şeker kamışı yalnızca suya komşu zemine dikilir.',
+  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır ve doğma noktasını belirler.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.', 'Arı kovanının altına kamp ateşi yakılırsa bal toplarken arılar kızmaz.', 'Süt kovası içilince zehir ve olumsuz etkiler geçer.', 'Kırkılan koyunun yünü zamanla yeniden uzar.', 'Şeker kamışı yalnızca suya komşu zemine dikilir.', 'Kanlı Ay her mevsimin son gecesinde doğar; o gece uyunamaz.', 'Ölünce eşyalarınız mezar taşında saklanır.', 'Karlı bölgelerde deri zırh ve sıcak çorba hayat kurtarır.', 'Bandaj kanamayı durdurur; atel kırık bacağı hızla iyileştirir.', 'Düşen meteorların kraterinde Yıldız Parçası veren Gök Taşı bulunur.', 'Eve Dönüş Tılsımı sizi doğma noktasına ışınlar.',
     'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C tuşuna basılır.', 'F8 ile açılan geliştirici konsolunda “yardim” komutu tüm komutları listeler.',
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.',
@@ -419,7 +426,8 @@ function oyunBaslat(v) {
   oyun = { id: v.id, ad: v.ad, tohum: v.tohum, olusturma: v.olusturma || Date.now(), dunya, oyuncu, envanter, hayatta, dusenler, hud,
     zaman: v.zaman ?? 0.02, gun: v.gun || 1, dogum, olumNoktasi: v.olumNoktasi || null, ortamSayac: 4, sure: 0, kayitSayac: 0, tikSayac: 0, isikSayac: 0, isik: 1, hazir: false, yeniDogum: !v.oyuncu,
     istemci: !!v.istemci, ag: null, oyuncuKayitlari: v.oyuncuKayitlari || {}, yatakta: false,
-    harita, haritaKimlik, yerler: Array.isArray(v.yerler) ? v.yerler : [], komutlar: !!v.komutlar, gelistirici: !!v.gelistirici };
+    harita, haritaKimlik, yerler: Array.isArray(v.yerler) ? v.yerler : [], komutlar: !!v.komutlar, gelistirici: !!v.gelistirici,
+    hayatBasi: Number.isFinite(v.hayatBasi) ? v.hayatBasi : (v.gun || 1) + (v.zaman ?? 0.02), isiSayac: 0, tilsim: 0, sarsinti: 0 };
   const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
   oyun.varliklar = varliklar; oyun.gunIsigi = 1; oyun.uyku = 0; oyun.isaretSayac = 0;
   const yereBirak = (id, adet) => { const p = oyuncu.konum; dusenler.birak(id, adet, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1); };
@@ -445,7 +453,12 @@ function oyunBaslat(v) {
   basarimlar.iceAktar(v.basarimlar);
   basarimlar.kazanildi = b => basarimEkrani.goster(b);
   basarimlar.degisti = () => { if (basarimEkrani.acik) basarimEkrani.ciz(); };
-  oyun.basarimlar = basarimlar; basarimEkrani.basarimlar = basarimlar; basarimEkrani.temizle(); oyun.basarimSayac = 2;
+  oyun.basarimlar = basarimlar; basarimEkrani.basarimlar = basarimlar; basarimEkrani.hayatFn = () => (oyun && !oyun.hayatta.olu ? Math.max(0, oyun.gun + oyun.zaman - oyun.hayatBasi) : 0); basarimEkrani.temizle(); oyun.basarimSayac = 2;
+  /* 0.22.0: gök olayları (Kanlı Ay, kayan yıldızlar, meteor, kuzey ışıkları) */
+  oyun.gok = new GokOlaylari({ oyun: () => oyun, sahne, ses, bildirim: m => hud.bildirim(m), olay: k => basarimlar.ver(k), istat: k => basarimlar.istatEkle(k),
+    koyYakin: (x, z) => koylerAlan(dunya.uretici, x - 80, z - 80, x + 80, z + 80).some(k => Math.hypot(k.x - x, k.z - z) < (k.yaricap || 40) + 24),
+    yayinla: m => { if (oyun && oyun.ag && !oyun.istemci && oyun.ag.yay) oyun.ag.yay(m); } });
+  hayatta.isiAcik = ayar.vucutIsisi !== false;
   tarifKitabi.env = envanter; tarifKitabi.takip = Number.isInteger(ayar.tarifTakip) ? ayar.tarifTakip : -1; tarifKitabi.takipCiz(true);
   /* Yapılar: boss uyanması, haydutlar ve tuzaklar (tek oyunculu ve sunucu) */
   const yapiOlaylari = new YapiOlaylari({ uretici: dunya.uretici, varliklar, dunya, ses, olay: (ad, w) => {
@@ -473,17 +486,19 @@ function oyunBaslat(v) {
   Object.assign(gorevEkrani, { gorevler, envanter, oyuncu });
   /* vuran: çok oyunculuda canlıya vuran uzak oyuncu (görev ve itibar onun oyununda işlenir) */
   varliklar.olaylar.vurus = (w, vuran) => { if (vuran) { if (oyun.ag && oyun.ag.vurusOlayi) oyun.ag.vurusOlayi(w, vuran); return; } if (w.tur.koylu) koyler.koyluVuruldu(w); };
-  varliklar.olaylar.olum = (w, vuran, op) => { if (vuran) { if (oyun.ag && oyun.ag.olumOlayi) oyun.ag.olumOlayi(w, vuran, op); return; } gorevler.oldurme(w.turAd); oyun.basarimlar.oldurme(w.turAd, !!(op && op.ok)); if (w.tur.koylu) koyler.koyluOldu(w); if (w.tur.xp) hayatta.xpEkle(w.tur.xp); };
+  varliklar.olaylar.olum = (w, vuran, op) => { if (vuran) { if (oyun.ag && oyun.ag.olumOlayi) oyun.ag.olumOlayi(w, vuran, op); return; } gorevler.oldurme(w.turAd); oyun.basarimlar.oldurme(w.turAd, !!(op && op.ok)); if (w.tur.koylu) koyler.koyluOldu(w); if (w.tur.xp) hayatta.xpEkle(w.tur.xp * (w.kanli ? 2 : 1)); };
   oyun.etkilesim = new Etkilesim({ dunya, oyuncu, envanter, hayatta, dusenler, ses, sahne, varliklar, olta, tekneler, binek: oyun.binek, gecit: oyun.gecit, oyuncuAdi: ayar.ad, arayuz: {
     bildirim: (m, id) => hud.bildirim(m, id), envanterAc: ist => envanterAcKapa(ist), uyu: h => uyu(h),
     olay: k => basarimlar.ver(k),
+    istat: (k, n) => basarimlar.istatEkle(k, n),
+    tilsim: () => tilsimBaslat(),
     koyluAc: w => panelAc(koyluEkrani, w),
     sandikAc: (x, y, z) => {
       const k = x + ',' + y + ',' + z;
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
       if (oyun.istemci) { oyun.ag.sandikIste(x, y, z); return; }
       if (oyun.ag && !oyun.ag.sandikKilitle(k)) { hud.bildirim('Bu sandığı başka bir oyuncu kullanıyor.'); return; }
-      let d = dunya.sandiklar.get(k); if (!d) { d = koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
+      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
       sandikBasarim(x, y, z);
     },
     sandikYerlesti: (x, y, z) => { if (!oyun.istemci) dunya.sandiklar.set(x + ',' + y + ',' + z, new Array(27).fill(null)); },
@@ -503,11 +518,20 @@ function oyunBaslat(v) {
   envanter.degisti = () => { hud.cubukCiz(); if (envEkrani.acik) envEkrani.ciz(); };
   hud.cubukCiz(); hud.durumCiz(false);
   /* Tüy Düşüşü büyüsü (botlarda) düşme hasarını seviye başına %12 azaltır */
-  oyuncu.olaylar.dustu = d => { if (!oyuncu.suda) hayatta.hasar(Math.floor(d - 3) * (1 - 0.12 * Math.min(4, envanter.zirhBuyu('tuy'))), 'dusme'); };
+  oyuncu.olaylar.dustu = d => {
+    if (oyuncu.suda) return;
+    const n = Math.floor(d - 3) * (1 - 0.12 * Math.min(4, envanter.zirhBuyu('tuy')));
+    hayatta.hasar(n, 'dusme');
+    /* 0.22.0: sert düşüş bacağı kırabilir */
+    if (n >= 6 && !hayatta.olu && !hayatta.olumsuz && !hayatta.etki('kirik') && (n >= 9 || Math.random() < 0.5)) {
+      hayatta.etkiEkle('kirik', 180); hayatta.atel = false; ses.kemik();
+      hud.bildirim('Bacağınız kırıldı! Atel (3 çubuk, 1 ip) sarılınca daha hızlı iyileşir.');
+    }
+  };
   oyuncu.olaylar.adim = id => ses.adim(BLOKLAR[id] ? BLOKLAR[id].ses : 'tas');
   oyuncu.olaylar.ziplad = () => { hayatta.yor(oyuncu.kosuyor ? 0.2 : 0.05); };
   oyuncu.olaylar.suyaGirdi = h => ses.sicrama(Math.min(1.5, h / 8));
-  hayatta.olaylar.hasar = () => { ses.hasar(); hud.hasarParla(); };
+  hayatta.olaylar.hasar = n => { ses.hasar(); hud.hasarParla(); basarimlar.istatEkle('hasar', n / 2); };
   hayatta.olaylar.olum = sebep => olum(sebep);
   /* Deneyim sesleri (sık gelen küçük kazançlar seyreltilir) */
   let xpSesZaman = 0;
@@ -576,8 +600,22 @@ function olum(sebep) {
   o.olta.kaldir();
   const p = o.oyuncu.konum;
   o.olumNoktasi = { x: Math.round(p.x), y: Math.round(p.y), z: Math.round(p.z) };
-  for (const s of o.envanter.tumEsyalar()) o.dusenler.birak(s.id, s.adet, p.x, p.y + 1, p.z, (Math.random() - 0.5) * 4, 3 + Math.random() * 2, (Math.random() - 0.5) * 4, s.dayanim, 2, s.buyu);
+  /* 0.22.0: eşyalar mezar taşında saklanır (çok oyunculu istemcide mezarı sunucu koyar) */
+  const esyalar = o.envanter.tumEsyalar(), sac = l => { for (const s of l) o.dusenler.birak(s.id, s.adet, p.x, p.y + 1, p.z, (Math.random() - 0.5) * 4, 3 + Math.random() * 2, (Math.random() - 0.5) * 4, s.dayanim, 2, s.buyu); };
+  let mezarMetni = esyalar.length ? 'Eşyalarınız öldüğünüz yere düştü.' : 'Üzerinizde eşya yoktu.';
+  if (esyalar.length && o.istemci && o.ag.mezarIste) { o.ag.mezarIste(p.x, p.y, p.z, esyalar); mezarMetni = 'Eşyalarınız ölüm yerindeki mezar taşında saklanıyor (pusulada ✖).'; }
+  else if (esyalar.length) {
+    const r = mezarKoy(o.dunya, p.x, p.y, p.z, esyalar);
+    sac(r.kalan);
+    if (r.konum.length) { const [mx, my, mz] = r.konum[0]; o.olumNoktasi = { x: mx, y: my, z: mz }; mezarMetni = `Eşyalarınız mezar taşında saklanıyor (${mx}, ${my}, ${mz}; pusulada ✖). Mezara sağ tıklanarak geri alınır.`; }
+  }
   o.envanter.temizle();
+  /* 0.22.0: istatistikler */
+  const B = o.basarimlar, hayat = Math.max(0, o.gun + o.zaman - o.hayatBasi);
+  B.istatEkle('olum'); B.istatEnBuyuk('enUzun', hayat);
+  o.kanliIzlendi = null; o.tilsim = 0; $('#tilsimHalka').hidden = true;
+  $('#olumMezar').textContent = mezarMetni;
+  $('#olumIstat').textContent = `Bu hayat ${hayat < 1 ? Math.round(hayat * 24) + ' saat' : hayat.toFixed(1).replace('.', ',') + ' gün'} sürdü · En uzun: ${(B.istat.enUzun || 0).toFixed(1).replace('.', ',')} gün · Yenilen canavar: ${B.istat.canavar || 0}`;
   /* Ölümde iksir etkileri biter, deneyimin yarısı kaybedilir */
   o.hayatta.etkiler = {}; o.hayatta.xp = Math.floor(o.hayatta.xp / 2);
   $('#olumSebep').textContent = OLUM_SEBEBI[sebep] || 'Hayatınızı kaybettiniz.';
@@ -586,7 +624,7 @@ function olum(sebep) {
 }
 $('#yenidenDog').onclick = () => {
   const o = oyun; ses.tik();
-  o.hayatta.sifirla();
+  o.hayatta.sifirla(); o.hayatBasi = o.gun + o.zaman;
   o.oyuncu.konum.set(o.dogum.x, o.dogum.y, o.dogum.z); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0;
   o.hazir = false;
   ekran('yukleme'); $('#yukleBaslik').textContent = 'Yeniden doğuluyor';
@@ -604,7 +642,7 @@ async function oyunKaydet() {
   const veri = {
     id: o.id, ad: o.ad, tohum: o.tohum, olusturma: o.olusturma, son: Date.now(), surum: SURUM,
     oyuncu: { x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
-    hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi,
+    hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), tekneler: o.tekneler.disaAktar(),
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
@@ -664,8 +702,8 @@ function dongu(t) {
 function adim(t) {
   let dt = (t - onceki) / 1000; onceki = t;
   if (dt < 0) return;
+  fpsSayac++; fpsZaman += Math.min(dt, 1);   // 0.22.0: kare hızı gerçek süreyle ölçülür (yavaş cihazda 20'nin altı da gösterilir)
   if (dt > 0.05) dt = 0.05;
-  fpsSayac++; fpsZaman += dt;
   dokun.guncelle();
   otoCozunurluk(t);
   if (fpsZaman >= 0.5) { $('#fps').textContent = Math.round(fpsSayac / fpsZaman) + ' FPS'; fpsSayac = 0; fpsZaman = 0; }
@@ -695,7 +733,12 @@ function adim(t) {
       o.zaman += dt * (o.zamanHizi || 1) * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI;
       if (o.zaman >= 1) { o.zaman -= 1; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı`); }
     }
-    if (oncekiZaman < 0.46 && o.zaman >= 0.46) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');
+    if (oncekiZaman < 0.46 && o.zaman >= 0.46 && !kanliAyGunu(o.gun)) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');
+    /* 0.22.0: Kanlı Ay sabaha kadar atlatıldı mı */
+    if (o.kanliIzlendi && o.kanliIzlendi === o.gun - 1 && o.zaman < 0.3 && !o.hayatta.olu) {
+      o.kanliIzlendi = null; o.basarimlar.ver('kanliAy'); o.basarimlar.artir('kanliAy3'); o.basarimlar.istatEkle('kanliAy'); o.hayatta.xpEkle(25);
+      o.hud.bildirim('Kanlı Ay geride kaldı. Hayatta kaldınız!'); ses.gorev();
+    }
     /* Uyku: ekran kararır, sabah olur */
     if (o.uyku > 0) {
       o.uyku -= dt;
@@ -709,7 +752,7 @@ function adim(t) {
     if (o.yatakta && (!kilitli ? false : (tus.KeyW || tus.KeyA || tus.KeyS || tus.KeyD || tus.Space || tus.KeyC)) || (o.yatakta && (((o.zaman < 0.52 || o.zaman > 0.97) && !o.hava.firtina) || o.hayatta.olu))) yataktanKalk();
     const g = kilitli && o.uyku <= 0 && !o.yatakta ? {
       ileri: tus.KeyW, geri: tus.KeyS, sol: tus.KeyA, sag: tus.KeyD, zipla: tus.Space,
-      kos: tus.ShiftLeft || tus.ShiftRight || kosKilit, egil: tus.KeyC, kosabilir: o.hayatta.aclik > 6
+      kos: tus.ShiftLeft || tus.ShiftRight || kosKilit, egil: tus.KeyC, kosabilir: o.hayatta.aclik > 6 && !o.hayatta.etki('kirik')
     } : { kosabilir: false };
     const zirh = o.envanter.zirh;
     g.palet = !!(zirh[3] && zirh[3].id === 457);
@@ -727,9 +770,25 @@ function adim(t) {
     let mesafe = 0;
     if (o.tekneler.binilen || BN.biniyor || BN.oturak) { const P = o.oyuncu; P.hiz.set(0, 0, 0); P.dusus = 0; P.suda = P.basSuda = P.lavda = P.basLavda = false; P.yerde = true; P.kosuyor = false; P.egiliyor = false; }
     else { const zem = BLOKLAR[o.dunya.blok(Math.floor(p.x), Math.floor(p.y - 0.05), Math.floor(p.z))];   // 0.18.0: kül kumu yavaşlatır
-      o.oyuncu.etkiHiz = (o.hayatta.etki('hiz') ? 1.3 : 1) * (o.hayatta.etki('yavas') ? 0.6 : 1) * (zem && zem.yavaslatir && o.oyuncu.yerde ? 0.55 : 1); mesafe = o.oyuncu.guncelle(dt, o.inisBekle > 0 ? { ...g, egil: false } : g) || 0; }
+      if (o.hayatta.atel && !o.hayatta.etki('kirik')) o.hayatta.atel = false;
+      o.oyuncu.etkiHiz = (o.hayatta.etki('hiz') ? 1.3 : 1) * (o.hayatta.etki('yavas') ? 0.6 : 1) * (zem && zem.yavaslatir && o.oyuncu.yerde ? 0.55 : 1)
+        * (o.hayatta.etki('kirik') ? (o.hayatta.atel ? 0.8 : 0.55) : 1) * (o.hayatta.isiDurum === -2 ? 0.85 : 1);   // 0.22.0: kırık bacak ve donma yavaşlatır
+      mesafe = o.oyuncu.guncelle(dt, o.inisBekle > 0 ? { ...g, egil: false } : g) || 0; }
     o.hayatta.yor(mesafe * (o.oyuncu.kosuyor ? 0.1 : 0.01));
-    o.hayatta.guncelle(dt, o.oyuncu.basSuda, { lavda: o.oyuncu.lavda, suda: o.oyuncu.suda && !o.oyuncu.lavda, maske: !!(zirh[0] && zirh[0].id === 456), solunum: o.envanter.zirhBuyu('solunum') });
+    o.hayatta.guncelle(dt, o.oyuncu.basSuda, { lavda: o.oyuncu.lavda, suda: o.oyuncu.suda && !o.oyuncu.lavda, maske: !!(zirh[0] && zirh[0].id === 456), solunum: o.envanter.zirhBuyu('solunum'), atesYakin: o.atesYakin });
+    /* 0.22.0: vücut ısısı (hissedilen sıcaklık yarım saniyede bir hesaplanır), tılsım, istatistikler */
+    o.isiSayac -= dt;
+    if (o.isiSayac <= 0 && o.hazir) {
+      o.isiSayac = 0.5;
+      const s = hissedilenSicaklik(o);
+      o.hayatta.hissedilen = s.t; o.ortamIsi = s.ortam; o.atesYakin = s.ates;
+      if (s.ates && o.hayatta.vucut < 36) o.basarimlar.ver('isinma');
+    }
+    o.hayatta.isiGuncelle(dt, { kosuyor: o.oyuncu.kosuyor });
+    if (o.hayatta.isiDurum < 0 && !o.hayatta.olu) { o.titremeSayac = (o.titremeSayac || 0) - dt; if (o.titremeSayac <= 0) { o.titremeSayac = 4 + Math.random() * 3; ses.titreme(); } }
+    if (o.hayatta.etki('kanama') && !o.hayatta.olu) { o.kalpSayac = (o.kalpSayac || 0) - dt; if (o.kalpSayac <= 0) { o.kalpSayac = 1.1; ses.kalpAtisi(0.6); if (Math.random() < 0.7) o.dusenler.renkliParcacik([0.6, 0.05, 0.05], p.x, p.y + 0.6, p.z, 3); } }
+    tilsimGuncelle(o, dt);
+    if (!o.hayatta.olu) { o.basarimlar.istatEkle('sure', dt); if (mesafe > 0) o.basarimlar.istatEkle('mesafe', mesafe); }
     $('#yanmaEfekt').classList.toggle('acik', o.hayatta.yanma > 0 && !o.hayatta.olu);
     /* 0.18.0: magma bloğu üstünde (eğilmeden) durmak yakar; geçidin içinde durmak geçirir */
     const zemId = o.dunya.blok(Math.floor(p.x), Math.floor(p.y - 0.05), Math.floor(p.z));
@@ -755,8 +814,8 @@ function adim(t) {
     o.olta.guncelle(dt, !!ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'olta' && !o.hayatta.olu, o.isik);
     varlikGuncelle(o, dt, {
       oyuncu: o.oyuncu, ad: ayar.ad, oyuncuOlu: o.hayatta.olu, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
-      firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(),
-      oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n, v.turAd, v.tur.agu, k.x, k.z); },
+      firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(), kanliAy: o.gok.kanliAyMi(o),
+      oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n + (v.kanli ? 1 : 0), v.turAd, v.tur.agu, k.x, k.z); },
       okTopla: () => { const k = o.envanter.ekle(287, 1); if (!k) ses.topla(); return !k; }
     }, o.ag && !o.istemci);
     const ekKonumlar = o.ag && !o.istemci ? o.ag.konumlar() : null;
@@ -775,19 +834,22 @@ function adim(t) {
   if (o.ag) o.ag.guncelle(dt);
   /* Kamera, gökyüzü, ışık */
   o.oyuncu.kameraAyarla(sahne.kamera, ayar.sallanma);
+  /* 0.22.0: meteor çarpması sarsıntısı */
+  if (o.sarsinti > 0) { const s = o.sarsinti * (ayar.sallanma ? 0.35 : 0.12); sahne.kamera.position.x += (Math.random() - 0.5) * s; sahne.kamera.position.y += (Math.random() - 0.5) * s; sahne.kamera.position.z += (Math.random() - 0.5) * s; o.sarsinti = Math.max(0, o.sarsinti - dt * 0.8); }
   const kosFov = o.oyuncu.kosuyor ? 8 : 0;
   const hedefFov = ayar.fov + kosFov - o.etkilesim.germe * 12;
   if (Math.abs(sahne.kamera.fov - hedefFov) > 0.05) { sahne.kamera.fov += (hedefFov - sahne.kamera.fov) * Math.min(1, dt * 10); sahne.kamera.updateProjectionMatrix(); }
   const gozSuda = o.oyuncu.basSuda;
   const maskeli = !!(o.envanter.zirh[0] && o.envanter.zirh[0].id === 456);
   const H = o.hava, yagisTur = diyar ? 0 : H.yagisTuru(sahne.kamera.position);
+  o.gok.guncelle(calisiyor ? dt : 0);
   H.guncelle(calisiyor ? dt : 0, sahne.kamera, gozSuda || diyar);
   const gun = sahne.gokGuncelle(o.zaman, sahne.kamera.position, o.oyuncu.basLavda ? 'lav' : gozSuda ? (maskeli ? 'maske' : true) : false, o.dunya.gorus, o.sure,
     diyar ? { diyar: true, gece: o.hayatta.etki('gece') } : { y: H.yogunluk * (yagisTur === 0 ? 0.45 : 1), f: H.firtinaK, simsek: H.simsekParla, gece: o.hayatta.etki('gece') });
   o.gunIsigi = gun;
   o.fenerler.guncelle(dt, o.yakinKoyler, gun);
   /* 0.19.0: duruma göre müzik */
-  muzik.guncelle(dt, o.bossVar ? 'boss' : diyar ? 'diyar' : p.y < DENIZ - 6 && o.dunya.ustKati(Math.floor(p.x), Math.floor(p.z)) > p.y + 6 ? 'magara'
+  muzik.guncelle(dt, o.bossVar || (o.gok.kanli > 0.5 && !diyar) ? 'boss' : diyar ? 'diyar' : p.y < DENIZ - 6 && o.dunya.ustKati(Math.floor(p.x), Math.floor(p.z)) > p.y + 6 ? 'magara'
     : gun < 0.35 ? 'gece' : (o.biyom === BY.COL || o.biyom === BY.SAVAN) ? 'col' : 'gunduz');
   /* Meşale ışıkları */
   const seciliId = o.envanter.seciliId();
@@ -864,6 +926,12 @@ function adim(t) {
     const nokta = (n, sinif, metin, baslik) => { if (!n) return; const d = Math.hypot(n.x - p.x, n.z - p.z); if (d > 8) isaret.push({ aci: yonAci(n.x - p.x, n.z - p.z), sinif, metin, baslik, mesafe: d, kenar: sinif === 'olum' }); };
     nokta(o.dogum, 'dogum', '★', 'Doğma noktası');
     nokta(o.olumNoktasi, 'olum', '✖', 'Son ölüm noktası');
+    /* 0.22.0: düşen meteorun yeri pusulada 15 dakika gösterilir */
+    const mn = o.meteorNoktasi;
+    if (mn) { const md = Math.hypot(mn.x + 0.5 - p.x, mn.z + 0.5 - p.z); if (md < 5 || o.sure > mn.son) o.meteorNoktasi = null; else isaret.push({ aci: yonAci(mn.x + 0.5 - p.x, mn.z + 0.5 - p.z), sinif: 'yer', metin: '✦', baslik: `Meteor düşüş yeri · ${Math.round(md)} blok`, mesafe: md, renk: '#ff9a3a', kenar: true }); }
+    o.hud.isiCiz(o.hayatta, o.ortamIsi, ayar.vucutIsisi !== false);
+    const hayat = o.gun + o.zaman - o.hayatBasi;
+    if (hayat >= 10 && !o.hayatta.olu) o.basarimlar.ver('hayat10');
     /* Konum satırı: yeraltı derinliği, köy ya da biyom */
     const g = o.oyuncu.gozKonumu();
     const kol = o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {});
@@ -897,7 +965,11 @@ function adim(t) {
   konsol.guncelle(dt);
   gelPencere.guncelle(dt);
   if (haritaEkrani.acik) { haritaEkrani.guncelle(dt); haritaAlanYaz(o); }
-  o.hud.saat(o.zaman, o.gun, o.konumMetni, H.firtina && H.yogunluk > 0.5 && !diyar, diyar ? null : `${MEVSIMLER[o.mevsim]} ${((o.gun - 1) % MEVSIM_GUN) + 1}/${MEVSIM_GUN}`);
+  o.hud.saat(o.zaman, o.gun, o.konumMetni, H.firtina && H.yogunluk > 0.5 && !diyar, diyar ? null : `${MEVSIMLER[o.mevsim]} ${((o.gun - 1) % MEVSIM_GUN) + 1}/${MEVSIM_GUN}`, !diyar && kanliAyGunu(o.gun));
+  /* 0.22.0: soğuk ve sıcak kenar efektleri */
+  const vucut = o.hayatta.vucut, ayaz = Math.max(0, Math.min(1, (36.2 - vucut) / 2.2)), sicak = Math.max(0, Math.min(1, (vucut - 38) / 2));
+  if (Math.abs(ayaz - (o.sonAyaz || 0)) > 0.02) { o.sonAyaz = ayaz; $('#ayazEfekt').style.opacity = ayaz.toFixed(2); }
+  if (Math.abs(sicak - (o.sonSicak || 0)) > 0.02) { o.sonSicak = sicak; $('#sicakEfekt').style.opacity = sicak.toFixed(2); }
   o.hud.suAlti(gozSuda);
   if (!$('#hata').hidden) hataPaneli(o);
   if (envEkrani.acik && Math.random() < 0.05) envEkrani.ciz();
@@ -910,6 +982,34 @@ function haritaAlanYaz(o) {
 }
 /* Çok oyunculu sunucuda her oyuncu için ayrı bağlam kurulur */
 function varlikGuncelle(o, dt, ctx, sunucu) { o.varliklar.guncelle(dt, sunucu ? o.ag.ctxler(ctx) : ctx); }
+const KANATAN = new Set(['zombi', 'kurt', 'orumcek', 'haydut', 'kopekbaligi', 'bogulmus', 'mumya', 'kulzombi', 'reis', 'muhafiz', 'firavun']);
+/* 0.22.0: Eve Dönüş Tılsımı: sağ tık 3 saniye basılı tutulur, kımıldanmaz; doğma noktasına ışınlar */
+function tilsimBaslat() {
+  const o = oyun;
+  if (!o || o.tilsim > 0 || o.hayatta.olu) return;
+  if (diyarMi(o.oyuncu.konum.x)) { o.hud.bildirim('Tılsım Yeraltı Diyarı’nda çalışmaz.'); return; }
+  o.tilsim = 3; o.tilsimYer = o.oyuncu.konum.clone(); $('#tilsimHalka').hidden = false;
+  o.hud.bildirim('Tılsım ısınıyor… Kımıldamadan sağ tıkı basılı tutunuz.');
+}
+function tilsimGuncelle(o, dt) {
+  if (!(o.tilsim > 0)) return;
+  const halka = $('#tilsimHalka');
+  if (!fare.sag || o.hayatta.olu || o.oyuncu.konum.distanceTo(o.tilsimYer) > 0.8 || o.envanter.seciliId() !== 493) { o.tilsim = 0; halka.hidden = true; return; }
+  o.tilsim -= dt;
+  halka.style.setProperty('--o', String(1 - Math.max(0, o.tilsim) / 3));
+  if (Math.random() < dt * 12) o.dusenler.renkliParcacik([0.55, 0.85, 1], o.oyuncu.konum.x + (Math.random() - 0.5), o.oyuncu.konum.y + Math.random() * 1.8, o.oyuncu.konum.z + (Math.random() - 0.5), 2);
+  if (o.tilsim > 0) return;
+  o.tilsim = 0; halka.hidden = true;
+  if (o.envanter.aletYipran(1)) { ses.aletKirildi(); o.hud.bildirim('Tılsımın gücü tükendi.'); }
+  ses.tilsim(); o.basarimlar.ver('tilsim');
+  if (o.tekneler.binilen) o.tekneler.in(o.oyuncu);
+  if (o.binek.biniyor) o.binek.in();
+  if (o.binek.oturak) o.binek.kalk();
+  o.oyuncu.konum.set(o.dogum.x, o.dogum.y, o.dogum.z); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0;
+  o.hazir = false;
+  if (kilitli) { bilerekBirak = true; kilitBirak(); }
+  ekran('yukleme'); $('#yukleBaslik').textContent = 'Eve dönülüyor'; $('#yukleIpucu').textContent = '';
+}
 /* Canlı veya ok hasarı (çok oyunculu istemcide sunucudan gelir) */
 function yerelHasar(n, turAd, agu, kx, kz) {
   const o = oyun;
@@ -921,6 +1021,13 @@ function yerelHasar(n, turAd, agu, kx, kz) {
   if (T && T.etki && !o.hayatta.olu && !o.hayatta.olumsuz) o.hayatta.etkiEkle(T.etki[0], T.etki[1]);
   if (T && T.yakar && !o.hayatta.olu && !o.hayatta.etki('ates')) o.hayatta.yanma = Math.max(o.hayatta.yanma, T.yakar);   // 0.18.0: diyar canavarları tutuşturur
   if (turAd === 'tuzak' && o.basarimlar) o.basarimlar.ver('tuzak');
+  /* 0.22.0: pençe, diş ve bıçak yaraları kanatabilir (zırh olasılığı azaltır) */
+  const H = o.hayatta;
+  if (KANATAN.has(turAd) && n >= 2 && !H.olu && !H.olumsuz && Math.random() < 0.22 * (1 - Math.min(0.8, o.envanter.zirhPuani() / 25))) {
+    if (!H.etki('kanama')) o.hud.bildirim('Kanamanız var! Bandaj ya da şifa iksiri durdurur.');
+    H.etkiEkle('kanama', 40);
+  }
+  if (n > 0 && Number.isFinite(kx)) o.hud.hasarYonu(kx - o.oyuncu.konum.x, kz - o.oyuncu.konum.z, o.oyuncu.yaw);
   const dx = o.oyuncu.konum.x - kx, dz = o.oyuncu.konum.z - kz, l = Math.hypot(dx, dz) || 1;
   o.oyuncu.hiz.x += dx / l * 7; o.oyuncu.hiz.z += dz / l * 7; o.oyuncu.hiz.y = Math.max(o.oyuncu.hiz.y, 4.5);
 }
@@ -948,6 +1055,7 @@ function uyu(h) {
   const gece = (o.zaman > 0.52 && o.zaman < 0.97) || o.hava.firtina;
   if (!gece) { o.hud.bildirim('Yalnızca geceleri ve fırtınada uyunabilir. Doğma noktası bu yatağa ayarlandı.'); return; }
   if (o.varliklar.yakinDusman(o.oyuncu.konum, 10)) { o.hud.bildirim('Yakında canavarlar varken uyunamaz.'); return; }
+  if (o.gok && o.gok.kanliAyMi(o)) { o.hud.bildirim('Kanlı Ay gecesinde gözünüze uyku girmiyor. Sabaha kadar dayanınız!'); return; }
   if (o.uyku > 0) return;
   /* Çok oyunculu: gece, tüm oyuncular yattığında atlanır */
   if (o.ag) {
@@ -1175,7 +1283,7 @@ $('#cokKatil').onclick = async () => {
 function istemciBaslat(k, m, kod) {
   const r = m.kayit || {};
   oyunBaslat({ id: 'ag', ad: m.ad, tohum: m.tohum, zaman: m.zaman, gun: m.gun, degisiklikler: m.degisiklikler, dogum: r.dogum || m.dogum,
-    oyuncu: r.oyuncu || null, envanter: r.envanter, hayatta: r.hayatta, gorevler: r.gorevler, koyler: r.koyler, basarimlar: r.basarimlar, olumNoktasi: r.olumNoktasi, istemci: true,
+    oyuncu: r.oyuncu || null, envanter: r.envanter, hayatta: r.hayatta, gorevler: r.gorevler, koyler: r.koyler, basarimlar: r.basarimlar, olumNoktasi: r.olumNoktasi, hayatBasi: r.hayatBasi, istemci: true,
     yerler: r.yerler, komutlar: !!m.komutlar, haritaKimlik: `ag:${m.tohum}:${ayar.ad.toLocaleLowerCase('tr')}` });
   if (!r.oyuncu) oyun.oyuncu.konum.set(m.dogum.x, m.dogum.y, m.dogum.z);
   const ist = new IstemciOyun({ kanal: k, id: m.id, kod, oyun, sahne, ses, ad: ayar.ad, arayuz: agArayuz() });

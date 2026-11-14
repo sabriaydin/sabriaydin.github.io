@@ -1,6 +1,6 @@
 /* HungerMan - başarımlar penceresi (L) ve kazanma kutusu (0.14.0) */
 import { simge } from '../grafik/doku.js';
-import { BASARIMLAR, GRUP_SIRASI } from '../oyun/basarimlar.js';
+import { BASARIMLAR, GRUP_SIRASI, ISTATISTIKLER } from '../oyun/basarimlar.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -20,7 +20,18 @@ export class BasarimEkrani {
   ciz() {
     const B = this.basarimlar; if (!B) return;
     $('#basarimSayi').textContent = `${B.kazanilan} / ${BASARIMLAR.length}`;
-    $('#basarimListe').innerHTML = GRUP_SIRASI.map(g => {
+    /* 0.22.0: hayatta kalma istatistikleri */
+    const I = B.istat, ondalik = (n, b = 1) => n.toFixed(b).replace('.', ',');
+    const bicim = (k, tur) => {
+      const n = k === 'hayat' ? (this.hayatFn ? this.hayatFn() : 0) : I[k] || 0;
+      if (tur === 'sure') { const dk = Math.floor(n / 60); return dk >= 60 ? `${Math.floor(dk / 60)} sa ${dk % 60} dk` : `${dk} dk`; }
+      if (tur === 'gun') return n < 1 ? `${Math.round(n * 24)} saat` : `${ondalik(n)} gün`;
+      if (tur === 'm') return n >= 1000 ? `${ondalik(n / 1000, 2)} km` : `${Math.round(n)} m`;
+      if (tur === 'kalp') return `${Math.round(n)} kalp`;
+      return String(Math.round(n));
+    };
+    const ist = `<div class="bGrup"><h3>İstatistikler</h3><div class="istIzgara">${ISTATISTIKLER.map(([k, ad, tur]) => `<div class="istKart"><small>${esc(ad)}</small><b>${bicim(k, tur)}</b></div>`).join('')}</div></div>`;
+    $('#basarimListe').innerHTML = ist + GRUP_SIRASI.map(g => {
       const l = BASARIMLAR.filter(b => b.grup === g);
       return `<div class="bGrup"><h3>${g}</h3><div class="bIzgara">${l.map(b => {
         const a = B.var(b.k), il = B.ilerleme(b.k);

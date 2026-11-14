@@ -124,6 +124,7 @@ export class IstemciOyun {
       }
       case 'h': this.arayuz.hasar(m.n, m.s, m.k[0], m.k[1], m.a); break;
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
+      case 'met': if (o.gok && Array.isArray(m.p)) o.gok.meteorBaslat({ x: +m.p[0], y: +m.p[1], z: +m.p[2], aci: +m.a || 0 }); break;   // 0.22.0: meteor
       case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
       case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;
       case 'ce': { const v = o.varliklar.harita && o.varliklar.harita.get(m.i); o.etkilesim.canliSonuc({ tuket: !!m.tk, mesaj: m.m || null, olay: m.o || null, bin: !!m.b && !!v, degistir: m.dg || 0, yipran: !!m.y, ses: m.s || null }, v); break; }
@@ -166,6 +167,7 @@ export class IstemciOyun {
   sandikIste(x, y, z) { this.gonder({ t: 'sa', x, y, z }); }
   sandikKapat(k, yuvalar) { this.gonder({ t: 'sk', k, y: sandikDizi(yuvalar) }); }
   sandikKir(x, y, z) { this.gonder({ t: 'skr', x, y, z }); }
+  mezarIste(x, y, z, esyalar) { this.gonder({ t: 'mz', p: [r2(x), r2(y), r2(z)], y: sandikDizi(esyalar) }); }   // 0.22.0
   sohbetGonder(s) { this.gonder({ t: 'sh', m: s }); }
   kayitGonder() {
     const o = this.oyun;
@@ -173,7 +175,7 @@ export class IstemciOyun {
     const p = o.oyuncu.konum;
     this.gonder({ t: 'ky', v: {
       oyuncu: { x: r3(p.x), y: r3(p.y), z: r3(p.z), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
-      envanter: o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, olumNoktasi: o.olumNoktasi,
+      envanter: o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
       gorevler: o.gorevler.disaAktar(), koyler: o.koyler.disaAktar(), yerler: o.yerler, basarimlar: o.basarimlar ? o.basarimlar.disaAktar() : undefined
     } });
   }

@@ -211,5 +211,14 @@ export class Ses {
   sayfa() { if (!this.cal('sayfa', 0.45)) this.tik(); }
   tencere() { this.cal('tencere', 0.45); }
   olum() { this.cal('olum', 0.5); }
+  /* 0.22.0: gök olayları ve hayatta kalma */
+  meteorUguldu(h = 1) { this.patlama(300, 3.0, 0.22 * h, 'lowpass', 0.7, 0.35); this.ton(220, 3.0, 0.05 * h, 'sawtooth', 60); this.patlama(1800, 2.6, 0.06 * h, 'bandpass', 0.6, 0.5); }
+  meteorCarpma(h = 1) { this.patlama(140, 2.4, 0.9 * h, 'lowpass', 0.8, 0.3); this.patlama(900, 0.8, 0.5 * h, 'bandpass', 0.6, 0.4); this.ton(55, 1.8, 0.3 * h, 'sine', 30); if (h > 0.3) this.gokGurultusu(h, true); }
+  kayanYildiz() { this.ton(2400 + Math.random() * 600, 0.5, 0.012, 'sine', 1400); }
+  kanliAy() { [110, 104, 98, 82].forEach((f, i) => setTimeout(() => { this.ton(f, 1.6, 0.14, 'sawtooth', f * 0.97); this.ton(f * 1.5, 1.4, 0.05, 'triangle', f * 1.45); }, i * 900)); this.patlama(200, 4, 0.12, 'lowpass', 0.6, 0.5); }
+  kalpAtisi(h = 1) { this.ton(60, 0.12, 0.25 * h, 'sine', 40); setTimeout(() => this.ton(55, 0.14, 0.2 * h, 'sine', 38), 180); }
+  titreme() { this.patlama(2600, 0.25, 0.03, 'bandpass', 4, 1.1); }
+  kemik() { this.patlama(2200, 0.06, 0.5, 'highpass', 1); this.patlama(600, 0.1, 0.4, 'bandpass', 2); }
+  tilsim() { [392, 523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.06, 'sine', f * 1.02), i * 120)); this.patlama(3000, 1.2, 0.05, 'highpass', 0.6, 1.6); }
   hataSes() { if (!this.cal('hata', 0.4)) this.ton(220, 0.12, 0.06, 'square', 180); }
 }

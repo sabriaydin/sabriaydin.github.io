@@ -139,8 +139,10 @@ export class GelistiriciPenceresi {
         this.kaydirici('erisim', 'Blok erişim mesafesi', 5, 40, 1, o.etkilesim.erisim || 5, v => v + ' blok') +
         this.dugmeler(this.dugme('iyiles', 'Tamamen iyileş'), this.dugme('doy', 'Doyur'))) +
       this.bolum('Hasar ve durum sınaması',
-        this.dugmeler(this.dugme('hasar 4', '2 kalp hasar ver'), this.dugme('durum zehir', 'Mide bulantısı'), this.dugme('durum agu', 'Örümcek zehri'), this.dugme('durum yanma', 'Yanma'), this.dugme('durum temizle', 'Durumları kaldır'), this.onay('hasar 99', 'Oyuncuyu öldür')),
+        this.dugmeler(this.dugme('hasar 4', '2 kalp hasar ver'), this.dugme('durum zehir', 'Mide bulantısı'), this.dugme('durum agu', 'Örümcek zehri'), this.dugme('durum yanma', 'Yanma'), this.dugme('durum kanama', 'Kanama'), this.dugme('durum kirik', 'Kırık bacak'), this.dugme('durum temizle', 'Durumları kaldır'), this.onay('hasar 99', 'Oyuncuyu öldür')),
         'Hasar düğmeleri ölümsüzlük açıkken de etki eder.') +
+      this.bolum('Gök olayları ve vücut ısısı',
+        this.dugmeler(this.dugme('kanliay', 'Kanlı Ay'), this.dugme('meteor', 'Meteor düşür'), this.dugme('isi 33.5', 'Dondur'), this.dugme('isi 40', 'Sıcak çarpması'), this.dugme('isi 37', 'Normal ısı'))) +
       this.bolum('Deneyim', `<p class="gelDeger" id="gelXp"></p>` +
         this.dugmeler(this.dugme('xp seviye 1', '+1 seviye'), this.dugme('xp seviye 5', '+5 seviye'), this.dugme('xp seviye 10', '+10 seviye'), this.dugme('xp sifirla', 'Sıfırla'))) +
       this.bolum('İksir etkileri',

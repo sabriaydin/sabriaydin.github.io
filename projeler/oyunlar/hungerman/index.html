@@ -25,6 +25,7 @@
     <div id="geceUyari" hidden></div>
     <div id="konumDeger"></div>
     <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
+    <div id="isiGosterge" hidden><i></i><b></b><small></small></div>
     <div id="saat">
       <svg id="gunHalka" viewBox="0 0 20 20" aria-hidden="true">
         <circle class="iz" cx="10" cy="10" r="8"/>
@@ -36,6 +37,11 @@
     </div>
   </div>
   <div id="yanmaEfekt"></div>
+  <div id="ayazEfekt"></div>
+  <div id="sicakEfekt"></div>
+  <div id="gokParla"></div>
+  <div id="hasarYon"></div>
+  <div id="tilsimHalka" hidden></div>
   <div id="gecitEfekt"></div>
   <div id="bossCubuk" hidden><b id="bossAd"></b><div class="bossDis"><i id="bossCan"></i></div></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><i id="hedefCan"></i></div></div>
@@ -286,6 +292,7 @@
     <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
     <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
     <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
+    <label class="secim"><input type="checkbox" id="aIsi"> Vücut ısısı (soğuk ve sıcak etkileri)</label>
     <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
     <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
     <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
@@ -354,6 +361,12 @@
           <li><b>Yeraltı Diyarı</b>: obsidyenden (derin mağaralardaki lav göllerinin yüzeyinde bulunur, elmas kazmayla kazılır; demirci köylüsü de satar) en az 4 × 5 boyutunda bir çerçeve kurulur ve içine <b>Çakmak</b> (demir külçe + çakmaktaşı) ile sağ tıklanır. Açılan geçidin içinde birkaç saniye durunca diyara geçilir. Diyardaki 1 blok dünyadaki 8 bloğa karşılık gelir. Diyarda lav denizi, ışıltaş, kül kumu (yavaşlatır), magma (eğilmeden üstünde durmak yakar), kor cevheri, Kor Ruhları, Kül Zombileri ve hazineli Kül Kaleleri bulunur.</li>
           <li><b>Çiftlik</b>: <b>Kova</b> (3 demir külçe) sudan su alır, inekten süt sağar; su kovası lavı obsidyene çevirir. <b>Makas</b> (2 demir külçe) koyunu kırkar (yün zamanla yeniden uzar), balkabağını oyar. Tavuklar zaman zaman yumurtlar. Çayır ve ormanlarda <b>balkabağı</b>, su kenarlarında <b>şeker kamışı</b> (3 boya kadar uzar) yetişir; balkabağı çekirdeği tarlaya ekilince olgun sap yanına balkabağı verir. Oyma balkabağı ile meşaleden <b>Balkabağı Feneri</b> yapılır. Tencerede ve fırında süt, yumurta, şeker ve baldan peynir, yoğurt, ayran, omlet, kek, balkabağı turtası ve baklava pişer.</li>
           <li><b>Arıcılık</b>: ağaçlara asılı <b>arı kovanlarından</b> gündüz arılar çıkar, kovanın çevresindeki çiçeklerden polen toplayıp kovanı bala doldurur. Dolu kovandan cam şişeyle <b>bal şişesi</b>, makasla <b>bal peteği</b> alınır. Kovanın 5 blok altında kamp ateşi yoksa arılar kızar ve sokar (zehirler). Kovan, kalas ve bal peteğiyle üretilebilir.</li>
+          <li><b>Vücut ısısı</b>: sağ alttaki gösterge vücut sıcaklığını ve hissedilen havayı gösterir. Karlı bölgeler, kış, geceler, yükseklik, yağış ve ıslaklık üşütür; çöl öğleleri ve lav çevresi bunaltır. Üşüyünce ya da bunalınca açlık hızlanır; 34,5 °C altında donma, 39,5 °C üstünde sıcak çarpması can götürür. Kamp ateşi ve ışık kaynakları ısıtır, deri zırh sıcak tutar, sıcak çorbalar ısıtır, ayran serinletir. Ayarlardan kapatılabilir.</li>
+          <li><b>Yaralanma</b>: zombi, kurt, örümcek ve haydut saldırıları kanatabilir (zırh olasılığı azaltır); bandaj ya da şifa iksiri kanamayı durdurur. Sert düşüşler bacağı kırabilir: yavaş yürünür, koşulamaz. <b>Atel</b> (3 çubuk, 1 ip) iyileşmeyi 30 saniyeye indirir.</li>
+          <li><b>Mezar taşı</b>: ölünce eşyalar yere saçılmaz, ölüm yerindeki mezar taşında saklanır (pusulada ✖). Mezara sağ tıklanarak eşyalar geri alınır; boşalan mezar kaybolur.</li>
+          <li><b>Kanlı Ay</b>: her mevsimin son gecesi (7, 14, 21... gün) ay kızarır. Canavarlar iki kat kalabalık, daha güçlü ve kızıldır; meşaleler daha az korur, uyunamaz. Sabaha kadar hayatta kalana deneyim ve başarım verilir; Kanlı Ay canavarları iki kat ganimet bırakır.</li>
+          <li><b>Gök olayları</b>: açık gecelerde yıldız kayar; bazı geceler yıldız yağmuru olur. Meteorlar krater açar; kraterin dibindeki <b>Gök Taşı</b> (demir kazmayla) <b>Yıldız Parçası</b> verir. Yıldız parçasından <b>Eve Dönüş Tılsımı</b> (sağ tık 3 saniye basılı tutulunca doğma noktasına ışınlar) ve <b>Yıldız Feneri</b> yapılır. Karlı bölgelerde, dağlarda ve kışın açık gecelerde kuzey ışıkları görülür.</li>
+          <li><b>İstatistikler</b>: oynama süresi, hayatta kalınan gün, yenilen canavar, yürünen yol ve diğerleri Başarımlar penceresinin (L) başında gösterilir.</li>
           <li><b>Tarif Kitabı</b> (B) bütün eşyaların tariflerini, kullanıldığı tarifleri ve nereden bulunduklarını gösterir. Takibe alınan tarifin malzemeleri ekranın solunda izlenir.</li>
           <li>Harita, görülen yerlerden kendiliğinden çizilir ve kaydedilir. Sağ üstteki mini harita çevreyi, M tuşuyla açılan büyük harita keşfedilen tüm bölgeleri gösterir. Büyük haritada sürükleyerek kaydırılır, tekerlekle yakınlaştırılır; sol tıkla işaret eklenir veya düzenlenir, sağ tıkla silinir. İşaretler pusulada da görünür.</li>
           <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
@@ -407,7 +420,8 @@
   <div class="olumIc">
     <h2>Öldünüz</h2>
     <p id="olumSebep"></p>
-    <p class="aciklama">Eşyalarınız öldüğünüz yere düştü.</p>
+    <p class="aciklama" id="olumMezar">Eşyalarınız öldüğünüz yere düştü.</p>
+    <p class="olumIstat" id="olumIstat"></p>
     <div class="menuDugmeler"><button class="dugme ana" id="yenidenDog">Yeniden Doğ</button><button class="dugme" id="olumCik">Ana Menü</button></div>
   </div>
 </div>

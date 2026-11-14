@@ -74,21 +74,38 @@ export const BASARIMLAR = [
   { k: 'fener', ad: 'Gece Feneri', aciklama: 'Bir balkabağı feneri yap.', ikon: 564, grup: 'Çiftlik' },
   { k: 'aricilik', ad: 'Tatlı Kazanç', aciklama: 'Dolu bir arı kovanından bal ya da petek al.', ikon: 482, grup: 'Çiftlik' },
   { k: 'ciftci', ad: 'Çiftlik Mutfağı', aciklama: 'Çiftlik ürünleriyle yapılan bir yemek ye.', ikon: 487, grup: 'Çiftlik' },
+  { k: 'kanliAy', ad: 'Kızıl Gece', aciklama: 'Kanlı Ay gecesini sabaha kadar atlat.', ikon: 472, grup: 'Hayatta Kalma' },
+  { k: 'kanliAy3', ad: 'Ay Avcısı', aciklama: '3 Kanlı Ay gecesini atlat.', ikon: 474, hedef: 3, grup: 'Hayatta Kalma' },
+  { k: 'yildiz', ad: 'Gökten Gelen', aciklama: 'Bir yıldız parçası bul.', ikon: 492, grup: 'Hayatta Kalma' },
+  { k: 'tilsim', ad: 'Eve Dönüş', aciklama: 'Eve Dönüş Tılsımı ile doğma noktasına dön.', ikon: 493, grup: 'Hayatta Kalma' },
+  { k: 'aurora', ad: 'Kutup Işıkları', aciklama: 'Kuzey ışıklarını seyret.', ikon: 595, grup: 'Hayatta Kalma' },
+  { k: 'isinma', ad: 'Ateş Başında', aciklama: 'Üşürken bir ateşin başında ısın.', ikon: 48, grup: 'Hayatta Kalma' },
+  { k: 'ilkYardim', ad: 'İlk Yardım', aciklama: 'Kanamayı bandajla durdur.', ikon: 268, grup: 'Hayatta Kalma' },
+  { k: 'atel', ad: 'Sağlam Adım', aciklama: 'Kırık bacağa atel sar.', ikon: 494, grup: 'Hayatta Kalma' },
+  { k: 'mezar', ad: 'Geri Dönüş', aciklama: 'Kendi mezar taşından eşyalarını geri al.', ikon: 593, grup: 'Hayatta Kalma' },
+  { k: 'hayat10', ad: 'Ölümsüz Gibi', aciklama: 'Ölmeden 10 gün hayatta kal.', ikon: 289, grup: 'Hayatta Kalma' },
   { k: 'ticaret', ad: 'Pazarlıkçı', aciklama: 'Bir köylüyle ticaret yap.', ikon: 288, grup: 'Köyler' },
   { k: 'gorev', ad: 'Yardımsever', aciklama: 'Bir köy görevini tamamla.', ikon: 294, grup: 'Köyler' },
   { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' }
 ];
 export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
-export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler', 'Çiftlik'];
+export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler', 'Çiftlik', 'Hayatta Kalma'];
+/* 0.22.0: hayatta kalma istatistikleri (başarımlar penceresinde gösterilir) */
+export const ISTATISTIKLER = [
+  ['sure', 'Oynama süresi', 'sure'], ['hayat', 'Bu hayat', 'gun'], ['enUzun', 'En uzun hayat', 'gun'], ['olum', 'Ölüm', 'sayi'],
+  ['canavar', 'Yenilen canavar', 'sayi'], ['mesafe', 'Yürünen yol', 'm'], ['kirilan', 'Kırılan blok', 'sayi'], ['konulan', 'Konulan blok', 'sayi'],
+  ['yemek', 'Yenen yemek', 'sayi'], ['kanliAy', 'Atlatılan Kanlı Ay', 'sayi'], ['meteor', 'Görülen meteor', 'sayi'], ['hasar', 'Alınan hasar', 'kalp']
+];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
-const ESYA_BASARIM = [['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
+const ESYA_BASARIM = [['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
 
 export class Basarimlar {
   constructor() {
     this.acik = {};     // anahtar -> kazanma zamanı
     this.sayac = {};    // sayaçlı başarımlar
     this.kume = {};     // farklı köyler / biyomlar
+    this.istat = {};    // 0.22.0: istatistikler
     this.kazanildi = null;   // (b) => bildirim ve ses
     this.degisti = null;
   }
@@ -128,12 +145,14 @@ export class Basarimlar {
   /* Yerel oyuncunun yendiği canlı; ok: ok ile mi */
   oldurme(turAd, ok = false) {
     if (!CANAVARLAR.includes(turAd)) return;
-    this.ver('canavar'); this.artir('canavar50'); this.artir('canavar250');
+    this.ver('canavar'); this.artir('canavar50'); this.artir('canavar250'); this.istatEkle('canavar');
     if (BASARIM[turAd]) this.ver(turAd);
     if (BOSSLAR.includes(turAd)) this.kumeEkle('bossHepsi', turAd);
     if (ok) this.ver('okcu');
   }
   gorevTamam() { this.ver('gorev'); this.artir('gorev10'); }
+  istatEkle(k, n = 1) { if (Number.isFinite(n)) this.istat[k] = (this.istat[k] || 0) + n; }
+  istatEnBuyuk(k, n) { if (Number.isFinite(n) && n > (this.istat[k] || 0)) this.istat[k] = n; }
 
   /* ---------- Düzenli denetim (saniyede bir) ---------- */
   denetle(o) {
@@ -154,10 +173,11 @@ export class Basarimlar {
     if (o.biyom != null) this.kumeEkle('biyom', o.biyom);
   }
 
-  disaAktar() { return { a: { ...this.acik }, s: { ...this.sayac }, k: Object.fromEntries(Object.entries(this.kume).map(([k, l]) => [k, [...l]])) }; }
+  disaAktar() { return { a: { ...this.acik }, s: { ...this.sayac }, k: Object.fromEntries(Object.entries(this.kume).map(([k, l]) => [k, [...l]])), i: Object.fromEntries(Object.entries(this.istat).map(([k, n]) => [k, Math.round(n * 100) / 100])) }; }
   iceAktar(v) {
-    this.acik = {}; this.sayac = {}; this.kume = {};
+    this.acik = {}; this.sayac = {}; this.kume = {}; this.istat = {};
     if (!v || typeof v !== 'object') return;
+    for (const [k, n] of Object.entries(v.i || {})) if (Number.isFinite(+n)) this.istat[k] = +n;
     for (const [k, t] of Object.entries(v.a || {})) if (BASARIM[k]) this.acik[k] = +t || 1;
     for (const [k, n] of Object.entries(v.s || {})) if (BASARIM[k]) this.sayac[k] = +n || 0;
     for (const [k, l] of Object.entries(v.k || {})) if (BASARIM[k] && Array.isArray(l)) this.kume[k] = l.slice(0, 200);

@@ -27,6 +27,30 @@ export class Hayatta {
     this.can = 20; this.aclik = 20; this.oksijen = 10;
     this.yorgunluk = 0; this.iyiSayac = 0; this.acSayac = 0; this.oksSayac = 0; this.bogSayac = 0;
     this.olu = false; this.sonHasar = 0; this.zehir = 0; this.agu = 0; this.aguSayac = 0; this.yanma = 0; this.yanmaSayac = 0; this.lavSayac = 0;
+    /* 0.22.0: vücut ısısı (°C), hissedilen sıcaklık, ıslaklık, kanama sayacı */
+    this.vucut = 37; this.hissedilen = 20; this.islak = 0; this.isiSayac = 0; this.kanSayac = 4;
+  }
+  /* 0.22.0: vücut ısısı durumu: -2 donma, -1 üşüme, 0 normal, 1 bunalma, 2 sıcak çarpması */
+  get isiDurum() { const v = this.vucut; return v < 34.5 ? -2 : v < 36 ? -1 : v > 39.5 ? 2 : v > 38 ? 1 : 0; }
+  /* Vücut ısısı hissedilen sıcaklığa doğru yavaşça kayar; aşırı soğuk ve sıcak can götürür */
+  isiGuncelle(dt, o = {}) {
+    if (!this.isiAcik || this.olu) { this.vucut += (37 - this.vucut) * Math.min(1, dt); return; }
+    let h = this.hissedilen;
+    if (this.etki('sicak') && h < 22) h = Math.min(22, h + 14);
+    if (this.etki('serin') && h > 24) h = Math.max(24, h - 14);
+    if (this.etki('ates') && h > 30) h = 30;
+    let hedef = h < 12 ? 37 - (12 - h) * 0.22 : h > 30 ? 37 + (h - 30) * 0.15 : 37;
+    if (o.kosuyor) hedef += 0.4;
+    /* Normale dönüş hızlı, soğuma ve ısınma yavaştır */
+    const k = hedef < this.vucut ? (this.vucut > 37 ? 1 / 25 : 1 / 240) : (this.vucut < 37 ? 1 / 25 : 1 / 160);
+    this.vucut += (hedef - this.vucut) * Math.min(1, dt * k);
+    const d = this.isiDurum;
+    if (d === -1 || d === -2) this.yor(dt * 0.06);   // titreme açlığı hızlandırır
+    if (d === 1 || d === 2) this.yor(dt * 0.08);
+    if (d === -2 || d === 2) {
+      this.isiSayac -= dt;
+      if (this.isiSayac <= 0) { this.isiSayac = (this.vucut < 33.5 || this.vucut > 40.5) ? 2.5 : 5; this.hasar(1, d < 0 ? 'donma' : 'sicak'); }
+    } else this.isiSayac = 2;
   }
   yor(n) { if (!this.tok && !this.etki('tokluk')) this.yorgunluk += n; }   // tok: geliştirici modunda açlık azalmaz; tokluk: yemek etkisi
   /* zehirOlasilik: çürük et gibi yiyeceklerde mide bulantısı olasılığı; true dönerse bulantı başladı */
@@ -61,6 +85,10 @@ export class Hayatta {
       if (o.suda) this.yanma = 0;
       else { this.yanma -= dt; if (!o.lavda) { this.yanmaSayac -= dt; if (this.yanmaSayac <= 0) { this.yanmaSayac = 1; this.hasar(1, 'yanma'); } } }
     }
+    /* 0.22.0: kanama: her 4 saniyede 1 can; canı 1 kalbin altına düşürmez */
+    if (this.etki('kanama')) { this.kanSayac -= dt; if (this.kanSayac <= 0) { this.kanSayac = 4; if (this.can > 2) this.hasar(1, 'kanama'); } } else this.kanSayac = 4;
+    if (this.islak > 0) this.islak -= dt * (o.atesYakin ? 6 : 1);
+    if (o.suda) this.islak = 40;
     /* Örümcek zehri: canı 1'in altına düşürmez */
     if (this.agu > 0) { this.agu -= dt; this.aguSayac -= dt; if (this.aguSayac <= 0) { this.aguSayac = 1.25; if (this.can > 1) this.hasar(1, 'agu'); } }
     this.yor(dt * 0.045);
@@ -90,14 +118,15 @@ export class Hayatta {
       this.bogSayac = 0;
     }
   }
-  disaAktar() { return { can: this.can, aclik: this.aclik, oksijen: this.oksijen, yorgunluk: this.yorgunluk, zehir: Math.max(0, this.zehir), xp: Math.round(this.xp * 10) / 10, etkiler: { ...this.etkiler }, buyuTohum: this.buyuTohum }; }
+  disaAktar() { return { vucut: Math.round(this.vucut * 100) / 100, can: this.can, aclik: this.aclik, oksijen: this.oksijen, yorgunluk: this.yorgunluk, zehir: Math.max(0, this.zehir), xp: Math.round(this.xp * 10) / 10, etkiler: { ...this.etkiler }, buyuTohum: this.buyuTohum }; }
   iceAktar(o) {
     if (!o) return;
     this.can = o.can ?? 20; this.aclik = o.aclik ?? 20; this.oksijen = o.oksijen ?? 10; this.yorgunluk = o.yorgunluk ?? 0; this.zehir = o.zehir ?? 0; this.olu = this.can <= 0;
     this.xp = o.xp || 0; this.etkiler = o.etkiler && typeof o.etkiler === 'object' ? { ...o.etkiler } : {};
     if (o.buyuTohum) this.buyuTohum = o.buyuTohum >>> 0 || 1;
+    this.vucut = Number.isFinite(o.vucut) ? Math.min(42, Math.max(30, o.vucut)) : 37;
   }
 }
 
-export const OLUM_SEBEBI = { dusme: 'Yüksekten düştünüz.', aclik: 'Açlıktan öldünüz.', bogulma: 'Boğuldunuz.', zombi: 'Bir zombi tarafından öldürüldünüz.', kurt: 'Bir kurt tarafından öldürüldünüz.',
+export const OLUM_SEBEBI = { donma: 'Donarak öldünüz.', sicak: 'Sıcak çarpmasından öldünüz.', kanama: 'Kan kaybından öldünüz.', dusme: 'Yüksekten düştünüz.', aclik: 'Açlıktan öldünüz.', bogulma: 'Boğuldunuz.', zombi: 'Bir zombi tarafından öldürüldünüz.', kurt: 'Bir kurt tarafından öldürüldünüz.',
   iskelet: 'Bir iskeletin okuyla öldürüldünüz.', mumya: 'Bir mumya tarafından öldürüldünüz.', bogulmus: 'Bir boğulmuş zombi tarafından öldürüldünüz.', buziskelet: 'Bir buz iskeletinin okuyla öldürüldünüz.', yarasa: 'Bir yarasa sürüsü tarafından öldürüldünüz.', kopekbaligi: 'Bir köpekbalığı tarafından öldürüldünüz.', orumcek: 'Bir mağara örümceği tarafından öldürüldünüz.', lav: 'Lava düştünüz.', magma: 'Magma bloğunun üstünde yandınız.', korruhu: 'Bir Kor Ruhu tarafından yakıldınız.', kulzombi: 'Bir Kül Zombisi tarafından öldürüldünüz.', yanma: 'Yanarak öldünüz.', agu: 'Zehirlenerek öldünüz.', yildirim: 'Yıldırım çarptı.', tuzak: 'Bir tuzağa yakalandınız.', haydut: 'Bir haydut tarafından öldürüldünüz.', firavun: 'Firavun tarafından öldürüldünüz.', buzbuyucu: 'Buz Büyücüsü tarafından öldürüldünüz.', reis: 'Haydut Reisi tarafından öldürüldünüz.', muhafiz: 'Taş Muhafız tarafından ezildiniz.' };
