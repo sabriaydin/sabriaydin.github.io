@@ -5,7 +5,7 @@ import { THREE } from '../grafik/sahne.js';
 import { MODELLER, okModeli } from './modeller.js';
 import { TURLER, HAYVANLAR } from './turler.js';
 import { BY, KARLI } from '../dunya/uretici.js';
-import { KATI, SIVI, KESIK, BITKI, LAV } from '../bloklar.js';
+import { KATI, SIVI, KESIK, BITKI, LAV, BLOKLAR } from '../bloklar.js';
 import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
 import { karma3 } from '../rastgele.js';
@@ -13,6 +13,7 @@ import { PY, DENIZ, diyarMi } from '../sabitler.js';
 import { cakisma } from '../sekiller.js';
 
 let SIRA = 1;
+const CICEK = new Set([26, 27, 44]);   // 0.21.0: arıların polen topladığı çiçekler
 const MAX_HAYVAN = 18, HAYVAN_UZAK = 120, ZOMBI_UZAK = 72;
 
 export class Varliklar {
@@ -227,6 +228,7 @@ export class Varliklar {
     this._C = C;
     this.dogurSayac -= dt;
     if (this.dogurSayac <= 0) { this.dogurSayac = 1.2; if (!this.dogurmaKapali) for (const c of C) this.dogur(c); }
+    this.kovanlariGuncelle(dt, C);
     for (let i = this.liste.length - 1; i >= 0; i--) {
       const v = this.liste[i];
       /* Yapay zekâ en yakın canlı oyuncuya göre, kaybolma en yakın oyuncuya göre */
@@ -498,6 +500,10 @@ export class Varliklar {
   etkilesimVar(v, eldeki) {
     if (!v || v.olu) return false;
     const T = v.tur, sahipli = this.ayna ? !!((v.agBayrak || 0) & 8192) : !!v.sahip;
+    const yavru = this.ayna ? !!((v.agBayrak || 0) & 64) : v.yavru > 0;
+    /* 0.21.0: kovayla inek sağılır, makasla koyun kırkılır */
+    if (eldeki === 477 && v.turAd === 'inek' && !yavru) return true;
+    if (eldeki === 481 && v.turAd === 'koyun' && !yavru) return !(this.ayna ? ((v.agBayrak || 0) & 65536) : v.kirkildi);
     if (v.turAd === 'kurt') return eldeki === 295;
     if (v.turAd === 'kedi' && !sahipli) return T.mama.includes(eldeki);
     return !!((T.sadik && sahipli) || T.binek);
@@ -509,6 +515,13 @@ export class Varliklar {
     const duman = () => this.dusenler.renkliParcacik([0.62, 0.62, 0.62], p.x, p.y + T.boy + 0.2, p.z, 8);
     const kucuk = T.ad.toLocaleLowerCase('tr');
     if (v.olu) return S;
+    /* 0.21.0: sağma ve kırkma */
+    if (eldeki === 477 && v.turAd === 'inek' && !(v.yavru > 0)) { S.degistir = 479; S.mesaj = 'İnek sağıldı: süt kovası.'; S.olay = 'sut'; S.ses = 'sut'; return S; }
+    if (eldeki === 481 && v.turAd === 'koyun' && !(v.yavru > 0) && !v.kirkildi) {
+      v.kirkildi = true; v.yunSayac = 120 + Math.random() * 120;
+      this.dusenler.birak(49, 1 + Math.floor(Math.random() * 3), p.x, p.y + 0.8, p.z);
+      S.yipran = true; S.olay = 'kirkim'; S.ses = 'kirp'; return S;
+    }
     /* Kurt kemikle evcilleşir ve köpeğe dönüşür */
     if (v.turAd === 'kurt' && eldeki === 295) {
       S.tuket = true;
@@ -590,6 +603,13 @@ export class Varliklar {
   /* Yavru büyür, aşık hayvan eşini arar, yem tutan oyuncu izlenir; izlenecek nokta v.izle'ye yazılır */
   hayvanBakim(v, ctx, dt) {
     if (v.yavru > 0) { v.yavru -= dt; v.m.kok.scale.setScalar(v.yavru > 0 ? 0.55 : 1); if (v.yavru <= 0) v.yavru = 0; }
+    /* 0.21.0: kırkılan koyunun yünü 2-4 dakikada uzar; tavuk 5-10 dakikada bir yumurtlar */
+    if (v.kirkildi) { v.yunSayac -= dt; if (v.yunSayac <= 0) v.kirkildi = false; }
+    if (v.turAd === 'tavuk' && !(v.yavru > 0)) {
+      if (v.yumurtaSayac == null) v.yumurtaSayac = 60 + Math.random() * 360;
+      v.yumurtaSayac -= dt;
+      if (v.yumurtaSayac <= 0) { v.yumurtaSayac = 300 + Math.random() * 300; this.dusenler.birak(480, 1, v.konum.x, v.konum.y + 0.3, v.konum.z); if (this.sesK(v.konum) > 0.1) this.ses.canli('tavuk', 'normal', this.sesK(v.konum)); }
+    }
     if (v.dinlen > 0) v.dinlen -= dt;
     v.izle = null;
     if (v.ask > 0) {
@@ -667,6 +687,8 @@ export class Varliklar {
     m.kok.rotation.y = v.yaw;
     if (v.anim) this.animUygula(v, dt);
     if (m.sadik || m.binek) this.evcilCanlandir(v, dt);
+    /* 0.21.0: kırkılmış koyunun gövdesi incelir */
+    if (v.turAd === 'koyun') { const k = this.ayna ? !!((v.agBayrak || 0) & 65536) : !!v.kirkildi; m.govde.scale.set(k ? 0.84 : 1, k ? 0.86 : 1, k ? 0.94 : 1); }
     const c = m.malzeme.color;
     if (v.hasarZaman > 0) c.setRGB(1, 0.35, 0.35);
     else if (v.yaniyor) c.setRGB(1, 0.7 + Math.sin(performance.now() / 60) * 0.1, 0.45);
@@ -1000,10 +1022,15 @@ export class Varliklar {
     const T = v.tur, p = v.konum, op = ctx.oyuncu.konum;
     const dx = op.x - p.x, dy = op.y + 1.3 - p.y, dz = op.z - p.z, d = Math.hypot(dx, dy, dz) || 1;
     /* Gündüz açıkta kalan yarasa bir süre sonra kaybolur */
-    if (ctx.gunIsigi > 0.6 && this.gokAcik(p.x, p.y + 1, p.z)) { v.gunduz = (v.gunduz || 0) + dt; if (v.gunduz > 12) { v.sil = true; return; } } else v.gunduz = 0;
+    if (!T.ari && ctx.gunIsigi > 0.6 && this.gokAcik(p.x, p.y + 1, p.z)) { v.gunduz = (v.gunduz || 0) + dt; if (v.gunduz > 12) { v.sil = true; return; } } else v.gunduz = 0;
     let yx = 0, yy = 0, yz = 0, hiz = 0, kovaliyor = false;
     const t = performance.now() / 1000 + v.id * 1.7;
-    if (T.atesTopu && !this.barisci && !ctx.oyuncuOlu && d < T.gorus) {
+    /* 0.21.0: kızgın arı 25 saniye sonra sakinleşir */
+    if (T.ari && v.ofkeli) { v.ofkeSure = (v.ofkeSure ?? 25) - dt; if (v.ofkeSure <= 0) { v.ofkeli = false; v.ofkeSure = null; } }
+    const ariY = T.ari && !v.ofkeli ? this.ariYon(v, dt, ctx) : null;
+    if (v.sil) return;
+    if (ariY) [yx, yy, yz, hiz] = ariY;
+    else if (T.atesTopu && !this.barisci && !ctx.oyuncuOlu && d < T.gorus) {
       /* 0.18.0: Kor Ruhu oyuncunun 7-11 blok yakınında, biraz yukarıda süzülür; görünce art arda üç ateş topu atar */
       kovaliyor = true;
       const yatay = Math.hypot(dx, dz) || 1, yaklas = yatay > 11 ? 1 : yatay < 6 ? -1 : 0;
@@ -1012,7 +1039,7 @@ export class Varliklar {
       v.seriBek = (v.seriBek || 0) - dt;
       if (v.saldiriBek <= 0 && this.gorusVar(p.x, p.y + 1.2, p.z, op.x, op.y + 1.4, op.z)) { v.saldiriBek = 3 + Math.random() * 1.5; v.seri = 3; }
       if (v.seri > 0 && v.seriBek <= 0) { v.seri--; v.seriBek = 0.32; this.atesTopuAt(v, ctx); }
-    } else if (!this.barisci && !ctx.oyuncuOlu && d < T.gorus && v.kacZaman <= 0) {
+    } else if (!this.barisci && !ctx.oyuncuOlu && d < T.gorus && v.kacZaman <= 0 && (!T.ari || v.ofkeli)) {
       kovaliyor = true;
       yx = dx / d + Math.sin(t * 3.1) * 0.55; yy = dy / d + Math.sin(t * 4.3) * 0.45; yz = dz / d + Math.cos(t * 2.7) * 0.55; hiz = T.kosu;
       if (d < T.menzil + 0.6 && v.saldiriBek <= 0) {
@@ -1228,6 +1255,88 @@ export class Varliklar {
     if (v.tur.boss === 'buzbuyucu') for (const a of [-0.14, 0.14]) { const c = Math.cos(a), sn = Math.sin(a); this.okAt(p.clone(), new THREE.Vector3(h.x * c - h.z * sn, h.y, h.x * sn + h.z * c), v.tur.hasar, v); }
     v.ger = 0;
     if (this.sesK(p) > 0.3) this.ses.yayAt();
+  }
+  /* ---------- 0.21.0: Arıcılık (tek oyunculu ve sunucu) ---------- */
+  /* Kovanlar: oyuncuların 40 blok yakınındaki her kovandan gündüz ve yağmur yokken en çok 3 arı dışarı çıkar */
+  kovanlariGuncelle(dt, C) {
+    const d = this.dunya;
+    if (!this.kovanDinle) {
+      /* Dolu kovan hasat edilince ya da kovan kırılınca, altında 5 blok içinde kamp ateşi yoksa arılar kızar */
+      this.kovanDinle = (x, y, z, id, eski) => {
+        const eb = BLOKLAR[eski];
+        if (!eb || !eb.kovan) return;
+        const nb = BLOKLAR[id], hasat = nb && nb.kovan && eb.bal === 5 && nb.bal === 0;
+        if (!hasat && nb && nb.kovan) return;
+        for (let k = 1; k <= 5; k++) if (d.blok(x, y - k, z) === 48) return;
+        const kk = x + ',' + y + ',' + z;
+        let n = 0;
+        for (const v of this.liste) if (v.tur.ari && !v.olu && (v.kovan === kk || v.konum.distanceToSquared({ x: x + 0.5, y, z: z + 0.5 }) < 144)) { v.ofkeli = true; v.ofkeSure = 25; n++; }
+        for (; n < 2; n++) { const v = this.ekle('ari', x + 0.5 + (Math.random() - 0.5) * 2, y + 1.2, z + 0.5 + (Math.random() - 0.5) * 2); v.ofkeli = true; v.ofkeSure = 25; v.kovan = kk; }
+      };
+      d.dinleyiciler.push(this.kovanDinle);
+    }
+    this.kovanSayac = (this.kovanSayac || 0) - dt;
+    if (this.kovanSayac > 0) return;
+    this.kovanSayac = 1;
+    const gun = C[0] ? C[0].gunIsigi : 1;
+    if (!(gun > 0.45) || d.yagiyor) return;
+    for (const [k, kv] of d.kovanlar) {
+      if (!C.some(c => (c.oyuncu.konum.x - kv.x) ** 2 + (c.oyuncu.konum.z - kv.z) ** 2 < 1600)) continue;
+      kv.sayac -= 1;
+      if (kv.sayac > 0) continue;
+      let disari = 0;
+      for (const v of this.liste) if (v.kovan === k && !v.olu) disari++;
+      if (disari >= 3) continue;
+      const b = BLOKLAR[d.blok(kv.x, kv.y, kv.z)];
+      if (!b || !b.kovan) continue;
+      const [a, c] = [[0, -1], [1, 0], [0, 1], [-1, 0]][b.yon];
+      if (d.blok(kv.x + a, kv.y, kv.z + c) !== 0) { kv.sayac = 10; continue; }
+      const v = this.ekle('ari', kv.x + 0.5 + a * 0.8, kv.y + 0.3, kv.z + 0.5 + c * 0.8);
+      v.kovan = k; v.disari = 0;
+      kv.sayac = 5 + Math.random() * 8;
+    }
+  }
+  /* Sakin arının yönü: çiçek bul, 2,5 saniye polen topla, kovana dön ve içine girerek balı artır */
+  ariYon(v, dt, ctx) {
+    const p = v.konum, d = this.dunya, kv = v.kovan && d.kovanlar.get(v.kovan);
+    v.disari = (v.disari || 0) + dt;
+    if (!kv) { v.evsiz = (v.evsiz || 0) + dt; if (v.evsiz > 60) v.sil = true; return null; }
+    const kb = BLOKLAR[d.blok(kv.x, kv.y, kv.z)];
+    if (!kb || !kb.kovan) { d.kovanlar.delete(v.kovan); return null; }
+    const git = (x, y, z, h) => [x - p.x, y - p.y, z - p.z, h];
+    /* Eve dönüş: polen taşıyorsa, akşam olduysa, yağıyorsa ya da 2 dakikadır dışarıdaysa */
+    if (v.polen || ctx.gunIsigi < 0.35 || d.yagiyor || v.disari > 120) {
+      const [a, c] = [[0, -1], [1, 0], [0, 1], [-1, 0]][kb.yon];
+      const hx = kv.x + 0.5 + a * 0.85, hy = kv.y + 0.25, hz = kv.z + 0.5 + c * 0.85;
+      if ((hx - p.x) ** 2 + (hy - p.y) ** 2 + (hz - p.z) ** 2 < 0.5) {
+        if (v.polen && kb.bal < 5) d.blokKoy(kv.x, kv.y, kv.z, d.blok(kv.x, kv.y, kv.z) + 1, 'tik');
+        v.sil = true;
+        return null;
+      }
+      return git(hx, hy, hz, v.tur.hiz);
+    }
+    /* Çiçekte polen toplama */
+    if (v.cicek) {
+      const [cx, cy, cz] = v.cicek;
+      if (!CICEK.has(d.blok(cx, cy, cz))) { v.cicek = null; return null; }
+      const hx = cx + 0.5, hy = cy + 0.55, hz = cz + 0.5;
+      if ((hx - p.x) ** 2 + (hy - p.y) ** 2 + (hz - p.z) ** 2 < 0.4) {
+        v.konma = (v.konma || 0) + dt;
+        if (v.konma > 2.5) { v.polen = true; v.cicek = null; v.konma = 0; this.dusenler.renkliParcacik([1, 0.85, 0.2], hx, hy, hz, 3); }
+        return [0, 0, 0, 0];
+      }
+      return git(hx, hy, hz, v.tur.hiz);
+    }
+    /* Kovanın 10 blok çevresinde çiçek ara */
+    v.araSayac = (v.araSayac || 0) - dt;
+    if (v.araSayac <= 0) {
+      v.araSayac = 1.5;
+      for (let k = 0; k < 30 && !v.cicek; k++) {
+        const x = kv.x + Math.floor((Math.random() - 0.5) * 21), z = kv.z + Math.floor((Math.random() - 0.5) * 21);
+        for (let y = kv.y + 4; y >= kv.y - 8; y--) { const id = d.blok(x, y, z); if (CICEK.has(id)) { v.cicek = [x, y, z]; break; } if (id && !BITKI[id]) break; }
+      }
+    }
+    return null;   // çiçek bulunana kadar kovan çevresinde dolaşır
   }
   /* 0.18.0: Kor Ruhunun ateş topu: yer çekimsiz, düz gider; isabet eden oyuncuyu tutuşturur */
   atesTopuAt(v, ctx) {

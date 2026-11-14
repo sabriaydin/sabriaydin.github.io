@@ -331,6 +331,18 @@ export const MODELLER = {
     donen.add(new THREE.Mesh(birlestir(geo), malzeme));
     return { kok, malzeme, govde, kafa, bacaklar: [], kollar: [], kanatlar: [], kuyruk: null, donen };
   },
+  /* 0.21.0: Arı: sarı-siyah çizgili tombul gövde, iğne, saydam kanatlar */
+  ari: () => {
+    const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+    const kok = new THREE.Group();
+    const s = '#f2c230', k = '#2a2018';
+    const govde = parca(kok, malzeme, [0, 0.22, 0], [[0.24, 0.22, 0.34, s], [0.25, 0.23, 0.06, k, 0, 0, 0.02], [0.25, 0.23, 0.06, k, 0, 0, 0.12], [0.04, 0.04, 0.08, '#1a1410', 0, -0.02, 0.21],
+      [0.03, 0.12, 0.03, k, -0.05, -0.15, -0.02], [0.03, 0.12, 0.03, k, 0.05, -0.15, 0.04]]);
+    const kafa = parca(kok, malzeme, [0, 0.24, -0.17], [[0.2, 0.2, 0.08, s], [0.06, 0.08, 0.02, k, -0.06, 0.02, -0.045], [0.06, 0.08, 0.02, k, 0.06, 0.02, -0.045],
+      [0.02, 0.1, 0.02, k, -0.05, 0.14, -0.02], [0.02, 0.1, 0.02, k, 0.05, 0.14, -0.02]]);
+    const kanatlar = [-1, 1].map(i => parca(kok, malzeme, [i * 0.06, 0.34, -0.02], [[0.22, 0.02, 0.16, '#e8f4fa', i * 0.12, 0, 0.02]]));
+    return { kok, malzeme, govde, kafa, bacaklar: [], kollar: [], kanatlar, kuyruk: null, yarasa: true };
+  },
   /* Yarasa: küçük gövde, büyük kulaklar, zarlı kanatlar (kanatlar.rotation.z ile çırpılır) */
   yarasa: () => {
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });

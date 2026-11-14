@@ -57,6 +57,9 @@ export const TURLER = {
     dusur: r => [[471, ar(r, 0, 3)], ...(r() < 0.4 ? [[472, 1]] : [])], ses: 'korruhu', xp: 10 },
   kulzombi: { ad: 'Kül Zombisi', model: 'kulzombi', aile: 'zombi', gen: 0.3, boy: 1.95, can: 24, hiz: 1.05, kosu: 2.9, dusman: true, atesBagisik: true, hasar: 4, menzil: 1.0, gorus: 26, yakar: 3,
     dusur: r => { const o = [[281, ar(r, 0, 2)]]; if (r() < 0.12) o.push([263, 1]); if (r() < 0.1) o.push([472, 1]); return o; }, ses: 'zombi', xp: 6 },
+  /* 0.21.0: Arı: kovanından çıkar, çiçeklerden polen toplayıp kovanı bala doyurur; kızdırılırsa sokar ve zehirler */
+  ari: { ad: 'Arı', model: 'ari', gen: 0.2, boy: 0.45, can: 6, hiz: 2.0, kosu: 4.4, ucar: true, ari: true, notr: true, hasar: 2, agu: true, menzil: 0.7, gorus: 18,
+    dusur: () => [], ses: 'ari', xp: 1 },
   koylu: { ad: 'Köylü', model: 'koylu', gen: 0.3, boy: 1.9, can: 20, hiz: 1.0, kosu: 3.2, koylu: true, dusur: () => [], ses: 'koylu' }
 };
 export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt', 'at', 'kedi'];

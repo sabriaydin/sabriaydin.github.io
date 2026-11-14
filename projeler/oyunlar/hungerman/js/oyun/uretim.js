@@ -193,6 +193,21 @@ t(336, 1, [[331, 1], [450, 1], [296, 2]], 'simya', 'yiyecek');
 /* 0.18.0: Yeraltı Diyarı */
 t(473, 1, [[261, 1], [285, 1]], null, 'alet');
 t(523, 1, [[2, 3], [239, 1], [46, 2]], 'masa', 'mekanik');   // 0.20.0: Geciktirici
+/* 0.21.0: tarım ve hayvancılık */
+t(475, 4, [[559, 1]], null, 'malzeme');
+t(476, 1, [[568, 1]], null, 'malzeme');
+t(477, 1, [[261, 3]], 'masa', 'alet');
+t(481, 1, [[261, 2]], null, 'alet');
+t(564, 1, [[560, 1], [46, 1]], null, 'blok');
+t(569, 1, [['kalas', 6], [483, 3]], 'masa', 'blok');
+t(484, 3, [[479, 1]], 'tencere', 'yiyecek');
+t(485, 2, [[479, 1], [270, 2]], 'tencere', 'yiyecek');
+t(486, 2, [[485, 1], [331, 2]], null, 'yiyecek');
+t(487, 1, [[479, 1], [476, 2], [480, 1], [291, 3]], 'masa', 'yiyecek');
+t(488, 1, [[559, 1], [476, 1], [480, 1]], 'firin', 'yiyecek');
+t(489, 1, [[480, 2], [484, 1]], 'tencere', 'yiyecek');
+t(490, 2, [[291, 3], [482, 1], [476, 1]], 'firin', 'yiyecek');
+t(491, 1, [[480, 1]], 'tencere', 'yiyecek');
 t(514, 1, [[471, 4]], null, 'blok');
 t(518, 4, [[512, 4]], 'firin', 'blok');
 t(519, 1, [[518, 2]], 'masa', 'blok');
@@ -221,6 +236,8 @@ export function uret(env, tarif, kez = 1) {
     if (!env.bosYerVar(tarif.cikti, tarif.adet)) break;
     for (const [g, a] of tarif.girdi) girdiHarca(env, g, a);
     env.ekle(tarif.cikti, tarif.adet);
+    /* 0.21.0: süt kovası ve bal şişesi gibi kaplı malzemelerin kabı geri verilir */
+    for (const [g, a] of tarif.girdi) { const e = !GRUPLAR[g] && ESYALAR[g], kap = e && (e.kap || (e.kase ? 270 : 0)); if (kap) env.ekle(kap, a); }
     yapilan++;
   }
   return yapilan;

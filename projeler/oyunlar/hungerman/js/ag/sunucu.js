@@ -189,7 +189,7 @@ export class SunucuOyun {
         if (!w || w.olu || w.konum.distanceTo(c.konum) > 9) { c.k.gonder({ t: 'ce', i: m.i }); break; }
         const S = o.varliklar.canliEtkilesim(w, m.e | 0, c.ad);
         if (S.bin) w.binen = c.id;
-        c.k.gonder({ t: 'ce', i: w.id, tk: S.tuket ? 1 : 0, m: S.mesaj, o: S.olay, b: S.bin ? 1 : 0 });
+        c.k.gonder({ t: 'ce', i: w.id, tk: S.tuket ? 1 : 0, m: S.mesaj, o: S.olay, b: S.bin ? 1 : 0, dg: S.degistir || 0, y: S.yipran ? 1 : 0, s: S.ses || null });
         break;
       }
       case 'ati': { // attan inme
@@ -320,7 +320,7 @@ export class SunucuOyun {
         let b = 0;
         if (w.olu) b |= 1; if (w.hasarZaman > 0) b |= 2; if (w.yaniyor) b |= 4; if (w.nisan) b |= 8; if (!w.m.kok.visible) b |= 16; if (!w.yerde || w.kacZaman > 0) b |= 32;
         if (w.yavru > 0) b |= 64; if (w.ask > 0) b |= 128; if (w.dinlen > 0) b |= 256; if (w.anim) b |= (w.anim & 7) << 9;
-        if (w.oturuyor) b |= 4096; if (w.sahip) b |= 8192; if (w.eyer) b |= 16384; if (w.sahlan > 0) b |= 32768;
+        if (w.oturuyor) b |= 4096; if (w.sahip) b |= 8192; if (w.eyer) b |= 16384; if (w.sahlan > 0) b |= 32768; if (w.kirkildi) b |= 65536;
         const a = [w.id, r2(w.konum.x), r2(w.konum.y), r2(w.konum.z), r3(w.yaw), b, Math.max(0, Math.ceil(w.can))];
         if (!c.bilinen.has(w.id)) a.push(w.tur.koylu && w.koylu ? [w.turAd, w.koylu.meslek, w.koy.id, w.koylu.idx] : w.renk ? [w.turAd, 0, 0, 0, w.renk] : [w.turAd]);
         bilinen.add(w.id);

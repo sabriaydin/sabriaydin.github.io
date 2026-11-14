@@ -117,6 +117,35 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 21. aşama (0.21.0): Tarım ve hayvancılık
+
+**Yeni ekinler**
+- **Balkabağı:** çayır ve ormanlarda küçük öbekler hâlinde bulunur. Balkabağından 4 çekirdek elde edilir; çekirdek tarlaya ekilir, olgunlaşan sap yanındaki boş toprağa ya da çimene balkabağı verir (sap kalır, yeniden ürün verir). Makasla oyulan balkabağı bakılan yöne yüz çizer; oyma balkabağı ile meşaleden ışık düzeyi 15 olan **Balkabağı Feneri** yapılır.
+- **Şeker kamışı:** su kenarlarında yetişir; yalnızca suya komşu kum, toprak ya da çimene ya da başka bir kamışın üstüne dikilir, 3 boya kadar uzar. Kamıştan şeker elde edilir.
+
+**Hayvancılık**
+- **Kova** (3 demir külçe, Üretim Masası): su kaynağından su alır (kaynak tükenmez), inekten süt sağar. Su kovası suyu koyar; lava değen su lavı obsidyene çevirir.
+- **Süt Kovası** içilince zehir, örümcek zehri ve olumsuz etkiler geçer; kova geri kalır.
+- **Makas** (2 demir külçe): koyunu kırkar (1-3 yün; yün 2-4 dakikada yeniden uzar, kırkılmış koyun daha ince görünür), balkabağını oyar, kovandan petek alır. Örste demirle onarılır.
+- **Tavuklar** 5-10 dakikada bir yumurtlar.
+
+**Arıcılık**
+- Çayır, orman ve huş ormanlarındaki meşe ve huş ağaçlarının gövdesine **arı kovanları** asılıdır. Gündüz ve yağmur yokken her kovandan en çok 3 arı çıkar.
+- Arılar kovanın 10 blok çevresindeki çiçeklere (gelincik, karahindiba, peygamber çiçeği) konar, polen toplayınca kovana döner; her dönüş kovanın bal düzeyini 1 artırır (en çok 5). Dolu kovanın ön yüzünde bal görünür.
+- Dolu kovandan cam şişeyle **Bal Şişesi** (zehri giderir), makasla 3 **Bal Peteği** alınır. Kovanın 5 blok altında kamp ateşi yoksa çevredeki arılar 25 saniye boyunca kızar ve sokar (zehirler). Kovan kırılınca da arılar kızar.
+- **Arı Kovanı** 6 kalas ve 3 bal peteğiyle üretilir.
+
+**Yeni yiyecekler** (kaplar geri verilir)
+- Tencere: Peynir (süt kovası), Yoğurt (süt kovası, 2 kase; yenilenme), Omlet (2 yumurta, peynir; güç), Haşlanmış Yumurta.
+- El ile: Ayran (yoğurt, 2 cam şişe; hız).
+- Üretim Masası: Kek (süt kovası, 2 şeker, yumurta, 3 buğday; tokluk).
+- Fırın: Balkabağı Turtası (balkabağı, şeker, yumurta), Baklava (3 buğday, bal şişesi, şeker; hız).
+
+**Başarımlar** (“Çiftlik”): Su Taşıyıcı, Taze Süt, Kırkım Zamanı, Gece Feneri, Tatlı Kazanç, Çiftlik Mutfağı.
+
+**Teknik**
+- Dünya üretimi değiştiğinden keşif haritası önbelleği yenilenir. Kırkılmış koyun ve arılar çok oyunculuda da görünür.
+
 ## 20. aşama (0.20.0): Bilinen eksiklerin giderilmesi
 
 - **Geciktirici** (3 taş, bakır tel, 2 meşale; Üretim Masası, Mekanik): arkasından gelen gücü önüne 1-4 adım (0,1-0,4 saniye) gecikmeyle geçirir, gücü tersine çevirmez. Sağ tıklanınca gecikme bir adım artar (4'ten sonra 1'e döner); arkadaki uç gecikmeye göre kayar. Çıkışı, konulurken bakılan yöndedir. Ters çevirici ile birlikte kurulan saat devrelerinin hızı artık ayarlanabilir; arka arkaya geciktiriciler uzun gecikmeler verir.

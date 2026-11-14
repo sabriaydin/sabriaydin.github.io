@@ -68,15 +68,21 @@ export const BASARIMLAR = [
   { k: 'isiltas', ad: 'Işık Toplayıcı', aciklama: 'Işıltaş tozu topla.', ikon: 514, grup: 'Diyar ve Mevsimler' },
   { k: 'korKilic', ad: 'Ateşle Oynamak', aciklama: 'Bir Kor Kılıcı yap.', ikon: 474, grup: 'Diyar ve Mevsimler' },
   { k: 'yil', ad: 'Dört Mevsim', aciklama: 'Bir yılı (28 gün) geride bırak.', ikon: 45, grup: 'Diyar ve Mevsimler' },
+  { k: 'kova', ad: 'Su Taşıyıcı', aciklama: 'Kovayla su taşıyıp bir yere dök.', ikon: 478, grup: 'Çiftlik' },
+  { k: 'sut', ad: 'Taze Süt', aciklama: 'Kovayla bir inek sağ.', ikon: 479, grup: 'Çiftlik' },
+  { k: 'kirkim', ad: 'Kırkım Zamanı', aciklama: 'Makasla bir koyun kırk.', ikon: 481, grup: 'Çiftlik' },
+  { k: 'fener', ad: 'Gece Feneri', aciklama: 'Bir balkabağı feneri yap.', ikon: 564, grup: 'Çiftlik' },
+  { k: 'aricilik', ad: 'Tatlı Kazanç', aciklama: 'Dolu bir arı kovanından bal ya da petek al.', ikon: 482, grup: 'Çiftlik' },
+  { k: 'ciftci', ad: 'Çiftlik Mutfağı', aciklama: 'Çiftlik ürünleriyle yapılan bir yemek ye.', ikon: 487, grup: 'Çiftlik' },
   { k: 'ticaret', ad: 'Pazarlıkçı', aciklama: 'Bir köylüyle ticaret yap.', ikon: 288, grup: 'Köyler' },
   { k: 'gorev', ad: 'Yardımsever', aciklama: 'Bir köy görevini tamamla.', ikon: 294, grup: 'Köyler' },
   { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' }
 ];
 export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
-export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler'];
+export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler', 'Çiftlik'];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
-const ESYA_BASARIM = [['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
+const ESYA_BASARIM = [['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
 
 export class Basarimlar {
   constructor() {

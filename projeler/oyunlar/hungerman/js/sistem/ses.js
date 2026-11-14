@@ -104,6 +104,7 @@ export class Ses {
       case 'tavsan': this.ton(1300 * y, 0.08, 0.05 * h, 'triangle', 1000); break;
       case 'kurt': if (tip === 'normal') { this.patlama(220, 0.6, 0.12 * h, 'lowpass', 2); this.ton(95, 0.6, 0.1 * h, 'sawtooth', 80); } else this.ton(700 * y, 0.25, 0.12 * h, 'triangle', 450); break;
       /* 0.18.0: kor ruhu çatırdar ve uğuldar */
+      case 'ari': this.ton(220 * y + Math.random() * 20, 0.5, 0.05 * h, 'sawtooth', 240 * y); this.ton(440 * y, 0.5, 0.02 * h, 'square', 470 * y); break;
       case 'korruhu': this.patlama(900, 0.4, 0.12 * h, 'bandpass', 0.8, 1.6); this.ton(70 * y, 0.6, 0.1 * h, 'sawtooth', 55 * y); break;
       /* 0.16.0: köpek havlar, kedi miyavlar, at kişner */
       case 'kopek': if (tip === 'normal') { this.ton(420 * y, 0.08, 0.12 * h, 'sawtooth', 300 * y); this.patlama(700, 0.08, 0.08 * h, 'bandpass', 2); setTimeout(() => { this.ton(440 * y, 0.09, 0.12 * h, 'sawtooth', 310 * y); this.patlama(700, 0.08, 0.08 * h, 'bandpass', 2); }, 170); } else this.ton(900 * y, 0.22, 0.1 * h, 'triangle', 600); break;

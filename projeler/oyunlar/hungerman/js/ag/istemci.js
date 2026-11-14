@@ -126,7 +126,7 @@ export class IstemciOyun {
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
       case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
       case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;
-      case 'ce': { const v = o.varliklar.harita && o.varliklar.harita.get(m.i); o.etkilesim.canliSonuc({ tuket: !!m.tk, mesaj: m.m || null, olay: m.o || null, bin: !!m.b && !!v }, v); break; }
+      case 'ce': { const v = o.varliklar.harita && o.varliklar.harita.get(m.i); o.etkilesim.canliSonuc({ tuket: !!m.tk, mesaj: m.m || null, olay: m.o || null, bin: !!m.b && !!v, degistir: m.dg || 0, yipran: !!m.y, ses: m.s || null }, v); break; }
       case 'sim': if (o.hava) o.hava.simsekGoster(m.p[0], m.p[1], m.p[2], o.oyuncu.konum, this.ses); break;
       case 'o+': o.varliklar.aynaOk(m.i, m.p, m.v, m.d, m.k); break;
       case 'ef': if (m.e) o.varliklar.efektOyna(m.e); break;
