@@ -671,12 +671,11 @@ body.dokunmatik #tikla b::after { content: ''; }
 /* 0.23.0: ölüm perdesi: kızıl bir parlamanın ardından görüntü kararır */
 #olumPerde { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, rgba(120, 0, 0, .35), rgba(30, 0, 0, .9)); transition: opacity 1.6s ease-in; }
 #olumPerde.acik { opacity: 1; }
-#bakilanAd { position: absolute; left: 50%; top: 82px; transform: translateX(-50%); display: grid; justify-items: center; gap: 1px; padding: 4px 14px 5px; background: rgba(0, 0, 0, .5); border: 2px solid #000; border-radius: 4px; pointer-events: none; }
+/* 0.23.1: bakılan nesnenin adı: sol alt köşede, sade ve yarı saydam */
+#bakilanAd { position: absolute; left: 12px; bottom: 10px; max-width: 40vw; padding: 3px 9px; border-radius: 6px; background: rgba(0, 0, 0, .32); font: 600 .8rem var(--govde); color: rgba(255, 255, 255, .85); text-shadow: 1px 1px 0 rgba(0, 0, 0, .6); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #bakilanAd[hidden] { display: none; }
-#bakilanAd b { font: 700 .92rem var(--baslik); text-shadow: 1px 1px 0 #000; color: #fff; }
-#bakilanAd small { font: 600 .72rem var(--govde); color: rgba(255, 255, 255, .72); }
-#bakilanAd small[hidden] { display: none; }
-body:has(#bossCubuk:not([hidden])) #bakilanAd { top: 112px; }
+body:has(#fps:not([hidden])) #bakilanAd { bottom: 34px; }
+body.dokunmatik #bakilanAd { bottom: auto; top: 52px; left: 50%; transform: translateX(-50%); }
 /* 0.23.0: geliştirici penceresi: genel arama ve canlı bilgi şeridi */
 #gelGenelAra { margin-left: auto; width: min(320px, 40vw); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, .15); background: rgba(0, 0, 0, .35); color: #fff; font: 500 .85rem var(--govde); }
 .gelPencere header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -723,3 +722,4 @@ body.izleyici #cubuk, body.izleyici #durumlar, body.izleyici #xpCubuk, body.izle
 #ogretici.tamam { animation: ogrTamam .6s ease-out; }
 @keyframes ogrTamam { 0% { box-shadow: 0 0 0 0 rgba(120, 230, 120, .8); } 100% { box-shadow: 0 0 0 14px rgba(120, 230, 120, 0); } }
 body.gostergesiz #ogretici { display: none; }
+

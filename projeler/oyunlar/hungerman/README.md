@@ -117,6 +117,9 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 23.1 (0.23.1): Bakılan nesnenin adı
+- Bakılan bloğun adı ekranın üstünden sol alt köşeye taşındı; yalnızca ad gösterilir (açıklama satırı kaldırıldı), küçük ve yarı saydamdır. Dokunmatik kipte sol alttaki kol yüzünden üst ortada gösterilir. Ayarlardan kapatılabilir.
+
 ## 23. aşama (0.23.0): Sorun giderme ve büyük iyileştirme
 
 **Bildirilen sorunlar**
@@ -125,7 +128,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - **Elde tutulan eşyalar:** aletler sapından kavranmış duruşta; vuruşta çapraz savurma, blok ve eşyalarda öne itme, eşya değiştirirken aşağı inip kalkma, yemek yerken ağza götürme, nefes salınımı ve koşarken daha belirgin sallanma eklendi.
 - **Geliştirici Modu:** tekrar eden bölümler kaldırıldı (Işınlanma sekmesindeki harita işaretleri, Harita sekmesindeki mini harita anahtarı, Eşyalar sekmesindeki başarımlar, Köy sekmesindeki ticaret). Yeni "Hayatta Kalma" sekmesi (hasar ve durumlar, vücut ısısı kaydırıcısı, gök olayları, başarımlar), "★ Sık kullanılan" sekmesi (her düğme ve anahtar sağ tıkla sabitlenir), tüm sekmelerde arama (Ctrl + F) ve konum, biyom, saat, kare hızı, can ve vücut ısısını gösteren canlı bilgi şeridi eklendi.
 - **Köylü sayısı:** her binada en çok bir köylü; demirci ve balıkçı her zaman bulunur; köye göre toplam 4-7 köylü.
-- **Belirsiz nesneler:** bakılan bloğun adı ekranın üstünde gösterilir (ekin olgunluğu, kovandaki bal, gereken alet, sağ tık işlevi). Üretim Masası yeniden çizildi: üstte 3×3 üretim ızgarası, yanlarda çekiç, testere, kerpeten ve gönye. Üç haneli renk kodlarının yanlış çözülmesi giderildi (üretim masasındaki ve ana kayadaki kırmızı lekeler bu hatadandı).
+- **Belirsiz nesneler:** bakılan bloğun adı sol alt köşede, küçük ve yarı saydam yazılır (0.23.1). Üretim Masası yeniden çizildi: üstte 3×3 üretim ızgarası, yanlarda çekiç, testere, kerpeten ve gönye. Üç haneli renk kodlarının yanlış çözülmesi giderildi (üretim masasındaki ve ana kayadaki kırmızı lekeler bu hatadandı).
 - **Ölüm:** karakter yere yığılır: kamera yere iner ve yana devrilir, görüntü kızarıp kararır, ölüm ekranı 1,8 saniye sonra açılır. Ölüyken yerdeki eşyalar oyuncuya çekilmez (eski sürümde ölüm ekranında eşyalar geri toplanıyordu). Eşyalar mezar taşında saklanır. Çok oyunculuda ölen oyuncu diğerlerinin ekranında yere devrilir.
 
 **Zorluk ve denge**

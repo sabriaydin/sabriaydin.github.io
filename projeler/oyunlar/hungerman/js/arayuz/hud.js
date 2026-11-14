@@ -264,13 +264,13 @@ export class Hud {
     el.hidden = false;
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
-  /* 0.23.0: bakılan blok ya da tekne adı (ekranın üst ortasında) */
-  bakilan(ad, alt) {
-    const el = $('#bakilanAd'), a = ad ? ad + '|' + (alt || '') : '';
+  /* 0.23.1: bakılan blok ya da tekne adı: sol alt köşede, yalnızca ad */
+  bakilan(ad) {
+    const el = $('#bakilanAd'), a = ad || '';
     if (a === this.son.bakilan) return;
     this.son.bakilan = a;
     if (!ad) { el.hidden = true; return; }
-    el.hidden = false; el.querySelector('b').textContent = ad; const s = el.querySelector('small'); s.textContent = alt || ''; s.hidden = !alt;
+    el.hidden = false; el.textContent = ad;
   }
   /* 0.22.0: hasarın geldiği yön: dx, dz saldırana doğru dünya vektörü, yaw oyuncunun bakışı */
   hasarYonu(dx, dz, yaw) {

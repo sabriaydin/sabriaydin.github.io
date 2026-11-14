@@ -996,8 +996,8 @@ function adim(t) {
   o.hud.hedef(hc && hc.tur.boss ? null : hc);
   /* 0.23.0: bakılan nesnenin adı */
   if (ayar.bakilanAd === false || hc || !kilitli && !dokun.aktif) o.hud.bakilan(null);
-  else if (o.etkilesim.hedefTekne) o.hud.bakilan('Tekne', 'Sağ tık: bin');
-  else if (o.etkilesim.hedef) o.hud.bakilan(...bakilanBilgi(o, o.etkilesim.hedef));
+  else if (o.etkilesim.hedefTekne) o.hud.bakilan('Tekne');
+  else if (o.etkilesim.hedef) o.hud.bakilan((BLOKLAR[o.etkilesim.hedef.id] || {}).ad || null);
   else o.hud.bakilan(null);
   /* Gösterge */
   o.hud.durumCiz(o.oyuncu.basSuda);
@@ -1098,20 +1098,6 @@ function haritaAlanYaz(o) {
 }
 /* Çok oyunculu sunucuda her oyuncu için ayrı bağlam kurulur */
 function varlikGuncelle(o, dt, ctx, sunucu) { o.varliklar.guncelle(dt, sunucu ? o.ag.ctxler(ctx) : ctx); }
-/* 0.23.0: bakılan bloğun adı ve kısa bilgisi */
-const ALET_AD = { kazma: 'Kazma', balta: 'Balta', kurek: 'Kürek', kilic: 'Kılıç', makas: 'Makas' }, SEVIYE_AD = ['', 'Tahta', 'Taş', 'Bakır', 'Demir', 'Elmas'];
-function bakilanBilgi(o, h) {
-  const b = BLOKLAR[h.id]; if (!b) return [null];
-  let alt = '';
-  if (b.ekin != null) alt = b.meyve || b.ekin >= 3 ? 'Olgun' : `Büyüme ${Math.round(b.ekin / 3 * 100)}%`;
-  else if (b.kovan) alt = `Bal ${b.bal}/5`;
-  else if (b.mezar) alt = 'Sağ tık: eşyaları geri al';
-  else if (b.sandik) alt = 'Sağ tık: aç';
-  else if (b.istasyon) alt = 'Sağ tık: kullan';
-  else if (b.seviye && b.alet) alt = `${SEVIYE_AD[b.seviye] || ''} ${ALET_AD[b.alet] || ''} gerekir`.trim();
-  else if (b.alet && ALET_AD[b.alet]) alt = `${ALET_AD[b.alet]} ile hızlı kırılır`;
-  return [b.ad, alt];
-}
 const ogretici = new Ogretici(ses);
 const KANATAN = new Set(['zombi', 'kurt', 'orumcek', 'haydut', 'kopekbaligi', 'bogulmus', 'mumya', 'kulzombi', 'reis', 'muhafiz', 'firavun']);
 /* 0.22.0: Eve Dönüş Tılsımı: sağ tık 3 saniye basılı tutulur, kımıldanmaz; doğma noktasına ışınlar */
