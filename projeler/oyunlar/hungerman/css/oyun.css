@@ -928,3 +928,5 @@ body.gostergesiz #ogretici { display: none; }
 .ayarTuslar dt { font-weight: 700; color: var(--vurgu2); white-space: nowrap; }
 .ayarTuslar dd { margin: 0; color: rgba(255, 255, 255, .8); }
 .ayarPencere .altDugmeler { display: flex; justify-content: space-between; gap: 10px; }
+/* 0.29.1: devre dışı seçenek (ör. konsol kapalıyken "Komutlara izin ver") */
+.secim:has(input:disabled) { opacity: .45; cursor: not-allowed; }

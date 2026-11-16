@@ -299,7 +299,10 @@
       <label class="alan">Meteor<select id="yeniMeteor" data-denge="meteor"></select></label>
       <label class="alan">Vücut ısısı değişimi<select id="yeniIsi" data-denge="isiHizi"></select></label>
     </details>
-    <label class="secim"><input type="checkbox" id="yeniKomut"><span>Komutlara izin ver<small>Geliştirici konsolundaki (F8) eşya verme, ışınlanma, zaman ve uçma gibi komutlar bu dünyada kullanılabilir.</small></span></label>
+    <!-- 0.29.1: vücut ısısı ve geliştirici konsolu dünya ayarıdır -->
+    <label class="secim"><input type="checkbox" id="yeniVucut" checked><span>Vücut ısısı<small>Soğuk ve sıcak etkileri: üşüme, bunalma, donma ve sıcak çarpması.</small></span></label>
+    <label class="secim"><input type="checkbox" id="yeniKonsol"><span>Geliştirici konsolu (F8)<small>Bu dünyada F8 ile geliştirici konsolu açılabilir.</small></span></label>
+    <label class="secim"><input type="checkbox" id="yeniKomut" disabled><span>Komutlara izin ver<small>Geliştirici konsolundaki (F8) eşya verme, ışınlanma, zaman ve uçma gibi komutlar bu dünyada kullanılabilir.</small></span></label>
     <p class="aciklama">Her dünya, tohum değerinden üretilir. Aynı tohum aynı haritayı verir.</p>
     <div class="altDugmeler">
       <button class="dugme ana" id="yeniOlustur">Dünyayı Oluştur</button>
@@ -352,10 +355,8 @@
         <label class="secim"><input type="checkbox" id="aEnerji"> Elektrikli cihaz bilgi panelini göster</label>
       </section>
       <section class="ayarBolum" data-as="oynanis" hidden>
-        <label class="secim"><input type="checkbox" id="aIsi"> Vücut ısısı (soğuk ve sıcak etkileri)</label>
         <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
-        <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
-        <p class="ayarNot">Zorluk, Kanlı Ay ve meteor sıklığı her dünya için ayrıdır: duraklatma menüsündeki Dünya Ayarları'ndan değiştirilir.</p>
+        <p class="ayarNot">Zorluk, Kanlı Ay, meteor sıklığı, vücut ısısı ve geliştirici konsolu her dünya için ayrıdır: dünya oluşturulurken seçilir, sonradan duraklatma menüsündeki Dünya Ayarları'ndan değiştirilir.</p>
       </section>
     </div>
     <div class="altDugmeler"><button class="dugme" id="ayarSifirla">Varsayılanlara dön</button><button class="dugme ana" id="ayarTamam">Tamam</button></div>
@@ -425,7 +426,7 @@
           <li><b>Yeraltı Diyarı</b>: obsidyenden (derin mağaralardaki lav göllerinin yüzeyinde bulunur, elmas kazmayla kazılır; demirci köylüsü de satar) en az 4 × 5 boyutunda bir çerçeve kurulur ve içine <b>Çakmak</b> (demir külçe + çakmaktaşı) ile sağ tıklanır. Açılan geçidin içinde birkaç saniye durunca diyara geçilir. Diyardaki 1 blok dünyadaki 8 bloğa karşılık gelir. Diyarda lav denizi, ışıltaş, kül kumu (yavaşlatır), magma (eğilmeden üstünde durmak yakar), kor cevheri, Kor Ruhları, Kül Zombileri ve hazineli Kül Kaleleri bulunur.</li>
           <li><b>Çiftlik</b>: <b>Kova</b> (3 demir külçe) sudan su alır, inekten süt sağar; su kovası lavı obsidyene çevirir. <b>Makas</b> (2 demir külçe) koyunu kırkar (yün zamanla yeniden uzar), balkabağını oyar. Tavuklar zaman zaman yumurtlar. Çayır ve ormanlarda <b>balkabağı</b>, su kenarlarında <b>şeker kamışı</b> (3 boya kadar uzar) yetişir; balkabağı çekirdeği tarlaya ekilince olgun sap yanına balkabağı verir. Oyma balkabağı ile meşaleden <b>Balkabağı Feneri</b> yapılır. Tencerede ve fırında süt, yumurta, şeker ve baldan peynir, yoğurt, ayran, omlet, kek, balkabağı turtası ve baklava pişer.</li>
           <li><b>Arıcılık</b>: ağaçlara asılı <b>arı kovanlarından</b> gündüz arılar çıkar, kovanın çevresindeki çiçeklerden polen toplayıp kovanı bala doldurur. Dolu kovandan cam şişeyle <b>bal şişesi</b>, makasla <b>bal peteği</b> alınır. Kovanın 5 blok altında kamp ateşi yoksa arılar kızar ve sokar (zehirler). Kovan, kalas ve bal peteğiyle üretilebilir.</li>
-          <li><b>Vücut ısısı</b>: sağ alttaki gösterge vücut sıcaklığını ve hissedilen havayı gösterir. Karlı bölgeler, kış, geceler, yükseklik, yağış ve ıslaklık üşütür; çöl öğleleri ve lav çevresi bunaltır. Üşüyünce ya da bunalınca açlık hızlanır; 34,5 °C altında donma, 39,5 °C üstünde sıcak çarpması can götürür. Kamp ateşi ve ışık kaynakları ısıtır, deri zırh sıcak tutar, sıcak çorbalar ısıtır, ayran serinletir. Ayarlardan kapatılabilir.</li>
+          <li><b>Vücut ısısı</b>: sağ alttaki gösterge vücut sıcaklığını ve hissedilen havayı gösterir. Karlı bölgeler, kış, geceler, yükseklik, yağış ve ıslaklık üşütür; çöl öğleleri ve lav çevresi bunaltır. Üşüyünce ya da bunalınca açlık hızlanır; 34,5 °C altında donma, 39,5 °C üstünde sıcak çarpması can götürür. Kamp ateşi ve ışık kaynakları ısıtır, deri zırh sıcak tutar, sıcak çorbalar ısıtır, ayran serinletir. Dünya oluşturulurken ya da Dünya Ayarları'ndan kapatılabilir.</li>
           <li><b>Yaralanma</b>: zombi, kurt, örümcek ve haydut saldırıları kanatabilir (zırh olasılığı azaltır); bandaj ya da şifa iksiri kanamayı durdurur. Sert düşüşler bacağı kırabilir: yavaş yürünür, koşulamaz. <b>Atel</b> (3 çubuk, 1 ip) iyileşmeyi 30 saniyeye indirir.</li>
           <li><b>Mezar taşı</b>: ölünce eşyalar yere saçılmaz, ölüm yerindeki mezar taşında saklanır (pusulada ✖). Mezara sağ tıklanarak eşyalar geri alınır; boşalan mezar kaybolur.</li>
           <li><b>Kanlı Ay</b>: her mevsimin son gecesi (7, 14, 21... gün) ay kızarır. Canavarlar iki kat kalabalık, daha güçlü ve kızıldır; meşaleler daha az korur, uyunamaz. Sabaha kadar hayatta kalana deneyim ve başarım verilir; Kanlı Ay canavarları iki kat ganimet bırakır.</li>
@@ -475,6 +476,8 @@
     <label class="alan">Kanlı Ay<select id="daKanli" data-denge="kanliAy"></select></label>
     <label class="alan">Meteor<select id="daMeteor" data-denge="meteor"></select></label>
     <label class="alan">Vücut ısısı değişimi<select id="daIsi" data-denge="isiHizi"></select></label>
+    <label class="secim"><input type="checkbox" id="daVucut"><span>Vücut ısısı (soğuk ve sıcak etkileri)</span></label>
+    <label class="secim"><input type="checkbox" id="daKonsol"><span>Geliştirici konsolu (F8)</span></label>
     <p class="aciklama" id="daNot"></p>
     <div class="altDugmeler"><button class="dugme ana" id="daTamam">Tamam</button></div>
   </div>

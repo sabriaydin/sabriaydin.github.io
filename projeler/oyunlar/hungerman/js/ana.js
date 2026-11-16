@@ -74,7 +74,6 @@ $('#surum').textContent = 'Sürüm ' + SURUM;
 const ayar = ayarlariYukle();
 if (!ayar.ad) { ayar.ad = 'Oyuncu' + (100 + Math.floor(Math.random() * 900)); ayarlariKaydet(ayar); }
 if (ayar.miniHarita === undefined) ayar.miniHarita = true;
-if (ayar.konsol === undefined) ayar.konsol = true;
 const ses = new Ses(); ses.duzeyAyarla(ayar.ses);
 /* 0.19.0: müzik; tarayıcılar sesi ilk dokunuş ya da tıklamadan sonra açar */
 const muzik = new Muzik(); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
@@ -97,11 +96,12 @@ function ekran(ad) {
   if (ad === 'cok') { $('#cokAd').value = ayar.ad; $('#cokDurum').hidden = true; setTimeout(() => $('#cokKod').focus(), 30); }
   if (ad === 'duraklat') agPanelCiz();
   if (ad === 'ayarlar') ayarFormu();
-  if (ad === 'yeni') { $('#yeniTohum').value = ''; $('#yeniKomut').checked = false; zorlukFormu('#yeniZorluk', 'normal', false); dengeFormu('yeni', VARSAYILAN_DENGE); setTimeout(() => $('#yeniAd').select(), 30); }
+  if (ad === 'yeni') { $('#yeniTohum').value = ''; $('#yeniKomut').checked = false; $('#yeniKomut').disabled = true; $('#yeniKonsol').checked = false; $('#yeniVucut').checked = true; zorlukFormu('#yeniZorluk', 'normal', false); dengeFormu('yeni', VARSAYILAN_DENGE); setTimeout(() => $('#yeniAd').select(), 30); }
   if (ad === 'dunyaAyar' && oyun) {
     zorlukFormu('#daZorluk', oyun.zorluk, true); dengeFormu('da', oyun.denge);
     const kilit = !!oyun.istemci;
-    for (const el of document.querySelectorAll('#dunyaAyarEkrani select, #daZorluk button')) if (kilit) el.disabled = true; else if (el.tagName === 'SELECT') el.disabled = false;
+    $('#daVucut').checked = oyun.vucutIsisi !== false; $('#daKonsol').checked = !!oyun.konsol;
+    for (const el of document.querySelectorAll('#dunyaAyarEkrani select, #daZorluk button, #daVucut, #daKonsol')) if (kilit) el.disabled = true; else if (el.tagName !== 'BUTTON') el.disabled = false;
     $('#daNot').textContent = kilit ? 'Dünya ayarlarını dünyayı açan oyuncu değiştirir.' : oyun.zorluk === 'hardcore' ? 'Hardcore dünyalarda zorluk değiştirilemez; denge ayarları değiştirilebilir.' : 'Değişiklikler hemen uygulanır. Hardcore yalnızca yeni dünya oluşturulurken seçilebilir.';
   }
   tiklaGuncelle();
@@ -125,9 +125,10 @@ $('#ayarSifirla').onclick = e => {
   const b = e.currentTarget;
   if (!b.dataset.onay) { b.dataset.onay = '1'; b.textContent = 'Emin misiniz? Tekrar tıklayınız'; setTimeout(() => { if (b.isConnected) { delete b.dataset.onay; b.textContent = 'Varsayılanlara dön'; } }, 3000); return; }
   delete b.dataset.onay; b.textContent = 'Varsayılanlara dön';
-  const korunan = { konsol: ayar.konsol, ogretici: ayar.ogretici };
+  const korunan = { ad: ayar.ad, mobilVarsayilan: ayar.mobilVarsayilan };
   for (const k of Object.keys(ayar)) delete ayar[k];
-  Object.assign(ayar, VARSAYILAN_AYAR, { miniHarita: true, dokunmatik: dokunmatikCihaz() }, korunan);
+  Object.assign(ayar, VARSAYILAN_AYAR, { dokunmatik: dokunmatikCihaz() }, korunan);
+  if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5);   // mobil cihazlarda düşük görüş varsayılanı
   ses.tik(); ayarUygula(); ayarFormu();
 };
 /* 0.23.0: zorluk ve denge formları (yeni dünya ve Dünya Ayarları) */
@@ -141,8 +142,9 @@ function dengeOku(onek) { const d = {}; for (const sel of document.querySelector
 function dunyaAyarUygula() {
   const o = oyun; if (!o || o.istemci) return;
   if (o.zorluk !== 'hardcore' && $('#daZorluk').dataset.secili !== 'hardcore') o.zorluk = $('#daZorluk').dataset.secili;
-  o.denge = dengeOku('da'); zorlukUygula(o);
-  if (o.ag && o.ag.yay) o.ag.yay({ t: 'za', z: o.zorluk, d: o.denge });
+  o.denge = dengeOku('da'); o.vucutIsisi = $('#daVucut').checked; o.konsol = $('#daKonsol').checked; zorlukUygula(o);
+  if (!o.konsol && konsol.acik) panelKapat(true);
+  if (o.ag && o.ag.yay) o.ag.yay({ t: 'za', z: o.zorluk, d: o.denge, v: o.vucutIsisi ? 1 : 0, k: o.konsol ? 1 : 0 });
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('.zorlukSec button[data-z]'); if (!b || b.disabled) return;
@@ -150,7 +152,8 @@ document.addEventListener('click', e => {
   zorlukFormu('#' + kap.id, b.dataset.z, kap.id === 'daZorluk');
   if (kap.id === 'daZorluk') dunyaAyarUygula();
 });
-document.addEventListener('change', e => { if (e.target.closest('#dunyaAyarEkrani select')) dunyaAyarUygula(); });
+document.addEventListener('change', e => { if (e.target.closest('#dunyaAyarEkrani select, #daVucut, #daKonsol')) dunyaAyarUygula(); });
+$('#yeniKonsol').onchange = () => { const k = $('#yeniKonsol').checked; $('#yeniKomut').disabled = !k; if (!k) $('#yeniKomut').checked = false; };   // komutlar konsoldan girilir
 $('#daTamam').onclick = () => { ses.tik(); ekran('duraklat'); };
 /* Hardcore: izleyici kipi (uçarak, duvarlardan geçerek dolaşılır; hiçbir şeye dokunulamaz) */
 function izleyiciYap(o) {
@@ -170,20 +173,23 @@ document.addEventListener('click', e => {
 function ayarFormu() {
   const bag = (id, anahtar, bicim, tur = 'range') => {
     const el = $(id), d = $(id + 'D');
-    if (tur === 'range') { el.value = ayar[anahtar]; if (d) d.textContent = bicim(ayar[anahtar]); el.oninput = () => { ayar[anahtar] = +el.value; if (d) d.textContent = bicim(+el.value); ayarUygula(); }; }
+    if (tur === 'range') { el.value = ayar[anahtar]; if (d) d.textContent = bicim(ayar[anahtar]); el.oninput = () => { ayar[anahtar] = +el.value; if (d) d.textContent = bicim(+el.value); ayarUygula(); onAyarIsaretle(); }; }
     else { el.checked = !!ayar[anahtar]; el.onchange = () => { ayar[anahtar] = el.checked; ayarUygula(); }; }
   };
   bag('#aGorus', 'gorus', v => v + ' parça');
   bag('#aFov', 'fov', v => v + '°');
-  bag('#aHas', 'hassasiyet', v => v.toFixed(2) + '×');
+  bag('#aHas', 'hassasiyet', v => v.toFixed(2).replace('.', ',') + '×');
+  /* 0.29.1: geçerli değerlere uyan grafik ön ayarı işaretlenir */
+  onAyarIsaretle();
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
   bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
   bag('#aParlak', 'parlaklik', v => Math.round(v * 100) + '%');
   bag('#aOlcek', 'arayuzOlcek', v => Math.round(v * 100) + '%');
   bag('#aArkaSessiz', 'arkaSessiz', null, 'cb'); bag('#aEnerji', 'enerjiPanel', null, 'cb');
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb'); bag('#aIsi', 'vucutIsisi', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
 }
+function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOnAyar button')) { const g = GRAFIK_ON[x.dataset.on]; x.classList.toggle('on', g.gorus === ayar.gorus && g.cozunurluk === (ayar.cozunurluk | 0)); } }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
 function ayarUygula() {
@@ -195,7 +201,6 @@ function ayarUygula() {
   $('#fps').hidden = !ayar.fps;
   $('#miniHarita').hidden = !ayar.miniHarita;
   dokun.ayarla(ayar.dokunmatik);
-  if (oyun) oyun.hayatta.isiAcik = ayar.vucutIsisi !== false;
   gorunumAyarla(); arkaSesAyarla();
 }
 /* 0.29.0: parlaklık ve arayüz boyutu */
@@ -257,7 +262,7 @@ $('#yeniOlustur').onclick = () => {
   const t = $('#yeniTohum').value.trim();
   const tohum = t ? metinTohum(t) : (Math.random() * 4294967296) >>> 0;
   const s = sunucuIstek;
-  oyunBaslat({ id: 'd' + Date.now().toString(36), ad, tohum, olusturma: Date.now(), yeni: true, komutlar: $('#yeniKomut').checked, zorluk: $('#yeniZorluk').dataset.secili || 'normal', denge: dengeOku('yeni') });
+  oyunBaslat({ id: 'd' + Date.now().toString(36), ad, tohum, olusturma: Date.now(), yeni: true, komutlar: $('#yeniKonsol').checked && $('#yeniKomut').checked, konsol: $('#yeniKonsol').checked, vucutIsisi: $('#yeniVucut').checked, zorluk: $('#yeniZorluk').dataset.secili || 'normal', denge: dengeOku('yeni') });
   if (oyun) oyun.sunucuIstek = s;
 };
 $('#yeniAd').addEventListener('keydown', e => { if (e.key === 'Enter') $('#yeniOlustur').click(); });
@@ -277,7 +282,7 @@ addEventListener('keydown', e => {
     if (e.code === 'Tab' && oyun.ag) oyuncuListesiGoster(true);
     /* Geliştirici konsolu: F8 (veya 1 tuşunun solundaki tuş) */
     if (e.code === 'F9' && !e.repeat && oyun.gelistirici) { e.preventDefault(); if (gelPencere.acik) panelKapat(true); else if (!panelAcik()) panelAc(gelPencere); return; }
-    if ((e.code === 'F8' || e.code === 'Backquote') && !e.repeat && ayar.konsol) { e.preventDefault(); if (konsol.acik) panelKapat(true); else if (!panelAcik() && !oyun.hayatta.olu) panelAc(konsol); return; }
+    if ((e.code === 'F8' || e.code === 'Backquote') && !e.repeat && oyun.konsol) { e.preventDefault(); if (konsol.acik) panelKapat(true); else if (!panelAcik() && !oyun.hayatta.olu) panelAc(konsol); return; }
     if (e.repeat) { tus[e.code] = true; return; }
     tus[e.code] = true;
     if (e.code === 'KeyW') { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
@@ -540,6 +545,8 @@ function oyunBaslat(v) {
     zaman: v.zaman ?? 0.02, gun: v.gun || 1, dogum, olumNoktasi: v.olumNoktasi || null, ortamSayac: 4, sure: 0, kayitSayac: 0, tikSayac: 0, isikSayac: 0, isik: 1, hazir: false, yeniDogum: !v.oyuncu,
     istemci: !!v.istemci, ag: null, oyuncuKayitlari: v.oyuncuKayitlari || {}, yatakta: false,
     harita, haritaKimlik, yerler: Array.isArray(v.yerler) ? v.yerler : [], komutlar: !!v.komutlar, gelistirici: !!v.gelistirici,
+    /* 0.29.1: dünya ayarları; eski dünyalarda önceki genel ayar geçerlidir */
+    konsol: typeof v.konsol === 'boolean' ? v.konsol : ayar.konsol !== false, vucutIsisi: typeof v.vucutIsisi === 'boolean' ? v.vucutIsisi : ayar.vucutIsisi !== false,
     hayatBasi: Number.isFinite(v.hayatBasi) ? v.hayatBasi : (v.gun || 1) + (v.zaman ?? 0.02), isiSayac: 0, tilsim: 0, sarsinti: 0,
     zorluk: v.zorluk || 'normal', denge: dengeDuzelt(v.denge), hardcoreBitti: !!v.hardcoreBitti, ogretici: v.yeni ? 0 : Number.isFinite(v.ogretici) ? v.ogretici : -1 };
   const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
@@ -572,7 +579,6 @@ function oyunBaslat(v) {
   oyun.gok = new GokOlaylari({ oyun: () => oyun, sahne, ses, bildirim: m => hud.bildirim(m), olay: k => basarimlar.ver(k), istat: k => basarimlar.istatEkle(k),
     koyYakin: (x, z) => koylerAlan(dunya.uretici, x - 80, z - 80, x + 80, z + 80).some(k => Math.hypot(k.x - x, k.z - z) < (k.yaricap || 40) + 24),
     yayinla: m => { if (oyun && oyun.ag && !oyun.istemci && oyun.ag.yay) oyun.ag.yay(m); } });
-  hayatta.isiAcik = ayar.vucutIsisi !== false;
   zorlukUygula(oyun);
   document.body.classList.remove('izleyici');
   if (oyun.hardcoreBitti) { izleyiciYap(oyun); setTimeout(() => hud.bildirim('Bu Hardcore dünyası sona erdi; izleyici olarak dolaşılıyor.'), 1500); }
@@ -797,7 +803,7 @@ async function oyunKaydet() {
     hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), kablolar: o.kablolar.disaAktar(), tekneler: o.tekneler.disaAktar(),
-    oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
+    oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, konsol: !!o.konsol, vucutIsisi: o.vucutIsisi !== false, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
     hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar()
   };
   try { await Kayit.kaydet(veri); } catch (e) { o.hud.bildirim('Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.'); }
@@ -1158,7 +1164,7 @@ function adim(t) {
     /* 0.22.0: düşen meteorun yeri pusulada 15 dakika gösterilir */
     const mn = o.meteorNoktasi;
     if (mn) { const md = Math.hypot(mn.x + 0.5 - p.x, mn.z + 0.5 - p.z); if (md < 5 || o.sure > mn.son) o.meteorNoktasi = null; else isaret.push({ aci: yonAci(mn.x + 0.5 - p.x, mn.z + 0.5 - p.z), sinif: 'yer', metin: '✦', baslik: `Meteor düşüş yeri · ${Math.round(md)} blok`, mesafe: md, renk: '#ff9a3a', kenar: true }); }
-    o.hud.isiCiz(o.hayatta, o.ortamIsi, ayar.vucutIsisi !== false);
+    o.hud.isiCiz(o.hayatta, o.ortamIsi, o.vucutIsisi !== false);
     const hayat = o.gun + o.zaman - o.hayatBasi;
     if (hayat >= 10 && !o.hayatta.olu) o.basarimlar.ver('hayat10');
     /* Konum satırı: yeraltı derinliği, köy ya da biyom */
@@ -1539,7 +1545,7 @@ function istemciBaslat(k, m, kod) {
   const r = m.kayit || {};
   oyunBaslat({ id: 'ag', ad: m.ad, tohum: m.tohum, zaman: m.zaman, gun: m.gun, degisiklikler: m.degisiklikler, kablolar: m.kablolar, dogum: r.dogum || m.dogum,
     oyuncu: r.oyuncu || null, envanter: r.envanter, hayatta: r.hayatta, gorevler: r.gorevler, koyler: r.koyler, basarimlar: r.basarimlar, olumNoktasi: r.olumNoktasi, hayatBasi: r.hayatBasi, istemci: true,
-    yerler: r.yerler, komutlar: !!m.komutlar, zorluk: m.zorluk, denge: m.denge, haritaKimlik: `ag:${m.tohum}:${ayar.ad.toLocaleLowerCase('tr')}` });
+    yerler: r.yerler, komutlar: !!m.komutlar, konsol: m.konsol !== 0, vucutIsisi: m.vucutIsisi !== 0, zorluk: m.zorluk, denge: m.denge, haritaKimlik: `ag:${m.tohum}:${ayar.ad.toLocaleLowerCase('tr')}` });
   if (!r.oyuncu) oyun.oyuncu.konum.set(m.dogum.x, m.dogum.y, m.dogum.z);
   const ist = new IstemciOyun({ kanal: k, id: m.id, kod, oyun, sahne, ses, ad: ayar.ad, arayuz: agArayuz() });
   oyun.ag = ist;

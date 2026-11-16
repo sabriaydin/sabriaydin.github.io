@@ -14,6 +14,7 @@ export function zorlukUygula(o) {
   o.denge = dengeDuzelt(o.denge);
   const Z = o.Z = zorluk(o.zorluk);
   o.hayatta.yorCarpani = Z.aclik; o.hayatta.isiHasar = Z.isiHasar; o.hayatta.isiHizi = o.denge.isiHizi;
+  o.hayatta.isiAcik = o.vucutIsisi !== false;   // 0.29.1: vücut ısısı dünya ayarıdır
 }
 /* Denge: kanlıAy = kaç günde bir (0: kapalı), meteor = olasılık çarpanı (0: kapalı), isiHizi = vücut ısısı değişim hızı */
 export const VARSAYILAN_DENGE = { kanliAy: 7, meteor: 1, isiHizi: 1 };

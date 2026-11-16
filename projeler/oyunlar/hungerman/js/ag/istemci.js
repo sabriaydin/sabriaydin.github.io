@@ -131,7 +131,7 @@ export class IstemciOyun {
       }
       case 'h': this.arayuz.hasar(m.n, m.s, m.k[0], m.k[1], m.a); break;
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
-      case 'za': o.zorluk = m.z; o.denge = m.d; zorlukUygula(o); break;   // 0.23.0: dünya ayarları değişti
+      case 'za': o.zorluk = m.z; o.denge = m.d; if (m.v != null) o.vucutIsisi = !!m.v; if (m.k != null) o.konsol = !!m.k; zorlukUygula(o); break;   // 0.23.0: dünya ayarları değişti
       case 'eb': if (m.k === this.enerjiK) this.enerjiV = m.v || null; break;   // 0.24.0
       case 'k+': if (o.kablolar && Array.isArray(m.w)) { const w = m.w; o.kablolar.ekle(w[1], +w[2], w[3], +w[4], w[5] || [], w[6] || [], +w[0], w[7]); } break;   // 0.27.0: kablolar
       case 'k-': if (o.kablolar) o.kablolar.sil(+m.i); break;

@@ -117,6 +117,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 29.1 (0.29.1): Dünya ayarları ve ayar düzeltmeleri
+- Vücut ısısı ve geliştirici konsolu (F8) artık dünya ayarıdır: dünya oluşturulurken seçilir (vücut ısısı açık, konsol kapalı başlar), sonradan Dünya Ayarları'ndan değiştirilir. "Komutlara izin ver" yalnızca konsol açıkken seçilebilir. Eski dünyalarda önceki genel ayar geçerlidir.
+- Düzeltme: "Bakılan nesnenin adını göster", "Mini haritayı göster" ve "Öğretici ipuçları" ilk açılışta çalıştığı hâlde seçili görünmüyordu.
+- Düzeltme: "Varsayılanlara dön" mobil cihaz bilgisini siliyor ve öğretici seçimini sıfırlamıyordu; grafik ön ayarı açılışta işaretlenmiyordu; fare hassasiyeti ondalık virgülle gösterilir.
+
 ## 29. aşama (0.29.0): Ocak ve ısıtıcı tasarımı, taret cephanesi, Rust tarzı kablo kontrolleri, kategorili ayarlar
 - Elektrikli Ocak: fırın bölmeli mutfak ocağı (ocak gözlü tabla, düğme şeridi, camlı fırın kapağı); yönlüdür. Pişirme haznesi vardır: çalışırken içine konan çiğ yiyecekleri ve fırın malzemelerini 5 saniyede bir parti pişirir (kömür gerekmez). Yakınındayken fırın ve kamp ateşi yerine geçmeye devam eder.
 - Isıtıcı: ayaklı panel radyatör; çalışırken ön ızgarası kızarır. Ocak ve ısıtıcının bağlantı noktaları arka altta.
