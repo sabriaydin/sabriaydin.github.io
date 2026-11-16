@@ -188,11 +188,14 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 /* ---------- 2. aşama: zırh, hedef, uyku ---------- */
 #solDurum { display: grid; gap: 3px; }
 #zirhSira:empty { display: none; }
-#hedefBilgi { position: absolute; left: 50%; top: 82px; transform: translateX(-50%); display: grid; gap: 4px; justify-items: center; min-width: 180px; padding: 5px 12px 7px; background: rgba(0, 0, 0, .5); border: 2px solid #000; border-radius: 4px; }
-#hedefBilgi b { font: 700 .92rem var(--baslik); text-shadow: 1px 1px 0 #000; }
-.hedefCubuk { width: 160px; height: 7px; background: #2a0d0b; border: 1px solid #000; }
-.hedefCubuk i { display: block; height: 100%; background: linear-gradient(#ff6a5c, #c8261d); transition: width .15s; }
-#hedefBilgi.dusman b { color: #ff9a8a; }
+#hedefBilgi { position: absolute; left: 50%; top: 78px; transform: translateX(-50%); display: grid; gap: 5px; justify-items: center; min-width: 150px; pointer-events: none; }
+#hedefBilgi b { font: 600 .82rem var(--govde); letter-spacing: .04em; color: rgba(255, 255, 255, .92); text-shadow: 0 1px 3px rgba(0, 0, 0, .85); }
+.hedefCubuk { position: relative; width: 150px; height: 5px; border-radius: 3px; overflow: hidden; background: rgba(0, 0, 0, .45); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12), 0 1px 4px rgba(0, 0, 0, .4); }
+.hedefCubuk i, .hedefCubuk s { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.hedefCubuk s { background: rgba(255, 236, 200, .55); transition: width .5s ease-out .35s; }
+.hedefCubuk i { background: linear-gradient(90deg, #6fcf6a, #9be27d); transition: width .12s; }
+#hedefBilgi.dusman b { color: #ffb4a8; }
+#hedefBilgi.dusman .hedefCubuk i { background: linear-gradient(90deg, #d8433a, #ff7a64); }
 #uyku { position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity 1.2s; }
 #uyku.acik { opacity: 1; }
 .zirhSatir { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }

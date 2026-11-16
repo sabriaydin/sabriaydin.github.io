@@ -117,6 +117,9 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 23.2 (0.23.2): Canlı can çubuğu
+- Bakılan ya da vurulan canlının üstte görünen can çubuğu sadeleştirildi: kutu ve kalın çerçeve kaldırıldı; ince, yuvarlak köşeli bir çubuk ve gölgeli küçük ad kaldı. Dost canlılarda yeşil, düşmanlarda kırmızıdır; alınan hasar açık renkli bir iz olarak kısa bir gecikmeyle erir.
+
 ## 23.1 (0.23.1): Bakılan nesnenin adı
 - Bakılan bloğun adı ekranın üstünden sol alt köşeye taşındı; yalnızca ad gösterilir (açıklama satırı kaldırıldı), küçük ve yarı saydamdır. Dokunmatik kipte sol alttaki kol yüzünden üst ortada gösterilir. Ayarlardan kapatılabilir.
 

@@ -230,7 +230,8 @@ export class Hud {
     k.hidden = false;
     const a = (v.ad || v.tur.ad) + (v.ofkeli ? ' (öfkeli)' : '');
     if ($('#hedefAd').textContent !== a) $('#hedefAd').textContent = a;
-    $('#hedefCan').style.width = Math.max(0, v.can / v.tur.can * 100).toFixed(0) + '%';
+    const yuzde = Math.max(0, Math.min(100, v.can / v.tur.can * 100)).toFixed(0) + '%';
+    $('#hedefCan').style.width = yuzde; $('#hedefIz').style.width = yuzde;   // iz: alınan hasar kısa bir gecikmeyle erir
     k.classList.toggle('dusman', !!(v.tur.dusman || v.ofkeli));
   }
   /* Deneyim çubuğu: seviye ve bir sonraki seviyeye ilerleme */
