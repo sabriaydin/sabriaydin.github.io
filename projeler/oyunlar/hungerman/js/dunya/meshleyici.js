@@ -3,7 +3,7 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST } from '../bloklar.js';
+import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST, SU_SEVIYE } from '../bloklar.js';
 import { sekilKutulari } from '../sekiller.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
@@ -203,6 +203,18 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
   const ayni = n => (lav ? LAV[n] === 1 : SIVI[n] === 1 && !LAV[n]);
   const ustSivi = y < PY - 1 && ayni(P[i + DY]);
   const h = ustSivi ? 1 : 0.875;
+  /* 0.30.5: su yüzeyi köşe yükseklikleri: köşeyi paylaşan dört hücrenin su seviyesinin ortalaması (akan su eğimli görünür) */
+  const kose = [];
+  if (!lav && !ustSivi) for (let kz = 0; kz <= 1; kz++) for (let kx = 0; kx <= 1; kx++) {
+    let top = 0, n = 0, dolu = false;
+    for (let dz = kz - 1; dz <= kz; dz++) for (let dx = kx - 1; dx <= kx; dx++) {
+      const j = i + dx * DX + dz * DZ, id = P[j], L = SU_SEVIYE[id];
+      if (L) { if (y < PY - 1 && SU_SEVIYE[P[j + DY]]) dolu = true; top += L >= 8 ? 0.875 : L / 8 * 0.875; n++; }
+      else if (!OPAK[id] && CIZIM[id] !== C_KUP && !LAV[id]) n++;
+    }
+    kose[kz * 2 + kx] = dolu ? 1 : n ? Math.max(0.06, top / n) : h;
+  }
+  const yuk = (kx, kz) => (kose.length ? kose[kz * 2 + kx] : h);
   for (let f = 0; f < 6; f++) {
     const Y = YUZLER[f];
     const ni = i + Y.komsu;
@@ -215,7 +227,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
     const g = f === 2 ? 1 : (gok[ni] || gok[i]);
     for (let c = 0; c < 4; c++) {
       const k = Y.k[c];
-      T.p.push(x + k[0], y + k[1] * h, z + k[2]);
+      T.p.push(x + k[0], y + k[1] * yuk(k[0], k[2]), z + k[2]);
       dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
       if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g, g);
     }
@@ -226,7 +238,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
       const b2 = T.n;
       for (let c = 3; c >= 0; c--) {
         const k = Y.k[c];
-        T.p.push(x + k[0], y + k[1] * h, z + k[2]);
+        T.p.push(x + k[0], y + k[1] * yuk(k[0], k[2]), z + k[2]);
         dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
         T.l.push(0.8, g);
       }

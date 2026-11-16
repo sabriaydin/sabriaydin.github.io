@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
@@ -277,7 +277,8 @@ export class Etkilesim {
     const ust = d.blok(h.x, h.y + 1, h.z);
     /* Yan veya üstte su varsa boşluk suyla dolar */
     let yeni = 0;
-    for (const [dx, dy, dz] of [[0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]) { const n = d.blok(h.x + dx, h.y + dy, h.z + dz); if (n === 7 || n === 31) { yeni = 7; break; } if (n === 59) yeni = 59; }
+    /* 0.30.5: su artık akar (dunya/su-akisi.js); açılan boşluğu akış doldurur. Lav akmadığı için lav boşluğu doldurur */
+    for (const [dx, dy, dz] of [[0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]) { const n = d.blok(h.x + dx, h.y + dy, h.z + dz); if (n === 59 && !SU_SEVIYE[d.blok(h.x, h.y + 1, h.z)]) yeni = 59; }
     if (h.id === 31 || b.suIcinde) yeni = 7;
     if (!d.blokKoy(h.x, h.y, h.z, yeni)) return;
     /* Kapının diğer yarısı da kaldırılır */

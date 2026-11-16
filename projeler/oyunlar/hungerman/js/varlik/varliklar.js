@@ -10,7 +10,7 @@ import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
 import { karma3 } from '../rastgele.js';
 import { PY, DENIZ, diyarMi } from '../sabitler.js';
-import { cakisma } from '../sekiller.js';
+import { cakisma, hucreKutulari } from '../sekiller.js';
 
 let SIRA = 1;
 /* 0.23.0: canlıların altındaki yumuşak gölge (zemine yatırılmış, kenarı silinen koyu daire) */
@@ -43,6 +43,15 @@ export class Varliklar {
   }
   /* Ses düzeyi: çok oyunculuda dinleyiciye uzaklığa göre azalır (tek oyunculuda her zaman 1) */
   sesK(p, menzil = 32) { if (!this.dinleyici) return 1; const d = this.dinleyici.distanceTo(p); return d >= menzil ? 0 : 1 - d / menzil; }
+  /* 0.30.5: yeniden doğulan yerin çevresindeki canavarlar kaldırılır, öfkeli hayvanlar sakinleşir (boss ve evcil canlılar hariç) */
+  dogumTemizle(x, y, z, r = 24) {
+    let n = 0;
+    for (const v of [...this.liste]) {
+      if (v.olu || v.tur.boss || v.evcil || v.sahip || Math.hypot(v.konum.x - x, v.konum.z - z) > r || Math.abs(v.konum.y - y) > 24) continue;
+      if (v.tur.dusman) { this.kaldir(v); n++; } else if (v.ofkeli) v.ofkeli = false;
+    }
+    return n;
+  }
   kaldir(v) { const i = this.liste.indexOf(v); if (i >= 0) { this.modelSil(v); this.liste.splice(i, 1); } }
 
   temizle() {
@@ -336,7 +345,8 @@ export class Varliklar {
         v.ger = v.nisan ? Math.max(0, Math.min(1, 1 - v.saldiriBek / 1.2)) : 0;
       } else {
         const temas = yatay < T.menzil + T.gen + 0.3 && op.y < p.y + T.boy && op.y + 1.8 > p.y;
-        if (temas && v.saldiriBek <= 0 && !v.yt) { v.saldiriBek = 1.0; ctx.oyuncuyaVur(T.hasar, v); }
+        /* 0.30.5: yakın saldırı yalnızca arada engel yokken (kapalı kapı, çit, cam, duvar araya girer) */
+        if (temas && v.saldiriBek <= 0 && !v.yt && this.yakinErisim(v, op)) { v.saldiriBek = 1.0; ctx.oyuncuyaVur(T.hasar, v); }
         /* Örümcek atılır */
         if (T.agu && v.yerde && yatay > 1.6 && yatay < 4 && v.saldiriBek < 0.4 && Math.random() < dt * 3) { v.hiz.y = 5.8; v.hiz.x = yx * 7; v.hiz.z = yz * 7; }
       }
@@ -723,7 +733,7 @@ export class Varliklar {
       let yx = 0, yy = 0, yz = 0, hiz = 0;
       if (T.dusman && !this.barisci && ctx.oyuncuSuda && !ctx.oyuncuOlu && dd < T.gorus) {
         yx = dx / dd; yy = dy / dd; yz = dz / dd; hiz = T.kosu;
-        if (dd < T.menzil + 0.6 && v.saldiriBek <= 0) { v.saldiriBek = 1.5; ctx.oyuncuyaVur(T.hasar, v); const k = this.sesK(p); if (k > 0) this.ses.canli(T.ses, 'acima', 0.8 * k); }
+        if (dd < T.menzil + 0.6 && v.saldiriBek <= 0 && this.yakinErisim(v, op)) { v.saldiriBek = 1.5; ctx.oyuncuyaVur(T.hasar, v); const k = this.sesK(p); if (k > 0) this.ses.canli(T.ses, 'acima', 0.8 * k); }
       } else if (v.kacZaman > 0 || (!T.dusman && dd < (v.turAd === 'hamsi' ? 4.5 : 3) && ctx.oyuncuSuda)) {
         yx = -dx / dd; yy = -dy / dd * 0.5; yz = -dz / dd; hiz = T.kosu;
       } else {
@@ -1058,7 +1068,7 @@ export class Varliklar {
     } else if (!this.barisci && !ctx.oyuncuOlu && d < T.gorus && v.kacZaman <= 0 && (!T.ari || v.ofkeli)) {
       kovaliyor = true;
       yx = dx / d + Math.sin(t * 3.1) * 0.55; yy = dy / d + Math.sin(t * 4.3) * 0.45; yz = dz / d + Math.cos(t * 2.7) * 0.55; hiz = T.kosu;
-      if (d < T.menzil + 0.6 && v.saldiriBek <= 0) {
+      if (d < T.menzil + 0.6 && v.saldiriBek <= 0 && this.yakinErisim(v, op)) {
         v.saldiriBek = 1.4 + Math.random(); ctx.oyuncuyaVur(T.hasar, v);
         v.kacZaman = 0.8 + Math.random() * 0.7; v.kacYon = [-dx / d + (Math.random() - 0.5), 0.7, -dz / d + (Math.random() - 0.5)];
       }
@@ -1199,6 +1209,24 @@ export class Varliklar {
   yakinDusman(p, r) { return this.liste.some(v => !v.olu && v.tur.dusman && v.konum.distanceToSquared(p) < r * r); }
 
   /* İki nokta arasında katı blok yoksa true */
+  /* 0.30.5: yakın saldırı yolu: tam bloklar ve şekilli blokların çarpışma kutuları (kapalı kapı, çit, cam) engeldir; iki yükseklikten biri açıksa vurulur */
+  yakinErisim(v, op) {
+    const p = v.konum, h = v.tur.boy || 1.8;
+    const yol = (ay, by) => {
+      const ax = p.x, az = p.z, bx = op.x, bz = op.z, d = Math.hypot(bx - ax, by - ay, bz - az), n = Math.max(2, Math.ceil(d / 0.08));
+      for (let i = 1; i < n; i++) {
+        const t = i / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t, z = az + (bz - az) * t, cx = Math.floor(x), cy = Math.floor(y), cz = Math.floor(z);
+        const id = this.dunya.blok(cx, cy, cz);
+        if (!id) continue;
+        const b = BLOKLAR[id];
+        if (!b || SIVI[id] || BITKI[id]) continue;
+        if (!b.sekil) { if (KATI[id] === 1) return false; continue; }   // şekilli bloklarda (kapı, çit, cam) çarpışma kutusuna bakılır
+        for (const q of hucreKutulari(this.dunya, cx, cy, cz, id, true)) if (x - cx >= q[0] && x - cx <= q[3] && y - cy >= q[1] && y - cy <= q[4] && z - cz >= q[2] && z - cz <= q[5]) return false;
+      }
+      return true;
+    };
+    return yol(p.y + Math.min(h * 0.75, 1.4), op.y + 1.3) || yol(p.y + Math.min(h * 0.3, 0.6), op.y + 0.5);
+  }
   gorusVar(ax, ay, az, bx, by, bz) {
     const d = Math.hypot(bx - ax, by - ay, bz - az), n = Math.ceil(d / 0.5);
     for (let i = 1; i < n; i++) { const t = i / n; if (this.dunya.kati(Math.floor(ax + (bx - ax) * t), Math.floor(ay + (by - ay) * t), Math.floor(az + (bz - az) * t))) return false; }

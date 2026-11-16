@@ -3,6 +3,7 @@ import { THREE } from '../grafik/sahne.js';
 import { SIVI, KATI, LAV, BLOKLAR } from '../bloklar.js';
 import { DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
 import { cakisma } from '../sekiller.js';
+import { akisVektoru } from '../dunya/su-akisi.js';
 
 const YARIM = 0.3;
 const YER_CEKIMI = 28;
@@ -103,8 +104,11 @@ export class Oyuncu {
     const l = Math.hypot(ix, iz); if (l > 0) { ix /= l; iz /= l; }
     const ivme = this.ucus ? 10 : this.yerde ? 14 : this.suda ? (g.palet ? 7 : 5) : 3.2;
     const k = Math.min(1, ivme * dt);
-    v.x += (ix * hizMax - v.x) * k;
-    v.z += (iz * hizMax - v.z) * k;
+    /* 0.30.5: akan su oyuncuyu akış yönüne sürükler */
+    let ax = 0, az = 0;
+    if (this.suda && !this.ucus) { const f = akisVektoru(d, Math.floor(p.x), Math.floor(p.y + 0.2), Math.floor(p.z)) || akisVektoru(d, Math.floor(p.x), Math.floor(p.y + 1.2), Math.floor(p.z)); if (f) { ax = f[0] * 2.2; az = f[1] * 2.2; } }
+    v.x += (ix * hizMax + ax - v.x) * k;
+    v.z += (iz * hizMax + az - v.z) * k;
 
     if (this.ucus) {
       /* Uçma: Boşluk yükselir, C alçalır; yer çekimi ve düşme hasarı yoktur */

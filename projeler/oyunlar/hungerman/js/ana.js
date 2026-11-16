@@ -26,6 +26,7 @@ import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
 import { Taretler } from './oyun/taret.js';
 import { kapFiltresiId } from './oyun/kaplar.js';
+import { SuAkisi } from './dunya/su-akisi.js';
 import { Kablolar, kabloMaliyeti, KABLO } from './oyun/kablolar.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
@@ -241,7 +242,7 @@ function dunyaCiz() {
       <div class="dunyaRozet" style="--r:${renk}">${harf}</div>
       <div class="dunyaBilgi"><b title="${esc(d.ad)}">${esc(d.ad)}</b><div class="rozetler">${rozet}</div>
         <dl><dt>Gün</dt><dd>${d.gun}</dd><dt>Son oynama</dt><dd>${tarih(d.son)}</dd><dt>Tohum</dt><dd><button type="button" class="tohumKopya" data-tohum="${esc(d.tohum)}" title="Tohumu kopyala">${esc(d.tohum)}</button></dd></dl></div>
-      <div class="islem"><button class="dugme ana" data-oyna="${d.id}">${d.bitti ? 'İzle' : 'Oyna'}</button><button class="dugme kucuk" data-indir="${d.id}" title="Dünyayı dosya olarak indir">Yedekle</button>${d.yedek ? `<button class="dugme kucuk" data-geri="${d.id}" title="Dünyayı bir önceki açılışındaki hâline döndürür">Önceki oturum</button>` : ''}<button class="dugme kucuk tehlike" data-sil="${d.id}">Sil</button></div>
+      <div class="islem"><button class="dugme ana" data-oyna="${d.id}">${d.bitti ? 'İzle' : 'Oyna'}</button><button class="dugme kucuk" data-indir="${d.id}" title="Dünyayı dosya olarak indir">Yedekle</button><button class="dugme kucuk tehlike" data-sil="${d.id}">Sil</button></div>
     </article>`;
   }).join('');
 }
@@ -485,17 +486,18 @@ function panelAc(panel, ...a) {
   if (!oyun || oyun.hayatta.olu || panelAcik()) return;
   if (kilitli) { bilerekBirak = true; kilitBirak(); }
   fare.sol = fare.sag = false;
-  panel.ac(...a); if (panel === tarifKitabi || panel === gorevEkrani) ses.kitap(true); else ses.ac(); tiklaGuncelle();
+  panel.ac(...a); if (panel === tarifKitabi || panel === gorevEkrani) ses.kitap(true); else if (panel !== konsol) ses.ac(); tiklaGuncelle();   // 0.30.5: konsol sessiz açılır
 }
 function panelKapat(kilitlensin) {
   if (koyluEkrani.acik) koyluEkrani.kapat();
   if (gorevEkrani.acik) gorevEkrani.kapat();
   if (haritaEkrani.acik) haritaEkrani.kapat();
+  const sessiz = konsol.acik;   // 0.30.5: konsol sessiz kapanır
   if (konsol.acik) konsol.kapat();
   if (gelPencere.acik) gelPencere.kapat();
   if (basarimEkrani.acik) basarimEkrani.kapat();
   if (tarifKitabi.acik) tarifKitabi.kapat();
-  ses.kapa();
+  if (!sessiz) ses.kapa();
   if (kilitlensin) kilitle();
   tiklaGuncelle();
 }
@@ -637,6 +639,8 @@ function oyunBaslat(v) {
     kilitli: k => { const s = oyun.ag && oyun.ag.kilit && oyun.ag.kilit.get(k); return s != null && s !== 'yerel'; },
     degisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
   oyun.cihazCizici.taretAci = k => oyun.taretler.aci(k);
+  /* 0.30.5: akan su (tek oyunculu ve sunucu) */
+  oyun.suAkisi = v.istemci ? null : new SuAkisi(dunya);
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar,
     canlilar: () => { const l = []; if (!oyun.hayatta.olu) l.push([oyun.oyuncu.konum.x, oyun.oyuncu.konum.y + 1, oyun.oyuncu.konum.z, 'o']); if (oyun.ag && oyun.ag.konumlar) for (const q of oyun.ag.konumlar()) l.push([q.x, q.y + 1, q.z, 'o']);
       for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }),
@@ -808,6 +812,10 @@ $('#yenidenDog').onclick = () => {
   o.olumAnim = 0; $('#olumPerde').classList.remove('acik');
   o.hayatta.sifirla(); o.hayatBasi = o.gun + o.zaman;
   o.oyuncu.konum.set(o.dogum.x, o.dogum.y, o.dogum.z); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0;
+  /* 0.30.5: doğma noktasının 24 blok çevresindeki canavarlar kaldırılır; 5 saniye hasar alınmaz */
+  o.hayatta.koruma = 5;
+  if (o.istemci) { if (o.ag) o.ag.gonder({ t: 'dg', p: [o.dogum.x, o.dogum.y, o.dogum.z] }); }
+  else o.varliklar.dogumTemizle(o.dogum.x, o.dogum.y, o.dogum.z);
   o.hazir = false;
   ekran('yukleme'); $('#yukleBaslik').textContent = 'Yeniden doğuluyor';
 };
@@ -1021,6 +1029,7 @@ function adim(t) {
     if (!o.istemci) o.yapiOlaylari.guncelle(dt, (ekKonumlar ? [o.oyuncu.konum, ...ekKonumlar] : [o.oyuncu.konum]).filter(q => !diyarMi(q.x)));
     if (o.mekanik) o.mekanik.guncelle(dt);
     if (o.elektrik) o.elektrik.guncelle(dt);
+    if (o.suAkisi) o.suAkisi.guncelle(dt);   // 0.30.5
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
     if (o.tikSayac > 0.5 && !o.istemci) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); o.dunya.mevsimTik(p.x, p.z); if (ekKonumlar) for (const q of ekKonumlar) { o.dunya.rastgeleTik(q.x, q.z); o.dunya.mevsimTik(q.x, q.z); } o.dunya.ekinTik(); }

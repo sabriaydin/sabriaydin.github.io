@@ -243,6 +243,7 @@ export class Dunya {
         if (d) for (const [i, id] of d) m.v[i] = id;
         p.v = m.v; p.uretiliyor = false; p.kirli = true;
         this.kaynakTara(p);
+        if (this.parcaYuklendi) this.parcaYuklendi(p);   // 0.30.5: akan su taraması
       }
     } else if (m.tur === 'meshle') {
       const p = this.parca(m.cx, m.cz);

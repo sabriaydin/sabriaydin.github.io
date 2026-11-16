@@ -248,6 +248,11 @@ export class SunucuOyun {
         for (const e of r.kalan) o.dusenler.birak(e.id, e.adet, x, y + 1, z, 0, 2, 0, e.dayanim, 0.5, e.buyu);
         break;
       }
+      case 'dg': { // 0.30.5: istemci yeniden doğdu: doğma noktası çevresindeki canavarlar kaldırılır
+        const [x, y, z] = (m.p || []).map(Number);
+        if ([x, y, z].every(Number.isFinite)) o.varliklar.dogumTemizle(x, y, z);
+        break;
+      }
       case 'skr': { // sandık kırıldı: içindekiler yere düşer
         const s = m.x + ',' + m.y + ',' + m.z;
         const d = o.dunya.sandiklar.get(s) || (m.g === 0 ? [] : o.koyler.sandikGanimeti(m.x, m.y, m.z));

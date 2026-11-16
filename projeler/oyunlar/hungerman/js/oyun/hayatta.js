@@ -63,6 +63,7 @@ export class Hayatta {
   /* zirhli: canlı saldırısı ve ok gibi zırhın azalttığı hasarlar */
   hasar(n, sebep, zirhli = false) {
     if (this.olu || n <= 0 || this.olumsuz) return;   // olumsuz: geliştirici konsolundaki ölümsüzlük
+    if (this.koruma > 0 && sebep !== 'bosluk') return;   // 0.30.5: yeniden doğduktan sonraki kısa koruma
     if ((sebep === 'lav' || sebep === 'yanma') && this.etki('ates')) return;
     if (zirhli && this.zirhFn) { const p = Math.min(20, this.zirhFn()); n = n * (1 - p * 0.04); if (this.zirhYipran) this.zirhYipran(); }
     /* Koruma büyüsü (giyilen zırhlardaki toplam seviye; en çok %64): açlık ve boğulma dışındaki hasarları azaltır */
@@ -76,6 +77,7 @@ export class Hayatta {
   }
   /* basSuda: baş su altında; o: { lavda, suda, maske } (dalış maskesi oksijeni üç kat yavaş harcatır) */
   guncelle(dt, basSuda, o = {}) {
+    if (this.koruma > 0) this.koruma -= dt;
     if (this.olu) return;
     for (const k in this.etkiler) { this.etkiler[k] -= dt; if (this.etkiler[k] <= 0) delete this.etkiler[k]; }
     /* Lav ve yanma: zırh korumaz */

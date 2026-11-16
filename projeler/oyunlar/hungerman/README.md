@@ -117,6 +117,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.5 (0.30.5): Akan su, kapı arkası saldırı, güvenli yeniden doğma
+- **Akan su:** kaynak su tükenmez; altı boşsa aşağı düşer (şelale), altı katıysa yanlara 7 bloğa kadar yayılır, her adımda seviyesi azalır ve yüzeyi eğimli görünür. Kaynağı kesilen akan su çekilir; iki kaynak arasındaki akan su kaynağa dönüşür. Akış yolundaki ot ve çiçekleri siler; lava değince lav obsidyene (kaynak su) ya da parke taşa (akan su) döner. Akan su oyuncuyu akış yönüne sürükler. Uçurum ve mağara ağızlarındaki küp biçimli eski sular da akmaya başlar. Akan su kovayla alınamaz. Tek oyunculuda ve sunucuda işlenir.
+- Kazılan blok artık kendiliğinden su kaynağına dönüşmez; açılan boşluğu akış doldurur.
+- **Düzeltme:** canavarlar kapalı kapının, çitin, camın ya da duvarın arkasından yakın saldırı yapamaz (saldırı yolunda engel aranır).
+- **Yeniden doğma:** doğma noktasının 24 blok çevresindeki canavarlar kaldırılır, öfkeli hayvanlar sakinleşir; doğduktan sonra 5 saniye hasar alınmaz (çok oyunculuda da).
+- Geliştirici konsolu sessiz açılıp kapanır.
+- Dünyalar ekranındaki "Önceki oturum" düğmesi kaldırıldı.
+
 ## 30.4 (0.30.4): Bilgi baloncukları, sandık ekranı, dünya ayarları
 - Üretim penceresindeki istasyon simgelerinin ve kategori sekmelerinin üzerine gelince bilgi baloncuğu açılır (istasyonun adı ve yakında olup olmadığı; kategorideki tarif ve yapılabilir sayısı). Sandık işlem düğmelerinde de baloncuk vardır.
 - Dünya ayarları (zorluk, denge, vücut ısısı, geliştirici konsolu) dünya oluşturulduktan sonra değiştirilemez; duraklatma menüsündeki Dünya Ayarları kaldırıldı.

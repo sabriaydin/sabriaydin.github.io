@@ -387,10 +387,18 @@ for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [5
 export const BLOKLAR = B;
 export const BLOK_SAYISI = B.length;
 
+/* 0.30.5: akan su: 934 + seviye - 1 (seviye 1-7; 7 kaynağa en yakın), 941: düşen su (şelale). Kaynak su (7) tükenmez ve akmaz, çevresine akar.
+   Akan su kovayla alınamaz; kaynağı kesilince çekilir. */
+export const AKAN_SU = L => 933 + L, DUSEN_SU = 941;
+for (let L = 1; L <= 7; L++) blok(AKAN_SU(L), { ad: 'Akan Su', dok: 'su', cizim: C_SIVI, kati: false, opak: false, ayniGizle: true, sivi: true, sertlik: -1, ses: 'su', akis: L, gizli: true, harita: 7, dusur: () => [] });
+blok(DUSEN_SU, { ad: 'Akan Su', dok: 'su', cizim: C_SIVI, kati: false, opak: false, ayniGizle: true, sivi: true, sertlik: -1, ses: 'su', akis: 8, dusen: true, gizli: true, harita: 7, dusur: () => [] });
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 1024;
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
 export const AYNI_GIZLE = new Uint8Array(BLOK_UST), SIVI = new Uint8Array(BLOK_UST), BITKI = new Uint8Array(BLOK_UST), LAV = new Uint8Array(BLOK_UST);
+/* 0.30.5: SU_SEVIYE: su yüksekliği (0 su değil, 8 kaynak / düşen / su içi bitki, 1-7 akan su) */
+export const SU_SEVIYE = new Uint8Array(BLOK_UST);
 /* EKIN_SONRAKI: büyüyen ekinin sonraki evresi (0: büyümez) */
 export const EKIN_SONRAKI = new Uint16Array(BLOK_UST);
 /* Yüz dokuları: +x, -x, +y, -y, +z, -z */
@@ -400,6 +408,7 @@ for (const b of B) {
   KATI[b.id] = b.kati ? 1 : 0; OPAK[b.id] = b.opak ? 1 : 0; CIZIM[b.id] = b.cizim; KESIK[b.id] = b.kesik ? 1 : 0;
   AYNI_GIZLE[b.id] = b.ayniGizle ? 1 : 0; SIVI[b.id] = b.sivi ? 1 : 0; BITKI[b.id] = b.bitki ? 1 : 0; LAV[b.id] = b.lav ? 1 : 0;
   EKIN_SONRAKI[b.id] = b.sonraki || 0;
+  SU_SEVIYE[b.id] = b.sivi && !b.lav ? (b.akis || 8) : 0;
   let u, y, a, o;
   if (!b.dok) { u = y = a = o = 0; }
   else if (typeof b.dok === 'string') u = y = a = o = T[b.dok];
