@@ -117,6 +117,13 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30. aşama (0.30.0): Envanter ekranı ve canlı karakter önizlemesi
+- Karakter bölümü: dikey zırh yuvaları, ortada canlı 3B karakter önizlemesi, yanında durum paneli.
+- Önizleme: giyilen zırhlar karakterin üzerinde malzeme rengiyle görünür (büyülü zırh parıldar; dalış maskesi ve palet kendine özgü), eldeki eşya sağ elde durur. Kafa ve gövde fare imlecini izler (Minecraft gibi); önizleme sürüklenerek döndürülür, çift tıkla öne döner. Pencere kapalıyken çizim durur.
+- Durum paneli: can, açlık, seviye, zırh (hasar azaltma), vücut ısısı (durumuyla), su altında oksijen ve etkin iksirler (kalan süreyle); pencere açıkken canlı güncellenir.
+- Eşya arama (uyan yuvalar vurgulanır), çanta doluluğu, bölüm başlıkları.
+- Kısayollar: imleç bir yuvanın üzerindeyken 1-9 çubuktaki yuvayla değiştirir, X bir tane, Shift + X yığını atar; çift tık aynı eşyaları imleçteki yığında toplar.
+
 ## 29.2 (0.29.2): Ana menü ekranları
 - Dünyalar ekranı genişletildi: dünya sayısı, üstte Yeni Dünya ve Yedekten Yükle, ad ya da tohuma göre arama, sıralama (son oynanan, ad, gün, oluşturma) ve iki sütunlu dünya kartları (renkli simge, zorluk ve kural rozetleri, gün, son oynama, tıklanınca kopyalanan tohum).
 - Yeni Dünya ekranı iki sütunlu geniş düzene geçti: Dünya (ad, tohum, rastgele tohum düğmesi), açıklamalı zorluk kartları, Kurallar ve her zaman görünen Denge bölümü. Dar ekranlarda tek sütuna iner.

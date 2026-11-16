@@ -412,6 +412,8 @@ const envEkrani = new EnvanterEkrani({
   birak: (id, adet, dayanim, buyu) => { if (!oyun) return; const o = oyun.oyuncu, y = o.bakisYonu(), g = o.gozKonumu(); oyun.dusenler.birak(id, adet, g.x + y.x * 0.6, g.y - 0.3, g.z + y.z * 0.6, y.x * 4, 2, y.z * 4, dayanim, 1.5, buyu); }
 });
 envEkrani.kapatIste = () => envanterKapat(true);
+/* 0.30.0: karakter önizlemesinin gömlek rengi: çok oyunculuda oyuncunun rengi */
+envEkrani.renk = () => { const ag = oyun && oyun.ag; if (ag && ag.oyuncuListesi) { const b = ag.oyuncuListesi().find(o => o[0] === ag.benimId); if (b) return RENKLER[b[2] % RENKLER.length]; } return RENKLER[1]; };
 /* Çok oyunculu: sandık kapanınca içerik sunucuya gider (sunucuda kilit kalkar) */
 envEkrani.kapandi = s => {
   if (!oyun || !s.k) return;

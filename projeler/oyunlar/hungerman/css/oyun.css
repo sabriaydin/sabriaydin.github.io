@@ -1025,3 +1025,45 @@ body.gostergesiz #ogretici { display: none; }
 #yeniEkrani .yeniKart .aciklama { margin-top: 4px; font-size: .8rem; }
 .tohumSatir { align-items: stretch; }
 .tohumSatir .dugme.kucuk { min-height: 0; }
+
+/* ---------- 0.30.0: envanter: karakter bölümü, canlı önizleme, durum çubukları, arama ---------- */
+.envSol { width: calc(9 * var(--yuva) + 32px); }
+.envSol > header { margin-bottom: 12px; }
+#envAra { margin-left: auto; width: 150px; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .16); background: rgba(0, 0, 0, .35); color: #fff; font: 500 .8rem var(--govde); }
+#envAra:focus { outline: none; border-color: var(--vurgu); }
+.envSol > header .envIslem { margin-left: 0; }
+.karakterSatir { display: grid; grid-template-columns: var(--yuva) minmax(130px, 158px) 1fr; gap: 10px; align-items: stretch; margin-bottom: 14px; }
+.karakterSatir .zirhIzgara { grid-template-columns: var(--yuva); align-content: space-between; gap: 4px; }
+.karakterKutu { position: relative; min-height: calc(4 * var(--yuva) + 12px); border: 2px solid #000; border-radius: 6px; cursor: grab; touch-action: none; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, #4b5a6a 0%, #2b333d 55%, #1a1f26 100%); box-shadow: inset 0 2px 0 rgba(0, 0, 0, .55), inset 0 0 30px rgba(0, 0, 0, .45); }
+.karakterKutu.surukleniyor { cursor: grabbing; }
+.karakterKutu::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: linear-gradient(transparent, rgba(0, 0, 0, .35)); pointer-events: none; }
+.karakterTuval { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.karakterKutu.desteksiz::before { content: 'Önizleme bu cihazda desteklenmiyor'; position: absolute; inset: 0; display: grid; place-items: center; padding: 10px; text-align: center; color: var(--soluk); font-size: .75rem; }
+.karakterBilgi { display: flex; flex-direction: column; gap: 7px; min-width: 0; padding: 8px 10px; border: 2px solid #000; border-radius: 6px; background: rgba(0, 0, 0, .25); font-size: .78rem; }
+.kbSatir { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; }
+.kbSatir > span { color: var(--soluk); }
+.kbSatir > b { color: var(--yazi); font-weight: 700; }
+.kbSatir > i { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+.kbSatir > i em { display: block; height: 100%; border-radius: 3px; background: var(--c, #aaa); transition: width .3s; }
+.kbSatir > small { grid-column: 1 / -1; color: var(--soluk); font-size: .7rem; margin-top: -1px; }
+.kbCan { --c: linear-gradient(90deg, #c0392b, #ff6b5a); }
+.kbAclik { --c: linear-gradient(90deg, #b8742a, #f0a64a); }
+.kbXp { --c: linear-gradient(90deg, #4f9a2c, #9be27d); }
+.kbZirh { --c: linear-gradient(90deg, #7b8a96, #d8e2ea); }
+.kbOks { --c: linear-gradient(90deg, #2b7cc0, #7fd0ff); }
+.kbIsi { --c: linear-gradient(90deg, #5aa86a, #8ad87a); }
+.kbIsi.isi-2, .kbIsi.isi-1 { --c: linear-gradient(90deg, #2b6cc0, #7fc8ff); }
+.kbIsi.isi1, .kbIsi.isi2 { --c: linear-gradient(90deg, #d8743a, #ff5a3a); }
+.kbIsi.isi-2 > b, .kbIsi.isi-1 > b { color: #8fd0ff; }
+.kbIsi.isi1 > b, .kbIsi.isi2 > b { color: #ffb48a; }
+.kbEtkiler { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+.kbEtkiler span { padding: 2px 7px; border-radius: 99px; background: color-mix(in srgb, var(--r) 25%, transparent); border: 1px solid color-mix(in srgb, var(--r) 60%, transparent); font-size: .7rem; }
+.kbEtkiler b { font-weight: 700; }
+.envBolum { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 0 0 6px; font: 700 .72rem var(--govde); letter-spacing: .06em; text-transform: uppercase; color: var(--vurgu2); }
+.envBolum span + span { font: 400 .7rem var(--govde); letter-spacing: 0; text-transform: none; color: var(--soluk); text-align: right; }
+.envSol .cubukIzgara { margin-top: 0; padding-top: 0; border-top: 0; }
+#envIzgara { margin-bottom: 12px; }
+.izgara .yuva.aramaSoluk { opacity: .25; }
+.izgara .yuva.aramaUyar { border-color: var(--vurgu); box-shadow: inset 0 0 0 1px var(--vurgu), 0 0 8px rgba(232, 163, 61, .45); }
+@media (max-width: 560px) { .karakterSatir { grid-template-columns: var(--yuva) 1fr; } .karakterBilgi { grid-column: 1 / -1; } #envAra { width: 110px; } .envBolum span + span { display: none; } }

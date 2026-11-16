@@ -90,12 +90,18 @@
 <div id="envanterEkrani" class="kaplama" hidden>
   <div class="pencere envPencere">
     <section class="envSol">
-      <header><h2>Envanter</h2><button type="button" class="envIslem" id="envSirala" title="Çantadaki eşyaları birleştirir ve türüne göre sıralar">Sırala</button></header>
-      <div class="zirhSatir"><div id="envZirh" class="izgara zirhIzgara"></div><div id="zirhPuan"></div></div>
+      <header><h2>Envanter</h2><input type="search" id="envAra" placeholder="Eşya ara" autocomplete="off"><button type="button" class="envIslem" id="envSirala" title="Çantadaki eşyaları birleştirir ve türüne göre sıralar">Sırala</button></header>
+      <!-- 0.30.0: karakter bölümü: zırh yuvaları, canlı önizleme ve durum -->
+      <div class="karakterSatir">
+        <div id="envZirh" class="izgara zirhIzgara"></div>
+        <div id="karakterOnizleme" class="karakterKutu" title="Sürükleyerek döndürünüz · çift tık: öne çevir"></div>
+        <div id="karakterBilgi" class="karakterBilgi"></div>
+      </div>
+      <div class="envBolum"><span>Çanta</span><span id="cantaDoluluk"></span></div>
       <div id="envIzgara" class="izgara"></div>
+      <div class="envBolum"><span>Hızlı erişim</span><span title="İmleç bir yuvanın üzerindeyken">1-9: çubukla değiştir · X: bir tane at · Shift + X: yığını at</span></div>
       <div id="envCubuk" class="izgara cubukIzgara"></div>
-      <div id="envDurum"></div>
-      <p class="ipucuMetin">Sol tık: al / bırak · Sağ tık: yarısını al / bir tane bırak · Shift + tık: çubuk ile çanta arasında taşı · Pencere dışına tık: yere at</p>
+      <p class="ipucuMetin">Sol tık: al / bırak · Sağ tık: yarısını al / bir tane bırak · Çift tık: aynı eşyaları topla · Shift + tık: çubuk ile çanta arasında taşı, zırhı giy / çıkar · Pencere dışına tık: yere at</p>
     </section>
     <section class="envSag">
       <header class="uretimBaslik"><h2>Üretim</h2><span id="istasyonDurum"></span></header>
