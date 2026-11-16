@@ -597,6 +597,7 @@ export class Etkilesim {
       if (KATI[id] && this.oyuncu.hucreyiKapliyor(x, y, z)) return false;
       if (!d.blokKoy(x, y, z, id)) return false;
       if (BLOKLAR[id].sandik) this.arayuz.sandikYerlesti(x, y, z);
+      if (this.arayuz.blokKondu) this.arayuz.blokKondu(id);   // 0.32.0: inşa görevleri
       env.seciliAzalt(1); this.istat('konulan');
       this.ses.koy(BLOKLAR[id].ses);
       return true;

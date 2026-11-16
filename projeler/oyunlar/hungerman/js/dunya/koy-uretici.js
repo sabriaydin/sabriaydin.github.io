@@ -27,7 +27,7 @@ function koyAdi(u, rx, rz) {
 }
 const ERKEK = ['Ahmet', 'Mehmet', 'Hasan', 'Ali', 'Mustafa', 'Hüseyin', 'İbrahim', 'Osman', 'Yusuf', 'Murat', 'Kemal', 'Halil', 'Ramazan', 'Selim', 'Kadir', 'Recep', 'Emin', 'Cemal', 'Rıza', 'Şükrü'];
 const KADIN = ['Ayşe', 'Fatma', 'Emine', 'Hatice', 'Zeynep', 'Elif', 'Meryem', 'Şerife', 'Zehra', 'Hacer', 'Esra', 'Selin', 'Derya', 'Gülsüm', 'Nuriye', 'Saadet', 'Havva', 'Sevim', 'Nazlı', 'Dilek'];
-export const MESLEK_ADI = { ciftci: 'Çiftçi', kasap: 'Kasap', demirci: 'Demirci', oduncu: 'Oduncu', sifaci: 'Şifacı', avci: 'Avcı', balikci: 'Balıkçı' };
+export const MESLEK_ADI = { ciftci: 'Çiftçi', kasap: 'Kasap', demirci: 'Demirci', oduncu: 'Oduncu', sifaci: 'Şifacı', avci: 'Avcı', balikci: 'Balıkçı', mimar: 'Mimar', kutuphaneci: 'Kütüphaneci', coban: 'Çoban', asci: 'Aşçı' };
 const MARJ = 128;   // köy ve limanın bölge dışına taşabileceği en büyük mesafe
 
 const BOYUT = { ev_kucuk: [5, 5], ev_buyuk: [7, 7], demirci: [7, 5], ciftlik: [9, 7], tezgah: [3, 3], kulube: [5, 5], fener: [5, 5] };
@@ -147,10 +147,24 @@ function koyKur0(u, rx, rz, yer) {
   const sinir = 4 + (koy.binalar.length + koy.rx * 3 + koy.rz * 7 & 3);
   for (const kl of koy.koylular) if (secilen.length < sinir && !binada.has(kl.bina) && !secilen.includes(kl)) { secilen.push(kl); binada.add(kl.bina); }
   koy.koylular = secilen.sort((a, b) => a.idx - b.idx).map((kl, i) => ({ ...kl, idx: i }));
+  /* 0.32.0: yeni meslekler (mimar, kütüphaneci, çoban, aşçı): evlerdeki genel meslekli köylülerin bir kısmı ayrı bir karmayla dönüştürülür
+     (köyün yeri, binaları ve köylü adları değişmez); her köyde her yeni meslekten en çok bir tane bulunur */
+  const YENI = ['mimar', 'kutuphaneci', 'coban', 'asci'], kullanilan = new Set();
+  for (const kl of koy.koylular) {
+    if (!genel.includes(kl.meslek)) continue;
+    const h = karma2(koy.rx * 31 + kl.idx ^ u.tohum, koy.rz * 17 - kl.idx * 7);
+    if (h > 0.42) continue;
+    const m = YENI[Math.floor(h / 0.42 * 4) % 4];
+    if (kullanilan.has(m)) continue;
+    kullanilan.add(m); kl.meslek = m;
+  }
   koy.bbox = [x - koy.yaricap, z - koy.yaricap, x + koy.yaricap, z + koy.yaricap];
   if (koy.liman) { const L = koy.liman.kutu; koy.bbox = [Math.min(koy.bbox[0], L[0]), Math.min(koy.bbox[1], L[1]), Math.max(koy.bbox[2], L[2]), Math.max(koy.bbox[3], L[3])]; }
   return koy;
 }
+
+/* 0.32.0: köylü mesleği dönüşümü için ayrı, sıra bağımsız karma (0-1) */
+function karma2(a, b) { let h = Math.imul(a, 374761393) ^ Math.imul(b, 668265263) ^ 0x5bd1e995; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; }
 
 function yolDuzle(kol, nokta, t0, ts) {
   const y = [];

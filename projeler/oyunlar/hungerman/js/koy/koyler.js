@@ -1,7 +1,11 @@
 /* HungerMan - köy yöneticisi: köylülerin ortaya çıkması, köye giriş bildirimi, itibar, takas, sandık ganimetleri
    Köylerin yeri ve yapısı tohumdan hesaplanır; burada yalnızca oyuncuya bağlı durum (itibar, takas sayıları, ölen köylüler) tutulur. */
 import { koyBul, koylerAlan, KOY_BOLGE, MESLEK_ADI } from '../dunya/koy-uretici.js';
-import { MESLEKLER } from './meslekler.js';
+import { MESLEKLER, SEVIYELER, seviyeBul } from './meslekler.js';
+import { tekYapilar, YAPI_ADI } from '../dunya/yapi-uretici.js';
+import { batiklarAlan } from '../dunya/batik-uretici.js';
+import { zindanlarAlan } from '../dunya/zindan-uretici.js';
+import { lanetliAda, ADA_AD } from '../dunya/ada-uretici.js';
 import { karistir, uretec } from '../rastgele.js';
 import { ESYALAR } from '../bloklar.js';
 import { zindanAt } from '../dunya/zindan-uretici.js';
@@ -22,8 +26,14 @@ export class Koyler {
     this.sayac = 0;
     this.icindeki = null;
     this.ayna = false;   // çok oyunculu istemci: köylüleri ve limandaki tekneleri sunucu yönetir
+    this.gun = () => 1;  // 0.32.0: geçerli gün (ana.js ayarlar)
   }
-  durum(id) { return this.kayit[id] || (this.kayit[id] = { itibar: 0, takas: {}, gorevNo: {}, olu: [] }); }
+  durum(id) {
+    const d = this.kayit[id] || (this.kayit[id] = { itibar: 0, takas: {}, gorevNo: {}, olu: [] });
+    /* 0.32.0: deneyim (köylü seviyesi), talep (arz ve talep), hediye (son hediye günü), zincir (zincir görev durumu) */
+    if (!d.xp) { d.xp = {}; d.talep = {}; d.hediye = {}; d.zincir = {}; }
+    return d;
+  }
   koy(id) { const [rx, rz] = id.split(',').map(Number); return koyBul(this.uretici, rx, rz); }
 
   /* ekKonumlar: çok oyunculu sunucuda diğer oyuncuların konumları (köylüler onların çevresinde de ortaya çıkar) */
@@ -73,47 +83,122 @@ export class Koyler {
     }
   }
 
-  /* ---------- İtibar ---------- */
+  /* ---------- İtibar (0.32.0: kademeler) ----------
+     Güvenilmez (-40 ve altı): ticaret yok · Mesafeli (eksi) · Yabancı · Tanıdık (10+): zincir görevler · Dost (40+): özel takas, konaklama · Kahraman (70+): ek indirim, günlük hediye */
   itibar(id) { return this.durum(id).itibar; }
   itibarDegistir(id, n) { const d = this.durum(id); d.itibar = Math.max(-100, Math.min(100, d.itibar + n)); }
+  kademe(id) { const i = this.itibar(id); return i >= 70 ? 4 : i >= 40 ? 3 : i >= 10 ? 2 : i <= -40 ? -2 : i < 0 ? -1 : 1; }
   itibarMetni(id) {
-    const i = this.itibar(id);
-    return i >= 40 ? 'Köylüler size büyük saygı duyuyor.' : i >= 10 ? 'Köylüler sizi tanıyor.' : i <= -40 ? 'Köylüler size güvenmiyor.' : i < 0 ? 'Köylüler size mesafeli.' : '';
+    return { 4: 'Bu köyün kahramanı olarak karşılanıyorsunuz.', 3: 'Köylüler sizi dost biliyor.', 2: 'Köylüler sizi tanıyor.', '-1': 'Köylüler size mesafeli.', '-2': 'Köylüler size güvenmiyor.' }[this.kademe(id)] || '';
   }
-  itibarDerecesi(id) { const i = this.itibar(id); return i >= 40 ? 'Saygın' : i >= 10 ? 'Tanıdık' : i <= -40 ? 'Güvenilmez' : i < 0 ? 'Mesafeli' : 'Yabancı'; }
-  /* Fiyat çarpanı: iyi itibar indirim, kötü itibar zam */
-  carpan(id) { const i = this.itibar(id); return 1 - Math.max(-0.5, Math.min(0.3, i / 150)); }
+  itibarDerecesi(id) { return { 4: 'Kahraman', 3: 'Dost', 2: 'Tanıdık', 1: 'Yabancı', '-1': 'Mesafeli', '-2': 'Güvenilmez' }[this.kademe(id)]; }
+  /* Sonraki kademe ve gereken itibar */
+  sonrakiKademe(id) { const i = this.itibar(id); for (const [e, ad] of [[-39, 'Mesafeli'], [0, 'Yabancı'], [10, 'Tanıdık'], [40, 'Dost'], [70, 'Kahraman']]) if (i < e) return { ad, esik: e }; return null; }
+  /* Fiyat çarpanı: iyi itibar indirim (Kahraman en çok %40), kötü itibar zam */
+  carpan(id) { const i = this.itibar(id); return 1 - Math.max(-0.5, Math.min(i >= 70 ? 0.4 : 0.3, i / 150)); }
+
+  /* ---------- 0.32.0: köylü seviyesi ---------- */
+  koyluXp(koyId, idx) { return this.durum(koyId).xp[idx] || 0; }
+  koyluSeviye(koyId, idx) { return seviyeBul(this.koyluXp(koyId, idx)); }
+  xpEkle(koy, kl, n) {
+    const d = this.durum(koy.id), once = seviyeBul(d.xp[kl.idx] || 0);
+    d.xp[kl.idx] = (d.xp[kl.idx] || 0) + n;
+    const sonra = seviyeBul(d.xp[kl.idx]);
+    if (sonra > once) { this.bildirim(`${MESLEK_ADI[kl.meslek]} ${kl.ad} artık ${SEVIYELER[sonra].ad}! Yeni takaslar açıldı.`); if (this.seviyeAtladi) this.seviyeAtladi(koy, kl, sonra); }
+    return sonra > once;
+  }
 
   /* ---------- Takas ---------- */
-  takasListesi(koy, kl) {
+  /* Gün ve köye bağlı karma (günlük fırsat ve köyün ihtiyacı) */
+  gunKarma(koy, ek) { return uretec(karistir(this.uretici.tohum ^ Math.imul(this.gun() + 1, 2654435761) ^ Math.imul(koy.rx + 19, 4111) ^ Math.imul(koy.rz + 23, 6151) ^ Math.imul(ek + 1, 977)))(); }
+  /* Köyün bugünkü ihtiyacı: bir köylünün mal karşılığı sikke verdiği takaslardan biri (istenen miktar %35 azalır) */
+  ihtiyac(koy) {
+    const l = [];
+    for (const kl of koy.koylular) {
+      const M = MESLEKLER[kl.meslek]; if (!M) continue;
+      this.hamListe(koy, kl).forEach((t, i) => { if (t.al[0] === 288 && t.kilit == null) l.push([kl.idx, i]); });
+    }
+    return l.length ? l[Math.floor(this.gunKarma(koy, 999) * l.length)] : null;
+  }
+  /* Ham liste: sabit + havuzdan 3 (eski kayıtlarla aynı sıra) + seviye takasları + Dost takası; kilit: gereken seviye ('dost': itibar) */
+  hamListe(koy, kl) {
     const M = MESLEKLER[kl.meslek];
     const r = uretec(karistir(this.uretici.tohum ^ Math.imul(koy.rx + 3, 7333) ^ Math.imul(koy.rz + 5, 9551) ^ Math.imul(kl.idx + 11, 104729)));
     const havuz = [...M.havuz];
     for (let i = havuz.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [havuz[i], havuz[j]] = [havuz[j], havuz[i]]; }
-    const liste = [...M.sabit, ...havuz.slice(0, 3)];
-    const c = this.carpan(koy.id);
-    const kullanim = this.durum(koy.id).takas[kl.idx] || [];
-    return liste.map((t, i) => {
-      /* Sikke ödenen takaslarda fiyat, mal verilen takaslarda istenen miktar itibara göre değişir */
-      const ver = t.ver.map(([id, n]) => [id, Math.max(1, Math.round(n * c))]);
-      return { ver, al: t.al, kalan: TAKAS_SINIRI - (kullanim[i] || 0) };
+    const l = [...M.sabit, ...havuz.slice(0, 3)].map(t => ({ ...t, kilit: null }));
+    (M.seviye || []).forEach((sv, k) => sv.forEach(t => l.push({ ...t, kilit: k + 1 })));
+    if (M.ozel) l.push({ ...M.ozel, kilit: 'dost' });
+    return l;
+  }
+  takasListesi(koy, kl) {
+    const c = this.carpan(koy.id), d = this.durum(koy.id), sv = this.koyluSeviye(koy.id, kl.idx), dost = this.kademe(koy.id) >= 3;
+    const kullanim = d.takas[kl.idx] || [], talep = d.talep[kl.idx] || {};
+    const ham = this.hamListe(koy, kl), ihtiyac = this.ihtiyac(koy);
+    /* Günün fırsatı: açık, sikkeyle alınan takaslardan biri %25 indirimli */
+    const alim = ham.map((t, i) => i).filter(i => ham[i].ver.some(([id]) => id === 288) && (ham[i].kilit == null || (typeof ham[i].kilit === 'number' && ham[i].kilit <= sv)));
+    const firsat = alim.length ? alim[Math.floor(this.gunKarma(koy, kl.idx) * alim.length)] : -1;
+    return ham.map((t, i) => {
+      const acik = t.kilit == null || (t.kilit === 'dost' ? dost : t.kilit <= sv);
+      const sikkeyle = t.ver.some(([id]) => id === 288);
+      /* Arz ve talep: çok alınan pahalanır, çok satılan için daha fazla mal istenir (en çok %60); ertesi sabahlar yarıya iner */
+      const tl = 1 + Math.min(0.6, 0.07 * (talep[i] || 0));
+      const ozel = i === firsat ? 0.75 : ihtiyac && ihtiyac[0] === kl.idx && ihtiyac[1] === i ? 0.65 : 1;
+      const k = c * tl * ozel;
+      const ver = t.ver.map(([id, n]) => [id, Math.max(1, Math.round(n * k))]);
+      const taban = t.ver.map(([id, n]) => [id, Math.max(1, Math.round(n * c))]);
+      const fark = Math.round((ver[0][1] / taban[0][1] - 1) * 100);
+      return { ver, al: t.al, kalan: TAKAS_SINIRI - (kullanim[i] || 0), sinir: TAKAS_SINIRI, acik, kilit: t.kilit, firsat: i === firsat, ihtiyac: ozel === 0.65, fark, sikkeyle };
     });
   }
   takas(koy, kl, i, envanter) {
     if (this.itibar(koy.id) <= -40) return 'Köylüler sizinle ticaret yapmak istemiyor.';
     const t = this.takasListesi(koy, kl)[i];
-    if (!t || t.kalan <= 0) return 'Bu takas bugün için tükendi.';
+    if (!t || !t.acik) return 'Bu takas henüz açılmadı.';
+    if (t.kalan <= 0) return 'Bu takas bugün için tükendi.';
     for (const [id, n] of t.ver) if (envanter.say(id) < n) return `Yeterli ${ESYALAR[id].ad} mevcut değil.`;
     for (const [id, n] of t.ver) envanter.harca(id, n);
     const k = envanter.ekle(t.al[0], t.al[1]);
     if (k) this.birak(t.al[0], k);
     const d = this.durum(koy.id);
     (d.takas[kl.idx] = d.takas[kl.idx] || [])[i] = ((d.takas[kl.idx] || [])[i] || 0) + 1;
+    const tl = d.talep[kl.idx] = d.talep[kl.idx] || {}; tl[i] = (tl[i] || 0) + 1;
     this.itibarDegistir(koy.id, 1);
+    /* Köylü deneyimi: takasın sikke değerine göre 1-4 */
+    const sikke = [...t.ver, t.al].reduce((n, [id, a]) => n + (id === 288 ? a : 0), 0);
+    this.xpEkle(koy, kl, Math.min(4, 1 + Math.floor(sikke / 4)) + (t.ihtiyac ? 2 : 0));
     return null;
   }
+  /* Kahraman itibarında köylü günde bir kez hediye verir: [id, adet] ya da null */
+  hediye(koy, kl, envanter) {
+    if (this.kademe(koy.id) < 4) return null;
+    const d = this.durum(koy.id), g = this.gun();
+    if (d.hediye[kl.idx] === g) return null;
+    const M = MESLEKLER[kl.meslek], l = M.hediye || [[288, 3]];
+    const h = l[Math.floor(this.gunKarma(koy, kl.idx + 50) * l.length)];
+    d.hediye[kl.idx] = g;
+    const k = envanter.ekle(h[0], h[1]); if (k) this.birak(h[0], k);
+    return h;
+  }
+  /* 0.32.0: söylentiler: köye yakın bilinen yapılar (yön ve uzaklık) */
+  soylenti(koy, n) {
+    const u = this.uretici, l = [];
+    const ekle = (ad, x, z) => { const m = Math.hypot(x - koy.x, z - koy.z); if (m > 60 && m < 3000) l.push({ ad, x, z, m }); };
+    for (const [tur, Y] of Object.entries(tekYapilar(u))) ekle(YAPI_ADI[tur], Y.x, Y.z);
+    for (const b of batiklarAlan(u, koy.x - 900, koy.z - 900, koy.x + 900, koy.z + 900)) ekle('batık bir gemi', b.x, b.z);
+    for (const z of zindanlarAlan(u, koy.x - 700, koy.z - 700, koy.x + 700, koy.z + 700)) ekle('bir yeraltı zindanı', z.x, z.z);
+    try { const A = lanetliAda(u); ekle(ADA_AD, A.x, A.z); } catch (e) { /* yok sayılır */ }
+    if (!l.length) return null;
+    return l[Math.floor(this.gunKarma(koy, (n || 0) + 300) * l.length)];
+  }
   /* Her sabah takas hakları yenilenir */
-  sabah() { for (const d of Object.values(this.kayit)) d.takas = {}; }
+  sabah() {
+    for (const d of Object.values(this.kayit)) {
+      d.takas = {};
+      /* 0.32.0: talep her sabah yarıya iner */
+      if (d.talep) for (const t of Object.values(d.talep)) for (const i in t) { t[i] *= 0.5; if (t[i] < 0.3) delete t[i]; }
+    }
+  }
 
   /* Köylüye zarar verilirse */
   koyluVuruldu(v) { this.itibarDegistir(v.koy.id, -8); this.bildirim('Köylüler bu davranıştan hoşlanmadı.'); }

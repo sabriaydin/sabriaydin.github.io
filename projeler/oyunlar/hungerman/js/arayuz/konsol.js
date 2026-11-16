@@ -524,13 +524,12 @@ export class Konsol {
       if (a === 'tamamla') {
         let n = 0;
         for (const q of G.aktif) {
-          if (q.tur === 'getir') { const eksik = q.adet - o.envanter.say(q.esya); if (eksik > 0) o.envanter.ekle(q.esya, eksik); n++; }
-          else if (q.tur === 'oldur') { q.sayac = q.adet; n++; }
+          if (G.hazirla(q, o.envanter)) n++;
         }
         G.bildir(); this.tamam(`${n} görev teslime hazır. Ödül için görevi veren köylüyle konuşulmalıdır.`);
       }
       else if (a === 'birak') { const n = G.aktif.length; G.aktif = []; G.bildir(); this.tamam(`${n} görev bırakıldı.`); }
-      else this.yaz(G.aktif.length ? G.aktif.map(q => `${q.kisa} (${q.tur === 'mektup' ? 'mektup' : G.ilerleme(q, o.envanter) + '/' + q.adet})`).join(' · ') + ` · tamamlanan ${G.tamamlanan}` : `Etkin görev yok · tamamlanan ${G.tamamlanan}`, 'bilgi');
+      else this.yaz(G.aktif.length ? G.aktif.map(q => `${q.kisa} (${G.durumMetni(q, o.envanter, o.oyuncu.konum)})`).join(' · ') + ` · tamamlanan ${G.tamamlanan}` : `Etkin görev yok · tamamlanan ${G.tamamlanan}`, 'bilgi');
     }, { hile: true, tamamla: () => ['tamamla', 'birak', 'liste'] });
     ekle('aydinlik', 'Tam aydınlığı açar / kapatır (karanlık yerler de aydınlık görünür)', 'aydinlik', () => { const S = this.arayuz.sahne(); S.tamAydinlik = !S.tamAydinlik; this.tamam(`Tam aydınlık ${S.tamAydinlik ? 'açık' : 'kapalı'}.`); });
     ekle('sis', 'Uzaklık sisini açar / kapatır', 'sis', () => { const S = this.arayuz.sahne(); S.sisKapali = !S.sisKapali; this.tamam(`Sis ${S.sisKapali ? 'kapalı' : 'açık'}.`); });

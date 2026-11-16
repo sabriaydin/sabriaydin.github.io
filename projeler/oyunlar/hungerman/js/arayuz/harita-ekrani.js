@@ -29,7 +29,7 @@ export function haritaIsaretleri(o, x0, z0, x1, z1) {
   if (o.dogum) l.push({ tur: 'dogum', x: o.dogum.x, z: o.dogum.z, ad: 'Doğma noktası' });
   if (o.olumNoktasi) l.push({ tur: 'olum', x: o.olumNoktasi.x, z: o.olumNoktasi.z, ad: 'Son ölüm noktası' });
   for (const q of o.gorevler.aktif) {
-    const h = q.tur === 'mektup' ? q.hedefKoy : o.gorevler.tamamlanabilir(q, o.envanter) ? { x: q.koyX, z: q.koyZ } : null;
+    const h = o.gorevler.hedef(q, o.envanter);
     if (h) l.push({ tur: 'gorev', x: h.x, z: h.z, ad: q.kisa });
   }
   for (const y of o.yerler || []) l.push({ tur: 'yer', x: y.x, z: y.z, ad: y.ad, renk: y.renk, yer: y });

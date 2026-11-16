@@ -395,7 +395,7 @@ export class GelistiriciPenceresi {
         this.dugmeler(this.dugme('itibar -20', '−20'), this.dugme('itibar -5', '−5'), this.dugme('itibar 0', 'Sıfırla'), this.dugme('itibar +5', '+5'), this.dugme('itibar +20', '+20')) +
         this.dugmeler(this.dugme('koy takas', 'Takasları yenile'), this.dugme('koy dirilt', 'Ölen köylüleri geri getir'), this.dugme(`isinla ${k.x + 7} ${k.z}`, 'Köye ışınlan'));
     })() : '<p class="gelNot">800 blok içinde köy yok.</p>' + this.dugmeler(this.dugme('isinla koy', 'En yakın köye ışınlan'));
-    const gorevler = G.aktif.length ? `<div class="gelListe">${G.aktif.map(q => `<div><b>${esc(q.kisa)}</b><span>${q.tur === 'mektup' ? 'mektup teslimi' : G.ilerleme(q, o.envanter) + ' / ' + q.adet} · ${esc(q.koyluAd || '')}</span></div>`).join('')}</div>` : '<p class="gelNot">Etkin görev yok.</p>';
+    const gorevler = G.aktif.length ? `<div class="gelListe">${G.aktif.map(q => `<div><b>${esc(q.kisa)}</b><span>${esc(G.durumMetni(q, o.envanter, P))} · ${esc(q.koyluAd || '')}</span></div>`).join('')}</div>` : '<p class="gelNot">Etkin görev yok.</p>';
     return this.bolum('En yakın köy', koy, 'İtibar ve takas işlemleri en yakın köye uygulanır.') +
       this.bolum('Görevler', `<p class="gelDeger">Tamamlanan görev: <b>${G.tamamlanan}</b></p>` + gorevler +
         this.dugmeler(this.dugme('gorev tamamla', 'Görevleri teslime hazır yap'), this.onay('gorev birak', 'Görevleri bırak'), this.dugme('ver 288 64', 'Sikke × 64')), 'Teslime hazır yapılan görevlerin ödülü, görevi veren köylüden alınır. Mektup görevleri hedef köye götürülmelidir.');

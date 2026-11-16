@@ -935,6 +935,8 @@ const MAL_CIZ = {
   mektup: () => p => { cokgen(p, [[2, 4], [14, 4], [14, 12], [2, 12]], '#efe6cf', 0.03); cizgi(p, 2, 4, 8, 9, [170, 150, 110]); cizgi(p, 14, 4, 8, 9, [170, 150, 110]); p.set(8, 10, [180, 40, 40]); p.set(7, 10, [180, 40, 40]); },
   /* 0.31.0: Yapı Planı: mavi kâğıt üzerinde beyaz çizgili kat planı */
   plan: () => p => { cokgen(p, [[2, 3], [14, 3], [14, 13], [2, 13]], '#2f5bc0', 0.04); const b = [225, 235, 250]; cizgi(p, 4, 5, 12, 5, b); cizgi(p, 4, 5, 4, 11, b); cizgi(p, 4, 11, 12, 11, b); cizgi(p, 12, 5, 12, 11, b); cizgi(p, 8, 5, 8, 8, b); cizgi(p, 8, 8, 12, 8, b); p.set(6, 11, [47, 91, 192]); for (let y = 3; y < 13; y++) p.set(14, y, [30, 60, 140]); },
+  /* 0.32.0: Köy Kolisi: iple bağlı karton kutu */
+  koli: () => p => { cokgen(p, [[2, 5], [14, 5], [14, 14], [2, 14]], '#b8864a', 0.06); cokgen(p, [[2, 3], [14, 3], [14, 5], [2, 5]], '#d8a868', 0.05); const k = [110, 70, 36], ip = [232, 220, 190]; cizgi(p, 2, 5, 14, 5, k); cizgi(p, 8, 3, 8, 14, ip); cizgi(p, 2, 9, 14, 9, ip); p.set(7, 2, ip); p.set(9, 2, ip); p.set(8, 9, [200, 60, 50]); },
   kemik: () => p => { kalinCizgi(p, [[4, 12], [11, 5]], '#e8e4d6'); for (const [x, y] of [[3, 11], [4, 13], [2, 12], [11, 3], [12, 5], [13, 4]]) p.set(x, y, [232, 228, 214]); },
   /* 0.18.0 */
   toz: e => p => { const c = hex(e.renk || '#f2c84a'); for (let i = 0; i < 46; i++) { const a = p.r() * Math.PI * 2, r = p.r() * 5; p.set(Math.round(8 + Math.cos(a) * r), Math.round(9 + Math.sin(a) * r * 0.7), karis(c, 0.75 + p.r() * 0.4)); } },

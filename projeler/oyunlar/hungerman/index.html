@@ -155,9 +155,13 @@
 <!-- Köylü: ticaret ve görev -->
 <div id="koyluEkrani" class="kaplama" hidden>
   <div class="pencere koyluPencere">
-    <header><div><h2 id="kAd"></h2><span id="kAlt" class="kAlt"></span></div><span id="kItibar" class="rozet"></span></header>
+    <header class="kBaslik">
+      <div id="kAvatar" class="kAvatar"></div>
+      <div class="kKimlik"><h2 id="kAd"></h2><span id="kAlt" class="kAlt"></span><div id="kSeviye" class="kSeviye"></div></div>
+      <div class="kSag"><span id="kItibar" class="rozet"></span><div id="kKademe" class="kKademe"></div></div>
+    </header>
     <p id="kSoz" class="koyluSoz"></p>
-    <div class="sekmeler" id="kSekme"><button type="button" data-s="takas">Ticaret</button><button type="button" data-s="gorev">Görev</button></div>
+    <div class="kUst"><div class="sekmeler" id="kSekme"><button type="button" data-s="takas">Ticaret</button><button type="button" data-s="gorev">Görev</button></div><button type="button" id="kKonakla" class="kKonakla" hidden data-balon="<b>Köyde konakla</b><em>Doğma noktası köye ayarlanır; gece ise sabaha kadar uyunur.</em>">Köyde konakla</button></div>
     <div id="kIcerik"></div>
     <div id="kSikke" class="kSikke"></div>
     <button class="kapat" id="kKapat" aria-label="Kapat">✕</button>

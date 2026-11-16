@@ -600,6 +600,8 @@ YUN_RENKLERI.forEach((r, i) => esya(321 + i, { ad: `${r.ad} Boya`, simge: 'boya'
 /* 0.31.0: beyaz boya (boyalı blokları beyaza / doğal rengine döndürür) ve Yapı Planı (yapı kopyalama ve yapıştırma) */
 esya(346, { ad: 'Beyaz Boya', simge: 'boya', renk: '#ecebe4' });
 esya(345, { ad: 'Yapı Planı', simge: 'plan', tur: 'plan', yigin: 1 });
+/* 0.32.0: teslimat görevlerinde taşınan koli */
+esya(347, { ad: 'Köy Kolisi', simge: 'koli', yigin: 1 });
 esya(328, { ad: 'Havuç', simge: 'havuc', tur: 'yiyecek', yemek: 3, ekin: 129 });
 esya(329, { ad: 'Patates', simge: 'patates', renk: '#c8a25a', tur: 'yiyecek', yemek: 1, ekin: 133 });
 esya(330, { ad: 'Fırınlanmış Patates', simge: 'patates', renk: '#b8742e', pismis: true, tur: 'yiyecek', yemek: 5 });

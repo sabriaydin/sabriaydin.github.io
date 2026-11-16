@@ -117,6 +117,18 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 32.0 (0.32.0): Köylüler, ticaret ve görevler
+- **Köylü seviyeleri:** köylüler takas ve görevlerle deneyim kazanır; Çırak → Kalfa (12) → Usta (36) → Üstat (80). Her seviyede mesleğe özgü yeni ve daha değerli takaslar açılır (ör. üstat demirci elmas göğüslük ve kılıç, üstat şifacı Eve Dönüş Tılsımı satar).
+- **Yeni meslekler:** Mimar (yapı ve dekorasyon blokları, Yapı Planı, avize, şömine), Kütüphaneci (kitaplık, mum, kristal, büyü masası, iksir, tılsım), Çoban (yün, boya, halı, perde, sancak, makas, yatak) ve Aşçı (ekmek, çorba, kek, baklava, tencere). Köylerin evlerindeki köylülerin bir kısmı bu mesleklere geçer; her köyde her yeni meslekten en çok bir tane bulunur.
+- **Arz ve talep:** çok alınan eşya pahalanır, çok satılan eşya için daha fazla mal istenir (en çok %60); fark her sabah yarıya iner. Her köylünün bir **günün fırsatı** (%25 indirim) ve her köyün bir **ihtiyacı** (istenen mal %35 az, ek deneyim) vardır.
+- **Yeni ticaret penceresi:** meslek simgesi, köylünün seviyesi ve deneyim çubuğu, itibar kademesi ve ayrıcalıkları; iki sütunlu takas kartları (stok çubuğu, fiyat değişimi, fırsat ve ihtiyaç rozetleri, kilitli takaslar ve açılma koşulu), Shift + Takas ile toplu takas, çantadan satılabilecek eşyalar.
+- **Yeni görev türleri:** Teslimat (süreli koli; süre dolarsa iptal ve itibar kaybı), Keşif (özel yapı, batık gemi ya da Lanetli Ada bulma), Koruma (köyün içinde canavar avlama), İnşaat (köye çit, meşale, fener ya da saksı koyma).
+- **Zincir görevler (Tanıdık itibarında):** Kayıp Kervan, Köyün Feneri, Hasat Bayramı ve Eski Tapınağın Sırrı; 3 adımlı, hikâyeli, son adımda büyük ödüllü.
+- **Görev ödülleri:** zorluk yıldızı (1-3), deneyim, yıldıza göre nadir eşya; ek hedef: görev kabul edildiği gün tamamlanırsa +%50 sikke ve +2 itibar.
+- **İtibar kademeleri:** Güvenilmez, Mesafeli, Yabancı, Tanıdık (zincir görevler), Dost (özel takas, köyde konaklama: doğma noktası köye ayarlanır, gece ise uyunur), Kahraman (en çok %40 indirim, köylülerden günlük hediye).
+- **Konuşmalar:** gün saatine, yağış ve kara, itibar kademesine göre değişen sözler; köylüler yakındaki yapılar hakkında söylenti verir (yön ve uzaklıkla).
+- Pusula, harita, görev günlüğü (J) ve görev izleyici yeni görev türlerini gösterir. Yeni eşya: Köy Kolisi.
+
 ## 31.0 (0.31.0): Yapı ve Dekorasyon
 - **Altyapı:** doku atlası 16 x 16'dan 32 x 32 döşemeye (512 piksel), blok kimlik sınırı 1024'ten 2048'e çıkarıldı. Eski kayıtlar değişmeden açılır.
 - **Yeni yapı blokları:** Akasya Kalası (akasya kütüğünden), Cilalı Taş (fırında taştan), Parke Zemin (hasır örgü), Kareli Zemin (siyah-beyaz karo).

@@ -574,7 +574,7 @@ function oyunBaslat(v) {
     'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.', 'Kurt kemikle evcilleşip sadık bir köpeğe dönüşür; kedi balıkla evcilleşir. Sağ tık ile oturtulur ya da kaldırılır.', 'Vahşi at boş elle sağ tıklanarak ehlileştirilir; elma, buğday ya da havuç güvenini artırır. Eyer takılan ata binilir, C ile inilir.', 'Tencerede pişen yemekler açlığı doyurmanın yanında yenilenme, tokluk ve nefes gibi etkiler verir.', 'Sandalye ve koltuğa sağ tık ile oturulur; hareket edince kalkılır.', 'Tarif Kitabı B tuşuyla açılır; bir tarifi takibe alınca malzemeleri ekranın solunda izlenir.', 'Kol ve bakır telle kapılar uzaktan açılır; basınç plakası üstüne basılınca güç verir.', 'Ters çevirici, arkasından güç gelmediğinde önüne güç verir; kendine bağlanınca saat devresi olur.', 'Müzik kutusu altındaki bloğa göre farklı çalgı sesi çıkarır.', 'Yeraltı Diyarı’nın tek girişi, Issız Deniz’in ortasındaki Lanetli Ada’daki kadim geçittir; ada çevresinde deniz kararır.', 'Yeraltı Diyarı’nda 1 blok yürümek dünyada 8 bloğa denk gelir; uzak yolculuklar için kestirmedir.', 'Kor Ruhlarının ateş topları tutuşturur; Ateşe Dayanıklılık İksiri korur.', 'Kışın göller donar ve ekinler çok yavaş büyür; ilkbaharda tarlalar en verimli hâlindedir.', 'Kül kumu yavaşlatır; magma bloğunun üstünde eğilerek yürünürse yakmaz.',
     'İnekler ve koyunlar buğday, domuzlar havuç ya da patates, tavuklar tohum, tavşanlar havuç sever.', 'Beslenen hayvanlar ve yavruları kaybolmaz.',
     'Örs ile aletler ve zırhlar deneyim seviyesi karşılığında onarılır.', 'Simya masası yakınında hız, gece görüşü, su altında nefes, ateşe dayanıklılık ve güç iksirleri yapılır.',
-    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.', 'Merdiven bir bloğun alt yüzüne konunca ters döner; tavan kenarları ve kemerler için kullanılır.', 'Eldeki boyayla yün, cam, pişmiş kil, beton, perde ve sancağa sağ tıklanınca blok o renge boyanır.', 'Yapı Planı ile bir yapının iki köşesi seçilip kopyalanır; R ile döndürülüp başka bir yere kurulur.', 'Şömine sağ tıkla yakılır; yanan şömine odayı aydınlatır ve ısıtır.'];
+    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.', 'Merdiven bir bloğun alt yüzüne konunca ters döner; tavan kenarları ve kemerler için kullanılır.', 'Eldeki boyayla yün, cam, pişmiş kil, beton, perde ve sancağa sağ tıklanınca blok o renge boyanır.', 'Yapı Planı ile bir yapının iki köşesi seçilip kopyalanır; R ile döndürülüp başka bir yere kurulur.', 'Şömine sağ tıkla yakılır; yanan şömine odayı aydınlatır ve ısıtır.', 'Köylüler takas yaptıkça Kalfa, Usta ve Üstat olur; her seviyede yeni takaslar açılır.', 'Çok alınan eşyalar pahalanır; köylülerin günün fırsatlarını kaçırmayınız.', 'Tanıdık itibarındaki köylerde hikâyeli zincir görevler verilir.', 'Görev kabul edildiği gün tamamlanırsa ödül %50 artar.', 'Dost olunan köylerde köylüyle konuşarak köyde konaklanabilir.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
 
   const dunya = new Dunya(v.tohum, sahne);
@@ -676,9 +676,16 @@ function oyunBaslat(v) {
   gorevler.iceAktar(v.gorevler);
   gorevler.degisti = () => { if (gorevEkrani.acik) gorevEkrani.ciz(); };
   gorevler.tamamlandi = () => basarimlar.gorevTamam();
+  /* 0.32.0: gün, deneyim ödülü ve görev bildirimleri */
+  koyler.gun = gorevler.gun = () => (oyun && oyun.gun) || 1;
+  gorevler.xpVer = n => hayatta.xpEkle(n);
+  gorevler.bildirim = m => { hud.bildirim(m); ses.gorev(); };
   dunya.sandiklariYukle(v.sandiklar);
   oyun.koyler = koyler; oyun.gorevler = gorevler;
-  Object.assign(koyluEkrani, { koyler, gorevler, envanter, hud, oyuncu, xp: n => { hayatta.xpEkle(n); basarimlar.ver('ticaret'); } });
+  Object.assign(koyluEkrani, { koyler, gorevler, envanter, hud, oyuncu, xp: n => { hayatta.xpEkle(n); basarimlar.ver('ticaret'); },
+    /* 0.32.0: konuşmalar için ortam ve Dost itibarında köyde konaklama (doğma noktası köylünün kapısı, gece ise uyunur) */
+    ortam: () => { const z = oyun.zaman, H = oyun.hava; return { gece: z > 0.55 && z < 0.95, sabah: z < 0.12, yagis: H && H.yagiyor ? (H.yagisTuru ? H.yagisTuru(oyuncu.konum) : 1) : 0 }; },
+    konakla: w => { const k = w.koylu.kapi; uyu({ x: k.x, y: k.y - 1, z: k.z }); } });
   Object.assign(gorevEkrani, { gorevler, envanter, oyuncu });
   /* vuran: çok oyunculuda canlıya vuran uzak oyuncu (görev ve itibar onun oyununda işlenir) */
   varliklar.olaylar.vurus = (w, vuran) => { if (vuran) { if (oyun.ag && oyun.ag.vurusOlayi) oyun.ag.vurusOlayi(w, vuran); return; } if (w.tur.koylu) koyler.koyluVuruldu(w); };
@@ -687,6 +694,7 @@ function oyunBaslat(v) {
     bildirim: (m, id) => hud.bildirim(m, id), envanterAc: ist => envanterAcKapa(ist), uyu: h => uyu(h),
     olay: k => basarimlar.ver(k),
     istat: (k, n) => basarimlar.istatEkle(k, n),
+    blokKondu: id => oyun.gorevler && oyun.gorevler.blokKondu(id),   // 0.32.0: inşa görevleri
     tilsim: () => tilsimBaslat(),
     koyluAc: w => panelAc(koyluEkrani, w),
     sandikAc: (x, y, z) => {
@@ -1219,7 +1227,7 @@ function adim(t) {
       if (d > 4) isaret.push({ aci: yonAci(u.p.x - p.x, u.p.z - p.z), sinif: 'oyuncu', metin: '●', baslik: `${esc2(u.ad)} · ${Math.round(d)} blok`, mesafe: d, renk: u.renk, kenar: true });
     }
     for (const q of o.gorevler.aktif) {
-      const hedef = q.tur === 'mektup' ? q.hedefKoy : o.gorevler.tamamlanabilir(q, o.envanter) ? { x: q.koyX, z: q.koyZ } : null;
+      const hedef = o.gorevler.hedef(q, o.envanter);
       const hd = hedef && Math.hypot(hedef.x - p.x, hedef.z - p.z);
       if (hedef && hd > 12) isaret.push({ aci: yonAci(hedef.x - p.x, hedef.z - p.z), sinif: 'gorev', metin: '◆', baslik: q.kisa, mesafe: hd, kenar: true });
     }
@@ -1258,6 +1266,7 @@ function adim(t) {
     else o.konumMetni = BIYOMLAR[kol.b];
     /* Pusulada yalnızca oyuncunun haritada eklediği işaretler gösterilir (diğerleri mini haritada ve büyük haritada) */
     o.isaretler = isaret.filter(m => m.sinif === 'yer');
+    o.gorevler.guncelle(dt, p);   // 0.32.0: keşif ve teslimat süresi
     o.hud.gorevIzle(o.gorevler.ozet(o.envanter, p));
     o.hud.etkilerCiz(o.hayatta.etkiler);
     o.hud.hava(diyar ? 'acik' : H.durum, yagisTur);
