@@ -117,6 +117,18 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 31.0 (0.31.0): Yapı ve Dekorasyon
+- **Altyapı:** doku atlası 16 x 16'dan 32 x 32 döşemeye (512 piksel), blok kimlik sınırı 1024'ten 2048'e çıkarıldı. Eski kayıtlar değişmeden açılır.
+- **Yeni yapı blokları:** Akasya Kalası (akasya kütüğünden), Cilalı Taş (fırında taştan), Parke Zemin (hasır örgü), Kareli Zemin (siyah-beyaz karo).
+- **Merdiven ve yarım blok:** Ladin, Huş, Akasya, Taş, Kesme Taş, Yosunlu Parke Taş, Kiremit, Kül Tuğlası, Cilalı Taş ve Beton için. Merdivenler bir bloğun alt yüzüne ya da yan yüzün üst yarısına konunca ters (tavana yaslanan) olur; eski Meşe, Parke Taş, Taş Tuğla, Kum Taşı ve Buz Tuğla merdivenleri de ters konabilir.
+- **Duvarlar:** Parke Taş, Taş Tuğla, Yosunlu Parke Taş, Kiremit, Kül Tuğlası, Kum Taşı, Cilalı Taş ve Taş. Komşu duvarlara, dolu bloklara, cam bölmelere ve çit kapılarına bağlanır; düz sıralarda direksiz, köşelerde direkli görünür.
+- **Çitler:** Ladin, Huş ve Akasya Çit; tüm ahşap çitler birbirine bağlanır.
+- **Renkli bloklar:** 7 renk Renkli Cam ve Renkli Cam Bölme, 8 renk Pişmiş Kil (kil fırında pişirilir) ve 8 renk Beton (kum ve çakıldan). Yeni Beyaz Boya kemik tozundan yapılır.
+- **Boyama:** eldeki boyayla sağ tıklanan yün, halı, cam, cam bölme, pişmiş kil, beton, perde ve sancak o renge boyanır (beyaz boya beyaza / doğal rengine döndürür).
+- **Mobilya ve süs:** Duvar Rafı (kitaplı), Perde (8 renk; sağ tıkla açılır / kapanır), Avize (tavana asılır, çok parlak), Şömine (sağ tıkla yakılır / söndürülür; yanarken ışık, ısı, kıvılcım), Dolap (27 yuvalı saklama), Sehpa, Çiçekli Vazo, Mum, Sancak (8 renk, duvara asılır).
+- **Yapı Planı:** elde tutulurken iki köşeye sağ tıklanınca aradaki yapı (en çok 32 x 32 x 32) kopyalanır; ardından bakılan yerde yeşil çerçeveyle önizlenir, R ile döndürülür, sağ tıkla kurulur. Kurulum için gereken bloklar çantadan harcanır (geliştirici modunda harcanmaz), eksik malzeme listelenir; dolu hücreler atlanır. C + sağ tık planı temizler. Plan tarayıcıda saklandığından başka dünyalarda da kullanılır.
+- Üretim penceresine **Yapı** kategorisi, geliştirici penceresine "Yapı ve dekorasyon" seti eklendi.
+
 ## 30.7 (0.30.7): Değiştirilebilir tuşlar, dünya kartı düzeltmesi
 - Ayarlar > Kontroller: 22 eylemin tuşu değiştirilebilir (Hareket, Eylemler, Pencereler, Diğer). Tuşa tıklanıp yeni tuşa basılır; Esc vazgeçer, sağ tık varsayılana döndürür; başka eylemdeki tuş seçilirse iki eylemin tuşları yer değiştirir. "Varsayılan tuşlar" düğmesi; değiştirilmiş eylemler işaretlenir. Esc, 1-9 ve fare düğmeleri sabittir. Dokunmatik kontroller de atanmış tuşları kullanır.
 - Dünyalar ekranı: "Sil" düğmesi "Onayla"ya dönünce alt satıra kayıp kartı bozuyordu; düğmeler tek satırda ve sabit genişlikte. "Önceki oturum" düğmesinin kalan kodu da kaldırıldı.

@@ -262,8 +262,8 @@ export class EnvanterEkrani {
     const kat = (o, k) => k === 'hepsi' || (k === 'favori' ? this.favoriler.has(o.i) : o.t.kategori === k);
     /* Sekmeler: her kategoride yapılabilir tarif sayısı */
     /* 0.30.2: kategori şeridi: simge, kısa ad ve yapılabilir sayısı */
-    const KISA = { hepsi: 'Tümü', favori: 'Favori', alet: 'Alet', savas: 'Savaş', blok: 'Blok', malzeme: 'Malzeme', yiyecek: 'Yiyecek', mobilya: 'Mobilya', mekanik: 'Mekanik', elektrik: 'Elektrik' };
-    const SIMGE = { hepsi: 32, alet: 300 };
+    const KISA = { hepsi: 'Tümü', favori: 'Favori', alet: 'Alet', savas: 'Savaş', blok: 'Blok', malzeme: 'Malzeme', yiyecek: 'Yiyecek', yapi: 'Yapı', mobilya: 'Mobilya', mekanik: 'Mekanik', elektrik: 'Elektrik' };
+    const SIMGE = { hepsi: 32, alet: 300, yapi: 70 };
     yaz($('#tarifSekme'), this.sekmeler.map(([k, ad]) => {
       const l = hepsi.filter(o => kat(o, k) && uyar(o)), y = l.filter(o => o.yapilir).length;
       const id = SIMGE[k] && ESYALAR[SIMGE[k]] ? SIMGE[k] : (TARIFLER.find(t => t.kategori === k) || {}).cikti;

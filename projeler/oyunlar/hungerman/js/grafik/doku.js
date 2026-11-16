@@ -1,5 +1,5 @@
 /* HungerMan - prosedürel dokular: tüm blok dokuları, eşya simgeleri ve kırılma çatlakları kodla çizilir (dış görsel dosyası yoktur) */
-import { DOKULAR, T, BLOKLAR, ESYALAR, CIZIM, C_KUP, YUZ_DOKU, YUN_RENKLERI } from '../bloklar.js';
+import { DOKULAR, T, BLOKLAR, ESYALAR, CIZIM, C_KUP, YUZ_DOKU, YUN_RENKLERI, ATLAS_N } from '../bloklar.js';
 import { uretec } from '../rastgele.js';
 
 const D = 16;
@@ -641,20 +641,87 @@ function fidan(p, yaprakRenk, govde) {
   });
 }
 
+/* ---------- 0.31.0: yapı ve dekorasyon dokuları ---------- */
+const karisRenk = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+/* Renkli cam: çerçeve ve parıltı çizgileri; iç kısım seyrek renk noktalarıyla renk verir (kesik çizim) */
+const renkliCam = renk => p => {
+  for (let i = 0; i < D * D * 4; i++) p.d[i] = 0;
+  const c = hex(renk), k = karis(c, 0.75), a = karisRenk(c, [255, 255, 255], 0.45);
+  for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); }
+  for (let y = 2; y < 14; y++) for (let x = 2; x < 14; x++) if ((x * 3 + y * 5) % 7 === 0) p.set(x, y, karis(c, 0.9 + p.r() * 0.2));
+  cizgi(p, 3, 6, 6, 3, a); cizgi(p, 3, 8, 8, 3, a); cizgi(p, 10, 13, 13, 10, a);
+};
+/* Pişmiş kil: mat, hafif lekeli; renkler toprak tonuna yaklaştırılır */
+const pismisKil = renk => p => {
+  const c = karisRenk(hex(renk), [154, 106, 82], 0.38);
+  for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis(c, 0.94 + p.r() * 0.1));
+  for (let i = 0; i < 14; i++) p.set(Math.floor(p.r() * D), Math.floor(p.r() * D), karis(c, 0.86));
+};
+/* Beton: düz ve pürüzsüz, çok ince benekli */
+const beton = renk => p => {
+  const c = hex(renk);
+  for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis(c, 0.97 + p.r() * 0.05));
+  for (let i = 0; i < 8; i++) p.set(Math.floor(p.r() * D), Math.floor(p.r() * D), karis(c, 0.9));
+};
+Object.assign(RESSAM, {
+  akasya_kalas: p => kalas(p, '#b8643a'),
+  cilali_tas: p => {
+    p.doldur('#a4a4a4', 0.025); const k = hex('#7a7a7a'), a = hex('#bcbcbc');
+    for (let i = 0; i < D; i++) { p.set(i, 0, a); p.set(0, i, a); p.set(i, 15, k); p.set(15, i, k); }
+    for (let i = 2; i < 14; i++) { p.set(i, 2, karis(a, 0.97)); p.set(2, i, karis(a, 0.97)); p.set(i, 13, karis(k, 1.12)); p.set(13, i, karis(k, 1.12)); }
+  },
+  /* Parke zemin: 4 x 4 hücrelerde dönüşümlü yatay / dikey tahtalar (hasır örgü) */
+  parke_zemin: p => {
+    const a = hex('#a87a46'), b = hex('#8c6236'), k = hex('#5e3e1e');
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) {
+      const h = ((x >> 2) + (y >> 2)) & 1, s = h ? x & 3 : y & 3, renk = ((h ? x >> 1 : y >> 1) & 1) ? a : b;
+      p.set(x, y, s === 3 ? karis(k, 0.95 + p.r() * 0.1) : karis(renk, 0.92 + p.r() * 0.14));
+    }
+  },
+  kareli_zemin: p => {
+    const a = hex('#e6e2d8'), b = hex('#2c2c32');
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const c = ((x >> 2) + (y >> 2)) & 1 ? b : a; p.set(x, y, karis(c, 0.95 + p.r() * 0.08)); }
+    for (let i = 0; i < D; i++) { p.set(i, 15, karis(b, 0.8)); p.set(15, i, karis(b, 0.8)); }
+  },
+  dolap_on: p => {
+    kalas(p, '#7a5a37'); const a = hex('#a07a4a'), k = hex('#4a321c'), g = hex('#e8c040');
+    for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); p.set(7, i, k); p.set(8, i, karis(a, 0.9)); }
+    for (let y = 2; y < 14; y++) { p.set(2, y, a); p.set(10, y, a); p.set(5, y, karis(k, 1.3)); p.set(13, y, karis(k, 1.3)); }
+    for (let x = 2; x < 6; x++) { p.set(x, 2, a); p.set(x, 13, karis(k, 1.3)); p.set(x + 8, 2, a); p.set(x + 8, 13, karis(k, 1.3)); }
+    p.set(6, 7, g); p.set(6, 8, karis(g, 0.8)); p.set(9, 7, g); p.set(9, 8, karis(g, 0.8));
+  },
+  dolap_yan: p => { kalas(p, '#7a5a37'); const k = hex('#4a321c'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); } },
+  dolap_ust: p => { p.doldur('#6e5032', 0.05); const k = hex('#4a321c'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); } },
+  somine_ic: p => { p.doldur('#2a2220', 0.12); p.lekeler('#1a1412', 18, 2, 0.05); for (let i = 0; i < 5; i++) p.set(Math.floor(p.r() * D), 12 + Math.floor(p.r() * 4), hex('#c8541e')); },
+  mum_govde: p => { p.doldur('#efe6c8', 0.03); for (let y = 0; y < D; y++) { p.set(0, y, hex('#d8ccaa')); p.set(15, y, hex('#d8ccaa')); } for (let x = 3; x < 8; x++) p.set(x, 1 + (x & 1), hex('#fffbe8')); },
+  mum_alev: p => { p.doldur('#ffb83a', 0.06); for (let y = 4; y < 12; y++) for (let x = 5; x < 11; x++) p.set(x, y, hex('#fff1a8')); },
+  kitap_sirt: p => {
+    const R = ['#8a2a24', '#2a4a8a', '#2a6a3a', '#7a5a22', '#5a2a6a', '#8a6a2a', '#2a5a5a', '#6a2a2a'], g = hex('#e8c040');
+    for (let x = 0; x < D; x++) { const c = hex(R[(x >> 1) % R.length]); for (let y = 0; y < D; y++) p.set(x, y, (x & 1) && p.r() < 0.3 ? karis(c, 0.8) : karis(c, 0.92 + p.r() * 0.12)); if (!(x & 1)) { p.set(x, 3, g); p.set(x, 12, g); } }
+  },
+  vazo: p => {
+    p.doldur('#eef2f6', 0.03); const m = hex('#2f5bc0');
+    for (let x = 0; x < D; x++) { p.set(x, 2, m); p.set(x, 13, m); if (x % 4 === 1) for (let y = 5; y < 11; y++) if (Math.abs(y - 8) <= 2 - ((x >> 2) & 1)) p.set(x, y, karis(m, 1.1)); }
+    for (let x = 0; x < D; x += 4) { p.set(x + 3, 7, m); p.set(x + 3, 9, m); p.set(x + 2, 8, m); p.set(x + 4, 8, m); }
+  }
+});
+YUN_RENKLERI.forEach(r => { const ek = r.dok.slice(3); RESSAM['cam' + ek] = renkliCam(r.renk); RESSAM['kil' + ek] = pismisKil(r.renk); RESSAM['beton' + ek] = beton(r.renk); });
+RESSAM.kil_0 = pismisKil('#e8d8c8'); RESSAM.beton_0 = beton('#8e9092');
+
 /* ---------- Atlas ---------- */
 let ATLAS = null;
 const DOSEME = [];
 export function atlas() {
   if (ATLAS) return ATLAS;
   const cv = document.createElement('canvas');
-  cv.width = cv.height = 256;
+  cv.width = cv.height = ATLAS_N * 16;
   const ctx = cv.getContext('2d');
   DOKULAR.forEach((ad, i) => {
     const p = new Piksel(1000 + i * 31);
     (RESSAM[ad] || (q => q.doldur('#ff00ff')))(p);
     const t = p.tuval();
     DOSEME[i] = t;
-    ctx.drawImage(t, (i & 15) * 16, (i >> 4) * 16);
+    ctx.drawImage(t, (i % ATLAS_N) * 16, ((i / ATLAS_N) | 0) * 16);
   });
   ATLAS = cv;
   return cv;
@@ -700,8 +767,8 @@ export function canliDokular(t) {
   for (const [ad, f] of Object.entries(CANLI)) {
     const i = DOKULAR.indexOf(ad); if (i < 0) continue;
     const p = new Piksel(1000 + i * 31); f(p, kare);
-    ctx.clearRect((i & 15) * 16, (i >> 4) * 16, 16, 16);
-    ctx.drawImage(p.tuval(), (i & 15) * 16, (i >> 4) * 16);
+    ctx.clearRect((i % ATLAS_N) * 16, ((i / ATLAS_N) | 0) * 16, 16, 16);
+    ctx.drawImage(p.tuval(), (i % ATLAS_N) * 16, ((i / ATLAS_N) | 0) * 16);
   }
   return true;
 }
@@ -732,8 +799,8 @@ export function mevsimDokulari(m) {
     (l[m] || RESSAM[ad])(p);
     const t = p.tuval();
     DOSEME[i] = t;
-    ctx.clearRect((i & 15) * 16, (i >> 4) * 16, 16, 16);
-    ctx.drawImage(t, (i & 15) * 16, (i >> 4) * 16);
+    ctx.clearRect((i % ATLAS_N) * 16, ((i / ATLAS_N) | 0) * 16, 16, 16);
+    ctx.drawImage(t, (i % ATLAS_N) * 16, ((i / ATLAS_N) | 0) * 16);
   }
   return true;
 }
@@ -866,6 +933,8 @@ const MAL_CIZ = {
   tohum: () => p => { const c = hex('#7aa83a'); for (const [x, y] of [[5, 6], [9, 5], [7, 9], [11, 9], [4, 11], [9, 12]]) { p.set(x, y, c); p.set(x + 1, y, karis(c, 0.8)); p.set(x, y + 1, karis(c, 0.9)); } },
   ekmek: () => p => { cokgen(p, [[2, 9], [4, 6], [9, 4], [13, 5], [14, 8], [12, 11], [6, 12], [3, 12]], '#c98a3e', 0.08); cizgi(p, 6, 7, 7, 9, [150, 95, 40]); cizgi(p, 9, 6, 10, 8, [150, 95, 40]); },
   mektup: () => p => { cokgen(p, [[2, 4], [14, 4], [14, 12], [2, 12]], '#efe6cf', 0.03); cizgi(p, 2, 4, 8, 9, [170, 150, 110]); cizgi(p, 14, 4, 8, 9, [170, 150, 110]); p.set(8, 10, [180, 40, 40]); p.set(7, 10, [180, 40, 40]); },
+  /* 0.31.0: Yapı Planı: mavi kâğıt üzerinde beyaz çizgili kat planı */
+  plan: () => p => { cokgen(p, [[2, 3], [14, 3], [14, 13], [2, 13]], '#2f5bc0', 0.04); const b = [225, 235, 250]; cizgi(p, 4, 5, 12, 5, b); cizgi(p, 4, 5, 4, 11, b); cizgi(p, 4, 11, 12, 11, b); cizgi(p, 12, 5, 12, 11, b); cizgi(p, 8, 5, 8, 8, b); cizgi(p, 8, 8, 12, 8, b); p.set(6, 11, [47, 91, 192]); for (let y = 3; y < 13; y++) p.set(14, y, [30, 60, 140]); },
   kemik: () => p => { kalinCizgi(p, [[4, 12], [11, 5]], '#e8e4d6'); for (const [x, y] of [[3, 11], [4, 13], [2, 12], [11, 3], [12, 5], [13, 4]]) p.set(x, y, [232, 228, 214]); },
   /* 0.18.0 */
   toz: e => p => { const c = hex(e.renk || '#f2c84a'); for (let i = 0; i < 46; i++) { const a = p.r() * Math.PI * 2, r = p.r() * 5; p.set(Math.round(8 + Math.cos(a) * r), Math.round(9 + Math.sin(a) * r * 0.7), karis(c, 0.75 + p.r() * 0.4)); } },
@@ -964,7 +1033,17 @@ const BLOK_SIMGE = {
   fiskiye: p => { dokuBoya(p, T.demir_cubuk, [[2, 5, 14, 6], [7, 6, 9, 14], [5, 14, 11, 15]]); dokuBoya(p, T.batarya_ust, [[6, 3, 10, 6]]); for (const [x, y] of [[2, 2], [4, 1], [12, 1], [14, 3], [8, 0]]) p.set(x, y, [90, 160, 255]); },
   dagitici: (p, id) => { dokuBoya(p, T.salter_govde, [[1, 9, 15, 15]]); dokuBoya(p, T.salter_on, [[2, 8, 14, 9]]); const g = [63, 156, 255], c = [255, 157, 46]; if (BLOKLAR[id].birlestir) { p.set(4, 11, g); p.set(11, 11, g); p.set(8, 13, c); p.set(4, 12, g); p.set(11, 12, g); } else { p.set(8, 11, g); p.set(8, 12, g); p.set(3, 13, c); p.set(8, 14, c); p.set(13, 13, c); } },
   elamba: (p, id) => { dokuBoya(p, T.elamba_a, [[5, 2, 11, 8]]); dokuBoya(p, T.lamba_kap, [[6, 1, 10, 2]]); dokuBoya(p, T.demir_cubuk, [[7, 8, 9, 14], [5, 14, 11, 15]]); },
-  simya: p => { dokuBoya(p, T.parke, [[2, 13, 14, 15]]); dokuBoya(p, T.demir_cubuk, [[7, 2, 9, 13]]); dokuBoya(p, T.simya_sise, [[2, 8, 6, 13], [10, 8, 14, 13]]); }
+  simya: p => { dokuBoya(p, T.parke, [[2, 13, 14, 15]]); dokuBoya(p, T.demir_cubuk, [[7, 2, 9, 13]]); dokuBoya(p, T.simya_sise, [[2, 8, 6, 13], [10, 8, 14, 13]]); },
+  /* 0.31.0: yapı ve dekorasyon */
+  duvar: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 4, 5, 15], [11, 4, 15, 15], [5, 6, 11, 15, 0.85], [1, 3, 5, 4, 1.15], [11, 3, 15, 4, 1.15]]),
+  raf: p => { dokuBoya(p, T.kalas, [[1, 9, 15, 11]]); dokuBoya(p, T.demir_cubuk, [[2, 11, 3, 14], [13, 11, 14, 14]]); dokuBoya(p, T.kitap_sirt, [[2, 3, 8, 9], [9, 5, 13, 9]]); },
+  perde: (p, id) => { dokuBoya(p, T.demir_cubuk, [[1, 1, 15, 2]]); for (let x = 2; x < 14; x++) dokuBoya(p, YUZ_DOKU[id * 6], [[x, 2, x + 1, 15, x % 2 ? 0.82 : 1]]); },
+  avize: p => { dokuBoya(p, T.demir_cubuk, [[7, 0, 9, 6], [2, 9, 14, 10]]); dokuBoya(p, T.altin_blok, [[6, 6, 10, 11]]); dokuBoya(p, T.mum_govde, [[2, 6, 4, 9], [12, 6, 14, 9]]); dokuBoya(p, T.mum_alev, [[2, 4, 4, 6], [12, 4, 14, 6]]); },
+  somine: (p, id) => { dokuBoya(p, T.tas_tugla, [[1, 3, 15, 15]]); dokuBoya(p, T.kesme_tas, [[0, 2, 16, 4]]); dokuBoya(p, T.somine_ic, [[4, 6, 12, 14]]); dokuBoya(p, T.kamp_atesi, [[4, 7, 12, 14]]); },
+  sehpa: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 7, 15, 9], [2, 9, 4, 14, 0.8], [12, 9, 14, 14, 0.8], [4, 11, 12, 12, 0.75]]),
+  vazo: p => { dokuBoya(p, T.vazo, [[4, 8, 12, 15], [5, 6, 11, 8]]); dokuBoya(p, T.yun_y, [[7, 2, 9, 6]]); dokuBoya(p, T.yun_k, [[5, 1, 8, 4]]); dokuBoya(p, T.yun_s, [[9, 2, 12, 4]]); },
+  mum: p => { dokuBoya(p, T.demir_cubuk, [[4, 14, 12, 15]]); dokuBoya(p, T.mum_govde, [[6, 5, 10, 14]]); dokuBoya(p, T.mum_alev, [[7, 2, 9, 5]]); },
+  sancak: (p, id) => { dokuBoya(p, T.kalas, [[1, 0, 15, 2]]); dokuBoya(p, YUZ_DOKU[id * 6], [[3, 2, 13, 13], [4, 13, 12, 14], [5, 14, 11, 15]]); dokuBoya(p, T.altin_blok, [[7, 5, 9, 9], [6, 6, 10, 8]]); }
 };
 /* Kapı: üst ve alt dokular yarı ölçekte üst üste */
 BLOK_SIMGE.kapi = p => { const t = doseme(T.kapi_ust).veri, a = doseme(T.kapi_alt).veri;

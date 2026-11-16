@@ -5,7 +5,9 @@ import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
 import { KABLO, portlar, portBilgi, PORT_AD, kabloUcu, mesafe, yolUzunlugu, kabloMaliyeti } from './kablolar.js';
+import { YapiPlani } from './yapi-plani.js';
 
+const hexRgb = h => { h = (h || '#ffffff').replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255); };
 const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
 const ERISIM = 5;
@@ -25,6 +27,7 @@ export class Etkilesim {
     this.kablo = null;   // 0.26.0: çekilmekte olan kablo { k, i: başlangıç noktası, tur, n: ara noktalar, s: sarkmalar, sark: çekilen parçanın sarkması }
     this.shift = false;  // 0.27.0: Shift basılı mı (düz hizalama)
     this.saldiriBekleme = 0; this.germe = 0; this.okUyari = 0; this.hedefCanli = null; this.hedefTekne = null; this.sagOnceki = false;
+    this.plan = new YapiPlani(this);   // 0.31.0
   }
 
   /* Işın izleme (DDA) */
@@ -286,7 +289,7 @@ export class Etkilesim {
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
     if (b.ekin === 3) this.olay('hasat');
     this.istat('kirilan');
-    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z, !b.elektrik && !b.mezar)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
+    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z, !b.elektrik && !b.mezar && !b.dolap)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
     if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z, b.xp ? buyuSeviye(this.envanter.seciliYuva(), 'servet') : 0);
@@ -301,11 +304,14 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y + 1, h.z, 0); if (BLOKLAR[d.blok(h.x, h.y + 2, h.z)].sekil === 'kapi') d.blokKoy(h.x, h.y + 2, h.z, 0);
       this.dusur(88, h.x, h.y + 1, h.z);
     }
-    if ((BITKI[ust] || (BLOKLAR[ust] && ((BLOKLAR[ust].mesale && CIZIM[ust] !== C_KUP && !BLOKLAR[ust].gecit) || ZEMIN_MEK[BLOKLAR[ust].mekanik]))) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
+    if ((BITKI[ust] || (BLOKLAR[ust] && ((BLOKLAR[ust].mesale && CIZIM[ust] !== C_KUP && !BLOKLAR[ust].gecit && !BLOKLAR[ust].destekSiz) || ZEMIN_MEK[BLOKLAR[ust].mekanik]))) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
       d.blokKoy(h.x, h.y + 1, h.z, BLOKLAR[ust].suIcinde ? 7 : 0);
       this.dusur(ust, h.x, h.y + 1, h.z);
       if (ust === 28 || ust === 29) { /* çalı tamamen düşer */ }
     }
+    /* 0.31.0: alttaki avize tavanı kalmayınca düşer */
+    const altB = BLOKLAR[d.blok(h.x, h.y - 1, h.z)];
+    if (altB && altB.asili) { const ai = d.blok(h.x, h.y - 1, h.z); d.blokKoy(h.x, h.y - 1, h.z, 0); this.dusur(ai, h.x, h.y - 1, h.z); }
   }
 
   /* servet: Servet büyüsü seviyesi (cevherlerde blok dışındaki ürünler çoğalır) */
@@ -385,6 +391,16 @@ export class Etkilesim {
     const s = env.seciliYuva(), e = s && ESYALAR[s.id];
     /* 0.26.0: elde kablo varken şalter açılıp kapanmaz (0.29.0: kablo tıkları guncelle'de işlenir) */
     if (e && e.tur === 'kablo') return false;
+    /* 0.31.0: Yapı Planı: köşe seçme, kopyalama ve kurma */
+    if (e && e.tur === 'plan') return this.plan.kullan(h, g);
+    /* 0.31.0: boyanabilir bloklar (yün, halı, cam, cam bölme, pişmiş kil, beton, perde, sancak) eldeki boyanın rengine boyanır */
+    if (h && e && (s.id === 346 || (s.id >= 321 && s.id <= 327)) && BLOKLAR[h.id].boya) {
+      const yeni = BLOKLAR[h.id].boya(s.id === 346 ? 0 : s.id - 320);
+      if (yeni != null && yeni !== h.id && this.dunya.blokKoy(h.x, h.y, h.z, yeni)) {
+        env.seciliAzalt(1); this.ses.koy(BLOKLAR[yeni].ses); this.dusenler.renkliParcacik(hexRgb(e.renk), h.x + 0.5, h.y + 0.6, h.z + 0.5, 8);
+        return true;
+      }
+    }
     /* İstasyonlar */
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
     /* ---------- 0.21.0: tarım ve hayvancılık ---------- */
@@ -536,9 +552,9 @@ export class Etkilesim {
       const sid = this.yuzeyId(eb, h, f);
       if (sid != null) id = sid;
       else if (yid != null && eb.sekil !== 'kapi') id = yid;
-      else if (eb.sekil === 'tablo') {
+      else if (eb.sekil === 'tablo' || eb.duvara) {
         const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
-        if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tablo katı bir duvarın yan yüzüne asılır.'); return true; }
+        if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim(`${eb.sekil === 'tablo' ? 'Tablo' : eb.ad} katı bir duvarın yan yüzüne asılır.`); return true; }
         id = eb.taban + yi;
       }
       else if (eb.sekil === 'yarim') id = eb.taban + (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? 1 : 0);
@@ -564,7 +580,9 @@ export class Etkilesim {
       if (mevcut !== 0 && !(mb.degistirilebilir) && !(SIVI[mevcut] && !BITKI[mevcut] && !bitki)) return false;
       if (y < 1 || y >= 127) return false;
       const alt = d.blok(x, y - 1, z);
-      if (BLOKLAR[id].mesale && CIZIM[id] !== C_KUP && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
+      /* 0.31.0: avize tavana asılır */
+      if (BLOKLAR[id].asili) { const ust = d.blok(x, y + 1, z); if (!(KATI[ust] && OPAK[ust])) { this.arayuz.bildirim(`${BLOKLAR[id].ad} katı bir tavana asılır.`); return true; } }
+      else if (BLOKLAR[id].mesale && CIZIM[id] !== C_KUP && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
       if (ZEMIN_MEK[BLOKLAR[id].mekanik] && !(KATI[alt] && OPAK[alt])) { this.arayuz.bildirim(`${BLOKLAR[id].ad} katı bir bloğun üstüne konur.`); return true; }
       if (suBitkisi) {
         if (mevcut !== 7 || !KATI[alt]) { this.arayuz.bildirim('Bu bitki su altında katı bir zemine dikilir.'); return true; }
@@ -600,6 +618,10 @@ export class Etkilesim {
     if (eb.sekil === 'jenerator') return 860 + ((f + 2) % 4) * 2;   // 0.28.0: kontrol paneli oyuncuya bakar
     if (eb.sekil === 'eocak') return OCAK_ID((f + 2) % 4, 0);   // 0.29.0: ön yüz oyuncuya bakar
     if (eb.sekil === 'eisitici') return ISITICI_ID((f + 2) % 4, 0);
+    /* 0.31.0: perde bakılan yöndeki kenara, şöminenin ve dolabın önü oyuncuya */
+    if (eb.sekil === 'perde') return eb.taban + f * 2;
+    if (eb.sekil === 'somine') return eb.taban + ((f + 2) % 4) * 2;
+    if (eb.dolap) return eb.taban + (f + 2) % 4;
     return null;
   }
   /* ---------- 0.26.0 / 0.27.0: Rust tarzı kablo çekme ----------
@@ -716,6 +738,8 @@ export class Etkilesim {
 
   /* 0.26.0: tıklanan yüzeye göre biçim alan bloklar: şalter (duvar / ayaklı), lamba (zemin / tavan / duvar) */
   yuzeyId(eb, h, f) {
+    /* 0.31.0: merdiven bir bloğun alt yüzüne ya da yan yüzün üst yarısına konunca ters (tavana yaslanan) olur */
+    if (eb.sekil === 'merdiven' && eb.ters != null) return (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? eb.ters : eb.taban) + f;
     if (eb.sekil !== 'salter' && eb.sekil !== 'elamba' && eb.sekil !== 'algilayici') return null;
     const yi = h.ny === 0 ? YONLER.findIndex(([a, b]) => a === h.nx && b === h.nz) : -1, duvar = yi >= 0 && KATI[h.id] && OPAK[h.id];
     if (eb.sekil === 'algilayici') return duvar ? 872 + yi * 6 : 872 + (4 + (f + 2) % 4) * 6;   // 0.28.0
@@ -723,7 +747,7 @@ export class Etkilesim {
     return h.ny === -1 && KATI[h.id] ? 842 : duvar ? 844 + yi * 2 : 620;
   }
   /* Elde tutulan eşya R ile döndürülebilir mi */
-  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (e.tur === 'cihaz' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
+  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (e.tur === 'cihaz' || e.tur === 'plan' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
   dondur() { this.donus = (this.donus + 1) % 4; return this.donus; }
 
   /* 0.25.0: cihazın kurulacağı yer ve kurulabilirliği: { yon, x, y, z (kök), hucreler, gecerli, neden } */
@@ -830,6 +854,9 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y, h.z, 105 + b.eksen * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true;
     }
     if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
+    /* 0.31.0: perde açılıp kapanır, şömine yakılıp söndürülür */
+    if (b.sekil === 'perde') { d.blokKoy(h.x, h.y, h.z, b.taban + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.koy('yun'); return true; }
+    if (b.sekil === 'somine') { d.blokKoy(h.x, h.y, h.z, b.taban + b.yon * 2 + (b.acik ? 0 : 1)); if (b.acik) this.ses.koy('tas'); else if (this.ses.cakmak) this.ses.cakmak(); else this.ses.koy('odun'); return true; }
     /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
     /* 0.28.0: Hareket algılayıcının kipi sağ tıkla değişir */
     if (b.elektrik === 'algilayici') { const m = (b.kip + 1) % 3; d.blokKoy(h.x, h.y, h.z, h.id + (m - b.kip) * 2); this.ses.kol(true); this.arayuz.bildirim(`Hareket Algılayıcı: ${['herkesi', 'yalnızca oyuncuları', 'yalnızca canavarları'][m]} algılar.`); return true; }

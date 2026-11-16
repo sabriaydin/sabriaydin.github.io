@@ -3,7 +3,7 @@
    Vücut ısısı (oyun/hayatta.js) bu değere doğru yavaşça kayar. */
 import { BY } from '../dunya/uretici.js';
 import { DENIZ, diyarMi } from '../sabitler.js';
-import { OCAK_ID, ISITICI_ID } from '../bloklar.js';
+import { OCAK_ID, ISITICI_ID, BLOKLAR } from '../bloklar.js';
 
 /* Biyomların ortalama gündüz sıcaklığı */
 const BIYOM_ISI = {
@@ -15,6 +15,7 @@ const MEVSIM_ISI = [0, 7, -4, -12];   // ilkbahar, yaz, sonbahar, kış
 const KAYNAK = { 48: [20, 6], 46: [5, 3], 59: [24, 5], 521: [12, 4], 159: [3, 3], 219: [2, 2], 514: [3, 3], 595: [3, 3], 594: [6, 3], 189: [-7, 4], 197: [-5, 3] };
 for (let k = 0; k < 4; k++) KAYNAK[564 + k] = [4, 3];
 for (let f = 0; f < 4; f++) { KAYNAK[ISITICI_ID(f, 1)] = [16, 6]; KAYNAK[OCAK_ID(f, 1)] = [6, 3]; }   // 0.24.0: çalışan ısıtıcı ve elektrikli ocak (0.29.0: yönlü)
+for (const b of BLOKLAR) if (b && b.isi) KAYNAK[b.id] = b.isi;   // 0.31.0: yanan şömine
 /* Zırh yalıtımı: deri sıcak tutar, metal az */
 const YALITIM = id => (id >= 400 && id <= 403 ? 3 : id >= 404 && id <= 415 ? 1 : 0);
 

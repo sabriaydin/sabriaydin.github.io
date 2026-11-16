@@ -1165,7 +1165,7 @@ body.gostergesiz #ogretici { display: none; }
 .uretimSecim input:checked + i::after { transform: translateX(13px); background: #fff; }
 .uretimSecim input:focus-visible + i { outline: 2px solid var(--vurgu); outline-offset: 2px; }
 
-#tarifSekme { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; margin-bottom: 10px; padding: 4px; border: 2px solid #000; border-radius: 10px; background: rgba(0, 0, 0, .28); }
+#tarifSekme { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 4px; margin-bottom: 10px; padding: 4px; border: 2px solid #000; border-radius: 10px; background: rgba(0, 0, 0, .28); }
 #tarifSekme button { position: relative; display: grid; justify-items: center; gap: 3px; min-width: 0; padding: 6px 2px 5px; border: 0; border-radius: 7px; background: transparent; color: var(--soluk); font: 600 .68rem var(--govde); cursor: pointer; transition: background .12s, color .12s; }
 #tarifSekme button img { width: 24px; height: 24px; image-rendering: pixelated; transition: transform .12s; }
 #tarifSekme button .katYildiz { height: 24px; font-size: 1.2rem; line-height: 24px; color: #ffd257; }

@@ -3,7 +3,7 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST, SU_SEVIYE } from '../bloklar.js';
+import { ATLAS_N, OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST, SU_SEVIYE } from '../bloklar.js';
 import { sekilKutulari } from '../sekiller.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
@@ -13,7 +13,7 @@ for (const b of BLOKLAR) if (b && (b.sekil === 'merdiven' || b.sekil === 'yarim'
 /* 0.18.0: kendi ışığıyla parlayan bloklar (geçit, ışıltaş, magma): gölgelenmez, lav gibi çizilir */
 const PARLAK = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && b.parlak) PARLAK[b.id] = 1;
-const EPS = 0.5 / 256;
+const EPS = 0.5 / (ATLAS_N * 16);
 
 /* Yüzler: +x, -x, +y, -y, +z, -z (dışarıdan bakınca saat yönünün tersine) */
 const YUZLER = [
@@ -46,9 +46,9 @@ class Tampon {
 }
 
 function dokuUV(t, lu, lv, out) {
-  const tx = t & 15, ty = t >> 4;
-  const u0 = tx / 16 + EPS, u1 = (tx + 1) / 16 - EPS;
-  const vb = 1 - (ty + 1) / 16 + EPS, vt = 1 - ty / 16 - EPS;
+  const tx = t % ATLAS_N, ty = (t / ATLAS_N) | 0;
+  const u0 = tx / ATLAS_N + EPS, u1 = (tx + 1) / ATLAS_N - EPS;
+  const vb = 1 - (ty + 1) / ATLAS_N + EPS, vt = 1 - ty / ATLAS_N - EPS;
   out.push(u0 + lu * (u1 - u0), vb + lv * (vt - vb));
 }
 

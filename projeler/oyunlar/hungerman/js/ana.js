@@ -574,7 +574,7 @@ function oyunBaslat(v) {
     'Çapa ile işlenen tarla toprağında ekinler daha hızlı büyür; suya yakın tarla daha da hızlıdır.', 'Hayvanlar sevdikleri yemi tutan oyuncuyu izler; iki beslenen hayvan yavru yapar.', 'Kurt kemikle evcilleşip sadık bir köpeğe dönüşür; kedi balıkla evcilleşir. Sağ tık ile oturtulur ya da kaldırılır.', 'Vahşi at boş elle sağ tıklanarak ehlileştirilir; elma, buğday ya da havuç güvenini artırır. Eyer takılan ata binilir, C ile inilir.', 'Tencerede pişen yemekler açlığı doyurmanın yanında yenilenme, tokluk ve nefes gibi etkiler verir.', 'Sandalye ve koltuğa sağ tık ile oturulur; hareket edince kalkılır.', 'Tarif Kitabı B tuşuyla açılır; bir tarifi takibe alınca malzemeleri ekranın solunda izlenir.', 'Kol ve bakır telle kapılar uzaktan açılır; basınç plakası üstüne basılınca güç verir.', 'Ters çevirici, arkasından güç gelmediğinde önüne güç verir; kendine bağlanınca saat devresi olur.', 'Müzik kutusu altındaki bloğa göre farklı çalgı sesi çıkarır.', 'Yeraltı Diyarı’nın tek girişi, Issız Deniz’in ortasındaki Lanetli Ada’daki kadim geçittir; ada çevresinde deniz kararır.', 'Yeraltı Diyarı’nda 1 blok yürümek dünyada 8 bloğa denk gelir; uzak yolculuklar için kestirmedir.', 'Kor Ruhlarının ateş topları tutuşturur; Ateşe Dayanıklılık İksiri korur.', 'Kışın göller donar ve ekinler çok yavaş büyür; ilkbaharda tarlalar en verimli hâlindedir.', 'Kül kumu yavaşlatır; magma bloğunun üstünde eğilerek yürünürse yakmaz.',
     'İnekler ve koyunlar buğday, domuzlar havuç ya da patates, tavuklar tohum, tavşanlar havuç sever.', 'Beslenen hayvanlar ve yavruları kaybolmaz.',
     'Örs ile aletler ve zırhlar deneyim seviyesi karşılığında onarılır.', 'Simya masası yakınında hız, gece görüşü, su altında nefes, ateşe dayanıklılık ve güç iksirleri yapılır.',
-    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.'];
+    'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.', 'Merdiven bir bloğun alt yüzüne konunca ters döner; tavan kenarları ve kemerler için kullanılır.', 'Eldeki boyayla yün, cam, pişmiş kil, beton, perde ve sancağa sağ tıklanınca blok o renge boyanır.', 'Yapı Planı ile bir yapının iki köşesi seçilip kopyalanır; R ile döndürülüp başka bir yere kurulur.', 'Şömine sağ tıkla yakılır; yanan şömine odayı aydınlatır ve ısıtır.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
 
   const dunya = new Dunya(v.tohum, sahne);
@@ -694,7 +694,7 @@ function oyunBaslat(v) {
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
       if (oyun.istemci) { oyun.ag.sandikIste(x, y, z); return; }
       if (oyun.ag && !oyun.ag.sandikKilitle(k)) { hud.bildirim('Bu sandığı başka bir oyuncu kullanıyor.'); return; }
-      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k, kural: kapFiltresiId(dunya.blok(x, y, z)), blok: dunya.blok(x, y, z) });
+      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik || BLOKLAR[dunya.blok(x, y, z)].dolap ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k, kural: kapFiltresiId(dunya.blok(x, y, z)), blok: dunya.blok(x, y, z) });
       sandikBasarim(x, y, z);
     },
     /* 0.26.0: kablolar: çok oyunculu istemcide istek sunucuya gider; sökülen kablo envantere geri döner */
@@ -1118,6 +1118,7 @@ function adim(t) {
       const u = Math.hypot(m[0] - gp.x, m[1] - gp.y, m[2] - gp.z); if (u > 18) continue;
       const id = o.dunya.blok(Math.floor(m[0]), Math.floor(m[1] - 0.6), Math.floor(m[2]));
       if (id === 48) { if (Math.random() < 0.55) o.dusenler.atesParcacik(Math.floor(m[0]) + 0.5, Math.floor(m[1] - 0.6) + 0.55, Math.floor(m[2]) + 0.5, false); if (Math.random() < 0.35) o.dusenler.atesParcacik(Math.floor(m[0]) + 0.5, Math.floor(m[1] - 0.6) + 0.9, Math.floor(m[2]) + 0.5, true); }
+      else if (BLOKLAR[id] && BLOKLAR[id].sekil === 'somine' && BLOKLAR[id].acik) { const [ox, oz] = [[0, -0.1], [0.1, 0], [0, 0.1], [-0.1, 0]][BLOKLAR[id].yon]; if (Math.random() < 0.4) o.dusenler.atesParcacik(Math.floor(m[0]) + 0.5 + ox, Math.floor(m[1] - 0.6) + 0.3, Math.floor(m[2]) + 0.5 + oz, Math.random() < 0.3); }   // 0.31.0: şömine
       else if (id === 46 && Math.random() < 0.12) o.dusenler.atesParcacik(Math.floor(m[0]) + 0.5, Math.floor(m[1] - 0.6) + 0.72, Math.floor(m[2]) + 0.5, Math.random() < 0.4);
     }
   }
@@ -1160,7 +1161,7 @@ function adim(t) {
     }
     o.cihazCizici.onizleme(ayar.onizleme !== false && etkin && !o.etkilesim.kablo ? o.etkilesim.onizlemeBilgisi() : null);
     /* 0.26.0: kablolar, çekilen kablonun önizlemesi ve elde kablo varken bakılan kablonun vurgusu */
-    const E = o.etkilesim, kabloElde = o.envanter.seciliId() === KABLO.esya;
+    const E = o.etkilesim, kabloElde = o.envanter.seciliId() === KABLO.esya, planElde = o.envanter.seciliId() === 345;
     E.shift = !!(tus.ShiftLeft || tus.ShiftRight);
     if (E.kablo && !kabloElde) E.kabloIptal();
     o.cihazCizici.kablolariCiz(o.kablolar, o.isik);
@@ -1172,7 +1173,9 @@ function adim(t) {
     const pAd = p => `${p.ad} · <b>${p.tur === 'cikis' ? 'Çıkış' : 'Giriş'}</b>${p.dolu ? ' (dolu)' : ''}`, sr = v => v.toFixed(1).replace('.', ',');
     o.hud.kabloIpucu(kon ? `Kablo <b>${sr(kon.uz)}</b> / ${KABLO.toplam} blok · <b>${kon.maliyet}</b> kablo · sarkma <b>${kon.sark ? sr(kon.sark) + ' blok' : 'gergin'}</b>${E.shift ? ' · düz hizalı' : ''}${kon.port ? ' → ' + pAd(kon.port) : ''}${kon.gecerli ? '' : ` · <em>${kon.neden}</em>`}<span>Sol tık: karşı noktaya bağla / yüzeye ara nokta · Sağ tık: son noktayı geri al · Shift basılı: düz çek · Shift + tekerlek: sarkma · R: iptal</span>` :
       port ? `${pAd(port)}<span>${port.dolu ? 'Sağ tık: takılı kabloyu sök' : 'Sol tık: kablo çekmeye başla'}</span>` :
-      kabloElde && etkin ? 'Elektrik Kablosu<span>Bir cihazın mavi (giriş) ya da turuncu (çıkış) noktasına sol tıklayınız · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' : null);
+      kabloElde && etkin ? 'Elektrik Kablosu<span>Bir cihazın mavi (giriş) ya da turuncu (çıkış) noktasına sol tıklayınız · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' :
+      planElde && etkin ? E.plan.ipucu() : null);
+    E.plan.guncelle(etkin);   // 0.31.0: Yapı Planı çerçevesi
   }
   /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi */
   const eh = o.etkilesim.hedef, ebl = eh && !hc && !o.fotoModu && (kilitli || dokun.aktif) ? BLOKLAR[eh.id] : null;

@@ -1,10 +1,10 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME, YUN_RENKLERI } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
 
 export const GRUPLAR = {
-  kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39] },
+  kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
   kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144] }
 };
 export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere' };
@@ -17,7 +17,7 @@ export const istasyonMetni = t => istasyonlar(t).map(k => ISTASYON_ADI[k]).join(
 export const ELOCAK = { aktif: false };
 export const girdiListesi = t => (ELOCAK.aktif && istasyonlar(t).some(k => k === 'firin' || k === 'ates') && t.girdi.length > 1 ? t.girdi.filter(([g]) => g !== 257) : t.girdi);
 
-export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['mobilya', 'Mobilya'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik']];
+export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['yapi', 'Yapı'], ['mobilya', 'Mobilya'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik']];
 
 const R = [];
 const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, girdi, istasyon: istasyon || null, kategori });
@@ -240,6 +240,41 @@ t(518, 4, [[512, 4]], 'firin', 'blok');
 t(519, 1, [[518, 2]], 'masa', 'blok');
 t(474, 1, [[472, 3], [264, 1], [256, 1]], 'masa', 'savas');
 t(335, 1, [[331, 1], [472, 1]], 'simya', 'yiyecek');
+
+/* ---------- 0.31.0: Yapı ve Dekorasyon (sona eklenir; tarif sırası favorilerle uyumlu kalır) ---------- */
+const Y = YAPI_ID;
+t(Y.akasyaKalas, 4, [[144, 1]], null, 'blok');
+t(Y.cilaliTas, 4, [[2, 4], [257, 1]], 'firin', 'blok');
+t(Y.parkeZemin, 4, [['kalas', 4]], 'masa', 'yapi');
+t(Y.kareliZemin, 4, [[37, 2], [257, 2]], 'masa', 'yapi');
+/* Merdiven, yarım blok, duvar ve çit */
+YAPI_MALZEME.forEach(m => { t(m.merdiven, 4, [[m.taban, 6]], 'masa', 'yapi'); t(m.yarim, 6, [[m.taban, 3]], 'masa', 'yapi'); });
+DUVAR_MALZEME.forEach(m => t(m.duvar, 6, [[m.taban, 6]], 'masa', 'yapi'));
+CIT_MALZEME.forEach(m => t(m.cit, 3, [[m.taban, 4], [256, 2]], 'masa', 'yapi'));
+/* Renkli cam, pişmiş kil ve beton */
+t(Y.kil, 4, [[23, 4], [257, 1]], 'firin', 'blok');
+t(Y.beton, 8, [[5, 4], [6, 4]], 'masa', 'blok');
+t(346, 2, [[296, 1]], null, 'malzeme');
+YUN_RENKLERI.forEach((r, i) => {
+  t(Y.cam + i, 8, [[34, 8], [r.boya, 1]], 'masa', 'blok');
+  t(Y.bolme + i, 16, [[Y.cam + i, 6]], 'masa', 'blok');
+  t(Y.kil + i + 1, 8, [[Y.kil, 8], [r.boya, 1]], 'masa', 'blok');
+  t(Y.beton + i + 1, 8, [[Y.beton, 8], [r.boya, 1]], 'masa', 'blok');
+});
+/* Mobilya ve süs */
+t(Y.raf, 2, [['kalas', 3], [256, 2]], 'masa', 'mobilya');
+RENK8.forEach((r, c) => {
+  t(Y.perde + c * 8, 1, [[c ? 114 + c - 1 : 49, 3], [256, 1]], 'masa', 'mobilya');
+  t(Y.sancak + c * 4, 1, [[c ? 114 + c - 1 : 49, 6], [256, 1]], 'masa', 'mobilya');
+});
+t(Y.mum, 2, [[483, 1], [284, 1]], null, 'mobilya');
+t(Y.avize, 1, [[261, 4], [263, 1], [Y.mum, 4]], 'masa', 'mobilya');
+t(Y.somine, 1, [[35, 8], [37, 1], ['kutuk', 2]], 'masa', 'mobilya');
+t(Y.dolap, 1, [['kalas', 6], [50, 1]], 'masa', 'mobilya');
+t(Y.sehpa, 1, [['kalas', 2], [256, 2]], 'masa', 'mobilya');
+t(Y.vazo, 1, [[Y.kil, 2], [26, 1], [27, 1]], 'masa', 'mobilya');
+/* Yapı Planı */
+t(345, 1, [[256, 2], [282, 1], [325, 1]], 'masa', 'alet');
 
 export const TARIFLER = R;
 

@@ -1,7 +1,8 @@
 /* HungerMan - blok, eşya ve alet tanımları (ana iş parçacığı ve işçiler ortak kullanır) */
 import { CIHAZ, hucreYerel } from './cihazlar.js';
 
-/* ---------- Doku atlası döşeme dizinleri (16 x 16 döşeme) ---------- */
+/* ---------- Doku atlası döşeme dizinleri (0.31.0: 32 x 32 döşeme, 512 piksel) ---------- */
+export const ATLAS_N = 32;
 export const DOKULAR = [
   'cimen_ust', 'cimen_yan', 'toprak', 'tas', 'anakaya', 'kum', 'cakil', 'su',
   'mese_yan', 'mese_ust', 'mese_yaprak', 'ladin_yan', 'ladin_ust', 'ladin_yaprak', 'hus_yan', 'hus_ust',
@@ -55,7 +56,13 @@ export const DOKULAR = [
   /* 0.28.0: jeneratör ve algılayıcı */
   'jen_govde', 'jen_on', 'sensor', 'sensor_a',
   /* 0.29.0: elektrikli ocak ve ısıtıcı */
-  'ocak_cam', 'ocak_cam_a', 'isitici_izgara', 'isitici_izgara_a'
+  'ocak_cam', 'ocak_cam_a', 'isitici_izgara', 'isitici_izgara_a',
+  /* 0.31.0: yapı ve dekorasyon */
+  'akasya_kalas', 'cilali_tas', 'parke_zemin', 'kareli_zemin',
+  'cam_k', 'cam_t', 'cam_s', 'cam_y', 'cam_m', 'cam_mo', 'cam_si',
+  'kil_0', 'kil_k', 'kil_t', 'kil_s', 'kil_y', 'kil_m', 'kil_mo', 'kil_si',
+  'beton_0', 'beton_k', 'beton_t', 'beton_s', 'beton_y', 'beton_m', 'beton_mo', 'beton_si',
+  'dolap_on', 'dolap_yan', 'dolap_ust', 'somine_ic', 'mum_govde', 'mum_alev', 'kitap_sirt', 'vazo'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -393,8 +400,101 @@ export const AKAN_SU = L => 933 + L, DUSEN_SU = 941;
 for (let L = 1; L <= 7; L++) blok(AKAN_SU(L), { ad: 'Akan Su', dok: 'su', cizim: C_SIVI, kati: false, opak: false, ayniGizle: true, sivi: true, sertlik: -1, ses: 'su', akis: L, gizli: true, harita: 7, dusur: () => [] });
 blok(DUSEN_SU, { ad: 'Akan Su', dok: 'su', cizim: C_SIVI, kati: false, opak: false, ayniGizle: true, sivi: true, sertlik: -1, ses: 'su', akis: 8, dusen: true, gizli: true, harita: 7, dusur: () => [] });
 
+/* ---------- 0.31.0: Yapı ve Dekorasyon ----------
+   Kimlikler 942'den başlayarak sırayla ayrılır (sıra değişmez; kayıtlarla uyum için yeni bloklar yalnızca sona eklenir).
+   RENK8: 0 beyaz / doğal, 1-7 YUN_RENKLERI sırası. Boyanabilir bloklar eldeki boyayla sağ tıklanınca renk değiştirir (boya(k): k renginin kimliği). */
+let YENI_ID = 942;
+const ayir = n => { const s = YENI_ID; YENI_ID += n; return s; };
+export const RENK8 = [{ ad: 'Beyaz', ek: '0', renk: '#e9e6df' }, ...YUN_RENKLERI.map(r => ({ ad: r.ad, ek: r.dok.slice(4), renk: r.renk }))];
+const boyaAile = idler => idler.forEach((id, k) => { B[id].renk8 = k; B[id].boya = c => idler[c]; });
+const Y = {};   // 0.31.0 kimlik tablosu (uretim.js ve diğer modüller kullanır)
+/* Yeni temel bloklar */
+Y.akasyaKalas = ayir(1); blok(Y.akasyaKalas, { ad: 'Akasya Kalası', dok: 'akasya_kalas', sertlik: 2, alet: 'balta', ses: 'odun', harita: 14 });
+Y.cilaliTas = ayir(1); blok(Y.cilaliTas, { ad: 'Cilalı Taş', dok: 'cilali_tas', sertlik: 1.8, alet: 'kazma', seviye: 1, ses: 'tas', harita: 2 });
+Y.parkeZemin = ayir(1); blok(Y.parkeZemin, { ad: 'Parke Zemin', dok: 'parke_zemin', sertlik: 2, alet: 'balta', ses: 'odun', harita: 14 });
+Y.kareliZemin = ayir(1); blok(Y.kareliZemin, { ad: 'Kareli Zemin', dok: 'kareli_zemin', sertlik: 1.8, alet: 'kazma', seviye: 1, ses: 'tas', harita: 37 });
+/* Renkli cam ve renkli cam bölme (7 renk; 0: sıradan cam / cam bölme) */
+Y.cam = ayir(7); Y.bolme = ayir(7);
+YUN_RENKLERI.forEach((r, i) => {
+  blok(Y.cam + i, { ad: `${r.ad} Cam`, dok: 'cam' + r.dok.slice(3), opak: false, kesik: true, ayniGizle: true, sertlik: 0.3, ses: 'cam', dusur: () => [], bolmeAile: true, harita: 34 });
+  blok(Y.bolme + i, { ad: `${r.ad} Cam Bölme`, dok: 'cam' + r.dok.slice(3), cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'cam', sekil: 'bolme', dusur: () => [], bolmeAile: true, harita: 34 });
+});
+/* Pişmiş kil ve beton (8 renk) */
+Y.kil = ayir(8); Y.beton = ayir(8);
+RENK8.forEach((r, i) => {
+  blok(Y.kil + i, { ad: i ? `${r.ad} Pişmiş Kil` : 'Pişmiş Kil', dok: 'kil_' + r.ek, sertlik: 1.4, alet: 'kazma', seviye: 1, ses: 'tas', harita: 163 });
+  blok(Y.beton + i, { ad: i ? `${r.ad} Beton` : 'Beton', dok: 'beton_' + r.ek, sertlik: 1.8, alet: 'kazma', seviye: 1, ses: 'tas', harita: i ? 114 + i - 1 : 2 });
+});
+/* Merdiven (4 yön + 4 ters yön) ve yarım blok (alt / üst) */
+export const YAPI_MALZEME = [
+  { ad: 'Ladin', taban: 38 }, { ad: 'Huş', taban: 39 }, { ad: 'Akasya', taban: Y.akasyaKalas }, { ad: 'Taş', taban: 2 }, { ad: 'Kesme Taş', taban: 37 },
+  { ad: 'Yosunlu Parke Taş', taban: 60 }, { ad: 'Kiremit', taban: 51 }, { ad: 'Kül Tuğlası', taban: 518 }, { ad: 'Cilalı Taş', taban: Y.cilaliTas }, { ad: 'Beton', taban: Y.beton }
+];
+const yapiOrtak = t => ({ dok: t.dok, cizim: C_SEKIL, opak: false, sertlik: t.sertlik, alet: t.alet, seviye: t.seviye, ses: t.ses, harita: t.id < 256 ? t.id : t.harita || 2 });
+YAPI_MALZEME.forEach(m => {
+  const t = B[m.taban], o = yapiOrtak(t), mt = ayir(8), yt = ayir(2);
+  m.merdiven = mt; m.yarim = yt;
+  for (let f = 0; f < 4; f++) blok(mt + f, { ...o, ad: `${m.ad} Merdiven`, sekil: 'merdiven', yon: f, taban: mt, ters: mt + 4, gizli: f > 0, dusur: () => [[mt, 1]] });
+  for (let f = 0; f < 4; f++) blok(mt + 4 + f, { ...o, ad: `${m.ad} Merdiven`, sekil: 'merdiven', yon: f, ust: 1, taban: mt, ters: mt + 4, gizli: true, dusur: () => [[mt, 1]] });
+  for (let u = 0; u < 2; u++) blok(yt + u, { ...o, ad: `${m.ad} Yarım Blok`, sekil: 'yarim', ust: u, taban: yt, cift: m.taban, gizli: u > 0, dusur: () => [[yt, 1]] });
+});
+/* Eski merdivenlerin ters (tavana yaslanan) biçimleri */
+for (const mt of [70, 74, 78, 166, 190]) {
+  const ts = ayir(4), t = B[mt];
+  for (let f = 0; f < 4; f++) { B[mt + f].ters = ts; blok(ts + f, { ...t, id: ts + f, yon: f, ust: 1, ters: ts, gizli: true, harita: t.harita }); }
+}
+/* Duvarlar: komşu duvarlara ve dolu bloklara bağlanır */
+export const DUVAR_MALZEME = [
+  { ad: 'Parke Taş', taban: 15 }, { ad: 'Taş Tuğla', taban: 35 }, { ad: 'Yosunlu Parke Taş', taban: 60 }, { ad: 'Kiremit', taban: 51 },
+  { ad: 'Kül Tuğlası', taban: 518 }, { ad: 'Kum Taşı', taban: 24 }, { ad: 'Cilalı Taş', taban: Y.cilaliTas }, { ad: 'Taş', taban: 2 }
+];
+DUVAR_MALZEME.forEach(m => { m.duvar = ayir(1); blok(m.duvar, { ...yapiOrtak(B[m.taban]), ad: `${m.ad} Duvar`, sekil: 'duvar' }); });
+/* Ahşap çitler (meşe çitle birbirine bağlanır) */
+export const CIT_MALZEME = [{ ad: 'Ladin', taban: 38 }, { ad: 'Huş', taban: 39 }, { ad: 'Akasya', taban: Y.akasyaKalas }];
+CIT_MALZEME.forEach(m => { m.cit = ayir(1); blok(m.cit, { ad: `${m.ad} Çit`, dok: B[m.taban].dok, cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'balta', ses: 'odun', sekil: 'cit', harita: 14 }); });
+/* Mobilya ve süs */
+const MOB = { cizim: C_SEKIL, opak: false, sertlik: 1.2, alet: 'balta', ses: 'odun' };
+Y.raf = ayir(4);
+for (let f = 0; f < 4; f++) blok(Y.raf + f, { ...MOB, ad: 'Duvar Rafı', dok: 'kalas', kati: false, sekil: 'raf', duvara: true, yon: f, taban: Y.raf, gizli: f > 0, dusur: () => [[Y.raf, 1]], harita: 14 });
+/* Perde: taban + renk * 8 + yön * 2 + açık; sağ tıkla açılır / kapanır */
+Y.perde = ayir(64);
+RENK8.forEach((r, c) => { for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) {
+  const tb = Y.perde + c * 8;
+  blok(tb + f * 2 + a, { ad: `${r.ad} Perde`, dok: c ? YUN_RENKLERI[c - 1].dok : 'yun', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.3, ses: 'yun', sekil: 'perde', yon: f, acik: a, taban: tb, gizli: f + a > 0,
+    renk8: c, boya: k => Y.perde + k * 8 + f * 2 + a, dusur: () => [[tb, 1]], harita: c ? 114 + c - 1 : 49 });
+} });
+Y.avize = ayir(1);
+blok(Y.avize, { ad: 'Avize', dok: 'demir_cubuk', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.8, alet: 'kazma', ses: 'cam', sekil: 'avize', asili: true, destekSiz: true, mesale: true, isik: 15, harita: 2 });
+/* Şömine: taban + yön * 2 + yanıyor; ön yüz oyuncuya bakar, sağ tıkla yakılır / söndürülür */
+Y.somine = ayir(8);
+for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(Y.somine + f * 2 + a, { ad: 'Şömine', dok: 'tas_tugla', cizim: C_SEKIL, opak: false, sertlik: 2.5, alet: 'kazma', ses: 'tas', sekil: 'somine', yon: f, acik: a, taban: Y.somine,
+  gizli: f + a > 0, destekSiz: true, dusur: () => [[Y.somine, 1]], harita: 35, ...(a ? { mesale: true, isik: 13, isi: [18, 5] } : {}) });
+/* Dolap: sandık gibi eşya saklar; kapakları oyuncuya bakar */
+Y.dolap = ayir(4);
+for (let f = 0; f < 4; f++) blok(Y.dolap + f, { ad: 'Dolap', dok: { ust: 'dolap_ust', yan: 'dolap_yan', alt: 'dolap_ust', on: 'dolap_on' }, onYon: f, dolap: true, yon: f, taban: Y.dolap, gizli: f > 0, sandik: true, sertlik: 2, alet: 'balta', ses: 'odun', dusur: () => [[Y.dolap, 1]], harita: 14 });
+Y.sehpa = ayir(1); blok(Y.sehpa, { ...MOB, ad: 'Sehpa', dok: 'kalas_koyu', sekil: 'sehpa', harita: 14 });
+Y.vazo = ayir(1); blok(Y.vazo, { ...MOB, ad: 'Çiçekli Vazo', dok: 'vazo', sertlik: 0.3, alet: null, ses: 'cam', sekil: 'vazo', harita: 2 });
+Y.mum = ayir(1); blok(Y.mum, { ...MOB, ad: 'Mum', dok: 'mum_govde', kati: false, sertlik: 0.1, alet: null, ses: 'yun', sekil: 'mum', mesale: true, isik: 9, harita: 2 });
+/* Sancak: taban + renk * 4 + yön; duvara asılır */
+Y.sancak = ayir(32);
+RENK8.forEach((r, c) => { for (let f = 0; f < 4; f++) {
+  const tb = Y.sancak + c * 4;
+  blok(tb + f, { ad: `${r.ad} Sancak`, dok: c ? YUN_RENKLERI[c - 1].dok : 'yun', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.3, ses: 'yun', sekil: 'sancak', duvara: true, yon: f, taban: tb, gizli: f > 0,
+    renk8: c, boya: k => Y.sancak + k * 4 + f, dusur: () => [[tb, 1]], harita: c ? 114 + c - 1 : 49 });
+} });
+/* Boyanabilir aileler */
+boyaAile([49, 114, 115, 116, 117, 118, 119, 120]);
+boyaAile([208, 209, 210, 211, 212, 213, 214, 215]);
+boyaAile([34, ...YUN_RENKLERI.map((r, i) => Y.cam + i)]);
+boyaAile([109, ...YUN_RENKLERI.map((r, i) => Y.bolme + i)]);
+boyaAile(RENK8.map((r, i) => Y.kil + i));
+boyaAile(RENK8.map((r, i) => Y.beton + i));
+for (const id of [34, 109, 182, 188]) B[id].bolmeAile = true;
+export const YAPI_ID = Y;
+export const YAPI_SON = YENI_ID;
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
-export const BLOK_UST = 1024;
+export const BLOK_UST = 2048;   // 0.31.0: 1024'ten 2048'e
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
 export const AYNI_GIZLE = new Uint8Array(BLOK_UST), SIVI = new Uint8Array(BLOK_UST), BITKI = new Uint8Array(BLOK_UST), LAV = new Uint8Array(BLOK_UST);
 /* 0.30.5: SU_SEVIYE: su yüksekliği (0 su değil, 8 kaynak / düşen / su içi bitki, 1-7 akan su) */
@@ -402,7 +502,7 @@ export const SU_SEVIYE = new Uint8Array(BLOK_UST);
 /* EKIN_SONRAKI: büyüyen ekinin sonraki evresi (0: büyümez) */
 export const EKIN_SONRAKI = new Uint16Array(BLOK_UST);
 /* Yüz dokuları: +x, -x, +y, -y, +z, -z */
-export const YUZ_DOKU = new Uint8Array(BLOK_UST * 6);
+export const YUZ_DOKU = new Uint16Array(BLOK_UST * 6);
 for (const b of B) {
   if (!b) continue;
   KATI[b.id] = b.kati ? 1 : 0; OPAK[b.id] = b.opak ? 1 : 0; CIZIM[b.id] = b.cizim; KESIK[b.id] = b.kesik ? 1 : 0;
@@ -497,6 +597,9 @@ esya(457, { ad: 'Palet', tur: 'zirh', yigin: 1, simge: 'palet', zirh: { parca: 3
 
 /* 0.11.0: boyalar, yeni ekinler, iksirler */
 YUN_RENKLERI.forEach((r, i) => esya(321 + i, { ad: `${r.ad} Boya`, simge: 'boya', renk: r.renk }));
+/* 0.31.0: beyaz boya (boyalı blokları beyaza / doğal rengine döndürür) ve Yapı Planı (yapı kopyalama ve yapıştırma) */
+esya(346, { ad: 'Beyaz Boya', simge: 'boya', renk: '#ecebe4' });
+esya(345, { ad: 'Yapı Planı', simge: 'plan', tur: 'plan', yigin: 1 });
 esya(328, { ad: 'Havuç', simge: 'havuc', tur: 'yiyecek', yemek: 3, ekin: 129 });
 esya(329, { ad: 'Patates', simge: 'patates', renk: '#c8a25a', tur: 'yiyecek', yemek: 1, ekin: 133 });
 esya(330, { ad: 'Fırınlanmış Patates', simge: 'patates', renk: '#b8742e', pismis: true, tur: 'yiyecek', yemek: 5 });

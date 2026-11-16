@@ -7,7 +7,7 @@
    Modeller yerel düzende tanımlanır (cihazlar.js): kök hücrenin köşesi başlangıçtır, ön -z tarafıdır.
    Önizleme: elde cihaz ya da yönlü blok tutulurken konulacağı yerde yarı saydam hayalet model; uygunsa yeşil, değilse kırmızı. */
 import { THREE } from './sahne.js';
-import { T, YUZ_DOKU, BLOKLAR } from '../bloklar.js';
+import { T, YUZ_DOKU, BLOKLAR, ATLAS_N } from '../bloklar.js';
 import { CIHAZ, PERVANE } from '../cihazlar.js';
 import { sekilKutulari } from '../sekiller.js';
 import { cihazUretim } from '../oyun/elektrik.js';
@@ -24,7 +24,7 @@ function kutuGeo(liste) {
   for (const { k, t, m } of liste) {
     const [x0, y0, z0, x1, y1, z1] = k;
     for (let f = 0; f < 6; f++) {
-      const doku = Array.isArray(t) ? t[f] : t, tx = doku & 15, ty = doku >> 4;
+      const doku = Array.isArray(t) ? t[f] : t, tx = doku % ATLAS_N, ty = (doku / ATLAS_N) | 0;
       const eks = f >> 1, poz = !(f & 1);
       /* yüzün iki ekseni: u ve v */
       const ua = eks === 0 ? 2 : 0, va = eks === 1 ? 2 : 1;
@@ -39,7 +39,7 @@ function kutuGeo(liste) {
             v3.set(q[0], q[1], q[2]); if (m) v3.applyMatrix4(m);
             p.push(v3.x, v3.y, v3.z);
             const lu = a - Math.floor(u + 1e-6), lv = b - Math.floor(v + 1e-6);
-            uv.push((tx + EPS + Math.min(1, lu) * (1 - 2 * EPS)) / 16, 1 - (ty + 1 - EPS - Math.min(1, lv) * (1 - 2 * EPS)) / 16);
+            uv.push((tx + EPS + Math.min(1, lu) * (1 - 2 * EPS)) / ATLAS_N, 1 - (ty + 1 - EPS - Math.min(1, lv) * (1 - 2 * EPS)) / ATLAS_N);
             c.push(GOLGE[f], GOLGE[f], GOLGE[f]);
           }
           ix.push(taban, taban + 1, taban + 2, taban, taban + 2, taban + 3);

@@ -1,7 +1,7 @@
 /* HungerMan - sahne: çizici, kamera, blok malzemeleri, gökyüzü (güneş, ay, yıldızlar, bulutlar), seçim kutusu, elde tutulan eşya */
 import * as THREE from '../../lib/three.module.min.js';
 import { atlas, catlaklar, simge } from './doku.js';
-import { YUZ_DOKU, CIZIM, C_KUP, ESYALAR } from '../bloklar.js';
+import { YUZ_DOKU, CIZIM, C_KUP, ESYALAR, ATLAS_N } from '../bloklar.js';
 import { PY } from '../sabitler.js';
 import { uretec } from '../rastgele.js';
 
@@ -419,10 +419,10 @@ export class Sahne {
       /* BoxGeometry yüz sırası: +x, -x, +y, -y, +z, -z */
       const uv = g.attributes.uv;
       for (let f = 0; f < 6; f++) {
-        const t = YUZ_DOKU[id * 6 + f], tx = t & 15, ty = t >> 4;
+        const t = YUZ_DOKU[id * 6 + f], tx = t % ATLAS_N, ty = (t / ATLAS_N) | 0;
         for (let k = 0; k < 4; k++) {
           const i = f * 4 + k;
-          uv.setXY(i, (tx + uv.getX(i)) / 16, 1 - (ty + 1 - uv.getY(i)) / 16);
+          uv.setXY(i, (tx + uv.getX(i)) / ATLAS_N, 1 - (ty + 1 - uv.getY(i)) / ATLAS_N);
         }
       }
       this.elEsya = new THREE.Mesh(g, this.elBlokMalzeme);

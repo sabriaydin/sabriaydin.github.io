@@ -1,7 +1,7 @@
 /* HungerMan - yere düşen eşyalar ve kırılma parçacıkları */
 import { THREE, simgeHacmi } from '../grafik/sahne.js';
 import { simge, blokRengi } from '../grafik/doku.js';
-import { KATI, LAV, ESYALAR, CIZIM, C_KUP, YUZ_DOKU } from '../bloklar.js';
+import { KATI, LAV, ESYALAR, CIZIM, C_KUP, YUZ_DOKU, ATLAS_N } from '../bloklar.js';
 
 /* 0.23.0: yere düşen eşyalar düz resim (sprite) yerine üç boyutlu çizilir: küp bloklar küçük küp, diğerleri simgesinden kalınlaştırılmış model.
    Eski sürümde doku sRGB işaretlenmediği için renkler soluk görünüyordu; köşe renkleri doğrusal uzaya çevrilerek giderildi. */
@@ -14,8 +14,8 @@ function geometri(id) {
     g = new THREE.BoxGeometry(0.24, 0.24, 0.24);
     const uv = g.attributes.uv;
     for (let f = 0; f < 6; f++) {
-      const t = YUZ_DOKU[id * 6 + f], tx = t & 15, ty = t >> 4;
-      for (let k = 0; k < 4; k++) { const i = f * 4 + k; uv.setXY(i, (tx + uv.getX(i)) / 16, 1 - (ty + 1 - uv.getY(i)) / 16); }
+      const t = YUZ_DOKU[id * 6 + f], tx = t % ATLAS_N, ty = (t / ATLAS_N) | 0;
+      for (let k = 0; k < 4; k++) { const i = f * 4 + k; uv.setXY(i, (tx + uv.getX(i)) / ATLAS_N, 1 - (ty + 1 - uv.getY(i)) / ATLAS_N); }
     }
     g.userData.blok = true;
   } else g = simgeHacmi(simge(id).cv, 0.34);
