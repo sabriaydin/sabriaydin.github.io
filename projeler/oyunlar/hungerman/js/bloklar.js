@@ -338,6 +338,12 @@ const SALTER = (cesit, f, a) => 826 + cesit * 8 + f * 2 + a;
 for (let a = 0; a < 2; a++) blok(618 + a, { ad: 'Şalter', dok: a ? 'salter_a' : 'salter_k', sertlik: 1.5, alet: 'kazma', ses: 'tas', elektrik: 'salter', mekanik: 'salter', acik: a, taban: 618, gizli: true, dusur: () => [[826, 1]], harita: 2, port: [0.5, 1, 0.5] });
 for (let c = 0; c < 2; c++) for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(SALTER(c, f, a), { ad: 'Şalter', dok: 'salter_govde', cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'kazma', ses: 'tas',
   sekil: 'salter', cesit: c, yon: f, acik: a, taban: SALTER(c, f, 0), gizli: c + f + a > 0, elektrik: 'salter', mekanik: 'salter', dusur: () => [[826, 1]], harita: 2, port: c ? [0.5, 0.25, 0.6] : [0.5, 0.04, 0.75] });
+/* 0.27.0: Dağıtıcı (1 giriş, 3 çıkış; gücü taleplere göre böler) ve Birleştirici (2 giriş, 1 çıkış; güçleri toplar): 852 / 856 + yön.
+   Yön, çıkışların baktığı yöndür. */
+for (let f = 0; f < 4; f++) {
+  blok(852 + f, { ad: 'Dağıtıcı', dok: 'salter_govde', cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'kazma', ses: 'tas', sekil: 'dagitici', yon: f, taban: 852, gizli: f > 0, elektrik: 'dagitici', dusur: () => [[852, 1]], harita: 2 });
+  blok(856 + f, { ad: 'Birleştirici', dok: 'salter_govde', cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'kazma', ses: 'tas', sekil: 'dagitici', birlestir: true, yon: f, taban: 856, gizli: f > 0, elektrik: 'birlestirici', dusur: () => [[856, 1]], harita: 2 });
+}
 /* Elektrikli Lamba: zeminde ayaklı (620-621), tavanda sarkan (842-843), duvarda aplik (844 + yön * 2 + açık) */
 const LAMBA_IS = { mesale: true, isik: 15, lamba: true };
 for (let a = 0; a < 2; a++) {
@@ -569,12 +575,12 @@ esya(494, { ad: 'Atel', simge: 'atel', yigin: 16, tur: 'atel', ozellik: 'Kırık
 /* 0.24.0: elektrik parçaları */
 esya(495, { ad: 'Devre Kartı', simge: 'devre', ozellik: 'Elektrikli cihazların yapımında kullanılır' });
 esya(496, { ad: 'Bakır Bobin', simge: 'bobin', ozellik: 'Türbin, ocak ve ısıtıcı yapımında kullanılır' });
-esya(503, { ad: 'Elektrik Kablosu', tur: 'kablo', simge: 'kablo', ozellik: 'Cihaza sağ tıkla başla, ara nokta için bir yüzeye, bitirmek için başka bir cihaza sağ tıkla. Her 3 blok için 1 kablo harcanır · R: iptal · C + sağ tık: cihazın kablolarını sök' });
+esya(503, { ad: 'Elektrik Kablosu', tur: 'kablo', simge: 'kablo', ozellik: 'Bir çıkış noktasından bir giriş noktasına çekilir; yüzeye sağ tık ara nokta ekler. Shift: düz çek, Shift + tekerlek: sarkma, R: iptal. Her 3 blok için 1 kablo harcanır' });
 /* 0.25.0: çok bloklu cihazların eşyaları (sağ tıkla kurulur; R tuşu yönü çevirir) */
 const CIHAZ_SIMGE = { gunes: 'cihazGunes', ruzgar: 'cihazRuzgar', su: 'cihazSu', bataryaK: 'cihazBatarya', bataryaO: 'cihazBatarya', bataryaB: 'cihazBatarya' };
 for (const C of Object.values(CIHAZ)) esya(C.esya, { ad: C.ad, tur: 'cihaz', cihaz: C.tur, simge: CIHAZ_SIMGE[C.tur], boyut: { bataryaK: 0, bataryaO: 1, bataryaB: 2 }[C.tur], yigin: 16,
   ozellik: `${C.aciklama} · ${C.w} × ${C.d} taban, ${C.h} blok yükseklik` });
-for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakır tel sinyali. Duvara ya da zemine konur'], [620, '0,5 E/sn harcar · Zemine, tavana ya da duvara konur'],
+for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakır tel sinyali. Duvara ya da zemine konur'], [852, 'Bir girişteki gücü üç çıkışa, bağlı cihazların talebine göre böler'], [856, 'İki girişteki gücü toplayıp tek çıkıştan verir (ör. güneş panellerini birleştirmek için)'], [620, '0,5 E/sn harcar · Zemine, tavana ya da duvara konur'],
   [622, '4 E/sn harcar · Fırın ve kamp ateşi yerine geçer, kömür gerektirmez'], [624, '3 E/sn harcar · Çevresini ısıtır']]) E[id].ozellik = oz;
 for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
 E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';

@@ -4,7 +4,7 @@ import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, O
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
-import { KABLO, portNoktasi, kabloUcu, mesafe, yolUzunlugu, kabloMaliyeti } from './kablolar.js';
+import { KABLO, portlar, portBilgi, PORT_AD, kabloUcu, mesafe, yolUzunlugu, kabloMaliyeti } from './kablolar.js';
 
 const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
@@ -22,7 +22,8 @@ export class Etkilesim {
     this.vurus = 0;
     this.kazmaSesSayac = 0;
     this.donus = 0;   // 0.25.0: R tuşuyla eklenen yön (0-3)
-    this.kablo = null;   // 0.26.0: çekilmekte olan kablo { a: başlangıç ucu, n: ara noktalar }
+    this.kablo = null;   // 0.26.0: çekilmekte olan kablo { k, i: başlangıç noktası, tur, n: ara noktalar, s: sarkmalar, sark: çekilen parçanın sarkması }
+    this.shift = false;  // 0.27.0: Shift basılı mı (düz hizalama)
     this.saldiriBekleme = 0; this.germe = 0; this.okUyari = 0; this.hedefCanli = null; this.hedefTekne = null; this.sagOnceki = false;
   }
 
@@ -586,70 +587,104 @@ export class Etkilesim {
     if (eb.mekanik === 'gecik') return 523 + f * 8;   // 0.20.0
     if (eb.kovan) return 569 + ((f + 2) % 4) * 6;   // 0.21.0: arı kovanının girişi oyuncuya bakar
     if (eb.sekil === 'kapi') return 88 + f * 4;
+    if (eb.sekil === 'dagitici') return eb.taban + f;   // 0.27.0: çıkışlar bakılan yöne
     return null;
   }
-  /* ---------- 0.26.0: Rust tarzı kablo çekme ---------- */
+  /* ---------- 0.26.0 / 0.27.0: Rust tarzı kablo çekme ----------
+     Kablo bir bağlantı noktasından (giriş ya da çıkış) başlar ve karşı türden boş bir noktada biter; yüzeylere sağ tık ara nokta ekler.
+     Shift basılıyken eklenen nokta son noktadan eksen boyunca düz hizalanır; Shift + fare tekerleği çekilen parçanın sarkmasını ayarlar (0: gergin). */
   isabetNoktasi(h) {
     const g = this.oyuncu.gozKonumu(), y = this.oyuncu.bakisYonu();
     return [g.x + y.x * h.t + h.nx * 0.04, g.y + y.y * h.t + h.ny * 0.04, g.z + y.z * h.t + h.nz * 0.04];
   }
-  /* Çekilen kablonun şu anki durumu: noktalar (son nokta bakılan yer), uzunluk, maliyet, geçerlilik, bağlanacak uç */
+  /* Bakılan bağlantı noktası: ışına en yakın (0,22 blok içinde) nokta { k, i, tur, p, ad, dolu } ya da null */
+  bakilanPort() {
+    const d = this.dunya, goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu(), maks = (this.erisim || ERISIM) + 0.5, h = this.hedef;
+    const sinir = h ? h.t + 0.35 : maks, hedefUc = h ? kabloUcu(d, h.x, h.y, h.z) : null;   // bakılan cihazın kendi noktaları kutusunun içinde de seçilir
+    let en = null, enD = 0.22;
+    for (const [k, [x, y, z]] of d.elektrikler) {
+      if (Math.abs(x - goz.x) > 9 || Math.abs(z - goz.z) > 9 || Math.abs(y - goz.y) > 10) continue;
+      const b = BLOKLAR[d.blok(x, y, z)], P = portlar(b);
+      for (let i = 0; i < P.length; i++) {
+        const q = portBilgi(d, k, i); if (!q) continue;
+        const vx = q.p[0] - goz.x, vy = q.p[1] - goz.y, vz = q.p[2] - goz.z, t = vx * yon.x + vy * yon.y + vz * yon.z;
+        if (t < 0 || t > (k === hedefUc ? maks : Math.min(maks, sinir))) continue;
+        const dd = Math.sqrt(Math.max(0, vx * vx + vy * vy + vz * vz - t * t));
+        if (dd < enD) { enD = dd; en = { k, i, tur: q.tur, p: q.p, ad: b.ad, dolu: !!(this.kablolar && this.kablolar.portKablosu(k, i)) }; }
+      }
+    }
+    return en;
+  }
+  /* Shift ile düz hizalama: son noktadan en uzun eksen boyunca */
+  hizala(son, p) {
+    if (!this.shift) return p;
+    const d = [p[0] - son[0], p[1] - son[1], p[2] - son[2]], e = d.map(Math.abs), m = e.indexOf(Math.max(...e)), q = son.slice();
+    q[m] = p[m]; return q;
+  }
+  /* Çekilen kablonun şu anki durumu: noktalar (son nokta bakılan yer), sarkmalar, uzunluk, maliyet, geçerlilik */
   kabloOnizleme() {
     if (!this.kablo) return null;
-    const bas = portNoktasi(this.dunya, this.kablo.a);
+    const bas = portBilgi(this.dunya, this.kablo.k, this.kablo.i);
     if (!bas) return null;
-    const h = this.hedef, onceki = [bas, ...this.kablo.n];
-    let uc = null, son;
-    if (h) { uc = kabloUcu(this.dunya, h.x, h.y, h.z); son = uc && uc !== this.kablo.a ? portNoktasi(this.dunya, uc) : this.isabetNoktasi(h); if (uc === this.kablo.a) uc = null; }
-    else { const g = this.oyuncu.gozKonumu(), y = this.oyuncu.bakisYonu(); son = [g.x + y.x * 3, g.y + y.y * 3, g.z + y.z * 3]; }
-    const n = [...onceki, son], uz = yolUzunlugu(n), parca = mesafe(onceki[onceki.length - 1], son);
-    let neden = '';
-    if (parca > KABLO.parca) neden = `Bir parça en çok ${KABLO.parca} blok olabilir; araya bir tutturma noktası ekleyiniz.`;
-    else if (uz > KABLO.toplam) neden = `Kablo en çok ${KABLO.toplam} blok uzunluğunda olabilir.`;
-    return { noktalar: n, uz, maliyet: kabloMaliyeti(uz), uc, gecerli: !neden, neden, hedefVar: !!h };
+    const onceki = [bas.p, ...this.kablo.n], sonN = onceki[onceki.length - 1], port = this.bakilanPort(), h = this.hedef;
+    let son, hedefPort = null, neden = '';
+    if (port && !(port.k === this.kablo.k)) {
+      son = port.p; hedefPort = port;
+      if (port.tur === this.kablo.tur) neden = this.kablo.tur === 'cikis' ? 'Çıkış bir girişe bağlanmalıdır.' : 'Giriş bir çıkışa bağlanmalıdır.';
+      else if (port.dolu) neden = 'Bu bağlantı noktası dolu.';
+    } else if (h) son = this.hizala(sonN, this.isabetNoktasi(h));
+    else { const g = this.oyuncu.gozKonumu(), y = this.oyuncu.bakisYonu(); son = this.hizala(sonN, [g.x + y.x * 3, g.y + y.y * 3, g.z + y.z * 3]); }
+    const n = [...onceki, son], uz = yolUzunlugu(n), parca = mesafe(sonN, son);
+    if (!neden && parca > KABLO.parca) neden = `Bir parça en çok ${KABLO.parca} blok olabilir; araya bir tutturma noktası ekleyiniz.`;
+    else if (!neden && uz > KABLO.toplam) neden = `Kablo en çok ${KABLO.toplam} blok uzunluğunda olabilir.`;
+    return { noktalar: n, sarkmalar: [...this.kablo.s, this.kablo.sark], uz, maliyet: kabloMaliyeti(uz), port: hedefPort, gecerli: !neden, neden, sark: this.kablo.sark };
   }
   kabloIptal(mesaj = 'Kablo çekme iptal edildi.') { if (!this.kablo) return; this.kablo = null; this.arayuz.bildirim(mesaj); }
+  /* Shift + fare tekerleği: çekilen parçanın sarkması */
+  kabloSarkma(yon) { if (!this.kablo) return false; this.kablo.sark = Math.max(0, Math.min(KABLO.sarkmaUst, Math.round((this.kablo.sark + yon * 0.1) * 10) / 10)); return true; }
   kabloKullan(h, g) {
     const K = this.kablolar, env = this.envanter;
     if (!K) return false;
-    /* Bakılan kablo (bloktan yakınsa) sökülür */
-    if (!this.kablo && this.arayuz.kabloIsin) {
+    const port = this.bakilanPort();
+    /* Bakılan kablo (bağlantı noktasından ve bloktan yakınsa) sökülür */
+    if (!this.kablo && !port && this.arayuz.kabloIsin) {
       const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu(), ki = this.arayuz.kabloIsin(goz, yon, h ? h.t + 0.05 : ERISIM);
       if (ki != null) { this.arayuz.kabloSil(ki, true); this.ses.kir('tas'); this.arayuz.bildirim('Kablo söküldü; kablolar envantere geri döndü.'); return true; }
     }
-    if (!h) return false;
-    const uc = kabloUcu(this.dunya, h.x, h.y, h.z);
-    if (uc && !this.kablo) {
-      if (g.egil) {
+    if (!this.kablo) {
+      const uc = h && kabloUcu(this.dunya, h.x, h.y, h.z);
+      if (g.egil && uc) {
         const l = K.cihazKablolari(uc);
         for (const w of l) this.arayuz.kabloSil(w.i, true);
         this.arayuz.bildirim(l.length ? `${l.length} kablo söküldü.` : 'Bu cihaza bağlı kablo yok.');
         return true;
       }
-      if (K.cihazKablolari(uc).length >= KABLO.cihaz) { this.arayuz.bildirim(`Bir cihaza en çok ${KABLO.cihaz} kablo bağlanır.`); return true; }
-      this.kablo = { a: uc, n: [] }; this.ses.kol(true);
-      this.arayuz.bildirim('Kablo çekiliyor: başka bir cihaza sağ tıklayınız. Yüzeye sağ tık ara nokta ekler, R iptal eder.');
+      if (!port) { if (uc) this.arayuz.bildirim('Kablo bir bağlantı noktasından çekilir: cihazın üzerindeki mavi (giriş) ya da turuncu (çıkış) noktaya bakınız.'); return !!uc; }
+      if (port.dolu) { this.arayuz.bildirim(`Bu ${PORT_AD[port.tur].toLocaleLowerCase('tr')} noktasına zaten bir kablo takılı.`); return true; }
+      this.kablo = { k: port.k, i: port.i, tur: port.tur, n: [], s: [], sark: 0 }; this.ses.kol(true);
+      this.arayuz.bildirim(`${port.ad}: ${PORT_AD[port.tur]} noktasından kablo çekiliyor.`);
       return true;
     }
-    if (!this.kablo) return false;
     const o = this.kabloOnizleme();
     if (!o) { this.kabloIptal('Kablonun başladığı cihaz bulunamadı.'); return true; }
-    if (uc) {
-      if (uc === this.kablo.a) { if (!this.kablo.n.length) this.kabloIptal(); else this.arayuz.bildirim('Kablo aynı cihaza bağlanamaz.'); return true; }
+    if (o.port) {
       if (!o.gecerli) { this.arayuz.bildirim(o.neden); return true; }
-      if (K.cihazKablolari(uc).length >= KABLO.cihaz) { this.arayuz.bildirim(`Bir cihaza en çok ${KABLO.cihaz} kablo bağlanır.`); return true; }
-      if ([...K.liste.values()].some(w => (w.a === this.kablo.a && w.b === uc) || (w.b === this.kablo.a && w.a === uc))) { this.arayuz.bildirim('Bu iki cihaz zaten bağlı.'); return true; }
       if (env.say(KABLO.esya) < o.maliyet) { this.arayuz.bildirim(`Yetersiz kablo: ${o.maliyet} Elektrik Kablosu gerekir.`); return true; }
       env.harca(KABLO.esya, o.maliyet);
-      this.arayuz.kabloEkle(this.kablo.a, uc, this.kablo.n, o.uz);
+      /* Kablo her zaman çıkıştan girişe kaydedilir */
+      const k = this.kablo, ileri = k.tur === 'cikis', n = ileri ? k.n : [...k.n].reverse(), sk = [...k.s, k.sark], sr = ileri ? sk : sk.reverse();
+      if (ileri) this.arayuz.kabloEkle(k.k, k.i, o.port.k, o.port.i, n, sr, o.uz);
+      else this.arayuz.kabloEkle(o.port.k, o.port.i, k.k, k.i, n, sr, o.uz);
       this.kablo = null; this.ses.koy('tas');
       this.arayuz.bildirim(`Kablo bağlandı: ${o.uz.toFixed(1).replace('.', ',')} blok, ${o.maliyet} kablo harcandı.`);
       return true;
     }
+    if (port && port.k === this.kablo.k) { if (!this.kablo.n.length) this.kabloIptal(); else this.arayuz.bildirim('Kablo aynı cihaza bağlanamaz.'); return true; }
     /* Ara tutturma noktası */
+    if (!h) return true;
     if (!o.gecerli) { this.arayuz.bildirim(o.neden); return true; }
     if (this.kablo.n.length >= 10) { this.arayuz.bildirim('Bir kabloda en çok 10 ara nokta olabilir.'); return true; }
-    this.kablo.n.push(this.isabetNoktasi(h)); this.ses.koy('tas');
+    this.kablo.n.push(o.noktalar[o.noktalar.length - 1]); this.kablo.s.push(this.kablo.sark); this.ses.koy('tas');
     return true;
   }
 

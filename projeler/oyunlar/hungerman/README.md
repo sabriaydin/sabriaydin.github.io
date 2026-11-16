@@ -117,6 +117,16 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 27. aşama (0.27.0): Giriş / çıkış noktaları, yönlü güç akışı, kablo sarkması
+- **Bağlantı noktaları:** her elektrikli cihazın ayrı giriş (mavi) ve çıkış (turuncu) soketleri vardır; dolu soketin ortası koyudur. Üreticilerde yalnızca çıkış; bataryada giriş (şarj) ve çıkış; şalter, lamba, ocak ve ısıtıcıda giriş ve geçiş çıkışı bulunur. Her sokete tek kablo takılır.
+- **Yeni bloklar:** Dağıtıcı (1 giriş, 3 çıkış; gücü bağlı cihazların talebine göre böler) ve Birleştirici (2 giriş, 1 çıkış; güçleri toplar).
+- **Yönlü güç akışı (Rust gibi):** güç yalnızca kablolarla, çıkıştan girişe akar; yan yana duran cihazlar artık birbirine bağlı sayılmaz. Talep çıkışlardan geriye hesaplanır; üretici üretimini verir, batarya talep kadar (en çok çıkış hızı: küçük 10, orta 25, büyük 60 E/sn) verir ve girişinden aynı hızla şarj olur. Tüketici gelen güç yeterliyse çalışır ve artanı geçiş çıkışına verir; yetmezse söner. Şalter açıkken geçirir. Kablonun her bloğu taşıdığı gücü %0,1 azaltır.
+- **Kablo çekme:** kablo, bakılan sokete sağ tıklanarak başlar ve karşı türden boş bir sokete sağ tıklanarak biter (çıkıştan ya da girişten başlanabilir). Bakılan soket çerçeveyle vurgulanır, adı ve türü altta yazar.
+  - Kablo çekilirken varsayılan olarak gergin ve düzdür. **Shift + fare tekerleği** çekilen parçanın sarkmasını 0,1 blok adımlarla ayarlar (0 ile 3 blok); her parçanın sarkması ayrı saklanır.
+  - **Shift basılı tutulurken** eklenen ara nokta son noktadan eksen boyunca hizalanır: düz yatay ya da dikey kablo çekilir.
+- **Bilgi paneli:** cihazın girişine gelen ve çıkışından verilen güç, talep, bağlı soket sayısı; bataryada şarj ve boşalma hızı; durum (Çalışıyor, Enerji yetersiz, Şarj ediliyor, Boşalıyor, Dolu, Bağlı değil…).
+- 0.26.0 kabloları yüklenirken uçlarının boş çıkış ve giriş soketlerine bağlanır; eski yer kabloları artık iletmez (kırılınca kablo verir).
+
 ## 26. aşama (0.26.0): Gerçekçi şalter, lamba ve bataryalar; Rust tarzı kablolar
 - **Şalter:** metal pano: ön kapak (yıldırım uyarı etiketi), gösterge ışığı (açıkken yeşil, kapalıyken kırmızı) ve sağda yukarı (açık) / aşağı (kapalı) inen kırmızı uçlu kol. Duvara ya da ayağıyla zemine konur; zemindeki şalter R ile çevrilir. Kablolar alttan girer.
 - **Elektrikli Lamba:** konulduğu yüzeye göre biçim alır: zeminde ayaklı cam küre, tavanda kordonla sarkan emaye abajur, duvarda aplik. Yanınca camı aydınlanır.

@@ -950,6 +950,7 @@ const BLOK_SIMGE = {
   batarya: (p, id, boyut) => { const k = [[3, 9], [2, 13], [1, 15]][boyut ?? BLOKLAR[id].boyut], a = k[0], h = k[1]; dokuBoya(p, T.batarya_yan4, [[a, 16 - h, 16 - a, 16]]); dokuBoya(p, T.demir_cubuk, [[a + 2, 15 - h, a + 4, 16 - h]]); dokuBoya(p, T.salter_a, [[12 - a, 15 - h, 14 - a, 16 - h]]); },
   ekablo: p => { dokuBoya(p, T.ekablo, [[1, 6, 15, 10]]); for (let x = 1; x < 15; x += 4) p.set(x, 6, [232, 192, 64]); },
   salter: (p, id) => { dokuBoya(p, T.salter_govde, [[3, 2, 12, 14]]); dokuBoya(p, T.salter_on, [[4, 3, 11, 13]]); dokuBoya(p, T.demir_cubuk, [[12, 5, 14, 9]]); dokuBoya(p, T.led_kirmizi, [[12, 3, 15, 5]]); dokuBoya(p, T.led_yesil, [[5, 4, 7, 5]]); },
+  dagitici: (p, id) => { dokuBoya(p, T.salter_govde, [[1, 9, 15, 15]]); dokuBoya(p, T.salter_on, [[2, 8, 14, 9]]); const g = [63, 156, 255], c = [255, 157, 46]; if (BLOKLAR[id].birlestir) { p.set(4, 11, g); p.set(11, 11, g); p.set(8, 13, c); p.set(4, 12, g); p.set(11, 12, g); } else { p.set(8, 11, g); p.set(8, 12, g); p.set(3, 13, c); p.set(8, 14, c); p.set(13, 13, c); } },
   elamba: (p, id) => { dokuBoya(p, T.elamba_a, [[5, 2, 11, 8]]); dokuBoya(p, T.lamba_kap, [[6, 1, 10, 2]]); dokuBoya(p, T.demir_cubuk, [[7, 8, 9, 14], [5, 14, 11, 15]]); },
   simya: p => { dokuBoya(p, T.parke, [[2, 13, 14, 15]]); dokuBoya(p, T.demir_cubuk, [[7, 2, 9, 13]]); dokuBoya(p, T.simya_sise, [[2, 8, 6, 13], [10, 8, 14, 13]]); }
 };

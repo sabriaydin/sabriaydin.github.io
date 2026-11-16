@@ -1,46 +1,70 @@
-/* HungerMan - Rust tarzı elektrik kabloları (0.26.0)
-   Kablolar blok değildir: kablo aracıyla bir cihazın bağlantı noktasından başka bir cihazınkine, istenirse aradaki yüzeylere
-   tutturulan noktalardan geçerek çekilir ve iki nokta arasında hafifçe sarkarak çizilir (grafik/cihaz-cizici.js).
-   Bir kablo iki cihazı aynı elektrik ağına bağlar (oyun/elektrik.js). Çok bloklu cihazlarda uç, cihazın kök hücresidir.
-   Sınırlar: bir parça en çok 16, bütün kablo en çok 40 blok; bir cihaza en çok 6 kablo bağlanır. Her 3 blok için 1 Elektrik Kablosu harcanır.
-   Kayıt: dünya kaydında [no, a, b, ara noktalar]; çok oyunculuda sunucu tutar ve istemcilere dağıtır. */
+/* HungerMan - Rust tarzı elektrik kabloları ve bağlantı noktaları (0.26.0; 0.27.0: giriş / çıkış noktaları, sarkma ayarı)
+   Her elektrikli cihazın ayrı GİRİŞ ve ÇIKIŞ noktaları vardır (PORT tablosu). Kablo, bir çıkıştan bir girişe çekilir; güç çıkıştan girişe akar.
+   Her bağlantı noktasına tek kablo takılır. Kablo, isteğe bağlı ara noktalardan geçer; her parçanın sarkması ayrı ayarlanır (0: gergin, düz).
+   Sınırlar: bir parça en çok 16, bütün kablo en çok 40 blok. Her 3 blok için 1 Elektrik Kablosu harcanır.
+   Kayıt: [no, a, a noktası, b, b noktası, ara noktalar, sarkmalar, uzunluk]; a çıkış, b giriş tarafıdır.
+   Çok oyunculuda sunucu tutar ve istemcilere dağıtır. */
 import { BLOKLAR } from '../bloklar.js';
 import { CIHAZ, kokKonumu, dondurXZ } from '../cihazlar.js';
 
-export const KABLO = { parca: 16, toplam: 40, cihaz: 6, esya: 503, bloktaBir: 3 };
+export const KABLO = { parca: 16, toplam: 40, esya: 503, bloktaBir: 3, sarkmaUst: 3 };
 const C = k => String(k).split(',').map(Number);
 
-/* Anahtardaki cihazın kablo bağlantı noktası (dünya koordinatı); cihaz yoksa null */
-export function portNoktasi(dunya, k) {
-  const [x, y, z] = C(k), b = BLOKLAR[dunya.blok(x, y, z)];
-  if (!b || !b.elektrik) return null;
-  let p = b.port || [0.5, 0.5, 0.5], yon = b.yon || 0;
-  if (b.cihaz) { const D = CIHAZ[b.cihaz]; p = D.port; const [dx, dz] = dondurXZ(p[0] - 0.5, p[2] - 0.5, yon); return [x + 0.5 + dx, y + p[1], z + 0.5 + dz]; }
-  const [dx, dz] = dondurXZ(p[0] - 0.5, p[2] - 0.5, yon);
-  return [x + 0.5 + dx, y + p[1], z + 0.5 + dz];
+/* Bağlantı noktaları: [tür, yerel konum] (yön 0; çok bloklu cihazlarda kök hücreye, diğerlerinde hücreye göre) */
+const G = (x, y, z) => ['giris', [x, y, z]], K = (x, y, z) => ['cikis', [x, y, z]];
+export const PORT = {
+  gunes: [K(1.76, 0.3, 0.9)],
+  ruzgar: [K(1, 0.5, 1.4)],
+  su: [K(1.5, 1.8, 1.02)],
+  bataryaK: [G(0.28, 0.85, 0.48), K(0.72, 0.85, 0.48)],
+  bataryaO: [G(0.38, 1.8, 0.5), K(0.62, 1.8, 0.5)],
+  bataryaB: [G(0.3, 1.74, 0.07), K(1.7, 1.74, 0.07)],
+  salter0: [G(0.3, 0.1, 0.78), K(0.7, 0.1, 0.78)],
+  salter1: [G(0.3, 0.23, 0.6), K(0.7, 0.23, 0.6)],
+  salterEski: [G(0.3, 1.02, 0.5), K(0.7, 1.02, 0.5)],
+  lamba0: [G(0.36, 0.09, 0.5), K(0.64, 0.09, 0.5)],
+  lamba1: [G(0.4, 0.93, 0.5), K(0.6, 0.93, 0.5)],
+  lamba2: [G(0.42, 0.29, 0.96), K(0.58, 0.29, 0.96)],
+  ocak: [G(0.3, 1.02, 0.5), K(0.7, 1.02, 0.5)],
+  isitici: [G(0.3, 1.02, 0.5), K(0.7, 1.02, 0.5)],
+  dagitici: [G(0.5, 0.2, 0.86), K(0.24, 0.2, 0.14), K(0.5, 0.2, 0.14), K(0.76, 0.2, 0.14)],
+  birlestirici: [G(0.3, 0.2, 0.86), G(0.7, 0.2, 0.86), K(0.5, 0.2, 0.14)]
+};
+export const PORT_AD = { giris: 'Giriş', cikis: 'Çıkış' };
+/* Bloğun bağlantı noktası listesi (yoksa boş) */
+export function portlar(b) {
+  if (!b || !b.elektrik || (b.cihaz && b.parca)) return [];
+  const k = b.cihaz || (b.elektrik === 'salter' ? (b.sekil === 'salter' ? 'salter' + b.cesit : 'salterEski') : b.elektrik === 'lamba' ? 'lamba' + (b.cesit || 0) : b.elektrik);
+  return PORT[k] || [];
 }
-/* Bir bloğun kablo ucu olarak anahtarı (çok bloklu cihazda kök hücre); elektrikli değilse null */
+/* Anahtardaki cihazın i. bağlantı noktasının dünya konumu ve türü: { p, tur } ya da null */
+export function portBilgi(dunya, k, i) {
+  const [x, y, z] = C(k), b = BLOKLAR[dunya.blok(x, y, z)], l = portlar(b), P = l[i];
+  if (!P) return null;
+  const [dx, dz] = dondurXZ(P[1][0] - 0.5, P[1][2] - 0.5, b.yon || 0);
+  return { p: [x + 0.5 + dx, y + P[1][1], z + 0.5 + dz], tur: P[0] };
+}
+/* Bir bloğun kablo ucu anahtarı (çok bloklu cihazda kök hücre); bağlantı noktası yoksa null */
 export function kabloUcu(dunya, x, y, z) {
   const b = BLOKLAR[dunya.blok(x, y, z)];
   if (!b || !b.elektrik || b.elektrik === 'kablo') return null;
   return b.cihaz && b.parca ? kokKonumu(b, x, y, z).join(',') : x + ',' + y + ',' + z;
 }
 export const mesafe = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-/* Noktalar boyunca uzunluk */
 export function yolUzunlugu(l) { let n = 0; for (let i = 1; i < l.length; i++) n += mesafe(l[i - 1], l[i]); return n; }
 export const kabloMaliyeti = uz => Math.max(1, Math.ceil(uz / KABLO.bloktaBir));
+const r2 = v => Math.round(v * 100) / 100;
 
 export class Kablolar {
   constructor(dunya) {
     this.dunya = dunya;
-    this.liste = new Map();   // no -> { i, a, b, n: [[x, y, z], ...] }
+    this.liste = new Map();   // no -> { i, a, ap, b, bp, n: ara noktalar, s: parça sarkmaları, uz }
     this.sira = 0; this.surum = 0;
     this.ag = null;           // sunucu: eklendi(w), silindi(i)
   }
-  /* uz: kablonun uzunluğu (koptuğunda geri verilecek kablo sayısı için) */
-  ekle(a, b, n = [], i, uz) {
+  ekle(a, ap, b, bp, n = [], s = [], i, uz) {
     if (i == null) i = ++this.sira; else this.sira = Math.max(this.sira, i);
-    const w = { i, a, b, n: n.map(p => p.map(v => Math.round(v * 100) / 100)), uz: Math.round((uz ?? 3) * 10) / 10 };
+    const w = { i, a, ap, b, bp, n: n.map(p => p.map(r2)), s: Array.from({ length: n.length + 1 }, (_, j) => Math.max(0, Math.min(KABLO.sarkmaUst, +s[j] || 0))), uz: Math.round((uz ?? 3) * 10) / 10 };
     this.liste.set(i, w); this.surum++;
     if (this.ag && this.ag.eklendi) this.ag.eklendi(w);
     return w;
@@ -52,26 +76,42 @@ export class Kablolar {
     if (this.ag && this.ag.silindi) this.ag.silindi(i);
     return w;
   }
+  dizi(w) { return [w.i, w.a, w.ap, w.b, w.bp, w.n, w.s, w.uz]; }
   cihazKablolari(k) { const l = []; for (const w of this.liste.values()) if (w.a === k || w.b === k) l.push(w); return l; }
-  /* Ağ hesabı için komşuluk: uç -> [diğer uçlar] */
-  komsular() {
-    const m = new Map(), ekle = (a, b) => { let l = m.get(a); if (!l) m.set(a, l = []); l.push(b); };
-    for (const w of this.liste.values()) { ekle(w.a, w.b); ekle(w.b, w.a); }
-    return m;
-  }
+  /* Bağlantı noktasına takılı kablo (yoksa null) */
+  portKablosu(k, i) { for (const w of this.liste.values()) if ((w.a === k && w.ap === i) || (w.b === k && w.bp === i)) return w; return null; }
   /* Kablonun bütün noktaları (uçlar dahil); uç cihaz yüklü değilse null */
   noktalar(w) {
-    const a = portNoktasi(this.dunya, w.a), b = portNoktasi(this.dunya, w.b);
-    return a && b ? [a, ...w.n, b] : null;
+    const a = portBilgi(this.dunya, w.a, w.ap), b = portBilgi(this.dunya, w.b, w.bp);
+    return a && b ? [a.p, ...w.n, b.p] : null;
   }
   uzunluk(w) { const l = this.noktalar(w); return l ? yolUzunlugu(l) : 0; }
-  disaAktar() { return [...this.liste.values()].map(w => [w.i, w.a, w.b, w.n, w.uz]); }
+  disaAktar() { return [...this.liste.values()].map(w => this.dizi(w)); }
   iceAktar(l) {
     this.liste.clear(); this.sira = 0;
-    for (const v of Array.isArray(l) ? l : []) if (Array.isArray(v) && typeof v[1] === 'string' && typeof v[2] === 'string') {
-      const n = Array.isArray(v[3]) ? v[3].filter(p => Array.isArray(p) && p.length === 3 && p.every(Number.isFinite)).slice(0, 12) : [];
-      this.liste.set(+v[0], { i: +v[0], a: v[1], b: v[2], n, uz: +v[4] || 3 }); this.sira = Math.max(this.sira, +v[0]);
+    for (const v of Array.isArray(l) ? l : []) {
+      if (!Array.isArray(v)) continue;
+      const nok = p => (Array.isArray(p) ? p.filter(q => Array.isArray(q) && q.length === 3 && q.every(Number.isFinite)).slice(0, 10) : []);
+      let w;
+      if (typeof v[1] === 'string' && typeof v[3] === 'string') w = { i: +v[0], a: v[1], ap: +v[2] || 0, b: v[3], bp: +v[4] || 0, n: nok(v[5]), s: Array.isArray(v[6]) ? v[6].map(Number) : [], uz: +v[7] || 3 };
+      else if (typeof v[1] === 'string' && typeof v[2] === 'string') w = { i: +v[0], a: v[1], ap: -1, b: v[2], bp: -1, n: nok(v[3]), s: [], uz: +v[4] || 3, eski: true };   // 0.26.0 kaydı: noktalar sonra atanır
+      else continue;
+      if (!w.s.length) w.s = Array.from({ length: w.n.length + 1 }, () => 0.4);
+      this.liste.set(w.i, w); this.sira = Math.max(this.sira, w.i);
     }
     this.surum++;
+  }
+  /* 0.26.0 kablolarına bağlantı noktası atar (uçlar yüklendiğinde): a'nın boş çıkışı, b'nin boş girişi; uymazsa yön çevrilir */
+  eskileriAta() {
+    for (const w of [...this.liste.values()]) {
+      if (!w.eski) continue;
+      const [ax, ay, az] = C(w.a), [bx, by, bz] = C(w.b);
+      if (!this.dunya.yuklu(ax, az) || !this.dunya.yuklu(bx, bz)) continue;
+      const bos = (k, tur) => portlar(BLOKLAR[this.dunya.blok(...C(k))]).findIndex((P, i) => P[0] === tur && !this.portKablosu(k, i));
+      let ap = bos(w.a, 'cikis'), bp = bos(w.b, 'giris');
+      if (ap < 0 || bp < 0) { const a2 = bos(w.b, 'cikis'), b2 = bos(w.a, 'giris'); if (a2 >= 0 && b2 >= 0) { [w.a, w.b] = [w.b, w.a]; w.n.reverse(); ap = a2; bp = b2; } }
+      if (ap < 0 || bp < 0) { this.sil(w.i); continue; }
+      w.ap = ap; w.bp = bp; delete w.eski; this.surum++;
+    }
   }
 }

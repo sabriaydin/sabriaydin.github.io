@@ -167,9 +167,12 @@ export function sekilKutulari(id, komsu, carp = false) {
       if (b.acik) L.push([13.3 * P, (y + 6) * P, (zb + 1.4) * P, 14.2 * P, (y + 10) * P, (zb + 2.6) * P, T.demir_cubuk], [12.9 * P, (y + 9.6) * P, (zb + 1) * P, 14.6 * P, (y + 11.2) * P, (zb + 3) * P, T.led_kirmizi]);
       else L.push([13.3 * P, (y + 1) * P, (zb + 1.4) * P, 14.2 * P, (y + 5) * P, (zb + 2.6) * P, T.demir_cubuk], [12.9 * P, (y - 0.2) * P, (zb + 1) * P, 14.6 * P, (y + 1.4) * P, (zb + 3) * P, T.led_kirmizi]);
       if (b.cesit) L.push([4 * P, 0, 5 * P, 12 * P, P, 13 * P, T.panel_yan], [7 * P, P, 8.5 * P, 9 * P, 4 * P, 10.5 * P, T.demir_cubuk]);
-      else L.push([7 * P, 0, 11 * P, 9 * P, 2 * P, 13 * P, T.kablo_kilif]);   // alttan çıkan kablo kanalı
       return dondur(L, b.yon);
     }
+    /* 0.27.0: Dağıtıcı ve Birleştirici: alçak metal kutu, üstte yön oku etiketi */
+    case 'dagitici':
+      if (carp) return [[2 * P, 0, 2 * P, 14 * P, 5 * P, 14 * P]];
+      return dondur([[2 * P, 0, 2 * P, 14 * P, 4.5 * P, 14 * P], [3 * P, 4.5 * P, 3 * P, 13 * P, 5 * P, 13 * P, T.salter_on], [7 * P, 5 * P, 4 * P, 9 * P, 5.3 * P, 8 * P, b.birlestir ? T.led_yesil : T.led_kirmizi]], b.yon);
     /* 0.26.0: Elektrikli Lamba: çeşit 0 zemin (ayak, direk, cam küre), 1 tavan (sarkan abajur), 2 duvar (aplik) */
     case 'elamba': {
       const D = T.demir_cubuk, K = T.lamba_kap;

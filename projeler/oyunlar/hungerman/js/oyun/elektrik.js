@@ -1,23 +1,23 @@
-/* HungerMan - elektrik sistemi (0.24.0; 0.25.0: çok bloklu cihazlar)
-   Elektrik blokları (bloklar.js'te elektrik niteliği taşıyanlar) birbirine bitişik olunca aynı ağı oluşturur; uzak cihazlar Elektrik Kablosuyla bağlanır.
-   Çok bloklu cihazların (cihazlar.js) bütün hücreleri ağa iletir; üretim ve depo yalnızca kök hücrede (hücre 0) hesaplanır.
-   0.26.0: Rust tarzı kablolar (oyun/kablolar.js) iki cihazı aynı ağa bağlar; kablonun her bloğu üretimi %0,1 azaltır.
-   Kapalı Şalter ağı keser. Her 0,5 saniyede bir ağlar bulunur ve hesaplanır:
-   - Üreticiler: Güneş Paneli (gündüz, üstü açık hücre başına; bulut ve yağış azaltır), Rüzgâr Türbini (yükseklik, rüzgâr ve fırtınayla artar;
-     pervane alanında katı blok varsa durur), Su Çarkı (alt sırasına değen her su bloğu için; kışın yarı yarıya).
-   - Kablo kaybı: ağdaki her kablo üretimi %0,2 azaltır (en çok %25).
-   - Tüketiciler (lamba, ocak, ısıtıcı) üretim yeterliyse ya da bataryalarda yetecek enerji varsa çalışır; yoksa hepsi söner.
-   - Artan enerji bataryalara, doluluk oranları eşit olacak biçimde dağıtılır; bataryanın önündeki gösterge doluluğu gösterir.
-   Hesap tek oyunculuda ve sunucuda yapılır; tüketici durumları blok değişikliği, batarya doluluğu 'bo' iletisiyle dağıtılır.
-   Çok oyunculu istemci bilgi panelinin verisini sunucudan ister. */
+/* HungerMan - elektrik sistemi (0.24.0; 0.25.0: çok bloklu cihazlar; 0.27.0: Rust tarzı yönlü güç akışı)
+   Her cihazın giriş ve çıkış bağlantı noktaları vardır (oyun/kablolar.js). Güç yalnızca kablolarla, çıkıştan girişe akar; yan yana duran
+   cihazlar birbirine bağlı sayılmaz. Her 0,5 saniyede:
+   1. Talep (çıkışlardan geriye doğru): tüketici kendi ihtiyacı + geçiş çıkışının talebi; açık şalter ve dağıtıcı çıkışlarının toplamı;
+      kapalı şalter 0; batarya dolu değilse şarj hızı (bataryanın arkasındaki talep, bataryanın kendi deposundan karşılanır).
+   2. Güç (kaynaklardan ileriye doğru, sıra gözetilerek): üretici üretimini çıkışına verir; batarya çıkışına talep kadar (en çok çıkış hızı
+      ve deposu kadar) verir; tüketici girişine gelen güç ihtiyacını karşılıyorsa çalışır ve artanı çıkışına geçirir, karşılamıyorsa söner
+      ve çıkışına bir şey vermez; şalter açıkken gelen gücü geçirir; dağıtıcı gelen gücü çıkışlarına talepleri oranında böler;
+      birleştirici girişlerini toplar. Kablonun her bloğu taşıdığı gücü %0,1 azaltır.
+   3. Batarya girişine gelen güç (en çok şarj hızı) depoya eklenir, çıkışa verilen düşülür.
+   Hesap tek oyunculuda ve sunucuda yapılır; tüketici durumları blok değişikliği, batarya doluluğu 'bo' iletisiyle dağıtılır. */
 import { BLOKLAR, SIVI, LAV, KATI } from '../bloklar.js';
 import { DENIZ, diyarMi } from '../sabitler.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
+import { portlar } from './kablolar.js';
 
-const YAN6 = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
 const ADIM = 0.5;
 const C = k => k.split(',').map(Number);
-const ILET = b => !!(b && b.elektrik && !(b.elektrik === 'salter' && !b.acik));   // kapalı şalter iletmez
+/* Bataryaların şarj ve çıkış hızı (E/sn) */
+export const BATARYA_HIZ = { bataryaK: 10, bataryaO: 25, bataryaB: 60 };
 export const kokAnahtari = (b, x, y, z) => (b && b.cihaz && b.parca ? kokKonumu(b, x, y, z).join(',') : x + ',' + y + ',' + z);
 
 /* Kök hücresi (x, y, z) olan üreticinin bu anki üretimi (E/sn) ve durmasının nedeni; çizici de dönüş hızı için kullanır.
@@ -63,10 +63,8 @@ export class Elektrik {
   constructor(o) {
     Object.assign(this, o);   // dunya, ortam(): { gunIsigi, yogunluk, firtina, mevsim, sure }, kablolar, kabloKoptu(w, nokta)
     this.sayac = 0;
-    this.agBilgi = new Map();   // blok anahtarı -> ağ özeti
-    this.cihaz = new Map();     // kök anahtarı -> cihazın anlık üretimi / tüketimi
-    this.neden = new Map();     // kök anahtarı -> üretmeme nedeni
-    this.oranlar = new Map();   // batarya kök anahtarı -> doluluk (0..1)
+    this.dugumler = new Map();   // kök anahtarı -> son hesabın özeti
+    this.oranlar = new Map();    // batarya kök anahtarı -> doluluk (0..1)
     /* Kırılan bataryanın enerjisi silinir */
     this.dinle = (x, y, z, id, eski) => {
       const a = BLOKLAR[eski];
@@ -77,7 +75,7 @@ export class Elektrik {
   kapat() { const i = this.dunya.dinleyiciler.indexOf(this.dinle); if (i >= 0) this.dunya.dinleyiciler.splice(i, 1); }
 
   guncelle(dt) {
-    if (!this.dunya.elektrikler.size) { if (this.agBilgi.size) { this.agBilgi.clear(); this.cihaz.clear(); } return; }
+    if (!this.dunya.elektrikler.size) { if (this.dugumler.size) this.dugumler.clear(); return; }
     this.sayac -= dt;
     if (this.sayac > 0) return;
     this.sayac = ADIM;
@@ -85,96 +83,120 @@ export class Elektrik {
   }
 
   hesapla(dt) {
-    const d = this.dunya, E = d.elektrikler, O = this.ortam();
-    const gorulen = new Set();
-    this.agBilgi.clear(); this.cihaz.clear(); this.neden.clear();
+    const d = this.dunya, E = d.elektrikler, O = this.ortam(), K = this.kablolar;
     /* Kökü kalmamış cihaz hücreleri (patlama, eksik kayıt) kaldırılır */
-    for (const [k, [x, y, z]] of E) {
+    for (const [, [x, y, z]] of E) {
       const b = BLOKLAR[d.blok(x, y, z)];
       if (!b || !b.cihaz || !b.parca) continue;
       const [ax, ay, az] = kokKonumu(b, x, y, z);
       if (d.yuklu(ax, az) && d.blok(ax, ay, az) !== b.kok) d.blokKoy(x, y, z, 0, 'elektrik');
     }
-    /* 0.26.0: ucundaki cihaz kalkan kablolar kopar (kablo eşyası düşer) */
-    const K = this.kablolar;
-    if (K) for (const w of [...K.liste.values()]) for (const u of [w.a, w.b]) {
-      const [x, y, z] = C(u);
-      if (!d.yuklu(x, z)) continue;
+    /* Düğümler: bağlantı noktası olan cihazlar */
+    const D = new Map();
+    for (const [k, [x, y, z]] of E) {
       const b = BLOKLAR[d.blok(x, y, z)];
-      if (!b || !b.elektrik || (b.cihaz && b.parca)) { K.sil(w.i); if (this.kabloKoptu) this.kabloKoptu(w, [x + 0.5, y + 0.5, z + 0.5]); break; }
+      if (!b || !b.elektrik) { E.delete(k); continue; }
+      const P = portlar(b);
+      if (!P.length) continue;
+      D.set(k, { k, x, y, z, b, P, cik: [], gir: [], gelen: 0, giden: 0, talep: 0, uretim: 0 });
     }
-    const komsu = K ? K.komsular() : new Map();
-    for (const [k0, p0] of E) {
-      if (gorulen.has(k0)) continue;
-      const b0 = BLOKLAR[d.blok(p0[0], p0[1], p0[2])];
-      if (!b0 || !b0.elektrik) { E.delete(k0); continue; }
-      gorulen.add(k0);
-      /* Kapalı şalter tek başına kalır */
-      if (!ILET(b0)) { this.agBilgi.set(k0, { uretim: 0, tuketim: 0, istek: 0, depo: 0, kap: 0, calisiyor: false, cihaz: 1, kapali: true }); continue; }
-      /* Ağı bul */
-      const ag = [k0], kuyruk = [p0];
-      while (kuyruk.length) {
-        const [x, y, z] = kuyruk.pop();
-        for (const [a, bb, c] of YAN6) {
-          const k = (x + a) + ',' + (y + bb) + ',' + (z + c);
-          if (gorulen.has(k) || !E.has(k)) continue;
-          if (!ILET(BLOKLAR[d.blok(x + a, y + bb, z + c)])) continue;
-          gorulen.add(k); ag.push(k); kuyruk.push([x + a, y + bb, z + c]);
+    /* Ucundaki cihaz kalkan ya da bağlantı noktası değişen kablolar kopar (kablo eşyası düşer) */
+    if (K) {
+      K.eskileriAta();
+      for (const w of [...K.liste.values()]) {
+        if (w.eski) continue;
+        let kop = null;
+        for (const [u, pi, tur] of [[w.a, w.ap, 'cikis'], [w.b, w.bp, 'giris']]) {
+          const [x, y, z] = C(u);
+          if (!d.yuklu(x, z)) continue;
+          const n = D.get(u);
+          if (!n || !n.P[pi] || n.P[pi][0] !== tur) { kop = [x + 0.5, y + 0.5, z + 0.5]; break; }
         }
-        /* kablo ile bağlı cihazlar */
-        if (komsu.size) {
-          const kk = kokAnahtari(BLOKLAR[d.blok(x, y, z)], x, y, z), l = komsu.get(kk);
-          if (l) for (const k of l) {
-            if (gorulen.has(k) || !E.has(k)) continue;
-            const [qx, qy, qz] = C(k);
-            if (!ILET(BLOKLAR[d.blok(qx, qy, qz)])) continue;
-            gorulen.add(k); ag.push(k); kuyruk.push([qx, qy, qz]);
-          }
-        }
+        if (kop) { K.sil(w.i); if (this.kabloKoptu) this.kabloKoptu(w, kop); continue; }
+        const A = D.get(w.a), B = D.get(w.b);
+        if (!A || !B) continue;
+        const kayip = Math.min(0.25, K.uzunluk(w) * 0.001);
+        A.cik.push({ w, n: B, f: 1 - kayip }); B.gir.push(w);
       }
-      /* Üretim, istek ve depo (çok bloklu cihazlar yalnızca kök hücrede sayılır) */
-      let uretim = 0, istek = 0, kablo = 0, depo = 0, kap = 0, cihazSayisi = 0;
-      const tuketiciler = [], bataryalar = [];
-      for (const k of ag) {
-        const [x, y, z] = C(k), b = BLOKLAR[d.blok(x, y, z)];
-        if (b.elektrik === 'kablo') { kablo++; continue; }
-        if (b.cihaz && b.parca) continue;
-        cihazSayisi++;
-        if (b.uretim) { const r = cihazUretim(d, b, x, y, z, O); uretim += r.u; this.cihaz.set(k, r.u); if (r.neden) this.neden.set(k, r.neden); }
-        else if (b.tuketim) { istek += b.tuketim; tuketiciler.push([k, x, y, z, b]); }
-        else if (b.elektrik === 'batarya') { const e = Math.min(b.kapasite, d.enerji.get(k) || 0); depo += e; kap += b.kapasite; bataryalar.push([k, b]); }
-      }
-      let tel = 0;
-      if (K && K.liste.size) { const s = new Set(ag); for (const w of K.liste.values()) if (s.has(w.a)) tel += K.uzunluk(w); }
-      const kayip = Math.min(0.25, kablo * 0.002 + tel * 0.001);
-      uretim *= 1 - kayip;
-      const net = uretim - istek;
-      const calisiyor = istek > 0 && (net >= 0 || depo + net * dt >= 0);
-      const tuketim = calisiyor ? istek : 0;
-      depo = Math.max(0, Math.min(kap, depo + (uretim - tuketim) * dt));
-      /* Enerji bataryalara doluluk oranı eşit olacak biçimde dağıtılır */
-      const oran = kap > 0 ? depo / kap : 0;
-      for (const [k, b] of bataryalar) { d.enerji.set(k, b.kapasite * oran); this.oranlar.set(k, Math.round(oran * 100) / 100); }
-      for (const [k, x, y, z, b] of tuketiciler) {
-        this.cihaz.set(k, calisiyor ? b.tuketim : 0);
-        if (!!b.acik !== calisiyor) d.blokKoy(x, y, z, b.taban + (calisiyor ? 1 : 0), 'elektrik');
-      }
-      const ozet = { uretim, tuketim, istek, depo, kap, calisiyor, cihaz: cihazSayisi, kayip, eksik: istek > 0 && !calisiyor };
-      for (const k of ag) this.agBilgi.set(k, ozet);
     }
-    /* Yüklü olmayan bataryaların oranı unutulur */
-    for (const k of this.oranlar.keys()) if (!E.has(k)) this.oranlar.delete(k);
+    /* 1. Talep */
+    const tamam = new Set(), yolda = new Set();
+    const talep = n => {
+      if (tamam.has(n.k)) return n.talep;
+      if (yolda.has(n.k)) return 0;
+      yolda.add(n.k);
+      const b = n.b, alt = () => n.cik.reduce((t, c) => t + talep(c.n), 0);
+      let t = 0;
+      if (b.tuketim) t = b.tuketim + alt();
+      else if (b.elektrik === 'salter') t = b.acik ? alt() : 0;
+      else if (b.elektrik === 'dagitici' || b.elektrik === 'birlestirici') t = alt();
+      else if (b.elektrik === 'batarya') { const e = d.enerji.get(n.k) || 0; t = e < b.kapasite - 0.5 ? BATARYA_HIZ[b.cihaz] : 0; }
+      for (const c of n.cik) c.talep = talep(c.n);
+      yolda.delete(n.k); tamam.add(n.k); n.talep = t;
+      return t;
+    };
+    for (const n of D.values()) talep(n);
+    /* 2. Güç akışı: bir düğüm, girişlerine bağlı bütün düğümler işlendikten sonra işlenir (üreticiler ve bataryalar önce) */
+    const kalan = new Map();
+    for (const n of D.values()) kalan.set(n.k, n.gir.filter(w => D.has(w.a)).length);
+    const kuyruk = [...D.values()].filter(n => n.b.uretim || n.b.elektrik === 'batarya' || !kalan.get(n.k)), islendi = new Set();
+    const gonder = (n, c, P) => {
+      c.guc = P; n.giden += P;
+      c.n.gelen += P * c.f;
+      if (c.n.b.elektrik !== 'batarya' && !c.n.b.uretim) { const r = kalan.get(c.n.k) - 1; kalan.set(c.n.k, r); if (r <= 0 && !islendi.has(c.n.k)) kuyruk.push(c.n); }
+    };
+    const isle = n => {
+      if (islendi.has(n.k)) return;
+      islendi.add(n.k);
+      const b = n.b;
+      let P = 0;
+      if (b.uretim) { const r = cihazUretim(d, b, n.x, n.y, n.z, O); n.uretim = r.u; n.neden = r.neden; P = r.u; }
+      else if (b.elektrik === 'batarya') { const e = d.enerji.get(n.k) || 0, cik = n.cik.reduce((t, c) => t + c.talep, 0); P = Math.min(BATARYA_HIZ[b.cihaz], cik, e / dt); }
+      else if (b.tuketim) { n.calisiyor = n.gelen >= b.tuketim * 0.95; P = n.calisiyor ? Math.max(0, n.gelen - b.tuketim) : 0; }   // kablo kaybı için %5 pay
+      else if (b.elektrik === 'salter') P = b.acik ? n.gelen : 0;
+      else P = n.gelen;   // dağıtıcı, birleştirici
+      if (!n.cik.length) return;
+      if (n.cik.length === 1) { gonder(n, n.cik[0], P); return; }
+      /* Birden çok çıkış: talepleri oranında (talep yoksa eşit) bölünür */
+      const top = n.cik.reduce((t, c) => t + c.talep, 0);
+      for (const c of n.cik) gonder(n, c, top > 0 ? Math.min(c.talep, P * c.talep / top) : P / n.cik.length);
+    };
+    while (kuyruk.length) isle(kuyruk.shift());
+    for (const n of D.values()) if (!islendi.has(n.k)) isle(n);   // döngüdeki düğümler
+    /* 3. Bataryalar ve tüketici durumları */
+    for (const n of D.values()) {
+      const b = n.b;
+      if (b.elektrik === 'batarya') {
+        const e0 = d.enerji.get(n.k) || 0, sarj = Math.min(n.gelen, BATARYA_HIZ[b.cihaz]);
+        const e = Math.max(0, Math.min(b.kapasite, e0 + (sarj - n.giden) * dt));
+        d.enerji.set(n.k, e); n.depo = e; n.sarj = sarj;
+        this.oranlar.set(n.k, Math.round(e / b.kapasite * 100) / 100);
+      } else if (b.tuketim) {
+        const c = !!n.calisiyor;
+        if (!!b.acik !== c) d.blokKoy(n.x, n.y, n.z, b.taban + (c ? 1 : 0), 'elektrik');
+      }
+    }
+    for (const k of this.oranlar.keys()) if (!D.has(k)) this.oranlar.delete(k);
+    this.dugumler = D;
   }
 
+  /* Yüklü cihazların toplamı (geliştirici penceresi için) */
+  ozet() {
+    let u = 0, t = 0, dp = 0, kap = 0, eksik = 0, n = 0;
+    for (const x of this.dugumler.values()) {
+      n++; u += x.uretim || 0;
+      if (x.b.tuketim) { if (x.calisiyor) t += x.b.tuketim; else eksik++; }
+      if (x.b.elektrik === 'batarya') { dp += x.depo || 0; kap += x.b.kapasite; }
+    }
+    return { cihaz: n, uretim: u, tuketim: t, depo: dp, kap, eksik };
+  }
   /* Bakılan bloğun bilgisi (arayüz ve ağ isteği için); hesaplanmamışsa null */
   bilgi(k) {
-    const a = this.agBilgi.get(k);
-    if (!a) return null;
-    const [x, y, z] = C(k), b = BLOKLAR[this.dunya.blok(x, y, z)], kk = kokAnahtari(b, x, y, z);
-    const v = { u: r1(a.uretim), t: r1(a.tuketim), i: r1(a.istek), d: Math.round(a.depo), k: a.kap, c: a.calisiyor ? 1 : 0, n: a.cihaz, s: a.kapali ? 1 : 0, ky: Math.round(a.kayip * 100) };
-    if (this.cihaz.has(kk)) v.x = r1(this.cihaz.get(kk));
-    if (this.neden.has(kk)) v.ne = this.neden.get(kk);
-    if (b && b.elektrik === 'batarya') v.bd = Math.round(Math.min(b.kapasite, this.dunya.enerji.get(kk) || 0));
+    const [x, y, z] = C(k), b = BLOKLAR[this.dunya.blok(x, y, z)], n = this.dugumler.get(kokAnahtari(b, x, y, z));
+    if (!n) return null;
+    const v = { g: r1(n.gelen), c: r1(n.giden), t: r1(n.talep), u: r1(n.uretim || 0), on: n.calisiyor ? 1 : 0, gb: n.gir.length, cb: n.cik.length };
+    if (n.neden) v.ne = n.neden;
+    if (n.b.elektrik === 'batarya') { v.d = Math.round(n.depo || 0); v.sj = r1(n.sarj || 0); }
     return v;
   }
 }
@@ -184,14 +206,31 @@ const r1 = n => Math.round(n * 10) / 10;
 export function enerjiMetni(b, v) {
   const s = n => String(n).replace('.', ','), bin = n => Math.round(n).toLocaleString('tr-TR');
   if (!v) return { satirlar: ['Bilgi alınıyor…'], durum: '', oran: null };
-  if (v.s) return { satirlar: ['Şalter kapalı: ağ kesik.'], durum: 'kapali', oran: null };
-  const l = [];
-  if (b.uretim) l.push(`Bu cihaz <b>${s(v.x ?? 0)}</b> / ${b.uretim} E/sn üretiyor` + (v.ne ? ` (${v.ne})` : ''));
-  else if (b.tuketim) l.push(`Bu cihaz <b>${s(b.tuketim)}</b> E/sn harcar · ${v.c ? 'çalışıyor' : 'kapalı'}`);
-  else if (b.elektrik === 'batarya') l.push(`Batarya <b>${bin(v.bd || 0)}</b> / ${bin(b.kapasite)} E`);
-  l.push(`Ağ: üretim <b>${s(v.u)}</b> · tüketim <b>${s(v.t)}</b> E/sn` + (v.ky ? ` · kayıp %${v.ky}` : ''));
-  if (v.k) l.push(`Ağ deposu <b>${bin(v.d)}</b> / ${bin(v.k)} E`);
-  const durum = v.i > 0 && !v.c ? 'eksik' : v.u > v.t + 0.05 ? (v.k && v.d < v.k ? 'sarj' : 'fazla') : v.i > 0 ? 'calisiyor' : v.n ? 'bos' : '';
-  return { satirlar: l, durum, oran: v.k ? v.d / v.k : null };
+  const l = [], P = portlar(b), gs = P.filter(p => p[0] === 'giris').length, cs = P.length - gs;
+  const baglanti = `Bağlı: ${gs ? `giriş ${v.gb}/${gs}` : ''}${gs && cs ? ' · ' : ''}${cs ? `çıkış ${v.cb}/${cs}` : ''}`;
+  let durum = '', oran = null;
+  if (b.uretim) {
+    l.push(`Üretim <b>${s(v.u)}</b> / ${b.uretim} E/sn` + (v.ne ? ` (${v.ne})` : ''));
+    l.push(v.cb ? `Çıkıştan verilen <b>${s(v.c)}</b> E/sn (talep ${s(v.t || 0)})` : 'Çıkışa kablo bağlı değil.');
+    durum = !v.cb ? 'bagsiz' : v.u <= 0 ? 'kapali' : v.c + 0.05 < v.u ? 'fazla' : 'calisiyor';
+  } else if (b.elektrik === 'batarya') {
+    l.push(`Depo <b>${bin(v.d || 0)}</b> / ${bin(b.kapasite)} E`);
+    l.push(`Şarj <b>+${s(v.sj || 0)}</b> · Çıkış <b>${s(v.c)}</b> E/sn (en çok ${BATARYA_HIZ[b.cihaz]})`);
+    oran = (v.d || 0) / b.kapasite;
+    durum = v.sj > v.c + 0.05 ? 'sarj' : v.c > v.sj + 0.05 ? 'bosaliyor' : oran >= 0.995 ? 'dolu' : v.d <= 0 ? 'bos' : 'beklemede';
+  } else if (b.tuketim) {
+    l.push(`İhtiyaç <b>${s(b.tuketim)}</b> E/sn · Giriş <b>${s(v.g)}</b> E/sn`);
+    if (v.cb) l.push(`Geçiş çıkışı <b>${s(v.c)}</b> E/sn`);
+    durum = !v.gb ? 'bagsiz' : v.on ? 'calisiyor' : 'eksik';
+  } else if (b.elektrik === 'salter') {
+    l.push(`${b.acik ? 'Açık' : 'Kapalı'} · Giriş <b>${s(v.g)}</b> · Çıkış <b>${s(v.c)}</b> E/sn`);
+    durum = b.acik ? (v.g > 0 ? 'calisiyor' : 'bagsiz') : 'kapali';
+  } else {
+    l.push(`Giriş <b>${s(v.g)}</b> · Çıkış <b>${s(v.c)}</b> E/sn · Talep ${s(v.t)}`);
+    durum = v.g > 0 ? 'calisiyor' : 'bagsiz';
+  }
+  l.push(baglanti);
+  return { satirlar: l, durum, oran };
 }
-export const DURUM_AD = { eksik: 'Enerji yetersiz', sarj: 'Şarj ediliyor', fazla: 'Fazla üretim', calisiyor: 'Çalışıyor', bos: 'Tüketici yok', kapali: 'Kesik' };
+export const DURUM_AD = { eksik: 'Enerji yetersiz', sarj: 'Şarj ediliyor', bosaliyor: 'Boşalıyor', dolu: 'Dolu', bos: 'Boş', beklemede: 'Beklemede', fazla: 'Fazla üretim',
+  calisiyor: 'Çalışıyor', kapali: 'Kapalı', bagsiz: 'Bağlı değil' };

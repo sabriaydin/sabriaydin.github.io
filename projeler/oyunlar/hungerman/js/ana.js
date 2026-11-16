@@ -282,6 +282,8 @@ addEventListener('mouseup', e => { if (e.button === 0) fare.sol = false; if (e.b
 tuval.addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('wheel', e => {
   if (!oyun || !kilitli) return;
+  /* 0.27.0: Shift + tekerlek: çekilen kablonun sarkması (yukarı: gergin, aşağı: sarkık) */
+  if ((tus.ShiftLeft || tus.ShiftRight || e.shiftKey) && oyun.etkilesim.kablo) { oyun.etkilesim.kabloSarkma((e.deltaY || e.deltaX) > 0 ? 1 : -1); return; }
   const n = (oyun.envanter.secili + (e.deltaY > 0 ? 1 : -1) + 9) % 9;
   seciliAyarla(n);
 }, { passive: true });
@@ -560,6 +562,7 @@ function oyunBaslat(v) {
   oyun.cihazCizici = new CihazCizici(sahne, dunya);   // 0.25.0: çok bloklu cihazların modelleri ve önizleme
   oyun.bataryaOran = new Map();   // 0.25.0: istemcide sunucudan gelen batarya doluluğu
   oyun.kablolar = new Kablolar(dunya); oyun.kablolar.iceAktar(v.kablolar);   // 0.26.0: Rust tarzı kablolar
+  oyun.cihazCizici.kablolar = oyun.kablolar;
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
@@ -588,7 +591,7 @@ function oyunBaslat(v) {
       sandikBasarim(x, y, z);
     },
     /* 0.26.0: kablolar: çok oyunculu istemcide istek sunucuya gider; sökülen kablo envantere geri döner */
-    kabloEkle: (a, b, n, uz) => { if (oyun.istemci) oyun.ag.gonder({ t: 'ke', a, b, n, uz }); else oyun.kablolar.ekle(a, b, n, undefined, uz); },
+    kabloEkle: (a, ap, b, bp, n, sr, uz) => { if (oyun.istemci) oyun.ag.gonder({ t: 'ke', a, ap, b, bp, n, s: sr, uz }); else oyun.kablolar.ekle(a, ap, b, bp, n, sr, undefined, uz); },
     kabloSil: (i, iade) => {
       const w = oyun.kablolar.liste.get(i); if (!w) return;
       if (iade) { const k = envanter.ekle(KABLO.esya, kabloMaliyeti(w.uz)); if (k) dusenler.birak(KABLO.esya, k, oyuncu.konum.x, oyuncu.konum.y + 1, oyuncu.konum.z); }
@@ -1032,13 +1035,18 @@ function adim(t) {
     o.cihazCizici.onizleme(ayar.onizleme !== false && etkin && !o.etkilesim.kablo ? o.etkilesim.onizlemeBilgisi() : null);
     /* 0.26.0: kablolar, çekilen kablonun önizlemesi ve elde kablo varken bakılan kablonun vurgusu */
     const E = o.etkilesim, kabloElde = o.envanter.seciliId() === KABLO.esya;
+    E.shift = !!(tus.ShiftLeft || tus.ShiftRight);
     if (E.kablo && !kabloElde) E.kabloIptal();
     o.cihazCizici.kablolariCiz(o.kablolar, o.isik);
-    const kon = E.kablo && etkin ? E.kabloOnizleme() : null;
+    const kon = E.kablo && etkin ? E.kabloOnizleme() : null, port = kabloElde && etkin ? (kon ? kon.port : E.bakilanPort()) : null;
     o.cihazCizici.kabloOnizleme(kon);
-    o.cihazCizici.kabloVurgula(kabloElde && !E.kablo && etkin ? o.cihazCizici.kabloIsin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu(), E.hedef ? E.hedef.t + 0.05 : 5) : null);
-    o.hud.kabloIpucu(kon ? `Kablo <b>${kon.uz.toFixed(1).replace('.', ',')}</b> / ${KABLO.toplam} blok · <b>${kon.maliyet}</b> kablo${kon.gecerli ? '' : ` · <em>${kon.neden}</em>`}<span>Cihaza sağ tık: bağla · Yüzeye sağ tık: ara nokta · R: iptal</span>` :
-      kabloElde && etkin ? 'Elektrik Kablosu<span>Cihaza sağ tık: kablo çek · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' : null);
+    o.cihazCizici.portVurgula(port, kon ? kon.gecerli : port && !port.dolu);
+    o.cihazCizici.portlariGoster(kabloElde);
+    o.cihazCizici.kabloVurgula(kabloElde && !E.kablo && !port && etkin ? o.cihazCizici.kabloIsin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu(), E.hedef ? E.hedef.t + 0.05 : 5) : null);
+    const pAd = p => `${p.ad} · <b>${p.tur === 'cikis' ? 'Çıkış' : 'Giriş'}</b>${p.dolu ? ' (dolu)' : ''}`, sr = v => v.toFixed(1).replace('.', ',');
+    o.hud.kabloIpucu(kon ? `Kablo <b>${sr(kon.uz)}</b> / ${KABLO.toplam} blok · <b>${kon.maliyet}</b> kablo · sarkma <b>${kon.sark ? sr(kon.sark) + ' blok' : 'gergin'}</b>${E.shift ? ' · düz hizalı' : ''}${kon.port ? ' → ' + pAd(kon.port) : ''}${kon.gecerli ? '' : ` · <em>${kon.neden}</em>`}<span>Karşı noktaya sağ tık: bağla · Yüzeye sağ tık: ara nokta · Shift basılı: düz çek · Shift + tekerlek: sarkma · R: iptal</span>` :
+      port ? `${pAd(port)}<span>${port.dolu ? 'Takılı kabloyu sökmek için kabloya sağ tıklayınız' : 'Sağ tık: kablo çekmeye başla'}</span>` :
+      kabloElde && etkin ? 'Elektrik Kablosu<span>Bir cihazın mavi (giriş) ya da turuncu (çıkış) noktasına bakınız · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' : null);
   }
   /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi */
   const eh = o.etkilesim.hedef, ebl = eh && !hc && !o.fotoModu && (kilitli || dokun.aktif) ? BLOKLAR[eh.id] : null;

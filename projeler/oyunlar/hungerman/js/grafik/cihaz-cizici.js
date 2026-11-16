@@ -11,6 +11,7 @@ import { T, YUZ_DOKU, BLOKLAR } from '../bloklar.js';
 import { CIHAZ, PERVANE } from '../cihazlar.js';
 import { sekilKutulari } from '../sekiller.js';
 import { cihazUretim } from '../oyun/elektrik.js';
+import { portlar, portBilgi } from '../oyun/kablolar.js';
 
 const EPS = 0.0008;
 const GOLGE = [0.8, 0.8, 1, 0.55, 0.88, 0.88];   // +x, -x, +y, -y, +z, -z yüz aydınlığı
@@ -207,15 +208,18 @@ export class CihazCizici {
       }
     }
     for (const [k, o] of this.liste) if (!gorulen.has(k)) { this.grup.remove(o.dis); this.liste.delete(k); }
+    this.portlariKur(this.kablolar);
   }
   temizle() { for (const o of this.liste.values()) this.grup.remove(o.dis); this.liste.clear(); this.onizleme(null); }
 
   /* ---------- 0.26.0: kablolar ----------
      Kablo noktaları arasında sarkan bir eğri boyunca ince bir boru olarak çizilir. Bakılan kablo (elde kablo varken) vurgulanır. */
-  static sarkik(noktalar) {
+  /* sarkmalar: her parçanın ortasındaki sarkma (blok; 0: gergin, düz). Verilmezse uzunluğa göre hafif sarkar */
+  static sarkik(noktalar, sarkmalar) {
     const yol = [];
     for (let i = 1; i < noktalar.length; i++) {
-      const a = noktalar[i - 1], b = noktalar[i], L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), sark = Math.min(1.4, L * 0.06), n = Math.max(2, Math.ceil(L * 2.5));
+      const a = noktalar[i - 1], b = noktalar[i], L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), n = Math.max(2, Math.ceil(L * 2.5));
+      const sark = Math.min(L * 0.6, sarkmalar ? (+sarkmalar[i - 1] || 0) : Math.min(1.4, L * 0.06));
       for (let j = i === 1 ? 0 : 1; j <= n; j++) { const t = j / n; yol.push(new THREE.Vector3(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t - 4 * sark * t * (1 - t), a[2] + (b[2] - a[2]) * t)); }
     }
     return yol;
@@ -239,7 +243,7 @@ export class CihazCizici {
     for (const w of K.liste.values()) {
       const n = K.noktalar(w);
       if (!n) { this.kEksik = true; continue; }
-      const yol = CihazCizici.sarkik(n), g = this.boru(yol);
+      const yol = CihazCizici.sarkik(n, w.s), g = this.boru(yol);
       if (!g) continue;
       const m = new THREE.Mesh(g, this.kabloMalz); m.userData.i = w.i; this.kabloGrup.add(m); this.kabloYol.set(w.i, yol);
     }
@@ -263,14 +267,55 @@ export class CihazCizici {
     this.vurgu = i;
     for (const m of this.kabloGrup.children) m.material = m.userData.i === i ? this.kabloVurguMalz : this.kabloMalz;
   }
+  /* ---------- 0.27.0: bağlantı noktaları ----------
+     Her elektrikli cihazın giriş (mavi) ve çıkış (turuncu) noktaları küçük soketler olarak çizilir; dolu soketin ortası koyudur.
+     Elde kablo yokken soketler sönük görünür; bakılan nokta beyaz bir çerçeveyle (uygun değilse kırmızı) vurgulanır. */
+  portlariKur(K) {
+    if (!this.portGrup) {
+      this.portGrup = new THREE.Group(); this.grup.add(this.portGrup);
+      this.portGeo = new THREE.BoxGeometry(0.1, 0.1, 0.1); this.portIcGeo = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+      this.portMalz = { giris: new THREE.MeshBasicMaterial({ color: 0x3f9cff }), cikis: new THREE.MeshBasicMaterial({ color: 0xff9d2e }), ic: new THREE.MeshBasicMaterial({ color: 0x15181c }) };
+      this.portIz = '';
+    }
+    const d = this.dunya, parca = [];
+    for (const [k, [x, y, z]] of d.elektrikler) { const n = portlar(BLOKLAR[d.blok(x, y, z)]).length; if (n) parca.push(k + ':' + d.blok(x, y, z)); }
+    const iz = parca.join('|') + '#' + (K ? K.surum : 0);
+    if (iz === this.portIz) return;
+    this.portIz = iz;
+    this.portGrup.clear();
+    for (const p of parca) {
+      const k = p.split(':')[0], [x, y, z] = k.split(',').map(Number), l = portlar(BLOKLAR[d.blok(x, y, z)]);
+      for (let i = 0; i < l.length; i++) {
+        const q = portBilgi(d, k, i); if (!q) continue;
+        const m = new THREE.Mesh(this.portGeo, this.portMalz[q.tur]); m.position.set(q.p[0], q.p[1], q.p[2]); this.portGrup.add(m);
+        if (K && K.portKablosu(k, i)) { const c = new THREE.Mesh(this.portIcGeo, this.portMalz.ic); c.scale.set(1.05, 1.05, 1.05); c.position.copy(m.position); this.portGrup.add(c); }
+      }
+    }
+  }
+  portlariGoster(elde) {
+    if (!this.portMalz) return;
+    const a = elde ? 1 : 0.6;
+    this.portMalz.giris.color.setRGB(0.25 * a, 0.61 * a, a); this.portMalz.cikis.color.setRGB(a, 0.62 * a, 0.18 * a);
+  }
+  portVurgula(p, gecerli) {
+    if (!this.portCerceve) {
+      this.portCerceve = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.16, 0.16, 0.16)), new THREE.LineBasicMaterial({ color: 0xffffff, depthTest: false }));
+      this.portCerceve.renderOrder = 10; this.grup.add(this.portCerceve);
+    }
+    this.portCerceve.visible = !!p;
+    if (!p) return;
+    this.portCerceve.position.set(p.p[0], p.p[1], p.p[2]);
+    this.portCerceve.material.color.set(gecerli ? 0xffffff : 0xff5a4e);
+  }
+
   /* Çekilmekte olan kablonun önizlemesi: b = etkilesim.kabloOnizleme() */
   kabloOnizleme(b) {
     if (!this.kOnMalz) this.kOnMalz = new THREE.MeshBasicMaterial({ color: 0x7fe08a, transparent: true, opacity: 0.85 });
     if (!b) { if (this.kOn) this.kOn.visible = false; this.kOnAnahtar = ''; return; }
-    const anahtar = b.noktalar.map(p => p.map(v => v.toFixed(2)).join(',')).join(';') + b.gecerli;
+    const anahtar = b.noktalar.map(p => p.map(v => v.toFixed(2)).join(',')).join(';') + b.gecerli + b.sarkmalar.join(',');
     if (anahtar === this.kOnAnahtar && this.kOn) { this.kOn.visible = true; return; }
     this.kOnAnahtar = anahtar;
-    const g = this.boru(CihazCizici.sarkik(b.noktalar), 0.028);
+    const g = this.boru(CihazCizici.sarkik(b.noktalar, b.sarkmalar), 0.028);
     if (!g) return;
     if (!this.kOn) { this.kOn = new THREE.Mesh(g, this.kOnMalz); this.grup.add(this.kOn); }
     else { this.kOn.geometry.dispose(); this.kOn.geometry = g; }

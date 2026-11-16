@@ -418,11 +418,10 @@ export class GelistiriciPenceresi {
     let html;
     if (!E) html = '<p class="gelNot">Ağ bilgisi sunucuda tutulur.</p>';
     else {
-      const aglar = new Set(E.agBilgi.values()); let u = 0, t = 0, d = 0, kap = 0, eksik = 0;
-      for (const a of aglar) { u += a.uretim; t += a.tuketim; d += a.depo; kap += a.kap; if (a.eksik) eksik++; }
+      const z = E.ozet(), u = z.uretim, t = z.tuketim, d = z.depo, kap = z.kap, eksik = z.eksik, aglar = { size: o.kablolar ? o.kablolar.liste.size : 0 };
       const s = n => (Math.round(n * 10) / 10).toLocaleString('tr-TR'), olcu = (ad, v) => `<div class="gelOlcu"><small>${ad}</small><b>${v}</b></div>`;
-      html = olcu('Elektrik bloğu', o.dunya.elektrikler.size) + olcu('Ağ', aglar.size) + olcu('Üretim', s(u) + ' E/sn') + olcu('Tüketim', s(t) + ' E/sn') +
-        olcu('Depo', `${Math.round(d).toLocaleString('tr-TR')} / ${Math.round(kap).toLocaleString('tr-TR')} E`) + olcu('Enerjisi yetmeyen ağ', eksik);
+      html = olcu('Elektrik bloğu', o.dunya.elektrikler.size) + olcu('Kablo', aglar.size) + olcu('Üretim', s(u) + ' E/sn') + olcu('Tüketim', s(t) + ' E/sn') +
+        olcu('Depo', `${Math.round(d).toLocaleString('tr-TR')} / ${Math.round(kap).toLocaleString('tr-TR')} E`) + olcu('Enerjisi yetmeyen tüketici', eksik);
     }
     if (son.elg !== html) { son.elg = html; g.innerHTML = html; }
   }
