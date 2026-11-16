@@ -108,7 +108,7 @@ function ekran(ad) {
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-git]');
-  if (!b) return;
+  if (!b || !EKRANLAR[b.dataset.git]) return;   // 0.30.3: yalnızca tanımlı ekranlar (bilinmeyen değer bütün ekranları gizliyordu)
   ses.baslat(); ses.tik();
   ekran(b.dataset.git);
 });
@@ -1238,7 +1238,8 @@ function adim(t) {
   if (Math.abs(sicak - (o.sonSicak || 0)) > 0.02) { o.sonSicak = sicak; $('#sicakEfekt').style.opacity = sicak.toFixed(2); }
   o.hud.suAlti(gozSuda);
   if (!$('#hata').hidden) hataPaneli(o);
-  if (envEkrani.acik && Math.random() < 0.05) envEkrani.ciz();
+  /* 0.30.3: açık envanter yarım saniyede bir yenilenir (yakın istasyonlar); değişmeyen öğeler yeniden kurulmaz */
+  if (envEkrani.acik) { o.envYenile = (o.envYenile || 0) - dt; if (o.envYenile <= 0) { o.envYenile = 0.5; envEkrani.ciz(); } }
   if (gorevEkrani.acik && Math.random() < 0.03) gorevEkrani.ciz();
   if (!document.hidden) sahne.ciz();
 }

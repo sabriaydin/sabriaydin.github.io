@@ -483,8 +483,8 @@ body:has(#bossCubuk:not([hidden])) #hedefBilgi { top: 112px; }
 .tkGirdiler i { font-style: normal; color: var(--soluk); font: 700 .9rem var(--baslik); padding: 0 1px; }
 .tkGirdiler i.ok { color: var(--vurgu2); padding: 0 4px; }
 .tkGirdi { position: relative; display: grid; place-items: center; width: 40px; height: 40px; background: #2a251e; border: 2px solid #3d352b; border-radius: 3px; }
-.tkGirdi[data-git] { cursor: pointer; }
-.tkGirdi[data-git]:hover { border-color: var(--cizgi2); }
+.tkGirdi[data-tkgit] { cursor: pointer; }
+.tkGirdi[data-tkgit]:hover { border-color: var(--cizgi2); }
 .tkGirdi img { width: 28px; height: 28px; image-rendering: pixelated; }
 .tkGirdi b { position: absolute; right: 2px; bottom: 0; font: 700 .78rem var(--baslik); color: #fff; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
 .tkGirdi small { display: none; }

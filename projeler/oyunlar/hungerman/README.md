@@ -117,6 +117,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.3 (0.30.3): Envanter ve üretim hata düzeltmeleri
+- Kategoriler arası geçiş takılıyordu: açık envanter her karede rastgele (saniyede birkaç kez) baştan çiziliyor, tıklanan düğme fare basılıyken yerinden sökülüyordu. Pencere artık yarım saniyede bir yenilenir ve yalnızca içeriği değişen bölümler yeniden kurulur.
+- Üretim ayrıntısındaki "tarif ›", "Bununla yapılanlar" ve "Son üretilenler" düğmeleri ile Tarif Kitabı'ndaki tarif bağlantıları ekran geçişi sanılıp bütün ekranları gizleyebiliyordu; düzeltildi.
+- Miktar kutusuna yazarken odak kaybolmaz; arama kutusu dışına tıklanınca ya da Enter / Esc ile odak bırakılır, Q ve diğer kısayollar yeniden çalışır.
+
 ## 30.2 (0.30.2): Üretim üst bölümü yeniden tasarlandı
 - Başlık altında "yapılabilir tarif" özeti; istasyonlar simgeyle gösterilir (yakındakiler yeşil işaretli, çalışan elektrikli ocak turuncu).
 - Büyüteç simgeli arama çubuğu, Öneri / A–Z / Adet sıralama düğmeleri ve anahtar biçiminde "Yapılabilenler" süzgeci.

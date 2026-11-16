@@ -73,8 +73,8 @@ export class TarifKitabi {
     $('#tkSekme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; this.sekme = b.dataset.k; this.ses.tik(); this.izgaraCiz(); });
     $('#tkIzgara').addEventListener('click', e => { const b = e.target.closest('button[data-id]'); if (b) this.sec(+b.dataset.id); });
     $('#tkAyrinti').addEventListener('click', e => {
-      const g = e.target.closest('[data-git]'), tk = e.target.closest('[data-takip]'), geri = e.target.closest('[data-geri]');
-      if (g) { this.gecmis.push(this.secili); this.sec(+g.dataset.git, true); }
+      const g = e.target.closest('[data-tkgit]'), tk = e.target.closest('[data-takip]'), geri = e.target.closest('[data-geri]');
+      if (g) { this.gecmis.push(this.secili); this.sec(+g.dataset.tkgit, true); }
       else if (geri && this.gecmis.length) this.sec(this.gecmis.pop(), true);
       else if (tk) { const i = +tk.dataset.takip; this.takipEt(this.takip === i ? -1 : i); this.ses.tik(); this.ayrintiCiz(); }
     });
@@ -113,7 +113,7 @@ export class TarifKitabi {
   /* Girdi kutusu: simge, adet ve envanterdeki durum */
   girdi(g, a, carpan = 1) {
     const id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g, var_ = this.env ? girdiSay(this.env, g) : 0, gerek = a * carpan;
-    return `<span class="tkGirdi ${var_ >= gerek ? 'tamam' : 'eksik'}" ${GRUPLAR[g] ? '' : `data-git="${id}"`} title="${esc(girdiAdi(g))}"><img src="${simge(id).url}" alt=""><b>${gerek}</b><small>${esc(girdiAdi(g))}</small></span>`;
+    return `<span class="tkGirdi ${var_ >= gerek ? 'tamam' : 'eksik'}" ${GRUPLAR[g] ? '' : `data-tkgit="${id}"`} title="${esc(girdiAdi(g))}"><img src="${simge(id).url}" alt=""><b>${gerek}</b><small>${esc(girdiAdi(g))}</small></span>`;
   }
   tarifSatiri(t) {
     const i = TARIFLER.indexOf(t), kez = this.env ? kacKez(this.env, t) : 0;
@@ -121,7 +121,7 @@ export class TarifKitabi {
     const istVar = !t.istasyon || [].concat(t.istasyon).some(k => this.mevcut.has(k));
     return `<div class="tkTarif">
       <div class="tkGirdiler">${girdiListesi(t).map(([g, a]) => this.girdi(g, a)).join('<i class="arti">+</i>')}<i class="ok">→</i>
-        <span class="tkGirdi cikti" data-git="${t.cikti}" title="${esc(ESYALAR[t.cikti].ad)}"><img src="${simge(t.cikti).url}" alt=""><b>${t.adet}</b><small>${esc(ESYALAR[t.cikti].ad)}</small></span></div>
+        <span class="tkGirdi cikti" data-tkgit="${t.cikti}" title="${esc(ESYALAR[t.cikti].ad)}"><img src="${simge(t.cikti).url}" alt=""><b>${t.adet}</b><small>${esc(ESYALAR[t.cikti].ad)}</small></span></div>
       <div class="tkTarifAlt"><span class="tkIst ${istVar ? '' : 'uzak'}">${esc(ist)}</span>${kez > 0 ? `<span class="tkKez">Malzeme ${kez} kez yetiyor</span>` : '<span class="tkKez eksik">Malzeme eksik</span>'}
         <button type="button" class="dugme kucuk ${this.takip === i ? 'ana' : ''}" data-takip="${i}">${this.takip === i ? 'Takibi bırak' : 'Takip et'}</button></div>
     </div>`;
@@ -155,7 +155,7 @@ export class TarifKitabi {
       <h4>Nasıl yapılır</h4>
       ${yap.length ? yap.map(t => this.tarifSatiri(t)).join('') : '<p class="tkNot">Bu eşyanın tarifi yoktur; doğada bulunur ya da elde edilir.</p>'}
       ${kay.length ? `<h4>Nereden bulunur</h4><ul class="tkKaynak">${kay.map(k => `<li>${esc(k)}</li>`).join('')}</ul>` : ''}
-      ${kul.length ? `<h4>Kullanıldığı tarifler <small>${kul.length}</small></h4><div class="tkKullanim">${kul.map(t => `<button type="button" data-git="${t.cikti}" title="${esc(ESYALAR[t.cikti].ad)}"><img src="${simge(t.cikti).url}" alt=""><span>${esc(ESYALAR[t.cikti].ad)}</span></button>`).join('')}</div>` : ''}`;
+      ${kul.length ? `<h4>Kullanıldığı tarifler <small>${kul.length}</small></h4><div class="tkKullanim">${kul.map(t => `<button type="button" data-tkgit="${t.cikti}" title="${esc(ESYALAR[t.cikti].ad)}"><img src="${simge(t.cikti).url}" alt=""><span>${esc(ESYALAR[t.cikti].ad)}</span></button>`).join('')}</div>` : ''}`;
   }
 
   /* ---------- Takip ---------- */

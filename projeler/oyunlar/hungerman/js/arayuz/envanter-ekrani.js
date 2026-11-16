@@ -10,6 +10,8 @@ const KRISTAL = 61;
 import { TARIFLER, KATEGORILER, ISTASYON_ADI, ISTASYON_BLOK, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar, girdiListesi } from '../oyun/uretim.js';
 
 const $ = s => document.querySelector(s);
+/* 0.30.3: içerik değişmediyse öğeleri yeniden kurmaz (tıklama sırasında öğenin yerinden sökülmesini ve titremeyi önler) */
+const yaz = (el, html) => { if (el && el._html !== html) { el._html = html; el.innerHTML = html; } };
 
 export class EnvanterEkrani {
   constructor(o) {
@@ -45,8 +47,9 @@ export class EnvanterEkrani {
     $('#tarifYapilir').addEventListener('change', e => { this.yalnizYapilir = e.target.checked; this.ses.tik(); this.tarifCiz(); });
     $('#tarifAyrinti').addEventListener('click', e => this.ayrintiTikla(e));
     $('#tarifAyrinti').addEventListener('input', e => { if (e.target.id === 'tarifMiktar') { this.miktar = Math.max(1, Math.min(this.miktarUst(), Math.floor(+e.target.value) || 1)); this.ayrintiCiz(true); } });
+    $('#tarifAyrinti').addEventListener('change', e => { if (e.target.id === 'tarifMiktar') e.target.value = this.miktar; });
     $('#tarifAyrinti').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && e.target.id === 'tarifMiktar') this.uretSec(this.secTarif, this.miktar); });
-    $('#tarifAra').addEventListener('keydown', e => e.stopPropagation());
+    $('#tarifAra').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' || e.key === 'Enter') e.target.blur(); });
     $('#envKapat').addEventListener('click', () => this.kapatIste && this.kapatIste());
     this.kok.addEventListener('contextmenu', e => e.preventDefault());
     this.kok.addEventListener('mousedown', e => this.fare(e));
@@ -158,15 +161,15 @@ export class EnvanterEkrani {
     const env = this.envanter;
     this.kok.querySelectorAll('.izgara .yuva[data-i]').forEach(el => {
       const i = +el.dataset.i;
-      el.innerHTML = this.hud.yuvaIc(env.yuvalar[i]);
+      yaz(el, this.hud.yuvaIc(env.yuvalar[i]));
       el.classList.toggle('secili', i === env.secili);
     });
     this.kok.querySelectorAll('.zirhYuva').forEach(el => {
       const z = +el.dataset.z, s = env.zirh[z];
       el.classList.toggle('bosZirh', !s);
-      el.innerHTML = s ? this.hud.yuvaIc(s) : `<img src="${simge(400 + z).url}" alt="">`;
+      yaz(el, s ? this.hud.yuvaIc(s) : `<img src="${simge(400 + z).url}" alt="">`);
     });
-    if (this.sandik) this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { el.innerHTML = this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s]); });
+    if (this.sandik) this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { yaz(el, this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s])); });
     if (this.istasyon === 'ors') this.orsCiz();
     if (this.istasyon === 'buyu') this.buyuCiz();
     this.durumCiz();
@@ -175,8 +178,8 @@ export class EnvanterEkrani {
     this.aramaCiz();
     const ist = this.istasyonlar();
     /* 0.30.2: istasyonlar simgeyle: yakındakiler yeşil işaretli */
-    $('#istasyonDurum').innerHTML = Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="istSimge ${ist.has(k) ? 'var' : 'yok'}" title="${a}: ${ist.has(k) ? 'yakında' : 'yakında değil'}"><img src="${simge(ISTASYON_BLOK[k]).url}" alt="${a}"></span>`).join('')
-      + (ist.has('elocak') ? `<span class="istSimge var ocak" title="Elektrikli Ocak çalışıyor: fırın ve kamp ateşi tariflerinde kömür gerekmez"><img src="${simge(622).url}" alt="Elektrikli Ocak"></span>` : '');
+    yaz($('#istasyonDurum'), Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="istSimge ${ist.has(k) ? 'var' : 'yok'}" title="${a}: ${ist.has(k) ? 'yakında' : 'yakında değil'}"><img src="${simge(ISTASYON_BLOK[k]).url}" alt="${a}"></span>`).join('')
+      + (ist.has('elocak') ? `<span class="istSimge var ocak" title="Elektrikli Ocak çalışıyor: fırın ve kamp ateşi tariflerinde kömür gerekmez"><img src="${simge(622).url}" alt="Elektrikli Ocak"></span>` : ''));
     this.tarifCiz();
     this.tasimaCiz();
   }
@@ -239,12 +242,12 @@ export class EnvanterEkrani {
     /* 0.30.2: kategori şeridi: simge, kısa ad ve yapılabilir sayısı */
     const KISA = { hepsi: 'Tümü', favori: 'Favori', alet: 'Alet', savas: 'Savaş', blok: 'Blok', malzeme: 'Malzeme', yiyecek: 'Yiyecek', mobilya: 'Mobilya', mekanik: 'Mekanik', elektrik: 'Elektrik' };
     const SIMGE = { hepsi: 32, alet: 300 };
-    $('#tarifSekme').innerHTML = this.sekmeler.map(([k, ad]) => {
+    yaz($('#tarifSekme'), this.sekmeler.map(([k, ad]) => {
       const l = hepsi.filter(o => kat(o, k) && uyar(o)), y = l.filter(o => o.yapilir).length;
       const id = SIMGE[k] && ESYALAR[SIMGE[k]] ? SIMGE[k] : (TARIFLER.find(t => t.kategori === k) || {}).cikti;
       const ic = k === 'favori' ? '<b class="katYildiz">★</b>' : id ? `<img src="${simge(id).url}" alt="">` : '';
       return `<button type="button" data-k="${k}" title="${ad.replace('★ ', '')}: ${l.length} tarif${y ? `, ${y} yapılabilir` : ''}" class="${k === this.kategori ? 'on' : ''}${!l.length ? ' bosSekme' : ''}">${ic}<span>${KISA[k] || ad}</span>${y ? `<em>${y}</em>` : ''}</button>`;
-    }).join('');
+    }).join(''));
     $('#uretimOzet').textContent = `${hepsi.filter(o => o.yapilir).length} / ${TARIFLER.length} tarif yapılabilir`;
     let liste = hepsi.filter(o => kat(o, this.kategori) && uyar(o) && (!this.yalnizYapilir || o.yapilir));
     const ad = o => ESYALAR[o.t.cikti].ad;
@@ -253,9 +256,9 @@ export class EnvanterEkrani {
     else liste.sort((x, y) => (y.yapilir - x.yapilir) || (y.istOk - x.istOk) || (this.favoriler.has(y.i) - this.favoriler.has(x.i)));
     this.gorunen = liste.map(o => o.i);
     if (!liste.length) {
-      $('#tarifListe').innerHTML = `<div class="bos">${this.kategori === 'favori' && !this.favoriler.size ? 'Favori tarif mevcut değil. Tarif ayrıntısındaki ☆ düğmesiyle eklenir.' : 'Eşleşen tarif mevcut değil.'}</div>`;
+      yaz($('#tarifListe'), `<div class="bos">${this.kategori === 'favori' && !this.favoriler.size ? 'Favori tarif mevcut değil. Tarif ayrıntısındaki ☆ düğmesiyle eklenir.' : 'Eşleşen tarif mevcut değil.'}</div>`);
     } else {
-      $('#tarifListe').innerHTML = liste.map(({ t, i, n, istOk, yapilir }) => {
+      yaz($('#tarifListe'), liste.map(({ t, i, n, istOk, yapilir }) => {
         const e = ESYALAR[t.cikti];
         const gir = girdiListesi(t).map(([g, k]) => { const v = girdiSay(env, g), id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g; return `<span class="${v >= k ? 'ok' : 'eksik'}" title="${girdiAdi(g)}: ${v} / ${k}"><img src="${simge(id).url}" alt="">${k}</span>`; }).join('');
         return `<div class="tarif${yapilir ? '' : ' olmaz'}${i === this.secTarif ? ' secili' : ''}" data-sec="${i}">
@@ -263,7 +266,7 @@ export class EnvanterEkrani {
           <div class="tOrta"><b>${this.favoriler.has(i) ? '<i class="yildiz">★</i>' : ''}${e.ad}</b><div class="gir">${gir}${t.istasyon && !istOk ? `<span class="istEksik" title="${istasyonMetni(t)} gerekli">${istasyonMetni(t)}</span>` : ''}</div></div>
           <div class="uretBtn">${yapilir ? `<small>×${n > 99 ? '99+' : n}</small>` : ''}<button type="button" data-t="${i}" ${yapilir ? '' : 'disabled'} title="Shift + tık: olabildiğince çok üret">Üret</button></div>
         </div>`;
-      }).join('');
+      }).join(''));
     }
     if (!TARIFLER[this.secTarif] && liste.length) { this.secTarif = liste[0].i; this.miktar = 1; }   // seçim, süzgeç dışında kalsa da korunur
     this.ayrintiCiz();
@@ -313,24 +316,26 @@ export class EnvanterEkrani {
   }
   ayrintiCiz(sadeceMiktar) {
     const kap = $('#tarifAyrinti'), i = this.secTarif, t = TARIFLER[i];
-    if (!t) { kap.innerHTML = '<div class="bos">Ayrıntı için listeden bir tarif seçiniz.</div>'; return; }
+    if (!sadeceMiktar && document.activeElement && document.activeElement.id === 'tarifMiktar' && kap.contains(document.activeElement) && kap.dataset.t == i) sadeceMiktar = true;   // yazılırken giriş kutusu yeniden kurulmaz
+    if (!t) { yaz(kap, '<div class="bos">Ayrıntı için listeden bir tarif seçiniz.</div>'); return; }
     const env = this.envanter, d = this.tarifDurum(i), e = ESYALAR[t.cikti], ust = this.miktarUst();
     this.miktar = Math.max(1, Math.min(this.miktar, ust));
     const m = this.miktar, ok = d.yapilir && m <= d.n;
     const girdiler = girdiListesi(t).map(([g, k]) => {
       const v = girdiSay(env, g), gerek = k * m, id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g;
       const kaynak = !GRUPLAR[g] && v < gerek ? TARIFLER.findIndex(x => x.cikti === g) : -1;
-      return `<li class="${v >= gerek ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt=""><span>${girdiAdi(g)}</span><b>${v} / ${gerek}</b>${kaynak >= 0 ? `<button type="button" class="tLink" data-git="${kaynak}" title="Bu malzemenin tarifine git">tarif ›</button>` : ''}</li>`;
+      return `<li class="${v >= gerek ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt=""><span>${girdiAdi(g)}</span><b>${v} / ${gerek}</b>${kaynak >= 0 ? `<button type="button" class="tLink" data-tgit="${kaynak}" title="Bu malzemenin tarifine git">tarif ›</button>` : ''}</li>`;
     }).join('');
     if (sadeceMiktar && kap.querySelector('#tarifMiktar')) {
       kap.querySelector('.tGirdi').innerHTML = girdiler;
       const b = kap.querySelector('[data-uret]'); b.disabled = !ok; b.textContent = `Üret × ${m * t.adet}`;
       return;
     }
+    kap.dataset.t = i;
     const kullanim = [...new Set(TARIFLER.map((x, j) => [x, j]).filter(([x]) => x.girdi.some(([g]) => g === t.cikti || (GRUPLAR[g] && GRUPLAR[g].idler.includes(t.cikti)))).map(([x, j]) => j))].slice(0, 12);
     const takip = this.takip && this.takip.get() === i;
     const elde = env.say(t.cikti);
-    kap.innerHTML = `
+    yaz(kap, `
       <div class="tBas"><div class="tBuyuk"><img src="${simge(t.cikti).url}" alt="">${t.adet > 1 ? `<span>${t.adet}</span>` : ''}</div>
         <div><b>${e.ad}</b><small>${(KATEGORILER.find(([k]) => k === t.kategori) || [0, ''])[1]}${elde ? ` · Çantada ${elde}` : ''}</small></div>
         <button type="button" class="tYildiz${this.favoriler.has(i) ? ' on' : ''}" data-favori="${i}" title="${this.favoriler.has(i) ? 'Favorilerden çıkar' : 'Favorilere ekle'}">${this.favoriler.has(i) ? '★' : '☆'}</button></div>
@@ -339,13 +344,13 @@ export class EnvanterEkrani {
       <h4>Malzemeler</h4><ul class="tGirdi">${girdiler}</ul>
       <div class="tMiktar"><button type="button" data-m="-1" title="Azalt">−</button><input id="tarifMiktar" type="number" min="1" max="${ust}" value="${m}"><button type="button" data-m="1" title="Artır">+</button><button type="button" data-m="max" class="tMaks" title="Malzemenin yettiği kadar">En çok (${d.n > 0 ? ust : 0})</button></div>
       <div class="tIslem"><button type="button" class="tUret" data-uret ${ok ? '' : 'disabled'}>Üret × ${m * t.adet}</button><button type="button" class="tTakip${takip ? ' on' : ''}" data-takip title="Gereken malzemeler ekranın solunda gösterilir">${takip ? 'Takibi bırak' : 'Takip et'}</button></div>
-      ${kullanim.length ? `<h4>Bununla yapılanlar</h4><div class="tKullanim">${kullanim.map(j => `<button type="button" data-git="${j}" title="${ESYALAR[TARIFLER[j].cikti].ad}"><img src="${simge(TARIFLER[j].cikti).url}" alt=""></button>`).join('')}</div>` : ''}
-      ${this.son && this.son.length ? `<h4>Son üretilenler</h4><div class="tKullanim">${this.son.map(j => `<button type="button" data-git="${j}" title="${ESYALAR[TARIFLER[j].cikti].ad}"><img src="${simge(TARIFLER[j].cikti).url}" alt=""></button>`).join('')}</div>` : ''}`;
+      ${kullanim.length ? `<h4>Bununla yapılanlar</h4><div class="tKullanim">${kullanim.map(j => `<button type="button" data-tgit="${j}" title="${ESYALAR[TARIFLER[j].cikti].ad}"><img src="${simge(TARIFLER[j].cikti).url}" alt=""></button>`).join('')}</div>` : ''}
+      ${this.son && this.son.length ? `<h4>Son üretilenler</h4><div class="tKullanim">${this.son.map(j => `<button type="button" data-tgit="${j}" title="${ESYALAR[TARIFLER[j].cikti].ad}"><img src="${simge(TARIFLER[j].cikti).url}" alt=""></button>`).join('')}</div>` : ''}`);
   }
   ayrintiTikla(e) {
     const b = e.target.closest('button'); if (!b) return;
     const i = this.secTarif;
-    if (b.dataset.git != null) { this.sec(+b.dataset.git); this.ses.tik(); }
+    if (b.dataset.tgit != null) { this.sec(+b.dataset.tgit); this.ses.tik(); }
     else if (b.dataset.favori != null) this.favori(i);
     else if (b.dataset.m != null) { this.miktar = b.dataset.m === 'max' ? this.miktarUst() : this.miktar + +b.dataset.m; this.ses.tik(); this.ayrintiCiz(true); const g = $('#tarifMiktar'); if (g) g.value = this.miktar; }
     else if (b.dataset.uret != null) this.uretSec(i, this.miktar);
@@ -354,6 +359,9 @@ export class EnvanterEkrani {
 
   /* ---------- Yuva tıklamaları ---------- */
   fare(e) {
+    /* 0.30.3: arama / miktar kutusu dışına tıklanınca odak bırakılır (Q, 1-9, X kısayolları yeniden çalışır) */
+    const odak = document.activeElement;
+    if (odak && odak !== document.body && this.kok.contains(odak) && odak.matches('input, select, textarea') && !e.target.closest('input, select, textarea, label')) odak.blur();
     if (e.target.closest('#tarifListe, #tarifSekme, #tarifAra, #tarifAyrinti, .uretimUst, .kapat')) return;
     const el = e.target.closest('.izgara .yuva');
     const env = this.envanter;
@@ -457,7 +465,7 @@ export class EnvanterEkrani {
   }
   orsCiz() {
     const H = this.orsHesap();
-    this.kok.querySelectorAll('.yuva[data-o]').forEach(el => { const i = +el.dataset.o; el.innerHTML = this.hud.yuvaIc(i < 2 ? this.ors[i] : H.sonuc || null); el.classList.toggle('olmaz', i === 2 && !!H.sonuc && this.hayatta.seviye < H.maliyet && !this.sinirsiz()); });
+    this.kok.querySelectorAll('.yuva[data-o]').forEach(el => { const i = +el.dataset.o; yaz(el, this.hud.yuvaIc(i < 2 ? this.ors[i] : H.sonuc || null)); el.classList.toggle('olmaz', i === 2 && !!H.sonuc && this.hayatta.seviye < H.maliyet && !this.sinirsiz()); });
     const sv = this.hayatta.seviye;
     $('#orsBilgi').innerHTML = H.hata ? `<span class="soluk">${H.hata}</span>`
       : `Bedel: <b>${H.maliyet}</b> deneyim seviyesi · Seviyeniz: <b class="${sv >= H.maliyet || this.sinirsiz() ? 'ok' : 'eksik'}">${sv}</b><br><span class="soluk">Sonuca tıklanarak eşya alınır.</span>`;
@@ -566,7 +574,7 @@ export class EnvanterEkrani {
     return { secenekler: l };
   }
   buyuCiz() {
-    this.kok.querySelectorAll('.yuva[data-b]').forEach(el => { el.innerHTML = this.hud.yuvaIc(this.buyuYuva[+el.dataset.b]); });
+    this.kok.querySelectorAll('.yuva[data-b]').forEach(el => { yaz(el, this.hud.yuvaIc(this.buyuYuva[+el.dataset.b])); });
     const H = this.buyuSecenekleri(), sv = this.hayatta.seviye, kr = this.buyuYuva[1] ? this.buyuYuva[1].adet : 0, sinir = this.sinirsiz();
     if (H.hata) { $('#buyuSecenek').innerHTML = `<p class="soluk">${H.hata}</p>`; return; }
     $('#buyuSecenek').innerHTML = H.secenekler.map((o, i) => {
