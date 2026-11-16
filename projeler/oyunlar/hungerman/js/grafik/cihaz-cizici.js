@@ -95,20 +95,31 @@ function modeller() {
     ],
     donen: { merkez: [1.5, 1.5, 0.5], kutular: cark }
   };
-  /* Bataryalar: gövde, kutup başları, gösterge (x0, x1, y0, y1, ön z) */
-  M.bataryaK = {
-    statik: [{ k: [0.15, 0, 0.2, 0.85, 0.75, 0.8], t: yuzler(BU, BY) }, { k: [0.27, 0.75, 0.44, 0.39, 0.83, 0.56], t: D }, { k: [0.61, 0.75, 0.44, 0.73, 0.83, 0.56], t: T.salter_k }],
-    gosterge: [[0.4, 0.6, 0.12, 0.62, 0.2]]
+  /* Bataryalar (0.26.0): kasa, etiket, havalandırma, kutup başları ve LED göstergesi.
+     gosterge: [x0, x1, y0, y1, ön z, LED sayısı, yatay mı] */
+  const KS = T.batarya_kasa, ET = T.batarya_etiket, HV = T.havalandirma, UY = T.uyari, KR = T.led_kirmizi;
+  M.bataryaK = {   // akü: kapaklı kasa, kırmızı (+) ve gri (−) kutup, taşıma kulpu
+    statik: [{ k: [0.14, 0, 0.22, 0.86, 0.6, 0.78], t: yuzler(BU, KS, KS, ET) }, { k: [0.12, 0.6, 0.2, 0.88, 0.68, 0.8], t: BU },
+      { k: [0.2, 0.68, 0.36, 0.34, 0.72, 0.6], t: BU }, { k: [0.66, 0.68, 0.36, 0.8, 0.72, 0.6], t: BU },
+      { k: [0.24, 0.72, 0.42, 0.32, 0.8, 0.54], t: KR }, { k: [0.68, 0.72, 0.42, 0.76, 0.8, 0.54], t: D },
+      { k: [0.42, 0.68, 0.47, 0.45, 0.82, 0.53], t: KK }, { k: [0.55, 0.68, 0.47, 0.58, 0.82, 0.53], t: KK }, { k: [0.42, 0.82, 0.47, 0.58, 0.85, 0.53], t: KK },
+      { k: [0.14, 0, 0.215, 0.86, 0.05, 0.22], t: UY }],
+    gosterge: [[0.3, 0.7, 0.085, 0.15, 0.22, 5, true]]
   };
-  M.bataryaO = {
-    statik: [{ k: [0.1, 0, 0.15, 0.9, 1.68, 0.85], t: yuzler(BU, BY) }, { k: [0.16, 1.68, 0.2, 0.84, 1.75, 0.8], t: BU },
-      ...[0.3, 0.6, 0.9, 1.2].map(y => ({ k: [0.06, y, 0.3, 0.1, y + 0.12, 0.7], t: BU })), ...[0.3, 0.6, 0.9, 1.2].map(y => ({ k: [0.9, y, 0.3, 0.94, y + 0.12, 0.7], t: BU }))],
-    gosterge: [[0.38, 0.62, 0.2, 1.45, 0.15]]
+  M.bataryaO = {   // ev tipi batarya: yüksek kasa, etiket, alt havalandırma, dikey LED çubuğu, üst bağlantı kutusu
+    statik: [{ k: [0.1, 0.04, 0.16, 0.9, 1.66, 0.84], t: yuzler(BU, KS) }, { k: [0.12, 1.66, 0.18, 0.88, 1.72, 0.82], t: BU },
+      { k: [0.12, 0, 0.18, 0.2, 0.04, 0.82], t: D }, { k: [0.8, 0, 0.18, 0.88, 0.04, 0.82], t: D },
+      { k: [0.22, 1.08, 0.15, 0.78, 1.5, 0.16], t: ET }, { k: [0.2, 0.14, 0.15, 0.8, 0.46, 0.16], t: HV },
+      { k: [0.38, 1.72, 0.38, 0.62, 1.79, 0.62], t: D },
+      ...[0.35, 0.65, 0.95, 1.25].flatMap(y => [{ k: [0.07, y, 0.3, 0.1, y + 0.16, 0.7], t: HV }, { k: [0.9, y, 0.3, 0.93, y + 0.16, 0.7], t: HV }])],
+    gosterge: [[0.44, 0.56, 0.56, 1.0, 0.15, 5, false]]
   };
-  M.bataryaB = {
-    statik: [{ k: [0.05, 0, 0.1, 1.95, 1.84, 0.9], t: yuzler(BU, BY) }, { k: [0.1, 1.84, 0.15, 1.9, 1.9, 0.85], t: BU }, { k: [0.98, 0.04, 0.07, 1.02, 1.8, 0.1], t: D },
-      { k: [0.12, 0.04, 0.07, 0.2, 0.1, 0.1], t: D }, { k: [1.8, 0.04, 0.07, 1.88, 0.1, 0.1], t: D }],
-    gosterge: [[0.38, 0.62, 0.3, 1.55, 0.1], [1.38, 1.62, 0.3, 1.55, 0.1]]
+  M.bataryaB = {   // endüstriyel batarya dolabı: iki kapak, havalandırma, etiketler, kulplar, tehlike şeridi, üst fan
+    statik: [{ k: [0.04, 0.06, 0.1, 1.96, 1.84, 0.9], t: yuzler(BU, KS) }, { k: [0.08, 1.84, 0.14, 1.92, 1.9, 0.86], t: BU },
+      { k: [0.04, 0, 0.09, 1.96, 0.06, 0.91], t: UY }, { k: [0.985, 0.08, 0.085, 1.015, 1.82, 0.1], t: D },
+      ...[0, 1].flatMap(i => [{ k: [0.16 + i, 0.16, 0.085, 0.84 + i, 0.56, 0.1], t: HV }, { k: [0.2 + i, 1.28, 0.085, 0.62 + i, 1.68, 0.1], t: ET }, { k: [0.86 + i, 0.8, 0.06, 0.9 + i, 1.1, 0.1], t: D }]),
+      { k: [0.55, 1.9, 0.3, 1.45, 1.98, 0.7], t: HV }, { k: [0.9, 1.98, 0.42, 1.1, 2.0, 0.58], t: D }],
+    gosterge: [[0.68, 0.8, 0.64, 1.2, 0.1, 6, false], [1.68, 1.8, 0.64, 1.2, 0.1, 6, false]]
   };
   return M;
 }
@@ -120,7 +131,7 @@ export class CihazCizici {
     const at = sahne.atlasDoku.clone(); at.colorSpace = THREE.SRGBColorSpace; at.needsUpdate = true;
     this.malz = new THREE.MeshBasicMaterial({ map: at, vertexColors: true, alphaTest: 0.5, side: THREE.DoubleSide });
     this.hayaletMalz = new THREE.MeshBasicMaterial({ map: at, vertexColors: true, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide });
-    this.gostergeMalz = { bos: new THREE.MeshBasicMaterial({ color: 0x14181d, side: THREE.DoubleSide }), yesil: new THREE.MeshBasicMaterial({ color: 0x52e07c, side: THREE.DoubleSide }),
+    this.gostergeMalz = { bos: new THREE.MeshBasicMaterial({ color: 0x0c0e11, side: THREE.DoubleSide }), sonuk: new THREE.MeshBasicMaterial({ color: 0x1f2a22, side: THREE.DoubleSide }), yesil: new THREE.MeshBasicMaterial({ color: 0x52e07c, side: THREE.DoubleSide }),
       sari: new THREE.MeshBasicMaterial({ color: 0xf2b23a, side: THREE.DoubleSide }), kirmizi: new THREE.MeshBasicMaterial({ color: 0xf0584e, side: THREE.DoubleSide }) };
     this.duz = new THREE.PlaneGeometry(1, 1).translate(0, 0.5, 0);
     this.M = modeller();
@@ -148,10 +159,17 @@ export class CihazCizici {
     if (m.donen) { donen = new THREE.Mesh(g.donen, malz); donen.position.set(...m.donen.merkez); ic.add(donen); }
     if (m.egik) m.egik.forEach((e, i) => { const x = new THREE.Mesh(g.egik[i], malz); x.position.set(...e.merkez); x.rotation.x = e.rx; ic.add(x); });
     const gostergeler = [];
-    if (m.gosterge && malz === this.malz) for (const [x0, x1, y0, y1, z] of m.gosterge) {
-      const zemin = new THREE.Mesh(this.duz, this.gostergeMalz.bos); zemin.position.set((x0 + x1) / 2, y0, z - 0.004); zemin.scale.set(x1 - x0, y1 - y0, 1); ic.add(zemin);
-      const dolu = new THREE.Mesh(this.duz, this.gostergeMalz.yesil); dolu.position.set((x0 + x1) / 2, y0 + 0.02, z - 0.008); dolu.scale.set(x1 - x0 - 0.05, 0.001, 1); ic.add(dolu);
-      gostergeler.push({ dolu, h: y1 - y0 - 0.04 });
+    /* 0.26.0: LED göstergesi: koyu çerçeve ve ayrı ayrı yanan bölmeler */
+    if (m.gosterge && malz === this.malz) for (const [x0, x1, y0, y1, z, n, yatay] of m.gosterge) {
+      const zemin = new THREE.Mesh(this.duz, this.gostergeMalz.bos); zemin.position.set((x0 + x1) / 2, y0, z - 0.003); zemin.scale.set(x1 - x0, y1 - y0, 1); ic.add(zemin);
+      const ledler = [], ara = 0.012, W = x1 - x0 - 0.03, H = y1 - y0 - 0.03;
+      for (let i = 0; i < n; i++) {
+        const l = new THREE.Mesh(this.duz, this.gostergeMalz.sonuk);
+        if (yatay) { const w = (W - ara * (n - 1)) / n; l.position.set(x0 + 0.015 + w / 2 + i * (w + ara), y0 + 0.015, z - 0.006); l.scale.set(w, H, 1); }
+        else { const h = (H - ara * (n - 1)) / n; l.position.set((x0 + x1) / 2, y0 + 0.015 + i * (h + ara), z - 0.006); l.scale.set(W, h, 1); }
+        ic.add(l); ledler.push(l);
+      }
+      gostergeler.push({ ledler });
     }
     return { dis, donen, gostergeler };
   }
@@ -185,12 +203,80 @@ export class CihazCizici {
       if (o.donen) { const r = cihazUretim(d, b, x, y, z, O), n = r.u / b.uretim; o.hedefHiz = r.u > 0 ? (b.cihaz === 'ruzgar' ? 0.5 + 2.4 * n : 0.7 + 1.2 * n) : 0; }
       if (o.gostergeler.length) {
         const r = Math.max(0, Math.min(1, oran(k) ?? 0)), malz = r < 0.2 ? this.gostergeMalz.kirmizi : r < 0.5 ? this.gostergeMalz.sari : this.gostergeMalz.yesil;
-        for (const g of o.gostergeler) { g.dolu.scale.y = Math.max(0.001, g.h * r); g.dolu.material = malz; }
+        for (const g of o.gostergeler) { const n = g.ledler.length, yanan = r <= 0.01 ? 0 : Math.max(1, Math.round(r * n)); g.ledler.forEach((l, i) => { l.material = i < yanan ? malz : this.gostergeMalz.sonuk; }); }
       }
     }
     for (const [k, o] of this.liste) if (!gorulen.has(k)) { this.grup.remove(o.dis); this.liste.delete(k); }
   }
   temizle() { for (const o of this.liste.values()) this.grup.remove(o.dis); this.liste.clear(); this.onizleme(null); }
+
+  /* ---------- 0.26.0: kablolar ----------
+     Kablo noktaları arasında sarkan bir eğri boyunca ince bir boru olarak çizilir. Bakılan kablo (elde kablo varken) vurgulanır. */
+  static sarkik(noktalar) {
+    const yol = [];
+    for (let i = 1; i < noktalar.length; i++) {
+      const a = noktalar[i - 1], b = noktalar[i], L = Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), sark = Math.min(1.4, L * 0.06), n = Math.max(2, Math.ceil(L * 2.5));
+      for (let j = i === 1 ? 0 : 1; j <= n; j++) { const t = j / n; yol.push(new THREE.Vector3(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t - 4 * sark * t * (1 - t), a[2] + (b[2] - a[2]) * t)); }
+    }
+    return yol;
+  }
+  boru(yol, r = 0.032) {
+    if (yol.length < 2) return null;
+    return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(yol, false, 'centripetal'), Math.min(400, yol.length * 2), r, 5, false);
+  }
+  kablolariCiz(K, isik) {
+    if (!this.kabloGrup) {
+      this.kabloGrup = new THREE.Group(); this.grup.add(this.kabloGrup);
+      this.kabloMalz = new THREE.MeshBasicMaterial({ color: 0x24282e }); this.kabloVurguMalz = new THREE.MeshBasicMaterial({ color: 0xe8a33d });
+      this.kabloYol = new Map(); this.kSurum = -1; this.kEksik = false;
+    }
+    const c = 0.16 * Math.max(0.35, isik); this.kabloMalz.color.setRGB(c * 0.95, c, c * 1.1);
+    if (K.surum === this.kSurum && !this.kEksik) return;
+    if (this.kEksik && K.surum === this.kSurum && (this.kSayac = (this.kSayac || 0) + 1) % 30) return;   // yüklenmemiş uçlar ara sıra yeniden denenir
+    for (const m of this.kabloGrup.children) m.geometry.dispose();
+    this.kabloGrup.clear(); this.kabloYol.clear();
+    this.kSurum = K.surum; this.kEksik = false;
+    for (const w of K.liste.values()) {
+      const n = K.noktalar(w);
+      if (!n) { this.kEksik = true; continue; }
+      const yol = CihazCizici.sarkik(n), g = this.boru(yol);
+      if (!g) continue;
+      const m = new THREE.Mesh(g, this.kabloMalz); m.userData.i = w.i; this.kabloGrup.add(m); this.kabloYol.set(w.i, yol);
+    }
+    this.vurgu = null;
+  }
+  /* Işının en yakın kabloyla kesişmesi: kablo numarası ya da null (maks: ışın uzunluğu) */
+  kabloIsin(goz, yon, maks) {
+    if (!this.kabloYol) return null;
+    let en = null, enT = maks;
+    const v = new THREE.Vector3();
+    for (const [i, yol] of this.kabloYol) for (const p of yol) {
+      v.subVectors(p, goz); const t = v.dot(yon);
+      if (t < 0 || t > enT) continue;
+      const d2 = v.lengthSq() - t * t;
+      if (d2 < 0.16 * 0.16) { en = i; enT = t; }
+    }
+    return en;
+  }
+  kabloVurgula(i) {
+    if (!this.kabloGrup || this.vurgu === i) return;
+    this.vurgu = i;
+    for (const m of this.kabloGrup.children) m.material = m.userData.i === i ? this.kabloVurguMalz : this.kabloMalz;
+  }
+  /* Çekilmekte olan kablonun önizlemesi: b = etkilesim.kabloOnizleme() */
+  kabloOnizleme(b) {
+    if (!this.kOnMalz) this.kOnMalz = new THREE.MeshBasicMaterial({ color: 0x7fe08a, transparent: true, opacity: 0.85 });
+    if (!b) { if (this.kOn) this.kOn.visible = false; this.kOnAnahtar = ''; return; }
+    const anahtar = b.noktalar.map(p => p.map(v => v.toFixed(2)).join(',')).join(';') + b.gecerli;
+    if (anahtar === this.kOnAnahtar && this.kOn) { this.kOn.visible = true; return; }
+    this.kOnAnahtar = anahtar;
+    const g = this.boru(CihazCizici.sarkik(b.noktalar), 0.028);
+    if (!g) return;
+    if (!this.kOn) { this.kOn = new THREE.Mesh(g, this.kOnMalz); this.grup.add(this.kOn); }
+    else { this.kOn.geometry.dispose(); this.kOn.geometry = g; }
+    this.kOn.visible = true;
+    this.kOnMalz.color.set(b.gecerli ? 0x7fe08a : 0xf0584e);
+  }
 
   /* ---------- Önizleme ----------
      b: null (gizle), { cihaz, yon, x, y, z, gecerli } ya da { id, x, y, z, gecerli } */

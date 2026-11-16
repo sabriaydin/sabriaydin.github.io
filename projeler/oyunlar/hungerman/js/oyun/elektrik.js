@@ -1,6 +1,7 @@
 /* HungerMan - elektrik sistemi (0.24.0; 0.25.0: çok bloklu cihazlar)
    Elektrik blokları (bloklar.js'te elektrik niteliği taşıyanlar) birbirine bitişik olunca aynı ağı oluşturur; uzak cihazlar Elektrik Kablosuyla bağlanır.
    Çok bloklu cihazların (cihazlar.js) bütün hücreleri ağa iletir; üretim ve depo yalnızca kök hücrede (hücre 0) hesaplanır.
+   0.26.0: Rust tarzı kablolar (oyun/kablolar.js) iki cihazı aynı ağa bağlar; kablonun her bloğu üretimi %0,1 azaltır.
    Kapalı Şalter ağı keser. Her 0,5 saniyede bir ağlar bulunur ve hesaplanır:
    - Üreticiler: Güneş Paneli (gündüz, üstü açık hücre başına; bulut ve yağış azaltır), Rüzgâr Türbini (yükseklik, rüzgâr ve fırtınayla artar;
      pervane alanında katı blok varsa durur), Su Çarkı (alt sırasına değen her su bloğu için; kışın yarı yarıya).
@@ -60,7 +61,7 @@ export function cihazUretim(d, b, x, y, z, O) {
 
 export class Elektrik {
   constructor(o) {
-    Object.assign(this, o);   // dunya, ortam(): { gunIsigi, yogunluk, firtina, mevsim, sure }
+    Object.assign(this, o);   // dunya, ortam(): { gunIsigi, yogunluk, firtina, mevsim, sure }, kablolar, kabloKoptu(w, nokta)
     this.sayac = 0;
     this.agBilgi = new Map();   // blok anahtarı -> ağ özeti
     this.cihaz = new Map();     // kök anahtarı -> cihazın anlık üretimi / tüketimi
@@ -94,6 +95,15 @@ export class Elektrik {
       const [ax, ay, az] = kokKonumu(b, x, y, z);
       if (d.yuklu(ax, az) && d.blok(ax, ay, az) !== b.kok) d.blokKoy(x, y, z, 0, 'elektrik');
     }
+    /* 0.26.0: ucundaki cihaz kalkan kablolar kopar (kablo eşyası düşer) */
+    const K = this.kablolar;
+    if (K) for (const w of [...K.liste.values()]) for (const u of [w.a, w.b]) {
+      const [x, y, z] = C(u);
+      if (!d.yuklu(x, z)) continue;
+      const b = BLOKLAR[d.blok(x, y, z)];
+      if (!b || !b.elektrik || (b.cihaz && b.parca)) { K.sil(w.i); if (this.kabloKoptu) this.kabloKoptu(w, [x + 0.5, y + 0.5, z + 0.5]); break; }
+    }
+    const komsu = K ? K.komsular() : new Map();
     for (const [k0, p0] of E) {
       if (gorulen.has(k0)) continue;
       const b0 = BLOKLAR[d.blok(p0[0], p0[1], p0[2])];
@@ -111,6 +121,16 @@ export class Elektrik {
           if (!ILET(BLOKLAR[d.blok(x + a, y + bb, z + c)])) continue;
           gorulen.add(k); ag.push(k); kuyruk.push([x + a, y + bb, z + c]);
         }
+        /* kablo ile bağlı cihazlar */
+        if (komsu.size) {
+          const kk = kokAnahtari(BLOKLAR[d.blok(x, y, z)], x, y, z), l = komsu.get(kk);
+          if (l) for (const k of l) {
+            if (gorulen.has(k) || !E.has(k)) continue;
+            const [qx, qy, qz] = C(k);
+            if (!ILET(BLOKLAR[d.blok(qx, qy, qz)])) continue;
+            gorulen.add(k); ag.push(k); kuyruk.push([qx, qy, qz]);
+          }
+        }
       }
       /* Üretim, istek ve depo (çok bloklu cihazlar yalnızca kök hücrede sayılır) */
       let uretim = 0, istek = 0, kablo = 0, depo = 0, kap = 0, cihazSayisi = 0;
@@ -124,7 +144,9 @@ export class Elektrik {
         else if (b.tuketim) { istek += b.tuketim; tuketiciler.push([k, x, y, z, b]); }
         else if (b.elektrik === 'batarya') { const e = Math.min(b.kapasite, d.enerji.get(k) || 0); depo += e; kap += b.kapasite; bataryalar.push([k, b]); }
       }
-      const kayip = Math.min(0.25, kablo * 0.002);
+      let tel = 0;
+      if (K && K.liste.size) { const s = new Set(ag); for (const w of K.liste.values()) if (s.has(w.a)) tel += K.uzunluk(w); }
+      const kayip = Math.min(0.25, kablo * 0.002 + tel * 0.001);
       uretim *= 1 - kayip;
       const net = uretim - istek;
       const calisiyor = istek > 0 && (net >= 0 || depo + net * dt >= 0);

@@ -1,6 +1,7 @@
 /* HungerMan - çok oyunculu sunucu: dünyayı açan oyuncunun tarayıcısında çalışır
    Dünya, canlılar, yere düşen eşyalar, tekneler, sandıklar ve zaman burada yönetilir; diğer oyunculara anlık durum gönderilir.
    Her oyuncu kendi hareketini, envanterini, görevlerini ve köy itibarını kendisi yürütür; sunucu bunları oyuncu adına kaydeder. */
+import { kabloUcu, KABLO } from '../oyun/kablolar.js';
 import { THREE } from '../grafik/sahne.js';
 import { AgSunucu } from './baglanti.js';
 import { UzakOyuncular, RENKLER, B } from './uzak-oyuncular.js';
@@ -43,6 +44,8 @@ export class SunucuOyun {
     const o = this.oyun;
     this.dinle = (x, y, z, id, eski, kaynak) => { if (kaynak !== 'ag') this.yay({ t: 'b', b: [x, y, z, id], e: kaynak === 'yerel' ? 1 : 0 }); };
     o.dunya.dinleyiciler.push(this.dinle);
+    /* 0.26.0: kablolar */
+    if (o.kablolar) o.kablolar.ag = { eklendi: w => this.yay({ t: 'k+', w: [w.i, w.a, w.b, w.n, w.uz] }), silindi: i => this.yay({ t: 'k-', i }) };
     for (const d of o.dusenler.liste) if (!d.ni) d.ni = ++o.dusenler.sira;
     o.dusenler.ag = {
       eklendi: d => this.yay({ t: 'd+', l: [this.dusenVeri(d)] }),
@@ -99,7 +102,7 @@ export class SunucuOyun {
     this.uzak.ekle(id, ad, renk);
     k.gonder({
       t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, zaman: o.zaman, gun: o.gun, komutlar: !!o.komutlar, zorluk: o.zorluk, denge: o.denge,
-      degisiklikler: o.dunya.degisiklikleriAl(), kayit, dogum,
+      degisiklikler: o.dunya.degisiklikleriAl(), kablolar: o.kablolar ? o.kablolar.disaAktar() : [], kayit, dogum,
       dusenler: o.dusenler.liste.map(x => this.dusenVeri(x)),
       tekneler: o.tekneler.liste.map(t => this.tekneVeri(t)),
       oyuncular: this.oyuncuListesi()
@@ -204,6 +207,14 @@ export class SunucuOyun {
         break;
       }
       case 'ok': o.varliklar.okAt(new THREE.Vector3(...m.p), new THREE.Vector3(...m.v), Math.min(24, +m.h || 2), false, c, m.yv ? { yavas: true } : null); break;
+      case 'ke': {   // 0.26.0: istemci kablo çekti (uçlar sunucuda yeniden denetlenir)
+        if (!o.kablolar || typeof m.a !== 'string' || typeof m.b !== 'string' || !Array.isArray(m.n) || m.n.length > 10) break;
+        const uc = k2 => { const [x, y, z] = k2.split(',').map(Number); return kabloUcu(o.dunya, x, y, z) === k2; };
+        if (!uc(m.a) || !uc(m.b) || m.a === m.b) break;
+        o.kablolar.ekle(m.a, m.b, m.n.filter(p => Array.isArray(p) && p.length === 3 && p.every(Number.isFinite)), undefined, Math.min(KABLO.toplam, +m.uz || 3));
+        break;
+      }
+      case 'ks': if (o.kablolar) o.kablolar.sil(+m.i); break;
       case 'eb': if (o.elektrik && typeof m.k === 'string' && m.k.length < 40) k.gonder({ t: 'eb', k: m.k, v: o.elektrik.bilgi(m.k) }); break;   // 0.24.0: elektrik ağı bilgisi
       case 'sa': {  // sandık açma
         const s = m.x + ',' + m.y + ',' + m.z;

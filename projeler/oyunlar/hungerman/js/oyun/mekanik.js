@@ -191,7 +191,7 @@ export class Mekanik {
       if (this.sesYakin(x, y, z)) this.ses.yayAt();
     } else if (b.mekanik === 'salter') {
       /* 0.24.0: Şalter, sinyal gelince açılır, sinyal kesilince kapanır (elle de kullanılabilir) */
-      if (!!b.acik !== acik) { this.koy(x, y, z, 618 + (acik ? 1 : 0)); if (this.sesYakin(x, y, z)) this.ses.kol(acik); }
+      if (!!b.acik !== acik) { this.koy(x, y, z, b.taban + (acik ? 1 : 0)); if (this.sesYakin(x, y, z)) this.ses.kol(acik); }
     } else if (b.mekanik === 'muzik' && acik) {
       this.varliklar.efekt({ t: 'patlama', x: x + 0.5, y: y + 1.2, z: z + 0.5, c: [0.95, 0.5, 0.75], n: 6, ses: 'nota', m: ezgiTuru(d.blok(x, y - 1, z)) });
     }

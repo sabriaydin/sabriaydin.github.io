@@ -156,6 +156,36 @@ export function sekilKutulari(id, komsu, carp = false) {
     }
     case 'algi': return [[0, 0, 0, 1, 6 * P, 1]];
     /* 0.24.0: elektrik blokları */
+    /* 0.26.0: Şalter: gövde, ön kapak, gösterge ışığı ve sağda yukarı (açık) / aşağı (kapalı) kol; çeşit 1 ayaklıdır */
+    case 'salter': {
+      const zb = b.cesit ? 6 : 9, y = b.cesit ? 4 : 2;   // gövdenin arka yüzü: duvar şalterinde duvara dayalı, ayaklıda ortada
+      const L = [[3 * P, y * P, zb * P, 13 * P, (y + 11) * P, (zb + 7) * P]];
+      if (carp) return dondur(b.cesit ? [...L, [4 * P, 0, 5 * P, 12 * P, P, 13 * P]] : L, b.yon);
+      L.push([3.5 * P, (y + 0.5) * P, (zb - 0.4) * P, 12.5 * P, (y + 10.5) * P, zb * P, T.salter_on]);
+      L.push([5 * P, (y + 8.5) * P, (zb - 0.7) * P, 7 * P, (y + 9.5) * P, (zb - 0.4) * P, b.acik ? T.led_yesil : T.led_kirmizi]);
+      L.push([13 * P, (y + 4.5) * P, (zb + 1) * P, 14.5 * P, (y + 6.5) * P, (zb + 3) * P, T.demir_cubuk]);   // kol göbeği
+      if (b.acik) L.push([13.3 * P, (y + 6) * P, (zb + 1.4) * P, 14.2 * P, (y + 10) * P, (zb + 2.6) * P, T.demir_cubuk], [12.9 * P, (y + 9.6) * P, (zb + 1) * P, 14.6 * P, (y + 11.2) * P, (zb + 3) * P, T.led_kirmizi]);
+      else L.push([13.3 * P, (y + 1) * P, (zb + 1.4) * P, 14.2 * P, (y + 5) * P, (zb + 2.6) * P, T.demir_cubuk], [12.9 * P, (y - 0.2) * P, (zb + 1) * P, 14.6 * P, (y + 1.4) * P, (zb + 3) * P, T.led_kirmizi]);
+      if (b.cesit) L.push([4 * P, 0, 5 * P, 12 * P, P, 13 * P, T.panel_yan], [7 * P, P, 8.5 * P, 9 * P, 4 * P, 10.5 * P, T.demir_cubuk]);
+      else L.push([7 * P, 0, 11 * P, 9 * P, 2 * P, 13 * P, T.kablo_kilif]);   // alttan çıkan kablo kanalı
+      return dondur(L, b.yon);
+    }
+    /* 0.26.0: Elektrikli Lamba: çeşit 0 zemin (ayak, direk, cam küre), 1 tavan (sarkan abajur), 2 duvar (aplik) */
+    case 'elamba': {
+      const D = T.demir_cubuk, K = T.lamba_kap;
+      if (b.cesit === 1) {
+        if (carp) return [[4 * P, 4 * P, 4 * P, 12 * P, 1, 12 * P]];
+        return [[6 * P, 15 * P, 6 * P, 10 * P, 1, 10 * P, D], [7.6 * P, 9 * P, 7.6 * P, 8.4 * P, 15 * P, 8.4 * P, T.kablo_kilif], [6.5 * P, 8.5 * P, 6.5 * P, 9.5 * P, 9.5 * P, 9.5 * P, D],
+          [4 * P, 6 * P, 4 * P, 12 * P, 8.5 * P, 12 * P, K], [5 * P, 8.5 * P, 5 * P, 11 * P, 9 * P, 11 * P, K], [6 * P, 4.5 * P, 6 * P, 10 * P, 6 * P, 10 * P]];
+      }
+      if (b.cesit === 2) {
+        if (carp) return dondur([[5 * P, 4 * P, 5 * P, 11 * P, 12 * P, 1]], b.yon);
+        return dondur([[6 * P, 4 * P, 15 * P, 10 * P, 12 * P, 1, D], [7.5 * P, 7.5 * P, 10 * P, 8.5 * P, 8.5 * P, 15 * P, D], [5 * P, 5 * P, 5 * P, 11 * P, 11 * P, 11 * P], [6 * P, 11 * P, 6 * P, 10 * P, 12 * P, 10 * P, K], [6 * P, 4 * P, 6 * P, 10 * P, 5 * P, 10 * P, K]], b.yon);
+      }
+      if (carp) return [[5 * P, 0, 5 * P, 11 * P, 15 * P, 11 * P]];
+      return [[5 * P, 0, 5 * P, 11 * P, P, 11 * P, D], [6 * P, P, 6 * P, 10 * P, 1.5 * P, 10 * P, K], [7.5 * P, 1.5 * P, 7.5 * P, 8.5 * P, 9 * P, 8.5 * P, D], [6.5 * P, 9 * P, 6.5 * P, 9.5 * P, 10 * P, 9.5 * P, K],
+        [5 * P, 10 * P, 5 * P, 11 * P, 15 * P, 11 * P], [6 * P, 15 * P, 6 * P, 10 * P, 16 * P, 10 * P, K]];
+    }
     /* 0.25.0: çok bloklu cihaz hücresi: cihazın çarpışma kutularının bu hücreye düşen parçası */
     case 'cihaz': return dondur(CIHAZ_KUTU[id] || [], b.yon);
     case 'ekablo': {   // elektrik kablosu: elektrikli komşulara uzanır; üstteki ve alttaki elektrikli bloğa dikey bağlanır

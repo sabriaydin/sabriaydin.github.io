@@ -267,6 +267,12 @@ export class Hud {
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
   /* 0.23.1: bakılan blok ya da tekne adı: sol alt köşede, yalnızca ad */
+  /* 0.26.0: kablo çekerken alttaki ipucu (html ya da null) */
+  kabloIpucu(m) {
+    const el = $('#kabloIpucu'), a = m || '';
+    if (a === this.son.kablo) return;
+    this.son.kablo = a; el.hidden = !m; if (m) el.innerHTML = m;
+  }
   /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi (m: enerjiMetni sonucu ya da null) */
   enerji(m) {
     const el = $('#enerjiBilgi');

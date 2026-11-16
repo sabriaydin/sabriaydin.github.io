@@ -133,6 +133,8 @@ export class IstemciOyun {
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
       case 'za': o.zorluk = m.z; o.denge = m.d; zorlukUygula(o); break;   // 0.23.0: dünya ayarları değişti
       case 'eb': if (m.k === this.enerjiK) this.enerjiV = m.v || null; break;   // 0.24.0
+      case 'k+': if (o.kablolar && Array.isArray(m.w)) o.kablolar.ekle(m.w[1], m.w[2], m.w[3] || [], m.w[0], m.w[4]); break;   // 0.26.0: kablolar
+      case 'k-': if (o.kablolar) o.kablolar.sil(+m.i); break;
       case 'bo': if (Array.isArray(m.l) && o.bataryaOran) for (const [k, r] of m.l) if (typeof k === 'string') o.bataryaOran.set(k, +r || 0); break;   // 0.25.0: batarya doluluğu
       case 'met': if (o.gok && Array.isArray(m.p)) o.gok.meteorBaslat({ x: +m.p[0], y: +m.p[1], z: +m.p[2], aci: +m.a || 0 }); break;   // 0.22.0: meteor
       case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;

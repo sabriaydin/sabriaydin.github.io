@@ -898,3 +898,11 @@ body.gostergesiz #ogretici { display: none; }
 .gelEsyalar.gelSon { max-height: none; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); }
 .gelEsyalar.gelSon img { width: 24px; height: 24px; }
 @media (max-width: 860px) { .gelDenetci { display: none; } }
+
+/* 0.26.0: kablo çekme ipucu (hızlı erişim çubuğunun üstünde) */
+#kabloIpucu { position: absolute; left: 50%; bottom: 112px; transform: translateX(-50%); display: block; text-align: center; padding: 6px 14px 7px; border-radius: 8px;
+  background: rgba(12, 16, 22, .66); border: 1px solid rgba(255, 255, 255, .1); font: 500 .8rem var(--govde); color: rgba(255, 255, 255, .88); pointer-events: none; white-space: nowrap; }
+#kabloIpucu[hidden] { display: none; }
+#kabloIpucu b { color: #ffd28a; }
+#kabloIpucu em { font-style: normal; color: #ff9f96; }
+#kabloIpucu span { display: block; margin-top: 2px; font-size: .7rem; color: rgba(255, 255, 255, .6); }

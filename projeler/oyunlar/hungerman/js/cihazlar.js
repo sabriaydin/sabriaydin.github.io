@@ -5,21 +5,21 @@
    Kök hücre (hücre 0) cihazın üretimini ve deposunu taşır; diğer hücreler yalnızca ağa iletir.
    Bu dosya işçilerde de kullanılır (THREE içermez). */
 
-/* carp: yerel koordinatta çarpışma kutuları [x0, y0, z0, x1, y1, z1] */
+/* carp: yerel koordinatta çarpışma kutuları [x0, y0, z0, x1, y1, z1]; port: kablo bağlantı noktası (0.26.0) */
 export const CIHAZ = {
-  gunes: { ad: 'Güneş Paneli', esya: 497, taban: 626, w: 2, d: 1, h: 1, elektrik: 'gunes', uretim: 10, sertlik: 1.5, alet: 'kazma', ses: 'cam',
+  gunes: { port: [1, 0.45, 0.82], ad: 'Güneş Paneli', esya: 497, taban: 626, w: 2, d: 1, h: 1, elektrik: 'gunes', uretim: 10, sertlik: 1.5, alet: 'kazma', ses: 'cam',
     carp: [[0.05, 0, 0.05, 1.95, 0.95, 0.95]], aciklama: 'Gündüzleri en çok 10 E/sn üretir; üstü açık olmalıdır' },
-  ruzgar: { ad: 'Rüzgâr Türbini', esya: 498, taban: 634, w: 2, d: 2, h: 8, elektrik: 'ruzgar', uretim: 30, sertlik: 2.5, alet: 'kazma', ses: 'tas',
+  ruzgar: { port: [1, 0.32, 1.45], ad: 'Rüzgâr Türbini', esya: 498, taban: 634, w: 2, d: 2, h: 8, elektrik: 'ruzgar', uretim: 30, sertlik: 2.5, alet: 'kazma', ses: 'tas',
     carp: [[0.15, 0, 0.15, 1.85, 0.3, 1.85], [0.62, 0.3, 0.62, 1.38, 7.2, 1.38], [0.6, 7.2, 0.25, 1.4, 7.85, 1.95]],
     aciklama: 'En çok 30 E/sn üretir; yükseklik, rüzgâr ve fırtına artırır. Pervanenin döndüğü alan boş olmalıdır' },
-  su: { ad: 'Su Çarkı', esya: 499, taban: 762, w: 3, d: 1, h: 3, elektrik: 'su', uretim: 16, sertlik: 2, alet: 'balta', ses: 'odun',
+  su: { port: [1.5, 1.98, 0.88], ad: 'Su Çarkı', esya: 499, taban: 762, w: 3, d: 1, h: 3, elektrik: 'su', uretim: 16, sertlik: 2, alet: 'balta', ses: 'odun',
     carp: [[0.05, 0, 0.25, 2.95, 2.95, 0.75], [1.35, 0, 0.02, 1.65, 1.7, 0.2], [1.35, 0, 0.8, 1.65, 1.7, 0.98]],
     aciklama: 'Çarkın alt sırasına değen her su bloğu için 1,5 E/sn üretir (en çok 16); kışın yarı yarıya' },
-  bataryaK: { ad: 'Küçük Batarya', esya: 500, taban: 798, w: 1, d: 1, h: 1, elektrik: 'batarya', kapasite: 1500, sertlik: 2, alet: 'kazma', ses: 'tas',
+  bataryaK: { port: [0.3, 0.8, 0.48], ad: 'Küçük Batarya', esya: 500, taban: 798, w: 1, d: 1, h: 1, elektrik: 'batarya', kapasite: 1500, sertlik: 2, alet: 'kazma', ses: 'tas',
     carp: [[0.15, 0, 0.2, 0.85, 0.8, 0.8]], aciklama: '1.500 E depolar' },
-  bataryaO: { ad: 'Orta Batarya', esya: 501, taban: 802, w: 1, d: 1, h: 2, elektrik: 'batarya', kapasite: 6000, sertlik: 2.5, alet: 'kazma', ses: 'tas',
+  bataryaO: { port: [0.5, 1.76, 0.5], ad: 'Orta Batarya', esya: 501, taban: 802, w: 1, d: 1, h: 2, elektrik: 'batarya', kapasite: 6000, sertlik: 2.5, alet: 'kazma', ses: 'tas',
     carp: [[0.1, 0, 0.15, 0.9, 1.75, 0.85]], aciklama: '6.000 E depolar' },
-  bataryaB: { ad: 'Büyük Batarya', esya: 502, taban: 810, w: 2, d: 1, h: 2, elektrik: 'batarya', kapasite: 24000, sertlik: 3, alet: 'kazma', ses: 'tas',
+  bataryaB: { port: [1, 1.9, 0.5], ad: 'Büyük Batarya', esya: 502, taban: 810, w: 2, d: 1, h: 2, elektrik: 'batarya', kapasite: 24000, sertlik: 3, alet: 'kazma', ses: 'tas',
     carp: [[0.05, 0, 0.1, 1.95, 1.9, 0.9]], aciklama: '24.000 E depolar' }
 };
 for (const [k, C] of Object.entries(CIHAZ)) { C.tur = k; C.n = C.w * C.d * C.h; }

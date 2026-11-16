@@ -24,6 +24,7 @@ import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
 import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
+import { Kablolar, kabloMaliyeti, KABLO } from './oyun/kablolar.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
 import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
@@ -260,7 +261,8 @@ addEventListener('keydown', e => {
     if (e.code.startsWith('Digit')) { const n = +e.code.slice(5); if (n >= 1 && n <= 9) seciliAyarla(n - 1); }
     if (e.code === 'KeyG') oyun.etkilesim.at(e.shiftKey);
     /* 0.25.0: R: elde tutulan cihazın ya da yönlü bloğun konulacağı yönü çevirir */
-    if (e.code === 'KeyR' && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { const n = oyun.etkilesim.dondur(); ses.tik(); oyun.hud.bildirim(`Yerleştirme yönü çevrildi (${n * 90}°)`); }
+    if (e.code === 'KeyR' && !e.repeat && oyun.etkilesim.kablo) { oyun.etkilesim.kabloIptal(); ses.tik(); }
+    else if (e.code === 'KeyR' && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { const n = oyun.etkilesim.dondur(); ses.tik(); oyun.hud.bildirim(`Yerleştirme yönü çevrildi (${n * 90}°)`); }
     if (e.code === 'KeyE' && !e.repeat) oyun.etkilesim.etkiles();
     if ((e.code === 'KeyT' || e.code === 'Enter') && oyun.ag) { e.preventDefault(); sohbetAc(); }
     if (e.code === 'F3') $('#hata').hidden = !$('#hata').hidden;
@@ -557,7 +559,8 @@ function oyunBaslat(v) {
   dunya.enerjiYukle(v.enerji);
   oyun.cihazCizici = new CihazCizici(sahne, dunya);   // 0.25.0: çok bloklu cihazların modelleri ve önizleme
   oyun.bataryaOran = new Map();   // 0.25.0: istemcide sunucudan gelen batarya doluluğu
-  if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
+  oyun.kablolar = new Kablolar(dunya); oyun.kablolar.iceAktar(v.kablolar);   // 0.26.0: Rust tarzı kablolar
+  if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
   gorevler.iceAktar(v.gorevler);
@@ -584,6 +587,14 @@ function oyunBaslat(v) {
       let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
       sandikBasarim(x, y, z);
     },
+    /* 0.26.0: kablolar: çok oyunculu istemcide istek sunucuya gider; sökülen kablo envantere geri döner */
+    kabloEkle: (a, b, n, uz) => { if (oyun.istemci) oyun.ag.gonder({ t: 'ke', a, b, n, uz }); else oyun.kablolar.ekle(a, b, n, undefined, uz); },
+    kabloSil: (i, iade) => {
+      const w = oyun.kablolar.liste.get(i); if (!w) return;
+      if (iade) { const k = envanter.ekle(KABLO.esya, kabloMaliyeti(w.uz)); if (k) dusenler.birak(KABLO.esya, k, oyuncu.konum.x, oyuncu.konum.y + 1, oyuncu.konum.z); }
+      if (oyun.istemci) { oyun.ag.gonder({ t: 'ks', i }); oyun.kablolar.sil(i); } else oyun.kablolar.sil(i);
+    },
+    kabloIsin: (goz, yon, maks) => oyun.cihazCizici ? oyun.cihazCizici.kabloIsin(goz, yon, maks) : null,
     sandikYerlesti: (x, y, z) => { if (!oyun.istemci) dunya.sandiklar.set(x + ',' + y + ',' + z, new Array(27).fill(null)); },
     sandikKirildi: (x, y, z) => {
       const k = x + ',' + y + ',' + z;
@@ -592,6 +603,7 @@ function oyunBaslat(v) {
       const d = dunya.sandiklar.get(k) || koyler.sandikGanimeti(x, y, z); dunya.sandiklar.delete(k); return d.filter(Boolean);
     }
   } });
+  oyun.etkilesim.kablolar = oyun.kablolar;
   hayatta.zirhFn = () => envanter.zirhPuani();
   hayatta.buyuFn = k => envanter.zirhBuyu(k);
   hayatta.zirhYipran = () => { if (envanter.zirhYipran(1)) { ses.aletKirildi(); hud.bildirim('Bir zırh parçanız kırıldı.'); } };
@@ -737,7 +749,7 @@ async function oyunKaydet() {
     oyuncu: { x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
     hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
-    koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), tekneler: o.tekneler.disaAktar(),
+    koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), kablolar: o.kablolar.disaAktar(), tekneler: o.tekneler.disaAktar(),
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
     hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar()
   };
@@ -1016,7 +1028,17 @@ function adim(t) {
   if (o.cihazCizici) {
     o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure },
       k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k)));
-    o.cihazCizici.onizleme(ayar.onizleme !== false && kilitli && !gelPencere.acik && !o.hayatta.olu && !o.fotoModu && !o.izleyici ? o.etkilesim.onizlemeBilgisi() : null);
+    const etkin = kilitli && !gelPencere.acik && !o.hayatta.olu && !o.fotoModu && !o.izleyici;
+    o.cihazCizici.onizleme(ayar.onizleme !== false && etkin && !o.etkilesim.kablo ? o.etkilesim.onizlemeBilgisi() : null);
+    /* 0.26.0: kablolar, çekilen kablonun önizlemesi ve elde kablo varken bakılan kablonun vurgusu */
+    const E = o.etkilesim, kabloElde = o.envanter.seciliId() === KABLO.esya;
+    if (E.kablo && !kabloElde) E.kabloIptal();
+    o.cihazCizici.kablolariCiz(o.kablolar, o.isik);
+    const kon = E.kablo && etkin ? E.kabloOnizleme() : null;
+    o.cihazCizici.kabloOnizleme(kon);
+    o.cihazCizici.kabloVurgula(kabloElde && !E.kablo && etkin ? o.cihazCizici.kabloIsin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu(), E.hedef ? E.hedef.t + 0.05 : 5) : null);
+    o.hud.kabloIpucu(kon ? `Kablo <b>${kon.uz.toFixed(1).replace('.', ',')}</b> / ${KABLO.toplam} blok · <b>${kon.maliyet}</b> kablo${kon.gecerli ? '' : ` · <em>${kon.neden}</em>`}<span>Cihaza sağ tık: bağla · Yüzeye sağ tık: ara nokta · R: iptal</span>` :
+      kabloElde && etkin ? 'Elektrik Kablosu<span>Cihaza sağ tık: kablo çek · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' : null);
   }
   /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi */
   const eh = o.etkilesim.hedef, ebl = eh && !hc && !o.fotoModu && (kilitli || dokun.aktif) ? BLOKLAR[eh.id] : null;
@@ -1447,7 +1469,7 @@ $('#cokKatil').onclick = async () => {
 function istemciBaslat(k, m, kod) {
   sonKod = kod; baglanDeneme = 0;
   const r = m.kayit || {};
-  oyunBaslat({ id: 'ag', ad: m.ad, tohum: m.tohum, zaman: m.zaman, gun: m.gun, degisiklikler: m.degisiklikler, dogum: r.dogum || m.dogum,
+  oyunBaslat({ id: 'ag', ad: m.ad, tohum: m.tohum, zaman: m.zaman, gun: m.gun, degisiklikler: m.degisiklikler, kablolar: m.kablolar, dogum: r.dogum || m.dogum,
     oyuncu: r.oyuncu || null, envanter: r.envanter, hayatta: r.hayatta, gorevler: r.gorevler, koyler: r.koyler, basarimlar: r.basarimlar, olumNoktasi: r.olumNoktasi, hayatBasi: r.hayatBasi, istemci: true,
     yerler: r.yerler, komutlar: !!m.komutlar, zorluk: m.zorluk, denge: m.denge, haritaKimlik: `ag:${m.tohum}:${ayar.ad.toLocaleLowerCase('tr')}` });
   if (!r.oyuncu) oyun.oyuncu.konum.set(m.dogum.x, m.dogum.y, m.dogum.z);

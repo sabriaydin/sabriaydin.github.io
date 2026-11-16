@@ -117,6 +117,17 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 26. aşama (0.26.0): Gerçekçi şalter, lamba ve bataryalar; Rust tarzı kablolar
+- **Şalter:** metal pano: ön kapak (yıldırım uyarı etiketi), gösterge ışığı (açıkken yeşil, kapalıyken kırmızı) ve sağda yukarı (açık) / aşağı (kapalı) inen kırmızı uçlu kol. Duvara ya da ayağıyla zemine konur; zemindeki şalter R ile çevrilir. Kablolar alttan girer.
+- **Elektrikli Lamba:** konulduğu yüzeye göre biçim alır: zeminde ayaklı cam küre, tavanda kordonla sarkan emaye abajur, duvarda aplik. Yanınca camı aydınlanır.
+- **Bataryalar:** Küçük batarya akü biçimindedir (kapak, kırmızı ve gri kutup başları, taşıma kulpu, tehlike şeridi); Orta batarya ev tipi duvar bataryası (etiket, havalandırma ızgaraları, üst bağlantı kutusu); Büyük batarya iki kapaklı endüstriyel dolap (havalandırmalar, etiketler, kulplar, tehlike şeridi, üst fan). Doluluk, ayrı ayrı yanan LED bölmeleriyle gösterilir (yeşil, düşükken sarı, çok düşükken kırmızı).
+- **Kablolar (Rust tarzı):** Elektrik Kablosu artık bir araçtır. Bir cihaza sağ tıklanınca kablo onun bağlantı noktasından çekilmeye başlar; yüzeylere sağ tıklanarak ara tutturma noktaları eklenir; başka bir cihaza sağ tıklanınca bağlanır. Kablo, noktalar arasında sarkarak çizilir; çekilirken önizleme (uygunsa yeşil, değilse kırmızı) ve altta uzunluk, harcanacak kablo ve kısayollar görünür.
+  - Sınırlar: bir parça en çok 16, bütün kablo en çok 40 blok; bir cihaza en çok 6 kablo; her 3 blok için 1 Elektrik Kablosu harcanır; kablonun her bloğu üretimi %0,1 azaltır.
+  - R çekmeyi iptal eder. Elde kablo varken bakılan kablo turuncu vurgulanır; sağ tık onu söker. C + sağ tık bir cihazın bütün kablolarını söker. Sökülen kablolar envantere geri döner; ucundaki cihaz kırılan kablo kopar ve kabloları yere düşer.
+  - Elde kablo varken şaltere sağ tık şalteri çevirmez, kablo çeker.
+  - Kablolar dünya kaydına yazılır; çok oyunculuda sunucu tutar ve bütün oyunculara dağıtır.
+- 0.24.0'ın küp şalteri ve yer kablosu eski kayıtlarda çalışmaya devam eder; kırılınca yeni eşyalar düşer.
+
 ## 25. aşama (0.25.0): Gerçek boyutlu cihazlar, yerleştirme önizlemesi, Geliştirici Modu işlevleri
 - **Çok bloklu cihazlar** (cihazlar.js): üreticiler ve bataryalar gerçek boyutlarındadır; her hücre ayrı bir bloktur, görünüşü ve dönen parçaları ayrı bir modelle çizilir (grafik/cihaz-cizici.js).
   - Güneş Paneli 2 × 1: ayaklar üstünde öne eğik panel; en çok 10 E/sn, gölgede kalan hücre oranında azalır.
