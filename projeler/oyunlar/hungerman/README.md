@@ -117,6 +117,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.2 (0.30.2): Üretim üst bölümü yeniden tasarlandı
+- Başlık altında "yapılabilir tarif" özeti; istasyonlar simgeyle gösterilir (yakındakiler yeşil işaretli, çalışan elektrikli ocak turuncu).
+- Büyüteç simgeli arama çubuğu, Öneri / A–Z / Adet sıralama düğmeleri ve anahtar biçiminde "Yapılabilenler" süzgeci.
+- Kategori sekmeleri tek sıralık simgeli şeride dönüştü (simge, kısa ad, köşede yapılabilir sayısı).
+
 ## 30.1 (0.30.1): Üretim paneli
 - Araç çubuğu: tarif ya da malzeme adıyla arama, sıralama (önerilen, ad, yapılabilir miktar), "Yapılabilenler" süzgeci.
 - Sekmelerde yapılabilir tarif sayısı; yeni "Favoriler" sekmesi (favoriler tarayıcıda saklanır).

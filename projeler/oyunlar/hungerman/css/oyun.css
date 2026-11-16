@@ -1134,3 +1134,47 @@ body.gostergesiz #ogretici { display: none; }
 .tKullanim img { width: 24px; height: 24px; image-rendering: pixelated; }
 @media (max-width: 1340px) { .envPencere { grid-template-columns: auto minmax(420px, 1fr); } .uretimGovde { grid-template-columns: minmax(0, 1fr) 230px; } }
 @media (max-width: 1000px) { .envPencere { grid-template-columns: 1fr; } .uretimGovde { grid-template-columns: 1fr; } .uretimSecim span { display: none; } }
+
+/* ---------- 0.30.2: üretim üst bölümü yeniden tasarım ---------- */
+.uretimBaslik { display: flex; align-items: center !important; justify-content: space-between; gap: 12px; padding-bottom: 12px !important; }
+.uretimBaslik h2 { margin: 0; line-height: 1.1; }
+.uretimBaslik small { display: block; margin-top: 3px; color: var(--soluk); font-size: .74rem; }
+.istasyonlar { display: flex; gap: 6px; }
+.istSimge { position: relative; width: 34px; height: 34px; display: grid; place-items: center; border: 2px solid #000; border-radius: 7px; background: #1b1814; box-shadow: inset 0 2px 0 rgba(0, 0, 0, .5); }
+.istSimge img { width: 22px; height: 22px; image-rendering: pixelated; }
+.istSimge.yok img { filter: grayscale(1) brightness(.6); opacity: .55; }
+.istSimge.var { border-color: #3f7a35; background: #1c2a18; }
+.istSimge.var::after { content: ''; position: absolute; right: -3px; bottom: -3px; width: 10px; height: 10px; border-radius: 50%; background: #6fd35a; border: 2px solid #12160f; }
+.istSimge.ocak { border-color: #8a5a20; background: #2a1f14; }
+.istSimge.ocak::after { background: #ffb04a; }
+
+.uretimUst { display: flex; gap: 8px; align-items: stretch; margin-bottom: 10px; }
+.aramaKutu { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 2px solid #000; border-radius: 8px; background: #0e0c0a; box-shadow: inset 0 2px 0 rgba(0, 0, 0, .5); transition: border-color .15s; }
+.aramaKutu:focus-within { border-color: var(--vurgu); }
+.aramaKutu svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--soluk); stroke-width: 2.4; stroke-linecap: round; }
+.uretimUst .aramaKutu #tarifAra { flex: 1; min-width: 0; padding: 9px 0; border: 0; background: transparent; box-shadow: none; font-size: .9rem; outline: none; }
+.tSegment { display: flex; padding: 3px; gap: 2px; border: 2px solid #000; border-radius: 8px; background: #0e0c0a; }
+.tSegment button { padding: 0 10px; border: 0; border-radius: 5px; background: transparent; color: var(--soluk); font: 700 .76rem var(--govde); cursor: pointer; }
+.tSegment button:hover { color: var(--yazi); background: rgba(255, 255, 255, .06); }
+.tSegment button.on { background: #463d33; color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12); }
+.uretimSecim { gap: 8px; padding: 0 12px; border-radius: 8px; }
+.uretimSecim input { position: absolute; opacity: 0; pointer-events: none; }
+.uretimSecim i { position: relative; width: 30px; height: 17px; flex: none; border-radius: 99px; background: #3a332b; transition: background .15s; }
+.uretimSecim i::after { content: ''; position: absolute; left: 2px; top: 2px; width: 13px; height: 13px; border-radius: 50%; background: #b9ad9a; transition: transform .15s, background .15s; }
+.uretimSecim input:checked + i { background: #5a8a3a; }
+.uretimSecim input:checked + i::after { transform: translateX(13px); background: #fff; }
+.uretimSecim input:focus-visible + i { outline: 2px solid var(--vurgu); outline-offset: 2px; }
+
+#tarifSekme { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; margin-bottom: 10px; padding: 4px; border: 2px solid #000; border-radius: 10px; background: rgba(0, 0, 0, .28); }
+#tarifSekme button { position: relative; display: grid; justify-items: center; gap: 3px; min-width: 0; padding: 6px 2px 5px; border: 0; border-radius: 7px; background: transparent; color: var(--soluk); font: 600 .68rem var(--govde); cursor: pointer; transition: background .12s, color .12s; }
+#tarifSekme button img { width: 24px; height: 24px; image-rendering: pixelated; transition: transform .12s; }
+#tarifSekme button .katYildiz { height: 24px; font-size: 1.2rem; line-height: 24px; color: #ffd257; }
+#tarifSekme button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#tarifSekme button:hover { background: rgba(255, 255, 255, .06); color: var(--yazi); }
+#tarifSekme button:hover img { transform: translateY(-1px); }
+#tarifSekme button.on { background: linear-gradient(#4a3f32, #3a3127); color: #fff; box-shadow: inset 0 0 0 2px var(--vurgu), inset 0 1px 0 rgba(255, 255, 255, .12); }
+#tarifSekme button.bosSekme { opacity: .4; }
+#tarifSekme button em { position: absolute; top: 2px; right: 4px; margin: 0; min-width: 16px; padding: 0 4px; border-radius: 99px; background: #3f7a35; color: #eaffdf; font: 700 .62rem/15px var(--govde); font-style: normal; text-align: center; }
+#tarifSekme button.on em { background: #5a9a3a; color: #fff; }
+@media (max-width: 1000px) { #tarifSekme { grid-template-columns: repeat(5, minmax(0, 1fr)); } .istasyonlar { flex-wrap: wrap; justify-content: flex-end; } }
+.uretimBaslik .istasyonlar { margin-right: 46px; }

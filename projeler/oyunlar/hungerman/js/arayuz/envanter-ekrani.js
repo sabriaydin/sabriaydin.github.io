@@ -7,7 +7,7 @@ import { KarakterOnizleme } from './karakter-onizleme.js';
 /* Büyü masası: seçeneklerin seviye bedeli ve parıltı kristali gereksinimi */
 const BUYU_BEDEL = [2, 5, 9];
 const KRISTAL = 61;
-import { TARIFLER, KATEGORILER, ISTASYON_ADI, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar, girdiListesi } from '../oyun/uretim.js';
+import { TARIFLER, KATEGORILER, ISTASYON_ADI, ISTASYON_BLOK, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar, girdiListesi } from '../oyun/uretim.js';
 
 const $ = s => document.querySelector(s);
 
@@ -41,7 +41,7 @@ export class EnvanterEkrani {
     this.secTarif = -1; this.miktar = 1; this.sira = 'oneri'; this.yalnizYapilir = false;
     $('#tarifSekme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; this.kategori = b.dataset.k; this.ses.tik(); this.tarifCiz(); });
     $('#tarifAra').addEventListener('input', e => { this.arama = e.target.value.trim().toLocaleLowerCase('tr'); this.tarifCiz(); });
-    $('#tarifSira').addEventListener('change', e => { this.sira = e.target.value; this.ses.tik(); this.tarifCiz(); });
+    $('#tarifSira').addEventListener('click', e => { const b = e.target.closest('[data-sira]'); if (!b) return; this.sira = b.dataset.sira; [...$('#tarifSira').children].forEach(x => x.classList.toggle('on', x === b)); this.ses.tik(); this.tarifCiz(); });
     $('#tarifYapilir').addEventListener('change', e => { this.yalnizYapilir = e.target.checked; this.ses.tik(); this.tarifCiz(); });
     $('#tarifAyrinti').addEventListener('click', e => this.ayrintiTikla(e));
     $('#tarifAyrinti').addEventListener('input', e => { if (e.target.id === 'tarifMiktar') { this.miktar = Math.max(1, Math.min(this.miktarUst(), Math.floor(+e.target.value) || 1)); this.ayrintiCiz(true); } });
@@ -174,7 +174,9 @@ export class EnvanterEkrani {
     $('#cantaDoluluk').textContent = `${dolu} / 27 dolu`;
     this.aramaCiz();
     const ist = this.istasyonlar();
-    $('#istasyonDurum').innerHTML = Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="rozet ${ist.has(k) ? 'var' : 'yok'}">${a}${ist.has(k) ? ' yakında' : ''}</span>`).join('') + (ist.has('elocak') ? '<span class="rozet var">Elektrikli Ocak çalışıyor · kömür gerekmez</span>' : '');
+    /* 0.30.2: istasyonlar simgeyle: yakındakiler yeşil işaretli */
+    $('#istasyonDurum').innerHTML = Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="istSimge ${ist.has(k) ? 'var' : 'yok'}" title="${a}: ${ist.has(k) ? 'yakında' : 'yakında değil'}"><img src="${simge(ISTASYON_BLOK[k]).url}" alt="${a}"></span>`).join('')
+      + (ist.has('elocak') ? `<span class="istSimge var ocak" title="Elektrikli Ocak çalışıyor: fırın ve kamp ateşi tariflerinde kömür gerekmez"><img src="${simge(622).url}" alt="Elektrikli Ocak"></span>` : '');
     this.tarifCiz();
     this.tasimaCiz();
   }
@@ -234,10 +236,16 @@ export class EnvanterEkrani {
     const uyar = o => !a || ESYALAR[o.t.cikti].ad.toLocaleLowerCase('tr').includes(a) || girdiListesi(o.t).some(([g]) => girdiAdi(g).toLocaleLowerCase('tr').includes(a));
     const kat = (o, k) => k === 'hepsi' || (k === 'favori' ? this.favoriler.has(o.i) : o.t.kategori === k);
     /* Sekmeler: her kategoride yapılabilir tarif sayısı */
+    /* 0.30.2: kategori şeridi: simge, kısa ad ve yapılabilir sayısı */
+    const KISA = { hepsi: 'Tümü', favori: 'Favori', alet: 'Alet', savas: 'Savaş', blok: 'Blok', malzeme: 'Malzeme', yiyecek: 'Yiyecek', mobilya: 'Mobilya', mekanik: 'Mekanik', elektrik: 'Elektrik' };
+    const SIMGE = { hepsi: 32, alet: 300 };
     $('#tarifSekme').innerHTML = this.sekmeler.map(([k, ad]) => {
       const l = hepsi.filter(o => kat(o, k) && uyar(o)), y = l.filter(o => o.yapilir).length;
-      return `<button type="button" data-k="${k}" class="${k === this.kategori ? 'on' : ''}${!l.length ? ' bosSekme' : ''}">${ad}${y ? `<em>${y}</em>` : ''}</button>`;
+      const id = SIMGE[k] && ESYALAR[SIMGE[k]] ? SIMGE[k] : (TARIFLER.find(t => t.kategori === k) || {}).cikti;
+      const ic = k === 'favori' ? '<b class="katYildiz">★</b>' : id ? `<img src="${simge(id).url}" alt="">` : '';
+      return `<button type="button" data-k="${k}" title="${ad.replace('★ ', '')}: ${l.length} tarif${y ? `, ${y} yapılabilir` : ''}" class="${k === this.kategori ? 'on' : ''}${!l.length ? ' bosSekme' : ''}">${ic}<span>${KISA[k] || ad}</span>${y ? `<em>${y}</em>` : ''}</button>`;
     }).join('');
+    $('#uretimOzet').textContent = `${hepsi.filter(o => o.yapilir).length} / ${TARIFLER.length} tarif yapılabilir`;
     let liste = hepsi.filter(o => kat(o, this.kategori) && uyar(o) && (!this.yalnizYapilir || o.yapilir));
     const ad = o => ESYALAR[o.t.cikti].ad;
     if (this.sira === 'ad') liste.sort((x, y) => ad(x).localeCompare(ad(y), 'tr'));

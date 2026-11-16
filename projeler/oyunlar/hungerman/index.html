@@ -104,12 +104,13 @@
       <p class="ipucuMetin">Sol tık: al / bırak · Sağ tık: yarısını al / bir tane bırak · Çift tık: aynı eşyaları topla · Shift + tık: çubuk ile çanta arasında taşı, zırhı giy / çıkar · Pencere dışına tık: yere at</p>
     </section>
     <section class="envSag">
-      <header class="uretimBaslik"><h2>Üretim</h2><span id="istasyonDurum"></span></header>
+      <!-- 0.30.2: yeni üst bölüm: istasyon simgeleri, arama çubuğu, sıralama düğmeleri, kategori şeridi -->
+      <header class="uretimBaslik"><div><h2>Üretim</h2><small id="uretimOzet"></small></div><div id="istasyonDurum" class="istasyonlar"></div></header>
       <!-- 0.30.1: arama, sıralama, süzgeç, ayrıntı paneli -->
       <div class="uretimUst">
-        <input id="tarifAra" type="search" placeholder="Tarif ya da malzeme ara" autocomplete="off">
-        <select id="tarifSira" title="Sıralama"><option value="oneri">Önerilen</option><option value="ad">Ada göre</option><option value="adet">Yapılabilir miktar</option></select>
-        <label class="uretimSecim" title="Yalnızca malzemesi ve istasyonu hazır olan tarifler"><input type="checkbox" id="tarifYapilir"><span>Yapılabilenler</span></label>
+        <label class="aramaKutu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="tarifAra" type="search" placeholder="Tarif ya da malzeme ara" autocomplete="off"></label>
+        <div id="tarifSira" class="tSegment" role="group" aria-label="Sıralama"><button type="button" data-sira="oneri" class="on" title="Önce yapılabilenler">Öneri</button><button type="button" data-sira="ad" title="Ada göre">A–Z</button><button type="button" data-sira="adet" title="Yapılabilir miktara göre">Adet</button></div>
+        <label class="uretimSecim" title="Yalnızca malzemesi ve istasyonu hazır olan tarifler"><input type="checkbox" id="tarifYapilir"><i></i><span>Yapılabilenler</span></label>
       </div>
       <div id="tarifSekme" class="sekmeler"></div>
       <div class="uretimGovde">
