@@ -164,3 +164,4 @@ export class Olta {
 }
 
 export { DENIZ };
+export { BALIK as OLTA_BALIK, CER as OLTA_CER, HAZINE as OLTA_HAZINE };

@@ -117,6 +117,293 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 23.1 (0.23.1): Bakılan nesnenin adı
+- Bakılan bloğun adı ekranın üstünden sol alt köşeye taşındı; yalnızca ad gösterilir (açıklama satırı kaldırıldı), küçük ve yarı saydamdır. Dokunmatik kipte sol alttaki kol yüzünden üst ortada gösterilir. Ayarlardan kapatılabilir.
+
+## 23. aşama (0.23.0): Sorun giderme ve büyük iyileştirme
+
+**Bildirilen sorunlar**
+- **Ateş ve meşale animasyonu:** kamp ateşi ve meşale alevi saniyede 8 kare titrer; lav yavaşça akar, magma nabız gibi parlar. Kamp ateşinden kıvılcım ve duman, meşalelerden ara sıra kıvılcım yükselir.
+- **Soluk yer eşyaları:** yere düşen eşyaların dokusu doğru renk uzayında işaretlenmediği için soluk görünüyordu. Eşyalar artık düz resim yerine üç boyutlu çizilir (küp bloklar küçük küp, diğerleri kalınlaştırılmış model), yavaşça döner.
+- **Elde tutulan eşyalar:** aletler sapından kavranmış duruşta; vuruşta çapraz savurma, blok ve eşyalarda öne itme, eşya değiştirirken aşağı inip kalkma, yemek yerken ağza götürme, nefes salınımı ve koşarken daha belirgin sallanma eklendi.
+- **Geliştirici Modu:** tekrar eden bölümler kaldırıldı (Işınlanma sekmesindeki harita işaretleri, Harita sekmesindeki mini harita anahtarı, Eşyalar sekmesindeki başarımlar, Köy sekmesindeki ticaret). Yeni "Hayatta Kalma" sekmesi (hasar ve durumlar, vücut ısısı kaydırıcısı, gök olayları, başarımlar), "★ Sık kullanılan" sekmesi (her düğme ve anahtar sağ tıkla sabitlenir), tüm sekmelerde arama (Ctrl + F) ve konum, biyom, saat, kare hızı, can ve vücut ısısını gösteren canlı bilgi şeridi eklendi.
+- **Köylü sayısı:** her binada en çok bir köylü; demirci ve balıkçı her zaman bulunur; köye göre toplam 4-7 köylü.
+- **Belirsiz nesneler:** bakılan bloğun adı sol alt köşede, küçük ve yarı saydam yazılır (0.23.1). Üretim Masası yeniden çizildi: üstte 3×3 üretim ızgarası, yanlarda çekiç, testere, kerpeten ve gönye. Üç haneli renk kodlarının yanlış çözülmesi giderildi (üretim masasındaki ve ana kayadaki kırmızı lekeler bu hatadandı).
+- **Ölüm:** karakter yere yığılır: kamera yere iner ve yana devrilir, görüntü kızarıp kararır, ölüm ekranı 1,8 saniye sonra açılır. Ölüyken yerdeki eşyalar oyuncuya çekilmez (eski sürümde ölüm ekranında eşyalar geri toplanıyordu). Eşyalar mezar taşında saklanır. Çok oyunculuda ölen oyuncu diğerlerinin ekranında yere devrilir.
+
+**Zorluk ve denge**
+- Yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir:
+
+| Zorluk | Canavar hasarı | Açlık hızı | Canavar sayısı | Kanama olasılığı | Soğuk/sıcak hasarı |
+|---|---|---|---|---|---|
+| Kolay | ×0,6 | ×0,7 | ×0,6 | ×0,5 | Yok |
+| Normal | ×1 | ×1 | ×1 | ×1 | Var |
+| Zor | ×1,4 | ×1,25 | ×1,35 | ×1,5 | Var |
+| Hardcore | Zor ile aynı, tek can | | | | |
+
+- Denge ayarları: Kanlı Ay sıklığı (kapalı, 3, 5, 7, 10, 14 günde bir), meteor sıklığı (kapalı, az, normal, sık), vücut ısısı değişim hızı (yavaş, normal, hızlı).
+- Duraklatma menüsündeki **Dünya Ayarları** ile sonradan değiştirilir (Hardcore'a geçilemez, Hardcore'dan çıkılamaz). Çok oyunculuda sunucunun ayarları geçerlidir ve değişiklik istemcilere iletilir.
+- Hardcore: ölünce dünya sona erer; "İzleyici Olarak Dolaş" ile uçarak ve duvarlardan geçerek dolaşılır, hiçbir şeye dokunulamaz. Dünya yeniden açılınca da izleyici kipinde açılır. Dünyalar listesinde Hardcore dünyalar işaretlenir.
+
+**Görsel kalite**
+- Rüzgâr: otlar, çiçekler, ekinler ve fidanlar ile yapraklar rüzgârda salınır; yağmurda ve fırtınada salınım güçlenir.
+- Su yüzeyi dalgalanır.
+- Canlıların altında yumuşak gölge (yükseldikçe küçülür; geceleri soluklaşır).
+- Koşarken ayak tozu; ateşlerden kıvılcım ve duman.
+- Fotoğraf modu: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü kaydeder.
+- Grafik ön ayarları (Düşük, Orta, Yüksek, Ultra): görüş mesafesi ve çizim çözünürlüğünü birlikte ayarlar.
+
+**Arayüz**
+- Envanterde "Sırala": çantadaki yığınlar birleşir; aletler, zırhlar, yiyecekler, malzemeler ve bloklar sırayla dizilir.
+- Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri (mezar taşında da çalışır).
+- Ayrıntılı ipuçları: iksir ve yemek etkisi, ışık düzeyi, aletin kazabildiği madenler, renkli dayanım çubuğu, yığın bilgisi.
+- Öğretici: yeni dünyada 7 adımlık rehber (hareket, odun, üretim masası, ilk alet, meşale, yemek, ilk gece); adım tamamlanınca kendiliğinden geçer. Ayarlardan kapatılabilir.
+
+**Çok oyunculu**
+- Sohbet komutları: /f <ad> <mesaj> (özel mesaj), /oyuncular, /konum, /ben <eylem>, /zar, /yardim; sunucu /at <ad> ile ya da duraklatma menüsündeki düğmeyle oyuncu çıkarabilir.
+- Bağlantı beklenmedik biçimde koparsa 5 saniye sonra kendiliğinden yeniden bağlanılır (en çok 3 deneme); "Yeniden Bağlan" düğmesi de bulunur. Oyuncu bilgileri sunucuda saklandığından kalınan yerden devam edilir.
+
+**Kalıcılık**
+- Dünyalar listesinde "Yedekle": dünya, sıkıştırılmış tek bir dosya (.hmdunya) olarak indirilir. "Yedekten Yükle" dosyayı yeni bir dünya olarak ekler.
+- Her açılışta dünyanın bir önceki hâli ayrıca saklanır; "Önceki oturum" düğmesiyle (iki tıkla onaylanarak) o hâle dönülür.
+
+**Diğer düzeltmeler**
+- Ölüm animasyonu ve ölüm ekranı süresi gerçek zamana göre ölçülür.
+- Gök Taşı demir kazma gerektirir (önceki sürümde taş kazma yetiyordu; yardım metni demir diyordu).
+
+**Bu sürümde yapılmayanlar:** gerçek gölge haritası (dinamik gölge yerine canlı gölgeleri eklendi), uzak parçalarda düşük ayrıntılı çizim, takım ve oyuncular arası ticaret sistemi. Dünya üretimi ve parça çizimi (meshleme) zaten arka plan işçilerinde (Web Worker) yapılmaktadır.
+
+## 22. aşama (0.22.0): Büyük hayatta kalma güncellemesi
+
+**Vücut ısısı**
+- Sağ alttaki gösterge vücut sıcaklığını (°C), eğilimini (▲ ▼) ve hissedilen hava sıcaklığını gösterir.
+- Hissedilen sıcaklık; biyom, mevsim, gün saati (çölde geceler çok soğuk), yükseklik, mağara derinliği, yağış ve kar, suda olma ve ıslaklık (sudan çıktıktan sonra 40 saniye), çatı altı ve ısı kaynaklarından hesaplanır.
+- Isı kaynakları: kamp ateşi, meşale, lav, magma, fener, balkabağı feneri, ışıltaş, yıldız feneri, gök taşı; buz feneri ve buz kristali soğutur.
+- Deri zırh parça başına 3, diğer zırhlar 1 derece yalıtım sağlar. Sıcak çorbalar 150 saniye **Isınma**, ayran 150 saniye **Serinlik** etkisi verir; ateşe dayanıklılık iksiri sıcağı keser.
+- 36 °C altında **üşüme** (titreme, açlık hızlanır, ekran kenarı buzlanır), 34,5 °C altında **donma** (yavaşlama, can kaybı); 38 °C üstünde **bunalma**, 39,5 °C üstünde **sıcak çarpması** (can kaybı).
+- Ayarlar › Vücut ısısı ile kapatılabilir. Geliştirici konsolu: `isi [derece]`.
+
+**Yaralanma**
+- Zombi, kurt, örümcek, haydut, mumya, köpekbalığı ve bossların saldırıları kanatabilir (zırh olasılığı azaltır): 40 saniye boyunca 4 saniyede bir 1 can; can 1 kalbin altına düşmez. Bandaj ya da şifa iksiri durdurur.
+- 6 kalp ve üstü düşüş hasarı bacağı kırabilir (9 ve üstünde kesin): 3 dakika yavaş yürünür, koşulamaz. **Atel** (3 çubuk, 1 ip) sarılınca kemik 30 saniyede kaynar ve yavaşlık azalır.
+- Hasarın geldiği yön ekranın ortasında kırmızı bir yayla gösterilir.
+
+**Mezar taşı**
+- Ölünce eşyalar yere saçılmaz; ölüm yerindeki mezar taşında (27 yuva; fazlası için yanına ikinci mezar) saklanır. Lavda ya da suda ölünürse mezar ilk güvenli yere konur.
+- Pusuladaki ✖ mezarı gösterir; mezara sağ tıklanarak eşyalar alınır, boşalan mezar kaybolur. Çok oyunculuda da çalışır.
+- Ölüm ekranında bu hayatın süresi, en uzun hayat ve yenilen canavar sayısı yazar.
+
+**Kanlı Ay**
+- Her mevsimin son gecesi (7, 14, 21... gün) ay kızarır, gökyüzü ve sis kızıla döner; akşamdan önce uyarı ve korna sesi duyulur.
+- Canavarlar iki kat kalabalık ve sık doğar, %50 fazla canlı ve 1 fazla hasarlıdır, kızıl görünür; meşaleler 6 blok içinde korur. Uyunamaz; boss müziği çalar.
+- Kanlı Ay canavarları iki kat ganimet ve deneyim, %6 olasılıkla yıldız parçası bırakır. Sabaha kadar hayatta kalana 25 deneyim ve başarım verilir.
+
+**Gök olayları**
+- Açık gecelerde yıldız kayar; bazı geceler **yıldız yağmuru** olur (bildirilir).
+- **Meteor**: açık gecelerin bir kısmında (yıldız yağmurunda çoğunda) 35-80 blok uzağa ateş topu düşer: uğultu, çarpma sesi, sarsıntı ve parlama. Krater açar; dibinde **Gök Taşı** (demir kazma; 1-2 Yıldız Parçası) ve magma bulunur. Düşüş yeri pusulada 15 dakika ✦ ile gösterilir. Köylere düşmez.
+- **Kuzey ışıkları**: karlı biyomlarda, dağlarda, çok yüksekte ve kışın açık gecelerde kuzey göğünde dalgalanır.
+- **Eve Dönüş Tılsımı** (3 yıldız parçası, 2 altın külçe, 1 ip; 8 kullanım): sağ tık 3 saniye basılı tutulup kımıldanmazsa doğma noktasına ışınlar (diyarda çalışmaz). **Yıldız Feneri** (4 yıldız parçası, cam): ışık düzeyi 15.
+- Geliştirici konsolu: `kanliay`, `meteor`.
+
+**İstatistikler**: oynama süresi, bu hayat, en uzun hayat, ölüm, yenilen canavar, yürünen yol, kırılan ve konulan blok, yenen yemek, atlatılan Kanlı Ay, görülen meteor, alınan hasar. Başarımlar penceresinin (L) başında gösterilir.
+
+**Başarımlar** (“Hayatta Kalma”): Kızıl Gece, Ay Avcısı, Gökten Gelen, Eve Dönüş, Kutup Işıkları, Ateş Başında, İlk Yardım, Sağlam Adım, Geri Dönüş, Ölümsüz Gibi.
+
+**Hata düzeltmeleri ve iyileştirmeler**
+- Köy verisi olmayan köylü (örneğin konsolla doğurulan) canlı güncellemesini durduruyordu; düzeltildi.
+- Kare hızı göstergesi 20'nin altını gösteremiyordu (yavaş cihazlarda yanlış değer); gerçek süreyle ölçülür.
+- Ayar kaydındaki geçersiz değerler (örneğin 4'ten küçük görüş mesafesi) dünyanın yüklenmesini engelliyordu; değerler geçerli aralığa çekilir.
+- Doku ve simge çiziminde tuvalden piksel geri okuması kaldırıldı (daha hızlı açılış, tarayıcı uyarıları giderildi).
+- Süt kovası kanamayı ve kırığı iyileştirmez (yalnızca zehir ve olumsuz etkiler).
+- Gece bulutları gökyüzünün tonunu alır; gri lekeler görünmez.
+- Sistemli tarama: 482 eşya simgesi, 218 tarif, 334 blok, 29 canlı türü, tüm konsol komutları, pencereler ve kayıt/yükleme sınandı.
+
+## 21. aşama (0.21.0): Tarım ve hayvancılık
+
+**Yeni ekinler**
+- **Balkabağı:** çayır ve ormanlarda küçük öbekler hâlinde bulunur. Balkabağından 4 çekirdek elde edilir; çekirdek tarlaya ekilir, olgunlaşan sap yanındaki boş toprağa ya da çimene balkabağı verir (sap kalır, yeniden ürün verir). Makasla oyulan balkabağı bakılan yöne yüz çizer; oyma balkabağı ile meşaleden ışık düzeyi 15 olan **Balkabağı Feneri** yapılır.
+- **Şeker kamışı:** su kenarlarında yetişir; yalnızca suya komşu kum, toprak ya da çimene ya da başka bir kamışın üstüne dikilir, 3 boya kadar uzar. Kamıştan şeker elde edilir.
+
+**Hayvancılık**
+- **Kova** (3 demir külçe, Üretim Masası): su kaynağından su alır (kaynak tükenmez), inekten süt sağar. Su kovası suyu koyar; lava değen su lavı obsidyene çevirir.
+- **Süt Kovası** içilince zehir, örümcek zehri ve olumsuz etkiler geçer; kova geri kalır.
+- **Makas** (2 demir külçe): koyunu kırkar (1-3 yün; yün 2-4 dakikada yeniden uzar, kırkılmış koyun daha ince görünür), balkabağını oyar, kovandan petek alır. Örste demirle onarılır.
+- **Tavuklar** 5-10 dakikada bir yumurtlar.
+
+**Arıcılık**
+- Çayır, orman ve huş ormanlarındaki meşe ve huş ağaçlarının gövdesine **arı kovanları** asılıdır. Gündüz ve yağmur yokken her kovandan en çok 3 arı çıkar.
+- Arılar kovanın 10 blok çevresindeki çiçeklere (gelincik, karahindiba, peygamber çiçeği) konar, polen toplayınca kovana döner; her dönüş kovanın bal düzeyini 1 artırır (en çok 5). Dolu kovanın ön yüzünde bal görünür.
+- Dolu kovandan cam şişeyle **Bal Şişesi** (zehri giderir), makasla 3 **Bal Peteği** alınır. Kovanın 5 blok altında kamp ateşi yoksa çevredeki arılar 25 saniye boyunca kızar ve sokar (zehirler). Kovan kırılınca da arılar kızar.
+- **Arı Kovanı** 6 kalas ve 3 bal peteğiyle üretilir.
+
+**Yeni yiyecekler** (kaplar geri verilir)
+- Tencere: Peynir (süt kovası), Yoğurt (süt kovası, 2 kase; yenilenme), Omlet (2 yumurta, peynir; güç), Haşlanmış Yumurta.
+- El ile: Ayran (yoğurt, 2 cam şişe; hız).
+- Üretim Masası: Kek (süt kovası, 2 şeker, yumurta, 3 buğday; tokluk).
+- Fırın: Balkabağı Turtası (balkabağı, şeker, yumurta), Baklava (3 buğday, bal şişesi, şeker; hız).
+
+**Başarımlar** (“Çiftlik”): Su Taşıyıcı, Taze Süt, Kırkım Zamanı, Gece Feneri, Tatlı Kazanç, Çiftlik Mutfağı.
+
+**Teknik**
+- Dünya üretimi değiştiğinden keşif haritası önbelleği yenilenir. Kırkılmış koyun ve arılar çok oyunculuda da görünür.
+
+## 20. aşama (0.20.0): Bilinen eksiklerin giderilmesi
+
+- **Geciktirici** (3 taş, bakır tel, 2 meşale; Üretim Masası, Mekanik): arkasından gelen gücü önüne 1-4 adım (0,1-0,4 saniye) gecikmeyle geçirir, gücü tersine çevirmez. Sağ tıklanınca gecikme bir adım artar (4'ten sonra 1'e döner); arkadaki uç gecikmeye göre kayar. Çıkışı, konulurken bakılan yöndedir. Ters çevirici ile birlikte kurulan saat devrelerinin hızı artık ayarlanabilir; arka arkaya geciktiriciler uzun gecikmeler verir.
+- **Bakır tel görünümü:** bir basamak yukarıdaki tele, yandaki bloğun yüzünden tırmanan dikey bir iz çizilir; aşağıdaki tele uzanan kol da gösterilir. Güç iletimi değişmedi.
+- **Mevsime göre gün uzunluğu:** bir günün toplam süresi aynı kalır; yazın gündüz %62,5, kışın %37,5 sürer, ilkbahar ve sonbaharda gece ile gündüz eşittir. Çok oyunculuda istemci de aynı hızla ilerler.
+- **Diyar Geçidi dokusu** artık boşluksuzdur; geçidin arkası görünmez.
+- **Dokunmatik çanta:** yuvaya kısa dokunuş eşyayı alır ya da bırakır (sol tık); basılı tutma (0,4 saniye) yığını ikiye böler ya da taşınan yığından bir tane bırakır (sağ tık). Destekleyen cihazlarda kısa titreşim verilir.
+- **Geliştirici konsolu:** `diyar` komutu dünya ile Yeraltı Diyarı arasında geçirir (karşı tarafta 8:1 oranlı konuma; yakında geçit yoksa kurulur). `isinla` komutu diyardayken diyarın sınırlarını kullanır.
+
+## 19. aşama (0.19.0): Gerçek sesler ve müzik, dokunmatik kontroller, performans
+
+**Ses efektleri (gerçek kayıtlar)**
+- Kenney ses paketlerinden (Impact Sounds, RPG Audio, Interface Sounds, Music Jingles; CC0) 118 kayıt `ses/efekt` klasöründedir.
+- Adımlar zemine göre (çimen ve toprak, taş, ahşap, kar, kum ve yün), kazma, kırma ve koyma bloğun türüne göre (taş, ahşap, toprak, cam), vuruş, hasar, kapı açılıp kapanma, sandık gıcırtısı, para (takas), kumaş (zırh giyme), kitap (Tarif Kitabı ve görev günlüğü), tencere, kol, metal kırılması, arayüz tıklamaları ve pencereler, başarım, görev, seviye atlama, büyüleme ve ölüm ezgileri gerçek kayıtlardır.
+- Her ses birkaç değişkeden rastgele seçilir ve perdesi hafifçe oynatılır; böylece tekrar eden sesler mekanik duyulmaz.
+- Kayıtlar arka planda yüklenir; yüklenene kadar ya da yüklenemezse aynı ses Web Audio ile üretilir.
+- Hayvan, canavar, yağmur, gök gürültüsü, rüzgâr, su, lav, büyü, geçit ve mekanik blok sesleri oyun içinde üretilmeye devam eder.
+
+**Müzik**
+- Tanner Helland'ın (CC BY 4.0) dokuz parçası `ses/muzik` klasöründedir: gündüz (The Forest Awakes, Familiar Roads), gece (A Memory Away, From Here), mağara (Deeper), çöl ve savan (King of the Desert), Yeraltı Diyarı (Dark Knight), boss savaşı (Retribution), ana menü (Daybreak).
+- Oyunda müzik sürekli çalmaz: bir parça bitince 1-3 dakika sessizlik olur, ardından o anki duruma uyan parça yavaşça açılır. Boss savaşında ve Yeraltı Diyarı'nda kendi parçası hemen başlar ve döner; durumdan çıkınca yavaşça susar.
+- Parçalar akış hâlinde çalınır (belleğe tümüyle yüklenmez); sekme gizlenince müzik duraklar.
+- Ayarlar'a ayrı **Müzik düzeyi** kaydırıcısı eklendi. Lisanslar `ses/LISANS.md` dosyasında ve Nasıl Oynanır › Emeği geçenler bölümündedir.
+
+**Dokunmatik kontroller**
+- Telefon ve tabletlerde kendiliğinden açılır (Ayarlar › Dokunmatik kontroller ile açılıp kapatılır).
+- Sol altta sanal kol: yürüme; sonuna kadar ileri itilince koşu. Ekranın geri kalanında parmak kaydırılarak bakılır (iki parmak aynı anda kullanılabilir).
+- Ekrana kısa dokunma kullanır ya da blok koyar; parmağı basılı tutma kırar ve saldırır.
+- Sağ altta Kır, Kullan, Eğil ve Zıpla; sol üstte Çanta, Etkileşim (E), At, Harita, Kitap ve Duraklat düğmeleri. Alt çubuktaki yuvalara dokunarak eşya seçilir.
+- Oyuna girişte tam ekran ve yatay yön denenir; dikey tutulunca yatay çevirme uyarısı gösterilir. Mini harita, saat ve etkiler küçük ekranlara göre yerleşir.
+
+**Performans**
+- **Çözünürlük** ayarı: Otomatik, %50, %67, %85, %100. Otomatikte kare hızı 2 saniye boyunca 45'in altında kalırsa çizim çözünürlüğü düşer, 57'nin üstüne çıkınca yeniden yükselir.
+- En yakın ışık kaynakları listesi önbelleğe alındı: oyuncu kımıldamadıkça ve ışıklar değişmedikçe yeniden sıralanmaz (Yeraltı Diyarı'nın lav denizi binlerce ışık kaynağı içerir).
+- Telefon ve tabletlerde ilk açılışta görüş mesafesi en çok 5 parça olarak başlar.
+
+## 18. aşama (0.18.0): Mevsimler ve Yeraltı Diyarı
+
+**Mevsimler**
+- Yıl 28 gündür; her mevsim 7 gün sürer: İlkbahar, Yaz, Sonbahar, Kış. Saatin yanında mevsim ve mevsimin kaçıncı günü olduğu yazar; mevsim değişince bildirilir.
+- Çimen, yaprak ve otların renkleri mevsimle değişir: ilkbaharda taze yeşil ve meşe ile huş yapraklarında çiçekler; sonbaharda turuncu, kızıl ve sarı yapraklar; kışın solgun çimen ve seyrek, kurumuş yapraklar.
+- **Kış:** çöl ve savan dışında yağış kar olarak düşer; açıktaki zemin ve ağaçlar karla örtülür (yağışta daha hızlı), göl ve nehirlerin yüzeyi donar. Karlı olmayan bölgelerde kar ve buz ilkbaharla birlikte erir. Mevsimlik kar ve buz kayıt dosyasını büyütmez.
+- **Ekin ve fidan büyümesi:** ilkbaharda 1,4 kat, yazın 1,15 kat, sonbaharda 0,85 kat, kışın 0,25 kat.
+- İlkbaharda çimenlerin üstünde yer yer gelincik ve karahindiba açar.
+
+**Yeraltı Diyarı**
+- **Obsidyen:** derin mağaralardaki lav göllerinin yüzeyinde kabuklar hâlinde bulunur; elmas kazmayla kazılır. Demirci köylüsü de sikke karşılığında satar.
+- **Çakmak** (demir külçe + çakmaktaşı): obsidyenden kurulan dikdörtgen bir çerçevenin (iç kısmı en az 2 × 3, en çok 21 × 21; köşeler gerekmez) içine sağ tıklanınca mor **Diyar Geçidi** açılır. Çerçeveden bir blok kırılınca geçit söner.
+- Geçidin içinde 2,5 saniye durulunca diyara geçilir. Diyardaki 1 blok dünyadaki 8 bloğa karşılık gelir; dönüşte de aynı oranla dünyaya çıkılır. Varılan yerin 20 blok çevresinde bir geçit varsa ona çıkılır; yoksa obsidyen platformlu yeni bir geçit kurulur.
+- Diyar, tabanı ve tavanı ana kayayla kapalı dev mağaralardan oluşur: kor taşı, 31. katmana kadar uzanan lav denizi, tavandan sarkan **Işıltaş** kümeleri, ayakları yavaşlatan **Kül Kumu** düzlükleri, eğilmeden üstünde durulunca yakan **Magma** kıyıları, **Kızıl Mantar** ve **Kor Cevheri** (demir kazmayla; Kor Kristali verir).
+- Kızıl sis, sıcak ve loş ortam ışığı, uğultu ve lav sesleri vardır; gökyüzü, hava durumu ve mini harita yoktur. Diyarda uyunamaz.
+- **Kül Kalesi:** lav denizinin üstünde, kül tuğlasından burç; dört yöne uzanan, ışıltaş fenerli ve sütunlu köprüler, köprü uçlarında gözetleme kuleleri, parmaklıklı pencereler, mazgallı dam, köşe kuleleri. Burcun ortasında bir Kor Ruhu yuvası ve ganimet sandıkları (kor kristali, ışıltaş tozu, altın, elmas, obsidyen, iksir, elmas eşyalar, Kor Kılıcı) bulunur.
+- **Canavarlar:** Kor Ruhu (süzülür, art arda üç ateş topu atar, isabet edeni tutuşturur, kendi ışığıyla parlar) ve Kül Zombisi (vuruşu tutuşturur). İkisi de ateşe ve lava dayanıklıdır; diyarda gece gündüz doğarlar.
+- **Yeni tarifler:** Işıltaş (4 ışıltaş tozu), Kül Tuğlası (kor taşı, Fırın), Oymalı Kül Tuğlası, Kor Kılıcı (3 kor kristali, elmas, çubuk; vurulan canlıyı tutuşturur), Ateşe Dayanıklılık İksiri (kor kristaliyle, Simya Masası).
+- **Başarımlar** (“Diyar ve Mevsimler”): Geçit Bekçisi, Ateşin Eşiği, Kül Kalesi, Ruh Avcısı, Işık Toplayıcı, Ateşle Oynamak, Dört Mevsim.
+
+**Teknik**
+- Blok kimlikleri 16 bite genişletildi (yeni bloklar 512'den başlar); eski kayıtlar sorunsuz açılır.
+- Kendi ışığıyla parlayan bloklar (geçit, ışıltaş, magma) karanlıkta da parlak çizilir. Bakır lamba ve ışıltaş gibi küp biçimli ışık blokları artık altındaki blok kırılınca düşmez ve tam blok olarak seçilir.
+- Dünya üretimi değiştiğinden keşif haritası önbelleği yenilenir.
+
+## 17. aşama (0.17.0): Mekanik bloklar ve Tarif Kitabı
+
+**Güç kaynakları** (Üretim Masası, yeni “Mekanik” sekmesi)
+- **Kol** (çubuk + parke taş): sağ tık ya da E ile açılıp kapanır.
+- **Düğme** (taş): basılınca bir saniye güç verir, sonra kendiliğinden kalkar.
+- **Basınç Plakası** (2 kalas): üstünde oyuncu ya da canlı durdukça güç verir.
+- **Işık Algılayıcı** (3 cam, 3 kalas, bakır külçe): gündüz, üstü açıkken güç verir.
+
+**İletim**
+- **Bakır Tel** (1 bakır külçeden 8): gücü 15 bloğa kadar taşır; yanlardaki tellere bağlanır, bir blok yukarı ve aşağı basamaklanır. Güçlüyken parlak turuncu görünür. Katı bir bloğun üstüne konur.
+- Kaynağın ve telin altındaki katı blok da güç alır; bu blokların yanındaki makineler çalışır.
+- **Ters Çevirici** (3 taş, 2 tel, meşale): arkasından güç gelmezse önüne güç verir; çıkışı koyarken bakılan yöndedir. Bir adım gecikmeyle çalışır: arka arkaya iki tane geciktirici, kendi arkasına bağlanan tel halkası **saat devresi** olur.
+
+**Güçle çalışanlar**
+- **Bakır Lamba** (4 bakır külçe, cam, meşale): güç aldıkça yanar (en parlak ışık).
+- **Kapı, çit kapısı, tuzak kapı:** güç gelince açılır, gidince kapanır; yalnızca güç değiştiğinde etkilenir, elle de kullanılabilir.
+- **Ok Atıcı:** güç geldiği anda, gücün geldiği yönün tersine ok atar.
+- **Müzik Kutusu** (8 kalas, bakır tel): güç gelince ya da sağ tıklanınca ezgi çalar. Çalgı altındaki bloğa göre değişir: ahşap ve diğerleri piyano, taş bas, cam ve buz zil, yün flüt, kum, çakıl, toprak ve kil davul.
+- Devreler tek oyunculuda ve sunucuda hesaplanır; blok değişiklikleri bütün oyunculara iletilir. Basınç plakaları bütün oyuncuları algılar.
+
+**Tarif Kitabı (B)**
+- Bütün eşyalar arama kutusu ve sekmelerle (Aletler, Savaş, Bloklar, Malzemeler, Yiyecek, Mobilya, Mekanik, Doğada) süzülür. Malzemesi envanterde olan eşyalar yeşil noktayla işaretlenir.
+- Seçilen eşyanın tarifleri (istasyonu, envanterdeki malzeme durumu ve kaç kez yapılabileceği), **kullanıldığı tarifler** (tıklanınca o eşyaya geçilir, geri düğmesiyle dönülür), **nereden bulunduğu** (kırılan bloklar, canavar ve hayvan düşüşleri, köylü takasları, olta) ve yiyecek, alet ve zırh bilgileri gösterilir.
+- Kitap açılınca eldeki eşya seçili gelir.
+- **Takip et:** seçilen tarifin malzemeleri ekranın solunda envanterle birlikte güncellenir; hepsi tamamlanınca “Hazır” yazar. Takip ayarlarla saklanır.
+
+## 16. aşama (0.16.0): Evcil hayvanlar, binekler, yemek pişirme, mobilyalar
+
+**Evcil hayvanlar**
+- **Köpek:** Kurda kemik verilir; her denemede yaklaşık üçte bir olasılıkla evcilleşir ve kırmızı tasmalı bir köpeğe dönüşür. Sahibini izler, uzaklaşınca yanına ışınlanır, sahibine yaklaşan canavarlara saldırır.
+- **Kedi:** Çayır, orman ve huş ormanlarında seyrek görülür (beş renk). Çiğ ya da pişmiş balıkla evcilleşir, mavi tasma takar ve sahibini izler.
+- Evcil hayvana sağ tık ya da **E**: oturur / kalkar. Mamasıyla (köpek: et, kedi: balık) iyileşir. Sahibi kendi hayvanına zarar veremez.
+
+**At**
+- Çayır ve savanda sürüler hâlinde (beş renk: doru, yağız, kır, al, alaca).
+- **Ehlileştirme:** Boş elle sağ tık; at şahlanıp reddedebilir. Elma, buğday, havuç ya da altın elma güvenini artırır ve başarı olasılığını yükseltir.
+- **Eyer** (5 deri + 1 demir külçe + 2 ip, Üretim Masası) takılan ata sağ tık ya da E ile binilir; **C** ya da E ile inilir.
+- **Sürüş:** At binicinin baktığı yöne döner; W ileri, S geri, A/D yana, **Shift dörtnala**, **Boşluk zıplama** (yaklaşık iki blok). Bir bloklu basamakları kendiliğinden aşar; yüzebilir; nal sesleri vardır.
+- Çok oyunculuda her oyuncu kendi atını sürer; at ve binicinin duruşu diğer oyunculara görünür.
+- Evcil hayvanlar ve atlar (sahibi, rengi, eyeri, oturma durumu) dünya ile kaydedilir.
+
+**Yemek pişirme**
+- **Tencere** (5 demir külçe): yeni üretim istasyonu. Kâseli yemekler yenince kâse geri kalır.
+- **Balık Çorbası** (balık, patates, kâse): Su Altında Nefes 60 sn.
+- **Etli Güveç** (sığır eti, patates, havuç, kâse): Yenilenme 20 sn.
+- **Tavuk Çorbası** (tavuk, havuç, kâse): Yenilenme 10 sn.
+- **Kuzu Haşlama** (koyun eti, patates, kâse): Tokluk 90 sn.
+- **Sebze Çorbası** (havuç, patates, mantar, kâse): Yenilenme 12 sn.
+- **Şiş Kebap** (çiğ et ve çubuk, Kamp Ateşi): Güç 30 sn.
+- **Köfte Ekmek** (biftek ve ekmek, Kamp Ateşi ya da Tencere): Tokluk 120 sn.
+- **Reçelli Ekmek** (ekmek ve 3 böğürtlen): Hız 30 sn.
+- Yeni etkiler: **Yenilenme** (can her 2,5 saniyede 1 artar), **Tokluk** (açlık azalmaz). Etkili yemekler açlık doluyken de yenebilir.
+
+**Mobilyalar** (Üretim Masası, yeni “Mobilya” sekmesi)
+- **Sandalye** ve **Koltuk**: sağ tık ya da E ile oturulur; hareket edince ya da C ile kalkılır. Arkalık, koyan oyuncunun karşısına gelir.
+- **Masa**, **Masa Lambası** (masanın üstüne konabilen ışık kaynağı), sekiz renkte **Halı**, üç çeşit **Saksı** (gelincik, karahindiba, peygamber çiçeği), duvara asılan üç **Tablo** (manzara, deniz, çiçekler).
+
+**Başarımlar:** yeni “Yuva ve Dostlar” grubu: Sadık Dost, Mırnav, Seyis, Atlı, Aşçı, Gurme, Ev Sahibi.
+
+## 0.15.4: Buzul Kulesi yeniden tasarlandı
+
+Buzul Kulesi, Buz Büyücüsü'nün yuvarlak kulesi olarak baştan tasarlandı (taban 27 blok çapında, tepe 45 blok yüksekliğinde).
+
+- **Teras:** taş döşeme, yer yer kar; buz fenerli alçak duvar, buz kemerli giriş kapısı, uçlarında buz kristali parlayan dört buz kümesi.
+- **Gövde:** 15 blok çapında, buz tuğladan; her katta sıkışmış buz ve kar taneli oymalı buz bantları, mavi vitray pencereler; dışta sekiz kademeli payanda ve uçlarında buz fenerleri.
+- **Sarmal merdiven:** duvar boyunca dolanan, katlar arasında kesintisiz buz tuğla merdiven; zeminden tepeye zıplamadan çıkılır.
+- **Katlar:**
+  - Giriş salonu: donmuş çeşme, kristal kandiller, buz fenerli avize.
+  - Kütüphane: duvar boyunca kitaplıklar, mavi halı üzerinde büyü masası, okuma kürsüleri.
+  - Simya odası: iki simya masası, malzeme fıçıları, kristal sergisi, yatak.
+  - Gözlem ve hazine odası: kristal küre, iki sandık.
+- **Tepe (boss alanı):** kademeli taşmalar (altlarında buz sarkıtları) üzerinde 23 blok çapında açık savaş alanı; büyü çemberi deseni, mazgallı korkuluk, sekiz buz sivrisi, buz fenerleri; üstünde süzülen **Buz Kalbi** kristali ve çevresinde dönen buz parçaları. Merdiven boşluğu demir parmaklıkla çevrilidir.
+- Toplam 5 sandık.
+- **Soğuk ışık:** Buz Feneri ve Buz Kristali mavi-beyaz ışık verir; meşale, fener ve ateşin sıcak ışığıyla birlikte toplanır.
+- **Yeni bloklar** (tümü üretilebilir): Buz Tuğla, Sıkışmış Buz, Oymalı Buz Tuğla, Buz Tuğla Merdiven, Buz Tuğla Yarım Blok, Kitaplık, Mavi Vitray, Buz Feneri, Buz Kristali, Buz Sarkıtı.
+- Yapıların çevresindeki ağaçlar artık 30 blok yüksekliğe kadar temizlenir (havada asılı ağaç tepesi kalmaz).
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır.
+
+## 0.15.3: Haydut Kampı yeniden tasarlandı
+
+Haydut Kampı, Kızıl Pençe haydutlarının tahkimli yuvası olarak baştan tasarlandı (yaklaşık 37 blok çapında, halka biçimli).
+
+- **Dış savunma:** dibinde sivri kazıklar bulunan hendek, kapı önünde ahşap köprü; uçları sivriltilmiş kütüklerden halka biçimli çit ve çit üstünde aralıklı meşaleler.
+- **Kapı kulesi:** iki ahşap kule (içinden tırmanma merdiveni), kapının üstünden geçen mazgallı yürüyüş yolu, kara-kızıl sancaklar, fenerler.
+- **Gözetleme kuleleri:** arka köşelerde iki kule; dikmeler, çapraz parmaklıklar, tırmanma merdiveni, korkuluklu nöbet yeri, piramit çatı ve flama.
+- **Reis otağı:** ahşap kürsü üzerinde kırmızı-krem çizgili büyük çadır, saçak ve direkleri, sancaklar; içeride taht, halı, altın, fıçılar, masa ve iki ganimet sandığı.
+- **Meydan:** taş halkalı büyük kamp ateşi ve şiş, oturaklar, kütük tabureler, fener direkleri. Haydut Reisi burada bekler.
+- **Yatakhane çadırları:** yataklı iki bez çadır (birinde sandık), odun yığını.
+- **Demirci tezgâhı:** örs, fırın, üretim masası, su fıçısı, sandık.
+- **Ganimet ambarı:** fıçı ve saman yığınları, sandık.
+- **Hazine kafesi:** demir parmaklıklar ardında sandık ve altın blok.
+- **Okçuluk alanı:** hedef tahtaları, atış çizgisi.
+- Toplam 7 sandık; 6 haydut (meydanda, kulelerde, kapı yolunda ve ambarda).
+- **Yeni bloklar** (tümü üretilebilir): Çadır Bezi, Çizgili Çadır Bezi, Fıçı, Demir Parmaklık, Hedef, Sivri Kazık.
+- Üretim değiştiği için eski dünyalarda harita kaydı sıfırlanır.
+
 ## 0.15.2: Çöl Tapınağı yeniden tasarlandı
 
 Çöl Tapınağı, Mısır tapınaklarının düzeninde güneyden kuzeye ilerleyen bir yapı topluluğu olarak baştan tasarlandı (yaklaşık 29 x 50 blokluk tapınak alanı, 18 blok derinlikte mezar salonu).
@@ -294,6 +581,9 @@ Yeni aşamalar istek üzerine belirlenir.
 index.html            Menüler ve oyun ekranı
 css/oyun.css          Arayüz stilleri
 lib/                  Three.js (r169, MIT lisansı), PeerJS (1.5.4, MIT lisansı; yalnız çok oyunculuda yüklenir)
+ses/efekt/            Ses efekti kayıtları (Kenney, CC0)
+ses/muzik/            Müzik parçaları (Tanner Helland, CC BY 4.0)
+ses/LISANS.md         Ses ve müzik lisansları
 js/ana.js             Giriş noktası: menüler, girdi, oyun döngüsü, kayıt
 js/sabitler.js        Ortak sabitler (parça boyutu, deniz seviyesi, gün süresi)
 js/rastgele.js        Tohumlu rastgele sayı ve gürültü fonksiyonları

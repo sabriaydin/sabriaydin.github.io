@@ -1,12 +1,12 @@
 /* HungerMan - biçimli bloklar: merdiven, yarım blok, kapı, tuzak kapı, çit, çit kapısı, cam bölme, tırmanma merdiveni, tarla, örs, simya masası
    Her blok, hücre içinde 0..1 aralığında kutulardan oluşur: [x0, y0, z0, x1, y1, z1, doku?].
    Aynı tanımlar meshleme (işçi), çarpışma (oyuncu ve canlılar), ışın izleme ve seçim kutusu için kullanılır. */
-import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T } from './bloklar.js';
+import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T, BLOK_UST } from './bloklar.js';
 
 const P = 1 / 16;
 /* Yönler: 0 kuzey (-z), 1 doğu (+x), 2 güney (+z), 3 batı (-x) */
 export const YONLER = [[0, -1], [1, 0], [0, 1], [-1, 0]];
-export const SEKIL = new Uint8Array(256);
+export const SEKIL = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && b.cizim === C_SEKIL) SEKIL[b.id] = 1;
 
 /* Hücrenin bir kenarına yaslanan ince panel */
@@ -20,7 +20,7 @@ function panel(f, k, y0 = 0, y1 = 1) {
 }
 
 const CIT_AILE = id => id === 104 || (id >= 105 && id <= 108);
-const BOLME_AILE = id => id === 109 || id === 34;
+const BOLME_AILE = id => id === 109 || id === 34 || id === 182 || id === 188;
 /* Çit ve cam bölme komşuya bağlanır mı */
 function baglanir(id, n, f) {
   if (!n) return false;
@@ -36,6 +36,15 @@ function baglanir(id, n, f) {
 }
 
 /* komsu(f): yatay komşu blok (f: 0..3); carp: çarpışma kutuları (çitler 1,5 blok yüksekliğindedir) */
+/* 0.16.0: kuzeye (yon 0) göre tanımlanan kutuları blok merkezi çevresinde döndürür */
+function dondur(l, f) {
+  if (!f) return l;
+  const n = ([x, z]) => (f === 1 ? [1 - z, x] : f === 2 ? [1 - x, 1 - z] : [z, 1 - x]);
+  return l.map(k => {
+    const [ax, az] = n([k[0], k[2]]), [bx, bz] = n([k[3], k[5]]);
+    return [Math.min(ax, bx), k[1], Math.min(az, bz), Math.max(ax, bx), k[4], Math.max(az, bz), ...k.slice(6)];
+  });
+}
 export function sekilKutulari(id, komsu, carp = false) {
   const b = BLOKLAR[id];
   if (!b) return [];
@@ -49,7 +58,10 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'tuzak': return [b.acik ? panel(b.yon, 3 * P) : [0, 0, 0, 1, 3 * P, 1]];
     case 'tirmanma': return [panel(b.yon, carp ? 3 * P : P)];
     case 'tarla': return [[0, 0, 0, 1, 15 * P, 1]];
+    /* 0.22.0: mezar taşı: toprak taban, dikili taş */
+    case 'mezar': return carp ? [[P, 0, 2 * P, 15 * P, 15 * P, 14 * P]] : [[P, 0, 2 * P, 15 * P, 2 * P, 14 * P, T.toprak], [3 * P, 2 * P, 6 * P, 13 * P, 14 * P, 10 * P], [4 * P, 14 * P, 6 * P, 12 * P, 15 * P, 10 * P]];
     case 'karKatman': return [[0, 0, 0, 1, 2 * P, 1]];
+    case 'gecit': return carp ? [] : [b.eksen ? [6 * P, 0, 0, 10 * P, 1, 1] : [0, 0, 6 * P, 1, 1, 10 * P]];
     case 'fener': return [[5 * P, 0, 5 * P, 11 * P, 8 * P, 11 * P], [6 * P, 8 * P, 6 * P, 10 * P, 9 * P, 10 * P, T.demir_cubuk], [7 * P, 9 * P, 7.5 * P, 9 * P, 13 * P, 8.5 * P, T.demir_cubuk]];
     case 'tel': return carp ? [] : [[0, P, 7 * P, 1, 1.6 * P, 9 * P], [7 * P, P, 0, 9 * P, 1.6 * P, 1]];
     case 'nilufer': return carp ? [] : [[P, 0, P, 15 * P, 0.5 * P, 15 * P]];
@@ -67,6 +79,83 @@ export function sekilKutulari(id, komsu, carp = false) {
       }
       return l;
     }
+    /* 0.16.0: mobilyalar (yon: arkalığın / duvarın bulunduğu taraf) */
+    case 'sandalye': {
+      if (carp) return dondur([[P, 0, P, 15 * P, 9 * P, 15 * P], [P, 0, P, 15 * P, 1, 4 * P]], b.yon);
+      return dondur([
+        [2 * P, 0, 2 * P, 4 * P, 7 * P, 4 * P], [12 * P, 0, 2 * P, 14 * P, 7 * P, 4 * P], [2 * P, 0, 12 * P, 4 * P, 7 * P, 14 * P], [12 * P, 0, 12 * P, 14 * P, 7 * P, 14 * P],
+        [P, 7 * P, P, 15 * P, 9 * P, 15 * P],
+        [2 * P, 9 * P, 2 * P, 4 * P, 1, 4 * P], [12 * P, 9 * P, 2 * P, 14 * P, 1, 4 * P],
+        [4 * P, 13 * P, 2.5 * P, 12 * P, 15 * P, 3.5 * P], [4 * P, 10 * P, 2.5 * P, 12 * P, 11.5 * P, 3.5 * P]
+      ], b.yon);
+    }
+    case 'masa':
+      if (carp) return [[0, 0, 0, 1, 1, 1]];
+      return [[0, 13 * P, 0, 1, 1, 1], [P, 0, P, 3 * P, 13 * P, 3 * P], [13 * P, 0, P, 15 * P, 13 * P, 3 * P], [P, 0, 13 * P, 3 * P, 13 * P, 15 * P], [13 * P, 0, 13 * P, 15 * P, 13 * P, 15 * P]];
+    case 'koltuk': {
+      if (carp) return dondur([[0, 0, 0, 1, 10 * P, 1], [0, 0, 0, 1, 1, 4 * P]], b.yon);
+      const M = T.minder_k;
+      return dondur([
+        [P, 0, P, 3 * P, 2 * P, 3 * P], [13 * P, 0, P, 15 * P, 2 * P, 3 * P], [P, 0, 13 * P, 3 * P, 2 * P, 15 * P], [13 * P, 0, 13 * P, 15 * P, 2 * P, 15 * P],
+        [0, 2 * P, 0, 1, 7 * P, 1],
+        [2 * P, 7 * P, 3 * P, 14 * P, 10 * P, 15 * P, M], [2 * P, 7 * P, P, 14 * P, 18 * P, 4 * P, M],
+        [0, 7 * P, 0, 2 * P, 13 * P, 1], [14 * P, 7 * P, 0, 1, 13 * P, 1], [0, 7 * P, 0, 1, 18 * P, P]
+      ], b.yon);
+    }
+    case 'hali': return [[0, 0, 0, 1, P, 1]];
+    case 'saksi': {
+      if (carp) return [[5 * P, 0, 5 * P, 11 * P, 6 * P, 11 * P]];
+      const Y = T.yun_y, C = T[b.cicek];
+      return [[5 * P, 0, 5 * P, 11 * P, 6 * P, 11 * P], [6 * P, 6 * P, 6 * P, 10 * P, 6.4 * P, 10 * P, T.toprak],
+        [7.5 * P, 6 * P, 7.5 * P, 8.5 * P, 11 * P, 8.5 * P, Y], [5.5 * P, 8 * P, 7.5 * P, 10.5 * P, 9 * P, 8.5 * P, Y],
+        [6.5 * P, 11 * P, 6.5 * P, 9.5 * P, 13 * P, 9.5 * P, C], [7.25 * P, 12.5 * P, 7.25 * P, 8.75 * P, 13.5 * P, 8.75 * P, b.cicek === 'yun_s' ? T.yun_t : T.yun_s]];
+    }
+    case 'lamba':
+      if (carp) return [[4.5 * P, 0, 4.5 * P, 11.5 * P, 12 * P, 11.5 * P]];
+      return [[5 * P, 0, 5 * P, 11 * P, P, 11 * P, T.demir_cubuk], [7.5 * P, P, 7.5 * P, 8.5 * P, 7 * P, 8.5 * P, T.demir_cubuk], [4.5 * P, 7 * P, 4.5 * P, 11.5 * P, 12 * P, 11.5 * P]];
+    case 'tablo': return carp ? [] : dondur([[P, P, 0, 15 * P, 15 * P, P]], b.yon);
+    case 'tencere':
+      if (carp) return [[2 * P, 0, 2 * P, 14 * P, 9 * P, 14 * P]];
+      return [[3 * P, 0, 3 * P, 13 * P, 8 * P, 13 * P], [2 * P, 8 * P, 2 * P, 14 * P, 9 * P, 14 * P, T.tencere_ust],
+        [0, 6 * P, 7 * P, 2 * P, 7 * P, 9 * P, T.demir_cubuk], [14 * P, 6 * P, 7 * P, 1, 7 * P, 9 * P, T.demir_cubuk]];
+    /* 0.17.0: mekanik bloklar */
+    case 'kol': {
+      if (carp) return [];
+      const l = [[5 * P, 0, 4 * P, 11 * P, 2 * P, 12 * P], [7 * P, 2 * P, 6 * P, 9 * P, 6 * P, 8 * P, T.kalas], [7 * P, 6 * P, 4.5 * P, 9 * P, 9 * P, 6.5 * P, T.kalas], [6.5 * P, 9 * P, 3.5 * P, 9.5 * P, 11 * P, 5.5 * P, b.acik ? T.kol_bas_a : T.kol_bas]];
+      return b.acik ? dondur(l, 2) : l;
+    }
+    case 'dugme': return carp ? [] : [[5 * P, 0, 6 * P, 11 * P, (b.acik ? 1 : 2) * P, 10 * P]];
+    case 'plaka': return carp ? [] : [[P, 0, P, 15 * P, (b.acik ? 0.5 : 1) * P, 15 * P]];
+    case 'kablo': {
+      if (carp) return [];
+      const h = 0.6 * P, l = [[6 * P, 0, 6 * P, 10 * P, h, 10 * P]];
+      const tel = n => BLOKLAR[n] && BLOKLAR[n].mekanik === 'tel', dolu = n => KATI[n] && OPAK[n];
+      const ustAcik = !dolu(komsu(12));
+      for (let f = 0; f < 4; f++) {
+        const n = komsu(f), nb = BLOKLAR[n];
+        /* 0.20.0: bir basamak yukarıdaki tele yandaki bloğun yüzünden tırmanır; aşağıdaki tele kenara kadar uzanır */
+        const yukari = ustAcik && tel(komsu(4 + f)) && dolu(n), asagi = !dolu(n) && tel(komsu(8 + f));
+        if (!yukari && !asagi && !(nb && (nb.mekanik || nb.sekil === 'kapi' || nb.sekil === 'citKapi' || nb.sekil === 'tuzak' || n === 157))) continue;
+        l.push(f === 0 ? [7 * P, 0, 0, 9 * P, h, 7 * P] : f === 1 ? [9 * P, 0, 7 * P, 1, h, 9 * P] : f === 2 ? [7 * P, 0, 9 * P, 9 * P, h, 1] : [0, 0, 7 * P, 7 * P, h, 9 * P]);
+        if (yukari) l.push(f === 0 ? [7 * P, 0, 0, 9 * P, 1, h] : f === 1 ? [1 - h, 0, 7 * P, 1, 1, 9 * P] : f === 2 ? [7 * P, 0, 1 - h, 9 * P, 1, 1] : [0, 0, 7 * P, h, 1, 9 * P]);
+      }
+      return l;
+    }
+    case 'ters':
+      if (carp) return [[0, 0, 0, 1, 2 * P, 1]];
+      return dondur([[0, 0, 0, 1, 2 * P, 1], [7 * P, 2 * P, 3 * P, 9 * P, 6 * P, 5 * P, T.kalas], [6.5 * P, 6 * P, 2.5 * P, 9.5 * P, 8 * P, 5.5 * P, b.acik ? T.bakir_lamba_a : T.kol_bas], [7 * P, 2 * P, 11 * P, 9 * P, 4 * P, 13 * P, T.kalas]], b.yon);
+    /* 0.20.0: Geciktirici: önde sabit çıkış ucu, arkada gecikmeye göre kayan ikinci uç */
+    case 'gecik': {
+      if (carp) return [[0, 0, 0, 1, 2 * P, 1]];
+      const ba = b.acik ? T.bakir_lamba_a : T.kol_bas, z = (7 + 2 * b.gecikme) * P;
+      return dondur([[0, 0, 0, 1, 2 * P, 1], [7 * P, 2 * P, 3 * P, 9 * P, 5 * P, 5 * P, T.kalas], [6.5 * P, 5 * P, 2.5 * P, 9.5 * P, 7 * P, 5.5 * P, ba],
+        [7 * P, 2 * P, z, 9 * P, 5 * P, z + 2 * P, T.kalas], [6.5 * P, 5 * P, z - 0.5 * P, 9.5 * P, 7 * P, z + 2.5 * P, ba]], b.yon);
+    }
+    case 'algi': return [[0, 0, 0, 1, 6 * P, 1]];
+    case 'kazik':
+      /* Sivri kazık: kütük gövde, daralan uç */
+      if (carp) return [[0, 0, 0, 1, 1, 1]];
+      return [[0, 0, 0, 1, 10 * P, 1], [2 * P, 10 * P, 2 * P, 14 * P, 13 * P, 14 * P], [5 * P, 13 * P, 5 * P, 11 * P, 1, 11 * P]];
     case 'korkuluk': {
       /* Kum taşı korkuluk: kalın direk ve komşuya uzanan alçak duvar (çarpışma 1,5 blok) */
       const l = [], h = carp ? 1.5 : 1;
@@ -123,7 +212,7 @@ export function sekilKutulari(id, komsu, carp = false) {
 
 /* Dünyadaki bir hücrenin kutuları (dünya koordinatında değil, hücre içinde) */
 export function hucreKutulari(dunya, x, y, z, id, carp = false) {
-  return sekilKutulari(id, f => dunya.blok(x + YONLER[f][0], y, z + YONLER[f][1]), carp);
+  return sekilKutulari(id, f => (f >= 12 ? dunya.blok(x, y + (f === 12 ? 1 : -1), z) : dunya.blok(x + YONLER[f & 3][0], y + (f < 4 ? 0 : f < 8 ? 1 : -1), z + YONLER[f & 3][1])), carp);
 }
 
 /* Seçim ve çatlak için kutuların sınırı */

@@ -27,7 +27,24 @@ export const DOKULAR = [
   /* 0.15.1: asılı fener */
   'fener_kafes',
   /* 0.15.2: çöl tapınağı */
-  'kumtasi_duz', 'kumtasi_oyma', 'hiyeroglif', 'pismis_turuncu', 'cini_mavi', 'altin_blok', 'sutun_yan', 'nemes_yan', 'nemes_ust', 'firavun_yuz'
+  'kumtasi_duz', 'kumtasi_oyma', 'hiyeroglif', 'pismis_turuncu', 'cini_mavi', 'altin_blok', 'sutun_yan', 'nemes_yan', 'nemes_ust', 'firavun_yuz',
+  /* 0.15.3: haydut kampı */
+  'cadir_bezi', 'cadir_cizgili', 'fici_yan', 'fici_ust', 'demir_parmaklik', 'hedef_on',
+  /* 0.15.4: buzul kulesi */
+  'buz_tugla', 'mavi_buz', 'kitaplik', 'vitray_mavi', 'buz_fener', 'buz_oyma', 'buz_kristal', 'buz_sarkit',
+  /* 0.16.0: mobilya ve mutfak */
+  'saksi', 'lamba', 'tablo_manzara', 'tablo_deniz', 'tablo_cicek', 'tencere', 'tencere_ust', 'minder_k',
+  /* 0.17.0: mekanik bloklar */
+  'bakir_tel_k', 'bakir_tel_a', 'bakir_lamba', 'bakir_lamba_a', 'ters_ust', 'ters_ust_a', 'muzik_kutu', 'muzik_ust', 'algi_ust', 'algi_ust_a', 'algi_yan', 'kol_bas', 'kol_bas_a',
+  /* 0.18.0: Yeraltı Diyarı */
+  'kor_tasi', 'kul_kumu', 'isiltas', 'obsidyen', 'gecit', 'kul_tugla', 'kul_tugla_oyma', 'kor_cev', 'magma', 'kizil_mantar',
+  /* 0.20.0 */
+  'gecik_ust', 'gecik_ust_a',
+  /* 0.21.0: tarım ve hayvancılık */
+  'kabak_sap0', 'kabak_sap1', 'kabak_sap2', 'kabak_sap3', 'balkabagi_ust', 'balkabagi_yan', 'balkabagi_yuz', 'balkabagi_fener', 'seker_kamisi',
+  'kovan_ust', 'kovan_yan', 'kovan_on', 'kovan_on_bal',
+  /* 0.22.0: hayatta kalma */
+  'mezar', 'gok_tasi', 'yildiz_feneri'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -213,20 +230,103 @@ for (let k = 0; k < 4; k++) blok(172 + k, { ad: 'Firavun Heykeli Başı', dok: {
 blok(176, { ad: 'Kum Taşı Sütun', dok: ['kumtasi_duz', 'sutun_yan', 'kumtasi_duz'], sertlik: 0.8, alet: 'kazma', seviye: 1 });
 blok(177, { ad: 'Kum Taşı Korkuluk', dok: 'kumtasi_duz', cizim: C_SEKIL, opak: false, sertlik: 0.8, alet: 'kazma', seviye: 1, sekil: 'korkuluk' });
 blok(178, { ad: 'Çizgili Çini', dok: 'nemes_yan', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
+/* 0.15.3: haydut kampı blokları */
+blok(179, { ad: 'Çadır Bezi', dok: 'cadir_bezi', sertlik: 0.8, ses: 'yun' });
+blok(180, { ad: 'Çizgili Çadır Bezi', dok: 'cadir_cizgili', sertlik: 0.8, ses: 'yun' });
+blok(181, { ad: 'Fıçı', dok: ['fici_ust', 'fici_yan', 'fici_ust'], sertlik: 2, alet: 'balta', ses: 'odun' });
+blok(182, { ad: 'Demir Parmaklık', dok: 'demir_parmaklik', cizim: C_SEKIL, opak: false, sertlik: 5, alet: 'kazma', seviye: 1, ses: 'tas', sekil: 'bolme' });
+blok(183, { ad: 'Hedef', dok: ['saman_ust', 'hedef_on', 'saman_ust'], sertlik: 0.5, ses: 'bitki' });
+blok(184, { ad: 'Sivri Kazık', dok: ['mese_ust', 'mese_yan', 'mese_ust'], cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'balta', ses: 'odun', sekil: 'kazik' });
+/* 0.15.4: buzul kulesi blokları */
+blok(185, { ad: 'Buz Tuğla', dok: 'buz_tugla', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
+blok(186, { ad: 'Sıkışmış Buz', dok: 'mavi_buz', sertlik: 1, alet: 'kazma', ses: 'cam' });
+blok(187, { ad: 'Kitaplık', dok: ['kalas', 'kitaplik', 'kalas'], sertlik: 1.5, alet: 'balta', ses: 'odun' });
+blok(188, { ad: 'Mavi Vitray', dok: 'vitray_mavi', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'cam', sekil: 'bolme', dusur: () => [] });
+blok(189, { ad: 'Buz Feneri', dok: 'buz_fener', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'cam', sekil: 'fener', mesale: true, isik: 15, soguk: true });
+{
+  const ortak = { dok: 'buz_tugla', cizim: C_SEKIL, opak: false, sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' };
+  for (let f = 0; f < 4; f++) blok(190 + f, { ...ortak, ad: 'Buz Tuğla Merdiven', sekil: 'merdiven', yon: f, taban: 190, gizli: f > 0, dusur: () => [[190, 1]] });
+  for (let u = 0; u < 2; u++) blok(194 + u, { ...ortak, ad: 'Buz Tuğla Yarım Blok', sekil: 'yarim', ust: u, taban: 194, cift: 185, gizli: u > 0, dusur: () => [[194, 1]] });
+}
+blok(196, { ad: 'Oymalı Buz Tuğla', dok: 'buz_oyma', sertlik: 1.2, alet: 'kazma', seviye: 1, ses: 'cam' });
+blok(197, { ad: 'Buz Kristali', dok: 'buz_kristal', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1, alet: 'kazma', ses: 'cam', isik: 12, mesale: true, soguk: true });
+blok(198, { ad: 'Buz Sarkıtı', dok: 'buz_sarkit', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.5, ses: 'cam' });
+/* 0.16.0: mobilyalar ve tencere */
+for (let f = 0; f < 4; f++) blok(199 + f, { ad: 'Sandalye', dok: 'kalas', cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'balta', ses: 'odun', sekil: 'sandalye', yon: f, taban: 199, gizli: f > 0, oturak: 0.45, dusur: () => [[199, 1]] });
+blok(203, { ad: 'Masa', dok: 'kalas', cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'balta', ses: 'odun', sekil: 'masa' });
+for (let f = 0; f < 4; f++) blok(204 + f, { ad: 'Koltuk', dok: 'kalas', cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'balta', ses: 'yun', sekil: 'koltuk', yon: f, taban: 204, gizli: f > 0, oturak: 0.5, dusur: () => [[204, 1]] });
+[['Beyaz', 'yun'], ...YUN_RENKLERI.map(r => [r.ad, r.dok])].forEach(([ad, dok], i) => blok(208 + i, { ad: `${ad} Halı`, dok, cizim: C_SEKIL, opak: false, sertlik: 0.2, ses: 'yun', sekil: 'hali' }));
+[['Gelincikli Saksı', 'yun_k'], ['Karahindibalı Saksı', 'yun_s'], ['Peygamber Çiçekli Saksı', 'yun_m']].forEach(([ad, cicek], i) => blok(216 + i, { ad, dok: 'saksi', cizim: C_SEKIL, opak: false, sertlik: 0.2, ses: 'tas', sekil: 'saksi', cicek }));
+blok(219, { ad: 'Masa Lambası', dok: 'lamba', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'cam', sekil: 'lamba', mesale: true, isik: 13, lamba: true });
+[['Manzara', 'tablo_manzara'], ['Deniz', 'tablo_deniz'], ['Çiçekler', 'tablo_cicek']].forEach(([ad, dok], k) => {
+  for (let f = 0; f < 4; f++) blok(220 + k * 4 + f, { ad: `Tablo (${ad})`, dok, cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'odun', sekil: 'tablo', yon: f, taban: 220 + k * 4, gizli: f > 0, dusur: () => [[220 + k * 4, 1]] });
+});
+blok(232, { ad: 'Tencere', dok: 'tencere', cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'kazma', ses: 'tas', sekil: 'tencere', istasyon: 'tencere' });
+/* 0.17.0: mekanik bloklar. mekanik: tür; kaynak: güç verir; tuketici: güçle çalışır. Durumlar ayrı kimliklerdir. */
+for (let a = 0; a < 2; a++) {
+  blok(233 + a, { ad: 'Kol', dok: 'parke', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'tas', sekil: 'kol', mekanik: 'kol', acik: a, taban: 233, gizli: a > 0, dusur: () => [[233, 1]] });
+  blok(235 + a, { ad: 'Düğme', dok: 'tas', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'tas', sekil: 'dugme', mekanik: 'dugme', acik: a, taban: 235, gizli: a > 0, dusur: () => [[235, 1]] });
+  blok(237 + a, { ad: 'Basınç Plakası', dok: 'kalas', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.5, ses: 'odun', sekil: 'plaka', mekanik: 'plaka', acik: a, taban: 237, gizli: a > 0, dusur: () => [[237, 1]] });
+  blok(239 + a, { ad: 'Bakır Tel', dok: a ? 'bakir_tel_a' : 'bakir_tel_k', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0, ses: 'tas', sekil: 'kablo', mekanik: 'tel', acik: a, taban: 239, gizli: a > 0, dusur: () => [[239, 1]] });
+  blok(241 + a, { ad: 'Bakır Lamba', dok: a ? 'bakir_lamba_a' : 'bakir_lamba', sertlik: 1.5, alet: 'kazma', ses: 'cam', mekanik: 'lamba', acik: a, taban: 241, gizli: a > 0, dusur: () => [[241, 1]], ...(a ? { mesale: true, isik: 15 } : {}) });
+  blok(252 + a, { ad: 'Işık Algılayıcı', dok: [a ? 'algi_ust_a' : 'algi_ust', 'algi_yan', 'kalas'], cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'balta', ses: 'odun', sekil: 'algi', mekanik: 'algi', acik: a, taban: 252, gizli: a > 0, dusur: () => [[252, 1]] });
+}
+/* Ters çevirici: yon çıkış yönüdür; arkasından (karşı taraftan) güç gelmezse önüne güç verir; 243 + yon * 2 + yanık */
+for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(243 + f * 2 + a, { ad: 'Ters Çevirici', dok: a ? 'ters_ust_a' : 'ters_ust', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'tas', sekil: 'ters', mekanik: 'ters', yon: f, acik: a, taban: 243, gizli: f + a > 0, dusur: () => [[243, 1]], ...(a ? { mesale: true, isik: 5 } : {}) });
+blok(251, { ad: 'Müzik Kutusu', dok: ['muzik_ust', 'muzik_kutu', 'kalas'], sertlik: 1.2, alet: 'balta', ses: 'odun', mekanik: 'muzik' });
+
+/* 0.18.0: Yeraltı Diyarı blokları (512'den başlar). harita: haritada gösterildiği eski blok */
+blok(512, { ad: 'Kor Taşı', dok: 'kor_tasi', sertlik: 0.7, alet: 'kazma', seviye: 1, harita: 114 });
+blok(513, { ad: 'Kül Kumu', dok: 'kul_kumu', sertlik: 0.6, alet: 'kurek', ses: 'kum', yavaslatir: true, harita: 6 });
+blok(514, { ad: 'Işıltaş', dok: 'isiltas', sertlik: 0.4, ses: 'cam', mesale: true, isik: 15, lamba: true, parlak: true, dusur: r => [[471, 2 + Math.floor(r() * 3)]], harita: 116 });
+blok(515, { ad: 'Obsidyen', dok: 'obsidyen', sertlik: 18, alet: 'kazma', seviye: 5, harita: 120 });
+/* Diyar geçidi: 516 + eksen (0: düzlem x boyunca, 1: z boyunca); kırılmaz, çerçevesi kırılınca söner */
+for (let e = 0; e < 2; e++) blok(516 + e, { ad: 'Diyar Geçidi', dok: 'gecit', cizim: C_SEKIL, kati: false, opak: false, ayniGizle: true, sertlik: -1, ses: 'cam', sekil: 'gecit', eksen: e, gecit: true,
+  mesale: true, isik: 9, parlak: true, gizli: true, dusur: () => [], harita: 117 });
+blok(518, { ad: 'Kül Tuğlası', dok: 'kul_tugla', sertlik: 3, alet: 'kazma', seviye: 1, harita: 120 });
+blok(519, { ad: 'Oymalı Kül Tuğlası', dok: 'kul_tugla_oyma', sertlik: 3, alet: 'kazma', seviye: 1, harita: 120 });
+blok(520, { ad: 'Kor Cevheri', dok: 'kor_cev', sertlik: 3, alet: 'kazma', seviye: 4, dusur: r => [[472, 1 + (r() < 0.3 ? 1 : 0)]], harita: 114 });
+blok(521, { ad: 'Magma Bloğu', dok: 'magma', sertlik: 0.8, alet: 'kazma', seviye: 1, mesale: true, isik: 8, lamba: true, magma: true, parlak: true, harita: 59 });
+/* 0.20.0: Geciktirici: arkasından gelen gücü önüne 1-4 adım (0,1-0,4 sn) gecikmeyle geçirir; sağ tıkla gecikme değişir.
+   523 + yön * 8 + gecikme * 2 + açık (yön: çıkış yönü) */
+for (let f = 0; f < 4; f++) for (let g = 0; g < 4; g++) for (let a = 0; a < 2; a++) blok(523 + f * 8 + g * 2 + a, { ad: 'Geciktirici', dok: a ? 'gecik_ust_a' : 'gecik_ust', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'tas',
+  sekil: 'gecik', mekanik: 'gecik', yon: f, gecikme: g, acik: a, taban: 523, gizli: f + g + a > 0, dusur: () => [[523, 1]], harita: 2, ...(a ? { mesale: true, isik: 4 } : {}) });
+/* ---------- 0.21.0: Tarım ve hayvancılık ---------- */
+/* Balkabağı sapı: 4 evre; olgun sap (558) yanındaki boş toprağa balkabağı verir ve kalır */
+for (let e = 0; e < 4; e++) blok(555 + e, { ad: e === 3 ? 'Olgun Balkabağı Sapı' : 'Balkabağı Sapı', dok: 'kabak_sap' + e, cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true,
+  ekin: e, sonraki: e < 3 ? 556 + e : 558, meyve: e === 3, taban: 555, gizli: e > 0, dusur: r => [[475, e === 3 ? 1 + (r() < 0.5 ? 1 : 0) : 1]], harita: 4 });
+blok(559, { ad: 'Balkabağı', dok: { ust: 'balkabagi_ust', yan: 'balkabagi_yan', alt: 'balkabagi_ust', on: 'balkabagi_yan' }, sertlik: 1, alet: 'balta', ses: 'odun', harita: 114 });
+/* Oyma balkabağı ve balkabağı feneri: yüzü koyan oyuncuya döner */
+for (let k = 0; k < 4; k++) blok(560 + k, { ad: 'Oyma Balkabağı', dok: { ust: 'balkabagi_ust', yan: 'balkabagi_yan', alt: 'balkabagi_ust', on: 'balkabagi_yuz' }, onYon: (k + 2) % 4, yuzlu: true, taban: 560,
+  gizli: k > 0, sertlik: 1, alet: 'balta', ses: 'odun', dusur: () => [[560, 1]], harita: 114 });
+for (let k = 0; k < 4; k++) blok(564 + k, { ad: 'Balkabağı Feneri', dok: { ust: 'balkabagi_ust', yan: 'balkabagi_yan', alt: 'balkabagi_ust', on: 'balkabagi_fener' }, onYon: (k + 2) % 4, yuzlu: true, taban: 564,
+  gizli: k > 0, sertlik: 1, alet: 'balta', ses: 'odun', mesale: true, isik: 15, lamba: true, dusur: () => [[564, 1]], harita: 116 });
+/* Şeker kamışı: suya komşu kum, toprak ya da çimen üstünde 3 boya kadar uzar */
+blok(568, { ad: 'Şeker Kamışı', dok: 'seker_kamisi', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, kamis: true, sonraki: 568, harita: 4 });
+/* Arı kovanı: 569 + yön * 6 + bal seviyesi (0-5); ön yüzü yön tarafına bakar; dolu kovandan şişeyle bal, makasla petek alınır */
+for (let f = 0; f < 4; f++) for (let s = 0; s < 6; s++) blok(569 + f * 6 + s, { ad: 'Arı Kovanı', dok: { ust: 'kovan_ust', yan: 'kovan_yan', alt: 'kovan_ust', on: s === 5 ? 'kovan_on_bal' : 'kovan_on' },
+  onYon: f, kovan: true, yon: f, bal: s, taban: 569, gizli: f + s > 0, sertlik: 0.6, alet: 'balta', ses: 'odun', dusur: () => [[569, 1]], harita: 116 });
+/* 0.22.0: Mezar taşı: ölen oyuncunun eşyalarını saklar (sandık gibi açılır, boşalınca kaybolur) */
+blok(593, { ad: 'Mezar Taşı', dok: 'mezar', cizim: 5, opak: false, sertlik: 1.5, alet: 'kazma', ses: 'tas', sandik: true, mezar: true, sekil: 'mezar', gizli: true, dusur: () => [], harita: 2 });
+/* 0.22.0: Gök taşı: düşen meteorların çekirdeği; demir kazmayla kazılır, yıldız parçası verir */
+blok(594, { ad: 'Gök Taşı', dok: 'gok_tasi', sertlik: 5, alet: 'kazma', seviye: 4, ses: 'tas', mesale: true, isik: 7, parlak: true, dusur: r => [[492, 1 + (r() < 0.45 ? 1 : 0)]], xp: 6, harita: 117 });
+blok(595, { ad: 'Yıldız Feneri', dok: 'yildiz_feneri', sertlik: 0.4, ses: 'cam', mesale: true, isik: 15, lamba: true, parlak: true, harita: 116 });
+blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
 
 /* Maden deneyimi */
-for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4]]) B[id].xp = xp;
+for (const [id, xp] of [[16, 1], [18, 1], [17, 1], [19, 2], [20, 4], [61, 2], [58, 4], [520, 3]]) B[id].xp = xp;
 
 export const BLOKLAR = B;
 export const BLOK_SAYISI = B.length;
 
-/* Hızlı erişim tabloları */
-export const KATI = new Uint8Array(256), OPAK = new Uint8Array(256), CIZIM = new Uint8Array(256), KESIK = new Uint8Array(256);
-export const AYNI_GIZLE = new Uint8Array(256), SIVI = new Uint8Array(256), BITKI = new Uint8Array(256), LAV = new Uint8Array(256);
+/* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
+export const BLOK_UST = 1024;
+export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
+export const AYNI_GIZLE = new Uint8Array(BLOK_UST), SIVI = new Uint8Array(BLOK_UST), BITKI = new Uint8Array(BLOK_UST), LAV = new Uint8Array(BLOK_UST);
 /* EKIN_SONRAKI: büyüyen ekinin sonraki evresi (0: büyümez) */
-export const EKIN_SONRAKI = new Uint8Array(256);
+export const EKIN_SONRAKI = new Uint16Array(BLOK_UST);
 /* Yüz dokuları: +x, -x, +y, -y, +z, -z */
-export const YUZ_DOKU = new Uint8Array(256 * 6);
+export const YUZ_DOKU = new Uint8Array(BLOK_UST * 6);
 for (const b of B) {
   if (!b) continue;
   KATI[b.id] = b.kati ? 1 : 0; OPAK[b.id] = b.opak ? 1 : 0; CIZIM[b.id] = b.cizim; KESIK[b.id] = b.kesik ? 1 : 0;
@@ -332,11 +432,31 @@ export const ETKILER = {
   ates: { ad: 'Ateşe Dayanıklılık', renk: '#ff8a2a', aciklama: 'Lav ve yanma hasar vermez' },
   guc: { ad: 'Güç', renk: '#d83a3a', aciklama: 'Yakın dövüş hasarı %50 artar' },
   /* 0.14.0: canavarların verdiği olumsuz etkiler */
+  /* 0.16.0: yemeklerin verdiği etkiler */
+  yenilenme: { ad: 'Yenilenme', renk: '#e8668a', aciklama: 'Can her 2,5 saniyede 1 artar' },
+  tokluk: { ad: 'Tokluk', renk: '#d8a24a', aciklama: 'Açlık azalmaz' },
   yavas: { ad: 'Yavaşlık', renk: '#7a8fa8', aciklama: 'Hareket hızı %40 azalır', kotu: true },
-  aclik: { ad: 'Açlık', renk: '#8a7a3a', aciklama: 'Açlık hızla azalır', kotu: true }
+  aclik: { ad: 'Açlık', renk: '#8a7a3a', aciklama: 'Açlık hızla azalır', kotu: true },
+  /* 0.22.0: yaralanma ve vücut ısısı */
+  kanama: { ad: 'Kanama', renk: '#c81e1e', aciklama: 'Can azalır; bandaj durdurur', kotu: true },
+  kirik: { ad: 'Kırık Bacak', renk: '#b8a890', aciklama: 'Yavaş yürünür, koşulamaz; atel iyileşmeyi hızlandırır', kotu: true },
+  sicak: { ad: 'Isınma', renk: '#ff9a4a', aciklama: 'Soğuğa karşı korur' },
+  serin: { ad: 'Serinlik', renk: '#8ad8f0', aciklama: 'Sıcağa karşı korur' }
 };
 [['hiz', 'Hız İksiri'], ['gece', 'Gece Görüşü İksiri'], ['nefes', 'Su Altında Nefes İksiri'], ['ates', 'Ateşe Dayanıklılık İksiri'], ['guc', 'Güç İksiri']].forEach(([k, ad], i) =>
   esya(332 + i, { ad, simge: 'iksir', renk: ETKILER[k].renk, tur: 'iksir', etki: { tur: k, sure: 180 }, yigin: 16, ozellik: `${ETKILER[k].aciklama} (3 dakika)` }));
+
+/* 0.16.0: eyer ve yemekler (kâseli yemekler yenince kâse geri kalır) */
+esya(462, { ad: 'Eyer', simge: 'eyer', yigin: 1, ozellik: 'Ehlileştirilmiş ata takılır; eyerli ata binilir' });
+const yemek = (id, ad, o, etki, sure) => esya(id, { ad, tur: 'yiyecek', yigin: o.kase ? 1 : 16, ...o, ...(etki ? { etki: { tur: etki, sure }, ozellik: `${ETKILER[etki].ad} (${sure} saniye)` } : {}) });
+yemek(463, 'Balık Çorbası', { simge: 'corba2', renk: '#d8c070', yemek: 8, kase: true }, 'nefes', 60);
+yemek(464, 'Etli Güveç', { simge: 'corba2', renk: '#8a4a2a', yemek: 10, kase: true }, 'yenilenme', 20);
+yemek(465, 'Tavuk Çorbası', { simge: 'corba2', renk: '#e8c068', yemek: 8, kase: true }, 'yenilenme', 10);
+yemek(466, 'Kuzu Haşlama', { simge: 'corba2', renk: '#b07850', yemek: 9, kase: true }, 'tokluk', 90);
+yemek(467, 'Şiş Kebap', { simge: 'kebap', yemek: 9 }, 'guc', 30);
+yemek(468, 'Köfte Ekmek', { simge: 'kofte', yemek: 10 }, 'tokluk', 120);
+yemek(469, 'Reçelli Ekmek', { simge: 'recel', yemek: 7 }, 'hiz', 30);
+yemek(470, 'Sebze Çorbası', { simge: 'corba2', renk: '#d0803a', yemek: 8, kase: true }, 'yenilenme', 12);
 
 /* Zırhlar: 400 + malzeme * 4 + parça (0 kask, 1 göğüslük, 2 pantolon, 3 bot) */
 export const ZIRH_PARCALARI = ['Kask', 'Göğüslük', 'Pantolon', 'Bot'];
@@ -372,6 +492,40 @@ esya(460, { ad: 'Reis Baltası', tur: 'alet', yigin: 1, simge: 'balta', renk: '#
   alet: { tur: 'balta', seviye: 5, hiz: 9, dayanim: 1900, hasar: 10 } });
 esya(461, { ad: 'Muhafız Göğüslüğü', tur: 'zirh', yigin: 1, simge: 'zirh1', renk: '#7d8c96', efsane: true, ozellik: 'Taş muhafızın göğüslüğü',
   zirh: { parca: 1, puan: 9, dayanim: 900 }, alet: null });
+/* 0.18.0: Yeraltı Diyarı eşyaları */
+esya(471, { ad: 'Işıltaş Tozu', simge: 'toz', renk: '#f2c84a' });
+esya(472, { ad: 'Kor Kristali', simge: 'kor_kristal' });
+esya(473, { ad: 'Çakmak', tur: 'cakmak', yigin: 1, simge: 'cakmak2', ozellik: 'Obsidyen çerçevenin içine sağ tıklanınca Diyar Geçidi açılır',
+  alet: { tur: 'cakmak', seviye: 0, hiz: 1, dayanim: 64, hasar: 1 } });
+esya(474, { ad: 'Kor Kılıcı', tur: 'alet', yigin: 1, simge: 'kilic', renk: '#ff6a2a', yakar: true, ozellik: 'Vurulan canlıyı tutuşturur',
+  alet: { tur: 'kilic', seviye: 5, hiz: 8, dayanim: 1300, hasar: 8 } });
+
+/* 0.21.0: tarım ve hayvancılık eşyaları */
+esya(475, { ad: 'Balkabağı Çekirdeği', simge: 'cekirdek', ekin: 555 });
+esya(476, { ad: 'Şeker', simge: 'toz', renk: '#f6f4ee' });
+esya(477, { ad: 'Kova', simge: 'kova', yigin: 16, kova: true, ozellik: 'Sudan su alır, inekten süt sağar' });
+esya(478, { ad: 'Su Kovası', simge: 'kova', ic: '#3a6ad8', yigin: 1, suKovasi: true, ozellik: 'Suyu koyar; lavı obsidyene çevirir' });
+esya(479, { ad: 'Süt Kovası', simge: 'kova', ic: '#f4f4ee', yigin: 1, tur: 'yiyecek', yenir: true, yemek: 1, temizle: true, kap: 477, ozellik: 'İçilince zehri ve olumsuz etkileri giderir' });
+esya(480, { ad: 'Yumurta', simge: 'yumurta', yigin: 16 });
+esya(481, { ad: 'Makas', tur: 'alet', yigin: 1, simge: 'makas', ozellik: 'Koyunu kırkar, yaprak keser, kovandan petek alır', alet: { tur: 'makas', seviye: 0, hiz: 6, dayanim: 238, hasar: 1 } });
+esya(482, { ad: 'Bal Şişesi', simge: 'iksir', renk: '#e8a020', tur: 'yiyecek', yemek: 6, yigin: 16, kap: 331, zehirGider: true, ozellik: 'Zehri giderir' });
+esya(483, { ad: 'Bal Peteği', simge: 'petek' });
+yemek(484, 'Peynir', { simge: 'peynir', yemek: 4 });
+yemek(485, 'Yoğurt', { simge: 'corba2', renk: '#f2f0e6', yemek: 5, kase: true }, 'yenilenme', 6);
+yemek(486, 'Ayran', { simge: 'iksir', renk: '#f4f4ee', yemek: 3, kap: 331 }, 'hiz', 30);
+yemek(487, 'Kek', { simge: 'kek', yemek: 12 }, 'tokluk', 120);
+yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });
+yemek(489, 'Omlet', { simge: 'omlet', yemek: 7 }, 'guc', 20);
+yemek(490, 'Baklava', { simge: 'baklava', yemek: 9 }, 'hiz', 45);
+yemek(491, 'Haşlanmış Yumurta', { simge: 'yumurta', renk: '#f6f2e6', yemek: 4 });
+/* 0.22.0: hayatta kalma */
+esya(492, { ad: 'Yıldız Parçası', simge: 'yildiz', ozellik: 'Düşen meteorlardan elde edilir' });
+esya(493, { ad: 'Eve Dönüş Tılsımı', tur: 'alet', yigin: 1, simge: 'tilsim', ozellik: 'Sağ tık basılı tutulunca doğma noktasına ışınlar', alet: { tur: 'tilsim', seviye: 0, hiz: 1, dayanim: 8, hasar: 1 } });
+esya(494, { ad: 'Atel', simge: 'atel', yigin: 16, tur: 'atel', ozellik: 'Kırık bacağı sarar: iyileşme hızlanır, yavaşlık azalır' });
+/* Sıcak çorbalar soğuğa karşı ısıtır; ayran serinletir */
+for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
+E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
+
 /* Örste onarım malzemesi */
 export function onarimMalzemesi(id) {
   if (id >= 300 && id < 320) return [[14, 38, 39], [15], [259], [261], [264]][Math.floor((id - 300) / 4)];
@@ -383,6 +537,9 @@ export function onarimMalzemesi(id) {
   if (id === 458 || id === 460) return [264];
   if (id === 459) return [284];
   if (id === 461) return [261];
+  if (id === 473) return [261];
+  if (id === 481) return [261];
+  if (id === 474) return [472];
   return null;
 }
 export const aletId = (malzeme, tur) => 300 + malzeme * 4 + ALET_TURLERI.findIndex(t => t.tur === tur);

@@ -3,13 +3,16 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR } from '../bloklar.js';
+import { OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST } from '../bloklar.js';
 import { sekilKutulari } from '../sekiller.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
 /* Altına gölge düşüren biçimli bloklar (merdiven, yarım blok, tarla) */
-const GOLGE = new Uint8Array(256);
+const GOLGE = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && (b.sekil === 'merdiven' || b.sekil === 'yarim' || b.sekil === 'tarla')) GOLGE[b.id] = 1;
+/* 0.18.0: kendi ışığıyla parlayan bloklar (geçit, ışıltaş, magma): gölgelenmez, lav gibi çizilir */
+const PARLAK = new Uint8Array(BLOK_UST);
+for (const b of BLOKLAR) if (b && b.parlak) PARLAK[b.id] = 1;
 const EPS = 0.5 / 256;
 
 /* Yüzler: +x, -x, +y, -y, +z, -z (dışarıdan bakınca saat yönünün tersine) */
@@ -115,7 +118,7 @@ function kup(P, gok, i, id, x, y, z, T) {
         if (!kk && !(s1 && s2)) { g += gok[ni + o[2]]; gs++; }
       }
       ao[c] = a;
-      T.l.push(AO_D[a] * Y.g, g / gs);
+      T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : YAPRAK[id] ? -AO_D[a] * Y.g : AO_D[a] * Y.g, g / gs);
     }
     T.n += 4;
     if (ao[0] + ao[2] < ao[1] + ao[3]) T.i.push(tabanN + 1, tabanN + 2, tabanN + 3, tabanN + 1, tabanN + 3, tabanN);
@@ -125,7 +128,8 @@ function kup(P, gok, i, id, x, y, z, T) {
 
 /* Biçimli bloklar: her kutunun yüzleri; hücre sınırındaki yüzler opak komşu varsa çizilmez.
    Doku koordinatı kutunun hücredeki konumundan alınır (yarım blokta dokunun yarısı görünür). */
-const KOMSU_OFS = [-DZ, DX, DZ, -DX];
+/* Komşular: 0-3 yanlar, 4-7 yanların bir üstü, 8-11 yanların bir altı, 12 üst, 13 alt (0.20.0: basamaklanan tel için) */
+const KOMSU_OFS = [-DZ, DX, DZ, -DX, -DZ + DY, DX + DY, DZ + DY, -DX + DY, -DZ - DY, DX - DY, DZ - DY, -DX - DY, DY, -DY];
 const UVF = [
   (x, y, z) => [1 - z, y], (x, y, z) => [z, y], (x, y, z) => [x, 1 - z],
   (x, y, z) => [x, z], (x, y, z) => [x, y], (x, y, z) => [1 - x, y]
@@ -153,7 +157,7 @@ function sekil(P, gok, i, id, x, y, z, T) {
         T.p.push(x + px, y + py, z + pz);
         const uv = UVF[f](px, py, pz);
         dokuUV(doku, uv[0], uv[1], T.u);
-        T.l.push(Y.g * (sinirda ? 1 : 0.92), g);
+        T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : Y.g * (sinirda ? 1 : 0.92), g);
       }
       T.n += 4;
       T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
@@ -161,6 +165,13 @@ function sekil(P, gok, i, id, x, y, z, T) {
   }
 }
 
+/* 0.23.0: rüzgârda salınan bloklar: yapraklar ve çapraz çizilen bitkiler (meşale ve ateş hariç) */
+const YAPRAK = new Uint8Array(BLOK_UST), SALLANIR = new Uint8Array(BLOK_UST);
+for (const b of BLOKLAR) if (b) {
+  const d = Array.isArray(b.dok) ? b.dok.join(' ') : typeof b.dok === 'object' && b.dok ? Object.values(b.dok).join(' ') : String(b.dok || '');
+  if (/yaprak/.test(d) && b.cizim === C_KUP) YAPRAK[b.id] = 1;
+  if (b.cizim === C_CAPRAZ && !b.mesale && !b.sivi) SALLANIR[b.id] = 1;
+}
 const CAPRAZ = [
   [[0.15, 0, 0.15], [0.15, 1, 0.15], [0.85, 1, 0.85], [0.85, 0, 0.85]],
   [[0.15, 0, 0.85], [0.15, 1, 0.85], [0.85, 1, 0.15], [0.85, 0, 0.15]]
@@ -176,7 +187,7 @@ function capraz(gok, i, id, x, y, z, T) {
         const k = q[c];
         T.p.push(x + k[0], y + k[1], z + k[2]);
         dokuUV(doku, CAPRAZ_UV[c][0], CAPRAZ_UV[c][1], T.u);
-        T.l.push(0.92, g);
+        T.l.push(k[1] && SALLANIR[id] ? -1.92 : 0.92, g);
       }
       T.n += 4;
       if (yon === 0) T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);

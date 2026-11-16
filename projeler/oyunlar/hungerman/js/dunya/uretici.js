@@ -1,7 +1,8 @@
 /* HungerMan - dünya üreticisi
    Tohumdan belirlenimli olarak üretilir: aynı tohum her bilgisayarda aynı dünyayı verir (çok oyunculu için gerekli).
    Dünya, kıyıları denizle çevrili büyük bir kara parçasıdır; iç kısımda nehirler, dağlar ve farklı biyomlar bulunur. */
-import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin } from '../sabitler.js';
+import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin, diyarMi } from '../sabitler.js';
+import { diyarUret } from './diyar-uretici.js';
 import { Gurultu, karistir, karma2, karma3, uretec, yumusak } from '../rastgele.js';
 import { yapiYaz } from './yapi-uretici.js';
 import { koyYaz, koyIcinde, enYakinKoy } from './koy-uretici.js';
@@ -120,7 +121,8 @@ export class Uretici {
 
   /* ---------- Parça üretimi ---------- */
   parcaUret(cx, cz) {
-    const v = new Uint8Array(PB * PB * PY);
+    if (diyarMi(cx * PB)) return diyarUret(this, cx, cz);   // 0.18.0: Yeraltı Diyarı
+    const v = new Uint16Array(PB * PB * PY);
     const x0 = cx * PB, z0 = cz * PB;
     const kolonlar = new Array(PB * PB);
     const ky = {};
@@ -184,7 +186,7 @@ export class Uretici {
           oy = n > 0.58 - (40 - y) * 0.004;
         }
         /* Derinlerde boşluklar lavla dolar */
-        if (oy) v[i] = y <= 10 ? 59 : 0;
+        if (oy) v[i] = y <= 10 ? (y === 10 && this.gO.g3(x / 7, 3.5, z / 7) > 0.32 ? 515 : 59) : 0;   // 0.18.0: lav göllerinin yüzeyinde obsidyen kabuklar
       }
       /* Yarıklar: yer yer yüzeye kadar açılan, kıvrılarak ilerleyen, kenarlarına doğru sığlaşan kanyonlar */
       const dip = this.yarik(x, z, o);
@@ -277,11 +279,18 @@ export class Uretici {
       else if (o.b === BY.BATAKLIK) tur = 'bataklik';
       else if (o.b === BY.HUS) tur = s2 < 0.85 ? 'hus' : 'mese';
       else if (o.b === BY.ORMAN) tur = s2 < 0.2 ? 'hus' : 'mese';
-      liste.push([x, o.h + 1, z, tur]);
+      liste.push([x, o.h + 1, z, tur, o.b]);
     }
     /* Önce yapraklar, sonra gövdeler: komşu parçalarda aynı sonucu verir */
     for (const a of liste) agacKur(set, a[0], a[1], a[2], a[3], uretec(karistir(this.tohum ^ Math.imul(a[0], 341873128) ^ Math.imul(a[2], 132897987))), 'yaprak');
     for (const a of liste) agacKur(set, a[0], a[1], a[2], a[3], uretec(karistir(this.tohum ^ Math.imul(a[0], 341873128) ^ Math.imul(a[2], 132897987))), 'govde');
+    /* 0.21.0: çiçekli bölgelerdeki meşe ve huşların bir kısmında gövdeye asılı arı kovanı (girişi dışa bakar) */
+    for (const a of liste) {
+      if ((a[3] !== 'mese' && a[3] !== 'hus') || !(a[4] === BY.CAYIR || a[4] === BY.ORMAN || a[4] === BY.HUS)) continue;
+      if (karma2(this.tohum ^ 0xbee5, a[0], a[2]) > 0.07) continue;
+      const d = Math.floor(karma2(this.tohum ^ 0xbee6, a[0], a[2]) * 4) % 4, [dx, dz] = [[0, -1], [1, 0], [0, 1], [-1, 0]][d];
+      set(a[0] + dx, a[1] + 1, a[2] + dz, 569 + d * 6 + 2, true);
+    }
   }
 
   /* Otlar, çiçekler, çalılar, mantarlar, deniz yosunu */
@@ -326,6 +335,14 @@ export class Uretici {
       else if (alt === 142) id = r < 0.3 ? 25 : r < 0.33 ? 30 : r < 0.335 ? 27 : 0;
       else if (alt === 143) id = r < 0.16 ? 25 : r < 0.2 ? 43 : r < 0.215 ? 36 : r < 0.218 ? 26 : 0;
       else if (alt === 5 && o.b === BY.COL) id = r < 0.012 ? 30 : 0;
+      /* 0.21.0: çayır ve ormanlarda balkabağı tarlaları; deniz seviyesindeki kıyılarda şeker kamışı */
+      if (!id && (alt === 4 || alt === 45) && (o.b === BY.CAYIR || o.b === BY.ORMAN || o.b === BY.HUS || o.b === BY.TAYGA) && this.gG.g2(x / 30 + 77, z / 30 - 13) > 0.5 && karma2(this.tohum ^ 0xba1ab, x, z) < 0.1) id = 559;
+      if (!id && (alt === 3 || alt === 4 || alt === 5) && h === DENIZ && lx > 0 && lx < PB - 1 && lz > 0 && lz < PB - 1 && karma2(this.tohum ^ 0x5e4e, x, z) < 0.5
+        && (v[dizin(lx + 1, h, lz)] === 7 || v[dizin(lx - 1, h, lz)] === 7 || v[dizin(lx, h, lz + 1)] === 7 || v[dizin(lx, h, lz - 1)] === 7)) {
+        const boy = 1 + Math.floor(karma2(this.tohum ^ 0x5e4f, x, z) * 3);
+        for (let k = 1; k <= boy && h + k < PY; k++) if (v[dizin(lx, h + k, lz)] === 0) v[dizin(lx, h + k, lz)] = 568;
+        continue;
+      }
       if (id) v[ust] = id;
     }
   }

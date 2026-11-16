@@ -7,7 +7,7 @@ import { ESYALAR } from '../bloklar.js';
 export const RENKLER = ['#c0392b', '#2e86c1', '#27ae60', '#d68910', '#8e44ad', '#16a085', '#d35400', '#c2185b', '#5d6d7e'];
 
 /* Durum bayrakları (oyuncu durum dizisinin 7. öğesi) */
-export const B = { EGIL: 1, KOS: 2, OLU: 4, YATAK: 8, VURUS: 16, SUDA: 32, BAS_SUDA: 64, GERME: 128 };
+export const B = { EGIL: 1, KOS: 2, OLU: 4, YATAK: 8, VURUS: 16, SUDA: 32, BAS_SUDA: 64, GERME: 128, OTUR: 256, ATLI: 512 };
 
 const DOKU = new Map();
 function esyaDoku(id) {
@@ -79,7 +79,7 @@ export class UzakOyuncular {
   }
   temizle() { for (const id of [...this.harita.keys()]) this.sil(id); this.sahne.sahne.remove(this.grup); }
 
-  /* a: [x, y, z, yaw, pitch, eldeki, bayrak, tekne] */
+  /* a: [x, y, z, yaw, pitch, eldeki, bayrak, tekne, at] */
   durum(id, a) {
     const o = this.harita.get(id);
     if (!o) return;
@@ -99,19 +99,22 @@ export class UzakOyuncular {
     for (const o of this.harita.values()) {
       const m = o.m, b = o.bayrak;
       o.yeni += dt;
-      m.kok.visible = !o.ilk && !(b & B.OLU);
+      /* 0.23.0: ölen oyuncu yana devrilir, 3 saniye sonra kaybolur */
+      o.oluZaman = b & B.OLU ? (o.oluZaman || 0) + dt : 0;
+      m.kok.visible = !o.ilk && o.oluZaman < 3;
       if (!m.kok.visible) continue;
+      if (o.oluZaman > 0) { m.kok.rotation.set(0, o.yaw, -Math.min(1, o.oluZaman * 2.2) * Math.PI / 2); o.et.material.opacity = 1; continue; }
       const ox = o.p.x, oz = o.p.z;
       if (o.p.distanceToSquared(o.hedef) > 64) o.p.copy(o.hedef); else o.p.lerp(o.hedef, Math.min(1, dt * 12));
       let f = o.hedefYaw - o.yaw; f = Math.atan2(Math.sin(f), Math.cos(f)); o.yaw += f * Math.min(1, dt * 12);
       const yh = Math.hypot(o.p.x - ox, o.p.z - oz) / Math.max(dt, 1e-3);
       o.hiz += (yh - o.hiz) * Math.min(1, dt * 8);
-      const binik = o.tk >= 0, egil = !!(b & B.EGIL);
+      const atli = !!(b & B.ATLI), binik = o.tk >= 0 || atli || !!(b & B.OTUR), egil = !!(b & B.EGIL);
       /* Yürüme */
       if (!binik) o.faz += o.hiz * dt * 2.6;
       const sal = binik ? 0 : Math.sin(o.faz) * Math.min(0.9, o.hiz * 0.22);
       m.bacaklar[0].rotation.x = binik ? -1.45 : sal; m.bacaklar[1].rotation.x = binik ? -1.45 : -sal;
-      m.bacaklar[0].rotation.z = binik ? 0.12 : 0; m.bacaklar[1].rotation.z = binik ? -0.12 : 0;
+      m.bacaklar[0].rotation.z = atli ? 0.55 : binik ? 0.12 : 0; m.bacaklar[1].rotation.z = atli ? -0.55 : binik ? -0.12 : 0;
       /* Kollar: vuruş salınımı, yay germe */
       if (o.vurus > 0) { o.vurus += dt * 4; if (o.vurus >= 1) o.vurus = 0; }
       const vur = o.vurus > 0 ? Math.sin(o.vurus * Math.PI) : 0;

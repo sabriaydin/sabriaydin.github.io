@@ -196,14 +196,14 @@ export class Hud {
     if (h !== this.son.gorev) { this.son.gorev = h; $('#gorevIzleyici').innerHTML = h; }
   }
   /* z: gün zamanı (0 = 06:00), konum: alt satır metni */
-  saat(z, gun, konum, firtina) {
+  saat(z, gun, konum, firtina, mevsim, kanli = false) {
     const saatOndalik = (z * 24 + 6) % 24;
     const dk = Math.floor(saatOndalik * 60);
     const t = String(Math.floor(dk / 60)).padStart(2, '0') + ':' + String(dk % 60).padStart(2, '0');
     if (t !== this.son.saat) { this.son.saat = t; $('#saatDeger').textContent = t; }
     const h = saatOndalik;
     const evre = h >= 5 && h < 7 ? 'Şafak' : h < 11 && h >= 7 ? 'Sabah' : h >= 11 && h < 14 ? 'Öğle' : h >= 14 && h < 17 ? 'İkindi' : h >= 17 && h < 19.5 ? 'Akşam' : 'Gece';
-    const gt = `${gun}. gün`;
+    const gt = mevsim ? `${gun}. gün · ${mevsim}` : `${gun}. gün`;   // 0.18.0: mevsim
     if (gt !== this.son.gun) { this.son.gun = gt; $('#gunDeger').textContent = gt; }
     if (evre !== this.son.evreAd) { this.son.evreAd = evre; $('#evreDeger').textContent = evre; }
     const sinif = evre === 'Gece' ? 'gece' : evre === 'Şafak' ? 'safak' : evre === 'Akşam' ? 'aksam' : 'gunduz';
@@ -214,8 +214,10 @@ export class Hud {
     if (yay !== this.son.yay) { this.son.yay = yay; $('#gunYay').setAttribute('stroke-dashoffset', yay); }
     /* Gece uyarısı */
     let uyari = '', yakin = false;
-    if (z >= 0.43 && z < 0.5) { const kalan = Math.ceil((0.5 - z) * 24 * 60); uyari = `Gece yaklaşıyor · ${kalan} dk`; yakin = true; }
-    else if (z >= 0.5 && z < 0.98) uyari = 'Canavarlar ortalıkta';
+    if (z >= 0.43 && z < 0.5) { const kalan = Math.ceil((0.5 - z) * 24 * 60); uyari = `${kanli ? 'Kanlı Ay' : 'Gece'} yaklaşıyor · ${kalan} dk`; yakin = true; }
+    else if (z >= 0.5 && z < 0.98) uyari = kanli ? 'Kanlı Ay · Canavarlar azgın' : 'Canavarlar ortalıkta';
+    const kz = kanli && z >= 0.43;
+    if (kz !== this.son.kanli) { this.son.kanli = kz; $('#geceUyari').classList.toggle('kanli', kz); }
     else if (firtina) uyari = 'Fırtına · Canavarlar gündüz de çıkar';
     if (uyari !== this.son.uyari) { this.son.uyari = uyari; const u = $('#geceUyari'); u.hidden = !uyari; u.textContent = uyari; u.classList.toggle('yakin', yakin); }
     if (konum != null && konum !== this.son.konum) { this.son.konum = konum; $('#konumDeger').textContent = konum; }
@@ -262,5 +264,36 @@ export class Hud {
     el.hidden = false;
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
+  /* 0.23.1: bakılan blok ya da tekne adı: sol alt köşede, yalnızca ad */
+  bakilan(ad) {
+    const el = $('#bakilanAd'), a = ad || '';
+    if (a === this.son.bakilan) return;
+    this.son.bakilan = a;
+    if (!ad) { el.hidden = true; return; }
+    el.hidden = false; el.textContent = ad;
+  }
+  /* 0.22.0: hasarın geldiği yön: dx, dz saldırana doğru dünya vektörü, yaw oyuncunun bakışı */
+  hasarYonu(dx, dz, yaw) {
+    const f = -dx * Math.sin(yaw) - dz * Math.cos(yaw), r = dx * Math.cos(yaw) - dz * Math.sin(yaw);
+    if (Math.hypot(f, r) < 0.3) return;
+    const e = $('#hasarYon'), aci = Math.atan2(r, f) * 180 / Math.PI;
+    e.style.setProperty('--a', aci.toFixed(1) + 'deg');
+    e.classList.remove('acik'); void e.offsetWidth; e.classList.add('acik');
+  }
+  /* 0.22.0: vücut ısısı göstergesi: vücut sıcaklığı, eğilim ve hissedilen hava sıcaklığı */
+  isiCiz(h, ortam, acik) {
+    const el = $('#isiGosterge');
+    if (!acik) { if (!el.hidden) el.hidden = true; return; }
+    const v = h.vucut, d = h.isiDurum, soguk = h.hissedilen < 12 && !h.etki('sicak'), sicak = h.hissedilen > 30 && !h.etki('serin') && !h.etki('ates');
+    const egilim = soguk && v > 30.5 ? '▼' : sicak && v < 41 ? '▲' : v < 36.9 ? '▲' : v > 37.1 ? '▼' : '';
+    const metin = v.toFixed(1).replace('.', ',') + '°' + egilim + '|' + Math.round(ortam ?? h.hissedilen) + '|' + d;
+    if (metin === this.son.isi) return;
+    this.son.isi = metin;
+    el.hidden = false;
+    el.className = ['donma', 'usume', '', 'bunalma', 'carpma'][d + 2];
+    el.querySelector('b').textContent = v.toFixed(1).replace('.', ',') + '°' + (egilim ? ' ' + egilim : '');
+    el.querySelector('small').textContent = `Hava ${Math.round(ortam ?? h.hissedilen)}°`;
+    el.title = ['Donuyorsunuz: ısınmak için ateş yakınız, deri giyiniz ya da sıcak çorba içiniz.', 'Üşüyorsunuz: açlık daha hızlı azalır.', 'Vücut ısısı normal.', 'Bunaldınız: açlık daha hızlı azalır.', 'Sıcak çarpması: serin bir yere geçiniz ya da ayran içiniz.'][d + 2];
+  }
   suAlti(acik) { $('#suAlti').classList.toggle('acik', acik); }
 }

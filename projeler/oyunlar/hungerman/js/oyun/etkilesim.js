@@ -1,10 +1,13 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
+import { ezgiTuru } from './mekanik.js';
+
+const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
 const ERISIM = 5;
-const TOPRAK = new Set([3, 4, 45, 137, 138]);
+const TOPRAK = new Set([3, 4, 45, 137, 138]);   // ekim yapılabilen zeminler
 
 export class Etkilesim {
   constructor(o) {
@@ -34,7 +37,7 @@ export class Etkilesim {
         if (SEKIL[id]) {
           const k = hucreKutulari(this.dunya, x, y, z, id), r = kutuIsin(goz, yon, x, y, z, k, erisim);
           if (r) return { x, y, z, id, nx: r.nx, ny: r.ny, nz: r.nz, t: r.t, py: goz.y + yon.y * r.t - y, kutu: sinirKutusu(k) };
-        } else if (!BITKI[id] && !BLOKLAR[id].mesale || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
+        } else if (!BITKI[id] && !(BLOKLAR[id].mesale && CIZIM[id] !== C_KUP) || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
       }
       if (tx < ty && tx < tz) { x += sx; t = tx; tx += tdx; nx = -sx; ny = 0; nz = 0; }
       else if (ty < tz) { y += sy; t = ty; ty += tdy; nx = 0; ny = -sy; nz = 0; }
@@ -58,9 +61,14 @@ export class Etkilesim {
   }
 
   olay(k) { if (this.arayuz.olay) this.arayuz.olay(k); }
+  istat(k, n = 1) { if (this.arayuz.istat) this.arayuz.istat(k, n); }   // 0.22.0
   /* E tuşu (0.15.1): hedefteki nesneyle etkileşim (kapı, sandık, istasyon, yatak, köylü, tekne). Sağ tık da aynı işleri yapar. */
   etkiles() {
     if (this.tekneler.binilen) return false;
+    /* 0.16.0: attan inme, oturaktan kalkma */
+    if (this.binek && this.binek.biniyor) { this.binek.in(); return true; }
+    if (this.binek && this.binek.oturak) { this.binek.kalk(); return true; }
+    if (this.hedefCanli && this.varliklar.etkilesimVar(this.hedefCanli, this.envanter.seciliId())) { this.canliEtkiles(this.hedefCanli); return true; }
     if (this.hedefTekne) {
       if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) { this.olay('tekne'); this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne'); }
       return true;
@@ -69,11 +77,28 @@ export class Etkilesim {
     const h = this.hedef;
     if (!h) return false;
     const b = BLOKLAR[h.id];
+    if (b.oturak && this.binek) return this.binek.otur(h.x, h.y, h.z);
     if (b.istasyon) { this.arayuz.envanterAc(b.istasyon); return true; }
     if (b.sandik) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
     if (b.yatak) { this.arayuz.uyu(h); return true; }
     if (this.ac(h)) { this.vurus = 0.01; return true; }
     return false;
+  }
+  /* Evcil hayvan / at etkileşimi: tek oyunculuda ve sunucuda burada, istemcide sunucuda işlenir */
+  canliEtkiles(v) {
+    const eldeki = this.envanter.seciliId();
+    if (this.varliklar.ayna) { if (this.agCanli) this.agCanli(v, eldeki); return; }
+    this.canliSonuc(this.varliklar.canliEtkilesim(v, eldeki, this.oyuncuAdi), v);
+  }
+  canliSonuc(S, v) {
+    if (S.tuket) { this.envanter.seciliAzalt(1); this.ses.ye(); this.vurus = 0.01; }
+    /* 0.21.0: eldeki bir eşya başka bir eşyaya dönüşür (kova -> süt kovası); alet yıpranır */
+    if (S.degistir) { this.envanter.seciliAzalt(1); this.envanter.ekle(S.degistir, 1); this.vurus = 0.01; }
+    if (S.yipran) { this.aletYipran(); this.vurus = 0.01; }
+    if (S.ses === 'sut') this.ses.sicrama(0.4); else if (S.ses === 'kirp') this.ses.zirhGiy();
+    if (S.mesaj) this.arayuz.bildirim(S.mesaj);
+    if (S.olay) this.olay(S.olay);
+    if (S.bin && v && this.binek) { this.binek.bin(v); this.olay('binici'); }
   }
   aletBilgi() {
     const s = this.envanter.seciliYuva();
@@ -112,6 +137,7 @@ export class Etkilesim {
     const tb = this.tekneler ? this.tekneler.isin(goz, yon, 4.5) : null;
     this.hedefTekne = null;
     if (tb && (!this.hedef || tb.t < this.hedef.t) && (!this.hedefCanli || tb.t < vb.t)) { this.hedefTekne = tb.tekne; this.hedef = null; this.hedefCanli = null; }
+    if (this.izleyici) { this.hedefCanli = null; this.hedefTekne = null; this.ilerleme = 0; this.germe = 0; return; }   // 0.23.0: Hardcore izleyici kipi
     const sagYeni = g.sag && !this.sagOnceki;
     this.sagOnceki = g.sag;
     this.sagBekleme -= dt; this.solBekleme -= dt; this.saldiriBekleme -= dt; this.okUyari -= dt;
@@ -125,6 +151,13 @@ export class Etkilesim {
         if (this.olta && this.olta.aktif) this.olta.kaldir();
         if (this.tekneler.bin(this.hedefTekne, this.oyuncu) !== false) { this.olay('tekne'); this.arayuz.bildirim(`${this.hedefTekne.T.ad}: W/S hız, A/D dümen. İnmek için C tuşuna basınız.`, 'tekne'); }
       } else if (g.sol && this.saldiriBekleme <= 0) { this.saldiriBekleme = 0.3; this.vurus = 0.01; this.tekneler.vur(this.hedefTekne); }
+      this.sahne.secimGoster(null, 0);
+      return;
+    }
+    /* 0.16.0: evcil hayvan ve at etkileşimi (evcilleştirme, oturtma, eyer, binme) */
+    if (g.sag && this.hedefCanli && this.sagBekleme <= 0 && this.varliklar.etkilesimVar(this.hedefCanli, eldeki)) {
+      this.sagBekleme = 0.4; this.germe = 0;
+      this.canliEtkiles(this.hedefCanli);
       this.sahne.secimGoster(null, 0);
       return;
     }
@@ -201,7 +234,7 @@ export class Etkilesim {
     /* Savurma: geri itme seviye başına %60 artar; Yağma: ganimet artar */
     const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma'));
     /* Güneş Kılıcı vurulan canlıyı tutuşturur */
-    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma'), ates: !!(es && es.id === 458) })) {
+    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma'), ates: !!(es && (es.id === 458 || (ESYALAR[es.id] && ESYALAR[es.id].yakar))) })) {
       this.ses.vurus();
       if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       this.hayatta.yor(0.1);
@@ -237,6 +270,7 @@ export class Etkilesim {
     if (b.sekil === 'kapi') { const oy = h.y + (b.ust ? -1 : 1), ob = d.blok(h.x, oy, h.z); if (BLOKLAR[ob] && BLOKLAR[ob].sekil === 'kapi') d.blokKoy(h.x, oy, h.z, 0); }
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
     if (b.ekin === 3) this.olay('hasat');
+    this.istat('kirilan');
     if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
@@ -252,7 +286,7 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y + 1, h.z, 0); if (BLOKLAR[d.blok(h.x, h.y + 2, h.z)].sekil === 'kapi') d.blokKoy(h.x, h.y + 2, h.z, 0);
       this.dusur(88, h.x, h.y + 1, h.z);
     }
-    if ((BITKI[ust] || (BLOKLAR[ust] && BLOKLAR[ust].mesale)) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
+    if ((BITKI[ust] || (BLOKLAR[ust] && ((BLOKLAR[ust].mesale && CIZIM[ust] !== C_KUP && !BLOKLAR[ust].gecit) || ZEMIN_MEK[BLOKLAR[ust].mekanik]))) && (!SIVI[ust] || BLOKLAR[ust].suIcinde)) {
       d.blokKoy(h.x, h.y + 1, h.z, BLOKLAR[ust].suIcinde ? 7 : 0);
       this.dusur(ust, h.x, h.y + 1, h.z);
       if (ust === 28 || ust === 29) { /* çalı tamamen düşer */ }
@@ -266,11 +300,87 @@ export class Etkilesim {
     for (const [e, n0] of liste) { const n = servet && e !== id ? n0 * (1 + Math.floor(Math.random() * (servet + 1))) : n0; if (n > 0) this.dusenler.birak(e, n, x + 0.5, y + 0.4, z + 0.5); }
   }
 
+  /* ---------- 0.21.0: kova, makas, kovan ---------- */
+  /* Bakış yönündeki ilk su bloğu (katı bloğa çarpınca durur) */
+  suHedef() {
+    const g = this.oyuncu.gozKonumu(), y = this.oyuncu.bakisYonu(), d = this.dunya;
+    for (let t = 0; t < 5; t += 0.1) {
+      const x = Math.floor(g.x + y.x * t), yy = Math.floor(g.y + y.y * t), z = Math.floor(g.z + y.z * t), id = d.blok(x, yy, z);
+      if (id === 7) return { x, y: yy, z };
+      if (KATI[id]) return null;
+    }
+    return null;
+  }
+  /* Kova: sudan su alınır (su kaynağı tükenmez); su kovası suyu koyar ve değdiği lavı obsidyene çevirir */
+  kovaKullan(h, e) {
+    const env = this.envanter, d = this.dunya;
+    const degis = id => { env.seciliAzalt(1); env.ekle(id, 1); };
+    if (e.kova) {
+      const su = this.suHedef();
+      if (!su) return false;
+      degis(478); this.ses.sicrama(0.6); return true;
+    }
+    if (!h) return false;
+    const x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz, m = d.blok(x, y, z);
+    if (m && !(BLOKLAR[m] && BLOKLAR[m].degistirilebilir && !SIVI[m])) return false;
+    d.blokKoy(x, y, z, 7);
+    let obs = 0;
+    for (const [a, b, c] of [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]]) if (d.blok(x + a, y + b, z + c) === 59) { d.blokKoy(x + a, y + b, z + c, 515); obs++; }
+    if (obs) { this.ses.yanma(); this.dusenler.renkliParcacik([0.7, 0.7, 0.75], x + 0.5, y + 0.5, z + 0.5, 12); this.arayuz.bildirim('Su lava değdi: lav obsidyene dönüştü.'); }
+    degis(477); this.ses.sicrama(0.5); this.olay('kova');
+    return true;
+  }
+  /* Makas: balkabağı oyulur (4 çekirdek düşer), dolu kovandan petek alınır */
+  makasKullan(h) {
+    const d = this.dunya, b = BLOKLAR[h.id];
+    if (h.id === 559) {
+      d.blokKoy(h.x, h.y, h.z, 560 + this.bakisYonu4());
+      this.dusenler.birak(475, 4, h.x + 0.5 + h.nx * 0.6, h.y + 0.5, h.z + 0.5 + h.nz * 0.6);
+      this.ses.kaz('odun'); this.aletYipran();
+      return true;
+    }
+    if (b.kovan) return this.kovanHasat(h, 'makas');
+    return false;
+  }
+  aletYipran() { if (this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); } }
+  /* Dolu kovandan bal (şişeyle) ya da 3 petek (makasla); altında 5 blok içinde kamp ateşi yoksa arılar kızar (sunucuda) */
+  kovanHasat(h, ile) {
+    const b = BLOKLAR[h.id];
+    if (b.bal < 5) { this.arayuz.bildirim(`Kovan henüz dolmadı (bal ${b.bal}/5). Arılar yakındaki çiçeklerden bal yapar.`); return true; }
+    this.dunya.blokKoy(h.x, h.y, h.z, 569 + b.yon * 6);
+    if (ile === 'sise') { this.envanter.seciliAzalt(1); this.envanter.ekle(482, 1); this.ses.ic(); }
+    else { this.dusenler.birak(483, 3, h.x + 0.5 + h.nx * 0.7, h.y + 0.5, h.z + 0.5 + h.nz * 0.7); this.ses.kaz('toprak'); this.aletYipran(); }
+    let ates = false;
+    for (let k = 1; k <= 5 && !ates; k++) if (this.dunya.blok(h.x, h.y - k, h.z) === 48) ates = true;
+    this.arayuz.bildirim(ates ? 'Kamp ateşinin dumanı arıları sakinleştirdi.' : 'Arılar kızdı! Kovanın 5 blok altına kamp ateşi yakılırsa arılar sakin kalır.');
+    this.olay('aricilik');
+    return true;
+  }
+  /* Şeker kamışı yeri: altında kamış ya da suya komşu kum, toprak, çimen */
+  kamisYeri(x, y, z) {
+    const d = this.dunya, alt = d.blok(x, y - 1, z);
+    if (alt === 568) return true;
+    if (![3, 4, 5, 45, 142, 143].includes(alt)) return false;
+    for (const [a, c] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const n = d.blok(x + a, y - 1, z + c); if (n === 7 || n === 22) return true; }
+    return false;
+  }
+
   kullan(g) {
     const h = this.hedef, env = this.envanter;
     const s = env.seciliYuva(), e = s && ESYALAR[s.id];
     /* İstasyonlar */
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
+    /* ---------- 0.21.0: tarım ve hayvancılık ---------- */
+    if (e && (e.kova || e.suKovasi)) { if (this.kovaKullan(h, e)) return true; }
+    if (h && e && e.alet && e.alet.tur === 'makas' && this.makasKullan(h)) return true;
+    if (h && e && s.id === 331 && BLOKLAR[h.id].kovan && this.kovanHasat(h, 'sise')) return true;
+    /* 0.18.0: Çakmak: obsidyen çerçevenin içinde Diyar Geçidi açar */
+    if (h && e && e.tur === 'cakmak' && this.gecit) {
+      if (this.gecit.yak(h) && this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+      return true;
+    }
+    /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
+    if (h && BLOKLAR[h.id].oturak && !g.egil && !(e && e.tur === 'blok') && this.binek && this.binek.otur(h.x, h.y, h.z)) return true;
     /* Sandık */
     if (h && BLOKLAR[h.id].sandik && !g.egil) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
     /* Yatak */
@@ -299,7 +409,9 @@ export class Etkilesim {
     if (e.gubre && h) {
       const d = this.dunya;
       let oldu = false;
-      if (EKIN_SONRAKI[h.id]) { let n = EKIN_SONRAKI[h.id]; if (Math.random() < 0.5 && EKIN_SONRAKI[n]) n = EKIN_SONRAKI[n]; d.blokKoy(h.x, h.y, h.z, n); oldu = true; }
+      if (BLOKLAR[h.id].meyve) { for (let k = 0; k < 4 && !oldu; k++) oldu = d.meyveVer(h.x, h.y, h.z); oldu = true; }
+      else if (BLOKLAR[h.id].kamis) { let x = h.y; while (d.blok(h.x, x + 1, h.z) === 568) x++; d.kamisBuyut(h.x, x, h.z); oldu = true; }
+      else if (EKIN_SONRAKI[h.id]) { let n = EKIN_SONRAKI[h.id]; if (Math.random() < 0.5 && EKIN_SONRAKI[n]) n = EKIN_SONRAKI[n]; d.blokKoy(h.x, h.y, h.z, n); oldu = true; }
       else if (BLOKLAR[h.id].fidan) { if (Math.random() < 0.45) d.fidanBuyut(h.x, h.y, h.z, BLOKLAR[h.id].fidan); oldu = true; }
       else if (h.id === 4 && h.ny === 1) {
         for (let k = 0; k < 10; k++) {
@@ -336,19 +448,45 @@ export class Etkilesim {
       return true;
     }
     if ((e.tur === 'yiyecek' || e.yenir) && e.yemek) {
-      if (this.hayatta.aclik >= 20 && !e.iyilestirme) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      if (this.hayatta.aclik >= 20 && !e.iyilestirme && !e.etki && !e.temizle && !e.zehirGider) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      if (e.etki) { this.hayatta.etkiEkle(e.etki.tur, e.etki.sure); this.arayuz.bildirim(`${ETKILER[e.etki.tur].ad} etkisi: ${e.etki.sure} saniye.`, s.id); }
       if (e.iyilestirme) this.hayatta.iyiles(e.iyilestirme);
       if (this.hayatta.ye(e.yemek, e.zehir || 0)) this.arayuz.bildirim('Mide bulantısı: açlık bir süre daha hızlı azalır.');
       if (e.pismis) this.olay('pisir');
-      env.seciliAzalt(1); this.ses.ye();
-      if (s.id === 269) env.ekle(270, 1);
+      /* 0.22.0: sıcak çorba ısıtır, ayran serinletir */
+      if (e.sicak) { this.hayatta.etkiEkle('sicak', e.sicak); if (this.hayatta.vucut < 36) this.arayuz.bildirim('Sıcak çorba içinizi ısıttı.'); }
+      if (e.serin) this.hayatta.etkiEkle('serin', e.serin);
+      this.istat('yemek');
+      env.seciliAzalt(1);
+      if (e.kap) { env.ekle(e.kap, 1); this.ses.ic(); } else this.ses.ye();
+      this.yemeAnim = 1;   // 0.23.0: el ağza götürülür
+      if (s.id === 269 || e.kase) env.ekle(270, 1);
+      /* 0.21.0: süt olumsuz etkileri ve zehri, bal zehri giderir */
+      if (e.temizle || e.zehirGider) { const H = this.hayatta; H.zehir = 0; H.agu = 0; if (e.temizle) for (const k in H.etkiler) if (ETKILER[k] && ETKILER[k].kotu && k !== 'kanama' && k !== 'kirik') delete H.etkiler[k]; this.arayuz.bildirim(e.temizle ? 'Olumsuz etkiler geçti.' : 'Zehir geçti.'); }
+      if (s.id >= 484 && s.id <= 491) this.olay('ciftci');
+      if (s.id >= 463 && s.id <= 470) this.olay('gurme');
       return true;
     }
     if (e.tur === 'iyilestir') {
-      if (this.hayatta.can >= 20) { this.arayuz.bildirim('Canınız dolu.'); return true; }
+      /* 0.22.0: bandaj ve şifa iksiri kanamayı durdurur */
+      const kanama = this.hayatta.etki('kanama');
+      if (this.hayatta.can >= 20 && !kanama) { this.arayuz.bildirim('Canınız dolu.'); return true; }
       this.hayatta.iyiles(e.iyilestir); env.seciliAzalt(1); this.ses.topla();
+      if (kanama) { delete this.hayatta.etkiler.kanama; this.arayuz.bildirim('Kanama durdu.'); if (s.id === 268) this.olay('ilkYardim'); }
       return true;
     }
+    /* 0.22.0: atel kırık bacağı sarar */
+    if (e.tur === 'atel') {
+      const H = this.hayatta;
+      if (!H.etki('kirik')) { this.arayuz.bildirim('Kırık bir kemik yok.'); return true; }
+      if (H.atel) { this.arayuz.bildirim('Bacak zaten atelle sarılı.'); return true; }
+      H.etkiler.kirik = Math.min(H.etkiler.kirik, 30); H.atel = true;
+      env.seciliAzalt(1); this.ses.zirhGiy(); this.olay('atel');
+      this.arayuz.bildirim('Atel sarıldı: kemik 30 saniyede kaynar.');
+      return true;
+    }
+    /* 0.22.0: Eve Dönüş Tılsımı */
+    if (e.alet && e.alet.tur === 'tilsim') { if (this.arayuz.tilsim) this.arayuz.tilsim(); return true; }
     /* Blok koyma */
     if (e.tur === 'blok' && h) {
       let id = e.blok;
@@ -368,11 +506,20 @@ export class Etkilesim {
       }
       /* Biçimli blokların yönü ve durumu */
       const f = this.bakisYonu4();
-      if (eb.sekil === 'merdiven') id = eb.taban + f;
+      if (eb.sekil === 'merdiven' || eb.sekil === 'sandalye' || eb.sekil === 'koltuk') id = eb.taban + f;
+      else if (eb.sekil === 'tablo') {
+        const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
+        if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tablo katı bir duvarın yan yüzüne asılır.'); return true; }
+        id = eb.taban + yi;
+      }
       else if (eb.sekil === 'yarim') id = eb.taban + (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? 1 : 0);
       else if (eb.yuzlu) id = eb.taban + f;   // heykel başı: yüzü oyuncuya döner
       else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
       else if (eb.sekil === 'tuzak') id = 121 + f * 2;
+      else if (eb.mekanik === 'ters') id = 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir
+      else if (eb.mekanik === 'gecik') id = 523 + f * 8;   // 0.20.0
+      else if (eb.kovan) id = 569 + ((f + 2) % 4) * 6;   // 0.21.0: arı kovanının girişi oyuncuya bakar
+      else if (eb.kamis && !this.kamisYeri(x, y, z)) { this.arayuz.bildirim('Şeker kamışı suya komşu kum, toprak ya da çimen üstüne veya başka bir kamışın üstüne konur.'); return true; }
       else if (eb.sekil === 'tirmanma') {
         const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
         if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tırmanma merdiveni katı bir duvarın yan yüzüne konur.'); return true; }
@@ -394,7 +541,8 @@ export class Etkilesim {
       if (mevcut !== 0 && !(mb.degistirilebilir) && !(SIVI[mevcut] && !BITKI[mevcut] && !bitki)) return false;
       if (y < 1 || y >= 127) return false;
       const alt = d.blok(x, y - 1, z);
-      if (BLOKLAR[id].mesale && !(KATI[alt] && OPAK[alt])) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
+      if (BLOKLAR[id].mesale && CIZIM[id] !== C_KUP && !(KATI[alt] && (OPAK[alt] || BLOKLAR[id].lamba))) { this.arayuz.bildirim('Meşale katı bir bloğun üstüne konur.'); return true; }
+      if (ZEMIN_MEK[BLOKLAR[id].mekanik] && !(KATI[alt] && OPAK[alt])) { this.arayuz.bildirim(`${BLOKLAR[id].ad} katı bir bloğun üstüne konur.`); return true; }
       if (suBitkisi) {
         if (mevcut !== 7 || !KATI[alt]) { this.arayuz.bildirim('Bu bitki su altında katı bir zemine dikilir.'); return true; }
       } else if (BITKI[id]) {
@@ -404,7 +552,7 @@ export class Etkilesim {
       if (KATI[id] && this.oyuncu.hucreyiKapliyor(x, y, z)) return false;
       if (!d.blokKoy(x, y, z, id)) return false;
       if (BLOKLAR[id].sandik) this.arayuz.sandikYerlesti(x, y, z);
-      env.seciliAzalt(1);
+      env.seciliAzalt(1); this.istat('konulan');
       this.ses.koy(BLOKLAR[id].ses);
       return true;
     }
@@ -433,6 +581,17 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y, h.z, 105 + b.eksen * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true;
     }
     if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
+    /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
+    if (b.mekanik === 'kol') { d.blokKoy(h.x, h.y, h.z, b.acik ? 233 : 234); this.ses.kol(!b.acik); return true; }
+    /* 0.20.0: Geciktiricinin gecikmesi sağ tıkla 1-4 adım arasında döner */
+    if (b.mekanik === 'gecik') { d.blokKoy(h.x, h.y, h.z, 523 + b.yon * 8 + ((b.gecikme + 1) % 4) * 2 + b.acik); this.ses.kol(true); this.arayuz.bildirim(`Gecikme: ${((b.gecikme + 1) % 4) + 1} adım (${(((b.gecikme + 1) % 4) + 1) / 10} sn)`.replace('.', ',')); return true; }
+    if (b.mekanik === 'dugme') { if (!b.acik) { d.blokKoy(h.x, h.y, h.z, 236); this.ses.dugme(); } return true; }
+    if (b.mekanik === 'muzik') {
+      const m = ezgiTuru(d.blok(h.x, h.y - 1, h.z)), V = this.varliklar;
+      if (V && !V.ayna) V.efekt({ t: 'patlama', x: h.x + 0.5, y: h.y + 1.2, z: h.z + 0.5, c: [0.95, 0.5, 0.75], n: 6, ses: 'nota', m });
+      else { this.ses.melodi(m, 1); this.dusenler.parcacik(251, h.x, h.y + 0.6, h.z, 4); }
+      return true;
+    }
     return false;
   }
   /* Tarlanın 4 blok çevresinde su var mı */

@@ -7,7 +7,7 @@ export const r3 = n => Math.round(n * 1000) / 1000;
 export const v3 = p => [r2(p.x), r2(p.y), r2(p.z)];
 export const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-/* Yerel oyuncunun ağa gönderilen durumu: [x, y, z, yaw, pitch, eldeki, bayrak, tekne] */
+/* Yerel oyuncunun ağa gönderilen durumu: [x, y, z, yaw, pitch, eldeki, bayrak, tekne, at] */
 export function durumDizisi(o) {
   const P = o.oyuncu, p = P.konum;
   let b = 0;
@@ -19,8 +19,11 @@ export function durumDizisi(o) {
   if (P.suda) b |= B.SUDA;
   if (P.basSuda) b |= B.BAS_SUDA;
   if (o.etkilesim && o.etkilesim.germe > 0) b |= B.GERME;
+  const BN = o.binek;
+  if (BN && BN.oturak) b |= B.OTUR;
+  if (BN && BN.at) b |= B.ATLI;
   const t = o.tekneler.binilen;
-  return [r2(p.x), r2(p.y), r2(p.z), r3(P.yaw), r3(P.pitch), o.envanter.seciliId(), b, t && t.ni != null ? t.ni : -1];
+  return [r2(p.x), r2(p.y), r2(p.z), r3(P.yaw), r3(P.pitch), o.envanter.seciliId(), b, t && t.ni != null ? t.ni : -1, BN && BN.at ? BN.at.id : -1];
 }
 
 /* Başka bir oyuncunun kırdığı / koyduğu blok yakındaysa ses ve parçacık */

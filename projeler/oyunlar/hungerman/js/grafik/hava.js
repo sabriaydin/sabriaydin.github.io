@@ -92,7 +92,9 @@ export class Hava {
     let c = this.kolonlar.get(k);
     if (!c) {
       const yuklu = this.dunya.yuklu(x, z);
-      c = { u: yuklu ? this.ustBlok(x, z) : PY, tur: yuklu ? (karMi(this.dunya.uretici.kolon(x, z, {})) ? 2 : 1) : 0 };
+      const k = yuklu ? this.dunya.uretici.kolon(x, z, {}) : null;
+      /* 0.18.0: kışın çöl ve savan dışında her yere kar yağar */
+      c = { u: yuklu ? this.ustBlok(x, z) : PY, tur: yuklu ? (karMi(k) || (this.kis && k.b !== BY.COL && k.b !== BY.SAVAN) ? 2 : 1) : 0 };
       this.kolonlar.set(k, c);
     }
     return c;

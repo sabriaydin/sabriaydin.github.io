@@ -181,6 +181,54 @@ export const MODELLER = {
     kafaEk: [[0.22, 0.16, 0.2, '#8f8d88', 0, -0.08, -0.42], [0.06, 0.06, 0.02, '#1a1a1a', 0, -0.03, -0.53], [0.08, 0.16, 0.06, '#8f8d88', -0.13, 0.27, -0.1], [0.08, 0.16, 0.06, '#8f8d88', 0.13, 0.27, -0.1], [0.06, 0.06, 0.02, '#111', -0.11, 0.06, -0.345], [0.06, 0.06, 0.02, '#111', 0.11, 0.06, -0.345]],
     kuyruk: [0.12, 0.12, 0.5], kuyrukRenk: '#b8b5ae'
   }),
+  /* 0.16.0: evcilleşmiş kurt (tasmalı), kedi ve at */
+  kopek: () => {
+    const m = dortAyak({
+      govde: [0.46, 0.46, 0.92], govdeY: 0.68, renk: '#b4b0a8', bacak: [0.16, 0.48], bacakRenk: '#aaa69e',
+      govdeEk: [[0.56, 0.5, 0.4, '#c6c2ba', 0, 0.04, -0.3]],
+      kafa: [0.42, 0.4, 0.34], kafaY: 0.82, kafaIleri: 0.0,
+      kafaEk: [[0.22, 0.16, 0.2, '#9c988f', 0, -0.08, -0.42], [0.06, 0.06, 0.02, '#1a1a1a', 0, -0.03, -0.53], [0.08, 0.16, 0.06, '#9c988f', -0.13, 0.27, -0.1], [0.08, 0.16, 0.06, '#9c988f', 0.13, 0.27, -0.1], [0.06, 0.06, 0.02, '#2a1a10', -0.11, 0.06, -0.345], [0.06, 0.06, 0.02, '#2a1a10', 0.11, 0.06, -0.345], [0.1, 0.03, 0.1, '#d86a6a', 0, -0.17, -0.42]],
+      kuyruk: [0.12, 0.12, 0.5], kuyrukRenk: '#c6c2ba'
+    });
+    m.tasma = parca(m.kok, m.malzeme, [0, 0.82, -0.47], [[0.46, 0.1, 0.12, '#c0302a'], [0.08, 0.08, 0.04, '#e8c040', 0, -0.07, -0.07]]);
+    m.sadik = true;
+    return m;
+  },
+  kedi: (_, renk = 0) => {
+    const R = [['#a8784a', '#7a5230'], ['#2a2a2e', '#1a1a1e'], ['#ece8e0', '#d6d0c4'], ['#e0903a', '#c06a24'], ['#8a8a90', '#6a6a70']][renk] || ['#a8784a', '#7a5230'];
+    const m = dortAyak({
+      govde: [0.3, 0.3, 0.62], govdeY: 0.42, renk: R[0], bacak: [0.1, 0.27], bacakRenk: R[0],
+      govdeEk: [[0.31, 0.04, 0.08, R[1], 0, 0.14, -0.15], [0.31, 0.04, 0.08, R[1], 0, 0.14, 0.05], [0.31, 0.04, 0.08, R[1], 0, 0.14, 0.24]],
+      kafa: [0.3, 0.26, 0.26], kafaY: 0.56, kafaIleri: -0.04,
+      kafaEk: [[0.07, 0.1, 0.05, R[1], -0.09, 0.17, -0.08], [0.07, 0.1, 0.05, R[1], 0.09, 0.17, -0.08], [0.06, 0.05, 0.02, '#58c040', -0.08, 0.02, -0.265], [0.06, 0.05, 0.02, '#58c040', 0.08, 0.02, -0.265], [0.04, 0.03, 0.02, '#e89a9a', 0, -0.05, -0.265], [0.14, 0.08, 0.06, R[0] === '#2a2a2e' ? '#3a3a3e' : '#f0ece4', 0, -0.07, -0.25]],
+      kuyruk: [0.06, 0.06, 0.5], kuyrukRenk: R[1]
+    });
+    m.tasma = parca(m.kok, m.malzeme, [0, 0.5, -0.32], [[0.3, 0.06, 0.08, '#2a6ac0'], [0.05, 0.05, 0.03, '#e8c040', 0, -0.04, -0.05]]);
+    m.tasma.visible = false;
+    m.sadik = true;
+    return m;
+  },
+  at: (_, renk = 0) => {
+    const R = [['#7a4a28', '#2a1a10', '#5a3418'], ['#2e2824', '#141210', '#201c18'], ['#d8d4cc', '#8e8a82', '#b8b4ac'], ['#a8582a', '#5a2c14', '#86441e'], ['#e6e0d4', '#3a2a1a', '#6a4a2a']][renk] || ['#7a4a28', '#2a1a10', '#5a3418'];
+    const lekeler = renk === 4 ? [[0.02, 0.4, 0.5, R[2], 0.36, 0.05, 0.2], [0.02, 0.36, 0.4, R[2], -0.36, -0.02, -0.25], [0.5, 0.02, 0.5, R[2], 0.05, 0.38, 0.35]] : [];
+    const m = dortAyak({
+      govde: [0.7, 0.72, 1.5], govdeY: 1.25, renk: R[0], bacak: [0.22, 0.92], bacakRenk: R[0], toynak: '#2a2420', bacakIc: 0.04, bacakUcIc: 0.08,
+      govdeEk: lekeler,
+      kafa: [0.32, 0.7, 0.4], kafaY: 1.62, kafaIleri: -0.15, kafaRenk: R[0],
+      kafaEk: [[0.34, 0.34, 0.6, R[0], 0, 0.42, -0.42], [0.3, 0.24, 0.22, R[2], 0, 0.38, -0.8], [0.07, 0.14, 0.05, R[0], -0.1, 0.66, -0.2], [0.07, 0.14, 0.05, R[0], 0.1, 0.66, -0.2],
+        [0.02, 0.06, 0.07, '#111', -0.175, 0.5, -0.5], [0.02, 0.06, 0.07, '#111', 0.175, 0.5, -0.5], [0.03, 0.04, 0.02, '#111', -0.07, 0.36, -0.915], [0.03, 0.04, 0.02, '#111', 0.07, 0.36, -0.915],
+        [0.09, 0.86, 0.22, R[1], 0, 0.22, 0.02], [0.1, 0.12, 0.2, R[1], 0, 0.62, -0.18]],
+      kuyruk: [0.14, 0.8, 0.16], kuyrukRenk: R[1]
+    });
+    m.eyer = parca(m.kok, m.malzeme, [0, 1.25, 0], [
+      [0.74, 0.1, 0.62, '#6a3e1c', 0, 0.4, 0.02], [0.6, 0.12, 0.5, '#8a5428', 0, 0.48, 0.06], [0.16, 0.14, 0.1, '#6a3e1c', 0, 0.56, -0.2], [0.18, 0.1, 0.12, '#6a3e1c', 0, 0.54, 0.3],
+      [0.04, 0.5, 0.04, '#3a2a1a', 0.39, 0.15, 0.02], [0.04, 0.5, 0.04, '#3a2a1a', -0.39, 0.15, 0.02], [0.12, 0.04, 0.14, '#b8b8c0', 0.4, -0.12, 0.02], [0.12, 0.04, 0.14, '#b8b8c0', -0.4, -0.12, 0.02],
+      [0.36, 0.06, 0.06, '#3a2a1a', 0, 0.62, -0.95]
+    ]);
+    m.eyer.visible = false;
+    m.binek = true;
+    return m;
+  },
   tavsan: () => dortAyak({
     govde: [0.3, 0.3, 0.44], govdeY: 0.3, renk: '#9a7b5a', bacak: [0.1, 0.15],
     kafa: [0.24, 0.24, 0.24], kafaY: 0.42, kafaIleri: -0.04,
@@ -265,6 +313,36 @@ export const MODELLER = {
     const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.26, 1.25, 0], [[0.36, 1.25, 0.4, k, 0, -0.62, 0], [0.4, 0.14, 0.46, t, 0, -1.18, -0.02]]));
     return { kok, malzeme, govde, kafa, bacaklar, kollar, kanatlar: [], kuyruk: null };
   },
+  /* 0.18.0: Kül Zombisi: kül rengi ten, közleşmiş giysi, korlu gözler */
+  kulzombi: () => zombiKalibi({ ten: '#5a5450', gomlek: '#2e2624', gomlekKoyu: '#221c1a', pantolon: '#3a2a26', ayakkabi: '#1a1412', sac: '#2a2420', goz: '#ff8a2a', agiz: '#1e1816',
+    ek: { govde: [[0.1, 0.08, 0.02, '#ff6a1e', 0.12, 0.1, -0.14], [0.08, 0.06, 0.02, '#e8501e', -0.14, -0.15, -0.14], [0.52, 0.06, 0.28, '#4a3a34', 0, -0.26, 0]],
+      kafa: [[0.06, 0.04, 0.02, '#ffd27a', -0.12, 0.3, -0.262], [0.06, 0.04, 0.02, '#ffd27a', 0.12, 0.3, -0.262], [0.14, 0.06, 0.04, '#e8501e', 0.16, 0.42, -0.24]],
+      kol: [[0.26, 0.06, 0.26, '#e8501e', 0, -0.55, 0]], bacak: [[0.26, 0.08, 0.26, '#4a3a34', 0, -0.2, 0]] } }),
+  /* Kor Ruhu: süzülen alevli bir baş; çevresinde dönen kor çubukları, altında parlayan çekirdek */
+  korruhu: () => {
+    const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+    const kok = new THREE.Group();
+    const govde = parca(kok, malzeme, [0, 0.55, 0], [[0.22, 0.5, 0.22, '#ffcf6a'], [0.12, 0.2, 0.12, '#fff2b0', 0, -0.3, 0]]);
+    const kafa = parca(kok, malzeme, [0, 1.1, 0], [[0.5, 0.5, 0.5, '#f0a030', 0, 0.12, 0], [0.12, 0.08, 0.02, '#3a1a0a', -0.12, 0.16, -0.255], [0.12, 0.08, 0.02, '#3a1a0a', 0.12, 0.16, -0.255],
+      [0.2, 0.04, 0.02, '#8a3a10', 0, 0.02, -0.255], [0.52, 0.08, 0.52, '#ffd27a', 0, 0.4, 0], [0.12, 0.06, 0.02, '#ffe9a0', -0.12, 0.22, -0.258], [0.12, 0.06, 0.02, '#ffe9a0', 0.12, 0.22, -0.258]]);
+    const donen = new THREE.Group(); donen.position.y = 0.2; kok.add(donen);
+    const geo = [];
+    for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, r = 0.5, y = i % 2 ? 0.75 : 0.25; geo.push(kutuGeo(0.1, 0.42, 0.1, '#e8702a', Math.cos(a) * r, y, Math.sin(a) * r), kutuGeo(0.1, 0.08, 0.1, '#ffd27a', Math.cos(a) * r, y + 0.24, Math.sin(a) * r)); }
+    donen.add(new THREE.Mesh(birlestir(geo), malzeme));
+    return { kok, malzeme, govde, kafa, bacaklar: [], kollar: [], kanatlar: [], kuyruk: null, donen };
+  },
+  /* 0.21.0: Arı: sarı-siyah çizgili tombul gövde, iğne, saydam kanatlar */
+  ari: () => {
+    const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+    const kok = new THREE.Group();
+    const s = '#f2c230', k = '#2a2018';
+    const govde = parca(kok, malzeme, [0, 0.22, 0], [[0.24, 0.22, 0.34, s], [0.25, 0.23, 0.06, k, 0, 0, 0.02], [0.25, 0.23, 0.06, k, 0, 0, 0.12], [0.04, 0.04, 0.08, '#1a1410', 0, -0.02, 0.21],
+      [0.03, 0.12, 0.03, k, -0.05, -0.15, -0.02], [0.03, 0.12, 0.03, k, 0.05, -0.15, 0.04]]);
+    const kafa = parca(kok, malzeme, [0, 0.24, -0.17], [[0.2, 0.2, 0.08, s], [0.06, 0.08, 0.02, k, -0.06, 0.02, -0.045], [0.06, 0.08, 0.02, k, 0.06, 0.02, -0.045],
+      [0.02, 0.1, 0.02, k, -0.05, 0.14, -0.02], [0.02, 0.1, 0.02, k, 0.05, 0.14, -0.02]]);
+    const kanatlar = [-1, 1].map(i => parca(kok, malzeme, [i * 0.06, 0.34, -0.02], [[0.22, 0.02, 0.16, '#e8f4fa', i * 0.12, 0, 0.02]]));
+    return { kok, malzeme, govde, kafa, bacaklar: [], kollar: [], kanatlar, kuyruk: null, yarasa: true };
+  },
   /* Yarasa: küçük gövde, büyük kulaklar, zarlı kanatlar (kanatlar.rotation.z ile çırpılır) */
   yarasa: () => {
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
@@ -284,6 +362,7 @@ export function okModeli(tur) {
   /* Boss mermileri (0.15.1): kaya, buz kıymığı, altın lanet küresi */
   if (tur === 'kaya') return new THREE.Mesh(birlestir([kutuGeo(0.55, 0.55, 0.55, '#7c7c80'), kutuGeo(0.4, 0.2, 0.58, '#5e5e64', 0.1, 0.1, 0), kutuGeo(0.2, 0.3, 0.3, '#4f7a3a', -0.18, -0.1, 0.12)]), malzeme);
   if (tur === 'buz') return new THREE.Mesh(birlestir([kutuGeo(0.1, 0.1, 0.7, '#bff4ff'), kutuGeo(0.16, 0.16, 0.2, '#e8fcff', 0, 0, -0.3), kutuGeo(0.06, 0.06, 0.3, '#7fc8e8', 0, 0, 0.3)]), malzeme);
+  if (tur === 'ates') return new THREE.Mesh(birlestir([kutuGeo(0.34, 0.34, 0.34, '#ff8a2a'), kutuGeo(0.22, 0.22, 0.46, '#ffd27a'), kutuGeo(0.46, 0.22, 0.22, '#e8501e'), kutuGeo(0.22, 0.46, 0.22, '#ffb04a')]), malzeme);   // 0.18.0: kor ruhunun ateş topu
   if (tur === 'lanet') return new THREE.Mesh(birlestir([kutuGeo(0.3, 0.3, 0.3, '#ffd24a'), kutuGeo(0.2, 0.2, 0.42, '#fff2a8'), kutuGeo(0.42, 0.2, 0.2, '#e6a82e')]), malzeme);
   const g = birlestir([kutuGeo(0.04, 0.04, 0.6, '#8a6034'), kutuGeo(0.07, 0.07, 0.1, '#55555c', 0, 0, -0.33), kutuGeo(0.01, 0.1, 0.14, '#f0f0ea', 0, 0, 0.24), kutuGeo(0.1, 0.01, 0.14, '#f0f0ea', 0, 0, 0.24)]);
   return new THREE.Mesh(g, malzeme);
