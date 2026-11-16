@@ -1226,3 +1226,25 @@ body.gostergesiz #ogretici { display: none; }
 /* 0.30.6: Lanetli Ada'nın çevresinde ekran kararır */
 #adaKarartma { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s;
   background: radial-gradient(ellipse at center, rgba(20, 8, 14, .25) 0%, rgba(14, 6, 10, .65) 55%, rgba(4, 2, 4, .95) 100%); }
+
+/* 0.30.7: dünya kartı düğmeleri tek satır; Sil / Onayla genişliği sabit */
+#dunyalarEkrani .dunya .islem { flex-wrap: nowrap; }
+#dunyalarEkrani .dunya .islem .dugme { flex: none; white-space: nowrap; }
+#dunyalarEkrani .dunya .islem .tehlike { min-width: 96px; }
+
+/* 0.30.7: tuş atamaları */
+.tusBaslik { display: flex; align-items: center; justify-content: space-between; margin: 16px 0 4px; }
+.tusBaslik h4 { margin: 0; font: 700 .72rem var(--govde); letter-spacing: .07em; text-transform: uppercase; color: var(--vurgu2); }
+.tusBaslik .envIslem { margin: 0; }
+.tusListe { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.tusGrup { padding: 8px 10px; border: 2px solid #000; border-radius: 8px; background: rgba(0, 0, 0, .22); }
+.tusGrup h5 { margin: 0 0 6px; font: 700 .7rem var(--govde); color: var(--soluk); text-transform: uppercase; letter-spacing: .06em; }
+.tusSatir { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; font-size: .8rem; }
+.tusSatir.degisti span::after { content: ' •'; color: var(--vurgu); }
+.tusSatir button { min-width: 84px; padding: 4px 10px; border: 2px solid #000; border-radius: 5px; background: linear-gradient(#4f453a, #3d352c); color: #fff; font: 700 .76rem var(--govde); cursor: pointer; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1); white-space: nowrap; }
+.tusSatir button:hover { filter: brightness(1.15); }
+.tusSatir button.bekliyor { background: var(--vurgu); color: #241608; animation: tusYanip 1s ease-in-out infinite; }
+.tusSatir button.hata { background: #a8443c; }
+.tusSatir button.yerDegisti { box-shadow: 0 0 0 2px #e7a443; }
+@keyframes tusYanip { 50% { filter: brightness(1.25); } }
+@media (max-width: 560px) { .tusListe { grid-template-columns: 1fr; } }

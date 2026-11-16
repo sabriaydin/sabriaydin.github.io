@@ -3,6 +3,7 @@
    Ekrana kısa dokunma: kullan / koy (sağ tık); parmağı basılı tutma: kır / saldır (sol tık).
    Sağ altta Zıpla, Eğil, Kır, Kullan; üstte Çanta, Etkileşim, At, Harita, Kitap ve Duraklat düğmeleri. Alt çubuktaki yuvalara dokunarak eşya seçilir.
    Dokunuşlar, klavye ve fare durumlarına (tus, fare) çevrilir; oyunun geri kalanı aynı kodla çalışır. */
+import { T } from '../sistem/tuslar.js';
 const $ = s => document.querySelector(s);
 const ESIK = 0.32;             // kolun yön sayılması için en az itme oranı
 const BASILI_TUT = 0.33;       // saniye: bu süreden uzun basılı tutma kırma sayılır
@@ -31,7 +32,7 @@ export class Dokunmatik {
   }
   sifirla() {
     const t = this.tus;
-    t.KeyW = t.KeyS = t.KeyA = t.KeyD = t.Space = t.KeyC = false;
+    for (const k of ['ileri', 'geri', 'sol', 'sag', 'zipla', 'egil']) t[T[k]] = false;
     this.fare.sol = this.fare.sag = false;
     this.kol = null; this.bakis.clear(); this.kosKilit(false);
     this.topuz.style.transform = '';
@@ -73,7 +74,7 @@ export class Dokunmatik {
     const bitir = e => {
       if (!this.aktif) return;
       for (const d of e.changedTouches) {
-        if (this.kol && d.identifier === this.kol.id) { this.kol = null; this.topuz.style.transform = ''; const t = this.tus; t.KeyW = t.KeyS = t.KeyA = t.KeyD = false; this.kosKilit(false); continue; }
+        if (this.kol && d.identifier === this.kol.id) { this.kol = null; this.topuz.style.transform = ''; const t = this.tus; t[T.ileri] = t[T.geri] = t[T.sol] = t[T.sag] = false; this.kosKilit(false); continue; }
         const b = this.bakis.get(d.identifier);
         if (!b) continue;
         this.bakis.delete(d.identifier);
@@ -85,11 +86,12 @@ export class Dokunmatik {
     addEventListener('touchend', bitir); addEventListener('touchcancel', bitir);
     /* Düğmeler: basılı tutulanlar (zıpla, eğil, kır, kullan) ve tek dokunuşluklar */
     for (const b of this.kok.querySelectorAll('[data-dk]')) {
-      const ad = b.dataset.dk, tut = { zipla: 'Space', egil: 'KeyC' }[ad];
+      const ad = b.dataset.dk, tutK = { zipla: 'zipla', egil: 'egil' }[ad];   // 0.30.7: atanmış tuş kullanılır
       b.addEventListener('touchstart', e => {
         e.preventDefault(); e.stopPropagation();
         if (!this.oyunda() && ad !== 'menu') { this.kilitle(); return; }
         b.classList.add('basili');
+        const tut = tutK && T[tutK]; b.tutulan = tut;
         if (tut) this.tus[tut] = true;
         else if (ad === 'kir') this.fare.sol = true;
         else if (ad === 'kullan') this.fare.sag = true;
@@ -98,6 +100,7 @@ export class Dokunmatik {
       const birak = e => {
         e.preventDefault();
         b.classList.remove('basili');
+        const tut = b.tutulan;
         if (tut) this.tus[tut] = false;
         else if (ad === 'kir') this.fare.sol = false;
         else if (ad === 'kullan') this.fare.sag = false;
@@ -120,7 +123,7 @@ export class Dokunmatik {
     if (m > 1) { dx /= m; dy /= m; }
     this.topuz.style.transform = `translate(${(dx * k.r * 0.6).toFixed(1)}px, ${(dy * k.r * 0.6).toFixed(1)}px)`;
     const t = this.tus;
-    t.KeyW = dy < -ESIK; t.KeyS = dy > ESIK; t.KeyA = dx < -ESIK; t.KeyD = dx > ESIK;
+    t[T.ileri] = dy < -ESIK; t[T.geri] = dy > ESIK; t[T.sol] = dx < -ESIK; t[T.sag] = dx > ESIK;
     this.kosKilit(dy < -0.9 && Math.abs(dx) < 0.45);
   }
   /* Basılı tutma süresi dolan dokunuş kırmaya başlar */

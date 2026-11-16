@@ -389,12 +389,16 @@
         <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
         <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
         <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
+        <!-- 0.30.7: değiştirilebilir tuş atamaları -->
+        <div class="tusBaslik"><h4>Tuş atamaları</h4><button type="button" class="envIslem" id="tusSifirla">Varsayılan tuşlar</button></div>
+        <p class="ayarNot">Değiştirmek için eylemin tuşuna tıklayıp yeni tuşa basınız (Esc: vazgeç, sağ tık: varsayılana döndür). Başka bir eylemde kullanılan tuş seçilirse iki eylemin tuşları yer değiştirir.</p>
+        <div id="tusListe" class="tusListe"></div>
         <dl class="ayarTuslar">
           <dt>Sol tık</dt><dd>Kırma, saldırı · elde kablo varken kablo yerleştirme</dd>
           <dt>Sağ tık</dt><dd>Kullanma, koyma · elde kablo varken son işlemi geri alma</dd>
-          <dt>R</dt><dd>Yerleştirmeden önce döndürme · kablo çekmeyi iptal</dd>
+          <dt>1-9 / tekerlek</dt><dd>Hızlı erişim yuvası seçimi</dd>
           <dt>Shift + tekerlek</dt><dd>Çekilen kablonun sarkması</dd>
-          <dt>E / M / Esc</dt><dd>Çanta / harita / duraklatma</dd>
+          <dt>Esc</dt><dd>Duraklatma, pencereleri kapatma</dd>
         </dl>
       </section>
       <section class="ayarBolum" data-as="arayuz" hidden>

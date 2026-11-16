@@ -117,6 +117,10 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.7 (0.30.7): Değiştirilebilir tuşlar, dünya kartı düzeltmesi
+- Ayarlar > Kontroller: 22 eylemin tuşu değiştirilebilir (Hareket, Eylemler, Pencereler, Diğer). Tuşa tıklanıp yeni tuşa basılır; Esc vazgeçer, sağ tık varsayılana döndürür; başka eylemdeki tuş seçilirse iki eylemin tuşları yer değiştirir. "Varsayılan tuşlar" düğmesi; değiştirilmiş eylemler işaretlenir. Esc, 1-9 ve fare düğmeleri sabittir. Dokunmatik kontroller de atanmış tuşları kullanır.
+- Dünyalar ekranı: "Sil" düğmesi "Onayla"ya dönünce alt satıra kayıp kartı bozuyordu; düğmeler tek satırda ve sabit genişlikte. "Önceki oturum" düğmesinin kalan kodu da kaldırıldı.
+
 ## 30.6 (0.30.6): Lanetli Ada, Kor Ruhu dengesi, çimen ve balkabağı
 - **Lanetli Ada:** Yeraltı Diyarı'nın dünyadaki tek girişi. Issız Deniz'in (başlangıçtan 900-2600 blok uzakta, çevresi en az 50 blok açık deniz olan derin bir nokta) ortasında, kül kumu, kor taşı, obsidyen ve kül tuğlasından küçük, karanlık bir ada: ortada yanan kadim geçit, kıyıda obsidyen sivri kayalar, kurumuş ağaçlar, örümcek ağları, iskelet yuvası ve bir sandık. Her dünyada bir tanedir; konumu tohumdan belirlenir. Yaklaştıkça ekran kararır ve uğultu duyulur.
 - Çakmakla başka yerde geçit açılamaz; çakmak yalnızca adadaki geçidi (ya da diyardaki karşılığını) çerçevesi bozulup sönerse yeniden yakar. Bütün geçitler ada ile diyardaki karşılığı arasında işler (eski kayıtlardaki geçitler de).

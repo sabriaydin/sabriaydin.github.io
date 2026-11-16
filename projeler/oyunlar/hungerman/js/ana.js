@@ -26,6 +26,7 @@ import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
 import { Taretler } from './oyun/taret.js';
 import { kapFiltresiId } from './oyun/kaplar.js';
+import { T, EYLEMLER, VARSAYILAN_TUS, tuslariKur, tusKaydi, tusAta, basili, tusAdi, SABIT } from './sistem/tuslar.js';
 import { SuAkisi } from './dunya/su-akisi.js';
 import { Kablolar, kabloMaliyeti, KABLO } from './oyun/kablolar.js';
 import { Gecit } from './oyun/gecit.js';
@@ -74,6 +75,7 @@ addEventListener('unhandledrejection', e => hataGoster(String(e.reason && e.reas
 
 $('#surum').textContent = 'Sürüm ' + SURUM;
 const ayar = ayarlariYukle();
+tuslariKur(ayar.tuslar);   // 0.30.7
 if (!ayar.ad) { ayar.ad = 'Oyuncu' + (100 + Math.floor(Math.random() * 900)); ayarlariKaydet(ayar); }
 if (ayar.miniHarita === undefined) ayar.miniHarita = true;
 const ses = new Ses(); ses.duzeyAyarla(ayar.ses);
@@ -140,6 +142,7 @@ $('#ayarSifirla').onclick = e => {
   const korunan = { ad: ayar.ad, mobilVarsayilan: ayar.mobilVarsayilan };
   for (const k of Object.keys(ayar)) delete ayar[k];
   Object.assign(ayar, VARSAYILAN_AYAR, { dokunmatik: dokunmatikCihaz() }, korunan);
+  tuslariKur(ayar.tuslar);
   if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5);   // mobil cihazlarda düşük görüş varsayılanı
   ses.tik(); ayarUygula(); ayarFormu();
 };
@@ -183,6 +186,7 @@ function ayarFormu() {
   bag('#aHas', 'hassasiyet', v => v.toFixed(2).replace('.', ',') + '×');
   /* 0.29.1: geçerli değerlere uyan grafik ön ayarı işaretlenir */
   onAyarIsaretle();
+  tusListesiCiz();
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
   bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
@@ -191,6 +195,29 @@ function ayarFormu() {
   bag('#aArkaSessiz', 'arkaSessiz', null, 'cb'); bag('#aEnerji', 'enerjiPanel', null, 'cb');
   bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
 }
+/* 0.30.7: tuş atamaları listesi; tıklanan eylem bir sonraki tuşu bekler */
+let tusBekleyen = null;
+function tusListesiCiz() {
+  $('#tusListe').innerHTML = EYLEMLER.map(([, baslik, l]) => `<div class="tusGrup"><h5>${baslik}</h5>${l.map(([k, ad]) =>
+    `<div class="tusSatir${T[k] !== VARSAYILAN_TUS[k] ? ' degisti' : ''}"><span>${ad}</span><button type="button" data-tus="${k}" class="${tusBekleyen === k ? 'bekliyor' : ''}" title="Değiştirmek için tıklayınız · sağ tık: varsayılan (${tusAdi(VARSAYILAN_TUS[k])})">${tusBekleyen === k ? 'Bir tuşa basınız…' : tusAdi(T[k])}</button></div>`).join('')}</div>`).join('');
+}
+function tusKaydet() { ayar.tuslar = tusKaydi(); ayarlariKaydet(ayar); }
+$('#tusListe').addEventListener('click', e => { const b = e.target.closest('[data-tus]'); if (!b) return; ses.tik(); tusBekleyen = tusBekleyen === b.dataset.tus ? null : b.dataset.tus; tusListesiCiz(); });
+$('#tusListe').addEventListener('contextmenu', e => {
+  const b = e.target.closest('[data-tus]'); if (!b) return; e.preventDefault();
+  tusAta(b.dataset.tus, VARSAYILAN_TUS[b.dataset.tus]); tusBekleyen = null; tusKaydet(); ses.tik(); tusListesiCiz();
+});
+$('#tusSifirla').onclick = () => { tuslariKur({}); tusBekleyen = null; tusKaydet(); ses.tik(); tusListesiCiz(); };
+addEventListener('keydown', e => {
+  if (!tusBekleyen) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const k = tusBekleyen; tusBekleyen = null;
+  if (e.code === 'Escape') { tusListesiCiz(); return; }
+  if (SABIT.has(e.code)) { tusListesiCiz(); const el = $('#tusListe').querySelector(`[data-tus="${k}"]`); if (el) { el.classList.add('hata'); el.textContent = 'Bu tuş atanamaz'; setTimeout(tusListesiCiz, 1200); } return; }
+  const diger = tusAta(k, e.code); tusKaydet(); ses.tik(); tusListesiCiz();
+  if (diger) { const el = $('#tusListe').querySelector(`[data-tus="${diger}"]`); if (el) el.classList.add('yerDegisti'); }
+}, true);
+addEventListener('mousedown', e => { if (tusBekleyen && !e.target.closest('[data-tus]')) { tusBekleyen = null; tusListesiCiz(); } }, true);
 function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOnAyar button')) { const g = GRAFIK_ON[x.dataset.on]; x.classList.toggle('on', g.gorus === ayar.gorus && g.cozunurluk === (ayar.cozunurluk | 0)); } }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
@@ -267,17 +294,13 @@ $('#dunyaListe').addEventListener('click', async e => {
   ses.baslat();
   if (o) { ses.tik(); const v = await Kayit.yukle(o.dataset.oyna); if (v) { Kayit.kaydet({ ...v, id: v.id + '~yedek' }).catch(() => {}); const s = sunucuIstek; oyunBaslat(v); if (oyun) oyun.sunucuIstek = s; } }
   /* 0.23.0: yedek indirme ve önceki oturuma dönme */
-  const ind = e.target.closest('[data-indir]'), ger = e.target.closest('[data-geri]');
+  const ind = e.target.closest('[data-indir]');
   if (ind) {
     ses.tik(); const v = await Kayit.yukle(ind.dataset.indir); if (!v) return;
     const b = await yedekDosyasi({ ...v, surum: SURUM }), a = document.createElement('a');
     a.href = URL.createObjectURL(b); a.download = `${String(v.ad).replace(/[^\p{L}\p{N}_-]+/gu, '_')}.hmdunya`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   }
-  if (ger) {
-    if (!ger.dataset.onay) { ger.dataset.onay = '1'; ger.textContent = 'Emin misiniz? Tekrar tıklayınız'; setTimeout(() => { if (ger.isConnected) { delete ger.dataset.onay; ger.textContent = 'Önceki oturum'; } }, 3000); return; }
-    const y = await Kayit.yukle(ger.dataset.geri + '~yedek'); if (!y) return;
-    await Kayit.kaydet({ ...y, id: ger.dataset.geri, son: Date.now() }); ses.tik(); dunyaListesi();
-  }
+
   if (s) {
     if (s.dataset.onay) { await Kayit.sil(s.dataset.sil); HaritaKayit.sil(s.dataset.sil).catch(() => {}); ses.tik(); dunyaListesi(); }
     else { s.dataset.onay = '1'; s.textContent = 'Onayla'; setTimeout(() => { if (s.isConnected) { delete s.dataset.onay; s.textContent = 'Sil'; } }, 3000); }
@@ -303,38 +326,38 @@ addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
   if (oyun && aktifEkran === 'oyun') {
     /* 0.23.0: fotoğraf modu: F1 göstergeleri ve eli gizler, F2 ekran görüntüsü kaydeder */
-    if (e.code === 'F1' && !e.repeat) { e.preventDefault(); oyun.fotoModu = !oyun.fotoModu; document.body.classList.toggle('gostergesiz', oyun.fotoModu); hud.bildirim(oyun.fotoModu ? 'Fotoğraf modu: göstergeler gizlendi (F1 ile geri gelir, F2 ile kaydedilir).' : 'Göstergeler açıldı.'); return; }
-    if (e.code === 'F2' && !e.repeat) { e.preventDefault(); ekranGoruntusu(); ses.tik(); $('#gokParla') && sahne.parlama(0.35); if (!oyun.fotoModu) hud.bildirim('Ekran görüntüsü kaydedildi.'); return; }
-    if (['Space', 'Tab', 'F3', 'KeyQ', 'KeyG'].includes(e.code) || (e.ctrlKey && ['KeyS', 'KeyD', 'KeyF'].includes(e.code))) e.preventDefault();
-    if (e.code === 'Tab' && oyun.ag) oyuncuListesiGoster(true);
+    if (e.code === T.foto && !e.repeat) { e.preventDefault(); oyun.fotoModu = !oyun.fotoModu; document.body.classList.toggle('gostergesiz', oyun.fotoModu); hud.bildirim(oyun.fotoModu ? 'Fotoğraf modu: göstergeler gizlendi (F1 ile geri gelir, F2 ile kaydedilir).' : 'Göstergeler açıldı.'); return; }
+    if (e.code === T.ekran && !e.repeat) { e.preventDefault(); ekranGoruntusu(); ses.tik(); $('#gokParla') && sahne.parlama(0.35); if (!oyun.fotoModu) hud.bildirim('Ekran görüntüsü kaydedildi.'); return; }
+    if ([T.zipla, T.liste, T.hata, T.envanter, T.at, 'Tab', 'Space'].includes(e.code) || (e.ctrlKey && ['KeyS', 'KeyD', 'KeyF'].includes(e.code))) e.preventDefault();
+    if (e.code === T.liste && oyun.ag) oyuncuListesiGoster(true);
     /* Geliştirici konsolu: F8 (veya 1 tuşunun solundaki tuş) */
-    if (e.code === 'F9' && !e.repeat && oyun.gelistirici) { e.preventDefault(); if (gelPencere.acik) panelKapat(true); else if (!panelAcik()) panelAc(gelPencere); return; }
-    if ((e.code === 'F8' || e.code === 'Backquote') && !e.repeat && oyun.konsol) { e.preventDefault(); if (konsol.acik) panelKapat(true); else if (!panelAcik() && !oyun.hayatta.olu) panelAc(konsol); return; }
+    if (e.code === T.gelistirici && !e.repeat && oyun.gelistirici) { e.preventDefault(); if (gelPencere.acik) panelKapat(true); else if (!panelAcik()) panelAc(gelPencere); return; }
+    if ((e.code === T.konsol || (e.code === 'Backquote' && !Object.values(T).includes('Backquote'))) && !e.repeat && oyun.konsol) { e.preventDefault(); if (konsol.acik) panelKapat(true); else if (!panelAcik() && !oyun.hayatta.olu) panelAc(konsol); return; }
     if (e.repeat) { tus[e.code] = true; return; }
     tus[e.code] = true;
-    if (e.code === 'KeyW') { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
+    if (e.code === T.ileri) { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
     /* 0.15.1: Q envanter ve üretim, E nesnelerle etkileşim, G eşya atma */
-    if (e.code === 'KeyE' && !e.repeat && (envEkrani.acik || koyluEkrani.acik)) { if (envEkrani.acik) envanterAcKapa(); else panelKapat(true); return; }
-    if (e.code === 'KeyQ') { if (koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik) panelKapat(true); else envanterAcKapa(); return; }
-    if (e.code === 'KeyJ') { if (gorevEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(gorevEkrani); return; }
-    if (e.code === 'KeyM') { if (haritaEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(haritaEkrani, oyun); return; }
-    if (e.code === 'KeyL') { if (basarimEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(basarimEkrani); return; }
-    if (e.code === 'KeyB') { if (tarifKitabi.acik) panelKapat(true); else if (!panelAcik()) panelAc(tarifKitabi, oyun.envanter, yakinIstasyonlar(), eldekiTarif()); return; }
+    if (e.code === T.etkiles && !e.repeat && (envEkrani.acik || koyluEkrani.acik)) { if (envEkrani.acik) envanterAcKapa(); else panelKapat(true); return; }
+    if (e.code === T.envanter) { if (koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik) panelKapat(true); else envanterAcKapa(); return; }
+    if (e.code === T.gorev) { if (gorevEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(gorevEkrani); return; }
+    if (e.code === T.harita) { if (haritaEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(haritaEkrani, oyun); return; }
+    if (e.code === T.basarim) { if (basarimEkrani.acik) panelKapat(true); else if (!panelAcik()) panelAc(basarimEkrani); return; }
+    if (e.code === T.tarif) { if (tarifKitabi.acik) panelKapat(true); else if (!panelAcik()) panelAc(tarifKitabi, oyun.envanter, yakinIstasyonlar(), eldekiTarif()); return; }
     if (e.code === 'Escape' && haritaEkrani.acik && haritaEkrani.formAcik) { haritaEkrani.formKapat(); return; }
     if (haritaEkrani.acik && (e.code === 'Equal' || e.code === 'NumpadAdd' || e.code === 'Minus' || e.code === 'NumpadSubtract')) { haritaEkrani.yakinlas(e.code === 'Equal' || e.code === 'NumpadAdd' ? 1 : -1); return; }
     if (e.code === 'Escape' && panelAcik()) { if (envEkrani.acik) envanterKapat(false); else panelKapat(false); return; }
     if (!kilitli) return;
     if (e.code.startsWith('Digit')) { const n = +e.code.slice(5); if (n >= 1 && n <= 9) seciliAyarla(n - 1); }
-    if (e.code === 'KeyG') oyun.etkilesim.at(e.shiftKey);
+    if (e.code === T.at) oyun.etkilesim.at(e.shiftKey);
     /* 0.25.0: R: elde tutulan cihazın ya da yönlü bloğun konulacağı yönü çevirir */
-    if (e.code === 'KeyR' && !e.repeat && oyun.etkilesim.kablo) { oyun.etkilesim.kabloIptal(); ses.tik(); }
-    else if (e.code === 'KeyR' && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { const n = oyun.etkilesim.dondur(); ses.tik(); oyun.hud.bildirim(`Yerleştirme yönü çevrildi (${n * 90}°)`); }
-    if (e.code === 'KeyE' && !e.repeat) oyun.etkilesim.etkiles();
-    if ((e.code === 'KeyT' || e.code === 'Enter') && oyun.ag) { e.preventDefault(); sohbetAc(); }
-    if (e.code === 'F3') $('#hata').hidden = !$('#hata').hidden;
+    if (e.code === T.dondur && !e.repeat && oyun.etkilesim.kablo) { oyun.etkilesim.kabloIptal(); ses.tik(); }
+    else if (e.code === T.dondur && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { const n = oyun.etkilesim.dondur(); ses.tik(); oyun.hud.bildirim(`Yerleştirme yönü çevrildi (${n * 90}°)`); }
+    if (e.code === T.etkiles && !e.repeat) oyun.etkilesim.etkiles();
+    if ((e.code === T.sohbet || e.code === 'Enter') && oyun.ag) { e.preventDefault(); sohbetAc(); }
+    if (e.code === T.hata) $('#hata').hidden = !$('#hata').hidden;
   }
 });
-addEventListener('keyup', e => { tus[e.code] = false; if (e.code === 'KeyW') kosKilit = false; if (e.code === 'Tab') oyuncuListesiGoster(false); });
+addEventListener('keyup', e => { tus[e.code] = false; if (e.code === T.ileri) kosKilit = false; if (e.code === T.liste) oyuncuListesiGoster(false); });
 addEventListener('blur', () => { for (const k in tus) tus[k] = false; fare.sol = fare.sag = false; });
 tuval.addEventListener('mousedown', e => {
   ses.baslat();
@@ -947,10 +970,10 @@ function adim(t) {
       }
     }
     /* Çok oyunculu: yatakta beklerken hareket edilince kalkılır; gündüz olunca da kalkılır */
-    if (o.yatakta && (!kilitli ? false : (tus.KeyW || tus.KeyA || tus.KeyS || tus.KeyD || tus.Space || tus.KeyC)) || (o.yatakta && (((o.zaman < 0.52 || o.zaman > 0.97) && !o.hava.firtina) || o.hayatta.olu))) yataktanKalk();
+    if (o.yatakta && (!kilitli ? false : (basili(tus, 'ileri') || basili(tus, 'sol') || basili(tus, 'geri') || basili(tus, 'sag') || basili(tus, 'zipla') || basili(tus, 'egil'))) || (o.yatakta && (((o.zaman < 0.52 || o.zaman > 0.97) && !o.hava.firtina) || o.hayatta.olu))) yataktanKalk();
     const g = kilitli && o.uyku <= 0 && !o.yatakta ? {
-      ileri: tus.KeyW, geri: tus.KeyS, sol: tus.KeyA, sag: tus.KeyD, zipla: tus.Space,
-      kos: tus.ShiftLeft || tus.ShiftRight || kosKilit, egil: tus.KeyC, kosabilir: o.hayatta.aclik > 6 && !o.hayatta.etki('kirik')
+      ileri: basili(tus, 'ileri'), geri: basili(tus, 'geri'), sol: basili(tus, 'sol'), sag: basili(tus, 'sag'), zipla: basili(tus, 'zipla'),   // 0.30.7: değiştirilebilir tuşlar
+      kos: basili(tus, 'kos') || kosKilit, egil: basili(tus, 'egil'), kosabilir: o.hayatta.aclik > 6 && !o.hayatta.etki('kirik')
     } : { kosabilir: false };
     const zirh = o.envanter.zirh;
     g.palet = !!(zirh[3] && zirh[3].id === 457);
@@ -1012,7 +1035,7 @@ function adim(t) {
         for (const m of o.dunya.mesaleler.values()) if (m[3] === 11 && Math.hypot(m[0] - g.x, m[1] - g.y, m[2] - g.z) < 14) { ses.lav(0.8); break; }
       }
     }
-    if (kilitli && !o.hayatta.olu && o.uyku <= 0) o.etkilesim.guncelle(dt, { sol: fare.sol, sag: fare.sag, egil: tus.KeyC });
+    if (kilitli && !o.hayatta.olu && o.uyku <= 0) o.etkilesim.guncelle(dt, { sol: fare.sol, sag: fare.sag, egil: basili(tus, 'egil') });
     else { o.etkilesim.ilerleme = 0; sahne.secimGoster(o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu())); }
     const eldeki = o.envanter.seciliId();
     o.olta.guncelle(dt, !!ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'olta' && !o.hayatta.olu, o.isik);
