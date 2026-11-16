@@ -9,7 +9,7 @@ import { koylerAlan } from '../dunya/koy-uretici.js';
 import { simge } from '../grafik/doku.js';
 import { THREE } from '../grafik/sahne.js';
 import { YER_RENKLERI } from './harita-ekrani.js';
-import { PB, PY, SURUM } from '../sabitler.js';
+import { PB, PY, SURUM, diyarMi } from '../sabitler.js';
 import { enerjiMetni, DURUM_AD } from '../oyun/elektrik.js';
 import { HAVA_ADI } from '../grafik/hava.js';
 import { CIHAZ } from '../cihazlar.js';
@@ -375,6 +375,9 @@ export class GelistiriciPenceresi {
     const oyuncular = o.ag && o.ag.uzak ? [...o.ag.uzak.harita.values()].filter(u => !u.ilk) : [];
     return this.bolum('Yerler', this.dugmeler(this.dugme('isinla koy', 'En yakın köy'), this.dugme('isinla liman', 'En yakın liman'), this.dugme('isinla zindan', 'En yakın zindan'), this.dugme('isinla maden', 'En yakın maden'), this.dugme('isinla tapinak', 'Çöl tapınağı'), this.dugme('isinla ormantapinak', 'Orman tapınağı'), this.dugme('isinla kule', 'Buzul kulesi'), this.dugme('isinla kamp', 'Haydut kampı'), this.dugme('boss liste', 'Boss yerleri'), this.dugme('isinla batik', 'En yakın batık'),
         this.dugme('isinla dogum', 'Doğma noktası'), o.olumNoktasi ? this.dugme('isinla olum', 'Son ölüm noktası') : '', this.dugme('isinla ~ ~', 'Yüzeye çık'), this.dugme('isinla geri', 'Önceki konuma dön'))) +
+      /* 0.30.4: Yeraltı Diyarı */
+      this.bolum('Yeraltı Diyarı', this.dugmeler(this.dugme('diyar', diyarMi(P.x) ? 'Dünyaya dön' : 'Diyara geç'), this.dugme('isinla kale', 'En yakın Kül Kalesi')),
+        diyarMi(P.x) ? 'Şu an diyardasınız. Dönüşte 8:1 oranlı konuma çıkılır; yakında geçit yoksa kurulur.' : 'Diyara geçişte bulunulan konumun sekizde birine karşılık gelen yere varılır; yakında geçit yoksa obsidyen platformlu yeni bir geçit kurulur.') +
       this.bolum('Biyomlar', this.dugmeler(...BIYOMLAR.map(b => this.dugme('isinla biyom ' + b.replace(/ /g, '_'), b))), 'Seçilen biyomun en yakın noktasına ışınlar.') +
       this.bolum('Koordinat', `<div class="gelSatir gelKoord"><label>X <input type="number" id="gelX" value="${Math.round(P.x)}"></label><label>Y <input type="number" id="gelY" placeholder="zemin"></label><label>Z <input type="number" id="gelZ" value="${Math.round(P.z)}"></label><button type="button" data-git="1">Git</button></div>` +
         this.dugmeler(...[['Kuzey', '~ ~-100'], ['Güney', '~ ~100'], ['Doğu', '~100 ~'], ['Batı', '~-100 ~']].map(([a, k]) => this.dugme('isinla ' + k, a + ' 100 blok')), this.dugme('isinla ~ ~40 ~', '40 blok yukarı'), `<button type="button" data-harita="1">Haritadan seç (Ctrl + tık)</button>`)) +

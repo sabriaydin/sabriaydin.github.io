@@ -84,12 +84,12 @@ try { sahne = new Sahne(tuval); } catch (e) { hataGoster('WebGL başlatılamadı
 sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
 
 /* ---------- Ekran yönetimi ---------- */
-const EKRANLAR = { dunyaAyar: '#dunyaAyarEkrani', ana: '#anaMenu', dunyalar: '#dunyalarEkrani', yeni: '#yeniEkrani', ayarlar: '#ayarlarEkrani', yardim: '#yardimEkrani', duraklat: '#duraklatEkrani', olum: '#olumEkrani', yukleme: '#yuklemeEkrani', cok: '#cokEkrani', bilgi: '#bilgiEkrani' };
+const EKRANLAR = { ana: '#anaMenu', dunyalar: '#dunyalarEkrani', yeni: '#yeniEkrani', ayarlar: '#ayarlarEkrani', duraklat: '#duraklatEkrani', olum: '#olumEkrani', yukleme: '#yuklemeEkrani', cok: '#cokEkrani', bilgi: '#bilgiEkrani' };
 let aktifEkran = 'ana', oncekiEkran = 'ana';
 function ekran(ad) {
-  if (ad === 'ayarlar' || ad === 'yardim') oncekiEkran = aktifEkran;
+  if (ad === 'ayarlar') oncekiEkran = aktifEkran;
   for (const [k, s] of Object.entries(EKRANLAR)) $(s).hidden = k !== ad;
-  if (ad === 'ayarlar' || ad === 'yardim') { const el = $(EKRANLAR[ad]); el.classList.toggle('menuArka', !oyun); el.classList.toggle('yari', !!oyun); }
+  if (ad === 'ayarlar') { const el = $(EKRANLAR[ad]); el.classList.toggle('menuArka', !oyun); el.classList.toggle('yari', !!oyun); }
   aktifEkran = ad;
   if (ad === 'ana') sunucuIstek = false;
   if (ad === 'dunyalar') { $('#dunyaAra').value = ''; dunyaListesi(); $('#dunyalarBaslik').textContent = sunucuIstek ? 'Açılacak Dünyayı Seçiniz' : 'Dünyalar'; }
@@ -97,13 +97,7 @@ function ekran(ad) {
   if (ad === 'duraklat') agPanelCiz();
   if (ad === 'ayarlar') ayarFormu();
   if (ad === 'yeni') { $('#yeniTohum').value = ''; $('#yeniKomut').checked = false; $('#yeniKomut').disabled = true; $('#yeniKonsol').checked = false; $('#yeniVucut').checked = true; zorlukFormu('#yeniZorluk', 'normal', false); dengeFormu('yeni', VARSAYILAN_DENGE); setTimeout(() => $('#yeniAd').select(), 30); }
-  if (ad === 'dunyaAyar' && oyun) {
-    zorlukFormu('#daZorluk', oyun.zorluk, true); dengeFormu('da', oyun.denge);
-    const kilit = !!oyun.istemci;
-    $('#daVucut').checked = oyun.vucutIsisi !== false; $('#daKonsol').checked = !!oyun.konsol;
-    for (const el of document.querySelectorAll('#dunyaAyarEkrani select, #daZorluk button, #daVucut, #daKonsol')) if (kilit) el.disabled = true; else if (el.tagName !== 'BUTTON') el.disabled = false;
-    $('#daNot').textContent = kilit ? 'Dünya ayarlarını dünyayı açan oyuncu değiştirir.' : oyun.zorluk === 'hardcore' ? 'Hardcore dünyalarda zorluk değiştirilemez; denge ayarları değiştirilebilir.' : 'Değişiklikler hemen uygulanır. Hardcore yalnızca yeni dünya oluşturulurken seçilebilir.';
-  }
+  /* 0.30.4: dünya ayarları oluşturulduktan sonra değiştirilemez; Dünya Ayarları ve Nasıl Oynanır ekranları kaldırıldı */
   tiklaGuncelle();
 }
 document.addEventListener('click', e => {
@@ -113,6 +107,22 @@ document.addEventListener('click', e => {
   ekran(b.dataset.git);
 });
 $('#ayarTamam').onclick = () => { ses.tik(); ekran(oncekiEkran); };
+/* 0.30.4: data-balon taşıyan öğelerin üzerine gelince bilgi baloncuğu (öğenin üstünde, ekran dışına taşmadan) */
+{
+  const B = $('#balon'); let hedef = null;
+  const goster = el => {
+    hedef = el; B.innerHTML = el.dataset.balon; B.hidden = false;
+    const r = el.getBoundingClientRect(), w = B.offsetWidth, h = B.offsetHeight;
+    let x = r.left + r.width / 2 - w / 2, y = r.top - h - 10, alt = false;
+    if (y < 6) { y = r.bottom + 10; alt = true; }
+    x = Math.max(6, Math.min(innerWidth - w - 6, x));
+    B.style.left = x + 'px'; B.style.top = y + 'px'; B.classList.toggle('alt', alt);
+    B.style.setProperty('--ok', (r.left + r.width / 2 - x) + 'px');
+  };
+  document.addEventListener('mouseover', e => { const el = e.target.closest && e.target.closest('[data-balon]'); if (el && el !== hedef) goster(el); else if (!el && hedef) { hedef = null; B.hidden = true; } });
+  document.addEventListener('mousedown', () => { hedef = null; B.hidden = true; }, true);
+  new MutationObserver(() => { if (hedef && !hedef.isConnected) { hedef = null; B.hidden = true; } }).observe(document.body, { childList: true, subtree: true });
+}
 /* 0.29.0: ayar kategorileri ve varsayılanlara dönüş */
 $('#ayarSekmeler').addEventListener('click', e => {
   const b = e.target.closest('button[data-as]'); if (!b) return;
@@ -131,7 +141,7 @@ $('#ayarSifirla').onclick = e => {
   if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5);   // mobil cihazlarda düşük görüş varsayılanı
   ses.tik(); ayarUygula(); ayarFormu();
 };
-/* 0.23.0: zorluk ve denge formları (yeni dünya ve Dünya Ayarları) */
+/* 0.23.0: zorluk ve denge formları (yeni dünya) */
 function zorlukFormu(kap, secili, mevcut) {
   const el = $(kap);
   const kart = el.classList.contains('zorlukKart');   // 0.29.2: yeni dünya ekranında açıklamalı kartlar
@@ -140,28 +150,17 @@ function zorlukFormu(kap, secili, mevcut) {
 }
 function dengeFormu(onek, d) { for (const sel of document.querySelectorAll(`select[id^="${onek}"][data-denge]`)) { const k = sel.dataset.denge; sel.innerHTML = DENGE_SECENEK[k].map(([v, a]) => `<option value="${v}">${a}</option>`).join(''); sel.value = String(d[k]); } }
 function dengeOku(onek) { const d = {}; for (const sel of document.querySelectorAll(`select[id^="${onek}"][data-denge]`)) d[sel.dataset.denge] = +sel.value; return dengeDuzelt(d); }
-function dunyaAyarUygula() {
-  const o = oyun; if (!o || o.istemci) return;
-  if (o.zorluk !== 'hardcore' && $('#daZorluk').dataset.secili !== 'hardcore') o.zorluk = $('#daZorluk').dataset.secili;
-  o.denge = dengeOku('da'); o.vucutIsisi = $('#daVucut').checked; o.konsol = $('#daKonsol').checked; zorlukUygula(o);
-  if (!o.konsol && konsol.acik) panelKapat(true);
-  if (o.ag && o.ag.yay) o.ag.yay({ t: 'za', z: o.zorluk, d: o.denge, v: o.vucutIsisi ? 1 : 0, k: o.konsol ? 1 : 0 });
-}
 document.addEventListener('click', e => {
   const b = e.target.closest('.zorlukSec button[data-z]'); if (!b || b.disabled) return;
   const kap = b.parentNode; ses.tik();
-  zorlukFormu('#' + kap.id, b.dataset.z, kap.id === 'daZorluk');
-  if (kap.id === 'daZorluk') dunyaAyarUygula();
+  zorlukFormu('#' + kap.id, b.dataset.z, false);
 });
-document.addEventListener('change', e => { if (e.target.closest('#dunyaAyarEkrani select, #daVucut, #daKonsol')) dunyaAyarUygula(); });
 $('#yeniKonsol').onchange = () => { const k = $('#yeniKonsol').checked; $('#yeniKomut').disabled = !k; if (!k) $('#yeniKomut').checked = false; };   // komutlar konsoldan girilir
-$('#daTamam').onclick = () => { ses.tik(); ekran('duraklat'); };
 /* Hardcore: izleyici kipi (uçarak, duvarlardan geçerek dolaşılır; hiçbir şeye dokunulamaz) */
 function izleyiciYap(o) {
   o.izleyici = true; o.oyuncu.ucus = true; o.oyuncu.hayalet = true; o.hayatta.olumsuz = true; o.hayatta.tok = true; o.etkilesim.izleyici = true;
   document.body.classList.add('izleyici');
 }
-$('#yardimTamam').onclick = () => { ses.tik(); ekran(oncekiEkran); };
 
 /* ---------- Ayarlar ---------- */
 /* 0.23.0: grafik ön ayarları: görüş mesafesi, çizim çözünürlüğü ve kafa sallanması birlikte ayarlanır */
@@ -667,7 +666,7 @@ function oyunBaslat(v) {
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
       if (oyun.istemci) { oyun.ag.sandikIste(x, y, z); return; }
       if (oyun.ag && !oyun.ag.sandikKilitle(k)) { hud.bildirim('Bu sandığı başka bir oyuncu kullanıyor.'); return; }
-      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k, kural: kapFiltresiId(dunya.blok(x, y, z)) });
+      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k, kural: kapFiltresiId(dunya.blok(x, y, z)), blok: dunya.blok(x, y, z) });
       sandikBasarim(x, y, z);
     },
     /* 0.26.0: kablolar: çok oyunculu istemcide istek sunucuya gider; sökülen kablo envantere geri döner */
@@ -1393,7 +1392,7 @@ function agArayuz() {
       const o = oyun;
       if (!o || o.hayatta.olu || panelAcik() || envEkrani.acik) { if (o && o.ag) o.ag.sandikKapat(k, yuvalar); return; }
       const [x, y, z] = String(k).split(',').map(Number);
-      envanterAcKapa(null, { yuvalar, k, kural: kapFiltresiId(o.dunya.blok(x, y, z)) });
+      envanterAcKapa(null, { yuvalar, k, kural: kapFiltresiId(o.dunya.blok(x, y, z)), blok: o.dunya.blok(x, y, z) });
       sandikBasarim(x, y, z);
     },
     sandikKapat: k => { if (envEkrani.acik && envEkrani.sandik && (k == null || envEkrani.sandik.k === k)) { envanterKapat(aktifEkran === 'oyun'); if (oyun) oyun.hud.bildirim('Sandık kırıldı.'); } }

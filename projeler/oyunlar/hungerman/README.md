@@ -117,6 +117,13 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.4 (0.30.4): Bilgi baloncukları, sandık ekranı, dünya ayarları
+- Üretim penceresindeki istasyon simgelerinin ve kategori sekmelerinin üzerine gelince bilgi baloncuğu açılır (istasyonun adı ve yakında olup olmadığı; kategorideki tarif ve yapılabilir sayısı). Sandık işlem düğmelerinde de baloncuk vardır.
+- Dünya ayarları (zorluk, denge, vücut ısısı, geliştirici konsolu) dünya oluşturulduktan sonra değiştirilemez; duraklatma menüsündeki Dünya Ayarları kaldırıldı.
+- "Nasıl Oynanır" ekranı ana menüden ve duraklatma menüsünden kaldırıldı (ayrıntılı rehber sonra hazırlanacak).
+- Geliştirici penceresi, Işınlanma sekmesi: yeni "Yeraltı Diyarı" bölümü: Diyara geç / Dünyaya dön ve En yakın Kül Kalesi. Konsola `isinla kale` eklendi (dünyadayken 8:1 oranlı konuma en yakın kale).
+- Sandık ekranı yeniden tasarlandı: simgeli başlık (çeşit ve eşya sayısı), doluluk çubuğu, çerçeveli 27 yuvalık ızgara, simgeli işlem düğmeleri, cihaz haznelerinde kural notu ve "İçindekiler" özeti (eşya başına toplam; tıklanan eşyanın tamamı çantaya alınır).
+
 ## 30.3 (0.30.3): Envanter ve üretim hata düzeltmeleri
 - Kategoriler arası geçiş takılıyordu: açık envanter her karede rastgele (saniyede birkaç kez) baştan çiziliyor, tıklanan düğme fare basılıyken yerinden sökülüyordu. Pencere artık yarım saniyede bir yenilenir ve yalnızca içeriği değişen bölümler yeniden kurulur.
 - Üretim ayrıntısındaki "tarif ›", "Bununla yapılanlar" ve "Son üretilenler" düğmeleri ile Tarif Kitabı'ndaki tarif bağlantıları ekran geçişi sanılıp bütün ekranları gizleyebiliyordu; düzeltildi.

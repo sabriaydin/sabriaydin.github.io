@@ -12,6 +12,7 @@ import { madenlerAlan } from '../dunya/maden-uretici.js';
 import { yapilarAlan, YAPI_ADI, tekYapilar } from '../dunya/yapi-uretici.js';
 import { zindanBossu } from '../oyun/yapilar.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
+import { kalelerAlan } from '../dunya/diyar-uretici.js';
 import { HaritaKesif } from '../harita/kesif.js';
 import { PB, DENIZ, DUNYA_SINIRI, KITA_YARICAP, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
 
@@ -188,7 +189,7 @@ export class Konsol {
       if (kucuk(p[0] || '') !== 'temizle') { this.hata('Kullanım: envanter temizle'); return; }
       o.envanter.temizle(); this.tamam('Envanter boşaltıldı.');
     }, { hile: true });
-    ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, maden, batik, tapinak, ormantapinak, kule, kamp, dogum, olum, geri, biyom <ad>, oyuncu <ad>, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | maden | batik | tapinak | ormantapinak | kule | kamp | dogum | olum | geri | biyom <ad> | oyuncu <ad> | isaret <ad>', (o, p) => {
+    ekle('isinla', 'Koordinata veya yere ışınlar (koy, liman, zindan, maden, batik, tapinak, ormantapinak, kule, kamp, kale, dogum, olum, geri, biyom <ad>, oyuncu <ad>, isaret <ad>)', 'isinla <x> [y] <z> | koy | liman | zindan | maden | batik | tapinak | ormantapinak | kule | kamp | kale | dogum | olum | geri | biyom <ad> | oyuncu <ad> | isaret <ad>', (o, p) => {
       const P = o.oyuncu.konum, a = kucuk(p[0] || ''), u = o.dunya.uretici, R = 1600;
       if (a === 'geri') {
         const e = this.oncekiKonum;
@@ -245,6 +246,13 @@ export class Konsol {
         this.isinla(o, en.x + 0.5, en.y + 3, en.z + 0.5); return;
       }
       if (a === 'dogum') { const d = o.dogum; this.isinla(o, d.x, d.y + 0.5, d.z); return; }
+      /* 0.30.4: Yeraltı Diyarı: en yakın Kül Kalesi'nin burcuna (dünyadayken 8:1 oranlı konuma göre en yakını) */
+      if (a === 'kale') {
+        const ic = diyarMi(P.x), cx = ic ? P.x : DIYAR_X + P.x / 8, cz = ic ? P.z : P.z / 8;
+        const en = this.enYakin(kalelerAlan(u, DIYAR_X - DIYAR_SINIR, -DIYAR_SINIR, DIYAR_X + DIYAR_SINIR, DIYAR_SINIR), { x: cx, z: cz });
+        if (!en) { this.hata('Diyarda Kül Kalesi bulunamadı.'); return; }
+        this.isinla(o, en.x + 2.5, en.y + 0.2, en.z + 2.5); this.yaz(`Kül Kalesi · Y ${en.y}`, 'soluk'); return;
+      }
       if (a === 'isaret') {
         const ad = kucuk(p.slice(1).join(' '));
         const y = (o.yerler || []).find(v => kucuk(v.ad) === ad) || (o.yerler || []).find(v => kucuk(v.ad).includes(ad));
@@ -256,7 +264,7 @@ export class Konsol {
       else if (p.length === 2) { x = this.koord(p[0], P.x); y = null; z = this.koord(p[1], P.z); }
       if (x == null || z == null || (p.length >= 3 && y == null)) { this.hata('Kullanım: isinla <x> [y] <z> | koy | liman | zindan | maden | batik | dogum | isaret <ad>'); return; }
       this.isinla(o, x, y, z);
-    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'maden', 'batik', 'tapinak', 'ormantapinak', 'kule', 'kamp', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
+    }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'maden', 'batik', 'tapinak', 'ormantapinak', 'kule', 'kamp', 'kale', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
     ekle('dogum', 'Doğma noktasını bulunulan yere ayarlar', 'dogum', o => {
       const P = o.oyuncu.konum; o.dogum = { x: P.x, y: P.y, z: P.z };
       this.tamam(`Doğma noktası: X ${Math.round(P.x)} · Y ${Math.round(P.y)} · Z ${Math.round(P.z)}`);

@@ -87,6 +87,8 @@
 </div>
 
 <!-- Envanter ve üretim -->
+<!-- 0.30.4: simgelerin üzerine gelindiğinde açılan bilgi baloncuğu -->
+<div id="balon" role="tooltip" hidden></div>
 <div id="envanterEkrani" class="kaplama" hidden>
   <div class="pencere envPencere">
     <section class="envSol">
@@ -118,10 +120,20 @@
         <aside id="tarifAyrinti" class="tarifAyrinti"></aside>
       </div>
     </section>
+    <!-- 0.30.4: sandık ekranı yeniden tasarlandı: başlık kartı, doluluk, düzenli ızgara, işlem çubuğu, içindekiler özeti -->
     <section class="envSandik" hidden>
-      <header><h2>Sandık</h2><span class="ipucuMetin">Shift + tık: sandık ile envanter arasında taşı</span></header>
-      <div class="sandikIslem"><button type="button" class="envIslem" data-sandik="al">Tümünü al</button><button type="button" class="envIslem" data-sandik="koy">Çantayı boşalt</button><button type="button" class="envIslem" data-sandik="benzer">Benzerlerini koy</button><button type="button" class="envIslem" data-sandik="sirala">Sırala</button></div>
-      <div id="sandikIzgara" class="izgara"></div>
+      <header class="sandikBaslik"><div class="sandikSimge" id="sandikSimge"></div><div><h2>Sandık</h2><small id="sandikAlt"></small></div></header>
+      <div class="sandikDoluluk"><i><em id="sandikDolulukCubuk"></em></i><span id="sandikDolulukMetin"></span></div>
+      <p class="sandikKural" id="sandikKural" hidden></p>
+      <div class="sandikKutu"><div id="sandikIzgara" class="izgara"></div></div>
+      <div class="sandikIslem">
+        <button type="button" class="sIslem" data-sandik="al" data-balon="<b>Tümünü al</b><em>Sandıktaki her şeyi çantaya alır</em>"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Tümünü al</button>
+        <button type="button" class="sIslem" data-sandik="koy" data-balon="<b>Çantayı boşalt</b><em>Çantadaki eşyaları sandığa koyar (hızlı erişim çubuğu hariç)</em>"><svg viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>Çantayı boşalt</button>
+        <button type="button" class="sIslem" data-sandik="benzer" data-balon="<b>Benzerlerini koy</b><em>Yalnızca sandıkta zaten bulunan türdeki eşyaları koyar</em>"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h6M17 10l3 3-3 3"/></svg>Benzerlerini koy</button>
+        <button type="button" class="sIslem" data-sandik="sirala" data-balon="<b>Sırala</b><em>Yığınları birleştirir ve türe göre dizer</em>"><svg viewBox="0 0 24 24"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>Sırala</button>
+      </div>
+      <div class="sandikOzet"><h4>İçindekiler <small>tıklanan eşyanın tamamı çantaya alınır</small></h4><div id="sandikOzet"></div></div>
+      <p class="ipucuMetin">Shift + tık: sandık ile çanta arasında taşı · Çift tık: aynı eşyaları topla · Yuvanın üzerindeyken 1-9: çubukla değiştir</p>
     </section>
     <section class="envOrs" hidden>
       <header><h2>Örs</h2><span class="ipucuMetin">Eşyalar, malzemesiyle ya da aynı türden ikinci bir eşyayla onarılır</span></header>
@@ -252,7 +264,6 @@
       <button class="dugme ana" data-git="dunyalar">Tek Oyunculu</button>
       <button class="dugme" data-git="cok">Çok Oyunculu</button>
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
-      <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
     </div>
     <p class="surum"><span id="surum"></span> · <a href="../../../" class="siteDon">Siteye dön</a></p>
   </div>
@@ -339,7 +350,7 @@
             <label class="alan">Meteor<select id="yeniMeteor" data-denge="meteor"></select></label>
             <label class="alan">Vücut ısısı değişimi<select id="yeniIsi" data-denge="isiHizi"></select></label>
           </div>
-          <p class="aciklama">Zorluk ve denge ayarları sonradan duraklatma menüsündeki Dünya Ayarları'ndan değiştirilebilir (Hardcore hariç).</p>
+          <p class="aciklama">Dünya ayarları dünya oluşturulduktan sonra değiştirilemez.</p>
         </section>
       </div>
     </div>
@@ -395,132 +406,15 @@
       </section>
       <section class="ayarBolum" data-as="oynanis" hidden>
         <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
-        <p class="ayarNot">Zorluk, Kanlı Ay, meteor sıklığı, vücut ısısı ve geliştirici konsolu her dünya için ayrıdır: dünya oluşturulurken seçilir, sonradan duraklatma menüsündeki Dünya Ayarları'ndan değiştirilir.</p>
+        <p class="ayarNot">Zorluk, Kanlı Ay, meteor sıklığı, vücut ısısı ve geliştirici konsolu her dünya için ayrıdır: dünya oluşturulurken seçilir ve sonradan değiştirilemez.</p>
       </section>
     </div>
     <div class="altDugmeler"><button class="dugme" id="ayarSifirla">Varsayılanlara dön</button><button class="dugme ana" id="ayarTamam">Tamam</button></div>
   </div>
 </div>
 
-<!-- Yardım -->
-<div id="yardimEkrani" class="ekran" hidden>
-  <div class="pencere orta genis">
-    <header><h2>Nasıl Oynanır</h2></header>
-    <div class="yardimIcerik">
-      <div>
-        <h3>Kontroller</h3>
-        <dl class="tuslar">
-          <dt>W A S D</dt><dd>Hareket</dd>
-          <dt>Boşluk</dt><dd>Zıplama, suda yukarı yüzme</dd>
-          <dt>Sol Shift / W'ye iki kez</dt><dd>Koşma</dd>
-          <dt>C</dt><dd>Eğilme (kenardan düşmez), tekneden inme, paletle suda dalma, tırmanma merdiveninde tutunma</dd>
-          <dt>Sol tık (basılı)</dt><dd>Kazma, kesme, kırma</dd>
-          <dt>Sağ tık</dt><dd>Blok koyma, yeme, içme, toplama, masa ve fırını açma, kapı açma, hayvan besleme</dd>
-          <dt>E</dt><dd>Etkileşim: kapı, sandık, masa, fırın, örs, tencere, yatak, köylü, tekne, sandalye, kol, düğme, müzik kutusu; evcil hayvanı oturtma, ata binme / inme</dd>
-          <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
-          <dt>R</dt><dd>Elde tutulan cihazın ya da yönlü bloğun (merdiven, sandalye, kapı, kovan…) konulacağı yönü 90° çevirir; konulacağı yer yarı saydam önizlemeyle gösterilir</dd>
-          <dt>Q</dt><dd>Envanter ve üretim</dd>
-          <dt>J</dt><dd>Görev günlüğü</dd>
-          <dt>L</dt><dd>Başarımlar</dd>
-          <dt>B</dt><dd>Tarif Kitabı: bütün tarifler, eşyaların bulunduğu yerler, tarif takibi</dd>
-          <dt>M</dt><dd>Büyük harita</dd>
-          <dt>G / Shift + G</dt><dd>Elindekini at / yığını at</dd>
-          <dt>T / Enter</dt><dd>Sohbet (çok oyunculu)</dd>
-          <dt>Tab (basılı)</dt><dd>Oyuncu listesi ve katılım kodu</dd>
-          <dt>F3</dt><dd>Konum ve teknik bilgiler</dd>
-          <dt>F8</dt><dd>Geliştirici konsolu (komut listesi: yardim)</dd>
-          <dt>F9</dt><dd>Geliştirici modu penceresi (geliştirici kodu girildikten sonra)</dd>
-          <dt>Esc</dt><dd>Duraklat</dd>
-        </dl>
-      </div>
-      <div>
-        <h3>Hayatta kalma</h3>
-        <ul>
-          <li>Ağaçları elle kesip kütük toplayın, kütükten kalas, kalastan çubuk ve <b>Üretim Masası</b> yapın.</li>
-          <li>Masanın yanında tahta kazma üretin; taş kazarak parke taş toplayın ve daha güçlü aletlere geçin.</li>
-          <li>Cevherlerin her biri belirli bir kazma seviyesi ister: kömür tahta, bakır taş, demir bakır, altın ve elmas demir kazma.</li>
-          <li>Ham cevherler <b>Fırın</b> yanında kömürle külçeye dönüşür. Kütük fırında odun kömürü verir.</li>
-          <li>Açlık çubuğu zamanla ve koşarken azalır. Böğürtlen, elma ve mantar toplayın; doyunca can yenilenir.</li>
-          <li>Su altında oksijen azalır. Yüksekten düşmek can kaybettirir.</li>
-          <li>Geceler karanlıktır; meşale (çubuk + kömür) ışık verir. Mağaralar derinde daha değerli cevherler saklar.</li>
-          <li>Geceleri ve karanlık mağaralarda zombiler ortaya çıkar; gün doğunca güneş altında yanarlar. Meşale ve kamp ateşinin çevresinde doğmazlar.</li>
-          <li>Canlılara sol tıkla vurulur; kılıç en çok hasarı verir. Düşerken yapılan vuruş kritik hasar verir. Yay, sağ tık basılı tutularak gerilir ve bırakılınca ok atar.</li>
-          <li>Zırh parçaları envanterdeki zırh yuvalarına konur ya da elde tutulurken sağ tıkla giyilir; alınan hasarı azaltır.</li>
-          <li>Hayvanlardan et, deri, yün ve tüy elde edilir. Çiğ et kamp ateşi veya fırın yanında pişirilir. Kurtlar saldırıya uğramadıkça zararsızdır.</li>
-          <li>Yatakta yalnızca geceleri uyunabilir; yatak aynı zamanda doğma noktasını belirler.</li>
-          <li>Haritada köyler bulunur. Köylülere sağ tıklayarak sikke karşılığında ticaret yapılır ve görev alınır. Görevler ve ticaret köydeki itibarı yükseltir; köylülere zarar vermek itibarı düşürür.</li>
-          <li>Pusuladaki ev simgesi yakındaki köyleri, sarı işaret görev hedefini gösterir. Köylüler geceleri evlerine çekilir.</li>
-          <li>Buğday tohumu toprak veya çimen üstüne ekilir ve zamanla olgunlaşır. Buğdaydan ekmek yapılır. Köy sandıklarında yararlı eşyalar bulunabilir.</li>
-          <li>Derin mağaralarda lav gölleri bulunur; lav yakar ve içine düşen eşyaları yok eder. Su içine girmek yanmayı söndürür.</li>
-          <li>Zindanlar, canavar yuvası ve ganimet sandıkları içeren taş odalardır. Yuvanın çevresine meşale koymak canavar çıkışını durdurur; yuva kazmayla kırılabilir.</li>
-          <li>İskeletler uzaktan ok atar, mağara örümcekleri duvara tırmanır ve zehirler. Kemikten elde edilen kemik tozu ekinleri hızla büyütür.</li>
-          <li>Çöl ve savanda güneşte yanmayan mumyalar dolaşır; vuruşları açlığı hızlandırır. Karlı bölgelerdeki buz iskeletlerinin okları yavaşlatır. Derin sularda boğulmuş zombiler bulunur. Mağaralarda ve gece açıkta yarasa sürüleri saldırabilir.</li>
-          <li><b>Büyü Masası</b> (elmas, parıltı kristali ve kesme taş) ile aletler, silahlar ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir: Keskinlik, Savurma, Yağma, Verimlilik, Servet, Güç, Cazibe, Koruma, Solunum, Tüy Düşüşü ve Kırılmazlık. Büyüler örste aynı türden eşyalarla birleştirilir.</li>
-          <li>Başarımlar L tuşuyla ya da duraklatma menüsünden görüntülenir; kazanılan başarım sağ üstte gösterilir.</li>
-          <li>Dünyada özel yapılar bulunur: çöl tapınakları, orman tapınakları, buzul kuleleri ve haydut kampları. Tapınaklardaki tuzak tellerine basmak yakındaki ok atıcıları tetikler; tel kırılarak tuzak etkisizleştirilir.</li>
-          <li>Bosslar yaklaşınca uyanır: çöl tapınağının hazine odasında Firavun, buzul kulesinin tepesinde Buz Büyücüsü, haydut kampında Haydut Reisi, derin zindanlarda Taş Muhafız. Yenilen bosslar efsanevi eşyalar düşürür ve bir daha çıkmaz.</li>
-          <li>Pusulada ★ doğma noktasını, ✖ son ölüm noktasını gösterir; işaretlerin yanındaki sayı blok cinsinden uzaklıktır.</li>
-          <li><b>Mekanik bloklar</b>: kol, düğme, basınç plakası ve ışık algılayıcı güç verir. <b>Bakır tel</b> gücü 15 bloğa kadar taşır, bir basamak yukarı ve aşağı çıkar. Güç alan bakır lamba yanar; kapı, çit kapısı ve tuzak kapı açılır; ok atıcı ok atar; müzik kutusu altındaki bloğa göre (ahşap, taş, cam, yün, kum) farklı çalgıyla ezgi çalar. <b>Ters çevirici</b> arkasından güç gelmediğinde önüne güç verir; çıkışı konulurken bakılan yöndedir. <b>Geciktirici</b> arkasından gelen gücü önüne 0,1-0,4 saniye gecikmeyle geçirir; sağ tıklanınca gecikme değişir. Tel, ters çevirici ve geciktiriciden ayarlı saat ve kapı kilidi gibi devreler kurulur.</li>
-          <li><b>Mevsimler</b>: her mevsim 7 gün sürer (ilkbahar, yaz, sonbahar, kış). İlkbaharda ekinler hızlı büyür ve çiçekler açar; sonbaharda yapraklar kızarır; kışın çöl ve savan dışında kar yağar, zemin karla örtülür, göl ve nehirler donar, ekinler çok yavaş büyür. Yazın gündüzler, kışın geceler uzundur.</li>
-          <li><b>Yeraltı Diyarı</b>: obsidyenden (derin mağaralardaki lav göllerinin yüzeyinde bulunur, elmas kazmayla kazılır; demirci köylüsü de satar) en az 4 × 5 boyutunda bir çerçeve kurulur ve içine <b>Çakmak</b> (demir külçe + çakmaktaşı) ile sağ tıklanır. Açılan geçidin içinde birkaç saniye durunca diyara geçilir. Diyardaki 1 blok dünyadaki 8 bloğa karşılık gelir. Diyarda lav denizi, ışıltaş, kül kumu (yavaşlatır), magma (eğilmeden üstünde durmak yakar), kor cevheri, Kor Ruhları, Kül Zombileri ve hazineli Kül Kaleleri bulunur.</li>
-          <li><b>Çiftlik</b>: <b>Kova</b> (3 demir külçe) sudan su alır, inekten süt sağar; su kovası lavı obsidyene çevirir. <b>Makas</b> (2 demir külçe) koyunu kırkar (yün zamanla yeniden uzar), balkabağını oyar. Tavuklar zaman zaman yumurtlar. Çayır ve ormanlarda <b>balkabağı</b>, su kenarlarında <b>şeker kamışı</b> (3 boya kadar uzar) yetişir; balkabağı çekirdeği tarlaya ekilince olgun sap yanına balkabağı verir. Oyma balkabağı ile meşaleden <b>Balkabağı Feneri</b> yapılır. Tencerede ve fırında süt, yumurta, şeker ve baldan peynir, yoğurt, ayran, omlet, kek, balkabağı turtası ve baklava pişer.</li>
-          <li><b>Arıcılık</b>: ağaçlara asılı <b>arı kovanlarından</b> gündüz arılar çıkar, kovanın çevresindeki çiçeklerden polen toplayıp kovanı bala doldurur. Dolu kovandan cam şişeyle <b>bal şişesi</b>, makasla <b>bal peteği</b> alınır. Kovanın 5 blok altında kamp ateşi yoksa arılar kızar ve sokar (zehirler). Kovan, kalas ve bal peteğiyle üretilebilir.</li>
-          <li><b>Vücut ısısı</b>: sağ alttaki gösterge vücut sıcaklığını ve hissedilen havayı gösterir. Karlı bölgeler, kış, geceler, yükseklik, yağış ve ıslaklık üşütür; çöl öğleleri ve lav çevresi bunaltır. Üşüyünce ya da bunalınca açlık hızlanır; 34,5 °C altında donma, 39,5 °C üstünde sıcak çarpması can götürür. Kamp ateşi ve ışık kaynakları ısıtır, deri zırh sıcak tutar, sıcak çorbalar ısıtır, ayran serinletir. Dünya oluşturulurken ya da Dünya Ayarları'ndan kapatılabilir.</li>
-          <li><b>Yaralanma</b>: zombi, kurt, örümcek ve haydut saldırıları kanatabilir (zırh olasılığı azaltır); bandaj ya da şifa iksiri kanamayı durdurur. Sert düşüşler bacağı kırabilir: yavaş yürünür, koşulamaz. <b>Atel</b> (3 çubuk, 1 ip) iyileşmeyi 30 saniyeye indirir.</li>
-          <li><b>Mezar taşı</b>: ölünce eşyalar yere saçılmaz, ölüm yerindeki mezar taşında saklanır (pusulada ✖). Mezara sağ tıklanarak eşyalar geri alınır; boşalan mezar kaybolur.</li>
-          <li><b>Kanlı Ay</b>: her mevsimin son gecesi (7, 14, 21... gün) ay kızarır. Canavarlar iki kat kalabalık, daha güçlü ve kızıldır; meşaleler daha az korur, uyunamaz. Sabaha kadar hayatta kalana deneyim ve başarım verilir; Kanlı Ay canavarları iki kat ganimet bırakır.</li>
-          <li><b>Gök olayları</b>: açık gecelerde yıldız kayar; bazı geceler yıldız yağmuru olur. Meteorlar krater açar; kraterin dibindeki <b>Gök Taşı</b> (demir kazmayla) <b>Yıldız Parçası</b> verir. Yıldız parçasından <b>Eve Dönüş Tılsımı</b> (sağ tık 3 saniye basılı tutulunca doğma noktasına ışınlar) ve <b>Yıldız Feneri</b> yapılır. Karlı bölgelerde, dağlarda ve kışın açık gecelerde kuzey ışıkları görülür.</li>
-          <li><b>İstatistikler</b>: oynama süresi, hayatta kalınan gün, yenilen canavar, yürünen yol ve diğerleri Başarımlar penceresinin (L) başında gösterilir.</li>
-          <li><b>Zorluk</b>: yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir; Kanlı Ay, meteor sıklığı ve vücut ısısı hızı "Denge ayarları"ndan düzenlenir. Duraklatma menüsündeki <b>Dünya Ayarları</b> ile sonradan değiştirilebilir. Hardcore'da tek can vardır: ölünce dünya sona erer ve yalnızca izleyici olarak dolaşılır.</li>
-          <li><b>Bakılan nesne</b>: bakılan bloğun adı sol alt köşede görünür. Ayarlardan kapatılabilir.</li>
-          <li><b>Elektrik</b>: güneş paneli (2 × 1), rüzgâr türbini (2 × 2 taban, 8 blok yükseklik) ve su çarkı (3 × 3) enerji üretir; bataryalar depolar; lamba, elektrikli ocak ve ısıtıcı harcar. Cihazlar gerçek boyutlarındadır: kurulurken önizleme gösterilir, R tuşu yönü çevirir, cihazların üstüne blok konmaz. Her cihazın mavi giriş ve turuncu çıkış soketleri vardır; güç kabloyla çıkıştan girişe akar. Soketler yalnızca elde kablo varken renkli görünür. Kablo elde: sokete sol tık başlatır, yüzeye sol tık ara nokta ekler, karşı sokete sol tık bağlar; sağ tık son ara noktayı geri alır (ara nokta yoksa iptal eder); Shift basılı: düz çekilir, Shift + tekerlek: sarkma, R: iptal, kabloya sağ tık: söker. Dağıtıcı gücü böler, Birleştirici toplar. Yakıtlı Jeneratör yalnızca yakıt alır: kömür ve odun yakar (sağ tık: yakıt deposu); Elektrikli Ocak çalışırken haznesine konan çiğ yiyecekleri ve fırın malzemelerini pişirir (sağ tık: hazne); Otomatik Taret önündeki 180° alanda canavarlara ok atar, okları ok haznesinden harcar (sağ tık: hazne) ve durum lambası tehlikede kırmızı, aksi hâlde yeşil yanar; Hareket Algılayıcı yakında canlı varken gücü geçirir (sağ tık: kip); Sulama Fıskiyesi tarlaları sular. Şalter (sağ tık) ağı keser. Elektrikli bir bloğa bakılınca ağın durumu sol altta görünür.</li>
-          <li><b>Fotoğraf modu</b>: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü PNG olarak kaydeder.</li>
-          <li><b>Envanter</b>: "Sırala" çantayı birleştirip türüne göre dizer. Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri bulunur.</li>
-          <li><b>Çok oyunculu sohbet komutları</b>: /f &lt;ad&gt; &lt;mesaj&gt; özel mesaj, /oyuncular, /konum, /ben, /zar; sunucu /at &lt;ad&gt; ile oyuncu çıkarabilir. Bağlantı koparsa oyun 5 saniye sonra kendiliğinden yeniden bağlanmayı dener.</li>
-          <li><b>Dünya yedeği</b>: Dünyalar listesinde "Yedekle" dünyayı dosya (.hmdunya) olarak indirir, "Yedekten Yükle" geri yükler. Her açılışta dünyanın önceki hâli saklanır; "Önceki oturum" ile ona dönülebilir.</li>
-          <li><b>Tarif Kitabı</b> (B) bütün eşyaların tariflerini, kullanıldığı tarifleri ve nereden bulunduklarını gösterir. Takibe alınan tarifin malzemeleri ekranın solunda izlenir.</li>
-          <li>Harita, görülen yerlerden kendiliğinden çizilir ve kaydedilir. Sağ üstteki mini harita çevreyi, M tuşuyla açılan büyük harita keşfedilen tüm bölgeleri gösterir. Büyük haritada sürükleyerek kaydırılır, tekerlekle yakınlaştırılır; sol tıkla işaret eklenir veya düzenlenir, sağ tıkla silinir. İşaretler pusulada da görünür.</li>
-          <li>Denizlerde mercan resifleri, deniz çayırları ve istiridyeler bulunur; istiridyelerden inci çıkabilir. Okyanus tabanındaki batık gemilerin sandıkları hazine saklar.</li>
-          <li>Sularda hamsi sürüleri, çipura ve ahtapot yaşar. Derin açık denizlerde dolaşan köpekbalıkları sudaki oyuncuya saldırır.</li>
-          <li>Olta sağ tıkla atılır; şamandıra suya daldığı anda yeniden sağ tıklanırsa av çekilir. Derin sularda hazine çıkma olasılığı artar. Balık ve ahtapot pişirilerek yenir.</li>
-          <li>Dalış maskesi kask yuvasına takılır; oksijeni üç kat yavaş harcatır ve su altında görüşü uzatır. Palet bot yuvasına takılır; yüzme hızını artırır, karada yürüyüşü biraz yavaşlatır.</li>
-          <li>Sandal ve yelkenli suya bakılarak sağ tıkla konur ve sağ tıkla binilir. W/S hızı, A/D dümeni ayarlar; C tuşuyla inilir. Yelkenli daha hızlı, sandal daha çeviktir. Tekneye sol tıkla vurularak kırılır.</li>
-          <li>Kıyı köylerinde iskele, deniz feneri, balıkçı kulübesi ve demirli tekneler bulunan limanlar vardır. Balıkçı balık alır; olta, tekne, maske ve palet satar. Pusuladaki ⚓ limanı, ⛵ en yakın tekneyi gösterir.</li>
-          <li>Çok oyunculu: bir oyuncu dünyasını “Dünyayı Arkadaşlara Aç” ile açar ve 6 karakterlik katılım kodunu paylaşır; diğerleri ana menüdeki Çok Oyunculu ekranından bu kodla katılır (en çok 8 oyuncu). Bloklar, canlılar, yere düşen eşyalar, sandıklar, tekneler ve zaman herkes için ortaktır; envanter, görevler ve köy itibarı her oyuncunun kendisinedir ve sunucuda oyuncu adıyla saklanır.</li>
-          <li>Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır. Pusuladaki renkli nokta diğer oyuncuları gösterir.</li>
-          <li><b>Dokunmatik ekranlarda</b> sol alttaki kolla yürünür (sonuna kadar ileri itince koşulur), ekranda parmak kaydırılarak bakılır. Ekrana kısa dokunmak kullanır ya da blok koyar, parmağı basılı tutmak kırar ve saldırır. Sağ alttaki düğmeler Kır, Kullan, Eğil ve Zıpla; üstteki düğmeler Çanta, Etkileşim, At, Harita, Kitap ve Duraklat içindir. Alt çubuktaki yuvalara dokunarak eşya seçilir. Çantada yuvaya kısa dokunmak eşyayı alır ya da bırakır, basılı tutmak yığını ikiye böler ya da tek tek bırakır. Ayarlardan açılıp kapatılabilir.</li>
-          <li>Müzik sürekli çalmaz; parçalar arasında sessizlik olur. Gündüz, gece, mağara, çöl, Yeraltı Diyarı ve boss savaşlarının kendi parçaları vardır. Müzik ve ses düzeyi Ayarlar’dan ayrı ayrı değiştirilir. Kare hızı düşerse çözünürlük kendiliğinden azalır (Ayarlar › Çözünürlük).</li>
-          <li>Oyun otomatik olarak kaydedilir.</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Emeği geçenler</h3>
-        <ul>
-          <li>Müzikler: <b>Tanner Helland</b> — “The Forest Awakes”, “Familiar Roads”, “A Memory Away”, “From Here”, “Deeper”, “King of the Desert”, “Dark Knight”, “Retribution”, “Daybreak”. Lisans: Creative Commons Attribution 4.0 (CC BY 4.0). Kaynak: github.com/tannerhelland/free-music</li>
-          <li>Ses efektleri: <b>Kenney</b> (kenney.nl) — Impact Sounds, RPG Audio, Interface Sounds, Music Jingles. Lisans: CC0 (kamu malı).</li>
-          <li>3B çizim: three.js (MIT lisansı). Çok oyunculu bağlantı: PeerJS (MIT lisansı).</li>
-        </ul>
-      </div>
-    </div>
-    <div class="altDugmeler"><button class="dugme ana" id="yardimTamam">Tamam</button></div>
-  </div>
-</div>
 
 <!-- Duraklatma -->
-<!-- 0.23.0: Dünya ayarları (zorluk ve denge) -->
-<div id="dunyaAyarEkrani" class="ekran yari" hidden>
-  <div class="pencere orta dar">
-    <header><h2>Dünya Ayarları</h2></header>
-    <div class="zorlukSec" id="daZorluk"></div>
-    <label class="alan">Kanlı Ay<select id="daKanli" data-denge="kanliAy"></select></label>
-    <label class="alan">Meteor<select id="daMeteor" data-denge="meteor"></select></label>
-    <label class="alan">Vücut ısısı değişimi<select id="daIsi" data-denge="isiHizi"></select></label>
-    <label class="secim"><input type="checkbox" id="daVucut"><span>Vücut ısısı (soğuk ve sıcak etkileri)</span></label>
-    <label class="secim"><input type="checkbox" id="daKonsol"><span>Geliştirici konsolu (F8)</span></label>
-    <p class="aciklama" id="daNot"></p>
-    <div class="altDugmeler"><button class="dugme ana" id="daTamam">Tamam</button></div>
-  </div>
-</div>
 
 <div id="duraklatEkrani" class="ekran yari" hidden>
   <div class="pencere orta dar">
@@ -535,8 +429,6 @@
       <button class="dugme" id="agAc">Dünyayı Arkadaşlara Aç</button>
       <button class="dugme" id="basarimAc">Başarımlar</button>
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
-      <button class="dugme" data-git="dunyaAyar">Dünya Ayarları</button>
-      <button class="dugme" data-git="yardim">Nasıl Oynanır</button>
       <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>
     </div>
   </div>

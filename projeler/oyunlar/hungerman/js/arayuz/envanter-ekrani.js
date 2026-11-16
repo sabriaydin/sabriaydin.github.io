@@ -1,6 +1,6 @@
 /* HungerMan - envanter ve üretim ekranı: sürükle-bırak yerine tıkla-al / tıkla-bırak, tarif arama ve kategori */
 import { simge } from '../grafik/doku.js';
-import { ESYALAR, ZIRH_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER, BUYULER, buyuMetinleri, buyuluMu, uygunBuyuler, romaRakam } from '../bloklar.js';
+import { BLOKLAR, ESYALAR, ZIRH_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER, BUYULER, buyuMetinleri, buyuluMu, uygunBuyuler, romaRakam } from '../bloklar.js';
 import { uretec } from '../rastgele.js';
 import { KarakterOnizleme } from './karakter-onizleme.js';
 
@@ -78,6 +78,7 @@ export class EnvanterEkrani {
     this.kok.addEventListener('mouseleave', () => { $('#ipucu').hidden = true; });
     /* 0.23.0: sıralama ve sandık toplu aktarımı */
     $('#envSirala').addEventListener('click', () => { this.sirala(this.envanter.yuvalar, 9, 36); this.ses.tik(); this.envanter.bildir(); this.ciz(); });
+    $('#sandikOzet').addEventListener('click', e => { const b = e.target.closest('[data-ozet]'); if (b && this.sandik) this.ozetAl(+b.dataset.ozet); });
     this.kok.querySelector('.sandikIslem').addEventListener('click', e => { const b = e.target.closest('button[data-sandik]'); if (b) this.sandikIslem(b.dataset.sandik); });
     $('#tarifListe').addEventListener('click', e => {
       const fv = e.target.closest('[data-fav]'); if (fv) { this.favori(+fv.dataset.fav); return; }
@@ -95,7 +96,12 @@ export class EnvanterEkrani {
     const ors = istasyon === 'ors' && !this.sandik, buyu = istasyon === 'buyu' && !this.sandik;
     $('.envSag').hidden = !!this.sandik || ors || buyu; $('.envSandik').hidden = !this.sandik;
     /* 0.29.0: cihaz haznesi başlığı ve kuralı */
-    if (this.sandik) { const K = this.sandik.kural; $('.envSandik h2').textContent = K ? K.ad : 'Sandık'; $('.envSandik .ipucuMetin').textContent = K ? K.not + ' Shift + tık: taşı' : 'Shift + tık: sandık ile envanter arasında taşı'; } $('.envOrs').hidden = !ors; $('.envBuyu').hidden = !buyu;
+    if (this.sandik) {
+      const K = this.sandik.kural, B = BLOKLAR[this.sandik.blok];
+      $('.envSandik h2').textContent = K ? K.ad : B && B.ad ? B.ad : 'Sandık';
+      $('#sandikSimge').innerHTML = this.sandik.blok && ESYALAR[this.sandik.blok] ? `<img src="${simge(this.sandik.blok).url}" alt="">` : '';
+      $('#sandikKural').hidden = !K; $('#sandikKural').textContent = K ? K.not : '';
+    } $('.envOrs').hidden = !ors; $('.envBuyu').hidden = !buyu;
     this.kok.hidden = false;
     if (this.renk) this.onizleme.renkAyarla(this.renk());
     this.onizleme.baslat();
@@ -105,7 +111,7 @@ export class EnvanterEkrani {
   kapat() {
     this.acik = false; this.kok.hidden = true;
     $('#ipucu').hidden = true;
-    this.onizleme.durdur(); clearInterval(this.durumSayac); this.uzerinde = null;
+    this.onizleme.durdur(); clearInterval(this.durumSayac); this.uzerinde = null; $('#balon').hidden = true;
     if (this.tasinan) {
       const k = this.envanter.ekle(this.tasinan.id, this.tasinan.adet, this.tasinan.dayanim, this.tasinan.buyu);
       if (k > 0) this.birak(this.tasinan.id, k, this.tasinan.dayanim, this.tasinan.buyu);
@@ -169,7 +175,7 @@ export class EnvanterEkrani {
       el.classList.toggle('bosZirh', !s);
       yaz(el, s ? this.hud.yuvaIc(s) : `<img src="${simge(400 + z).url}" alt="">`);
     });
-    if (this.sandik) this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { yaz(el, this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s])); });
+    if (this.sandik) { this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { yaz(el, this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s])); }); this.sandikOzetCiz(); }
     if (this.istasyon === 'ors') this.orsCiz();
     if (this.istasyon === 'buyu') this.buyuCiz();
     this.durumCiz();
@@ -178,8 +184,8 @@ export class EnvanterEkrani {
     this.aramaCiz();
     const ist = this.istasyonlar();
     /* 0.30.2: istasyonlar simgeyle: yakındakiler yeşil işaretli */
-    yaz($('#istasyonDurum'), Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="istSimge ${ist.has(k) ? 'var' : 'yok'}" title="${a}: ${ist.has(k) ? 'yakında' : 'yakında değil'}"><img src="${simge(ISTASYON_BLOK[k]).url}" alt="${a}"></span>`).join('')
-      + (ist.has('elocak') ? `<span class="istSimge var ocak" title="Elektrikli Ocak çalışıyor: fırın ve kamp ateşi tariflerinde kömür gerekmez"><img src="${simge(622).url}" alt="Elektrikli Ocak"></span>` : ''));
+    yaz($('#istasyonDurum'), Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="istSimge ${ist.has(k) ? 'var' : 'yok'}" data-balon="<b>${a}</b>${ist.has(k) ? '<em class=ok>Yakında · tarifleri yapılabilir</em>' : '<em>Yakında değil · tarifleri için yanına gidilmelidir</em>'}"><img src="${simge(ISTASYON_BLOK[k]).url}" alt="${a}"></span>`).join('')
+      + (ist.has('elocak') ? `<span class="istSimge var ocak" data-balon="<b>Elektrikli Ocak</b><em class=ok>Çalışıyor · fırın ve kamp ateşi tariflerinde kömür gerekmez</em>"><img src="${simge(622).url}" alt="Elektrikli Ocak"></span>` : ''));
     this.tarifCiz();
     this.tasimaCiz();
   }
@@ -199,6 +205,22 @@ export class EnvanterEkrani {
     if (et.length) html += `<div class="kbEtkiler">${et.map(([k, t]) => `<span style="--r:${ETKILER[k].renk}" title="${ETKILER[k].aciklama}">${ETKILER[k].ad} <b>${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}</b></span>`).join('')}</div>`;
     const el = $('#karakterBilgi');
     if (el.innerHTML !== html) el.innerHTML = html;
+  }
+  /* 0.30.4: sandık doluluğu ve içindekiler özeti (eşya başına toplam) */
+  sandikOzetCiz() {
+    const Y = this.sandik.yuvalar, dolu = Y.filter(Boolean).length, top = new Map();
+    for (const s of Y) if (s) top.set(s.id, (top.get(s.id) || 0) + s.adet);
+    $('#sandikDolulukCubuk').style.width = (dolu / Y.length * 100).toFixed(1) + '%';
+    $('#sandikDolulukCubuk').classList.toggle('dolu', dolu === Y.length);
+    $('#sandikDolulukMetin').textContent = `${dolu} / ${Y.length} yuva dolu`;
+    $('#sandikAlt').textContent = top.size ? `${top.size} çeşit · ${[...top.values()].reduce((a, b) => a + b, 0)} eşya` : 'Boş';
+    yaz($('#sandikOzet'), top.size ? [...top].sort((a, b) => b[1] - a[1]).map(([id, n]) => `<button type="button" data-ozet="${id}" data-balon="<b>${ESYALAR[id].ad}</b><em>Toplam ${n} · tıklanınca çantaya alınır</em>"><img src="${simge(id).url}" alt=""><span>${ESYALAR[id].ad}</span><b>${n}</b></button>`).join('') : '<p class="bos">Sandık boş. Eşya koymak için çantadaki eşyaya Shift + tık yapınız.</p>');
+  }
+  /* Özetten bir eşya türünün tamamını çantaya alır */
+  ozetAl(id) {
+    const Y = this.sandik.yuvalar, env = this.envanter;
+    for (let i = 0; i < Y.length; i++) { const s = Y[i]; if (!s || s.id !== id) continue; const k = env.ekle(s.id, s.adet, s.dayanim, s.buyu); Y[i] = k > 0 ? { ...s, adet: k } : null; if (k > 0) { this.hud.bildirim('Çantada yer kalmadı.'); break; } }
+    this.ses.tik(); env.bildir(); this.ciz();
   }
   /* 0.30.0: aramaya uymayan yuvalar soluklaşır */
   aramaCiz() {
@@ -246,7 +268,7 @@ export class EnvanterEkrani {
       const l = hepsi.filter(o => kat(o, k) && uyar(o)), y = l.filter(o => o.yapilir).length;
       const id = SIMGE[k] && ESYALAR[SIMGE[k]] ? SIMGE[k] : (TARIFLER.find(t => t.kategori === k) || {}).cikti;
       const ic = k === 'favori' ? '<b class="katYildiz">★</b>' : id ? `<img src="${simge(id).url}" alt="">` : '';
-      return `<button type="button" data-k="${k}" title="${ad.replace('★ ', '')}: ${l.length} tarif${y ? `, ${y} yapılabilir` : ''}" class="${k === this.kategori ? 'on' : ''}${!l.length ? ' bosSekme' : ''}">${ic}<span>${KISA[k] || ad}</span>${y ? `<em>${y}</em>` : ''}</button>`;
+      return `<button type="button" data-k="${k}" data-balon="<b>${ad.replace('★ ', '')}</b><em>${l.length} tarif${y ? ` · <i class=ok>${y} yapılabilir</i>` : ''}</em>" class="${k === this.kategori ? 'on' : ''}${!l.length ? ' bosSekme' : ''}">${ic}<span>${KISA[k] || ad}</span>${y ? `<em>${y}</em>` : ''}</button>`;
     }).join(''));
     $('#uretimOzet').textContent = `${hepsi.filter(o => o.yapilir).length} / ${TARIFLER.length} tarif yapılabilir`;
     let liste = hepsi.filter(o => kat(o, this.kategori) && uyar(o) && (!this.yalnizYapilir || o.yapilir));
@@ -362,7 +384,7 @@ export class EnvanterEkrani {
     /* 0.30.3: arama / miktar kutusu dışına tıklanınca odak bırakılır (Q, 1-9, X kısayolları yeniden çalışır) */
     const odak = document.activeElement;
     if (odak && odak !== document.body && this.kok.contains(odak) && odak.matches('input, select, textarea') && !e.target.closest('input, select, textarea, label')) odak.blur();
-    if (e.target.closest('#tarifListe, #tarifSekme, #tarifAra, #tarifAyrinti, .uretimUst, .kapat')) return;
+    if (e.target.closest('#tarifListe, #tarifSekme, #tarifAra, #tarifAyrinti, .uretimUst, .kapat, #sandikOzet, .sandikIslem')) return;
     const el = e.target.closest('.izgara .yuva');
     const env = this.envanter;
     if (el && el.dataset.o != null) { e.preventDefault(); this.orsTikla(+el.dataset.o, e); return; }
