@@ -83,7 +83,9 @@ export class EnvanterEkrani {
     if (istasyon) this.kategori = 'hepsi';
     /* Örs: sağ tarafta onarım bölümü */
     const ors = istasyon === 'ors' && !this.sandik, buyu = istasyon === 'buyu' && !this.sandik;
-    $('.envSag').hidden = !!this.sandik || ors || buyu; $('.envSandik').hidden = !this.sandik; $('.envOrs').hidden = !ors; $('.envBuyu').hidden = !buyu;
+    $('.envSag').hidden = !!this.sandik || ors || buyu; $('.envSandik').hidden = !this.sandik;
+    /* 0.29.0: cihaz haznesi başlığı ve kuralı */
+    if (this.sandik) { const K = this.sandik.kural; $('.envSandik h2').textContent = K ? K.ad : 'Sandık'; $('.envSandik .ipucuMetin').textContent = K ? K.not + ' Shift + tık: taşı' : 'Shift + tık: sandık ile envanter arasında taşı'; } $('.envOrs').hidden = !ors; $('.envBuyu').hidden = !buyu;
     this.kok.hidden = false;
     this.ciz();
   }
@@ -114,6 +116,14 @@ export class EnvanterEkrani {
     birlesik.sort((a, b) => sira(a) - sira(b) || a.id - b.id || b.adet - a.adet);
     for (let i = bas; i < son; i++) l[i] = birlesik[i - bas] || null;
   }
+  /* 0.29.0: eşya açık hazneye konabilir mi; konamazsa uyarır */
+  uyar(id) {
+    const K = this.sandik && this.sandik.kural;
+    if (!K || K.izin(id)) return true;
+    this.ses.hataSes();
+    this.hud.bildirim(`${K.ad}: ${K.not}`);
+    return false;
+  }
   sandikIslem(tur) {
     const S = this.sandik; if (!S) return;
     const env = this.envanter, Y = S.yuvalar;
@@ -121,7 +131,7 @@ export class EnvanterEkrani {
     else if (tur === 'koy' || tur === 'benzer') {
       const varolan = new Set(Y.filter(Boolean).map(s => s.id));
       for (let i = 9; i < 36; i++) {
-        const s = env.yuvalar[i]; if (!s || (tur === 'benzer' && !varolan.has(s.id))) continue;
+        const s = env.yuvalar[i]; if (!s || (tur === 'benzer' && !varolan.has(s.id)) || (S.kural && !S.kural.izin(s.id))) continue;
         let kalan = s.adet;
         if (s.dayanim == null && !s.buyu) for (const b of Y) if (b && b.id === s.id && b.dayanim == null && !b.buyu && b.adet < env.yigin(s.id)) { const n = Math.min(kalan, env.yigin(s.id) - b.adet); b.adet += n; kalan -= n; if (!kalan) break; }
         if (kalan) { const j = Y.indexOf(null); if (j >= 0) { Y[j] = { ...s, adet: kalan }; kalan = 0; } }
@@ -209,6 +219,7 @@ export class EnvanterEkrani {
       /* Sandık ile envanter arasında taşı */
       if (sandikta) { const k = env.ekle(s.id, s.adet, s.dayanim, s.buyu); if (k) s.adet = k; else D[i] = null; }
       else {
+        if (!this.uyar(s.id)) return;
         const S = this.sandik.yuvalar; let kalan = s.adet;
         if (s.dayanim == null) for (let j = 0; j < 27 && kalan; j++) { const t = S[j]; if (t && t.id === s.id && t.adet < max) { const k = Math.min(kalan, max - t.adet); t.adet += k; kalan -= k; } }
         for (let j = 0; j < 27 && kalan; j++) if (!S[j]) { S[j] = { ...s, adet: kalan }; kalan = 0; }
@@ -231,6 +242,7 @@ export class EnvanterEkrani {
       this.ses.tik(); env.bildir(); this.ciz(); return;
     }
     const T = this.tasinan;
+    if (sandikta && T && !this.uyar(T.id)) return;   // 0.29.0: hazneye uymayan eşya konamaz
     if (e.button === 2) {
       if (!T && s) { const yarim = Math.ceil(s.adet / 2); this.tasinan = { ...s, adet: yarim }; s.adet -= yarim; if (!s.adet) D[i] = null; }
       else if (T && !s) { D[i] = { ...T, adet: 1 }; T.adet--; if (!T.adet) this.tasinan = null; }

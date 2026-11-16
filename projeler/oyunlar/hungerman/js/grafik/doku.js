@@ -134,13 +134,10 @@ function ocakUst(p, acik) {
   const c = hex(acik ? '#ff5a24' : '#4a4e56'), c2 = hex(acik ? '#ffb040' : '#5c6068');
   for (const [cx, cy] of [[4.5, 4.5], [10.5, 10.5], [10.5, 4.5], [4.5, 10.5]]) for (let a = 0; a < 20; a++) { const t = a / 20 * Math.PI * 2; for (const r of [1.4, 2.6]) p.set(Math.round(cx + Math.cos(t) * r), Math.round(cy + Math.sin(t) * r), r > 2 ? c : c2); }
 }
-function isitici(p, acik) {
-  p.doldur('#e4e2de', 0.03); const k = hex('#9a9690');
-  for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); }
-  const c = hex(acik ? '#ff6a2a' : '#6a6660'), c2 = hex(acik ? '#ffc24a' : '#7c7872');
-  for (let y = 3; y < 13; y++) for (let x = 2; x < 14; x++) p.set(x, y, hex('#3a3632'));
-  for (const y of [4, 7, 10]) for (let x = 3; x < 13; x++) p.set(x, y + (x % 2), (x % 3) ? c : c2);
-  p.set(13, 14, hex(acik ? '#ff3a2a' : '#5a5650'));
+/* 0.29.0: ısıtıcı gövdesi: krem renkli, dikey dilimli panel radyatör */
+function isitici(p) {
+  p.doldur('#e8e4dc', 0.025); const k = hex('#c8c2b6');
+  for (let x = 1; x < D; x += 3) for (let y = 0; y < D; y++) p.set(x, y, karis(k, 0.97 + p.r() * 0.05));
 }
 function bataryaYan(p, s) {
   p.doldur('#3c4249', 0.05); const k = hex('#2a2f35');
@@ -579,9 +576,13 @@ const RESSAM = {
   elamba_a: p => { p.doldur('#fff3c8', 0.025); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const d = Math.hypot(x - 7.5, y - 7.5); p.set(x, y, karis(hex('#fffbe8'), 1.02 - d * 0.012)); } for (let x = 0; x < D; x++) p.set(x, 15, hex('#f2dc98')); },
   eocak_ust: p => ocakUst(p, false),
   eocak_ust_a: p => ocakUst(p, true),
-  eocak_yan: p => { p.doldur('#d4d6d8', 0.04); const k = hex('#8a8e94'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, karis(k, 1.1)); p.set(15, i, karis(k, 1.1)); } for (let x = 3; x < 13; x++) { p.set(x, 4, k); p.set(x, 12, k); } for (let y = 5; y < 12; y++) { p.set(3, y, k); p.set(12, y, k); } for (let y = 5; y < 12; y++) for (let x = 4; x < 12; x++) p.set(x, y, karis(hex('#2a2e34'), 0.9 + p.r() * 0.15)); p.set(5, 2, hex('#3a3e44')); p.set(8, 2, hex('#3a3e44')); p.set(11, 2, hex('#3a3e44')); },
-  isitici: p => isitici(p, false),
-  isitici_a: p => isitici(p, true),
+  eocak_yan: p => { p.doldur('#e2e4e6', 0.025); for (let x = 0; x < D; x++) { p.set(x, 15, hex('#c4c8cc')); p.set(x, 0, hex('#f2f3f4')); } },   // 0.29.0: düz emaye
+  ocak_cam: p => { p.doldur('#1a1e24', 0.03); for (let i = 0; i < D; i++) for (let k = 0; k < 2; k++) { const x = i + k, y = 15 - i; if (x < D && y >= 0) p.set(x, y, hex('#3a4452')); } },
+  ocak_cam_a: p => { for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const d = Math.hypot(x - 7.5, y - 8) / 9; p.set(x, y, karis(hex(d < 0.45 ? '#ffc060' : d < 0.8 ? '#ff8a30' : '#b04a18'), 0.92 + p.r() * 0.12)); } for (let x = 0; x < D; x++) p.set(x, 9, hex('#5a2a12')); },
+  isitici_izgara: p => { p.doldur('#2c2a28', 0.04); for (let y = 0; y < D; y += 2) for (let x = 0; x < D; x++) p.set(x, y, karis(hex('#8c8884'), x % 4 ? 1 : 0.9)); },
+  isitici_izgara_a: p => { for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, y % 2 ? karis(hex(Math.abs(x - 7.5) < 5 ? '#ffb347' : '#ff7a2a'), 0.9 + p.r() * 0.15) : karis(hex('#8c8884'), x % 4 ? 1 : 0.9)); },
+  isitici: p => isitici(p),
+  isitici_a: p => isitici(p),
   /* 0.28.0 */
   jen_govde: p => { p.doldur('#c8442e', 0.05); const k = hex('#8a2a1c'), a = hex('#e0644a'); for (let i = 0; i < D; i++) { p.set(i, 0, a); p.set(i, 15, k); } for (let y = 3; y < 13; y += 2) for (let x = 2; x < 14; x++) p.set(x, y, karis(k, 1.1)); },
   jen_on: p => { p.doldur('#2a2e34', 0.03); const a = hex('#f2c230'); for (let x = 1; x < 15; x++) { p.set(x, 1, a); p.set(x, 14, a); } for (const [x, y] of [[4, 6], [8, 6], [12, 6]]) { p.set(x, y, hex('#d8dce0')); p.set(x, y + 1, hex('#9aa0a8')); } for (let x = 3; x < 13; x++) p.set(x, 10, hex('#5a6068')); p.set(11, 10, hex('#4ad86a')); },
@@ -957,6 +958,8 @@ const BLOK_SIMGE = {
   ekablo: p => { dokuBoya(p, T.ekablo, [[1, 6, 15, 10]]); for (let x = 1; x < 15; x += 4) p.set(x, 6, [232, 192, 64]); },
   salter: (p, id) => { dokuBoya(p, T.salter_govde, [[3, 2, 12, 14]]); dokuBoya(p, T.salter_on, [[4, 3, 11, 13]]); dokuBoya(p, T.demir_cubuk, [[12, 5, 14, 9]]); dokuBoya(p, T.led_kirmizi, [[12, 3, 15, 5]]); dokuBoya(p, T.led_yesil, [[5, 4, 7, 5]]); },
   jenerator: p => { dokuBoya(p, T.jen_govde, [[2, 5, 14, 13]]); dokuBoya(p, T.batarya_ust, [[3, 3, 13, 5]]); dokuBoya(p, T.demir_cubuk, [[12, 0, 14, 3], [1, 13, 15, 15]]); dokuBoya(p, T.jen_on, [[4, 7, 10, 11]]); },
+  eocak: p => { dokuBoya(p, T.eocak_yan, [[1, 3, 15, 15]]); dokuBoya(p, T.eocak_ust, [[1, 2, 15, 3]]); dokuBoya(p, T.batarya_ust, [[2, 4, 14, 5]]); dokuBoya(p, T.ocak_cam_a, [[4, 7, 12, 12]]); dokuBoya(p, T.demir_cubuk, [[3, 6, 13, 7], [2, 15, 14, 16]]); for (const x of [3, 6, 9]) p.set(x, 4, [200, 204, 210]); },
+  eisitici: p => { dokuBoya(p, T.isitici, [[2, 2, 14, 14]]); dokuBoya(p, T.isitici_izgara_a, [[3, 4, 13, 12]]); dokuBoya(p, T.demir_cubuk, [[2, 14, 5, 16], [11, 14, 14, 16], [2, 1, 14, 2]]); },
   algilayici: p => { dokuBoya(p, T.sensor_a, [[4, 2, 12, 9]]); dokuBoya(p, T.salter_govde, [[4, 9, 12, 10]]); dokuBoya(p, T.demir_cubuk, [[7, 10, 9, 14], [5, 14, 11, 15]]); },
   fiskiye: p => { dokuBoya(p, T.demir_cubuk, [[2, 5, 14, 6], [7, 6, 9, 14], [5, 14, 11, 15]]); dokuBoya(p, T.batarya_ust, [[6, 3, 10, 6]]); for (const [x, y] of [[2, 2], [4, 1], [12, 1], [14, 3], [8, 0]]) p.set(x, y, [90, 160, 255]); },
   dagitici: (p, id) => { dokuBoya(p, T.salter_govde, [[1, 9, 15, 15]]); dokuBoya(p, T.salter_on, [[2, 8, 14, 9]]); const g = [63, 156, 255], c = [255, 157, 46]; if (BLOKLAR[id].birlestir) { p.set(4, 11, g); p.set(11, 11, g); p.set(8, 13, c); p.set(4, 12, g); p.set(11, 12, g); } else { p.set(8, 11, g); p.set(8, 12, g); p.set(3, 13, c); p.set(8, 14, c); p.set(13, 13, c); } },

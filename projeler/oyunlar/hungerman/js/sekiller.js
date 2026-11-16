@@ -177,6 +177,26 @@ export function sekilKutulari(id, komsu, carp = false) {
         [2 * P, 2.5 * P, 3 * P, 14 * P, 10.5 * P, 13 * P], [3 * P, 10.5 * P, 4 * P, 13 * P, 13 * P, 12 * P, T.batarya_ust], [7 * P, 13 * P, 7 * P, 9 * P, 13.6 * P, 9 * P, D],
         [12 * P, 10.5 * P, 10 * P, 13.5 * P, 15 * P, 11.5 * P, D], [4 * P, 4 * P, 2.6 * P, 12 * P, 9 * P, 3 * P, T.jen_on], [b.acik ? 13 * P : 13 * P, 4 * P, 1.4 * P, 15 * P, 6 * P, 2.6 * P, b.acik ? T.led_yesil : T.led_kirmizi]], b.yon);
     }
+    /* 0.29.0: Elektrikli Ocak: kaide, emaye gövde, ocak gözlü üst tabla, önde düğme şeridi ve camlı fırın kapağı */
+    case 'eocak': {
+      if (carp) return dondur([[P, 0, 2 * P, 15 * P, 14 * P, 15 * P]], b.yon);
+      const D = T.demir_cubuk, K = T.batarya_ust;
+      return dondur([[1.5 * P, 0, 2.5 * P, 14.5 * P, P, 14.5 * P, D], [P, P, 2 * P, 15 * P, 13 * P, 15 * P], [P, 13 * P, 2 * P, 15 * P, 14 * P, 15 * P, b.acik ? T.eocak_ust_a : T.eocak_ust],
+        [2 * P, 10.8 * P, 1.6 * P, 14 * P, 12.6 * P, 2 * P, K],
+        [3 * P, 11.2 * P, 1.1 * P, 4.2 * P, 12.2 * P, 1.6 * P, D], [5.2 * P, 11.2 * P, 1.1 * P, 6.4 * P, 12.2 * P, 1.6 * P, D], [7.4 * P, 11.2 * P, 1.1 * P, 8.6 * P, 12.2 * P, 1.6 * P, D], [9.6 * P, 11.2 * P, 1.1 * P, 10.8 * P, 12.2 * P, 1.6 * P, D],
+        [12.4 * P, 11.4 * P, 1.3 * P, 13.4 * P, 12 * P, 1.6 * P, b.acik ? T.led_kirmizi : K],
+        [2 * P, 1.6 * P, 1.5 * P, 14 * P, 10.2 * P, 2 * P], [4 * P, 3.4 * P, 1.2 * P, 12 * P, 8.2 * P, 1.5 * P, b.acik ? T.ocak_cam_a : T.ocak_cam],
+        [3.4 * P, 9 * P, 0.9 * P, 4 * P, 9.6 * P, 1.5 * P, D], [12 * P, 9 * P, 0.9 * P, 12.6 * P, 9.6 * P, 1.5 * P, D], [3 * P, 9 * P, 0.4 * P, 13 * P, 9.6 * P, 0.9 * P, D]], b.yon);
+    }
+    /* 0.29.0: Isıtıcı: iki ayak üstünde ince panel radyatör, önde ısıtma ızgarası (çalışırken kızarır), üstte ayar düğmesi */
+    case 'eisitici': {
+      if (carp) return dondur([[2 * P, 0, 4 * P, 14 * P, 14 * P, 12 * P]], b.yon);
+      const D = T.demir_cubuk, K = T.batarya_ust;
+      return dondur([[2 * P, 0, 4 * P, 4 * P, P, 12 * P, D], [12 * P, 0, 4 * P, 14 * P, P, 12 * P, D], [2.5 * P, P, 7 * P, 3.5 * P, 2 * P, 9 * P, D], [12.5 * P, P, 7 * P, 13.5 * P, 2 * P, 9 * P, D],
+        [2 * P, 2 * P, 6 * P, 14 * P, 13 * P, 10 * P], [3 * P, 3 * P, 5.6 * P, 13 * P, 11.5 * P, 6 * P, b.acik ? T.isitici_izgara_a : T.isitici_izgara],
+        [2.5 * P, 13 * P, 6.5 * P, 13.5 * P, 13.6 * P, 9.5 * P, D], [10.5 * P, 13.6 * P, 7.2 * P, 12 * P, 14.6 * P, 8.8 * P, K],
+        [3.6 * P, 12 * P, 5.6 * P, 4.6 * P, 12.6 * P, 6 * P, b.acik ? T.led_kirmizi : K]], b.yon);
+    }
     /* 0.28.0: Hareket Algılayıcı: duvar plakası ya da ayak üstünde kubbeli algılayıcı başı (ışığı algılarken yanar) */
     case 'algilayici': {
       const D = T.demir_cubuk;

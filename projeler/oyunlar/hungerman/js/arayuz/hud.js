@@ -265,6 +265,14 @@ export class Hud {
     el.innerHTML = `<svg viewBox="0 0 18 18" aria-hidden="true">${bulut}${alt}</svg>${durum === 'firtina' ? 'Fırtına' : tur === 2 ? 'Kar' : tur === 0 ? 'Bulutlu' : 'Yağmur'}`;
     el.hidden = false;
   }
+  /* 0.29.0: zaman hızı 1× değilse saat göstergesinde uyarı */
+  zamanHizi(h) {
+    if (h === this.son.zhiz) return;
+    this.son.zhiz = h;
+    const el = $('#zhizDeger');
+    el.hidden = h === 1;
+    el.textContent = h === 0 ? 'Zaman durdu' : `Zaman ${h}×`;
+  }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
   /* 0.23.1: bakılan blok ya da tekne adı: sol alt köşede, yalnızca ad */
   /* 0.26.0: kablo çekerken alttaki ipucu (html ya da null) */

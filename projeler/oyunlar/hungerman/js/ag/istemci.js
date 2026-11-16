@@ -179,7 +179,7 @@ export class IstemciOyun {
   /* ---------- Oyuncunun işlemleri ---------- */
   sandikIste(x, y, z) { this.gonder({ t: 'sa', x, y, z }); }
   sandikKapat(k, yuvalar) { this.gonder({ t: 'sk', k, y: sandikDizi(yuvalar) }); }
-  sandikKir(x, y, z) { this.gonder({ t: 'skr', x, y, z }); }
+  sandikKir(x, y, z, g = true) { this.gonder({ t: 'skr', x, y, z, ...(g ? {} : { g: 0 }) }); }   // 0.29.0: g 0: cihaz haznesi (ganimet üretilmez)
   mezarIste(x, y, z, esyalar) { this.gonder({ t: 'mz', p: [r2(x), r2(y), r2(z)], y: sandikDizi(esyalar) }); }   // 0.22.0
   sohbetGonder(s) { this.gonder({ t: 'sh', m: s }); }
   fisilda(ad, s) { this.gonder({ t: 'fs', h: ad, m: s }); }   // 0.23.0: özel mesaj

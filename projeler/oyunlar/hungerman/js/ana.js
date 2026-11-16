@@ -25,6 +25,7 @@ import { Mekanik } from './oyun/mekanik.js';
 import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
 import { Taretler } from './oyun/taret.js';
+import { kapFiltresiId } from './oyun/kaplar.js';
 import { Kablolar, kabloMaliyeti, KABLO } from './oyun/kablolar.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
@@ -37,7 +38,7 @@ import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
 import { Ses } from './sistem/ses.js';
 import { Muzik } from './sistem/muzik.js';
-import { Kayit, ayarlariYukle, ayarlariKaydet, yedekDosyasi, yedekOku } from './sistem/kayit.js';
+import { Kayit, ayarlariYukle, ayarlariKaydet, VARSAYILAN_AYAR, yedekDosyasi, yedekOku } from './sistem/kayit.js';
 import { SunucuOyun } from './ag/sunucu.js';
 import { IstemciOyun } from './ag/istemci.js';
 import { katil, kodDuzelt } from './ag/baglanti.js';
@@ -112,6 +113,23 @@ document.addEventListener('click', e => {
   ekran(b.dataset.git);
 });
 $('#ayarTamam').onclick = () => { ses.tik(); ekran(oncekiEkran); };
+/* 0.29.0: ayar kategorileri ve varsayılanlara dönüş */
+$('#ayarSekmeler').addEventListener('click', e => {
+  const b = e.target.closest('button[data-as]'); if (!b) return;
+  ses.tik(); ayarSekme = b.dataset.as;
+  for (const x of document.querySelectorAll('#ayarSekmeler button')) x.classList.toggle('on', x === b);
+  for (const s of document.querySelectorAll('.ayarBolum')) s.hidden = s.dataset.as !== ayarSekme;
+});
+let ayarSekme = 'goruntu';
+$('#ayarSifirla').onclick = e => {
+  const b = e.currentTarget;
+  if (!b.dataset.onay) { b.dataset.onay = '1'; b.textContent = 'Emin misiniz? Tekrar tıklayınız'; setTimeout(() => { if (b.isConnected) { delete b.dataset.onay; b.textContent = 'Varsayılanlara dön'; } }, 3000); return; }
+  delete b.dataset.onay; b.textContent = 'Varsayılanlara dön';
+  const korunan = { konsol: ayar.konsol, ogretici: ayar.ogretici };
+  for (const k of Object.keys(ayar)) delete ayar[k];
+  Object.assign(ayar, VARSAYILAN_AYAR, { miniHarita: true, dokunmatik: dokunmatikCihaz() }, korunan);
+  ses.tik(); ayarUygula(); ayarFormu();
+};
 /* 0.23.0: zorluk ve denge formları (yeni dünya ve Dünya Ayarları) */
 function zorlukFormu(kap, secili, mevcut) {
   const el = $(kap);
@@ -161,6 +179,9 @@ function ayarFormu() {
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
   bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
+  bag('#aParlak', 'parlaklik', v => Math.round(v * 100) + '%');
+  bag('#aOlcek', 'arayuzOlcek', v => Math.round(v * 100) + '%');
+  bag('#aArkaSessiz', 'arkaSessiz', null, 'cb'); bag('#aEnerji', 'enerjiPanel', null, 'cb');
   bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb'); bag('#aIsi', 'vucutIsisi', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
 }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
@@ -175,7 +196,19 @@ function ayarUygula() {
   $('#miniHarita').hidden = !ayar.miniHarita;
   dokun.ayarla(ayar.dokunmatik);
   if (oyun) oyun.hayatta.isiAcik = ayar.vucutIsisi !== false;
+  gorunumAyarla(); arkaSesAyarla();
 }
+/* 0.29.0: parlaklık ve arayüz boyutu */
+function gorunumAyarla() {
+  $('#oyun').style.filter = (ayar.parlaklik ?? 1) !== 1 ? `brightness(${ayar.parlaklik})` : '';
+  document.documentElement.style.fontSize = (ayar.arayuzOlcek ?? 1) !== 1 ? (15 * ayar.arayuzOlcek).toFixed(2) + 'px' : '';
+}
+function arkaSesAyarla() {
+  const sessiz = !!ayar.arkaSessiz && document.hidden;
+  ses.duzeyAyarla(sessiz ? 0 : ayar.ses);
+  if (muzik.el) muzik.el.muted = sessiz;
+}
+document.addEventListener('visibilitychange', arkaSesAyarla);
 
 /* ---------- Dünya listesi ---------- */
 const tarih = t => new Date(t).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -376,6 +409,7 @@ envEkrani.olay = k => { if (oyun && oyun.basarimlar) oyun.basarimlar.ver(k); };
 const haritaEkrani = new HaritaEkrani({ ses, kapatIste: () => panelKapat(true) });
 const miniHarita = new MiniHarita();
 $('#miniHarita').hidden = !ayar.miniHarita;
+gorunumAyarla();   // 0.29.0
 const konsol = new Konsol({ ses, oyun: () => oyun, kapatIste: () => panelKapat(true), arayuz: {
   fps: () => { ayar.fps = !ayar.fps; ayarlariKaydet(ayar); $('#fps').hidden = !ayar.fps; return ayar.fps; },
   fpsMetni: () => $('#fps').textContent || '-',
@@ -444,7 +478,7 @@ function yakinIstasyonlar() {
   for (let y = -2; y <= 3; y++) for (let z = -4; z <= 4; z++) for (let x = -4; x <= 4; x++) {
     const b = oyun.dunya.blok(x0 + x, y0 + y, z0 + z);
     for (const [k, id] of Object.entries(ISTASYON_BLOK)) if (b === id) s.add(k);
-    if (b === 623) { s.add('elocak'); s.add('firin'); s.add('ates'); }   // 0.24.0: çalışan elektrikli ocak, fırın ve ateş yerine geçer
+    if (BLOKLAR[b] && BLOKLAR[b].elektrik === 'ocak' && BLOKLAR[b].acik) { s.add('elocak'); s.add('firin'); s.add('ates'); }   // 0.24.0: çalışan elektrikli ocak, fırın ve ateş yerine geçer
   }
   ELOCAK.aktif = s.has('elocak');
   return s;
@@ -564,11 +598,16 @@ function oyunBaslat(v) {
   oyun.bataryaOran = new Map();   // 0.25.0: istemcide sunucudan gelen batarya doluluğu
   oyun.kablolar = new Kablolar(dunya); oyun.kablolar.iceAktar(v.kablolar);   // 0.26.0: Rust tarzı kablolar
   oyun.cihazCizici.kablolar = oyun.kablolar;
-  oyun.taretler = new Taretler({ dunya, varliklar, ses, yerel: () => oyun.oyuncu.konum, atesEder: !v.istemci });   // 0.28.0
+  oyun.taretler = new Taretler({ dunya, varliklar, ses, yerel: () => oyun.oyuncu.konum, atesEder: !v.istemci,   // 0.28.0
+    kilitli: k => { const s = oyun.ag && oyun.ag.kilit && oyun.ag.kilit.get(k); return s != null && s !== 'yerel'; },
+    degisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
   oyun.cihazCizici.taretAci = k => oyun.taretler.aci(k);
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar,
     canlilar: () => { const l = []; if (!oyun.hayatta.olu) l.push([oyun.oyuncu.konum.x, oyun.oyuncu.konum.y + 1, oyun.oyuncu.konum.z, 'o']); if (oyun.ag && oyun.ag.konumlar) for (const q of oyun.ag.konumlar()) l.push([q.x, q.y + 1, q.z, 'o']);
-      for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
+      for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }),
+    /* 0.29.0: ocak haznesi: başka oyuncuda açıkken pişirme bekler; açık hazne ekranı yenilenir */
+    sandikKilitli: k => { const s = oyun.ag && oyun.ag.kilit && oyun.ag.kilit.get(k); return s != null && s !== 'yerel'; },
+    sandikDegisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
   gorevler.iceAktar(v.gorevler);
@@ -592,7 +631,7 @@ function oyunBaslat(v) {
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
       if (oyun.istemci) { oyun.ag.sandikIste(x, y, z); return; }
       if (oyun.ag && !oyun.ag.sandikKilitle(k)) { hud.bildirim('Bu sandığı başka bir oyuncu kullanıyor.'); return; }
-      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
+      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k, kural: kapFiltresiId(dunya.blok(x, y, z)) });
       sandikBasarim(x, y, z);
     },
     /* 0.26.0: kablolar: çok oyunculu istemcide istek sunucuya gider; sökülen kablo envantere geri döner */
@@ -604,11 +643,11 @@ function oyunBaslat(v) {
     },
     kabloIsin: (goz, yon, maks) => oyun.cihazCizici ? oyun.cihazCizici.kabloIsin(goz, yon, maks) : null,
     sandikYerlesti: (x, y, z) => { if (!oyun.istemci) dunya.sandiklar.set(x + ',' + y + ',' + z, new Array(27).fill(null)); },
-    sandikKirildi: (x, y, z) => {
+    sandikKirildi: (x, y, z, ganimet = true) => {
       const k = x + ',' + y + ',' + z;
-      if (oyun.istemci) { oyun.ag.sandikKir(x, y, z); return []; }
+      if (oyun.istemci) { oyun.ag.sandikKir(x, y, z, ganimet); return []; }
       if (oyun.ag) oyun.ag.sandikKirildi(k);
-      const d = dunya.sandiklar.get(k) || koyler.sandikGanimeti(x, y, z); dunya.sandiklar.delete(k); return d.filter(Boolean);
+      const d = dunya.sandiklar.get(k) || (ganimet ? koyler.sandikGanimeti(x, y, z) : []); dunya.sandiklar.delete(k); return d.filter(Boolean);
     }
   } });
   oyun.etkilesim.kablolar = oyun.kablolar;
@@ -845,7 +884,7 @@ function adim(t) {
     /* İstemcide gün değişimi sunucudan gelir */
     if (o.istemci) o.zaman = Math.min(0.99999, o.zaman + dt * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI);
     else {
-      o.zaman += dt * (o.zamanHizi || 1) * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI;
+      o.zaman += dt * (o.zamanHizi ?? 1) * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI;
       if (o.zaman >= 1) { o.zaman -= 1; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı`); }
     }
     if (oncekiZaman < 0.46 && o.zaman >= 0.46 && !kanliAyGunu(o.gun, o.denge.kanliAy)) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');
@@ -1063,13 +1102,13 @@ function adim(t) {
     o.cihazCizici.portlariGoster(kabloElde);
     o.cihazCizici.kabloVurgula(kabloElde && !E.kablo && !port && etkin ? o.cihazCizici.kabloIsin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu(), E.hedef ? E.hedef.t + 0.05 : 5) : null);
     const pAd = p => `${p.ad} · <b>${p.tur === 'cikis' ? 'Çıkış' : 'Giriş'}</b>${p.dolu ? ' (dolu)' : ''}`, sr = v => v.toFixed(1).replace('.', ',');
-    o.hud.kabloIpucu(kon ? `Kablo <b>${sr(kon.uz)}</b> / ${KABLO.toplam} blok · <b>${kon.maliyet}</b> kablo · sarkma <b>${kon.sark ? sr(kon.sark) + ' blok' : 'gergin'}</b>${E.shift ? ' · düz hizalı' : ''}${kon.port ? ' → ' + pAd(kon.port) : ''}${kon.gecerli ? '' : ` · <em>${kon.neden}</em>`}<span>Karşı noktaya sağ tık: bağla · Yüzeye sağ tık: ara nokta · Shift basılı: düz çek · Shift + tekerlek: sarkma · R: iptal</span>` :
-      port ? `${pAd(port)}<span>${port.dolu ? 'Takılı kabloyu sökmek için kabloya sağ tıklayınız' : 'Sağ tık: kablo çekmeye başla'}</span>` :
-      kabloElde && etkin ? 'Elektrik Kablosu<span>Bir cihazın mavi (giriş) ya da turuncu (çıkış) noktasına bakınız · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' : null);
+    o.hud.kabloIpucu(kon ? `Kablo <b>${sr(kon.uz)}</b> / ${KABLO.toplam} blok · <b>${kon.maliyet}</b> kablo · sarkma <b>${kon.sark ? sr(kon.sark) + ' blok' : 'gergin'}</b>${E.shift ? ' · düz hizalı' : ''}${kon.port ? ' → ' + pAd(kon.port) : ''}${kon.gecerli ? '' : ` · <em>${kon.neden}</em>`}<span>Sol tık: karşı noktaya bağla / yüzeye ara nokta · Sağ tık: son noktayı geri al · Shift basılı: düz çek · Shift + tekerlek: sarkma · R: iptal</span>` :
+      port ? `${pAd(port)}<span>${port.dolu ? 'Sağ tık: takılı kabloyu sök' : 'Sol tık: kablo çekmeye başla'}</span>` :
+      kabloElde && etkin ? 'Elektrik Kablosu<span>Bir cihazın mavi (giriş) ya da turuncu (çıkış) noktasına sol tıklayınız · Kabloya sağ tık: sök · C + sağ tık cihaza: kablolarını sök</span>' : null);
   }
   /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi */
   const eh = o.etkilesim.hedef, ebl = eh && !hc && !o.fotoModu && (kilitli || dokun.aktif) ? BLOKLAR[eh.id] : null;
-  if (ebl && ebl.elektrik) {
+  if (ebl && ebl.elektrik && ayar.enerjiPanel !== false) {
     const ek = eh.x + ',' + eh.y + ',' + eh.z;
     o.hud.enerji(enerjiMetni(ebl, o.elektrik ? o.elektrik.bilgi(ek) : o.ag && o.ag.enerjiIste ? o.ag.enerjiIste(ek) : null));
   } else o.hud.enerji(null);
@@ -1145,6 +1184,7 @@ function adim(t) {
     o.hud.gorevIzle(o.gorevler.ozet(o.envanter, p));
     o.hud.etkilerCiz(o.hayatta.etkiler);
     o.hud.hava(diyar ? 'acik' : H.durum, yagisTur);
+    o.hud.zamanHizi(o.istemci ? 1 : (o.zamanHizi ?? 1));
   }
   o.hud.xpCiz(o.hayatta);
   if (o.olumNoktasi && Math.hypot(o.olumNoktasi.x - p.x, o.olumNoktasi.z - p.z) < 3 && !o.hayatta.olu) o.olumNoktasi = null;
@@ -1315,8 +1355,9 @@ function agArayuz() {
     sandikAc: (k, yuvalar) => {
       const o = oyun;
       if (!o || o.hayatta.olu || panelAcik() || envEkrani.acik) { if (o && o.ag) o.ag.sandikKapat(k, yuvalar); return; }
-      envanterAcKapa(null, { yuvalar, k });
-      const [x, y, z] = String(k).split(',').map(Number); sandikBasarim(x, y, z);
+      const [x, y, z] = String(k).split(',').map(Number);
+      envanterAcKapa(null, { yuvalar, k, kural: kapFiltresiId(o.dunya.blok(x, y, z)) });
+      sandikBasarim(x, y, z);
     },
     sandikKapat: k => { if (envEkrani.acik && envEkrani.sandik && (k == null || envEkrani.sandik.k === k)) { envanterKapat(aktifEkran === 'oyun'); if (oyun) oyun.hud.bildirim('Sandık kırıldı.'); } }
   };

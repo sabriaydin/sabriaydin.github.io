@@ -80,7 +80,7 @@ const SETLER = {
   buyu: { ad: 'Büyü', esya: [[156, 1], [61, 32], [139, 1], [316, 1], [319, 1], [286, 1], [453, 1], [412, 1], [415, 1]] },
   simya: { ad: 'Simya ve örs', esya: [[140, 1], [139, 1], [331, 16], [61, 8], [283, 8], [265, 16], [297, 8], [299, 4], [263, 4], [450, 4], [296, 8], [328, 8], [257, 8]] },
   tuccar: { ad: 'Tüccar', esya: [[288, 64], [291, 40], [271, 12], [257, 24], [8, 24], [282, 12], [297, 12]] },
-  elektrik: { ad: 'Elektrik', esya: [[497, 4], [498, 2], [499, 2], [500, 2], [501, 1], [502, 1], [503, 64], [826, 2], [852, 2], [856, 2], [860, 1], [257, 32], [504, 2], [872, 2], [920, 2], [620, 8], [622, 1], [624, 2], [233, 2], [239, 16]] }
+  elektrik: { ad: 'Elektrik', esya: [[497, 4], [498, 2], [499, 2], [500, 2], [501, 1], [502, 1], [503, 64], [826, 2], [852, 2], [856, 2], [860, 1], [257, 32], [504, 2], [287, 64], [872, 2], [920, 2], [620, 8], [622, 1], [624, 2], [233, 2], [239, 16]] }
 };
 
 export class GelistiriciPenceresi {
@@ -148,7 +148,7 @@ export class GelistiriciPenceresi {
     this.anahtarlar = this.anahtarlariKur();
   }
   ac() { this.acik = true; this.kok.hidden = false; this.mesaj('Değişiklikler hemen uygulanır ve konsol kaydına da yazılır (F8).', 'soluk'); this.ciz(); }
-  kapat() { this.acik = false; this.kok.hidden = true; $('#gelGecmis').hidden = true; }
+  kapat() { if (this.kok.contains(document.activeElement)) document.activeElement.blur(); this.acik = false; this.kok.hidden = true; $('#gelGecmis').hidden = true; }
   k(s) { this.gecmisEkle({ k: s }); this.konsol.calistir(s); this.ses.tik(); }
   sekmeSec(k) {
     if (this.genelArama) { this.genelArama = ''; $('#gelGenelAra').value = ''; }
@@ -326,7 +326,7 @@ export class GelistiriciPenceresi {
     return this.bolum('Zaman',
         this.kaydirici('saat', 'Saat', 0, 23.75, 0.25, Math.round(saat * 4) / 4, v => `${String(Math.floor(v)).padStart(2, '0')}:${String(Math.round((v % 1) * 60)).padStart(2, '0')}`) +
         this.dugmeler(...[['safak', 'Şafak'], ['sabah', 'Sabah'], ['ogle', 'Öğle'], ['aksam', 'Akşam'], ['gece', 'Gece'], ['gece_yarisi', 'Gece yarısı']].map(([k, a]) => this.dugme('zaman ' + k, a))) +
-        this.kaydirici('zhiz', 'Zaman hızı', 0, 100, 1, o.zamanHizi ?? 1, v => v === 0 ? 'durdu' : v + '×') +
+        `<div class="gelSatir gelZhiz"><span>Zaman hızı</span><span class="gelAdet" id="gelZhiz">${[[0, 'Dur'], [1, '1×'], [2, '2×'], [5, '5×'], [10, '10×'], [30, '30×'], [60, '60×']].map(([n, a]) => `<button type="button" data-k="zaman hiz ${n}" data-zhiz="${n}" class="${(o.zamanHizi ?? 1) === n ? 'on' : ''}">${a}</button>`).join('')}</span></div>` +
         this.anahtarGrubu(o, 'zamanDur') +
         `<div class="gelSatir"><label>Gün <input type="number" id="gelGun" min="1" max="9999" value="${o.gun}"></label><button type="button" data-gun="1">Uygula</button><span class="gelNot">Canavar sayısı gün sayısıyla artar.</span></div>`) +
       this.bolum('Hava durumu', `<div class="gelDugmeler" id="gelHava">${[['acik', 'Açık'], ['yagmur', 'Yağmur'], ['firtina', 'Fırtına']].map(([k, a]) => `<button type="button" data-k="hava ${k}" data-hava="${k}">${a}</button>`).join('')}${this.dugme('hava simsek', 'Şimşek çaktır')}</div>` +
@@ -453,7 +453,7 @@ export class GelistiriciPenceresi {
       else if (d.duzle) this.k(`duzle ${this.alanR}`);
       else { o.yerler.length = 0; this.ses.tik(); this.mesaj('Tüm işaretler silindi.', 'tamam'); }
     }
-    else if (d.k) this.k(d.k);
+    else if (d.k) { this.k(d.k); if (d.zhiz != null) this.esitle(o); }
     else if (d.etki) this.k(`etki ${d.etki} ${this.etkiSure}`);
     else if (d.ver) {
       this.k(`ver ${d.ver} ${e.shiftKey ? 64 : this.adet}`);
@@ -521,9 +521,9 @@ export class GelistiriciPenceresi {
   }
   degisti(e) {
     const t = e.target, o = this.oyun(); if (!o) return;
+    if (t.type === 'range') t.blur();   // 0.29.0: odakta kalan kaydırıcı ok tuşlarıyla kendiliğinden değişmesin
     const r = t.dataset.r, a = t.dataset.a, v = +t.value;
     if (r === 'saat') this.k(`zaman ${v}`);
-    else if (r === 'zhiz') { this.k(`zaman hiz ${v}`); this.esitle(o); }
     else if (r === 'gorus') this.k(`gorus ${v}`);
     else if (r === 'erisim') this.k(`erisim ${v}`);
     else if (r === 'vucut') this.k(`isi ${v}`);
@@ -538,8 +538,7 @@ export class GelistiriciPenceresi {
   /* Anahtarları ve bağlı kaydırıcıları gerçek durumla eşitle */
   esitle(o) {
     for (const el of $('#gelIcerik').querySelectorAll('input[data-a]')) { const A = this.anahtarlar[el.dataset.a]; if (A) el.checked = !!A.al(o); }
-    const z = $('#gelIcerik').querySelector('input[data-r="zhiz"]');
-    if (z) { z.value = o.zamanHizi ?? 1; z.style.setProperty('--p', ((o.zamanHizi ?? 1) / 100 * 100).toFixed(1) + '%'); const el = this.kok.querySelector('[data-d="zhiz"]'); if (el) el.textContent = this.bicimler.zhiz(+z.value); }
+    for (const b of $('#gelIcerik').querySelectorAll('[data-zhiz]')) b.classList.toggle('on', +b.dataset.zhiz === (o.zamanHizi ?? 1));
   }
   bakilan(o) { return o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu()); }
 

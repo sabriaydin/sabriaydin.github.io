@@ -53,7 +53,9 @@ export const DOKULAR = [
   /* 0.26.0: şalter, lamba ve batarya ayrıntıları */
   'salter_govde', 'salter_on', 'led_yesil', 'led_kirmizi', 'lamba_kap', 'batarya_kasa', 'batarya_etiket', 'havalandirma', 'uyari', 'kablo_kilif',
   /* 0.28.0: jeneratör ve algılayıcı */
-  'jen_govde', 'jen_on', 'sensor', 'sensor_a'
+  'jen_govde', 'jen_on', 'sensor', 'sensor_a',
+  /* 0.29.0: elektrikli ocak ve ısıtıcı */
+  'ocak_cam', 'ocak_cam_a', 'isitici_izgara', 'isitici_izgara_a'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -330,7 +332,8 @@ for (let id = 596; id <= 616; id++) { const e = id === 596 ? 497 : id <= 600 ? 4
 for (const C of Object.values(CIHAZ)) for (let f = 0; f < 4; f++) for (let i = 0; i < C.n; i++) {
   const [lx, ly, lz] = hucreYerel(C, i);
   blok(C.taban + f * C.n + i, { ad: C.ad, dok: 'panel_yan', cizim: C_SEKIL, opak: false, sertlik: C.sertlik, alet: C.alet, ses: C.ses, sekil: 'cihaz', gorunmez: true, ustuneKonmaz: true,
-    cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: C.taban + f * C.n, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, tuketim: C.tuketim || 0, gizli: true, dusur: () => [], harita: 2 });
+    cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: C.taban + f * C.n, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, tuketim: C.tuketim || 0, gizli: true, dusur: () => [], harita: 2,
+    ...(C.sandik && i === 0 ? { sandik: true } : {}) });   // 0.29.0: taretin ok haznesi
 }
 /* 0.26.0: kablolar Rust'taki gibi kablo aracıyla cihazdan cihaza çekilir (oyun/kablolar.js); eski yer kablosu (617) eski kayıtlar için iletmeye devam eder */
 blok(617, { ad: 'Eski Yer Kablosu', dok: 'ekablo', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'tas', sekil: 'ekablo', elektrik: 'kablo', gizli: true, dusur: () => [[503, 1]], harita: 2, port: [0.5, 0.1, 0.5] });
@@ -365,11 +368,16 @@ for (let a = 0; a < 2; a++) {
   for (let f = 0; f < 4; f++) blok(844 + f * 2 + a, { ad: 'Elektrikli Lamba', dok: a ? 'elamba_a' : 'elamba', cizim: C_SEKIL, opak: false, sertlik: 0.8, ses: 'cam', sekil: 'elamba', cesit: 2, yon: f, elektrik: 'lamba', tuketim: 0.5,
     acik: a, taban: 844 + f * 2, gizli: true, dusur: () => [[620, 1]], harita: a ? 116 : 2, port: [0.5, 0.36, 0.97], ...(a ? LAMBA_IS : {}) });
 }
-for (let a = 0; a < 2; a++) {
-  blok(622 + a, { ad: 'Elektrikli Ocak', dok: [a ? 'eocak_ust_a' : 'eocak_ust', 'eocak_yan', 'eocak_yan'], sertlik: 2.5, alet: 'kazma', ses: 'tas', elektrik: 'ocak', tuketim: 4, acik: a, taban: 622, gizli: a > 0, port: [0.5, 1, 0.5],
-    dusur: () => [[622, 1]], harita: 2, ...(a ? { mesale: true, isik: 6 } : {}) });
-  blok(624 + a, { ad: 'Isıtıcı', dok: a ? 'isitici_a' : 'isitici', sertlik: 2, alet: 'kazma', ses: 'tas', elektrik: 'isitici', tuketim: 3, acik: a, taban: 624, gizli: a > 0, port: [0.5, 1, 0.5], dusur: () => [[624, 1]], harita: 2,
-    ...(a ? { mesale: true, isik: 7 } : {}) });
+/* 0.29.0: Elektrikli Ocak (fırın bölmeli mutfak ocağı) ve Isıtıcı (ayaklı panel radyatör) yönlüdür; ön yüz oyuncuya bakar, bağlantı noktaları arka altta.
+   Yön 0: 622-623 / 624-625 (eski kayıtlarla uyumlu); yön 1-3: ocak 920 + yön * 2 + açık, ısıtıcı 926 + yön * 2 + açık.
+   Ocak bir pişirme haznesidir: çalışırken içindeki fırın / ateş malzemelerini sırayla pişirir. */
+export const OCAK_ID = (f, a) => (f ? 920 + f * 2 + a : 622 + a);
+export const ISITICI_ID = (f, a) => (f ? 926 + f * 2 + a : 624 + a);
+for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) {
+  blok(OCAK_ID(f, a), { ad: 'Elektrikli Ocak', dok: 'eocak_yan', cizim: C_SEKIL, opak: false, sertlik: 2.5, alet: 'kazma', ses: 'tas', sekil: 'eocak', yon: f, elektrik: 'ocak', tuketim: 4, acik: a,
+    taban: OCAK_ID(f, 0), gizli: f + a > 0, sandik: true, dusur: () => [[622, 1]], harita: 2, ...(a ? { mesale: true, isik: 6 } : {}) });
+  blok(ISITICI_ID(f, a), { ad: 'Isıtıcı', dok: 'isitici', cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'kazma', ses: 'tas', sekil: 'eisitici', yon: f, elektrik: 'isitici', tuketim: 3, acik: a,
+    taban: ISITICI_ID(f, 0), gizli: f + a > 0, dusur: () => [[624, 1]], harita: 2, ...(a ? { mesale: true, isik: 7 } : {}) });
 }
 blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
 
@@ -592,7 +600,7 @@ const CIHAZ_SIMGE = { gunes: 'cihazGunes', ruzgar: 'cihazRuzgar', su: 'cihazSu',
 for (const C of Object.values(CIHAZ)) esya(C.esya, { ad: C.ad, tur: 'cihaz', cihaz: C.tur, simge: CIHAZ_SIMGE[C.tur], boyut: { bataryaK: 0, bataryaO: 1, bataryaB: 2 }[C.tur], yigin: 16,
   ozellik: `${C.aciklama} · ${C.w} × ${C.d} taban, ${C.h} blok yükseklik` });
 for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakır tel sinyali. Duvara ya da zemine konur'], [860, 'Kömür, kütük, kalas ya da çubuk yakarak 20 E/sn üretir; çıkışına talep varken yakıt harcar. Sağ tık: yakıt deposu'], [872, 'Yakınında (7 blok) canlı varken gücü çıkışına geçirir; 0,5 E/sn harcar. Sağ tık: kip (herkes / oyuncular / canavarlar)'], [920, 'Çevresindeki 9 × 9 tarlayı sular ve ekinleri hızlandırır; 2 E/sn harcar'], [852, 'Bir girişteki gücü üç çıkışa, bağlı cihazların talebine göre böler'], [856, 'İki girişteki gücü toplayıp tek çıkıştan verir (ör. güneş panellerini birleştirmek için)'], [620, '0,5 E/sn harcar · Zemine, tavana ya da duvara konur'],
-  [622, '4 E/sn harcar · Fırın ve kamp ateşi yerine geçer, kömür gerektirmez'], [624, '3 E/sn harcar · Çevresini ısıtır']]) E[id].ozellik = oz;
+  [622, '4 E/sn harcar · Sağ tık: pişirme haznesi; çalışırken içine konan çiğ yiyecek ve fırın malzemelerini pişirir. Yakınındayken fırın ve kamp ateşi yerine geçer, kömür gerektirmez'], [624, '3 E/sn harcar · Çevresini ısıtır']]) E[id].ozellik = oz;
 for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
 E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
 

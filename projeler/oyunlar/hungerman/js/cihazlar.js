@@ -21,9 +21,10 @@ export const CIHAZ = {
     carp: [[0.1, 0, 0.15, 0.9, 1.75, 0.85]], aciklama: '6.000 E depolar' },
   bataryaB: { port: [1, 1.9, 0.5], ad: 'Büyük Batarya', esya: 502, taban: 810, w: 2, d: 1, h: 2, elektrik: 'batarya', kapasite: 24000, sertlik: 3, alet: 'kazma', ses: 'tas',
     carp: [[0.05, 0, 0.1, 1.95, 1.9, 0.9]], aciklama: '24.000 E depolar' },
-  /* 0.28.0: Otomatik Taret: çalışırken 16 blok içindeki canavarlara ok atar */
-  taret: { ad: 'Otomatik Taret', esya: 504, taban: 868, w: 1, d: 1, h: 1, elektrik: 'taret', tuketim: 8, sertlik: 3, alet: 'kazma', ses: 'tas',
-    carp: [[0.15, 0, 0.15, 0.85, 0.85, 0.85]], aciklama: 'Çalışırken 16 blok içindeki canavarlara ve öfkeli hayvanlara ok atar; 8 E/sn harcar' }
+  /* 0.28.0: Otomatik Taret: çalışırken 16 blok içindeki canavarlara ok atar
+     0.29.0: arbalet başlı taret; ok haznesi (sağ tık) elle doldurulur, her atış 1 ok harcar. Önüne bakan 180° görüş alanında arar, arkadan yalnızca 2 bloğa kadar sezer */
+  taret: { ad: 'Otomatik Taret', esya: 504, taban: 868, w: 1, d: 1, h: 1, elektrik: 'taret', tuketim: 8, sertlik: 3, alet: 'kazma', ses: 'tas', sandik: true,
+    carp: [[0.12, 0, 0.12, 0.88, 0.9, 0.88]], aciklama: 'Çalışırken önündeki 180° alanda, 16 blok içindeki canavarlara ok atar (ok haznesi sağ tıkla doldurulur); 8 E/sn harcar' }
 };
 for (const [k, C] of Object.entries(CIHAZ)) { C.tur = k; C.n = C.w * C.d * C.h; }
 export const CIHAZ_SON = 826;   // ilk boş blok kimliği

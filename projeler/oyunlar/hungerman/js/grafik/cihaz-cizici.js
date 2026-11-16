@@ -122,14 +122,24 @@ function modeller() {
       { k: [0.55, 1.9, 0.3, 1.45, 1.98, 0.7], t: HV }, { k: [0.9, 1.98, 0.42, 1.1, 2.0, 0.58], t: D }],
     gosterge: [[0.68, 0.8, 0.64, 1.2, 0.1, 6, false], [1.68, 1.8, 0.64, 1.2, 0.1, 6, false]]
   };
-  /* 0.28.0: Otomatik Taret: taban, dönen kafa (yaw) ve eğilen çift namlu (pitch); kafa ve namlu ayrıca döndürülür */
+  /* 0.28.0: Otomatik Taret; 0.29.0: arbalet taret: taban, ok sandığı, döner tabla, çatal (yaw) ve üstünde eğilen arbalet (pitch): ahşap kundak,
+     yaylar, gergin kiriş, yüklü ok ve ok şarjörü. Çatalın arkasında ışık saçmayan durum lambası: tehlikede kırmızı, aksi hâlde yeşil, güçsüzken sönük */
+  const kiris = (x0, z0, x1, z1) => { const L = Math.hypot(x1 - x0, z1 - z0); return { k: [-L / 2, 0, -0.004, L / 2, 0.008, 0.004], t: D, m: new THREE.Matrix4().makeRotationY(-Math.atan2(z1 - z0, x1 - x0)).setPosition((x0 + x1) / 2, 0.012, (z0 + z1) / 2) }; };
   M.taret = {
-    statik: [{ k: [0.15, 0, 0.15, 0.85, 0.1, 0.85], t: yuzler(BU, KS) }, { k: [0.2, 0.1, 0.2, 0.8, 0.14, 0.8], t: UY }, { k: [0.38, 0.14, 0.38, 0.62, 0.52, 0.62], t: D },
-      { k: [0.33, 0.48, 0.33, 0.67, 0.56, 0.67], t: BU }],
-    kafa: { merkez: [0.5, 0.68, 0.5], kutular: [{ k: [-0.24, -0.12, -0.2, 0.24, 0.14, 0.24], t: yuzler(BU, KS) }, { k: [0.24, -0.1, -0.08, 0.34, 0.08, 0.16], t: HV },
-      { k: [-0.09, 0.02, -0.235, 0.09, 0.1, -0.2], t: KR }, { k: [-0.2, 0.14, 0.0, 0.2, 0.17, 0.2], t: HV }],
-      namlu: { merkez: [0, -0.01, -0.18], kutular: [{ k: [-0.14, -0.05, -0.42, -0.06, 0.03, 0.02], t: D }, { k: [0.06, -0.05, -0.42, 0.14, 0.03, 0.02], t: D },
-        { k: [-0.16, -0.07, -0.47, -0.04, 0.05, -0.42], t: KK }, { k: [0.04, -0.07, -0.47, 0.16, 0.05, -0.42], t: KK }] } }
+    statik: [{ k: [0.12, 0, 0.12, 0.88, 0.08, 0.88], t: yuzler(BU, KS) }, { k: [0.18, 0.08, 0.18, 0.82, 0.1, 0.82], t: UY },
+      { k: [0.28, 0.08, 0.64, 0.72, 0.32, 0.86], t: KK }, { k: [0.26, 0.32, 0.62, 0.74, 0.35, 0.88], t: D },   // ok sandığı
+      { k: [0.41, 0.08, 0.41, 0.59, 0.46, 0.59], t: D }, { k: [0.3, 0.46, 0.3, 0.7, 0.52, 0.7], t: BU }],
+    kafa: { merkez: [0.5, 0.6, 0.5], kutular: [{ k: [-0.2, -0.08, -0.08, 0.2, -0.04, 0.08], t: D }, { k: [-0.2, -0.04, -0.05, -0.16, 0.12, 0.05], t: D }, { k: [0.16, -0.04, -0.05, 0.2, 0.12, 0.05], t: D },
+      { k: [-0.03, -0.04, 0.08, 0.03, 0.12, 0.12], t: D }],
+      isik: [-0.045, 0.12, 0.072, 0.045, 0.18, 0.128],
+      namlu: { merkez: [0, 0.06, 0], kutular: [
+        { k: [-0.05, -0.04, -0.34, 0.05, 0.035, 0.3], t: KK }, { k: [-0.07, -0.08, 0.12, 0.07, 0.035, 0.3], t: BU }, { k: [-0.016, -0.12, 0.16, 0.016, -0.08, 0.2], t: D },
+        { k: [-0.08, -0.025, -0.31, 0.08, 0.035, -0.26], t: D },
+        { k: [-0.25, -0.015, -0.29, -0.08, 0.025, -0.25], t: KK }, { k: [-0.39, -0.015, -0.25, -0.25, 0.025, -0.21], t: KK }, { k: [-0.43, -0.02, -0.21, -0.38, 0.03, -0.17], t: D },
+        { k: [0.08, -0.015, -0.29, 0.25, 0.025, -0.25], t: KK }, { k: [0.25, -0.015, -0.25, 0.39, 0.025, -0.21], t: KK }, { k: [0.38, -0.02, -0.21, 0.43, 0.03, -0.17], t: D },
+        kiris(-0.405, -0.19, 0, 0.07), kiris(0, 0.07, 0.405, -0.19),
+        { k: [-0.008, 0.035, -0.4, 0.008, 0.05, 0.07], t: K }, { k: [-0.016, 0.03, -0.45, 0.016, 0.055, -0.4], t: D },
+        { k: [-0.065, 0.035, -0.04, 0.065, 0.13, 0.12], t: KK }, { k: [-0.07, 0.13, -0.05, 0.07, 0.145, 0.13], t: D }] } }
   };
   return M;
 }
@@ -174,6 +184,9 @@ export class CihazCizici {
       kafa = new THREE.Group(); kafa.position.set(...m.kafa.merkez); kafa.add(new THREE.Mesh(g.kafa, malz)); ic.add(kafa);
       namlu = new THREE.Group(); namlu.position.set(...m.kafa.namlu.merkez); namlu.add(new THREE.Mesh(g.namlu, malz)); kafa.add(namlu);
     }
+    /* 0.29.0: taretin durum lambası (ışık saçmaz; rengi guncelle'de değişir) */
+    let durumIsik = null;
+    if (m.kafa && m.kafa.isik && malz === this.malz) { durumIsik = new THREE.Mesh(this.isikGeo || (this.isikGeo = kutuGeo([{ k: m.kafa.isik, t: 0 }])), this.gostergeMalz.bos); kafa.add(durumIsik); }
     const gostergeler = [];
     /* 0.26.0: LED göstergesi: koyu çerçeve ve ayrı ayrı yanan bölmeler */
     if (m.gosterge && malz === this.malz) for (const [x0, x1, y0, y1, z, n, yatay] of m.gosterge) {
@@ -187,7 +200,7 @@ export class CihazCizici {
       }
       gostergeler.push({ ledler });
     }
-    return { dis, donen, gostergeler, kafa, namlu };
+    return { dis, donen, gostergeler, kafa, namlu, durumIsik };
   }
   yerlestir(dis, yon, x, y, z) { dis.position.set(x + 0.5, y, z + 0.5); dis.rotation.y = -yon * Math.PI / 2; }
 
@@ -197,7 +210,11 @@ export class CihazCizici {
     this.sayac -= dt;
     if (this.sayac <= 0) { this.sayac = 0.5; this.tara(O, oran); }
     for (const o of this.liste.values()) {
-      if (o.kafa && this.taretAci) { const a = this.taretAci(o.k); if (a) { o.kafa.rotation.y = a.yaw + o.yon * Math.PI / 2; o.namlu.rotation.x = a.pitch; } }
+      if (o.kafa && this.taretAci) {
+        const a = this.taretAci(o.k);
+        if (a) { o.kafa.rotation.y = a.yaw + o.yon * Math.PI / 2; o.namlu.rotation.x = a.pitch; }
+        if (o.durumIsik) o.durumIsik.material = !a || !a.aktif ? this.gostergeMalz.bos : a.hedef ? this.gostergeMalz.kirmizi : this.gostergeMalz.yesil;
+      }
       if (!o.donen) continue;
       o.hiz += (o.hedefHiz - o.hiz) * Math.min(1, dt * 0.6);
       o.aci = (o.aci + o.hiz * dt) % (Math.PI * 2);
@@ -308,10 +325,12 @@ export class CihazCizici {
       }
     }
   }
+  /* 0.29.0: elde kablo yokken bağlantı noktaları renksiz, parlamayan koyu gri metal soket olarak görünür (ortam ışığıyla kararır) */
   portlariGoster(elde) {
     if (!this.portMalz) return;
-    const a = elde ? 1 : 0.6;
-    this.portMalz.giris.color.setRGB(0.25 * a, 0.61 * a, a); this.portMalz.cikis.color.setRGB(a, 0.62 * a, 0.18 * a);
+    if (elde) { this.portMalz.giris.color.setRGB(0.25, 0.61, 1); this.portMalz.cikis.color.setRGB(1, 0.62, 0.18); return; }
+    const g = 0.2 * Math.max(0.3, this.isik ?? 1);
+    this.portMalz.giris.color.setRGB(g, g, g * 1.05); this.portMalz.cikis.color.setRGB(g, g, g * 1.05);
   }
   portVurgula(p, gecerli) {
     if (!this.portCerceve) {

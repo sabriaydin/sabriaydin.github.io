@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
@@ -143,10 +143,18 @@ export class Etkilesim {
     this.hedefTekne = null;
     if (tb && (!this.hedef || tb.t < this.hedef.t) && (!this.hedefCanli || tb.t < vb.t)) { this.hedefTekne = tb.tekne; this.hedef = null; this.hedefCanli = null; }
     if (this.izleyici) { this.hedefCanli = null; this.hedefTekne = null; this.ilerleme = 0; this.germe = 0; return; }   // 0.23.0: Hardcore izleyici kipi
-    const sagYeni = g.sag && !this.sagOnceki;
-    this.sagOnceki = g.sag;
+    const sagYeni = g.sag && !this.sagOnceki, solYeni = g.sol && !this.solOnceki;
+    this.sagOnceki = g.sag; this.solOnceki = g.sol;
     this.sagBekleme -= dt; this.solBekleme -= dt; this.saldiriBekleme -= dt; this.okUyari -= dt;
     if (this.vurus > 0) { this.vurus += dt * 3.2; if (this.vurus >= 1) this.vurus = 0; }
+    /* 0.29.0: elde kablo varken Rust'taki gibi: sol tık yerleştirir (başla, ara nokta, bağla), sağ tık son işlemi geri alır; blok kırılmaz */
+    if (ESYALAR[this.envanter.seciliId()] && ESYALAR[this.envanter.seciliId()].tur === 'kablo') {
+      this.ilerleme = 0; this.kirilanAnahtar = ''; this.germe = 0;
+      if (solYeni) { if (this.kabloSol(this.hedef, g)) this.vurus = 0.01; }
+      else if (sagYeni) { if (this.kabloSag(this.hedef, g)) this.vurus = 0.01; }
+      this.sahne.secimGoster(null, 0);
+      return;
+    }
 
     const eldeki = this.envanter.seciliId();
     if (this.hedefTekne) {
@@ -277,7 +285,7 @@ export class Etkilesim {
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
     if (b.ekin === 3) this.olay('hasat');
     this.istat('kirilan');
-    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
+    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z, !b.elektrik && !b.mezar)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
     if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z, b.xp ? buyuSeviye(this.envanter.seciliYuva(), 'servet') : 0);
@@ -374,8 +382,8 @@ export class Etkilesim {
   kullan(g) {
     const h = this.hedef, env = this.envanter;
     const s = env.seciliYuva(), e = s && ESYALAR[s.id];
-    /* 0.26.0: elde kablo varken sağ tık yalnızca kablo çeker (şalter açılıp kapanmaz) */
-    if (e && e.tur === 'kablo') return this.kabloKullan(h, g);
+    /* 0.26.0: elde kablo varken şalter açılıp kapanmaz (0.29.0: kablo tıkları guncelle'de işlenir) */
+    if (e && e.tur === 'kablo') return false;
     /* İstasyonlar */
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
     /* ---------- 0.21.0: tarım ve hayvancılık ---------- */
@@ -589,10 +597,12 @@ export class Etkilesim {
     if (eb.sekil === 'kapi') return 88 + f * 4;
     if (eb.sekil === 'dagitici') return eb.taban + f;   // 0.27.0: çıkışlar bakılan yöne
     if (eb.sekil === 'jenerator') return 860 + ((f + 2) % 4) * 2;   // 0.28.0: kontrol paneli oyuncuya bakar
+    if (eb.sekil === 'eocak') return OCAK_ID((f + 2) % 4, 0);   // 0.29.0: ön yüz oyuncuya bakar
+    if (eb.sekil === 'eisitici') return ISITICI_ID((f + 2) % 4, 0);
     return null;
   }
   /* ---------- 0.26.0 / 0.27.0: Rust tarzı kablo çekme ----------
-     Kablo bir bağlantı noktasından (giriş ya da çıkış) başlar ve karşı türden boş bir noktada biter; yüzeylere sağ tık ara nokta ekler.
+     Kablo bir bağlantı noktasından (giriş ya da çıkış) başlar ve karşı türden boş bir noktada biter; yüzeylere sol tık ara nokta ekler (0.29.0: sağ tık geri alır).
      Shift basılıyken eklenen nokta son noktadan eksen boyunca düz hizalanır; Shift + fare tekerleği çekilen parçanın sarkmasını ayarlar (0: gergin). */
   isabetNoktasi(h) {
     const g = this.oyuncu.gozKonumu(), y = this.oyuncu.bakisYonu();
@@ -643,25 +653,39 @@ export class Etkilesim {
   kabloIptal(mesaj = 'Kablo çekme iptal edildi.') { if (!this.kablo) return; this.kablo = null; this.arayuz.bildirim(mesaj); }
   /* Shift + fare tekerleği: çekilen parçanın sarkması */
   kabloSarkma(yon) { if (!this.kablo) return false; this.kablo.sark = Math.max(0, Math.min(KABLO.sarkmaUst, Math.round((this.kablo.sark + yon * 0.1) * 10) / 10)); return true; }
-  kabloKullan(h, g) {
+  /* 0.29.0: sağ tık: çizerken son ara noktayı geri alır (ara nokta yoksa çekmeyi iptal eder);
+     çizmiyorken bakılan kabloyu söker, C (eğilme) + sağ tık cihazın bütün kablolarını söker */
+  kabloSag(h, g) {
+    const K = this.kablolar;
+    if (!K) return false;
+    if (this.kablo) {
+      const k = this.kablo;
+      if (k.n.length) { k.n.pop(); k.sark = k.s.pop() ?? 0; this.ses.tik(); this.arayuz.bildirim(`Son ara nokta geri alındı (${k.n.length} ara nokta).`); }
+      else this.kabloIptal();
+      return true;
+    }
+    const uc = h && kabloUcu(this.dunya, h.x, h.y, h.z);
+    if (g.egil && uc) {
+      const l = K.cihazKablolari(uc);
+      for (const w of l) this.arayuz.kabloSil(w.i, true);
+      this.arayuz.bildirim(l.length ? `${l.length} kablo söküldü.` : 'Bu cihaza bağlı kablo yok.');
+      return true;
+    }
+    const port = this.bakilanPort(), pw = port && port.dolu ? K.portKablosu(port.k, port.i) : null;
+    let ki = pw ? pw.i : null;
+    if (ki == null && this.arayuz.kabloIsin) { const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu(); ki = this.arayuz.kabloIsin(goz, yon, h ? h.t + 0.05 : ERISIM); }
+    if (ki != null) { this.arayuz.kabloSil(ki, true); this.ses.kir('tas'); this.arayuz.bildirim('Kablo söküldü; kablolar envantere geri döndü.'); return true; }
+    return false;
+  }
+  /* Sol tık: bağlantı noktasından çekmeye başlar, yüzeye ara nokta koyar, karşı noktada bağlar */
+  kabloSol(h, g) {
     const K = this.kablolar, env = this.envanter;
     if (!K) return false;
     const port = this.bakilanPort();
-    /* Bakılan kablo (bağlantı noktasından ve bloktan yakınsa) sökülür */
-    if (!this.kablo && !port && this.arayuz.kabloIsin) {
-      const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu(), ki = this.arayuz.kabloIsin(goz, yon, h ? h.t + 0.05 : ERISIM);
-      if (ki != null) { this.arayuz.kabloSil(ki, true); this.ses.kir('tas'); this.arayuz.bildirim('Kablo söküldü; kablolar envantere geri döndü.'); return true; }
-    }
     if (!this.kablo) {
       const uc = h && kabloUcu(this.dunya, h.x, h.y, h.z);
-      if (g.egil && uc) {
-        const l = K.cihazKablolari(uc);
-        for (const w of l) this.arayuz.kabloSil(w.i, true);
-        this.arayuz.bildirim(l.length ? `${l.length} kablo söküldü.` : 'Bu cihaza bağlı kablo yok.');
-        return true;
-      }
       if (!port) { if (uc) this.arayuz.bildirim('Kablo bir bağlantı noktasından çekilir: cihazın üzerindeki mavi (giriş) ya da turuncu (çıkış) noktaya bakınız.'); return !!uc; }
-      if (port.dolu) { this.arayuz.bildirim(`Bu ${PORT_AD[port.tur].toLocaleLowerCase('tr')} noktasına zaten bir kablo takılı.`); return true; }
+      if (port.dolu) { this.arayuz.bildirim(`Bu ${PORT_AD[port.tur].toLocaleLowerCase('tr')} noktasına zaten bir kablo takılı (sökmek için sağ tık).`); return true; }
       this.kablo = { k: port.k, i: port.i, tur: port.tur, n: [], s: [], sark: 0 }; this.ses.kol(true);
       this.arayuz.bildirim(`${port.ad}: ${PORT_AD[port.tur]} noktasından kablo çekiliyor.`);
       return true;
@@ -680,7 +704,7 @@ export class Etkilesim {
       this.arayuz.bildirim(`Kablo bağlandı: ${o.uz.toFixed(1).replace('.', ',')} blok, ${o.maliyet} kablo harcandı.`);
       return true;
     }
-    if (port && port.k === this.kablo.k) { if (!this.kablo.n.length) this.kabloIptal(); else this.arayuz.bildirim('Kablo aynı cihaza bağlanamaz.'); return true; }
+    if (port && port.k === this.kablo.k) { this.arayuz.bildirim(this.kablo.n.length ? 'Kablo aynı cihaza bağlanamaz.' : 'Kablo aynı cihaza bağlanamaz; iptal için sağ tık.'); return true; }
     /* Ara tutturma noktası */
     if (!h) return true;
     if (!o.gecerli) { this.arayuz.bildirim(o.neden); return true; }
@@ -761,6 +785,7 @@ export class Etkilesim {
     const hucreler = cihazHucreleri(C, b.yon, ax, ay, az).filter(([x, y, z]) => BLOKLAR[d.blok(x, y, z)] && BLOKLAR[d.blok(x, y, z)].cihaz === b.cihaz);
     for (const [x, y, z, i] of hucreler.reverse()) { d.blokKoy(x, y, z, 0); if (i % 3 === 0) this.dusenler.parcacik(h.id, x, y, z, 5); }   // kök hücre en son kalkar
     this.dusenler.birak(C.esya, 1, h.x + 0.5, h.y + 0.4, h.z + 0.5);
+    if (C.sandik) for (const s of this.arayuz.sandikKirildi(ax, ay, az, false)) this.dusenler.birak(s.id, s.adet, ax + 0.5, ay + 0.5, az + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);   // 0.29.0: taretin okları
     this.ses.kir(C.ses); this.istat('kirilan');
     const a = this.aletBilgi();
     if (a && this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }

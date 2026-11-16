@@ -10,6 +10,7 @@ import { SURUM, PB } from '../sabitler.js';
 import { BLOKLAR, ESYALAR } from '../bloklar.js';
 import { OTURMA } from '../oyun/binek.js';
 import { mezarKoy, mezarBosalt } from '../oyun/mezar.js';
+import { kapFiltresiId } from '../oyun/kaplar.js';
 
 const MAKS = 8;                 // sunucu dahil en çok oyuncu
 const ANLIK = 0.1;              // anlık durum gönderim aralığı (sn)
@@ -233,6 +234,9 @@ export class SunucuOyun {
         const yuvalar = sandikKur(m.y).slice(0, 27);
         while (yuvalar.length < 27) yuvalar.push(null);
         if (o.dunya.yuklu(x, z) && !BLOKLAR[o.dunya.blok(x, y, z)].sandik) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
+        /* 0.29.0: cihaz haznesine uymayan eşyalar (ör. jeneratöre yakıt dışı) yere düşer */
+        const kural = kapFiltresiId(o.dunya.blok(x, y, z)), eski = o.dunya.sandiklar.get(m.k) || [];
+        if (kural) for (let i = 0; i < yuvalar.length; i++) { const e = yuvalar[i]; if (e && !kural.izin(e.id) && !eski.some(q => q && q.id === e.id)) { o.dusenler.birak(e.id, e.adet, x + 0.5, y + 1, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); yuvalar[i] = null; } }
         o.dunya.sandiklar.set(m.k, yuvalar);
         mezarBosalt(o.dunya, m.k);   // 0.22.0: boşaltılan mezar kaybolur
         break;
@@ -246,7 +250,7 @@ export class SunucuOyun {
       }
       case 'skr': { // sandık kırıldı: içindekiler yere düşer
         const s = m.x + ',' + m.y + ',' + m.z;
-        const d = o.dunya.sandiklar.get(s) || o.koyler.sandikGanimeti(m.x, m.y, m.z);
+        const d = o.dunya.sandiklar.get(s) || (m.g === 0 ? [] : o.koyler.sandikGanimeti(m.x, m.y, m.z));
         this.sandikKirildi(s);
         o.dunya.sandiklar.delete(s);
         for (const e of d) if (e) o.dusenler.birak(e.id, e.adet, m.x + 0.5, m.y + 0.5, m.z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu);

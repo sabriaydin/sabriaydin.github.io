@@ -9,7 +9,7 @@
       birleştirici girişlerini toplar. Kablonun her bloğu taşıdığı gücü %0,1 azaltır.
    3. Batarya girişine gelen güç (en çok şarj hızı) depoya eklenir, çıkışa verilen düşülür.
    Hesap tek oyunculuda ve sunucuda yapılır; tüketici durumları blok değişikliği, batarya doluluğu 'bo' iletisiyle dağıtılır. */
-import { BLOKLAR, SIVI, LAV, KATI, EKIN_SONRAKI } from '../bloklar.js';
+import { BLOKLAR, ESYALAR, SIVI, LAV, KATI, EKIN_SONRAKI } from '../bloklar.js';
 import { DENIZ, diyarMi } from '../sabitler.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
 import { portlar } from './kablolar.js';
@@ -18,8 +18,9 @@ const ADIM = 0.5;
 const C = k => k.split(',').map(Number);
 /* Bataryaların şarj ve çıkış hızı (E/sn) */
 export const BATARYA_HIZ = { bataryaK: 10, bataryaO: 25, bataryaB: 60 };
-/* 0.28.0: jeneratör yakıtları: eşya -> yanma süresi (sn) */
-export const YAKIT = { 257: 40, 8: 15, 10: 15, 12: 15, 144: 15, 14: 4, 38: 4, 39: 4, 256: 1 };
+/* 0.28.0: jeneratör yakıtları: eşya -> yanma süresi (sn); 0.29.0: hazne kuralları oyun/kaplar.js'te */
+import { YAKIT, PISIRME, PISIRME_SURE, OK_ESYALARI } from './kaplar.js';
+export { YAKIT };
 export const kokAnahtari = (b, x, y, z) => (b && b.cihaz && b.parca ? kokKonumu(b, x, y, z).join(',') : x + ',' + y + ',' + z);
 
 /* Kök hücresi (x, y, z) olan üreticinin bu anki üretimi (E/sn) ve durmasının nedeni; çizici de dönüş hızı için kullanır.
@@ -182,6 +183,7 @@ export class Elektrik {
       else if (b.tuketim) {
         const c = !!n.calisiyor;
         if (!!b.acik !== c) d.blokKoy(n.x, n.y, n.z, b.taban + (c ? 1 : 0), 'elektrik');
+        if (b.elektrik === 'ocak') this.pisir(n, dt);   // 0.29.0
       } else if (b.elektrik === 'jenerator') {
         const c = n.uretim > 0;
         if (!!b.acik !== c) d.blokKoy(n.x, n.y, n.z, b.taban + (c ? 1 : 0), 'elektrik');
@@ -214,6 +216,34 @@ export class Elektrik {
     kalan -= dt; d.enerji.set(yk, Math.max(0, kalan));
     n.uretim = Math.min(b.uretim, talep); n.neden = '';
     return n.uretim;
+  }
+  /* ---------- 0.29.0: Elektrikli Ocak: çalışırken haznedeki ilk pişirilebilir malzemeyi 5 saniyede bir parti pişirir ----------
+     İlerleme 'p:' anahtarıyla saklanır. Çok oyunculuda hazne bir oyuncuda açıkken beklenir (içerik kapanınca sunucuya döner). */
+  pisir(n, dt) {
+    const d = this.dunya, l = d.sandiklar.get(n.k), pk = 'p:' + n.k;
+    n.pisen = null;
+    if (!n.calisiyor || !l || (this.sandikKilitli && this.sandikKilitli(n.k))) { if (!n.calisiyor) d.enerji.delete(pk); return; }
+    let i = -1, P = null;
+    for (let j = 0; j < l.length; j++) {
+      const s = l[j], q = s && PISIRME[s.id];
+      if (!q || s.adet < q.n || s.buyu) continue;
+      /* çıktının sığacağı yer: aynı eşyanın yığını, boş yuva ya da tükenecek girdi yuvası */
+      if (!l.some((t, m) => !t || (t.id === q.cikti && t.dayanim == null && t.adet + q.adet <= 64) || (m === j && s.adet === q.n))) continue;
+      i = j; P = q; break;
+    }
+    if (i < 0) { d.enerji.delete(pk); return; }
+    n.pisen = l[i].id;
+    let t = (d.enerji.get(pk) || 0) + dt;
+    if (t >= PISIRME_SURE) {
+      t = 0;
+      const s = l[i]; s.adet -= P.n; if (s.adet <= 0) l[i] = null;
+      let kalan = P.adet;
+      for (const u of l) if (kalan && u && u.id === P.cikti && u.dayanim == null && !u.buyu && u.adet < 64) { const k = Math.min(kalan, 64 - u.adet); u.adet += k; kalan -= k; }
+      for (let m = 0; m < l.length && kalan; m++) if (!l[m]) { l[m] = { id: P.cikti, adet: kalan }; kalan = 0; }
+      if (this.sandikDegisti) this.sandikDegisti(n.k);
+    }
+    n.ilerleme = t / PISIRME_SURE;
+    d.enerji.set(pk, t);
   }
   yakitSuresi(l) { let t = 0; if (l) for (const s of l) if (s && YAKIT[s.id]) t += YAKIT[s.id] * s.adet; return t; }
 
@@ -261,6 +291,8 @@ export class Elektrik {
     if (n.b.elektrik === 'batarya') { v.d = Math.round(n.depo || 0); v.sj = r1(n.sarj || 0); }
     if (n.b.elektrik === 'jenerator') v.yk = Math.round(n.yakit || 0);
     if (n.b.elektrik === 'algilayici') v.al = n.algiliyor ? 1 : 0;
+    if (n.b.elektrik === 'ocak') { if (n.pisen) { v.ps = n.pisen; v.pi = Math.round((n.ilerleme || 0) * 100); } }   // 0.29.0
+    if (n.b.cihaz === 'taret') { let ok = 0; for (const s of this.dunya.sandiklar.get(n.k) || []) if (s && OK_ESYALARI.has(s.id)) ok += s.adet; v.ok = ok; }
     return v;
   }
 }
@@ -293,6 +325,8 @@ export function enerjiMetni(b, v) {
     durum = v.sj > v.c + 0.05 ? 'sarj' : v.c > v.sj + 0.05 ? 'bosaliyor' : oran >= 0.995 ? 'dolu' : v.d <= 0 ? 'bos' : 'beklemede';
   } else if (b.tuketim) {
     l.push(`İhtiyaç <b>${s(b.tuketim)}</b> E/sn · Giriş <b>${s(v.g)}</b> E/sn`);
+    if (b.elektrik === 'ocak') l.push(v.ps ? `Pişiyor: <b>${ESYALAR[v.ps] ? ESYALAR[v.ps].ad : '?'}</b> %${v.pi || 0}` : 'Haznede pişecek malzeme yok (sağ tık: hazne)');   // 0.29.0
+    if (b.cihaz === 'taret') l.push(`Ok: <b>${v.ok || 0}</b>${v.ok ? '' : ' (sağ tık: ok haznesi)'}`);
     if (v.cb) l.push(`Geçiş çıkışı <b>${s(v.c)}</b> E/sn`);
     durum = !v.gb ? 'bagsiz' : v.on ? 'calisiyor' : 'eksik';
   } else if (b.elektrik === 'salter') {

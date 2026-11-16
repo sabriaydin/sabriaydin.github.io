@@ -33,7 +33,7 @@
         <circle class="cisim" cx="10" cy="10" r="3.4"/>
         <circle class="golge" cx="11.6" cy="8.6" r="2.9"/>
       </svg>
-      <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span><span id="havaDeger" class="hava" hidden></span>
+      <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span><span id="havaDeger" class="hava" hidden></span><span id="zhizDeger" class="hava zhiz" hidden title="Zaman hızı (geliştirici)"></span>
     </div>
   </div>
   <div id="yanmaEfekt"></div>
@@ -310,26 +310,55 @@
 
 <!-- Ayarlar -->
 <div id="ayarlarEkrani" class="ekran" hidden>
-  <div class="pencere orta dar">
+  <div class="pencere orta ayarPencere">
     <header><h2>Ayarlar</h2></header>
-    <div class="onAyar" id="grafikOnAyar"><span>Grafik ön ayarı</span><button type="button" data-on="dusuk">Düşük</button><button type="button" data-on="orta">Orta</button><button type="button" data-on="yuksek">Yüksek</button><button type="button" data-on="ultra">Ultra</button></div>
-    <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
-    <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
-    <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
-    <label class="kaydir">Ses düzeyi <b id="aSesD"></b><input type="range" id="aSes" min="0" max="1" step="0.05"></label>
-    <label class="kaydir">Müzik düzeyi <b id="aMuzikD"></b><input type="range" id="aMuzik" min="0" max="1" step="0.05"></label>
-    <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
-    <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
-    <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
-    <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
-    <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
-    <label class="secim"><input type="checkbox" id="aIsi"> Vücut ısısı (soğuk ve sıcak etkileri)</label>
-    <label class="secim"><input type="checkbox" id="aBakilan"> Bakılan nesnenin adını göster</label>
-    <label class="secim"><input type="checkbox" id="aOnizleme"> Yerleştirme önizlemesi (cihazlar ve yönlü bloklar; R tuşu yönü çevirir)</label>
-    <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
-    <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
-    <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
-    <div class="altDugmeler"><button class="dugme ana" id="ayarTamam">Tamam</button></div>
+    <!-- 0.29.0: ayarlar kategorilere ayrıldı -->
+    <nav class="ayarSekmeler" id="ayarSekmeler">
+      <button type="button" data-as="goruntu" class="on">Görüntü</button><button type="button" data-as="ses">Ses</button><button type="button" data-as="kontrol">Kontroller</button><button type="button" data-as="arayuz">Arayüz</button><button type="button" data-as="oynanis">Oynanış</button>
+    </nav>
+    <div class="ayarIcerik">
+      <section class="ayarBolum" data-as="goruntu">
+        <div class="onAyar" id="grafikOnAyar"><span>Grafik ön ayarı</span><button type="button" data-on="dusuk">Düşük</button><button type="button" data-on="orta">Orta</button><button type="button" data-on="yuksek">Yüksek</button><button type="button" data-on="ultra">Ultra</button></div>
+        <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
+        <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
+        <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
+        <label class="kaydir">Parlaklık <b id="aParlakD"></b><input type="range" id="aParlak" min="0.7" max="1.4" step="0.05"></label>
+        <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
+        <p class="ayarNot">Kare hızı düşükse görüş mesafesini ya da çözünürlüğü azaltınız. Çözünürlük "Otomatik" iken kare hızına göre kendiliğinden ayarlanır.</p>
+      </section>
+      <section class="ayarBolum" data-as="ses" hidden>
+        <label class="kaydir">Ses efektleri <b id="aSesD"></b><input type="range" id="aSes" min="0" max="1" step="0.05"></label>
+        <label class="kaydir">Müzik <b id="aMuzikD"></b><input type="range" id="aMuzik" min="0" max="1" step="0.05"></label>
+        <label class="secim"><input type="checkbox" id="aArkaSessiz"> Oyun penceresi arka plandayken sesi kapat</label>
+      </section>
+      <section class="ayarBolum" data-as="kontrol" hidden>
+        <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
+        <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
+        <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
+        <dl class="ayarTuslar">
+          <dt>Sol tık</dt><dd>Kırma, saldırı · elde kablo varken kablo yerleştirme</dd>
+          <dt>Sağ tık</dt><dd>Kullanma, koyma · elde kablo varken son işlemi geri alma</dd>
+          <dt>R</dt><dd>Yerleştirmeden önce döndürme · kablo çekmeyi iptal</dd>
+          <dt>Shift + tekerlek</dt><dd>Çekilen kablonun sarkması</dd>
+          <dt>E / M / Esc</dt><dd>Çanta / harita / duraklatma</dd>
+        </dl>
+      </section>
+      <section class="ayarBolum" data-as="arayuz" hidden>
+        <label class="kaydir">Arayüz boyutu <b id="aOlcekD"></b><input type="range" id="aOlcek" min="0.85" max="1.25" step="0.05"></label>
+        <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
+        <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
+        <label class="secim"><input type="checkbox" id="aBakilan"> Bakılan nesnenin adını göster</label>
+        <label class="secim"><input type="checkbox" id="aOnizleme"> Yerleştirme önizlemesi (cihazlar ve yönlü bloklar; R tuşu yönü çevirir)</label>
+        <label class="secim"><input type="checkbox" id="aEnerji"> Elektrikli cihaz bilgi panelini göster</label>
+      </section>
+      <section class="ayarBolum" data-as="oynanis" hidden>
+        <label class="secim"><input type="checkbox" id="aIsi"> Vücut ısısı (soğuk ve sıcak etkileri)</label>
+        <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
+        <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
+        <p class="ayarNot">Zorluk, Kanlı Ay ve meteor sıklığı her dünya için ayrıdır: duraklatma menüsündeki Dünya Ayarları'ndan değiştirilir.</p>
+      </section>
+    </div>
+    <div class="altDugmeler"><button class="dugme" id="ayarSifirla">Varsayılanlara dön</button><button class="dugme ana" id="ayarTamam">Tamam</button></div>
   </div>
 </div>
 
@@ -404,7 +433,7 @@
           <li><b>İstatistikler</b>: oynama süresi, hayatta kalınan gün, yenilen canavar, yürünen yol ve diğerleri Başarımlar penceresinin (L) başında gösterilir.</li>
           <li><b>Zorluk</b>: yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir; Kanlı Ay, meteor sıklığı ve vücut ısısı hızı "Denge ayarları"ndan düzenlenir. Duraklatma menüsündeki <b>Dünya Ayarları</b> ile sonradan değiştirilebilir. Hardcore'da tek can vardır: ölünce dünya sona erer ve yalnızca izleyici olarak dolaşılır.</li>
           <li><b>Bakılan nesne</b>: bakılan bloğun adı sol alt köşede görünür. Ayarlardan kapatılabilir.</li>
-          <li><b>Elektrik</b>: güneş paneli (2 × 1), rüzgâr türbini (2 × 2 taban, 8 blok yükseklik) ve su çarkı (3 × 3) enerji üretir; bataryalar depolar; lamba, elektrikli ocak ve ısıtıcı harcar. Cihazlar gerçek boyutlarındadır: kurulurken önizleme gösterilir, R tuşu yönü çevirir, cihazların üstüne blok konmaz. Her cihazın mavi giriş ve turuncu çıkış soketleri vardır; güç kabloyla çıkıştan girişe akar. Kablo elde: sokete sağ tık başlatır, yüzeye sağ tık ara nokta ekler, karşı sokete sağ tık bağlar; Shift basılı: düz çekilir, Shift + tekerlek: sarkma, R: iptal, kabloya sağ tık: söker. Dağıtıcı gücü böler, Birleştirici toplar. Yakıtlı Jeneratör kömür ve odun yakar (sağ tık: yakıt deposu); Otomatik Taret canavarlara ok atar; Hareket Algılayıcı yakında canlı varken gücü geçirir (sağ tık: kip); Sulama Fıskiyesi tarlaları sular. Şalter (sağ tık) ağı keser. Elektrikli bir bloğa bakılınca ağın durumu sol altta görünür.</li>
+          <li><b>Elektrik</b>: güneş paneli (2 × 1), rüzgâr türbini (2 × 2 taban, 8 blok yükseklik) ve su çarkı (3 × 3) enerji üretir; bataryalar depolar; lamba, elektrikli ocak ve ısıtıcı harcar. Cihazlar gerçek boyutlarındadır: kurulurken önizleme gösterilir, R tuşu yönü çevirir, cihazların üstüne blok konmaz. Her cihazın mavi giriş ve turuncu çıkış soketleri vardır; güç kabloyla çıkıştan girişe akar. Soketler yalnızca elde kablo varken renkli görünür. Kablo elde: sokete sol tık başlatır, yüzeye sol tık ara nokta ekler, karşı sokete sol tık bağlar; sağ tık son ara noktayı geri alır (ara nokta yoksa iptal eder); Shift basılı: düz çekilir, Shift + tekerlek: sarkma, R: iptal, kabloya sağ tık: söker. Dağıtıcı gücü böler, Birleştirici toplar. Yakıtlı Jeneratör yalnızca yakıt alır: kömür ve odun yakar (sağ tık: yakıt deposu); Elektrikli Ocak çalışırken haznesine konan çiğ yiyecekleri ve fırın malzemelerini pişirir (sağ tık: hazne); Otomatik Taret önündeki 180° alanda canavarlara ok atar, okları ok haznesinden harcar (sağ tık: hazne) ve durum lambası tehlikede kırmızı, aksi hâlde yeşil yanar; Hareket Algılayıcı yakında canlı varken gücü geçirir (sağ tık: kip); Sulama Fıskiyesi tarlaları sular. Şalter (sağ tık) ağı keser. Elektrikli bir bloğa bakılınca ağın durumu sol altta görünür.</li>
           <li><b>Fotoğraf modu</b>: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü PNG olarak kaydeder.</li>
           <li><b>Envanter</b>: "Sırala" çantayı birleştirip türüne göre dizer. Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri bulunur.</li>
           <li><b>Çok oyunculu sohbet komutları</b>: /f &lt;ad&gt; &lt;mesaj&gt; özel mesaj, /oyuncular, /konum, /ben, /zar; sunucu /at &lt;ad&gt; ile oyuncu çıkarabilir. Bağlantı koparsa oyun 5 saniye sonra kendiliğinden yeniden bağlanmayı dener.</li>

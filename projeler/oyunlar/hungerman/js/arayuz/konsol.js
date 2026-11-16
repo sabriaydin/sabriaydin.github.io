@@ -601,7 +601,7 @@ export class Konsol {
     const o = this.oyun();
     if (!o) return;
     const P = o.oyuncu.konum, k = o.dunya.uretici.kolon(Math.floor(P.x), Math.floor(P.z), {});
-    const bayrak = [o.hayatta.olumsuz ? 'ölümsüz' : '', o.oyuncu.ucus ? 'uçuyor' : '', o.oyuncu.hizCarpani !== 1 ? `hız ${o.oyuncu.hizCarpani}×` : '', (o.zamanHizi || 1) !== 1 ? `zaman ${o.zamanHizi}×` : '', this.kesif ? `keşif %${Math.floor(this.kesif.k.oran * 100)}` : ''].filter(Boolean).join(' · ');
+    const bayrak = [o.hayatta.olumsuz ? 'ölümsüz' : '', o.oyuncu.ucus ? 'uçuyor' : '', o.oyuncu.hizCarpani !== 1 ? `hız ${o.oyuncu.hizCarpani}×` : '', (o.zamanHizi ?? 1) !== 1 ? `zaman ${o.zamanHizi}×` : '', this.kesif ? `keşif %${Math.floor(this.kesif.k.oran * 100)}` : ''].filter(Boolean).join(' · ');
     $('#konsolBilgi').textContent = `${this.arayuz.fpsMetni()} · X ${P.x.toFixed(1)} Y ${P.y.toFixed(1)} Z ${P.z.toFixed(1)} · ${BIYOMLAR[k.b]} · canlı ${o.varliklar.liste.length} · parça ${o.dunya.parcalar.size}${o.ag ? (o.istemci ? ' · istemci' : ' · sunucu') : ''}${bayrak ? ' · ' + bayrak : ''}`;
   }
 }

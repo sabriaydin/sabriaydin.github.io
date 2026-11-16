@@ -117,6 +117,17 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 29. aşama (0.29.0): Ocak ve ısıtıcı tasarımı, taret cephanesi, Rust tarzı kablo kontrolleri, kategorili ayarlar
+- Elektrikli Ocak: fırın bölmeli mutfak ocağı (ocak gözlü tabla, düğme şeridi, camlı fırın kapağı); yönlüdür. Pişirme haznesi vardır: çalışırken içine konan çiğ yiyecekleri ve fırın malzemelerini 5 saniyede bir parti pişirir (kömür gerekmez). Yakınındayken fırın ve kamp ateşi yerine geçmeye devam eder.
+- Isıtıcı: ayaklı panel radyatör; çalışırken ön ızgarası kızarır. Ocak ve ısıtıcının bağlantı noktaları arka altta.
+- Otomatik Taret: arbalet başlı yeni tasarım (çatal, kundak, yaylar, kiriş, yüklü ok, ok şarjörü, ok sandığı). Oklar sınırsız değildir: ok haznesi sağ tıkla elle doldurulur, her atış 1 ok harcar. Durum lambası (ışık saçmaz): tehlikede kırmızı, aksi hâlde yeşil, güçsüzken sönük.
+- Taret, konulduğu yönün iki yanına 90° (toplam 180°) tarar; bu alan dışındaki tehditleri görmez. Arkadan gelen tehdit görüş alanına girince ya da 2 bloğa kadar yaklaşınca sezilir.
+- Hazne kuralları: jeneratöre yalnızca yakıt, tarete yalnızca ok, ocağa yalnızca pişirilebilen malzeme konur (sandık ekranında ve sunucuda).
+- Kablo kontrolleri (Rust tarzı): elde kablo varken sol tık yerleştirir (başla, ara nokta, bağla), sağ tık son ara noktayı geri alır (yoksa iptal eder); kabloya sağ tık söker. Kablo eldeyken blok kırılmaz.
+- Bağlantı noktaları elde kablo yokken renksiz, koyu gri metal soket olarak görünür.
+- Hata düzeltmesi: geliştirici penceresinde hava durumu düğmelerinin hemen üstündeki "Zaman hızı" kaydırıcısına yanlışlıkla tıklanınca zaman 100 kata kadar hızlanıyordu. Kaydırıcı yerine 0 / 1 / 2 / 5 / 10 / 30 / 60× düğmeleri konuldu; zaman durdurma artık çalışıyor; zaman hızı 1× değilken saat göstergesinde uyarı görünür.
+- Ayarlar kategorilere ayrıldı (Görüntü, Ses, Kontroller, Arayüz, Oynanış). Yeni ayarlar: parlaklık, arayüz boyutu, arka planda sesi kapatma, elektrikli cihaz bilgi paneli; "Varsayılanlara dön".
+
 ## 28. aşama (0.28.0): Jeneratör, otomatik taret, hareket algılayıcı, sulama fıskiyesi
 - **Yakıtlı Jeneratör:** kızaklı motor, yakıt tankı, egzoz ve kontrol paneli. Sağ tık yakıt deposunu (sandık) açar; kömür 40, kütük 15, kalas 4, çubuk 1 saniye yanar. Çıkışına talep varken en çok 20 E/sn üretir ve yakıt harcar (talep yokken yakıt korunur); çalışırken egzozdan duman çıkar ve paneldeki ışık yeşil yanar. Bilgi panelinde kalan yakıt süresi görünür.
 - **Otomatik Taret (giriş + geçiş çıkışı, 8 E/sn):** çalışırken 16 blok içinde görüş hattındaki en yakın canavara ya da öfkeli hayvana döner, namluyu eğer ve 0,8 saniyede bir ok atar (4 hasar). Oyunculara, evcil hayvanlara ve köylülere ateş etmez; hedef yokken yavaşça tarar, gücü kesilince namlusu aşağı eğilir. Çok oyunculuda ateşi sunucu yapar.
