@@ -8,6 +8,7 @@ import { yapiYaz } from './yapi-uretici.js';
 import { koyYaz, koyIcinde, enYakinKoy } from './koy-uretici.js';
 import { zindanYaz } from './zindan-uretici.js';
 import { batikYaz } from './batik-uretici.js';
+import { adaYaz } from './ada-uretici.js';
 import { madenYaz } from './maden-uretici.js';
 
 export const BIYOMLAR = ['Okyanus', 'Derin Okyanus', 'Nehir', 'Kumsal', 'Karlı Kumsal', 'Dağlar', 'Tayga', 'Çöl', 'Orman', 'Huş Ormanı', 'Çayır', 'Savan', 'Bataklık', 'Karlı Ova'];
@@ -164,6 +165,7 @@ export class Uretici {
     this.karKapla(v, kolonlar);
     yapiYaz(this, v, x0, z0);
     batikYaz(this, v, x0, z0);
+    adaYaz(this, v, x0, z0);   // 0.30.6: Lanetli Ada
     koyYaz(this, v, x0, z0);
     return v;
   }
@@ -336,7 +338,7 @@ export class Uretici {
       else if (alt === 143) id = r < 0.16 ? 25 : r < 0.2 ? 43 : r < 0.215 ? 36 : r < 0.218 ? 26 : 0;
       else if (alt === 5 && o.b === BY.COL) id = r < 0.012 ? 30 : 0;
       /* 0.21.0: çayır ve ormanlarda balkabağı tarlaları; deniz seviyesindeki kıyılarda şeker kamışı */
-      if (!id && (alt === 4 || alt === 45) && (o.b === BY.CAYIR || o.b === BY.ORMAN || o.b === BY.HUS || o.b === BY.TAYGA) && this.gG.g2(x / 30 + 77, z / 30 - 13) > 0.5 && karma2(this.tohum ^ 0xba1ab, x, z) < 0.1) id = 559;
+      if (!id && (alt === 4 || alt === 45) && (o.b === BY.CAYIR || o.b === BY.ORMAN || o.b === BY.HUS || o.b === BY.TAYGA) && this.gG.g2(x / 30 + 77, z / 30 - 13) > 0.74 && karma2(this.tohum ^ 0xba1ab, x, z) < 0.035) id = 559;   // 0.30.6: daha seyrek ve küçük tarlalar
       if (!id && (alt === 3 || alt === 4 || alt === 5) && h === DENIZ && lx > 0 && lx < PB - 1 && lz > 0 && lz < PB - 1 && karma2(this.tohum ^ 0x5e4e, x, z) < 0.5
         && (v[dizin(lx + 1, h, lz)] === 7 || v[dizin(lx - 1, h, lz)] === 7 || v[dizin(lx, h, lz + 1)] === 7 || v[dizin(lx, h, lz - 1)] === 7)) {
         const boy = 1 + Math.floor(karma2(this.tohum ^ 0x5e4f, x, z) * 3);

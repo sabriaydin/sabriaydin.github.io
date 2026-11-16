@@ -1,10 +1,12 @@
 /* HungerMan - Diyar Geçidi (0.18.0)
+   0.30.6: tek giriş Lanetli Ada'daki kadim geçittir (dunya/ada-uretici.js); çakmak yalnızca onu ya da diyardaki karşılığını yeniden yakar.
    Obsidyenden dikdörtgen bir çerçeve (iç kısmı en az 2 × 3, en çok 21 × 21) kurulur; içine Çakmakla sağ tıklanınca geçit açılır.
    Geçidin içinde 2,5 saniye durulunca dünya ile Yeraltı Diyarı arasında geçilir (diyardaki 1 blok dünyadaki 8 bloktur).
    Varılan yerde 20 blok çevrede bir geçit varsa ona çıkılır; yoksa obsidyen bir platform ve yeni bir geçit kurulur.
    Çerçevesinden bir blok kırılınca geçit söner. */
 import { BLOKLAR, KATI, OPAK, SIVI } from '../bloklar.js';
 import { PY, DENIZ, DIYAR_X, DIYAR_SINIR, DUNYA_SINIRI, diyarMi } from '../sabitler.js';
+import { lanetliAda, ADA_AD } from '../dunya/ada-uretici.js';
 
 const OBS = 515, GECIT = 516, BEKLE = 2.5;
 const gecitMi = id => !!(BLOKLAR[id] && BLOKLAR[id].gecit);
@@ -20,6 +22,10 @@ export class Gecit {
   yak(h) {
     const d = this.dunya, x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
     if (d.blok(x, y, z) !== 0) return false;
+    /* 0.30.6: Diyar'ın tek girişi Lanetli Ada'daki kadim geçittir; çakmak yalnızca onu (ya da diyardaki karşılığını) yeniden yakar */
+    const A = lanetliAda(d.uretici), ic = diyarMi(x);
+    const uzak = ic ? Math.hypot(x - (DIYAR_X + Math.floor(A.x / 8)), z - Math.floor(A.z / 8)) > 30 : Math.hypot(x - A.x, z - A.z) > 16;
+    if (uzak) { this.bildirim(`Geçit burada açılamaz. Yeraltı Diyarı'nın tek girişi, Issız Deniz'in ortasındaki ${ADA_AD}'daki kadim geçittir.`); return false; }
     for (const e of [0, 1]) {
       const l = this.cerceve(x, y, z, e);
       if (!l) continue;
@@ -87,8 +93,9 @@ export class Gecit {
     if (this.sesSayac <= 0) { this.sesSayac = 1.1; this.ses.gecitUgultu(); }
     if (this.sayac >= BEKLE) {
       this.sayac = 0; this.cikmali = true;
-      const p = this.oyuncu.konum, diyara = !diyarMi(p.x);
-      this.gec(diyara ? { x: DIYAR_X + Math.floor(p.x / 8), z: Math.floor(p.z / 8), diyara } : { x: Math.floor((p.x - DIYAR_X) * 8), z: Math.floor(p.z * 8), diyara });
+      /* 0.30.6: bütün geçitler Lanetli Ada ile diyardaki karşılığı arasında işler */
+      const p = this.oyuncu.konum, diyara = !diyarMi(p.x), A = lanetliAda(this.dunya.uretici);
+      this.gec(diyara ? { x: DIYAR_X + Math.floor(A.x / 8), z: Math.floor(A.z / 8), diyara } : { x: A.gecit.x, z: A.gecit.z, diyara });
     }
     return Math.min(1, this.sayac / BEKLE);
   }

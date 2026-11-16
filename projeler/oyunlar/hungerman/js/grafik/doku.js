@@ -714,7 +714,7 @@ const cimUst = (taban, koyu, acik) => p => { p.doldur(taban, 0.14); p.lekeler(ko
 const cimYan = renk => p => { RESSAM.toprak(p); const g = hex(renk); for (let x = 0; x < D; x++) { const h = 3 + Math.floor(p.r() * 2.2); for (let y = 0; y < h; y++) p.set(x, y, karis(g, 0.82 + p.r() * 0.35)); } };
 const ot = renk => p => bitki(p, p => { const c = hex(renk); for (let i = 0; i < 9; i++) { let x = 2 + Math.floor(p.r() * 12); const h = 6 + Math.floor(p.r() * 9); for (let y = 15; y > 15 - h; y--) { p.set(x, y, karis(c, 0.75 + p.r() * 0.45)); if (p.r() < 0.25) x += p.r() < 0.5 ? -1 : 1; } } });
 const MEVSIM_RESSAM = {
-  cimen_ust: [p => { cimUst('#66b040', '#55a034', '#7cc252')(p); serpis(p, ['#f2e65a', '#f0f0f0', '#e86a8a'], 5); }, null, cimUst('#8c9a40', '#7a8834', '#a8a84c'), cimUst('#7e8e6c', '#6c7c5c', '#929e80')],
+  cimen_ust: [cimUst('#66b040', '#55a034', '#7cc252'), null, cimUst('#8c9a40', '#7a8834', '#a8a84c'), cimUst('#7e8e6c', '#6c7c5c', '#929e80')],
   cimen_yan: [cimYan('#66b040'), null, cimYan('#8c9a40'), cimYan('#7e8e6c')],
   mese_yaprak: [p => { yaprak(p, '#4a9a32'); serpis(p, ['#f4b8d0', '#ffffff', '#f09ab8'], 14); }, null, p => { yaprak(p, '#c0702a'); serpis(p, ['#a8401e', '#d8a030', '#8a3016'], 40); }, p => yaprak(p, '#6a5e40', 0.42)],
   hus_yaprak: [p => { yaprak(p, '#7fb446'); serpis(p, ['#ffffff', '#f6f0d0'], 12); }, null, p => { yaprak(p, '#d8b03a'); serpis(p, ['#e8c84a', '#b88a26'], 30); }, p => yaprak(p, '#8a8456', 0.45)],

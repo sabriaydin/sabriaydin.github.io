@@ -8,6 +8,7 @@ import { BY, KARLI } from '../dunya/uretici.js';
 import { KATI, SIVI, KESIK, BITKI, LAV, BLOKLAR } from '../bloklar.js';
 import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
+import { adaYakin } from '../dunya/ada-uretici.js';
 import { karma3 } from '../rastgele.js';
 import { PY, DENIZ, diyarMi } from '../sabitler.js';
 import { cakisma, hucreKutulari } from '../sekiller.js';
@@ -121,7 +122,9 @@ export class Varliklar {
       let y = null;
       for (let k = 0; k < 16; k++) { const t = y0 - k; if (t < 33) break; if (this.dunya.kati(x, t - 1, z) && !this.dunya.kati(x, t, z) && !this.dunya.kati(x, t + 1, z) && !SIVI[this.dunya.blok(x, t, z)]) { y = t; break; } }
       if (y == null || (x + 0.5 - op.x) ** 2 + (y - op.y) ** 2 + (z + 0.5 - op.z) ** 2 < 14 * 14) continue;
-      if (Math.random() < 0.5) this.ekle('kulzombi', x + 0.5, y, z + 0.5);
+      /* 0.30.6: kor ruhu seyrek (yakında en çok 2) */
+      let kr = 0; for (const v of this.liste) if (!v.olu && v.turAd === 'korruhu' && (v.konum.x - op.x) ** 2 + (v.konum.z - op.z) ** 2 < 80 * 80) kr++;
+      if (Math.random() < 0.78 || kr >= 2) this.ekle('kulzombi', x + 0.5, y, z + 0.5);
       else if (!this.kati(x + 0.5, y + 2, z + 0.5)) this.ekle('korruhu', x + 0.5, y + 1.5, z + 0.5);
       break;
     }
@@ -1063,8 +1066,9 @@ export class Varliklar {
       yx = dx / yatay * yaklas + (-dz / yatay) * Math.sin(t * 0.7) * 0.6; yz = dz / yatay * yaklas + (dx / yatay) * Math.sin(t * 0.7) * 0.6;
       yy = (op.y + 3.5 - p.y) * 0.4 + Math.sin(t * 2.3) * 0.3; hiz = yaklas ? T.kosu : T.hiz;
       v.seriBek = (v.seriBek || 0) - dt;
-      if (v.saldiriBek <= 0 && this.gorusVar(p.x, p.y + 1.2, p.z, op.x, op.y + 1.4, op.z)) { v.saldiriBek = 3 + Math.random() * 1.5; v.seri = 3; }
-      if (v.seri > 0 && v.seriBek <= 0) { v.seri--; v.seriBek = 0.32; this.atesTopuAt(v, ctx); }
+      /* 0.30.6: seri iki ateş topu, seriler arası 5-7 sn; ilk atıştan önce 1,5 sn uyarı */
+      if (v.saldiriBek <= 0 && this.gorusVar(p.x, p.y + 1.2, p.z, op.x, op.y + 1.4, op.z)) { v.saldiriBek = 5 + Math.random() * 2; v.seri = 2; v.seriBek = 1.5; }
+      if (v.seri > 0 && v.seriBek <= 0) { v.seri--; v.seriBek = 0.6; this.atesTopuAt(v, ctx); }
     } else if (!this.barisci && !ctx.oyuncuOlu && d < T.gorus && v.kacZaman <= 0 && (!T.ari || v.ofkeli)) {
       kovaliyor = true;
       yx = dx / d + Math.sin(t * 3.1) * 0.55; yy = dy / d + Math.sin(t * 4.3) * 0.45; yz = dz / d + Math.cos(t * 2.7) * 0.55; hiz = T.kosu;
@@ -1245,6 +1249,7 @@ export class Varliklar {
       y.sayac = 8 + Math.random() * 10;
       if (this.mesaleYakin(y.x + 0.5, y.y, y.z + 0.5, 6)) continue;
       if (!y.tur && diyarMi(y.x)) y.tur = 'korruhu';   // 0.18.0: kül kalesi yuvası
+      if (!y.tur && adaYakin(this.uretici, y.x, y.z)) y.tur = 'iskelet';   // 0.30.6: Lanetli Ada
       if (!y.tur) { const zd = zindanAt(this.uretici, y.x, y.y, y.z); y.tur = zd ? zd.tur : madenAt(this.uretici, y.x, y.y, y.z) ? 'orumcek' : YUVA_TURLERI[Math.floor(karma3(7, y.x, y.y, y.z) * 3)]; }
       let yakin = 0;
       for (const v of this.liste) if (!v.olu && v.tur.dusman && v.konum.distanceToSquared(new THREE.Vector3(y.x, y.y, y.z)) < 64) yakin++;
@@ -1405,7 +1410,7 @@ export class Varliklar {
     const op = ctx.oyuncu.konum, p = new THREE.Vector3(v.konum.x, v.konum.y + 1.1, v.konum.z);
     const h = new THREE.Vector3(op.x - p.x + (Math.random() - 0.5) * 1.2, op.y + 1.1 - p.y + (Math.random() - 0.5) * 0.6, op.z - p.z + (Math.random() - 0.5) * 1.2).normalize();
     p.addScaledVector(h, 0.5);
-    this.okAt(p, h.multiplyScalar(15), v.tur.hasar, v, null, { tur: 'ates' });
+    this.okAt(p, h.multiplyScalar(11), v.tur.hasar, v, null, { tur: 'ates' });   // 0.30.6: yavaş, kaçınılabilir
     if (this.sesK(p) > 0.2) this.ses.atesTopu();
   }
   okGuncelle(dt, C) {

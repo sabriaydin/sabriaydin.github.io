@@ -61,7 +61,7 @@ export const BASARIMLAR = [
   { k: 'gurme', ad: 'Gurme', aciklama: 'Etkisi olan bir yemek ye.', ikon: 464, grup: 'Yuva ve Dostlar' },
   { k: 'ev', ad: 'Ev Sahibi', aciklama: 'Bir sandalyeye ya da koltuğa otur.', ikon: 199, grup: 'Yuva ve Dostlar' },
   /* 0.18.0: Yeraltı Diyarı ve mevsimler */
-  { k: 'gecit', ad: 'Geçit Bekçisi', aciklama: 'Bir Diyar Geçidi aç.', ikon: 473, grup: 'Diyar ve Mevsimler' },
+  { k: 'gecit', ad: 'Geçit Bekçisi', aciklama: 'Lanetli Ada’ya ayak bas.', ikon: 473, grup: 'Diyar ve Mevsimler' },
   { k: 'diyar', ad: 'Ateşin Eşiği', aciklama: 'Yeraltı Diyarı’na gir.', ikon: 515, grup: 'Diyar ve Mevsimler' },
   { k: 'kale', ad: 'Kül Kalesi', aciklama: 'Bir Kül Kalesi’ne ulaş.', ikon: 518, grup: 'Diyar ve Mevsimler' },
   { k: 'korruhu', ad: 'Ruh Avcısı', aciklama: 'Bir Kor Ruhu yen.', ikon: 472, grup: 'Diyar ve Mevsimler' },

@@ -117,6 +117,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.6 (0.30.6): Lanetli Ada, Kor Ruhu dengesi, çimen ve balkabağı
+- **Lanetli Ada:** Yeraltı Diyarı'nın dünyadaki tek girişi. Issız Deniz'in (başlangıçtan 900-2600 blok uzakta, çevresi en az 50 blok açık deniz olan derin bir nokta) ortasında, kül kumu, kor taşı, obsidyen ve kül tuğlasından küçük, karanlık bir ada: ortada yanan kadim geçit, kıyıda obsidyen sivri kayalar, kurumuş ağaçlar, örümcek ağları, iskelet yuvası ve bir sandık. Her dünyada bir tanedir; konumu tohumdan belirlenir. Yaklaştıkça ekran kararır ve uğultu duyulur.
+- Çakmakla başka yerde geçit açılamaz; çakmak yalnızca adadaki geçidi (ya da diyardaki karşılığını) çerçevesi bozulup sönerse yeniden yakar. Bütün geçitler ada ile diyardaki karşılığı arasında işler (eski kayıtlardaki geçitler de).
+- "Geçit Bekçisi" başarımı: Lanetli Ada'ya ayak basmak. Konsola `isinla ada`, geliştirici penceresine "Lanetli Ada" düğmesi eklendi.
+- **Kor Ruhu zayıflatıldı:** can 14, ateş topu hasarı 3 (yakma 2 sn), seride iki ateş topu ve seriler arası 5-7 sn, ilk atıştan önce 1,5 sn uyarı, ateş topu yavaşladı (kaçınılabilir), görüş 24 blok, tek tek doğar; diyarda yakında en çok 2 kor ruhu bulunur ve doğanların çoğu Kül Zombisidir.
+- Çimenli toprağın üstündeki beyaz, pembe ve sarı çiçek pikselleri kaldırıldı.
+- Balkabağı tarlaları daha seyrek ve küçük.
+
 ## 30.5 (0.30.5): Akan su, kapı arkası saldırı, güvenli yeniden doğma
 - **Akan su:** kaynak su tükenmez; altı boşsa aşağı düşer (şelale), altı katıysa yanlara 7 bloğa kadar yayılır, her adımda seviyesi azalır ve yüzeyi eğimli görünür. Kaynağı kesilen akan su çekilir; iki kaynak arasındaki akan su kaynağa dönüşür. Akış yolundaki ot ve çiçekleri siler; lava değince lav obsidyene (kaynak su) ya da parke taşa (akan su) döner. Akan su oyuncuyu akış yönüne sürükler. Uçurum ve mağara ağızlarındaki küp biçimli eski sular da akmaya başlar. Akan su kovayla alınamaz. Tek oyunculuda ve sunucuda işlenir.
 - Kazılan blok artık kendiliğinden su kaynağına dönüşmez; açılan boşluğu akış doldurur.
