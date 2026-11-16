@@ -9,7 +9,7 @@ import { BIYOMLAR, BY } from '../dunya/uretici.js';
 import { koylerAlan } from '../dunya/koy-uretici.js';
 import { zindanlarAlan } from '../dunya/zindan-uretici.js';
 import { madenlerAlan } from '../dunya/maden-uretici.js';
-import { yapilarAlan, YAPI_ADI } from '../dunya/yapi-uretici.js';
+import { yapilarAlan, YAPI_ADI, tekYapilar } from '../dunya/yapi-uretici.js';
 import { zindanBossu } from '../oyun/yapilar.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
 import { HaritaKesif } from '../harita/kesif.js';
@@ -234,9 +234,8 @@ export class Konsol {
       /* 0.15.0: özel yapılar (bossların bulunduğu yer) */
       const YT = { tapinak: 'tapinak', ormantapinak: 'ormanTapinak', kule: 'kule', kamp: 'kamp' }[a];
       if (YT) {
-        const l = yapilarAlan(u, P.x - 3000, P.z - 3000, P.x + 3000, P.z + 3000).filter(y => y.tur === YT && Math.hypot(y.x - P.x, y.z - P.z) > 12);
-        const en = this.enYakin(l, P);
-        if (!en) { this.hata(`Yakında ${YAPI_ADI[YT].toLocaleLowerCase('tr')} bulunamadı.`); return; }
+        const en = tekYapilar(u)[YT];   // 0.23.3: her türden dünyada tek yapı bulunur
+        if (!en) { this.hata(`Bu dünyada ${YAPI_ADI[YT].toLocaleLowerCase('tr')} bulunmuyor.`); return; }
         const m = Math.max(15, en.R + 3), [dx, dz] = [[0, m], [-m, 0], [0, -m], [m, 0]][en.f];
         this.isinla(o, en.x + dx + 0.5, null, en.z + dz + 0.5); this.yaz(`${YAPI_ADI[YT]} · ${Math.round(Math.hypot(en.x - P.x, en.z - P.z))} blok`, 'soluk'); return;
       }

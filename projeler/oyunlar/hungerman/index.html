@@ -46,6 +46,7 @@
   <div id="gecitEfekt"></div>
   <div id="bossCubuk" hidden><b id="bossAd"></b><div class="bossDis"><i id="bossCan"></i></div></div>
   <div id="bakilanAd" hidden></div>
+  <div id="enerjiBilgi" hidden></div>
   <div id="ogretici" hidden><b></b><p></p><button type="button">Gizle</button></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><s id="hedefIz"></s><i id="hedefCan"></i></div></div>
   <div id="uyku"></div>
@@ -147,13 +148,23 @@
 
 <!-- Geliştirici modu penceresi -->
 <div id="gelistirici" class="kaplama" hidden>
-  <div class="pencere gelPencere">
-    <header><h2>Geliştirici Modu</h2><span id="gelDurum" class="kAlt"></span><input type="search" id="gelGenelAra" placeholder="Tüm işlemlerde ara… (Ctrl + F)" autocomplete="off"></header>
-    <div id="gelCanliSerit" class="gelCanliSerit"></div>
-    <nav class="gelSekmeler" id="gelSekme" aria-label="Geliştirici sekmeleri"></nav>
-    <div id="gelIcerik"></div>
-    <div id="gelMesaj" class="gelMesaj"></div>
-    <button class="kapat" id="gelKapat" aria-label="Kapat">✕</button>
+  <div class="gelPencere" role="dialog" aria-label="Geliştirici Modu">
+    <aside class="gelYan">
+      <div class="gelMarka"><span class="gelLogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></svg></span><div><b>Geliştirici Modu</b><small id="gelSurum"></small></div></div>
+      <nav class="gelSekmeler" id="gelSekme" aria-label="Geliştirici sekmeleri"></nav>
+      <div class="gelYanAlt"><span><kbd>F9</kbd> Kapat</span><span><kbd>F8</kbd> Konsol</span><span><kbd>Sağ tık</kbd> Sabitle</span></div>
+    </aside>
+    <section class="gelAna">
+      <header class="gelUst">
+        <div class="gelUstBaslik"><h2 id="gelBaslikMetin">Geliştirici Modu</h2><span id="gelAltBaslik"></span></div>
+        <label class="gelAra"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="gelGenelAra" placeholder="Tüm işlemlerde ara" autocomplete="off"><kbd>Ctrl F</kbd></label>
+        <span id="gelDurum" class="gelRozet"></span>
+        <button type="button" class="gelKapat" id="gelKapat" aria-label="Kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </header>
+      <div id="gelCanliSerit" class="gelCanliSerit"></div>
+      <div id="gelIcerik"></div>
+      <footer class="gelAltBar"><div id="gelMesaj" class="gelMesaj"></div></footer>
+    </section>
   </div>
 </div>
 
@@ -384,6 +395,7 @@
           <li><b>İstatistikler</b>: oynama süresi, hayatta kalınan gün, yenilen canavar, yürünen yol ve diğerleri Başarımlar penceresinin (L) başında gösterilir.</li>
           <li><b>Zorluk</b>: yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir; Kanlı Ay, meteor sıklığı ve vücut ısısı hızı "Denge ayarları"ndan düzenlenir. Duraklatma menüsündeki <b>Dünya Ayarları</b> ile sonradan değiştirilebilir. Hardcore'da tek can vardır: ölünce dünya sona erer ve yalnızca izleyici olarak dolaşılır.</li>
           <li><b>Bakılan nesne</b>: bakılan bloğun adı sol alt köşede görünür. Ayarlardan kapatılabilir.</li>
+          <li><b>Elektrik</b>: güneş paneli, rüzgâr ve su türbini enerji üretir; bataryalar depolar; lamba, elektrikli ocak ve ısıtıcı harcar. Bitişik bloklar ve Elektrik Kablosu ağı oluşturur, Şalter (sağ tık) ağı keser. Elektrikli bir bloğa bakılınca ağın durumu sol altta görünür.</li>
           <li><b>Fotoğraf modu</b>: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü PNG olarak kaydeder.</li>
           <li><b>Envanter</b>: "Sırala" çantayı birleştirip türüne göre dizer. Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri bulunur.</li>
           <li><b>Çok oyunculu sohbet komutları</b>: /f &lt;ad&gt; &lt;mesaj&gt; özel mesaj, /oyuncular, /konum, /ben, /zar; sunucu /at &lt;ad&gt; ile oyuncu çıkarabilir. Bağlantı koparsa oyun 5 saniye sonra kendiliğinden yeniden bağlanmayı dener.</li>

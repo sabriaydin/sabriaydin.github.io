@@ -30,6 +30,12 @@ export class IstemciOyun {
     this.kanal.kapandi = () => { if (!this.kapali) { this.kapali = true; this.arayuz.koptu('Sunucuyla bağlantı kesildi.'); } };
   }
   gonder(m) { this.kanal.gonder(m); }
+  /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi sunucudan istenir (en çok saniyede iki kez); son yanıt döner */
+  enerjiIste(k) {
+    const s = performance.now();
+    if (k !== this.enerjiK || s - (this.enerjiZaman || 0) > 500) { if (k !== this.enerjiK) this.enerjiV = null; this.enerjiK = k; this.enerjiZaman = s; this.gonder({ t: 'eb', k }); }
+    return this.enerjiV || null;
+  }
 
   kancalar() {
     const o = this.oyun;
@@ -126,6 +132,7 @@ export class IstemciOyun {
       case 'h': this.arayuz.hasar(m.n, m.s, m.k[0], m.k[1], m.a); break;
       case 'kv': o.koyler.itibarDegistir(m.k, -8); o.hud.bildirim('Köylüler bu davranıştan hoşlanmadı.'); break;
       case 'za': o.zorluk = m.z; o.denge = m.d; zorlukUygula(o); break;   // 0.23.0: dünya ayarları değişti
+      case 'eb': if (m.k === this.enerjiK) this.enerjiV = m.v || null; break;   // 0.24.0
       case 'met': if (o.gok && Array.isArray(m.p)) o.gok.meteorBaslat({ x: +m.p[0], y: +m.p[1], z: +m.p[2], aci: +m.a || 0 }); break;   // 0.22.0: meteor
       case 'ol': o.gorevler.oldurme(m.tur); if (o.basarimlar) o.basarimlar.oldurme(m.tur, !!m.ok); if (m.k) o.koyler.itibarDegistir(m.k, -30); if (TURLER[m.tur] && TURLER[m.tur].xp) o.hayatta.xpEkle(TURLER[m.tur].xp); break;
       case 'xp': o.hayatta.xpEkle(Math.min(50, +m.n || 0)); break;

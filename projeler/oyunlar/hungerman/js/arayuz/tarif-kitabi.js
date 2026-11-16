@@ -4,7 +4,7 @@
    Bir tarif takibe alınınca ekranın solunda malzemelerin envanterdeki durumu görünür. */
 import { simge } from '../grafik/doku.js';
 import { BLOKLAR, ESYALAR, ETKILER } from '../bloklar.js';
-import { TARIFLER, KATEGORILER, GRUPLAR, istasyonMetni, girdiAdi, girdiSay, kacKez } from '../oyun/uretim.js';
+import { TARIFLER, KATEGORILER, GRUPLAR, istasyonMetni, girdiAdi, girdiSay, kacKez, girdiListesi } from '../oyun/uretim.js';
 import { TURLER } from '../varlik/turler.js';
 import { MESLEKLER } from '../koy/meslekler.js';
 import { OLTA_BALIK, OLTA_CER, OLTA_HAZINE } from '../oyun/olta.js';
@@ -120,7 +120,7 @@ export class TarifKitabi {
     const ist = t.istasyon ? istasyonMetni(t) : 'Her yerde';
     const istVar = !t.istasyon || [].concat(t.istasyon).some(k => this.mevcut.has(k));
     return `<div class="tkTarif">
-      <div class="tkGirdiler">${t.girdi.map(([g, a]) => this.girdi(g, a)).join('<i class="arti">+</i>')}<i class="ok">→</i>
+      <div class="tkGirdiler">${girdiListesi(t).map(([g, a]) => this.girdi(g, a)).join('<i class="arti">+</i>')}<i class="ok">→</i>
         <span class="tkGirdi cikti" data-git="${t.cikti}" title="${esc(ESYALAR[t.cikti].ad)}"><img src="${simge(t.cikti).url}" alt=""><b>${t.adet}</b><small>${esc(ESYALAR[t.cikti].ad)}</small></span></div>
       <div class="tkTarifAlt"><span class="tkIst ${istVar ? '' : 'uzak'}">${esc(ist)}</span>${kez > 0 ? `<span class="tkKez">Malzeme ${kez} kez yetiyor</span>` : '<span class="tkKez eksik">Malzeme eksik</span>'}
         <button type="button" class="dugme kucuk ${this.takip === i ? 'ana' : ''}" data-takip="${i}">${this.takip === i ? 'Takibi bırak' : 'Takip et'}</button></div>
@@ -168,7 +168,7 @@ export class TarifKitabi {
   takipCiz(zorla) {
     const k = $('#tarifTakip'), t = TARIFLER[this.takip];
     if (!t || !this.env) { if (!k.hidden) { k.hidden = true; this.sonTakip = ''; } return; }
-    const satir = t.girdi.map(([g, a]) => { const n = girdiSay(this.env, g), id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g; return [id, girdiAdi(g), Math.min(n, a), a]; });
+    const satir = girdiListesi(t).map(([g, a]) => { const n = girdiSay(this.env, g), id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g; return [id, girdiAdi(g), Math.min(n, a), a]; });
     const hazir = satir.every(s => s[2] >= s[3]);
     const h = `<header><img src="${simge(t.cikti).url}" alt=""><b>${esc(ESYALAR[t.cikti].ad)}${t.adet > 1 ? ` ×${t.adet}` : ''}</b></header>` +
       satir.map(([id, ad, n, a]) => `<div class="${n >= a ? 'tamam' : ''}"><img src="${simge(id).url}" alt=""><span>${esc(ad)}</span><b>${n}/${a}</b></div>`).join('') +

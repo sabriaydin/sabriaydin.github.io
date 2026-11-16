@@ -44,7 +44,11 @@ export const DOKULAR = [
   'kabak_sap0', 'kabak_sap1', 'kabak_sap2', 'kabak_sap3', 'balkabagi_ust', 'balkabagi_yan', 'balkabagi_yuz', 'balkabagi_fener', 'seker_kamisi',
   'kovan_ust', 'kovan_yan', 'kovan_on', 'kovan_on_bal',
   /* 0.22.0: hayatta kalma */
-  'mezar', 'gok_tasi', 'yildiz_feneri'
+  'mezar', 'gok_tasi', 'yildiz_feneri',
+  /* 0.24.0: elektrik */
+  'gunes_panel', 'panel_yan', 'turbin_govde', 'turbin_pervane', 'su_carki', 'turbin_ust', 'batarya_ust',
+  'batarya_yan0', 'batarya_yan1', 'batarya_yan2', 'batarya_yan3', 'batarya_yan4', 'ekablo', 'salter_k', 'salter_a',
+  'elamba', 'elamba_a', 'eocak_ust', 'eocak_ust_a', 'eocak_yan', 'isitici', 'isitici_a'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -311,6 +315,26 @@ blok(593, { ad: 'Mezar Taşı', dok: 'mezar', cizim: 5, opak: false, sertlik: 1.
 /* 0.22.0: Gök taşı: düşen meteorların çekirdeği; demir kazmayla kazılır, yıldız parçası verir */
 blok(594, { ad: 'Gök Taşı', dok: 'gok_tasi', sertlik: 5, alet: 'kazma', seviye: 4, ses: 'tas', mesale: true, isik: 7, parlak: true, dusur: r => [[492, 1 + (r() < 0.45 ? 1 : 0)]], xp: 6, harita: 117 });
 blok(595, { ad: 'Yıldız Feneri', dok: 'yildiz_feneri', sertlik: 0.4, ses: 'cam', mesale: true, isik: 15, lamba: true, parlak: true, harita: 116 });
+/* ---------- 0.24.0: Elektrik ----------
+   elektrik: tür (gunes, ruzgar, su, batarya, kablo, salter, lamba, ocak, isitici). Elektrik bloklarına bitişik olan bloklar aynı ağdadır.
+   uretim / tuketim: E/sn (en yüksek değer); kapasite: bataryanın depoladığı en çok enerji (E). Hesap oyun/elektrik.js'tedir. */
+blok(596, { ad: 'Güneş Paneli', dok: ['gunes_panel', 'panel_yan', 'panel_yan'], cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'kazma', ses: 'cam', sekil: 'gunes', elektrik: 'gunes', uretim: 5, harita: 120 });
+for (let f = 0; f < 4; f++) blok(597 + f, { ad: 'Rüzgâr Türbini', dok: 'turbin_govde', cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'kazma', ses: 'tas', sekil: 'ruzgar', yon: f, taban: 597, gizli: f > 0,
+  elektrik: 'ruzgar', uretim: 12, dusur: () => [[597, 1]], harita: 2 });
+blok(601, { ad: 'Su Türbini', dok: { ust: 'turbin_ust', yan: 'su_carki', alt: 'turbin_ust', on: 'su_carki' }, sertlik: 2, alet: 'balta', ses: 'odun', elektrik: 'su', uretim: 8, harita: 14 });
+const BATARYA = [['Küçük Batarya', 1500], ['Orta Batarya', 6000], ['Büyük Batarya', 24000]];
+BATARYA.forEach(([ad, kap], t) => { for (let s = 0; s < 5; s++) blok(602 + t * 5 + s, { ad, dok: ['batarya_ust', 'batarya_yan' + s, 'batarya_ust'], cizim: C_SEKIL, opak: false, sertlik: 2, alet: 'kazma', ses: 'tas',
+  sekil: 'batarya', boyut: t, seviye: s, elektrik: 'batarya', kapasite: kap, taban: 602 + t * 5, gizli: s > 0, dusur: () => [[602 + t * 5, 1]], harita: 2 }); });
+blok(617, { ad: 'Elektrik Kablosu', dok: 'ekablo', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'tas', sekil: 'ekablo', elektrik: 'kablo', harita: 2 });
+for (let a = 0; a < 2; a++) {
+  blok(618 + a, { ad: 'Şalter', dok: a ? 'salter_a' : 'salter_k', sertlik: 1.5, alet: 'kazma', ses: 'tas', elektrik: 'salter', mekanik: 'salter', acik: a, taban: 618, gizli: a > 0, dusur: () => [[618, 1]], harita: 2 });
+  blok(620 + a, { ad: 'Elektrikli Lamba', dok: a ? 'elamba_a' : 'elamba', sertlik: 1, ses: 'cam', elektrik: 'lamba', tuketim: 0.5, acik: a, taban: 620, gizli: a > 0, dusur: () => [[620, 1]], harita: a ? 116 : 2,
+    ...(a ? { mesale: true, isik: 15, lamba: true, parlak: true } : {}) });
+  blok(622 + a, { ad: 'Elektrikli Ocak', dok: [a ? 'eocak_ust_a' : 'eocak_ust', 'eocak_yan', 'eocak_yan'], sertlik: 2.5, alet: 'kazma', ses: 'tas', elektrik: 'ocak', tuketim: 4, acik: a, taban: 622, gizli: a > 0,
+    dusur: () => [[622, 1]], harita: 2, ...(a ? { mesale: true, isik: 6 } : {}) });
+  blok(624 + a, { ad: 'Isıtıcı', dok: a ? 'isitici_a' : 'isitici', sertlik: 2, alet: 'kazma', ses: 'tas', elektrik: 'isitici', tuketim: 3, acik: a, taban: 624, gizli: a > 0, dusur: () => [[624, 1]], harita: 2,
+    ...(a ? { mesale: true, isik: 7 } : {}) });
+}
 blok(522, { ad: 'Kızıl Mantar', dok: 'kizil_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
 
 /* Maden deneyimi */
@@ -523,6 +547,13 @@ esya(492, { ad: 'Yıldız Parçası', simge: 'yildiz', ozellik: 'Düşen meteorl
 esya(493, { ad: 'Eve Dönüş Tılsımı', tur: 'alet', yigin: 1, simge: 'tilsim', ozellik: 'Sağ tık basılı tutulunca doğma noktasına ışınlar', alet: { tur: 'tilsim', seviye: 0, hiz: 1, dayanim: 8, hasar: 1 } });
 esya(494, { ad: 'Atel', simge: 'atel', yigin: 16, tur: 'atel', ozellik: 'Kırık bacağı sarar: iyileşme hızlanır, yavaşlık azalır' });
 /* Sıcak çorbalar soğuğa karşı ısıtır; ayran serinletir */
+/* 0.24.0: elektrik parçaları */
+esya(495, { ad: 'Devre Kartı', simge: 'devre', ozellik: 'Elektrikli cihazların yapımında kullanılır' });
+esya(496, { ad: 'Bakır Bobin', simge: 'bobin', ozellik: 'Türbin, ocak ve ısıtıcı yapımında kullanılır' });
+for (const [id, oz] of [[596, 'Gündüzleri en çok 5 E/sn üretir; üstü açık olmalıdır'], [597, 'En çok 12 E/sn üretir; yükseğe kurulunca ve fırtınada daha çok üretir'],
+  [601, 'Yanındaki her su bloğu için 2 E/sn üretir (en çok 8)'], [602, '1.500 E depolar'], [607, '6.000 E depolar'], [612, '24.000 E depolar'],
+  [617, 'Elektrikli blokları birbirine bağlar'], [618, 'Sağ tıkla ya da kol ve bakır tel sinyaliyle ağı açar / keser'], [620, '0,5 E/sn harcar'],
+  [622, '4 E/sn harcar · Fırın ve kamp ateşi yerine geçer, kömür gerektirmez'], [624, '3 E/sn harcar · Çevresini ısıtır']]) E[id].ozellik = oz;
 for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
 E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
 

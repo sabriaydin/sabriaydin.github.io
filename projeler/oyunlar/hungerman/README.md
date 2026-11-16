@@ -117,6 +117,21 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 24. aşama (0.24.0): Elektrik sistemi ve yeni Geliştirici Modu
+- **Elektrik ağı:** elektrikli bloklar birbirine bitişik olunca aynı ağı oluşturur; uzaktaki cihazlar Elektrik Kablosuyla bağlanır. Ağ her 0,5 saniyede hesaplanır. Birimler: üretim ve tüketim E/sn, depo E.
+- **Üreticiler:** Güneş Paneli (gündüz en çok 5 E/sn; üstü açık olmalı, bulut ve yağış azaltır), Rüzgâr Türbini (en çok 12 E/sn; yükseklik, rüzgâr ve fırtınayla artar, pervanesi döner), Su Türbini (yanındaki her su bloğu için 2 E/sn, en çok 8; kışın yarı yarıya; çarkı döner).
+- **Bataryalar:** Küçük (1.500 E), Orta (6.000 E), Büyük (24.000 E). Artan enerji bataryalara eşit doluluk oranıyla dağıtılır; yan yüzdeki gösterge doluluğu gösterir. Kırılan bataryanın enerjisi kaybolur.
+- **İletim:** Elektrik Kablosu (her kablo üretimi %0,2 azaltır, en çok %25). Şalter ağı açar / keser; sağ tıkla ya da kol ve bakır tel sinyaliyle kullanılır.
+- **Tüketiciler:** Elektrikli Lamba (0,5 E/sn), Elektrikli Ocak (4 E/sn; çalışırken fırın ve kamp ateşi yerine geçer, bu tariflerde kömür harcanmaz), Isıtıcı (3 E/sn; çevresini ısıtır). Enerji yetmezse ağdaki tüm tüketiciler söner.
+- **Bilgi paneli:** elektrikli bir bloğa bakılınca sol altta cihazın ve ağın üretimi, tüketimi, deposu ve durumu (çalışıyor, şarj ediliyor, enerji yetersiz) görünür.
+- **Yapım:** Devre Kartı ve Bakır Bobin yeni ara malzemelerdir; bütün tarifler Üretim Masasındadır (tarif listesinde "Elektrik" kategorisi).
+- Çok oyunculuda ağlar sunucuda hesaplanır; istemci bilgi panelinin verisini sunucudan alır.
+- **Geliştirici Modu penceresi yenilendi:** sol kenar çubuğunda simgeli sekmeler ve kısayollar, üstte sekme başlığı, genel arama ve dünya rozeti, ölçü kutucuklarından oluşan canlı şerit (konum, biyom, zaman, kare hızı, can, vücut ısısı), kart düzeninde bölümler, alt durum çubuğu. Yeni **Elektrik** sekmesi: bakılan ağın durumu, yüklü ağların toplamı, bataryaları doldurma / boşaltma, elektrik seti.
+
+## 23.3 (0.23.3): Tek özel yapı
+- Çöl Tapınağı, Orman Tapınağı, Buzul Kulesi ve Haydut Kampı artık dünyada yalnızca birer tane bulunur: her tür için dünyanın merkezine en yakın uygun yer seçilir. Uygun biyom yoksa o yapı o dünyada bulunmaz. `isinla tapinak | ormantapinak | kule | kamp` komutu bu tek yapıya götürür.
+- Eski dünyalarda fazladan yapılar kaybolur; oyuncunun değiştirdiği bloklar yerinde kalır. Keşif haritası yeniden keşfedilir.
+
 ## 23.2 (0.23.2): Canlı can çubuğu
 - Bakılan ya da vurulan canlının üstte görünen can çubuğu sadeleştirildi: kutu ve kalın çerçeve kaldırıldı; ince, yuvarlak köşeli bir çubuk ve gölgeli küçük ad kaldı. Dost canlılarda yeşil, düşmanlarda kırmızıdır; alınan hasar açık renkli bir iz olarak kısa bir gecikmeyle erir.
 

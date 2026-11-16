@@ -10,6 +10,8 @@ import { simge } from '../grafik/doku.js';
 import { THREE } from '../grafik/sahne.js';
 import { YER_RENKLERI } from './harita-ekrani.js';
 import { PB, PY, SURUM } from '../sabitler.js';
+import { enerjiMetni, DURUM_AD } from '../oyun/elektrik.js';
+import { HAVA_ADI } from '../grafik/hava.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -17,8 +19,10 @@ const kucuk = s => String(s).toLocaleLowerCase('tr');
 const sure = sn => { const s = Math.ceil(sn); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 /* 0.23.0: sekmeler yeniden düzenlendi; tekrar eden bölümler kaldırıldı. Sık kullanılan işlemler sağ tıkla sabitlenir,
    üstteki arama kutusu tüm sekmelerdeki işlemleri bulur. */
+/* 0.24.0: pencere profesyonel bir düzenle yenilendi (sol kenar çubuğu, simgeli sekmeler, üst başlık ve arama, ölçü kutucuklu canlı şerit,
+   alt durum çubuğu); Elektrik sekmesi eklendi. */
 const SEKMELER = [
-  ['sik', '★ Sık kullanılan', 'Sağ tıkla sabitlenen işlemler'],
+  ['sik', 'Sık kullanılan', 'Sağ tıkla sabitlenen işlemler'],
   ['oyuncu', 'Oyuncu', 'Yetenekler, can ve açlık, deneyim, iksir etkileri'],
   ['hayatta', 'Hayatta Kalma', 'Hasar ve durumlar, vücut ısısı, gök olayları, başarımlar'],
   ['esya', 'Eşyalar', 'Eşya verme, hazır setler, envanter işlemleri'],
@@ -27,10 +31,27 @@ const SEKMELER = [
   ['canli', 'Canlılar', 'Doğurma, kaldırma, davranış, hayvancılık'],
   ['isinla', 'Işınlanma', 'Yerler, biyomlar, koordinat, köyler, oyuncular'],
   ['koy', 'Köy ve Görev', 'İtibar, takaslar, köylüler, görevler'],
+  ['elektrik', 'Elektrik', 'Ağ durumu, bataryalar, elektrik seti'],
   ['gorsel', 'Görüntü', 'Görünüm seçenekleri, göstergeler, ekran görüntüsü'],
   ['bilgi', 'Bilgi', 'Performans grafiği ve teknik bilgiler']
 ];
 const SAKLA = 'hungerman_gelistirici_sekme', SIK = 'hungerman_gelistirici_sik';
+/* Sekme simgeleri (24 × 24 çizgi simgeler) */
+const SIMGE = {
+  sik: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+  oyuncu: '<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.8-3.8 3.8-6 7.5-6s6.7 2.2 7.5 6"/>',
+  hayatta: '<path d="M12 20s-7-4.3-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.7-7 10-7 10z"/><path d="M8 11h2l1.2-2 1.6 4 1.2-2H16"/>',
+  esya: '<path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/>',
+  dunya: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.3 3.5 5 3.5 8s-1 5.7-3.5 8c-2.5-2.3-3.5-5-3.5-8s1-5.7 3.5-8z"/>',
+  harita: '<path d="M4 6.5l5-2 6 2 5-2v13l-5 2-6-2-5 2z"/><path d="M9 4.5v13M15 6.5v13"/>',
+  canli: '<path d="M6 13c-2 0-3-1.5-3-3s1-2.5 2.5-2.5M18 13c2 0 3-1.5 3-3s-1-2.5-2.5-2.5"/><ellipse cx="12" cy="13" rx="5.5" ry="5"/><circle cx="10" cy="12" r=".6"/><circle cx="14" cy="12" r=".6"/>',
+  isinla: '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="7"/>',
+  koy: '<path d="M4 11l8-6 8 6"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
+  elektrik: '<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>',
+  gorsel: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+  bilgi: '<path d="M4 19V9M9.3 19V5M14.6 19v-7M20 19v-4"/>'
+};
+const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${SIMGE[k] || ''}</svg>`;
 
 /* Eşya kategorileri */
 const KATEGORI = [['hepsi', 'Hepsi'], ['blok', 'Bloklar'], ['alet', 'Aletler'], ['zirh', 'Zırh'], ['yiyecek', 'Yiyecek ve iksir'], ['diger', 'Diğer']];
@@ -48,7 +69,8 @@ const SETLER = {
   efsane: { ad: 'Boss ganimetleri', esya: [[458, 1], [459, 1], [460, 1], [461, 1], [287, 64]] },
   buyu: { ad: 'Büyü', esya: [[156, 1], [61, 32], [139, 1], [316, 1], [319, 1], [286, 1], [453, 1], [412, 1], [415, 1]] },
   simya: { ad: 'Simya ve örs', esya: [[140, 1], [139, 1], [331, 16], [61, 8], [283, 8], [265, 16], [297, 8], [299, 4], [263, 4], [450, 4], [296, 8], [328, 8], [257, 8]] },
-  tuccar: { ad: 'Tüccar', esya: [[288, 64], [291, 40], [271, 12], [257, 24], [8, 24], [282, 12], [297, 12]] }
+  tuccar: { ad: 'Tüccar', esya: [[288, 64], [291, 40], [271, 12], [257, 24], [8, 24], [282, 12], [297, 12]] },
+  elektrik: { ad: 'Elektrik', esya: [[596, 4], [597, 2], [601, 2], [602, 2], [607, 1], [612, 1], [617, 64], [618, 2], [620, 8], [622, 1], [624, 2], [233, 2], [239, 16]] }
 };
 
 export class GelistiriciPenceresi {
@@ -80,7 +102,8 @@ export class GelistiriciPenceresi {
       try { localStorage.setItem(SIK, JSON.stringify(this.sik)); } catch (x) { /* depolama kapalı */ }
       this.ses.tik(); if (this.sekme === 'sik') this.ciz();
     });
-    $('#gelSekme').innerHTML = SEKMELER.map(([k, a]) => `<button type="button" data-s="${k}">${a}</button>`).join('');
+    $('#gelSekme').innerHTML = SEKMELER.map(([k, a], i) => `${i === 1 || i === 10 ? '<hr>' : ''}<button type="button" data-s="${k}" title="${esc(SEKMELER[i][2])}">${svg(k)}<span>${a}</span></button>`).join('');
+    $('#gelSurum').textContent = `HungerMan ${SURUM}`;
     $('#gelSekme').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; this.sekme = b.dataset.s; try { localStorage.setItem(SAKLA, this.sekme); } catch (x) { /* depolama kapalı */ } this.ses.tik(); this.ciz(); $('#gelIcerik').scrollTop = 0; });
     $('#gelKapat').addEventListener('click', () => this.kapatIste());
     this.kok.addEventListener('mousedown', e => { if (e.target === this.kok) this.kapatIste(); });
@@ -130,9 +153,10 @@ export class GelistiriciPenceresi {
   anahtarGrubu(o, ...adlar) { return `<div class="gelIzgara">${adlar.map(a => this.anahtar(a, o)).join('')}</div>`; }
   kaydirici(ad, baslik, min, max, adim, deger, bicim) {
     this.bicimler[ad] = bicim;
-    return `<label class="gelKaydir"><span>${baslik} <b data-d="${ad}">${bicim(+deger)}</b></span><input type="range" data-r="${ad}" min="${min}" max="${max}" step="${adim}" value="${deger}"></label>`;
+    const yuzde = ((Math.min(max, Math.max(min, +deger)) - min) / (max - min) * 100).toFixed(1);
+    return `<label class="gelKaydir"><span>${baslik} <b data-d="${ad}">${bicim(+deger)}</b></span><input type="range" data-r="${ad}" min="${min}" max="${max}" step="${adim}" value="${deger}" style="--p:${yuzde}%"></label>`;
   }
-  bolum(baslik, icerik, not = '') { return `<section class="gelBolum"><h4>${baslik}</h4>${not ? `<p class="gelNot">${not}</p>` : ''}${icerik}</section>`; }
+  bolum(baslik, icerik, not = '') { return `<section class="gelBolum"><header><h4>${baslik}</h4>${not ? `<p class="gelNot">${not}</p>` : ''}</header><div class="gelGovde">${icerik}</div></section>`; }
   dugme(komut, ad, sinif = '') { return `<button type="button" data-k="${esc(komut)}"${sinif ? ` class="${sinif}"` : ''}>${ad}</button>`; }
   onay(komut, ad) { return `<button type="button" data-onay="${esc(komut)}" class="tehlike">${ad}</button>`; }
   dugmeler(...l) { return `<div class="gelDugmeler">${l.join('')}</div>`; }
@@ -143,13 +167,19 @@ export class GelistiriciPenceresi {
     const o = this.oyun();
     if (!o) return;
     [...$('#gelSekme').children].forEach(b => b.classList.toggle('on', b.dataset.s === this.sekme));
-    $('#gelDurum').textContent = `${o.ad} · ${o.istemci ? 'çok oyunculu istemci (yalnız kişisel işlemler)' : o.ag ? 'çok oyunculu sunucu' : 'tek oyunculu'}`;
+    const kip = o.istemci ? 'İstemci' : o.ag ? 'Sunucu' : 'Tek oyunculu';
+    $('#gelDurum').innerHTML = `<i class="${o.komutlar ? 'acik' : 'kapali'}"></i>${esc(o.ad)} · ${kip}`;
+    $('#gelDurum').title = (o.komutlar ? 'Komutlar açık' : 'Komutlar kapalı') + (o.istemci ? ' · çok oyunculu istemcide yalnız kişisel işlemler kullanılır' : '');
     const S = SEKMELER.find(s => s[0] === this.sekme);
     this.son = {};
-    if (this.genelArama.trim()) { $('#gelIcerik').innerHTML = this.aramaSonucu(o, this.genelArama); this.canliYaz(o); return; }
-    const f = { sik: this.sikSekmesi, hayatta: this.hayattaSekmesi, oyuncu: this.oyuncuSekmesi, esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, gorsel: this.gorselSekmesi, bilgi: this.bilgiSekmesi }[this.sekme];
+    if (this.genelArama.trim()) {
+      $('#gelBaslikMetin').textContent = 'Arama sonuçları'; $('#gelAltBaslik').textContent = `“${this.genelArama.trim()}” · sağ tık: sık kullanılanlara ekle`;
+      $('#gelIcerik').innerHTML = this.aramaSonucu(o, this.genelArama); this.canliYaz(o); return;
+    }
+    $('#gelBaslikMetin').textContent = S[1]; $('#gelAltBaslik').textContent = S[2];
+    const f = { sik: this.sikSekmesi, hayatta: this.hayattaSekmesi, oyuncu: this.oyuncuSekmesi, esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, elektrik: this.elektrikSekmesi, gorsel: this.gorselSekmesi, bilgi: this.bilgiSekmesi }[this.sekme];
     this.son = {};
-    $('#gelIcerik').innerHTML = `<div class="gelBaslik"><h3>${S[1]}</h3><span>${S[2]}</span></div>` + f.call(this, o);
+    $('#gelIcerik').innerHTML = f.call(this, o);
     this.canliYaz(o);
     if (this.sekme === 'esya') { const g = $('#gelAra'); if (g && this.aramaOdak) { g.focus(); g.setSelectionRange(g.value.length, g.value.length); } }
   }
@@ -186,7 +216,7 @@ export class GelistiriciPenceresi {
   }
   /* 0.23.0: sık kullanılanlar */
   sikSekmesi(o) {
-    if (!this.sik.length) return '<p class="gelNot">Henüz sabitlenen işlem yok. Herhangi bir sekmedeki düğmeye ya da anahtara <b>sağ tıklanarak</b> buraya eklenir; tekrar sağ tıklanınca çıkarılır.</p>';
+    if (!this.sik.length) return `<div class="gelBos">${svg('sik')}<b>Sabitlenen işlem mevcut değil</b><span>Herhangi bir sekmedeki düğmeye ya da anahtara sağ tıklanarak buraya eklenir; tekrar sağ tıklanınca çıkarılır.</span></div>`;
     const anahtarlar = this.sik.filter(s => s.h.startsWith('<label')), dugmeler = this.sik.filter(s => !s.h.startsWith('<label'));
     const tazele = s => { const a = /data-a="([^"]+)"/.exec(s.h); return a && this.anahtarlar[a[1]] ? this.anahtar(a[1], o) : s.h; };
     return (anahtarlar.length ? this.bolum('Anahtarlar', `<div class="gelIzgara">${anahtarlar.map(tazele).join('')}</div>`) : '') +
@@ -197,7 +227,7 @@ export class GelistiriciPenceresi {
     const q = kucuk(a.trim()), kap = document.createElement('div'), sonuc = [];
     for (const [k, ad] of SEKMELER) {
       if (k === 'sik' || k === 'bilgi') continue;
-      const f = this[k + 'Sekmesi'] || { esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, gorsel: this.gorselSekmesi }[k];
+      const f = this[k + 'Sekmesi'] || { elektrik: this.elektrikSekmesi, esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, gorsel: this.gorselSekmesi }[k];
       if (!f) continue;
       const kayit = this.arama; this.arama = '';
       kap.innerHTML = f.call(this, o); this.arama = kayit;
@@ -205,7 +235,7 @@ export class GelistiriciPenceresi {
         .filter(b => kucuk(b.textContent).includes(q) || kucuk(b.title || '').includes(q) || kucuk(b.closest('section')?.querySelector('h4')?.textContent || '').includes(q));
       if (l.length) sonuc.push(this.bolum(`${ad}`, `<div class="gelDugmeler gelAramaSonuc">${l.map(b => b.outerHTML).join('')}</div>`));
     }
-    return `<div class="gelBaslik"><h3>Arama: “${esc(a.trim())}”</h3><span>Sağ tık: sık kullanılanlara ekle</span></div>` + (sonuc.join('') || '<p class="gelNot">Eşleşen işlem yok.</p>');
+    return sonuc.join('') || '<div class="gelBos">Eşleşen işlem mevcut değil.</div>';
   }
 
   esyaSekmesi(o) {
@@ -300,6 +330,36 @@ export class GelistiriciPenceresi {
         this.dugmeler(this.dugme('gorev tamamla', 'Görevleri teslime hazır yap'), this.onay('gorev birak', 'Görevleri bırak'), this.dugme('ver 288 64', 'Sikke × 64')), 'Teslime hazır yapılan görevlerin ödülü, görevi veren köylüden alınır. Mektup görevleri hedef köye götürülmelidir.');
   }
 
+  /* 0.24.0: elektrik ağları */
+  elektrikSekmesi(o) {
+    return this.bolum('Bakılan ağ', '<div id="gelElektrik" class="gelOzet"></div>', 'Elektrikli bir bloğa bakılınca ağın üretimi, tüketimi ve deposu burada görünür.') +
+      this.bolum('Yüklü ağların toplamı', '<div id="gelElektrikGenel" class="gelOlculer"></div>') +
+      this.bolum('İşlemler', this.dugmeler(`<button type="button" data-set="elektrik">Elektrik seti ver</button>`, `<button type="button" data-elektrik="doldur">Bataryaları doldur</button>`, `<button type="button" data-elektrik="bosalt" class="tehlike">Bataryaları boşalt</button>`, this.dugme('zaman ogle', 'Öğleye geç'), this.dugme('hava firtina', 'Fırtına (rüzgâr)')),
+        o.istemci ? 'Çok oyunculu istemcide batarya işlemleri kullanılamaz; ağlar sunucuda hesaplanır.' : 'Batarya işlemleri yüklü bölgedeki tüm bataryalara uygulanır.');
+  }
+  elektrikYaz(o) {
+    const h = this.bakilan(o), b = h && BLOKLAR[h.id], son = this.son;
+    let m = '<p class="gelNot">Bakılan blok elektrikli değil.</p>';
+    if (b && b.elektrik) {
+      const k = h.x + ',' + h.y + ',' + h.z, v = o.elektrik ? o.elektrik.bilgi(k) : o.ag && o.ag.enerjiIste ? o.ag.enerjiIste(k) : null, e = enerjiMetni(b, v);
+      m = `<div class="gelOzetBas"><b>${esc(b.ad)}</b>${e.durum ? `<span class="gelEtiket ${e.durum}">${DURUM_AD[e.durum]}</span>` : ''}</div>${e.satirlar.map(l => `<div>${l}</div>`).join('')}` +
+        (e.oran == null ? '' : `<div class="gelIlerleme ince"><i style="width:${(e.oran * 100).toFixed(1)}%"></i></div>`);
+    }
+    if (son.el !== m) { son.el = m; const el = $('#gelElektrik'); if (el) el.innerHTML = m; }
+    const E = o.elektrik, g = $('#gelElektrikGenel');
+    if (!g) return;
+    let html;
+    if (!E) html = '<p class="gelNot">Ağ bilgisi sunucuda tutulur.</p>';
+    else {
+      const aglar = new Set(E.agBilgi.values()); let u = 0, t = 0, d = 0, kap = 0, eksik = 0;
+      for (const a of aglar) { u += a.uretim; t += a.tuketim; d += a.depo; kap += a.kap; if (a.eksik) eksik++; }
+      const s = n => (Math.round(n * 10) / 10).toLocaleString('tr-TR'), olcu = (ad, v) => `<div class="gelOlcu"><small>${ad}</small><b>${v}</b></div>`;
+      html = olcu('Elektrik bloğu', o.dunya.elektrikler.size) + olcu('Ağ', aglar.size) + olcu('Üretim', s(u) + ' E/sn') + olcu('Tüketim', s(t) + ' E/sn') +
+        olcu('Depo', `${Math.round(d).toLocaleString('tr-TR')} / ${Math.round(kap).toLocaleString('tr-TR')} E`) + olcu('Enerjisi yetmeyen ağ', eksik);
+    }
+    if (son.elg !== html) { son.elg = html; g.innerHTML = html; }
+  }
+
   gorselSekmesi(o) {
     return this.bolum('Görünüm', this.anahtarGrubu(o, 'aydinlik', 'sis', 'tel', 'sinir', 'el', 'hud')) +
       this.bolum('Göstergeler', this.anahtarGrubu(o, 'fps', 'f3', 'mini')) +
@@ -310,9 +370,8 @@ export class GelistiriciPenceresi {
   }
 
   bilgiSekmesi(o) {
-    return `<canvas id="gelGrafik" class="gelGrafik" width="680" height="90"></canvas>
-      <table class="gelTablo" id="gelTablo"></table>` +
-      this.dugmeler(`<button type="button" data-kopya="tohum">Tohumu kopyala (${o.tohum})</button>`, `<button type="button" data-kopya="bilgi">Bilgileri kopyala</button>`, `<button type="button" data-konsol="1">Konsolu aç</button>`);
+    return this.bolum('Performans', `<canvas id="gelGrafik" class="gelGrafik" width="680" height="90"></canvas>`) +
+      this.bolum('Teknik bilgiler', `<table class="gelTablo" id="gelTablo"></table>` + this.dugmeler(`<button type="button" data-kopya="tohum">Tohumu kopyala (${o.tohum})</button>`, `<button type="button" data-kopya="bilgi">Bilgileri kopyala</button>`, `<button type="button" data-konsol="1">Konsolu aç</button>`));
   }
 
   /* ---------- Olaylar ---------- */
@@ -338,6 +397,14 @@ export class GelistiriciPenceresi {
       const s = SETLER[d.set]; let sigmayan = 0;
       for (const [i, n] of s.esya) if (ESYALAR[i]) sigmayan += o.envanter.ekle(i, n);
       this.ses.tik(); this.mesaj(`${s.ad} seti verildi.${sigmayan ? ` ${sigmayan} eşya sığmadı.` : ''}`, 'tamam');
+    }
+    else if (d.elektrik) {
+      if (!this.izin(o)) return;
+      if (!o.elektrik) { this.mesaj('Çok oyunculu istemcide batarya işlemleri kullanılamaz.', 'hata'); return; }
+      let n = 0;
+      for (const [k, [x, y, z]] of o.dunya.elektrikler) { const t = BLOKLAR[o.dunya.blok(x, y, z)]; if (t && t.elektrik === 'batarya') { o.dunya.enerji.set(k, d.elektrik === 'doldur' ? t.kapasite : 0); n++; } }
+      o.elektrik.hesapla(0.001); this.ses.tik();
+      this.mesaj(n ? `${n} batarya ${d.elektrik === 'doldur' ? 'dolduruldu' : 'boşaltıldı'}.` : 'Yüklü bölgede batarya mevcut değil.', n ? 'tamam' : 'hata');
     }
     else if (d.dogur) this.k(`dogur ${d.dogur} ${this.dogurAdet}${this.yavru ? ' yavru' : ''}`);
     else if (d.gun) this.k(`gun ${$('#gelGun').value}`);
@@ -368,6 +435,7 @@ export class GelistiriciPenceresi {
     if (t.id === 'gelAra') { this.arama = t.value; this.aramaOdak = true; this.ciz(); this.aramaOdak = false; return; }
     const r = t.dataset.r; if (!r) return;
     const v = +t.value, el = this.kok.querySelector(`[data-d="${r}"]`);
+    t.style.setProperty('--p', ((v - +t.min) / (+t.max - +t.min) * 100).toFixed(1) + '%');
     if (el && this.bicimler[r]) el.textContent = this.bicimler[r](v);
     if (r === 'hiz' && this.izin(o)) o.oyuncu.hizCarpani = v;
     else if (r === 'can' && this.izin(o)) o.hayatta.can = v;
@@ -398,7 +466,7 @@ export class GelistiriciPenceresi {
   esitle(o) {
     for (const el of $('#gelIcerik').querySelectorAll('input[data-a]')) { const A = this.anahtarlar[el.dataset.a]; if (A) el.checked = !!A.al(o); }
     const z = $('#gelIcerik').querySelector('input[data-r="zhiz"]');
-    if (z) { z.value = o.zamanHizi ?? 1; const el = this.kok.querySelector('[data-d="zhiz"]'); if (el) el.textContent = this.bicimler.zhiz(+z.value); }
+    if (z) { z.value = o.zamanHizi ?? 1; z.style.setProperty('--p', ((o.zamanHizi ?? 1) / 100 * 100).toFixed(1) + '%'); const el = this.kok.querySelector('[data-d="zhiz"]'); if (el) el.textContent = this.bicimler.zhiz(+z.value); }
   }
   bakilan(o) { return o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu()); }
 
@@ -441,10 +509,14 @@ export class GelistiriciPenceresi {
     const S = this.sekme, son = this.son || (this.son = {});
     const yaz = (id, m, html) => { if (son[id] === m) return; const el = $(id); if (!el) return; son[id] = m; if (html) el.innerHTML = m; else el.textContent = m; };
     /* 0.23.0: üst şerit: konum, biyom, saat, kare hızı, can ve vücut ısısı */
-    const P = o.oyuncu.konum, kb = o.biyom != null ? BIYOMLAR[o.biyom] : '';
-    yaz('#gelCanliSerit', `<span>X ${Math.round(P.x)} · Y ${Math.round(P.y)} · Z ${Math.round(P.z)}</span><span>${esc(kb || '')}</span><span>${o.gun}. gün · ${$('#saatDeger').textContent}</span><span>${$('#fps').textContent || '—'}</span><span>Can ${o.hayatta.can / 2} · Açlık ${o.hayatta.aclik / 2}</span><span>${o.hayatta.vucut.toFixed(1).replace('.', ',')} °C</span>`, true);
+    const P = o.oyuncu.konum, kb = BIYOMLAR[o.biyom != null ? o.biyom : o.dunya.uretici.kolon(Math.floor(P.x), Math.floor(P.z), {}).b] || '';
+    const olc = (ad, v, sinif = '') => `<div class="gelOlcu ${sinif}"><small>${ad}</small><b>${v}</b></div>`, fps = parseInt($('#fps').textContent, 10);
+    yaz('#gelCanliSerit', olc('Konum', `${Math.round(P.x)}, ${Math.round(P.y)}, ${Math.round(P.z)}`) + olc('Biyom', esc(kb || '—')) + olc('Zaman', `${o.gun}. gün · ${$('#saatDeger').textContent}`) +
+      olc('Kare hızı', isNaN(fps) ? '—' : fps + ' FPS', isNaN(fps) ? '' : fps < 25 ? 'kotu' : fps < 45 ? 'orta' : 'iyi') + olc('Can / Açlık', `${o.hayatta.can / 2} / ${o.hayatta.aclik / 2}`) +
+      olc('Vücut ısısı', o.hayatta.vucut.toFixed(1).replace('.', ',') + ' °C', o.hayatta.vucut < 35.5 || o.hayatta.vucut > 38.5 ? 'kotu' : ''), true);
     if (S === 'hayatta') yaz('#gelIsi', `Vücut ${o.hayatta.vucut.toFixed(1).replace('.', ',')} °C · hissedilen ${o.hayatta.hissedilen.toFixed(1).replace('.', ',')} °C · Kanlı Ay ${o.gok && o.gok.kanliAyMi(o) ? 'sürüyor' : 'yok'}`);
     if (S === 'bilgi') { this.tabloYaz(o); this.grafikCiz(); }
+    else if (S === 'elektrik') this.elektrikYaz(o);
     else if (S === 'canli') this.sayimYaz(o);
     else if (S === 'oyuncu') {
       const h = o.hayatta;
@@ -474,15 +546,15 @@ export class GelistiriciPenceresi {
     const cv = $('#gelGrafik'); if (!cv) return;
     const ctx = cv.getContext('2d'), W = cv.width, H = cv.height, n = this.kareler.length, ust = 50;
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, H);
-    for (const [ms, r] of [[16.7, 'rgba(155,227,139,.45)'], [33.3, 'rgba(255,211,78,.45)']]) { const y = H - ms / ust * H; ctx.fillStyle = r; ctx.fillRect(0, y, W, 1); }
+    ctx.fillStyle = '#0f1216'; ctx.fillRect(0, 0, W, H);
+    for (const [ms, r] of [[16.7, 'rgba(78,194,122,.5)'], [33.3, 'rgba(232,163,61,.5)']]) { const y = H - ms / ust * H; ctx.fillStyle = r; ctx.fillRect(0, y, W, 1); }
     const w = W / n;
     for (let i = 0; i < n; i++) {
       const ms = this.kareler[(this.kareSira + i) % n], h = Math.min(H, ms / ust * H);
-      ctx.fillStyle = ms > 33.3 ? '#ff8a7a' : ms > 17.5 ? '#ffd34e' : '#9be38b';
+      ctx.fillStyle = ms > 33.3 ? '#f0625a' : ms > 17.5 ? '#e8a33d' : '#4ec27a';
       ctx.fillRect(i * w, H - h, Math.max(1, w - 1), h);
     }
-    ctx.fillStyle = 'rgba(255,255,255,.7)'; ctx.font = '11px Rubik, Arial, sans-serif'; ctx.fillText('Kare süresi (ms) · çizgiler: 60 ve 30 FPS', 8, 14);
+    ctx.fillStyle = 'rgba(230,233,238,.65)'; ctx.font = '11px Rubik, Arial, sans-serif'; ctx.fillText('Kare süresi (ms) · çizgiler: 60 ve 30 FPS', 8, 14);
   }
   satirlar(o) {
     const P = o.oyuncu.konum, k = o.dunya.uretici.kolon(Math.floor(P.x), Math.floor(P.z), {}), V = o.varliklar.liste, m = performance.memory, inf = this.sahne.cizici.info;
@@ -499,7 +571,7 @@ export class GelistiriciPenceresi {
       ['Biyom / zemin', `${BIYOMLAR[k.b]} · ${k.h}`],
       ['Bakılan blok', h ? `${BLOKLAR[h.id].ad} (${h.id}) · ${h.x}, ${h.y}, ${h.z}` : '-'],
       ['Zaman', `${o.gun}. gün · ${$('#saatDeger').textContent} · hız ${o.zamanHizi ?? 1}×`],
-      ['Hava', `${o.hava.durum} · yoğunluk %${Math.round(o.hava.yogunluk * 100)}${o.hava.kilit ? ' · kilitli' : ` · ${Math.round(o.hava.sure)} sn sonra değişir`}`],
+      ['Hava', `${HAVA_ADI[o.hava.durum] || o.hava.durum} · yoğunluk %${Math.round(o.hava.yogunluk * 100)}${o.hava.kilit ? ' · kilitli' : ` · ${Math.round(o.hava.sure)} sn sonra değişir`}`],
       ['Oyuncu', `can ${o.hayatta.can} · açlık ${o.hayatta.aclik} · ${o.hayatta.seviye}. seviye (${Math.floor(o.hayatta.xp)} puan)${Object.keys(o.hayatta.etkiler).length ? ' · etkiler: ' + Object.keys(o.hayatta.etkiler).join(', ') : ''}`],
       ['Canlılar', `${V.length} (düşman ${V.filter(v => v.tur.dusman).length}, hayvan ${V.filter(v => !v.tur.dusman && !v.tur.su && !v.tur.koylu).length}, evcil ${V.filter(v => v.evcil).length}, deniz ${V.filter(v => v.tur.su).length}, köylü ${V.filter(v => v.tur.koylu).length})`],
       ['Ok / yerde eşya / tekne', `${o.varliklar.oklar.length} / ${o.dusenler.liste.length} / ${o.tekneler.liste.length}`],

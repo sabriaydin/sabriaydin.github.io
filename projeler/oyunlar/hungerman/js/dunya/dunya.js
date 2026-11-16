@@ -13,7 +13,7 @@ import { uretec } from '../rastgele.js';
 
 /* Işık kaynağı sayılan bloklar (meşale niteliği taşıyanlar, örümcek yuvası ve lav) */
 const KAYNAK = new Uint8Array(BLOK_UST);
-for (const b of BLOKLAR) if (b && (b.mesale || b.mekanik || b.kovan || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
+for (const b of BLOKLAR) if (b && (b.mesale || b.mekanik || b.elektrik || b.kovan || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
 
 const SINIR_ICIN = DUNYA_SINIRI;
 
@@ -32,6 +32,8 @@ export class Dunya {
     this.ekinler = new Set();         // büyümekte olan ekinlerin "x,y,z" anahtarları
     this.sandiklar = new Map();       // "x,y,z" -> 27 yuvalık dizi
     this.mekanikler = new Map();      // 0.17.0: mekanik bloklar "x,y,z" -> [x, y, z]
+    this.elektrikler = new Map();     // 0.24.0: elektrik blokları "x,y,z" -> [x, y, z]
+    this.enerji = new Map();          // 0.24.0: bataryalardaki enerji "x,y,z" -> E (kayda geçer)
     this.yuvalar = new Map();         // canavar yuvaları "x,y,z" -> { x, y, z, sayac }
     this.kovanlar = new Map();        // 0.21.0: arı kovanları "x,y,z" -> { x, y, z, sayac }
     this.gorus = 8;
@@ -115,6 +117,7 @@ export class Dunya {
     if (EKIN_SONRAKI[id]) this.ekinler.add(mk); else this.ekinler.delete(mk);
     if (id === 58) this.yuvalar.set(mk, { x, y, z, sayac: 5 }); else this.yuvalar.delete(mk);
     if (BLOKLAR[id] && BLOKLAR[id].mekanik) this.mekanikler.set(mk, [x, y, z]); else this.mekanikler.delete(mk);
+    if (BLOKLAR[id] && BLOKLAR[id].elektrik) this.elektrikler.set(mk, [x, y, z]); else this.elektrikler.delete(mk);
     if (BLOKLAR[id] && BLOKLAR[id].kovan) { if (!this.kovanlar.has(mk)) this.kovanlar.set(mk, { x, y, z, sayac: 2 }); } else this.kovanlar.delete(mk);
     if (eski === 59 || id === 59) this.lavIsikGuncelle(x, y, z);
     this.kirlet(p, true);
@@ -159,7 +162,7 @@ export class Dunya {
         /* Başka bir oyuncunun yakınındaysa veri kalır, yalnızca çizim kaldırılır */
         if (this.ekMerkezler.length && this.ekYakin(p.cx, p.cz, this.EK_R + 2)) { if (p.mesh || p.suMesh) { this.meshSil(p); p.kirli = true; } continue; }
         this.meshSil(p); this.parcalar.delete(p.k);
-        if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); this.mekanikler.delete(k); this.kovanlar.delete(k); }
+        if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); this.mekanikler.delete(k); this.elektrikler.delete(k); this.kovanlar.delete(k); }
       }
     }
     this.isDagit();
@@ -261,6 +264,7 @@ export class Dunya {
       const x = p.cx * PB + lx, z = p.cz * PB + lz;
       const k = x + ',' + y + ',' + z;
       if (BLOKLAR[id].mekanik) this.mekanikler.set(k, [x, y, z]);
+      if (BLOKLAR[id].elektrik) this.elektrikler.set(k, [x, y, z]);
       if (BLOKLAR[id].kovan) this.kovanlar.set(k, { x, y, z, sayac: 2 });
       if (id === 58) this.yuvalar.set(k, { x, y, z, sayac: 5 });
       else if (EKIN_SONRAKI[id]) this.ekinler.add(k);
@@ -404,6 +408,9 @@ export class Dunya {
   }
 
   /* ---------- Kayıt ---------- */
+  /* 0.24.0: batarya enerjileri */
+  enerjiAl() { return [...this.enerji].map(([k, e]) => [k, Math.round(e)]); }
+  enerjiYukle(l) { this.enerji.clear(); for (const [k, e] of Array.isArray(l) ? l : []) if (typeof k === 'string' && isFinite(e)) this.enerji.set(k, Math.max(0, +e)); }
   sandiklariAl() { return [...this.sandiklar].map(([k, y]) => [k, y.map(s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null))]); }
   sandiklariYukle(l) { this.sandiklar.clear(); for (const [k, y] of l || []) this.sandiklar.set(k, y.map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}), ...(s[3] && typeof s[3] === 'object' ? { buyu: { ...s[3] } } : {}) } : null))); }
 
@@ -413,7 +420,7 @@ export class Dunya {
     return o;
   }
   degisiklikleriYukle(liste) {
-    this.degisiklikler.clear(); this.mesaleler.clear(); this.ekinler.clear(); this.mekanikler.clear(); this.kovanlar.clear();
+    this.degisiklikler.clear(); this.mesaleler.clear(); this.ekinler.clear(); this.mekanikler.clear(); this.elektrikler.clear(); this.kovanlar.clear();
     for (const [k, a] of liste || []) {
       const d = new Map();
       const [cx, cz] = k.split(',').map(Number);

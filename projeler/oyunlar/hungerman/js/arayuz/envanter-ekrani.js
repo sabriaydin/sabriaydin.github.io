@@ -6,7 +6,7 @@ import { uretec } from '../rastgele.js';
 /* Büyü masası: seçeneklerin seviye bedeli ve parıltı kristali gereksinimi */
 const BUYU_BEDEL = [2, 5, 9];
 const KRISTAL = 61;
-import { TARIFLER, KATEGORILER, ISTASYON_ADI, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar } from '../oyun/uretim.js';
+import { TARIFLER, KATEGORILER, ISTASYON_ADI, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar, girdiListesi } from '../oyun/uretim.js';
 
 const $ = s => document.querySelector(s);
 
@@ -153,7 +153,7 @@ export class EnvanterEkrani {
     const h = this.hayatta;
     $('#envDurum').innerHTML = `<span>Can <b>${h.can / 2}</b> / 10</span><span>Açlık <b>${h.aclik / 2}</b> / 10</span>`;
     const ist = this.istasyonlar();
-    $('#istasyonDurum').innerHTML = Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="rozet ${ist.has(k) ? 'var' : 'yok'}">${a}${ist.has(k) ? ' yakında' : ''}</span>`).join('');
+    $('#istasyonDurum').innerHTML = Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="rozet ${ist.has(k) ? 'var' : 'yok'}">${a}${ist.has(k) ? ' yakında' : ''}</span>`).join('') + (ist.has('elocak') ? '<span class="rozet var">Elektrikli Ocak çalışıyor · kömür gerekmez</span>' : '');
     [...$('#tarifSekme').children].forEach(b => b.classList.toggle('on', b.dataset.k === this.kategori));
     this.tarifCiz();
     this.tasimaCiz();
@@ -168,7 +168,7 @@ export class EnvanterEkrani {
     if (!liste.length) { $('#tarifListe').innerHTML = '<div class="bos">Eşleşen tarif mevcut değil.</div>'; return; }
     $('#tarifListe').innerHTML = liste.map(({ t, i, n, istOk }) => {
       const e = ESYALAR[t.cikti];
-      const gir = t.girdi.map(([g, a]) => {
+      const gir = girdiListesi(t).map(([g, a]) => {
         const var_ = girdiSay(env, g), id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g;
         return `<span class="${var_ >= a ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt="">${girdiAdi(g)} ${Math.min(var_, a)}/${a}</span>`;
       }).join('');

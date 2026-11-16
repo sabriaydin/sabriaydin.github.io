@@ -4,7 +4,7 @@
    Bakır Tel gücü 15 bloğa kadar taşır; yanlara, bir blok yukarı ve aşağı basamaklanır.
    Güç alan bloklar: kaynağın ve telin altındaki katı blok; ters çeviricinin önündeki blok.
    Tüketiciler (bir güç verene bitişik olunca): Bakır Lamba yanar, kapı / çit kapısı / tuzak kapı açılır, Ok Atıcı ok atar,
-   Müzik Kutusu ezgi çalar (altındaki bloğa göre). Kapılar yalnızca güç durumu değişince açılır / kapanır; elle de kullanılabilir.
+   Müzik Kutusu ezgi çalar (altındaki bloğa göre), Şalter elektrik ağını açar (0.24.0). Kapılar yalnızca güç durumu değişince açılır / kapanır; elle de kullanılabilir.
    Hesap tek oyunculuda ve sunucuda 0,1 saniyelik adımlarla yapılır; blok değişiklikleri ağla dağıtılır. */
 import { THREE } from '../grafik/sahne.js';
 import { BLOKLAR, KATI, OPAK } from '../bloklar.js';
@@ -127,7 +127,7 @@ export class Mekanik {
     const adaylar = new Map();
     const ekle = (x, y, z, yon) => {
       const id = d.blok(x, y, z), b = BLOKLAR[id];
-      if (!b || !(b.sekil === 'kapi' || b.sekil === 'citKapi' || b.sekil === 'tuzak' || b.mekanik === 'lamba' || b.mekanik === 'muzik' || id === 157)) return;
+      if (!b || !(b.sekil === 'kapi' || b.sekil === 'citKapi' || b.sekil === 'tuzak' || b.mekanik === 'lamba' || b.mekanik === 'muzik' || b.mekanik === 'salter' || id === 157)) return;
       const yy = b.sekil === 'kapi' && b.ust ? y - 1 : y;
       const k = A(x, yy, z);
       if (!adaylar.has(k)) adaylar.set(k, [x, yy, z, yon]);
@@ -189,6 +189,9 @@ export class Mekanik {
       const h = new THREE.Vector3(a + (Math.random() - 0.5) * 0.04, bb + 0.03, c + (Math.random() - 0.5) * 0.04).normalize().multiplyScalar(22);
       this.varliklar.okAt(p, h, 3, { turAd: 'tuzak', tur: { agu: false }, konum: p });
       if (this.sesYakin(x, y, z)) this.ses.yayAt();
+    } else if (b.mekanik === 'salter') {
+      /* 0.24.0: Şalter, sinyal gelince açılır, sinyal kesilince kapanır (elle de kullanılabilir) */
+      if (!!b.acik !== acik) { this.koy(x, y, z, 618 + (acik ? 1 : 0)); if (this.sesYakin(x, y, z)) this.ses.kol(acik); }
     } else if (b.mekanik === 'muzik' && acik) {
       this.varliklar.efekt({ t: 'patlama', x: x + 0.5, y: y + 1.2, z: z + 0.5, c: [0.95, 0.5, 0.75], n: 6, ses: 'nota', m: ezgiTuru(d.blok(x, y - 1, z)) });
     }

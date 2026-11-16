@@ -13,8 +13,11 @@ export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencer
 export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? t.istasyon : [t.istasyon]);
 export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
 export const istasyonMetni = t => istasyonlar(t).map(k => ISTASYON_ADI[k]).join(' veya ');
+/* 0.24.0: yakında çalışan bir Elektrikli Ocak varsa fırın ve ateş tariflerinde kömür harcanmaz (ana.js yakın istasyonları bulurken ayarlar) */
+export const ELOCAK = { aktif: false };
+export const girdiListesi = t => (ELOCAK.aktif && istasyonlar(t).some(k => k === 'firin' || k === 'ates') && t.girdi.length > 1 ? t.girdi.filter(([g]) => g !== 257) : t.girdi);
 
-export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['mobilya', 'Mobilya'], ['mekanik', 'Mekanik']];
+export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['mobilya', 'Mobilya'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik']];
 
 const R = [];
 const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, girdi, istasyon: istasyon || null, kategori });
@@ -208,6 +211,20 @@ t(488, 1, [[559, 1], [476, 1], [480, 1]], 'firin', 'yiyecek');
 t(489, 1, [[480, 2], [484, 1]], 'tencere', 'yiyecek');
 t(490, 2, [[291, 3], [482, 1], [476, 1]], 'firin', 'yiyecek');
 t(491, 1, [[480, 1]], 'tencere', 'yiyecek');
+/* 0.24.0: elektrik */
+t(495, 1, [[259, 2], [263, 1]], 'masa', 'elektrik');
+t(496, 2, [[259, 4], [256, 1]], 'masa', 'elektrik');
+t(617, 8, [[259, 1], [267, 2]], 'masa', 'elektrik');
+t(596, 1, [[34, 3], [495, 1], [261, 2]], 'masa', 'elektrik');
+t(597, 1, [[261, 4], [496, 2], [495, 1]], 'masa', 'elektrik');
+t(601, 1, [['kalas', 6], [496, 2], [261, 1]], 'masa', 'elektrik');
+t(602, 1, [[259, 4], [257, 2], [495, 1]], 'masa', 'elektrik');
+t(607, 1, [[261, 4], [263, 2], [495, 1]], 'masa', 'elektrik');
+t(612, 1, [[261, 6], [264, 1], [495, 2]], 'masa', 'elektrik');
+t(618, 1, [[617, 2], [233, 1], [261, 1]], 'masa', 'elektrik');
+t(620, 2, [[34, 2], [259, 1], [263, 1]], 'masa', 'elektrik');
+t(622, 1, [[15, 6], [496, 2], [261, 2]], 'masa', 'elektrik');
+t(624, 1, [[261, 3], [496, 3]], 'masa', 'elektrik');
 /* 0.22.0: hayatta kalma */
 t(494, 1, [[256, 3], [284, 1]], null, 'yiyecek');
 t(493, 1, [[492, 3], [263, 2], [284, 1]], 'masa', 'alet');
@@ -230,7 +247,7 @@ export function girdiHarca(env, g, adet) {
 /* Kaç kez üretilebilir (malzemeye göre) */
 export function kacKez(env, tarif) {
   let n = Infinity;
-  for (const [g, a] of tarif.girdi) n = Math.min(n, Math.floor(girdiSay(env, g) / a));
+  for (const [g, a] of girdiListesi(tarif)) n = Math.min(n, Math.floor(girdiSay(env, g) / a));
   return n;
 }
 export function uret(env, tarif, kez = 1) {
@@ -238,10 +255,10 @@ export function uret(env, tarif, kez = 1) {
   let yapilan = 0;
   for (let i = 0; i < kez; i++) {
     if (!env.bosYerVar(tarif.cikti, tarif.adet)) break;
-    for (const [g, a] of tarif.girdi) girdiHarca(env, g, a);
+    for (const [g, a] of girdiListesi(tarif)) girdiHarca(env, g, a);
     env.ekle(tarif.cikti, tarif.adet);
     /* 0.21.0: süt kovası ve bal şişesi gibi kaplı malzemelerin kabı geri verilir */
-    for (const [g, a] of tarif.girdi) { const e = !GRUPLAR[g] && ESYALAR[g], kap = e && (e.kap || (e.kase ? 270 : 0)); if (kap) env.ekle(kap, a); }
+    for (const [g, a] of girdiListesi(tarif)) { const e = !GRUPLAR[g] && ESYALAR[g], kap = e && (e.kap || (e.kase ? 270 : 0)); if (kap) env.ekle(kap, a); }
     yapilan++;
   }
   return yapilan;

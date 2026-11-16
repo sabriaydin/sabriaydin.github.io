@@ -13,6 +13,7 @@ const MEVSIM_ISI = [0, 7, -4, -12];   // ilkbahar, yaz, sonbahar, kış
 /* Isı kaynakları: blok -> [en yakında eklenen °C, etki yarıçapı] (eksi değer soğutur) */
 const KAYNAK = { 48: [20, 6], 46: [5, 3], 59: [24, 5], 521: [12, 4], 159: [3, 3], 219: [2, 2], 514: [3, 3], 595: [3, 3], 594: [6, 3], 189: [-7, 4], 197: [-5, 3] };
 for (let k = 0; k < 4; k++) KAYNAK[564 + k] = [4, 3];
+KAYNAK[625] = [16, 6]; KAYNAK[623] = [6, 3];   // 0.24.0: çalışan ısıtıcı ve elektrikli ocak
 /* Zırh yalıtımı: deri sıcak tutar, metal az */
 const YALITIM = id => (id >= 400 && id <= 403 ? 3 : id >= 404 && id <= 415 ? 1 : 0);
 

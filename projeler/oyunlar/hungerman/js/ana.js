@@ -19,9 +19,10 @@ import { Koyler } from './koy/koyler.js';
 import { Gorevler, yonAci } from './koy/gorevler.js';
 import { koylerAlan } from './dunya/koy-uretici.js';
 import { KoyluEkrani, GorevEkrani } from './arayuz/koylu-ekrani.js';
-import { ISTASYON_BLOK } from './oyun/uretim.js';
+import { ISTASYON_BLOK, ELOCAK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
+import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
 import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
@@ -41,7 +42,7 @@ import { RENKLER } from './ag/uzak-oyuncular.js';
 import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 /* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
-const URETIM_SURUMU = 9;
+const URETIM_SURUMU = 10;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';
@@ -435,7 +436,9 @@ function yakinIstasyonlar() {
   for (let y = -2; y <= 3; y++) for (let z = -4; z <= 4; z++) for (let x = -4; x <= 4; x++) {
     const b = oyun.dunya.blok(x0 + x, y0 + y, z0 + z);
     for (const [k, id] of Object.entries(ISTASYON_BLOK)) if (b === id) s.add(k);
+    if (b === 623) { s.add('elocak'); s.add('firin'); s.add('ates'); }   // 0.24.0: çalışan elektrikli ocak, fırın ve ateş yerine geçer
   }
+  ELOCAK.aktif = s.has('elocak');
   return s;
 }
 
@@ -547,6 +550,9 @@ function oyunBaslat(v) {
   /* 0.17.0: mekanik devreler tek oyunculuda ve sunucuda hesaplanır */
   if (!v.istemci) oyun.mekanik = new Mekanik({ dunya, varliklar, ses, gunIsigi: () => oyun.gunIsigi, yerel: () => oyun.oyuncu.konum,
     konumlar: () => { const l = oyun.hayatta.olu ? [] : [oyun.oyuncu.konum]; if (oyun.ag && oyun.ag.konumlar) l.push(...oyun.ag.konumlar()); return l; } });
+  /* 0.24.0: elektrik ağları tek oyunculuda ve sunucuda hesaplanır */
+  dunya.enerjiYukle(v.enerji);
+  if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
   gorevler.iceAktar(v.gorevler);
@@ -726,7 +732,7 @@ async function oyunKaydet() {
     oyuncu: { x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
     hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
-    koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), tekneler: o.tekneler.disaAktar(),
+    koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), tekneler: o.tekneler.disaAktar(),
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
     hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar()
   };
@@ -914,6 +920,7 @@ function adim(t) {
     o.koyler.guncelle(dt, o.oyuncu, ekKonumlar);
     if (!o.istemci) o.yapiOlaylari.guncelle(dt, (ekKonumlar ? [o.oyuncu.konum, ...ekKonumlar] : [o.oyuncu.konum]).filter(q => !diyarMi(q.x)));
     if (o.mekanik) o.mekanik.guncelle(dt);
+    if (o.elektrik) o.elektrik.guncelle(dt);
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
     if (o.tikSayac > 0.5 && !o.istemci) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); o.dunya.mevsimTik(p.x, p.z); if (ekKonumlar) for (const q of ekKonumlar) { o.dunya.rastgeleTik(q.x, q.z); o.dunya.mevsimTik(q.x, q.z); } o.dunya.ekinTik(); }
@@ -999,6 +1006,12 @@ function adim(t) {
   else if (o.etkilesim.hedefTekne) o.hud.bakilan('Tekne');
   else if (o.etkilesim.hedef) o.hud.bakilan((BLOKLAR[o.etkilesim.hedef.id] || {}).ad || null);
   else o.hud.bakilan(null);
+  /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi */
+  const eh = o.etkilesim.hedef, ebl = eh && !hc && !o.fotoModu && (kilitli || dokun.aktif) ? BLOKLAR[eh.id] : null;
+  if (ebl && ebl.elektrik) {
+    const ek = eh.x + ',' + eh.y + ',' + eh.z;
+    o.hud.enerji(enerjiMetni(ebl, o.elektrik ? o.elektrik.bilgi(ek) : o.ag && o.ag.enerjiIste ? o.ag.enerjiIste(ek) : null));
+  } else o.hud.enerji(null);
   /* Gösterge */
   o.hud.durumCiz(o.oyuncu.basSuda);
   bossCubugu(o);

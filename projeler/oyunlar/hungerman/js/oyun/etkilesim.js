@@ -518,6 +518,7 @@ export class Etkilesim {
       else if (eb.sekil === 'tuzak') id = 121 + f * 2;
       else if (eb.mekanik === 'ters') id = 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir
       else if (eb.mekanik === 'gecik') id = 523 + f * 8;   // 0.20.0
+      else if (eb.sekil === 'ruzgar') id = 597 + ((f + 2) % 4);   // 0.24.0: pervane oyuncuya bakar
       else if (eb.kovan) id = 569 + ((f + 2) % 4) * 6;   // 0.21.0: arı kovanının girişi oyuncuya bakar
       else if (eb.kamis && !this.kamisYeri(x, y, z)) { this.arayuz.bildirim('Şeker kamışı suya komşu kum, toprak ya da çimen üstüne veya başka bir kamışın üstüne konur.'); return true; }
       else if (eb.sekil === 'tirmanma') {
@@ -582,6 +583,8 @@ export class Etkilesim {
     }
     if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
     /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
+    /* 0.24.0: Şalter elektrik ağını açar / keser */
+    if (b.mekanik === 'salter') { d.blokKoy(h.x, h.y, h.z, b.acik ? 618 : 619); this.ses.kol(!b.acik); this.arayuz.bildirim(b.acik ? 'Şalter kapatıldı: ağ kesildi.' : 'Şalter açıldı: ağ bağlandı.'); return true; }
     if (b.mekanik === 'kol') { d.blokKoy(h.x, h.y, h.z, b.acik ? 233 : 234); this.ses.kol(!b.acik); return true; }
     /* 0.20.0: Geciktiricinin gecikmesi sağ tıkla 1-4 adım arasında döner */
     if (b.mekanik === 'gecik') { d.blokKoy(h.x, h.y, h.z, 523 + b.yon * 8 + ((b.gecikme + 1) % 4) * 2 + b.acik); this.ses.kol(true); this.arayuz.bildirim(`Gecikme: ${((b.gecikme + 1) % 4) + 1} adım (${(((b.gecikme + 1) % 4) + 1) / 10} sn)`.replace('.', ',')); return true; }

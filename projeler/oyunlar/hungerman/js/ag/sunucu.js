@@ -204,6 +204,7 @@ export class SunucuOyun {
         break;
       }
       case 'ok': o.varliklar.okAt(new THREE.Vector3(...m.p), new THREE.Vector3(...m.v), Math.min(24, +m.h || 2), false, c, m.yv ? { yavas: true } : null); break;
+      case 'eb': if (o.elektrik && typeof m.k === 'string' && m.k.length < 40) k.gonder({ t: 'eb', k: m.k, v: o.elektrik.bilgi(m.k) }); break;   // 0.24.0: elektrik ağı bilgisi
       case 'sa': {  // sandık açma
         const s = m.x + ',' + m.y + ',' + m.z;
         const sahip = this.kilit.get(s);

@@ -1,8 +1,9 @@
 /* HungerMan - özel yapılar (0.15.0): çöl tapınağı, orman tapınağı, buzul kulesi, haydut kampı
-   Dünya YAPI_HUCRE x YAPI_HUCRE bloklu hücrelere ayrılır; her hücrede tohuma göre en fazla bir yapı bulunur.
+   Dünya YAPI_HUCRE x YAPI_HUCRE bloklu hücrelere ayrılır; her hücrede tohuma göre en fazla bir yapı adayı bulunur.
+   0.23.3: her yapı türünden dünyada yalnızca bir tane bulunur: dünyanın merkezine en yakın uygun aday seçilir, diğer adaylar üretilmez.
    Yapı türü bulunduğu biyoma göre seçilir. Yapılar yerel koordinatlarla (merkez, taban yüksekliği, dört yönden birine dönük) çizilir.
    Bosslar ve haydutlar yapının bilgisindeki noktalarda oyun sırasında ortaya çıkar (oyun/yapilar.js). */
-import { PB, PY, DENIZ, dizin } from '../sabitler.js';
+import { PB, PY, DENIZ, dizin, diyarMi } from '../sabitler.js';
 import { karistir, uretec, karma3 } from '../rastgele.js';
 import { BY, KARLI } from './uretici.js';
 import { koyIcinde } from './koy-uretici.js';
@@ -22,7 +23,30 @@ function turSec(o) {
   return null;
 }
 
+/* 0.23.3: her türün tek yapısı. Hücreler merkezden dışa doğru halkalar hâlinde taranır; her tür için ilk uygun aday seçilir. */
+const TARAMA_HALKA = 90;   // en fazla 90 hücre (yaklaşık 26.000 blok) uzağa kadar aranır
+export function tekYapilar(u) {
+  if (u.tekYapiListesi) return u.tekYapiListesi;
+  const T = {}, kalan = new Set(Object.keys(YAPI_ADI));
+  for (let d = 0; d <= TARAMA_HALKA && kalan.size; d++) {
+    const halka = [];
+    for (let gz = -d; gz <= d; gz++) for (let gx = -d; gx <= d; gx++) if (Math.max(Math.abs(gx), Math.abs(gz)) === d) halka.push([gx, gz]);
+    halka.sort((a, b) => Math.hypot(a[0] + 0.5, a[1] + 0.5) - Math.hypot(b[0] + 0.5, b[1] + 0.5));
+    for (const [gx, gz] of halka) {
+      const Y = yapiAday(u, gx, gz);
+      if (Y && kalan.has(Y.tur) && !diyarMi(Y.x + Y.R + 64)) { T[Y.tur] = Y; kalan.delete(Y.tur); }
+    }
+  }
+  return (u.tekYapiListesi = T);
+}
 export function yapiBul(u, gx, gz) {
+  const Y = yapiAday(u, gx, gz);
+  if (!Y) return null;
+  const T = tekYapilar(u)[Y.tur];
+  return T && T.anahtar === Y.anahtar ? Y : null;
+}
+/* Hücrenin yapı adayı (tekillik denetimi olmadan) */
+function yapiAday(u, gx, gz) {
   const k = gx + ',' + gz;
   if (!u.yapiOnbellek) u.yapiOnbellek = new Map();
   if (u.yapiOnbellek.has(k)) return u.yapiOnbellek.get(k);

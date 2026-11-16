@@ -1,5 +1,6 @@
 /* HungerMan - oyun içi gösterge: hızlı erişim çubuğu, can / açlık / oksijen, pusula, saat, bildirimler */
 import { simge } from '../grafik/doku.js';
+import { DURUM_AD } from '../oyun/elektrik.js';
 import { ESYALAR, maksDayanim, ETKILER, buyuluMu } from '../bloklar.js';
 import { ikon, IKON_RENK } from './ikonlar.js';
 
@@ -266,6 +267,16 @@ export class Hud {
   }
   hasarParla() { const e = $('#hasarParla'); e.classList.add('acik'); setTimeout(() => e.classList.remove('acik'), 120); }
   /* 0.23.1: bakılan blok ya da tekne adı: sol alt köşede, yalnızca ad */
+  /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi (m: enerjiMetni sonucu ya da null) */
+  enerji(m) {
+    const el = $('#enerjiBilgi');
+    if (!m) { if (!el.hidden) { el.hidden = true; this.son.enerji = ''; } return; }
+    const a = m.satirlar.join('|') + m.durum + (m.oran == null ? '' : m.oran.toFixed(3));
+    if (a === this.son.enerji && !el.hidden) return;
+    this.son.enerji = a; el.hidden = false;
+    el.innerHTML = (m.durum ? `<span class="ebDurum ${m.durum}">${DURUM_AD[m.durum] || ''}</span>` : '') + m.satirlar.map(l => `<div>${l}</div>`).join('') +
+      (m.oran == null ? '' : `<div class="ebCubuk"><i style="width:${(Math.min(1, Math.max(0, m.oran)) * 100).toFixed(1)}%"></i></div>`);
+  }
   bakilan(ad) {
     const el = $('#bakilanAd'), a = ad || '';
     if (a === this.son.bakilan) return;

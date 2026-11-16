@@ -152,6 +152,26 @@ export function sekilKutulari(id, komsu, carp = false) {
         [7 * P, 2 * P, z, 9 * P, 5 * P, z + 2 * P, T.kalas], [6.5 * P, 5 * P, z - 0.5 * P, 9.5 * P, 7 * P, z + 2.5 * P, ba]], b.yon);
     }
     case 'algi': return [[0, 0, 0, 1, 6 * P, 1]];
+    /* 0.24.0: elektrik blokları */
+    case 'gunes':   // ayaklı taban ve üstte ince güneş paneli
+      if (carp) return [[0, 0, 0, 1, 8 * P, 1]];
+      return [[3 * P, 0, 3 * P, 13 * P, P, 13 * P, T.panel_yan], [7 * P, P, 7 * P, 9 * P, 6 * P, 9 * P, T.demir_cubuk], [0, 6 * P, 0, 1, 8 * P, 1]];
+    case 'ruzgar':  // direk, gövde, kuyruk ve önde dönen pervane (yon: pervanenin baktığı yön)
+      if (carp) return [[5 * P, 0, 5 * P, 11 * P, 1, 11 * P]];
+      return dondur([[6 * P, 0, 6 * P, 10 * P, P, 10 * P, T.panel_yan], [7 * P, P, 7 * P, 9 * P, 7 * P, 9 * P, T.demir_cubuk], [6 * P, 6 * P, 3 * P, 10 * P, 10 * P, 12 * P],
+        [7.5 * P, 7 * P, 12 * P, 8.5 * P, 12 * P, 15.5 * P], [0, 0, 2 * P, 1, 1, 2.5 * P, T.turbin_pervane]], b.yon);
+    case 'batarya': {   // boyut 0: küçük, 1: orta, 2: büyük; üstte iki kutup başı
+      const k = [[3, 9], [2, 13], [1, 15]][b.boyut], a = k[0] * P, h = k[1] * P;
+      if (carp) return [[a, 0, a, 1 - a, h, 1 - a]];
+      return [[a, 0, a, 1 - a, h, 1 - a], [a + 2 * P, h, 7 * P, a + 4 * P, h + P, 9 * P, T.demir_cubuk], [1 - a - 4 * P, h, 7 * P, 1 - a - 2 * P, h + P, 9 * P, T.salter_a]];
+    }
+    case 'ekablo': {   // elektrik kablosu: elektrikli komşulara uzanır; üstteki ve alttaki elektrikli bloğa dikey bağlanır
+      if (carp) return [];
+      const h = 1.6 * P, el = n => !!(BLOKLAR[n] && BLOKLAR[n].elektrik), l = [[6.5 * P, 0, 6.5 * P, 9.5 * P, h, 9.5 * P]];
+      for (let f = 0; f < 4; f++) if (el(komsu(f))) l.push(f === 0 ? [7 * P, 0, 0, 9 * P, h, 7 * P] : f === 1 ? [9 * P, 0, 7 * P, 1, h, 9 * P] : f === 2 ? [7 * P, 0, 9 * P, 9 * P, h, 1] : [0, 0, 7 * P, 7 * P, h, 9 * P]);
+      if (el(komsu(12))) l.push([7 * P, h, 7 * P, 9 * P, 1, 9 * P]);
+      return l;
+    }
     case 'kazik':
       /* Sivri kazık: kütük gövde, daralan uç */
       if (carp) return [[0, 0, 0, 1, 1, 1]];
