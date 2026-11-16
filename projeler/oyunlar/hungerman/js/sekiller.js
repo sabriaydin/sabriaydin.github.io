@@ -2,12 +2,15 @@
    Her blok, hücre içinde 0..1 aralığında kutulardan oluşur: [x0, y0, z0, x1, y1, z1, doku?].
    Aynı tanımlar meshleme (işçi), çarpışma (oyuncu ve canlılar), ışın izleme ve seçim kutusu için kullanılır. */
 import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T, BLOK_UST } from './bloklar.js';
+import { CIHAZ, cihazHucreKutulari } from './cihazlar.js';
 
 const P = 1 / 16;
 /* Yönler: 0 kuzey (-z), 1 doğu (+x), 2 güney (+z), 3 batı (-x) */
 export const YONLER = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 export const SEKIL = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && b.cizim === C_SEKIL) SEKIL[b.id] = 1;
+const CIHAZ_KUTU = [];
+for (const b of BLOKLAR) if (b && b.sekil === 'cihaz') CIHAZ_KUTU[b.id] = cihazHucreKutulari(CIHAZ[b.cihaz], b.parca);
 
 /* Hücrenin bir kenarına yaslanan ince panel */
 function panel(f, k, y0 = 0, y1 = 1) {
@@ -153,18 +156,8 @@ export function sekilKutulari(id, komsu, carp = false) {
     }
     case 'algi': return [[0, 0, 0, 1, 6 * P, 1]];
     /* 0.24.0: elektrik blokları */
-    case 'gunes':   // ayaklı taban ve üstte ince güneş paneli
-      if (carp) return [[0, 0, 0, 1, 8 * P, 1]];
-      return [[3 * P, 0, 3 * P, 13 * P, P, 13 * P, T.panel_yan], [7 * P, P, 7 * P, 9 * P, 6 * P, 9 * P, T.demir_cubuk], [0, 6 * P, 0, 1, 8 * P, 1]];
-    case 'ruzgar':  // direk, gövde, kuyruk ve önde dönen pervane (yon: pervanenin baktığı yön)
-      if (carp) return [[5 * P, 0, 5 * P, 11 * P, 1, 11 * P]];
-      return dondur([[6 * P, 0, 6 * P, 10 * P, P, 10 * P, T.panel_yan], [7 * P, P, 7 * P, 9 * P, 7 * P, 9 * P, T.demir_cubuk], [6 * P, 6 * P, 3 * P, 10 * P, 10 * P, 12 * P],
-        [7.5 * P, 7 * P, 12 * P, 8.5 * P, 12 * P, 15.5 * P], [0, 0, 2 * P, 1, 1, 2.5 * P, T.turbin_pervane]], b.yon);
-    case 'batarya': {   // boyut 0: küçük, 1: orta, 2: büyük; üstte iki kutup başı
-      const k = [[3, 9], [2, 13], [1, 15]][b.boyut], a = k[0] * P, h = k[1] * P;
-      if (carp) return [[a, 0, a, 1 - a, h, 1 - a]];
-      return [[a, 0, a, 1 - a, h, 1 - a], [a + 2 * P, h, 7 * P, a + 4 * P, h + P, 9 * P, T.demir_cubuk], [1 - a - 4 * P, h, 7 * P, 1 - a - 2 * P, h + P, 9 * P, T.salter_a]];
-    }
+    /* 0.25.0: çok bloklu cihaz hücresi: cihazın çarpışma kutularının bu hücreye düşen parçası */
+    case 'cihaz': return dondur(CIHAZ_KUTU[id] || [], b.yon);
     case 'ekablo': {   // elektrik kablosu: elektrikli komşulara uzanır; üstteki ve alttaki elektrikli bloğa dikey bağlanır
       if (carp) return [];
       const h = 1.6 * P, el = n => !!(BLOKLAR[n] && BLOKLAR[n].elektrik), l = [[6.5 * P, 0, 6.5 * P, 9.5 * P, h, 9.5 * P]];

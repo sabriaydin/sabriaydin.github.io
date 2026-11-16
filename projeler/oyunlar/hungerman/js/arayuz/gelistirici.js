@@ -12,6 +12,8 @@ import { YER_RENKLERI } from './harita-ekrani.js';
 import { PB, PY, SURUM } from '../sabitler.js';
 import { enerjiMetni, DURUM_AD } from '../oyun/elektrik.js';
 import { HAVA_ADI } from '../grafik/hava.js';
+import { CIHAZ } from '../cihazlar.js';
+import { kokAnahtari } from '../oyun/elektrik.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -35,7 +37,10 @@ const SEKMELER = [
   ['gorsel', 'Görüntü', 'Görünüm seçenekleri, göstergeler, ekran görüntüsü'],
   ['bilgi', 'Bilgi', 'Performans grafiği ve teknik bilgiler']
 ];
-const SAKLA = 'hungerman_gelistirici_sekme', SIK = 'hungerman_gelistirici_sik';
+const SAKLA = 'hungerman_gelistirici_sekme', SIK = 'hungerman_gelistirici_sik', DUZEN = 'hungerman_gelistirici_duzen', SON_VERILEN = 'hungerman_gelistirici_son', DURUM = 'hungerman_gelistirici_durum_';
+const oku = (k, v) => { try { const x = JSON.parse(localStorage.getItem(k)); return x ?? v; } catch (e) { return v; } };
+const yazDepo = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* depolama kapalı */ } };
+const saatMetni = () => { const d = new Date(); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`; };
 /* Sekme simgeleri (24 × 24 çizgi simgeler) */
 const SIMGE = {
   sik: '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
@@ -54,8 +59,13 @@ const SIMGE = {
 const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${SIMGE[k] || ''}</svg>`;
 
 /* Eşya kategorileri */
-const KATEGORI = [['hepsi', 'Hepsi'], ['blok', 'Bloklar'], ['alet', 'Aletler'], ['zirh', 'Zırh'], ['yiyecek', 'Yiyecek ve iksir'], ['diger', 'Diğer']];
-function kategori(e) { if (e.zirh) return 'zirh'; if (e.tur === 'blok') return 'blok'; if (e.tur === 'alet' || e.tur === 'yay' || e.tur === 'olta') return 'alet'; if (e.tur === 'yiyecek' || e.tur === 'iyilestir' || e.tur === 'iksir' || e.yenir) return 'yiyecek'; return 'diger'; }
+const KATEGORI = [['hepsi', 'Hepsi'], ['blok', 'Bloklar'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik'], ['alet', 'Aletler'], ['zirh', 'Zırh'], ['yiyecek', 'Yiyecek ve iksir'], ['diger', 'Diğer']];
+function kategori(e) {
+  if (e.zirh) return 'zirh';
+  const b = e.tur === 'blok' && BLOKLAR[e.blok];
+  if (e.tur === 'cihaz' || e.id === 495 || e.id === 496 || (b && b.elektrik)) return 'elektrik';
+  if (b && b.mekanik) return 'mekanik';
+  if (e.tur === 'blok') return 'blok'; if (e.tur === 'alet' || e.tur === 'yay' || e.tur === 'olta') return 'alet'; if (e.tur === 'yiyecek' || e.tur === 'iyilestir' || e.tur === 'iksir' || e.yenir) return 'yiyecek'; return 'diger'; }
 
 /* Hazır setler: [eşya numarası, adet] */
 const SETLER = {
@@ -70,7 +80,7 @@ const SETLER = {
   buyu: { ad: 'Büyü', esya: [[156, 1], [61, 32], [139, 1], [316, 1], [319, 1], [286, 1], [453, 1], [412, 1], [415, 1]] },
   simya: { ad: 'Simya ve örs', esya: [[140, 1], [139, 1], [331, 16], [61, 8], [283, 8], [265, 16], [297, 8], [299, 4], [263, 4], [450, 4], [296, 8], [328, 8], [257, 8]] },
   tuccar: { ad: 'Tüccar', esya: [[288, 64], [291, 40], [271, 12], [257, 24], [8, 24], [282, 12], [297, 12]] },
-  elektrik: { ad: 'Elektrik', esya: [[596, 4], [597, 2], [601, 2], [602, 2], [607, 1], [612, 1], [617, 64], [618, 2], [620, 8], [622, 1], [624, 2], [233, 2], [239, 16]] }
+  elektrik: { ad: 'Elektrik', esya: [[497, 4], [498, 2], [499, 2], [500, 2], [501, 1], [502, 1], [617, 64], [618, 2], [620, 8], [622, 1], [624, 2], [233, 2], [239, 16]] }
 };
 
 export class GelistiriciPenceresi {
@@ -85,11 +95,32 @@ export class GelistiriciPenceresi {
     this.kok = $('#gelistirici');
     try { this.sik = JSON.parse(localStorage.getItem(SIK) || '[]'); } catch (e) { this.sik = []; }
     if (!Array.isArray(this.sik)) this.sik = [];
-    this.genelArama = '';
+    this.genelArama = ''; this.aramaSira = 0;
     const ga = $('#gelGenelAra');
-    ga.addEventListener('input', () => { this.genelArama = ga.value; this.ciz(); });
-    ga.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { if (ga.value) { ga.value = ''; this.genelArama = ''; this.ciz(); } else this.kapatIste(); } });
-    this.kok.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); ga.focus(); ga.select(); } });
+    ga.addEventListener('input', () => { this.genelArama = ga.value; this.aramaSira = 0; this.ciz(); });
+    /* 0.25.0: arama sonuçlarında ↑ ↓ ile gezinilir, Enter seçili işlemi çalıştırır */
+    ga.addEventListener('keydown', e => {
+      e.stopPropagation();
+      if (e.key === 'Escape') { if (ga.value) { ga.value = ''; this.genelArama = ''; this.ciz(); } else this.kapatIste(); return; }
+      const l = this.aramaListesi();
+      if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && l.length) { e.preventDefault(); this.aramaSira = (this.aramaSira + (e.key === 'ArrowDown' ? 1 : -1) + l.length) % l.length; this.aramaIsaretle(); }
+      else if (e.key === 'Enter' && l.length) { e.preventDefault(); const b = l[Math.min(this.aramaSira, l.length - 1)]; if (b.matches('label')) b.querySelector('input').click(); else b.click(); }
+    });
+    this.kok.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); ga.focus(); ga.select(); }
+      /* 0.25.0: Alt + 1-9 sekmeler arasında geçer */
+      else if (e.altKey && /^Digit[0-9]$/.test(e.code)) { e.preventDefault(); const i = (+e.code.slice(5) + 9) % 10, S = SEKMELER[i]; if (S) this.sekmeSec(S[0]); }
+    });
+    /* 0.25.0: kenara yaslama, denetçi, işlem geçmişi, son verilen eşyalar */
+    const dz = oku(DUZEN, {});
+    this.yasli = !!dz.yasli; this.denetciAcik = dz.denetci !== false;
+    this.gecmis = []; this.sonVerilen = Array.isArray(oku(SON_VERILEN, [])) ? oku(SON_VERILEN, []).filter(i => ESYALAR[i]).slice(0, 14) : [];
+    $('#gelYasla').addEventListener('click', () => { this.yasli = !this.yasli; this.duzenUygula(); this.ses.tik(); });
+    $('#gelDenetciDugme').addEventListener('click', () => { this.denetciAcik = !this.denetciAcik; this.duzenUygula(); this.ses.tik(); this.son = {}; this.canliYaz(this.oyun()); });
+    $('#gelGecmisDugme').addEventListener('click', () => { const g = $('#gelGecmis'); g.hidden = !g.hidden; if (!g.hidden) this.gecmisCiz(); this.ses.tik(); });
+    $('#gelGecmis').addEventListener('click', e => { const b = e.target.closest('button[data-tekrar]'); if (b) { this.k(b.dataset.tekrar); } else if (e.target.closest('button[data-gtemizle]')) { this.gecmis = []; this.gecmisCiz(); } });
+    $('#gelDenetci').addEventListener('click', e => this.denetciTikla(e));
+    this.duzenUygula();
     /* Sağ tık: işlemi sık kullanılanlara ekle / çıkar */
     $('#gelIcerik').addEventListener('contextmenu', e => {
       const b = e.target.closest('button[data-k], button[data-onay], button[data-etki], button[data-dogur], button[data-set], label.gelAnahtar');
@@ -104,7 +135,7 @@ export class GelistiriciPenceresi {
     });
     $('#gelSekme').innerHTML = SEKMELER.map(([k, a], i) => `${i === 1 || i === 10 ? '<hr>' : ''}<button type="button" data-s="${k}" title="${esc(SEKMELER[i][2])}">${svg(k)}<span>${a}</span></button>`).join('');
     $('#gelSurum').textContent = `HungerMan ${SURUM}`;
-    $('#gelSekme').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; this.sekme = b.dataset.s; try { localStorage.setItem(SAKLA, this.sekme); } catch (x) { /* depolama kapalı */ } this.ses.tik(); this.ciz(); $('#gelIcerik').scrollTop = 0; });
+    $('#gelSekme').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (b) this.sekmeSec(b.dataset.s); });
     $('#gelKapat').addEventListener('click', () => this.kapatIste());
     this.kok.addEventListener('mousedown', e => { if (e.target === this.kok) this.kapatIste(); });
     const ic = $('#gelIcerik');
@@ -113,12 +144,45 @@ export class GelistiriciPenceresi {
     ic.addEventListener('change', e => this.degisti(e));
     ic.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') this.kapatIste(); if (e.key === 'Enter' && e.target.closest('.gelKoord')) this.git(); });
     ic.addEventListener('mouseover', e => { const b = e.target.closest('[data-ver]'); if (b) $('#gelNotEsya') && ($('#gelNotEsya').textContent = `${ESYALAR[+b.dataset.ver].ad} (${b.dataset.ver}) · tık: ${this.adet} adet · Shift + tık: 64 adet`); });
-    this.konsol.mesajDinle = (m, sinif) => { const el = $('#gelMesaj'); el.textContent = m; el.className = 'gelMesaj ' + sinif; };
+    this.konsol.mesajDinle = (m, sinif) => { const el = $('#gelMesaj'); el.textContent = m; el.className = 'gelMesaj ' + sinif; this.gecmisEkle({ m, sinif }); };
     this.anahtarlar = this.anahtarlariKur();
   }
   ac() { this.acik = true; this.kok.hidden = false; this.mesaj('Değişiklikler hemen uygulanır ve konsol kaydına da yazılır (F8).', 'soluk'); this.ciz(); }
-  kapat() { this.acik = false; this.kok.hidden = true; }
-  k(s) { this.konsol.calistir(s); this.ses.tik(); }
+  kapat() { this.acik = false; this.kok.hidden = true; $('#gelGecmis').hidden = true; }
+  k(s) { this.gecmisEkle({ k: s }); this.konsol.calistir(s); this.ses.tik(); }
+  sekmeSec(k) {
+    if (this.genelArama) { this.genelArama = ''; $('#gelGenelAra').value = ''; }
+    this.sekme = k; try { localStorage.setItem(SAKLA, k); } catch (x) { /* depolama kapalı */ }
+    this.ses.tik(); this.ciz(); $('#gelIcerik').scrollTop = 0;
+  }
+  /* 0.25.0: pencere düzeni (kenara yaslı, denetçi açık) */
+  duzenUygula() {
+    this.kok.classList.toggle('yasli', this.yasli);
+    $('#gelYasla').classList.toggle('on', this.yasli);
+    $('#gelDenetciDugme').classList.toggle('on', this.denetciAcik);
+    $('#gelDenetci').hidden = !this.denetciAcik;
+    yazDepo(DUZEN, { yasli: this.yasli, denetci: this.denetciAcik });
+  }
+  /* 0.25.0: işlem geçmişi: çalıştırılan komutlar ve sonuç iletileri (en çok 60) */
+  gecmisEkle(g) {
+    const son = this.gecmis[0];
+    if (g.m && son && son.k && !son.m) { son.m = g.m; son.sinif = g.sinif; }
+    else this.gecmis.unshift({ ...g, z: saatMetni() });
+    if (this.gecmis.length > 60) this.gecmis.length = 60;
+    const say = $('#gelGecmisSay'); if (say) say.textContent = this.gecmis.length;
+    if (!$('#gelGecmis').hidden) this.gecmisCiz();
+  }
+  gecmisCiz() {
+    $('#gelGecmis').innerHTML = `<header><b>İşlem geçmişi</b><span>Komutlar tekrar çalıştırılabilir</span><button type="button" data-gtemizle="1">Temizle</button></header>` +
+      (this.gecmis.length ? `<ol>${this.gecmis.map(g => `<li class="${g.sinif || ''}"><time>${g.z}</time>${g.k ? `<code>${esc(g.k)}</code>` : ''}<span>${esc(g.m || '')}</span>${g.k ? `<button type="button" data-tekrar="${esc(g.k)}" title="Tekrar çalıştır">↻</button>` : ''}</li>`).join('')}</ol>` : '<p class="gelNot">Henüz işlem yapılmadı.</p>');
+  }
+  /* Arama sonuçlarındaki işlemler ve seçili olanın işaretlenmesi */
+  aramaListesi() { return this.genelArama.trim() ? [...$('#gelIcerik').querySelectorAll('.gelAramaSonuc > button, .gelAramaSonuc > label')] : []; }
+  aramaIsaretle() {
+    const l = this.aramaListesi();
+    l.forEach((b, i) => b.classList.toggle('secili', i === Math.min(this.aramaSira, l.length - 1)));
+    const s = l[Math.min(this.aramaSira, l.length - 1)]; if (s) s.scrollIntoView({ block: 'nearest' });
+  }
   izin(o) { if (!o.komutlar) { this.mesaj('Bu dünyada komutlar kapalı.', 'hata'); return false; } return true; }
   mesaj(m, sinif = '') { const el = $('#gelMesaj'); el.textContent = m; el.className = 'gelMesaj ' + sinif; }
 
@@ -174,7 +238,7 @@ export class GelistiriciPenceresi {
     this.son = {};
     if (this.genelArama.trim()) {
       $('#gelBaslikMetin').textContent = 'Arama sonuçları'; $('#gelAltBaslik').textContent = `“${this.genelArama.trim()}” · sağ tık: sık kullanılanlara ekle`;
-      $('#gelIcerik').innerHTML = this.aramaSonucu(o, this.genelArama); this.canliYaz(o); return;
+      $('#gelIcerik').innerHTML = this.aramaSonucu(o, this.genelArama); this.aramaIsaretle(); this.canliYaz(o); return;
     }
     $('#gelBaslikMetin').textContent = S[1]; $('#gelAltBaslik').textContent = S[2];
     const f = { sik: this.sikSekmesi, hayatta: this.hayattaSekmesi, oyuncu: this.oyuncuSekmesi, esya: this.esyaSekmesi, dunya: this.dunyaSekmesi, harita: this.haritaSekmesi, canli: this.canliSekmesi, isinla: this.isinlaSekmesi, koy: this.koySekmesi, elektrik: this.elektrikSekmesi, gorsel: this.gorselSekmesi, bilgi: this.bilgiSekmesi }[this.sekme];
@@ -198,6 +262,7 @@ export class GelistiriciPenceresi {
       this.bolum('İksir etkileri',
         this.kaydirici('etkiSure', 'Verilecek etkinin süresi', 30, 900, 30, this.etkiSure, v => sure(v)) +
         `<div class="gelDugmeler" id="gelEtkiler">${Object.entries(ETKILER).map(([k, e]) => `<button type="button" data-etki="${k}"><i style="background:${e.renk}"></i>${e.ad}<em></em></button>`).join('')}${this.dugme('etki temizle', 'Etkileri kaldır')}</div>`) +
+      this.bolum('Durum kayıtları', this.durumKayitlari(o), 'Konum, bakış, can, açlık, envanter, zaman ve hava kaydedilir; sınamadan önceki duruma tek tıkla dönülür. Kayıtlar bu dünyaya özeldir.') +
       this.bolum('Doğma noktası', `<p class="gelDeger">X ${Math.round(d.x)} · Y ${Math.round(d.y)} · Z ${Math.round(d.z)}</p>` +
         this.dugmeler(this.dugme('dogum', 'Bulunulan yere ayarla')), 'Doğma noktasına gitmek için Işınlanma sekmesi kullanılır.');
   }
@@ -232,7 +297,7 @@ export class GelistiriciPenceresi {
       const kayit = this.arama; this.arama = '';
       kap.innerHTML = f.call(this, o); this.arama = kayit;
       const l = [...kap.querySelectorAll('button[data-k], button[data-onay], button[data-etki], button[data-dogur], button[data-set], label.gelAnahtar')]
-        .filter(b => kucuk(b.textContent).includes(q) || kucuk(b.title || '').includes(q) || kucuk(b.closest('section')?.querySelector('h4')?.textContent || '').includes(q));
+        .filter(b => kucuk(ad).includes(q) || kucuk(b.textContent).includes(q) || kucuk(b.title || '').includes(q) || kucuk(b.closest('section')?.querySelector('h4')?.textContent || '').includes(q));
       if (l.length) sonuc.push(this.bolum(`${ad}`, `<div class="gelDugmeler gelAramaSonuc">${l.map(b => b.outerHTML).join('')}</div>`));
     }
     return sonuc.join('') || '<div class="gelBos">Eşleşen işlem mevcut değil.</div>';
@@ -247,7 +312,9 @@ export class GelistiriciPenceresi {
         'Tek büyü için konsolda: buyu <büyü> [seviye]') +
       this.bolum('Eşya ver', `
         <div class="gelSatir"><input type="search" id="gelAra" placeholder="Eşya adı ya da numarası" value="${esc(this.arama)}" autocomplete="off">
-          <span class="gelAdet" title="Tıklamada verilecek adet">${[1, 8, 16, 64].map(n => `<button type="button" data-adet="${n}" class="${this.adet === n ? 'on' : ''}">${n}</button>`).join('')}</span></div>
+          <span class="gelAdet" title="Tıklamada verilecek adet">${[1, 8, 16, 64].map(n => `<button type="button" data-adet="${n}" class="${this.adet === n ? 'on' : ''}">${n}</button>`).join('')}</span>
+          <label class="gelOzelAdet" title="Özel adet (1-999)">Adet <input type="number" id="gelAdetOzel" min="1" max="999" value="${this.adet}"></label></div>
+        ${this.sonVerilen.length ? `<h5>Son verilenler</h5><div class="gelEsyalar gelSon">${this.sonVerilen.map(i => `<button type="button" data-ver="${i}" title="${esc(ESYALAR[i].ad)} (${i})"><img src="${simge(+i).url}" alt=""></button>`).join('')}</div>` : ''}
         <div class="gelCipler">${KATEGORI.map(([k, ad]) => `<button type="button" data-kat="${k}" class="${this.kat === k ? 'on' : ''}">${ad}</button>`).join('')}</div>
         <p class="gelNot" id="gelNotEsya">${l.length} eşya · Üzerine gelinen eşyanın adı burada görünür.</p>
         <div class="gelEsyalar">${l.map(([i, e]) => `<button type="button" data-ver="${i}" title="${esc(e.ad)} (${i})"><img src="${simge(+i).url}" alt=""></button>`).join('')}</div>`);
@@ -389,7 +456,13 @@ export class GelistiriciPenceresi {
     }
     else if (d.k) this.k(d.k);
     else if (d.etki) this.k(`etki ${d.etki} ${this.etkiSure}`);
-    else if (d.ver) this.k(`ver ${d.ver} ${e.shiftKey ? 64 : this.adet}`);
+    else if (d.ver) {
+      this.k(`ver ${d.ver} ${e.shiftKey ? 64 : this.adet}`);
+      const i = +d.ver; this.sonVerilen = [i, ...this.sonVerilen.filter(x => x !== i)].slice(0, 14); yazDepo(SON_VERILEN, this.sonVerilen);
+    }
+    else if (d.durumkaydet) this.durumKaydet(o, +d.durumkaydet);
+    else if (d.durumyukle) this.durumYukle(o, +d.durumyukle);
+    else if (d.durumsil) { const l = oku(DURUM + o.id, []); l[+d.durumsil - 1] = null; yazDepo(DURUM + o.id, l); this.ses.tik(); this.mesaj('Durum kaydı silindi.', 'tamam'); }
     else if (d.adet) { this.adet = +d.adet; this.ses.tik(); }
     else if (d.kat) { this.kat = d.kat; this.ses.tik(); }
     else if (d.set) {
@@ -420,7 +493,7 @@ export class GelistiriciPenceresi {
       o.yerler.push({ x: Math.floor(P.x), z: Math.floor(P.z), ad: `İşaret ${n + 1}`, renk: YER_RENKLERI[n % YER_RENKLERI.length] });
       this.ses.tik(); this.mesaj('Bulunulan yere işaret eklendi. Adı büyük haritada değiştirilebilir.', 'tamam');
     }
-    else if (d.blokver) { const h = this.bakilan(o); if (!h) { this.mesaj('Bakılan bir blok yok.', 'hata'); return; } const t = BLOKLAR[h.id]; this.k(`ver ${t.gizli && t.taban ? t.taban : h.id} ${this.adet}`); }
+    else if (d.blokver) { const h = this.bakilan(o); if (!h) { this.mesaj('Bakılan bir blok yok.', 'hata'); return; } this.k(`ver ${this.blokEsyasi(h.id)} ${this.adet}`); }
     else if (d.blokdegis) this.k(`blok ${$('#gelBlokSec').value}`);
     else if (d.kopya) {
       const metin = d.kopya === 'tohum' ? String(o.tohum) : this.satirlar(o).map(([a, v]) => `${a}: ${v}`).join('\n');
@@ -433,6 +506,7 @@ export class GelistiriciPenceresi {
   girdi(e) {
     const t = e.target, o = this.oyun(); if (!o) return;
     if (t.id === 'gelAra') { this.arama = t.value; this.aramaOdak = true; this.ciz(); this.aramaOdak = false; return; }
+    if (t.id === 'gelAdetOzel') { const n = Math.max(1, Math.min(999, Math.round(+t.value) || 1)); this.adet = n; for (const b of this.kok.querySelectorAll('[data-adet]')) b.classList.toggle('on', +b.dataset.adet === n); return; }
     const r = t.dataset.r; if (!r) return;
     const v = +t.value, el = this.kok.querySelector(`[data-d="${r}"]`);
     t.style.setProperty('--p', ((v - +t.min) / (+t.max - +t.min) * 100).toFixed(1) + '%');
@@ -469,6 +543,79 @@ export class GelistiriciPenceresi {
     if (z) { z.value = o.zamanHizi ?? 1; z.style.setProperty('--p', ((o.zamanHizi ?? 1) / 100 * 100).toFixed(1) + '%'); const el = this.kok.querySelector('[data-d="zhiz"]'); if (el) el.textContent = this.bicimler.zhiz(+z.value); }
   }
   bakilan(o) { return o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu()); }
+
+  /* Bakılan bloğun verilebilecek eşyası (durum blokları ve cihaz hücreleri için asıl eşya) */
+  blokEsyasi(id) { const t = BLOKLAR[id]; return t.cihaz ? CIHAZ[t.cihaz].esya : t.gizli && t.taban ? t.taban : id; }
+
+  /* ---------- 0.25.0: durum kayıtları ---------- */
+  durumKayitlari(o) {
+    const l = oku(DURUM + o.id, []);
+    return `<div class="gelKayitlar">${[1, 2, 3].map(n => {
+      const k = l[n - 1];
+      return `<div class="gelKayit${k ? '' : ' bos'}"><b>Kayıt ${n}</b><span>${k ? `${esc(k.etiket)}` : 'Boş'}</span><div>
+        <button type="button" data-durumkaydet="${n}">${k ? 'Üzerine kaydet' : 'Kaydet'}</button>${k ? `<button type="button" data-durumyukle="${n}" class="birincil">Yükle</button><button type="button" data-durumsil="${n}" aria-label="Sil">✕</button>` : ''}</div></div>`;
+    }).join('')}</div>`;
+  }
+  durumKaydet(o, n) {
+    const P = o.oyuncu.konum, l = oku(DURUM + o.id, []), saat = $('#saatDeger').textContent;
+    l[n - 1] = { etiket: `${o.gun}. gün ${saat} · ${Math.round(P.x)}, ${Math.round(P.y)}, ${Math.round(P.z)} · ${new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`,
+      p: [P.x, P.y, P.z], yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch, hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, hava: o.hava.durum };
+    yazDepo(DURUM + o.id, l); this.ses.tik(); this.mesaj(`Durum ${n}. kayda alındı.`, 'tamam'); this.gecmisEkle({ m: `Durum kaydı ${n} alındı` });
+  }
+  durumYukle(o, n) {
+    if (!this.izin(o)) return;
+    const k = oku(DURUM + o.id, [])[n - 1];
+    if (!k) return;
+    o.oyuncu.konum.set(k.p[0], k.p[1], k.p[2]); o.oyuncu.yaw = k.yaw; o.oyuncu.pitch = k.pitch;
+    if (o.oyuncu.hiz && o.oyuncu.hiz.set) o.oyuncu.hiz.set(0, 0, 0);
+    o.hayatta.iceAktar(k.hayatta); o.envanter.iceAktar(k.envanter); o.envanter.bildir();
+    if (!o.istemci) { o.zaman = k.zaman; o.gun = k.gun; if (k.hava && o.hava.durum !== k.hava) this.konsol.calistir(`hava ${k.hava}`); }
+    this.ses.tik(); this.mesaj(`Durum ${n}. kayıttan yüklendi${o.istemci ? ' (zaman ve hava sunucuda kaldı)' : ''}.`, 'tamam'); this.gecmisEkle({ m: `Durum kaydı ${n} yüklendi` });
+  }
+
+  /* ---------- 0.25.0: denetçi: bakılan blok ya da canlı ve hızlı işlemler ---------- */
+  denetciYaz(o) {
+    const el = $('#gelDenetci'); if (!el || el.hidden) return;
+    const v = o.etkilesim.hedefCanli && !o.etkilesim.hedefCanli.olu ? o.etkilesim.hedefCanli : null, h = v ? null : this.bakilan(o);
+    let m;
+    const satir = (a, b) => `<div><dt>${a}</dt><dd>${b}</dd></div>`;
+    if (v) {
+      const T = v.tur, P = v.konum;
+      m = `<header><small>Bakılan canlı</small><b>${esc(v.ad || T.ad)}</b><span class="gelEtiket ${T.dusman || v.ofkeli ? 'eksik' : 'calisiyor'}">${T.dusman ? 'Düşman' : v.ofkeli ? 'Öfkeli' : v.evcil ? 'Evcil' : 'Barışçıl'}</span></header>
+        <div class="gelIlerleme ince"><i style="width:${Math.max(0, v.can / T.can * 100).toFixed(0)}%"></i></div>
+        <dl>${satir('Can', `${Math.ceil(v.can)} / ${T.can}`)}${satir('Tür', esc(v.turAd))}${satir('Konum', `${P.x.toFixed(1)}, ${P.y.toFixed(1)}, ${P.z.toFixed(1)}`)}${satir('Uzaklık', o.oyuncu.konum.distanceTo(P).toFixed(1) + ' blok')}${v.yavru > 0 ? satir('Yaş', 'yavru') : ''}${v.sahip ? satir('Sahibi', esc(v.sahip)) : ''}</dl>
+        <div class="gelDugmeler"><button type="button" data-dc="iyilestir">İyileştir</button><button type="button" data-dc="oldur" class="tehlike">Öldür</button><button type="button" data-dc="kaldir">Kaldır</button><button type="button" data-dc="dogur">Bir tane daha doğur</button></div>`;
+    } else if (h) {
+      const b = BLOKLAR[h.id], es = this.blokEsyasi(h.id), anahtar = h.x + ',' + h.y + ',' + h.z;
+      let ek = '';
+      if (b.elektrik) {
+        const kk = kokAnahtari(b, h.x, h.y, h.z), v2 = o.elektrik ? o.elektrik.bilgi(anahtar) : o.ag && o.ag.enerjiIste ? o.ag.enerjiIste(anahtar) : null, e = enerjiMetni(b, v2);
+        ek = `<h5>Elektrik</h5><div class="gelOzet">${e.durum ? `<span class="gelEtiket ${e.durum}">${DURUM_AD[e.durum]}</span>` : ''}${e.satirlar.map(l => `<div>${l}</div>`).join('')}${e.oran == null ? '' : `<div class="gelIlerleme ince"><i style="width:${(e.oran * 100).toFixed(1)}%"></i></div>`}</div>` +
+          (b.cihaz ? satir('Kök hücre', kk) : '');
+      }
+      m = `<header><small>Bakılan blok</small><b>${esc(b.ad)}</b><span class="gelEtiket">#${h.id}</span></header>
+        <dl>${satir('Konum', `${h.x}, ${h.y}, ${h.z}`)}${satir('Sertlik', b.sertlik < 0 ? 'kırılmaz' : String(b.sertlik).replace('.', ','))}${satir('Alet', b.alet ? { kazma: 'Kazma', balta: 'Balta', kurek: 'Kürek', kilic: 'Kılıç', makas: 'Makas' }[b.alet] + (b.seviye ? ` (${b.seviye}. seviye)` : '') : 'gerekmez')}${satir('Eşyası', esc(ESYALAR[es] ? ESYALAR[es].ad : '-'))}${b.cihaz ? satir('Cihaz', `${CIHAZ[b.cihaz].w} × ${CIHAZ[b.cihaz].d} × ${CIHAZ[b.cihaz].h}, yön ${['kuzey', 'doğu', 'güney', 'batı'][b.yon]}`) : ''}</dl>${ek}
+        <div class="gelDugmeler"><button type="button" data-dc="ver">Eşyasını ver</button><button type="button" data-dc="kir" class="tehlike">Kır</button><button type="button" data-dc="kopyala">Konumu kopyala</button></div>`;
+    } else m = `<header><small>Denetçi</small><b>Hedef yok</b></header><p class="gelNot">Pencere açılmadan önce bakılan blok ya da canlı burada gösterilir; 5 blok içinde bir hedefe bakılmalıdır.</p>`;
+    if (this.son.denetci !== m) { this.son.denetci = m; el.innerHTML = m; }
+  }
+  denetciTikla(e) {
+    const b = e.target.closest('button[data-dc]'), o = this.oyun(); if (!b || !o) return;
+    const a = b.dataset.dc, v = o.etkilesim.hedefCanli, h = this.bakilan(o);
+    if (['iyilestir', 'oldur', 'kaldir', 'kir'].includes(a) && !this.izin(o)) return;
+    if (a === 'iyilestir' || a === 'oldur' || a === 'kaldir') {
+      if (!v || v.olu) return;
+      if (o.istemci) { this.mesaj('Çok oyunculu istemcide canlıları sunucu yönetir.', 'hata'); return; }
+      if (a === 'iyilestir') v.can = v.tur.can;
+      else if (a === 'oldur') o.varliklar.hasarVer(v, 9999, null, { sessiz: true });
+      else { o.varliklar.kaldir(v); o.etkilesim.hedefCanli = null; }
+      this.mesaj({ iyilestir: 'Canlı iyileştirildi.', oldur: 'Canlı öldürüldü.', kaldir: 'Canlı kaldırıldı.' }[a], 'tamam'); this.gecmisEkle({ m: `${v.tur.ad}: ${a}` });
+    } else if (a === 'dogur' && v) this.k(`dogur ${v.turAd} 1`);
+    else if (a === 'ver' && h) this.k(`ver ${this.blokEsyasi(h.id)} ${this.adet}`);
+    else if (a === 'kir' && h) { o.etkilesim.kir({ ...h }); this.mesaj(`${BLOKLAR[h.id].ad} kırıldı.`, 'tamam'); this.gecmisEkle({ m: `${BLOKLAR[h.id].ad} kırıldı` }); }
+    else if (a === 'kopyala' && h) { const t = `${h.x} ${h.y} ${h.z}`; if (navigator.clipboard) navigator.clipboard.writeText(t).catch(() => {}); this.mesaj(`Konum panoya kopyalandı: ${t}`, 'tamam'); }
+    this.ses.tik(); this.son.denetci = null; this.denetciYaz(o);
+  }
 
   /* ---------- Parça sınırı çizgileri ---------- */
   sinirAyarla(acik) {
@@ -515,6 +662,7 @@ export class GelistiriciPenceresi {
       olc('Kare hızı', isNaN(fps) ? '—' : fps + ' FPS', isNaN(fps) ? '' : fps < 25 ? 'kotu' : fps < 45 ? 'orta' : 'iyi') + olc('Can / Açlık', `${o.hayatta.can / 2} / ${o.hayatta.aclik / 2}`) +
       olc('Vücut ısısı', o.hayatta.vucut.toFixed(1).replace('.', ',') + ' °C', o.hayatta.vucut < 35.5 || o.hayatta.vucut > 38.5 ? 'kotu' : ''), true);
     if (S === 'hayatta') yaz('#gelIsi', `Vücut ${o.hayatta.vucut.toFixed(1).replace('.', ',')} °C · hissedilen ${o.hayatta.hissedilen.toFixed(1).replace('.', ',')} °C · Kanlı Ay ${o.gok && o.gok.kanliAyMi(o) ? 'sürüyor' : 'yok'}`);
+    this.denetciYaz(o);
     if (S === 'bilgi') { this.tabloYaz(o); this.grafikCiz(); }
     else if (S === 'elektrik') this.elektrikYaz(o);
     else if (S === 'canli') this.sayimYaz(o);

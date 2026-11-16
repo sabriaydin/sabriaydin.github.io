@@ -152,18 +152,24 @@
     <aside class="gelYan">
       <div class="gelMarka"><span class="gelLogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></svg></span><div><b>Geliştirici Modu</b><small id="gelSurum"></small></div></div>
       <nav class="gelSekmeler" id="gelSekme" aria-label="Geliştirici sekmeleri"></nav>
-      <div class="gelYanAlt"><span><kbd>F9</kbd> Kapat</span><span><kbd>F8</kbd> Konsol</span><span><kbd>Sağ tık</kbd> Sabitle</span></div>
+      <div class="gelYanAlt"><span><kbd>F9</kbd> Kapat</span><span><kbd>F8</kbd> Konsol</span><span><kbd>Alt 1-9</kbd> Sekme</span><span><kbd>Sağ tık</kbd> Sabitle</span></div>
     </aside>
     <section class="gelAna">
       <header class="gelUst">
         <div class="gelUstBaslik"><h2 id="gelBaslikMetin">Geliştirici Modu</h2><span id="gelAltBaslik"></span></div>
-        <label class="gelAra"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="gelGenelAra" placeholder="Tüm işlemlerde ara" autocomplete="off"><kbd>Ctrl F</kbd></label>
+        <label class="gelAra"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input type="search" id="gelGenelAra" placeholder="İşlem ara · ↑↓ seç · Enter çalıştır" autocomplete="off"><kbd>Ctrl F</kbd></label>
         <span id="gelDurum" class="gelRozet"></span>
+        <button type="button" class="gelUstDugme" id="gelDenetciDugme" title="Denetçi: bakılan blok ya da canlı ve hızlı işlemler" aria-label="Denetçi"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15"/></svg></button>
+        <button type="button" class="gelUstDugme" id="gelYasla" title="Kenara yasla: pencere sağa yaslanır, oyun görünür kalır" aria-label="Kenara yasla"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M12 9l3 3-3 3M8 12h7"/></svg></button>
         <button type="button" class="gelKapat" id="gelKapat" aria-label="Kapat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </header>
       <div id="gelCanliSerit" class="gelCanliSerit"></div>
-      <div id="gelIcerik"></div>
-      <footer class="gelAltBar"><div id="gelMesaj" class="gelMesaj"></div></footer>
+      <div class="gelOrta">
+        <div id="gelIcerik"></div>
+        <aside id="gelDenetci" class="gelDenetci" hidden></aside>
+      </div>
+      <footer class="gelAltBar"><div id="gelMesaj" class="gelMesaj"></div><button type="button" id="gelGecmisDugme" class="gelGecmisDugme" title="İşlem geçmişi">Geçmiş <b id="gelGecmisSay">0</b></button></footer>
+      <div id="gelGecmis" class="gelGecmis" hidden></div>
     </section>
   </div>
 </div>
@@ -318,6 +324,7 @@
     <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
     <label class="secim"><input type="checkbox" id="aIsi"> Vücut ısısı (soğuk ve sıcak etkileri)</label>
     <label class="secim"><input type="checkbox" id="aBakilan"> Bakılan nesnenin adını göster</label>
+    <label class="secim"><input type="checkbox" id="aOnizleme"> Yerleştirme önizlemesi (cihazlar ve yönlü bloklar; R tuşu yönü çevirir)</label>
     <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
     <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
     <label class="secim"><input type="checkbox" id="aKonsol"> Geliştirici konsolu (F8)</label>
@@ -341,6 +348,7 @@
           <dt>Sağ tık</dt><dd>Blok koyma, yeme, içme, toplama, masa ve fırını açma, kapı açma, hayvan besleme</dd>
           <dt>E</dt><dd>Etkileşim: kapı, sandık, masa, fırın, örs, tencere, yatak, köylü, tekne, sandalye, kol, düğme, müzik kutusu; evcil hayvanı oturtma, ata binme / inme</dd>
           <dt>1-9 / Fare tekerleği</dt><dd>Hızlı erişim çubuğu</dd>
+          <dt>R</dt><dd>Elde tutulan cihazın ya da yönlü bloğun (merdiven, sandalye, kapı, kovan…) konulacağı yönü 90° çevirir; konulacağı yer yarı saydam önizlemeyle gösterilir</dd>
           <dt>Q</dt><dd>Envanter ve üretim</dd>
           <dt>J</dt><dd>Görev günlüğü</dd>
           <dt>L</dt><dd>Başarımlar</dd>
@@ -395,7 +403,7 @@
           <li><b>İstatistikler</b>: oynama süresi, hayatta kalınan gün, yenilen canavar, yürünen yol ve diğerleri Başarımlar penceresinin (L) başında gösterilir.</li>
           <li><b>Zorluk</b>: yeni dünya oluşturulurken Kolay, Normal, Zor ya da Hardcore seçilir; Kanlı Ay, meteor sıklığı ve vücut ısısı hızı "Denge ayarları"ndan düzenlenir. Duraklatma menüsündeki <b>Dünya Ayarları</b> ile sonradan değiştirilebilir. Hardcore'da tek can vardır: ölünce dünya sona erer ve yalnızca izleyici olarak dolaşılır.</li>
           <li><b>Bakılan nesne</b>: bakılan bloğun adı sol alt köşede görünür. Ayarlardan kapatılabilir.</li>
-          <li><b>Elektrik</b>: güneş paneli, rüzgâr ve su türbini enerji üretir; bataryalar depolar; lamba, elektrikli ocak ve ısıtıcı harcar. Bitişik bloklar ve Elektrik Kablosu ağı oluşturur, Şalter (sağ tık) ağı keser. Elektrikli bir bloğa bakılınca ağın durumu sol altta görünür.</li>
+          <li><b>Elektrik</b>: güneş paneli (2 × 1), rüzgâr türbini (2 × 2 taban, 8 blok yükseklik) ve su çarkı (3 × 3) enerji üretir; bataryalar depolar; lamba, elektrikli ocak ve ısıtıcı harcar. Cihazlar gerçek boyutlarındadır: kurulurken önizleme gösterilir, R tuşu yönü çevirir, cihazların üstüne blok konmaz. Bitişik bloklar ve Elektrik Kablosu ağı oluşturur, Şalter (sağ tık) ağı keser. Elektrikli bir bloğa bakılınca ağın durumu sol altta görünür.</li>
           <li><b>Fotoğraf modu</b>: F1 göstergeleri ve eli gizler, F2 ekran görüntüsünü PNG olarak kaydeder.</li>
           <li><b>Envanter</b>: "Sırala" çantayı birleştirip türüne göre dizer. Sandıkta "Tümünü al", "Çantayı boşalt", "Benzerlerini koy" ve "Sırala" düğmeleri bulunur.</li>
           <li><b>Çok oyunculu sohbet komutları</b>: /f &lt;ad&gt; &lt;mesaj&gt; özel mesaj, /oyuncular, /konum, /ben, /zar; sunucu /at &lt;ad&gt; ile oyuncu çıkarabilir. Bağlantı koparsa oyun 5 saniye sonra kendiliğinden yeniden bağlanmayı dener.</li>

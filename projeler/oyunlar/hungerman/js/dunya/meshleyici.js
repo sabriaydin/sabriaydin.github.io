@@ -85,7 +85,7 @@ export function meshle(P) {
       if (SIVI[id]) sivi(P, gok, i, x, y, z, su);
     } else if (ciz === C_SIVI) sivi(P, gok, i, x, y, z, su);
     else if (ciz === C_LAV) sivi(P, gok, i, x, y, z, op, true);
-    else if (ciz === C_SEKIL) sekil(P, gok, i, id, x, y, z, op);
+    else if (ciz === C_SEKIL) { if (!GORUNMEZ[id]) sekil(P, gok, i, id, x, y, z, op); }   // 0.25.0: cihaz hücreleri ayrıca çizilir
   }
   return { opak: op.bitir(), su: su.bitir() };
 }
@@ -167,6 +167,8 @@ function sekil(P, gok, i, id, x, y, z, T) {
 
 /* 0.23.0: rüzgârda salınan bloklar: yapraklar ve çapraz çizilen bitkiler (meşale ve ateş hariç) */
 const YAPRAK = new Uint8Array(BLOK_UST), SALLANIR = new Uint8Array(BLOK_UST);
+const GORUNMEZ = new Uint8Array(BLOK_UST);
+for (const b of BLOKLAR) if (b && b.gorunmez) GORUNMEZ[b.id] = 1;
 for (const b of BLOKLAR) if (b) {
   const d = Array.isArray(b.dok) ? b.dok.join(' ') : typeof b.dok === 'object' && b.dok ? Object.values(b.dok).join(' ') : String(b.dok || '');
   if (/yaprak/.test(d) && b.cizim === C_KUP) YAPRAK[b.id] = 1;

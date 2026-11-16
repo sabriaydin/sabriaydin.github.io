@@ -567,7 +567,7 @@ const RESSAM = {
   /* 0.24.0: elektrik blokları */
   gunes_panel: p => { p.doldur('#1d3a6e', 0.05); const k = hex('#c8ccd4'), h = hex('#2c5494'), a = hex('#6fa0e0'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); } for (let i = 1; i < 15; i++) { p.set(i, 5, karis(k, 0.7)); p.set(i, 10, karis(k, 0.7)); p.set(5, i, karis(k, 0.7)); p.set(10, i, karis(k, 0.7)); } for (let y = 1; y < 15; y++) for (let x = 1; x < 15; x++) if (x % 5 && y % 5 && (x + y) % 4 === 0) p.set(x, y, h); for (const [x, y] of [[2, 2], [3, 2], [7, 7], [8, 7], [12, 12], [12, 2]]) p.set(x, y, a); },
   panel_yan: p => { p.doldur('#9aa0a8', 0.05); const k = hex('#6c727a'); for (let i = 0; i < D; i++) { p.set(i, 0, karis(k, 1.2)); p.set(i, 15, k); } for (let x = 2; x < 14; x += 4) for (let y = 4; y < 12; y++) p.set(x, y, karis(k, 0.95)); },
-  turbin_govde: p => { p.doldur('#e6e8ea', 0.04); const k = hex('#b8bcc2'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, karis(k, 0.85)); } for (let x = 0; x < D; x++) p.set(x, 7, karis(k, 0.95)); p.set(3, 4, hex('#e85a3a')); p.set(4, 4, hex('#e85a3a')); },
+  turbin_govde: p => { p.doldur('#e8eaec', 0.025); const k = hex('#cfd3d8'); for (let i = 0; i < D; i++) p.set(i, 15, k); for (let i = 0; i < 6; i++) p.set(Math.floor(p.r() * 16), Math.floor(p.r() * 15), hex('#dde0e4')); },
   turbin_pervane: p => pervane(p, 0),
   su_carki: p => suCarki(p, 0),
   turbin_ust: p => { kalas(p, '#8a6a42'); const k = hex('#5a5e66'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(0, i, k); p.set(i, 15, k); p.set(15, i, k); } for (let y = 6; y < 10; y++) for (let x = 6; x < 10; x++) p.set(x, y, karis(k, 1.2)); },
@@ -670,8 +670,6 @@ const CANLI = {
     for (let i = 0; i < h; i++) { const y = 5 - i, rel = i / h; for (const x of [7, 8]) if (!(rel > 0.6 && h1(x + i, k) < 0.4)) p.set(x, y, hex(ALEV[Math.min(3, Math.floor((1 - rel) * 1.2 + (x === 8 ? 0.8 : 0) + h1(x * 5 + i, k) * 0.8))].replace('#e8541a', '#ffe680'))); }
     if (h1(9, k) < 0.5) p.set(h1(11, k) < 0.5 ? 6 : 9, 4 - Math.floor(h1(5, k) * 2), hex('#ffcf4a'));
   }),
-  turbin_pervane: (p, k) => pervane(p, k * 0.22),   // 0.24.0
-  su_carki: (p, k) => suCarki(p, k * 0.12),
   lav: (p, k) => { RESSAM.lav(p); kaydir(p, Math.floor(k / 4) % 16, Math.floor(k / 8) % 16); },
   magma: (p, k) => { RESSAM.magma(p); const t = (Math.sin(k * 0.4) + 1) * 0.08; for (let i = 0; i < D * D; i++) { const j = i * 4; if (p.d[j] > 180) { p.d[j + 1] = Math.min(255, p.d[j + 1] * (1 + t)); } } }
 };
@@ -887,6 +885,11 @@ const MAL_CIZ = {
   turta: () => p => { cokgen(p, [[2, 8], [5, 5], [11, 5], [14, 8], [12, 12], [4, 12]], '#d8a050', 0.06); cokgen(p, [[4, 8], [6, 6], [10, 6], [12, 8], [10, 10], [6, 10]], '#d8781c', 0.08); cizgi(p, 5, 8, 11, 8, [240, 190, 110]); },
   omlet: () => p => { cokgen(p, [[2, 8], [5, 5], [11, 5], [14, 8], [11, 11], [5, 11]], '#f6d84a', 0.08); for (const [x, y] of [[6, 7], [10, 8], [8, 9]]) p.set(x, y, [80, 150, 50]); p.set(9, 6, [255, 240, 160]); },
   /* 0.22.0 */
+  /* 0.25.0: çok bloklu cihazların simgeleri */
+  cihazGunes: () => p => { cokgen(p, [[1, 7], [11, 3], [15, 5], [5, 10]], '#1d3a6e', 0.04); const k = [200, 204, 212]; cizgi(p, 1, 7, 11, 3, k); cizgi(p, 5, 10, 15, 5, k); cizgi(p, 1, 7, 5, 10, k); cizgi(p, 11, 3, 15, 5, k); cizgi(p, 6, 5, 10, 8, [80, 120, 190]); cizgi(p, 3, 8, 13, 4, [80, 120, 190]); cizgi(p, 4, 10, 4, 14, [150, 154, 160]); cizgi(p, 12, 7, 12, 14, [150, 154, 160]); cizgi(p, 2, 14, 14, 14, [120, 124, 130]); },
+  cihazRuzgar: () => p => { const g = [236, 238, 240], k = [180, 186, 194]; cizgi(p, 8, 6, 7, 15, g); cizgi(p, 9, 6, 9, 15, k); cizgi(p, 6, 15, 10, 15, [130, 130, 130]); for (const [x, y] of [[8, 0], [14, 9], [2, 9]]) { cizgi(p, 8, 5, x, y, g); } cokgen(p, [[7, 4], [10, 4], [10, 7], [7, 7]], '#d8dce2', 0.02); p.set(8, 5, [120, 126, 134]); },
+  cihazSu: () => p => { dokuBoya(p, T.su_carki, [[1, 1, 15, 15]]); for (let x = 0; x < 16; x++) { p.set(x, 14, karis(hex('#3a6ad8'), 0.9 + (x % 3) * 0.08)); p.set(x, 15, karis(hex('#2a52b0'), 1)); } },
+  cihazBatarya: e => p => BLOK_SIMGE.batarya(p, null, e.boyut),
   devre: () => p => { cokgen(p, [[2, 3], [14, 3], [14, 13], [2, 13]], '#2f7a3e', 0.05); const y = [232, 192, 64]; cizgi(p, 3, 6, 8, 6, y); cizgi(p, 8, 6, 8, 11, y); cizgi(p, 8, 11, 13, 11, y); cizgi(p, 3, 10, 5, 10, y); for (let y2 = 5; y2 < 9; y2++) for (let x = 10; x < 13; x++) p.set(x, y2, [30, 32, 36]); p.set(4, 4, [210, 210, 220]); p.set(13, 5, [210, 210, 220]); },
   bobin: () => p => { for (let y = 3; y < 14; y++) for (let x = 4; x < 12; x++) p.set(x, y, karis(hex('#d27b40'), (y % 2 ? 0.8 : 1.1) * (x < 6 ? 1.15 : x > 9 ? 0.8 : 1))); for (let x = 3; x < 13; x++) { p.set(x, 2, [90, 90, 96]); p.set(x, 14, [70, 70, 76]); } cizgi(p, 7, 14, 7, 15, [210, 120, 70]); },
   yildiz: () => p => { for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * Math.PI * 2 / 5; kalinCizgi(p, [[8, 8], [Math.round(8 + Math.cos(a) * 6), Math.round(8 + Math.sin(a) * 6)]], i % 2 ? '#ffd84a' : '#fff0a0'); } for (const [x, y] of [[7, 7], [8, 7], [7, 8], [8, 8]]) p.set(x, y, [255, 255, 240]); p.set(13, 3, [160, 220, 255]); p.set(2, 12, [160, 220, 255]); },
@@ -932,7 +935,7 @@ const BLOK_SIMGE = {
   ors: (p, id) => dokuBoya(p, YUZ_DOKU[id * 6], [[1, 3, 15, 7], [6, 7, 10, 10, 0.85], [4, 10, 12, 11, 0.8], [3, 11, 13, 14, 0.9]]),
   gunes: p => { dokuBoya(p, T.gunes_panel, [[1, 4, 15, 8]]); dokuBoya(p, T.panel_yan, [[1, 8, 15, 9, 0.8]]); dokuBoya(p, T.demir_cubuk, [[7, 9, 9, 14]]); dokuBoya(p, T.panel_yan, [[4, 14, 12, 15]]); },
   ruzgar: p => { dokuBoya(p, T.demir_cubuk, [[7, 9, 9, 15]]); dokuBoya(p, T.turbin_govde, [[5, 6, 12, 9]]); dokuBoya(p, T.turbin_pervane, [[0, 0, 16, 16]]); },
-  batarya: (p, id) => { const k = [[3, 9], [2, 13], [1, 15]][BLOKLAR[id].boyut], a = k[0], h = k[1]; dokuBoya(p, T.batarya_yan4, [[a, 16 - h, 16 - a, 16]]); dokuBoya(p, T.demir_cubuk, [[a + 2, 15 - h, a + 4, 16 - h]]); dokuBoya(p, T.salter_a, [[12 - a, 15 - h, 14 - a, 16 - h]]); },
+  batarya: (p, id, boyut) => { const k = [[3, 9], [2, 13], [1, 15]][boyut ?? BLOKLAR[id].boyut], a = k[0], h = k[1]; dokuBoya(p, T.batarya_yan4, [[a, 16 - h, 16 - a, 16]]); dokuBoya(p, T.demir_cubuk, [[a + 2, 15 - h, a + 4, 16 - h]]); dokuBoya(p, T.salter_a, [[12 - a, 15 - h, 14 - a, 16 - h]]); },
   ekablo: p => { dokuBoya(p, T.ekablo, [[1, 6, 15, 10]]); for (let x = 1; x < 15; x += 4) p.set(x, 6, [232, 192, 64]); },
   simya: p => { dokuBoya(p, T.parke, [[2, 13, 14, 15]]); dokuBoya(p, T.demir_cubuk, [[7, 2, 9, 13]]); dokuBoya(p, T.simya_sise, [[2, 8, 6, 13], [10, 8, 14, 13]]); }
 };

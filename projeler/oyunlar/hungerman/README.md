@@ -117,6 +117,24 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 25. aşama (0.25.0): Gerçek boyutlu cihazlar, yerleştirme önizlemesi, Geliştirici Modu işlevleri
+- **Çok bloklu cihazlar** (cihazlar.js): üreticiler ve bataryalar gerçek boyutlarındadır; her hücre ayrı bir bloktur, görünüşü ve dönen parçaları ayrı bir modelle çizilir (grafik/cihaz-cizici.js).
+  - Güneş Paneli 2 × 1: ayaklar üstünde öne eğik panel; en çok 10 E/sn, gölgede kalan hücre oranında azalır.
+  - Rüzgâr Türbini 2 × 2 taban, 8 blok yükseklik: beton taban, daralan kule, gövde ve 7 blok çaplı üç kanatlı pervane. En çok 30 E/sn; pervane üretime göre hızlanır. Pervanenin döndüğü alana katı blok konamaz; alan kapanırsa türbin durur.
+  - Su Çarkı 3 × 3: ayaklar, mil, jeneratör ve dönen kepçeli çark; alt sırasına değen her su bloğu için 1,5 E/sn (en çok 16), kışın yarı yarıya. Suyun içine ya da kıyısına kurulur.
+  - Bataryalar: Küçük 1 × 1, Orta 1 × 1 × 2, Büyük 2 × 1 × 2; önlerindeki ışıklı gösterge doluluğu gösterir (çok oyunculuda sunucudan gelir).
+  - Herhangi bir hücre kırılınca bütün cihaz kalkar ve eşyası düşer; seçim çerçevesi bütün cihazı sarar.
+  - Cihazların üstüne blok konmaz; zemin katı ve düz olmalı, cihazın kaplayacağı alan boş olmalıdır.
+- **Yerleştirme önizlemesi ve R tuşu:** elde cihaz ya da yönlü blok (merdiven, sandalye, koltuk, kapı, tuzak kapı, çit kapısı, ters çevirici, geciktirici, kovan, oyma balkabağı) varken konulacağı yer yarı saydam gösterilir: uygunsa yeşil, değilse kırmızı. R tuşu yönü 90° çevirir. Ayarlardan kapatılabilir.
+- 0.24.0'ın tek bloklu üretici ve bataryaları "Eski Elektrik Bloğu" olur; kırılınca yeni cihazın eşyasını verir.
+- **Geliştirici Modu işlevleri:**
+  - Denetçi (sağ panel): bakılan blok (kimlik, konum, sertlik, alet, eşyası, elektrik ağı) ya da canlı (can, tür, konum, uzaklık); hızlı işlemler: eşyasını ver, kır, konumu kopyala; canlıyı iyileştir, öldür, kaldır, bir tane daha doğur.
+  - Kenara yaslama: pencere sağa yaslanır, oyun görünür kalır; sekmeler simge çubuğuna dönüşür.
+  - İşlem geçmişi: çalıştırılan komutlar ve sonuçları saatleriyle listelenir; her komut tek tıkla tekrar çalıştırılır.
+  - Arama: sonuçlarda ↑ ↓ ile gezinilir, Enter seçili işlemi çalıştırır; sekme adı da aranır. Alt + 1-9 sekmeler arasında geçer.
+  - Durum kayıtları (Oyuncu sekmesi): konum, bakış, can, açlık, envanter, zaman ve hava üç kayıt yuvasına alınır ve geri yüklenir.
+  - Eşya verme: özel adet (1-999), son verilen eşyalar, Mekanik ve Elektrik kategorileri; bakılan cihazın eşyası doğru verilir.
+
 ## 24. aşama (0.24.0): Elektrik sistemi ve yeni Geliştirici Modu
 - **Elektrik ağı:** elektrikli bloklar birbirine bitişik olunca aynı ağı oluşturur; uzaktaki cihazlar Elektrik Kablosuyla bağlanır. Ağ her 0,5 saniyede hesaplanır. Birimler: üretim ve tüketim E/sn, depo E.
 - **Üreticiler:** Güneş Paneli (gündüz en çok 5 E/sn; üstü açık olmalı, bulut ve yağış azaltır), Rüzgâr Türbini (en çok 12 E/sn; yükseklik, rüzgâr ve fırtınayla artar, pervanesi döner), Su Türbini (yanındaki her su bloğu için 2 E/sn, en çok 8; kışın yarı yarıya; çarkı döner).

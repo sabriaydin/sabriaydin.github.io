@@ -336,6 +336,16 @@ export class SunucuOyun {
     this.anlik -= dt;
     if (this.anlik <= 0) { this.anlik = ANLIK; this.anlikGonder(); }
     this.uykuKontrol();
+    /* 0.25.0: batarya doluluğu değişince istemcilere gönderilir (göstergeler için) */
+    this.boSayac = (this.boSayac || 0) - dt;
+    if (this.boSayac <= 0 && o.elektrik && this.istemciler.size) {
+      this.boSayac = 1.5;
+      this.boTur = ((this.boTur || 0) + 1) % 8;
+      if (!this.boTur) this.boSon = null;   // ara sıra hepsi yeniden gönderilir (yeni katılanlar için)
+      const son = this.boSon || (this.boSon = new Map()), l = [];
+      for (const [k, r] of o.elektrik.oranlar) if (son.get(k) !== r) { son.set(k, r); l.push([k, r]); }
+      if (l.length) this.yay({ t: 'bo', l });
+    }
   }
 
   anlikGonder() {

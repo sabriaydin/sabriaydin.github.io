@@ -23,6 +23,7 @@ import { ISTASYON_BLOK, ELOCAK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
 import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
+import { CihazCizici } from './grafik/cihaz-cizici.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
 import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
@@ -158,7 +159,7 @@ function ayarFormu() {
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
   bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb'); bag('#aIsi', 'vucutIsisi', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb');
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aKonsol', 'konsol', null, 'cb'); bag('#aIsi', 'vucutIsisi', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
 }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
@@ -258,6 +259,8 @@ addEventListener('keydown', e => {
     if (!kilitli) return;
     if (e.code.startsWith('Digit')) { const n = +e.code.slice(5); if (n >= 1 && n <= 9) seciliAyarla(n - 1); }
     if (e.code === 'KeyG') oyun.etkilesim.at(e.shiftKey);
+    /* 0.25.0: R: elde tutulan cihazın ya da yönlü bloğun konulacağı yönü çevirir */
+    if (e.code === 'KeyR' && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { const n = oyun.etkilesim.dondur(); ses.tik(); oyun.hud.bildirim(`Yerleştirme yönü çevrildi (${n * 90}°)`); }
     if (e.code === 'KeyE' && !e.repeat) oyun.etkilesim.etkiles();
     if ((e.code === 'KeyT' || e.code === 'Enter') && oyun.ag) { e.preventDefault(); sohbetAc(); }
     if (e.code === 'F3') $('#hata').hidden = !$('#hata').hidden;
@@ -552,6 +555,8 @@ function oyunBaslat(v) {
     konumlar: () => { const l = oyun.hayatta.olu ? [] : [oyun.oyuncu.konum]; if (oyun.ag && oyun.ag.konumlar) l.push(...oyun.ag.konumlar()); return l; } });
   /* 0.24.0: elektrik ağları tek oyunculuda ve sunucuda hesaplanır */
   dunya.enerjiYukle(v.enerji);
+  oyun.cihazCizici = new CihazCizici(sahne, dunya);   // 0.25.0: çok bloklu cihazların modelleri ve önizleme
+  oyun.bataryaOran = new Map();   // 0.25.0: istemcide sunucudan gelen batarya doluluğu
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
@@ -757,6 +762,7 @@ function oyunBitir() {
   basarimEkrani.temizle();
   oyun.harita.temizle();
   oyun.dusenler.temizle();
+  if (oyun.cihazCizici) { oyun.cihazCizici.temizle(); sahne.sahne.remove(oyun.cihazCizici.grup); }
   oyun.varliklar.temizle();
   oyun.tekneler.temizle(); oyun.fenerler.temizle(); oyun.olta.kaldir();
   oyun.hava.temizle(); ses.yagmurAyarla(0);
@@ -808,7 +814,7 @@ function adim(t) {
   if (o.mevsim !== mev) {
     const ilk = o.mevsim == null;
     o.mevsim = mev; o.dunya.mevsim = mev; o.hava.kis = mev === 3;
-    if (mevsimDokulari(mev)) { sahne.atlasDoku.needsUpdate = true; sahne.elBlokMalzeme.map.needsUpdate = true; o.dusenler.blokMalz.map.needsUpdate = true; }
+    if (mevsimDokulari(mev)) { sahne.atlasDoku.needsUpdate = true; sahne.elBlokMalzeme.map.needsUpdate = true; o.dusenler.blokMalz.map.needsUpdate = true; if (o.cihazCizici) o.cihazCizici.map.needsUpdate = true; }
     if (!ilk) o.hud.bildirim(`${MEVSIMLER[mev]} başladı.${mev === 3 ? ' Ekinler yavaş büyür, sular donar.' : mev === 0 ? ' Ekinler hızlı büyür, çiçekler açar.' : ''}`);
   }
   o.dunya.guncelle(p.x, p.z);
@@ -976,7 +982,7 @@ function adim(t) {
   }
   o.isik += ((o.isikHedef || 1) - o.isik) * Math.min(1, dt * 4);
   /* 0.23.0: hareketli ateş, meşale ve lav dokuları; yakındaki ateşlerden kıvılcım ve duman */
-  if (canliDokular(o.sure)) { sahne.atlasDoku.needsUpdate = true; sahne.elBlokMalzeme.map.needsUpdate = true; o.dusenler.blokMalz.map.needsUpdate = true; }
+  if (canliDokular(o.sure)) { sahne.atlasDoku.needsUpdate = true; sahne.elBlokMalzeme.map.needsUpdate = true; o.dusenler.blokMalz.map.needsUpdate = true; if (o.cihazCizici) o.cihazCizici.map.needsUpdate = true; }
   o.atesSayac = (o.atesSayac || 0) - dt;
   if (o.atesSayac <= 0 && calisiyor) {
     o.atesSayac = 0.12;
@@ -1006,6 +1012,12 @@ function adim(t) {
   else if (o.etkilesim.hedefTekne) o.hud.bakilan('Tekne');
   else if (o.etkilesim.hedef) o.hud.bakilan((BLOKLAR[o.etkilesim.hedef.id] || {}).ad || null);
   else o.hud.bakilan(null);
+  /* 0.25.0: cihaz modelleri ve yerleştirme önizlemesi */
+  if (o.cihazCizici) {
+    o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure },
+      k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k)));
+    o.cihazCizici.onizleme(ayar.onizleme !== false && kilitli && !gelPencere.acik && !o.hayatta.olu && !o.fotoModu && !o.izleyici ? o.etkilesim.onizlemeBilgisi() : null);
+  }
   /* 0.24.0: bakılan elektrik bloğunun ağ bilgisi */
   const eh = o.etkilesim.hedef, ebl = eh && !hc && !o.fotoModu && (kilitli || dokun.aktif) ? BLOKLAR[eh.id] : null;
   if (ebl && ebl.elektrik) {

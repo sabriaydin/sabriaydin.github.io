@@ -3,6 +3,7 @@ import { THREE } from '../grafik/sahne.js';
 import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
+import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
 
 const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
@@ -19,6 +20,7 @@ export class Etkilesim {
     this.solBekleme = 0;
     this.vurus = 0;
     this.kazmaSesSayac = 0;
+    this.donus = 0;   // 0.25.0: R tuşuyla eklenen yön (0-3)
     this.saldiriBekleme = 0; this.germe = 0; this.okUyari = 0; this.hedefCanli = null; this.hedefTekne = null; this.sagOnceki = false;
   }
 
@@ -36,7 +38,7 @@ export class Etkilesim {
         /* Biçimli bloklar: kutularına isabet aranır (açık kapının boşluğundan geçilebilir) */
         if (SEKIL[id]) {
           const k = hucreKutulari(this.dunya, x, y, z, id), r = kutuIsin(goz, yon, x, y, z, k, erisim);
-          if (r) return { x, y, z, id, nx: r.nx, ny: r.ny, nz: r.nz, t: r.t, py: goz.y + yon.y * r.t - y, kutu: sinirKutusu(k) };
+          if (r) return { x, y, z, id, nx: r.nx, ny: r.ny, nz: r.nz, t: r.t, py: goz.y + yon.y * r.t - y, kutu: BLOKLAR[id].cihaz ? this.cihazKutusu(BLOKLAR[id], x, y, z) : sinirKutusu(k) };
         } else if (!BITKI[id] && !(BLOKLAR[id].mesale && CIZIM[id] !== C_KUP) || this.bitkiIsabet(goz, yon, x, y, z)) return { x, y, z, id, nx, ny, nz, t, py: goz.y + yon.y * t - y };
       }
       if (tx < ty && tx < tz) { x += sx; t = tx; tx += tdx; nx = -sx; ny = 0; nz = 0; }
@@ -259,6 +261,7 @@ export class Etkilesim {
   kir(h) {
     const b = BLOKLAR[h.id];
     if (this.solBekleme > 0 && b.sertlik === 0) return;
+    if (b.cihaz) { this.cihazKir(h, b); return; }
     const d = this.dunya, r = Math.random;
     const ust = d.blok(h.x, h.y + 1, h.z);
     /* Yan veya üstte su varsa boşluk suyla dolar */
@@ -487,6 +490,16 @@ export class Etkilesim {
     }
     /* 0.22.0: Eve Dönüş Tılsımı */
     if (e.alet && e.alet.tur === 'tilsim') { if (this.arayuz.tilsim) this.arayuz.tilsim(); return true; }
+    /* 0.25.0: çok bloklu cihaz kurma */
+    if (e.tur === 'cihaz' && h) {
+      const y = this.cihazYeri(e.cihaz, h);
+      if (!y) return false;
+      if (!y.gecerli) { this.arayuz.bildirim(y.neden); return true; }
+      const C = CIHAZ[e.cihaz], d = this.dunya;
+      for (const [x, yy, z, i] of y.hucreler) d.blokKoy(x, yy, z, C.taban + y.yon * C.n + i);   // kök hücre önce konur
+      env.seciliAzalt(1); this.istat('konulan'); this.ses.koy(C.ses);
+      return true;
+    }
     /* Blok koyma */
     if (e.tur === 'blok' && h) {
       let id = e.blok;
@@ -505,21 +518,14 @@ export class Etkilesim {
         if (mb0 && mb0.sekil === 'yarim' && mb0.taban === id) return this.koyVeHarca(x, y, z, mb0.cift, env);
       }
       /* Biçimli blokların yönü ve durumu */
-      const f = this.bakisYonu4();
-      if (eb.sekil === 'merdiven' || eb.sekil === 'sandalye' || eb.sekil === 'koltuk') id = eb.taban + f;
+      const f = (this.bakisYonu4() + this.donus) % 4, yid = this.yonluId(eb, f);
+      if (yid != null && eb.sekil !== 'kapi') id = yid;
       else if (eb.sekil === 'tablo') {
         const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
         if (h.ny !== 0 || yi < 0 || !(KATI[h.id] && OPAK[h.id])) { this.arayuz.bildirim('Tablo katı bir duvarın yan yüzüne asılır.'); return true; }
         id = eb.taban + yi;
       }
       else if (eb.sekil === 'yarim') id = eb.taban + (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? 1 : 0);
-      else if (eb.yuzlu) id = eb.taban + f;   // heykel başı: yüzü oyuncuya döner
-      else if (eb.sekil === 'citKapi') id = 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
-      else if (eb.sekil === 'tuzak') id = 121 + f * 2;
-      else if (eb.mekanik === 'ters') id = 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir
-      else if (eb.mekanik === 'gecik') id = 523 + f * 8;   // 0.20.0
-      else if (eb.sekil === 'ruzgar') id = 597 + ((f + 2) % 4);   // 0.24.0: pervane oyuncuya bakar
-      else if (eb.kovan) id = 569 + ((f + 2) % 4) * 6;   // 0.21.0: arı kovanının girişi oyuncuya bakar
       else if (eb.kamis && !this.kamisYeri(x, y, z)) { this.arayuz.bildirim('Şeker kamışı suya komşu kum, toprak ya da çimen üstüne veya başka bir kamışın üstüne konur.'); return true; }
       else if (eb.sekil === 'tirmanma') {
         const yi = YONLER.findIndex(([a, b]) => a === -h.nx && b === -h.nz);
@@ -550,6 +556,10 @@ export class Etkilesim {
         if (id === 36 || id === 153 ? !KATI[alt] : !TOPRAK.has(alt)) { this.arayuz.bildirim('Bu bitki toprak veya çimen üstüne dikilir.'); return true; }
         if (SIVI[mevcut]) return false;
       }
+      /* 0.25.0: cihazların üstüne blok konmaz; rüzgâr türbininin pervane alanına katı blok konmaz */
+      const altB = BLOKLAR[alt];
+      if (altB && altB.ustuneKonmaz) { this.arayuz.bildirim(`${altB.ad} üstüne bir şey konamaz.`); return true; }
+      if (KATI[id] && this.pervaneAlaninda(x, y, z)) { this.arayuz.bildirim('Rüzgâr türbininin pervanesi bu alanda döner; buraya blok konamaz.'); return true; }
       if (KATI[id] && this.oyuncu.hucreyiKapliyor(x, y, z)) return false;
       if (!d.blokKoy(x, y, z, id)) return false;
       if (BLOKLAR[id].sandik) this.arayuz.sandikYerlesti(x, y, z);
@@ -558,6 +568,103 @@ export class Etkilesim {
       return true;
     }
     return false;
+  }
+
+  /* 0.25.0: yönlü blokların yöne göre kimliği (yönsüzse null); f: bakış yönü + R ile eklenen dönüş */
+  yonluId(eb, f) {
+    if (eb.sekil === 'merdiven' || eb.sekil === 'sandalye' || eb.sekil === 'koltuk') return eb.taban + f;
+    if (eb.yuzlu) return eb.taban + f;   // heykel başı, oyma balkabağı: yüzü oyuncuya döner
+    if (eb.sekil === 'citKapi') return 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
+    if (eb.sekil === 'tuzak') return 121 + f * 2;
+    if (eb.mekanik === 'ters') return 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir
+    if (eb.mekanik === 'gecik') return 523 + f * 8;   // 0.20.0
+    if (eb.kovan) return 569 + ((f + 2) % 4) * 6;   // 0.21.0: arı kovanının girişi oyuncuya bakar
+    if (eb.sekil === 'kapi') return 88 + f * 4;
+    return null;
+  }
+  /* Elde tutulan eşya R ile döndürülebilir mi */
+  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (e.tur === 'cihaz' || (e.tur === 'blok' && this.yonluId(BLOKLAR[e.blok], 0) != null))); }
+  dondur() { this.donus = (this.donus + 1) % 4; return this.donus; }
+
+  /* 0.25.0: cihazın kurulacağı yer ve kurulabilirliği: { yon, x, y, z (kök), hucreler, gecerli, neden } */
+  cihazYeri(tur, h) {
+    const C = CIHAZ[tur], d = this.dunya;
+    if (!C || !h) return null;
+    let x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
+    if (BLOKLAR[h.id] && BLOKLAR[h.id].degistirilebilir && !BLOKLAR[h.id].cihaz) { x = h.x; y = h.y; z = h.z; }
+    const yon = ((this.bakisYonu4() + 2) % 4 + this.donus) % 4;   // ön yüz oyuncuya bakar
+    const [ox, oz] = dondurXZ(Math.floor((C.w - 1) / 2), Math.floor((C.d - 1) / 2), yon);   // ayak izi hedefe ortalanır
+    const ax = x - ox, az = z - oz, hucreler = cihazHucreleri(C, yon, ax, y, az);
+    const sonuc = (gecerli, neden = '') => ({ cihaz: tur, yon, x: ax, y, z: az, hucreler, gecerli, neden });
+    const ic = new Set(hucreler.map(q => q[0] + ',' + q[1] + ',' + q[2]));
+    let su = 0;
+    for (const [hx, hy, hz, i] of hucreler) {
+      if (hy < 1 || hy >= 126 || !d.yuklu(hx, hz)) return sonuc(false, 'Cihaz bu yüksekliğe sığmaz.');
+      const q = d.blok(hx, hy, hz), qb = BLOKLAR[q];
+      const bos = q === 0 || (qb && qb.degistirilebilir && !qb.cihaz) || (C.elektrik === 'su' && SIVI[q] && q !== 59);
+      if (!bos) return sonuc(false, `${C.ad} için yer yok: ${C.w} × ${C.d} taban ve ${C.h} blok yükseklik gerekir.`);
+      if (this.oyuncu.hucreyiKapliyor(hx, hy, hz)) return sonuc(false, 'Oyuncu cihazın kurulacağı yerde duruyor.');
+      if (this.pervaneAlaninda(hx, hy, hz)) return sonuc(false, 'Burası bir rüzgâr türbininin pervane alanı.');
+      if (Math.floor(i / (C.w * C.d)) !== 0) continue;
+      /* alt sıra: zemin ve su */
+      const alt = d.blok(hx, hy - 1, hz), altB = BLOKLAR[alt];
+      if (altB && altB.ustuneKonmaz) return sonuc(false, `${altB.ad} üstüne bir şey konamaz.`);
+      if (C.elektrik === 'su') {
+        const [fx, fz] = dondurXZ(0, 1, yon);
+        for (const [a, b, c] of [[0, -1, 0], [fx, 0, fz], [-fx, 0, -fz]]) { if (ic.has((hx + a) + ',' + (hy + b) + ',' + (hz + c))) continue; const w = d.blok(hx + a, hy + b, hz + c); if (SIVI[w] && w !== 59) su++; }
+      } else if (!KATI[alt]) return sonuc(false, `${C.ad} düz ve katı bir zemine kurulur.`);
+    }
+    if (C.elektrik === 'su' && !su) return sonuc(false, 'Su çarkının alt kısmı suya değmelidir (çarkı suyun içine ya da kıyısına kurunuz).');
+    if (C.elektrik === 'ruzgar') for (const [px, py, pz] of pervaneHucreleri(yon, ax, y, az)) {
+      if (py >= 127 || KATI[d.blok(px, py, pz)]) return sonuc(false, 'Pervanenin döneceği alan boş olmalıdır (yaklaşık 7 blok çapında).');
+    }
+    return sonuc(true);
+  }
+  /* 0.25.0: seçim kutusu bütün cihazı sarar (hücreye göre) */
+  cihazKutusu(b, x, y, z) {
+    const C = CIHAZ[b.cihaz], [ax, ay, az] = kokKonumu(b, x, y, z), s = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+    for (const k of C.carp) for (const lx of [k[0], k[3]]) for (const lz of [k[2], k[5]]) {
+      const [dx, dz] = dondurXZ(lx - 0.5, lz - 0.5, b.yon), wx = ax + 0.5 + dx - x, wz = az + 0.5 + dz - z;
+      s[0] = Math.min(s[0], wx); s[3] = Math.max(s[3], wx); s[2] = Math.min(s[2], wz); s[5] = Math.max(s[5], wz);
+      s[1] = Math.min(s[1], ay + k[1] - y); s[4] = Math.max(s[4], ay + k[4] - y);
+    }
+    return s;
+  }
+  /* Bu hücre bir rüzgâr türbininin pervane alanında mı */
+  pervaneAlaninda(x, y, z) {
+    for (const [, [ax, ay, az]] of this.dunya.elektrikler) {
+      if (Math.abs(ax - x) > 7 || Math.abs(az - z) > 7 || y < ay || y > ay + 12) continue;
+      const b = BLOKLAR[this.dunya.blok(ax, ay, az)];
+      if (!b || b.cihaz !== 'ruzgar' || b.parca) continue;
+      for (const [px, py, pz] of pervaneHucreleri(b.yon, ax, ay, az)) if (px === x && py === y && pz === z) return true;
+    }
+    return false;
+  }
+  /* 0.25.0: cihazın herhangi bir hücresi kırılınca bütün cihaz kaldırılır ve eşyası düşer */
+  cihazKir(h, b) {
+    const d = this.dunya, C = CIHAZ[b.cihaz], [ax, ay, az] = kokKonumu(b, h.x, h.y, h.z);
+    const hucreler = cihazHucreleri(C, b.yon, ax, ay, az).filter(([x, y, z]) => BLOKLAR[d.blok(x, y, z)] && BLOKLAR[d.blok(x, y, z)].cihaz === b.cihaz);
+    for (const [x, y, z, i] of hucreler.reverse()) { d.blokKoy(x, y, z, 0); if (i % 3 === 0) this.dusenler.parcacik(h.id, x, y, z, 5); }   // kök hücre en son kalkar
+    this.dusenler.birak(C.esya, 1, h.x + 0.5, h.y + 0.4, h.z + 0.5);
+    this.ses.kir(C.ses); this.istat('kirilan');
+    const a = this.aletBilgi();
+    if (a && this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+    this.hayatta.yor(0.05);
+  }
+  /* 0.25.0: yerleştirme önizlemesi: elde cihaz ya da yönlü blok varken konulacağı yer */
+  onizlemeBilgisi() {
+    const s = this.envanter.seciliYuva(), e = s && ESYALAR[s.id], h = this.hedef;
+    if (!e || !h || this.hedefCanli || this.hedefTekne) return null;
+    if (e.tur === 'cihaz') return this.cihazYeri(e.cihaz, h);
+    if (e.tur !== 'blok') return null;
+    const eb = BLOKLAR[e.blok], f = (this.bakisYonu4() + this.donus) % 4, id = this.yonluId(eb, f);
+    if (id == null) return null;
+    const d = this.dunya, hb = BLOKLAR[h.id];
+    let x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
+    if (hb && hb.degistirilebilir) { x = h.x; y = h.y; z = h.z; }
+    const q = d.blok(x, y, z), qb = BLOKLAR[q], alt = BLOKLAR[d.blok(x, y - 1, z)];
+    const gecerli = (q === 0 || (qb && qb.degistirilebilir) || (SIVI[q] && q !== 59)) && !(alt && alt.ustuneKonmaz) && !(KATI[id] && (this.oyuncu.hucreyiKapliyor(x, y, z) || this.pervaneAlaninda(x, y, z)));
+    return { id, x, y, z, gecerli };
   }
 
   /* Bakış yönü dört yöne yuvarlanır: 0 kuzey (-z), 1 doğu, 2 güney, 3 batı */
