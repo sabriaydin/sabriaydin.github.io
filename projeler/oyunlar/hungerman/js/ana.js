@@ -92,7 +92,7 @@ function ekran(ad) {
   if (ad === 'ayarlar' || ad === 'yardim') { const el = $(EKRANLAR[ad]); el.classList.toggle('menuArka', !oyun); el.classList.toggle('yari', !!oyun); }
   aktifEkran = ad;
   if (ad === 'ana') sunucuIstek = false;
-  if (ad === 'dunyalar') { dunyaListesi(); $('#dunyalarBaslik').textContent = sunucuIstek ? 'Açılacak Dünyayı Seçiniz' : 'Dünyalar'; }
+  if (ad === 'dunyalar') { $('#dunyaAra').value = ''; dunyaListesi(); $('#dunyalarBaslik').textContent = sunucuIstek ? 'Açılacak Dünyayı Seçiniz' : 'Dünyalar'; }
   if (ad === 'cok') { $('#cokAd').value = ayar.ad; $('#cokDurum').hidden = true; setTimeout(() => $('#cokKod').focus(), 30); }
   if (ad === 'duraklat') agPanelCiz();
   if (ad === 'ayarlar') ayarFormu();
@@ -134,7 +134,8 @@ $('#ayarSifirla').onclick = e => {
 /* 0.23.0: zorluk ve denge formları (yeni dünya ve Dünya Ayarları) */
 function zorlukFormu(kap, secili, mevcut) {
   const el = $(kap);
-  el.innerHTML = Object.entries(ZORLUKLAR).map(([k, z]) => `<button type="button" data-z="${k}" class="${k === secili ? 'on' : ''}"${mevcut && k !== secili && (k === 'hardcore' || secili === 'hardcore') ? ' disabled' : ''}>${z.ad}</button>`).join('') + `<p>${ZORLUKLAR[secili].aciklama}</p>`;
+  const kart = el.classList.contains('zorlukKart');   // 0.29.2: yeni dünya ekranında açıklamalı kartlar
+  el.innerHTML = Object.entries(ZORLUKLAR).map(([k, z]) => `<button type="button" data-z="${k}" class="${k === secili ? 'on' : ''}"${mevcut && k !== secili && (k === 'hardcore' || secili === 'hardcore') ? ' disabled' : ''}>${kart ? `<b>${z.ad}</b><small>${z.aciklama}</small>` : z.ad}</button>`).join('') + (kart ? '' : `<p>${ZORLUKLAR[secili].aciklama}</p>`);
   el.dataset.secili = secili;
 }
 function dengeFormu(onek, d) { for (const sel of document.querySelectorAll(`select[id^="${onek}"][data-denge]`)) { const k = sel.dataset.denge; sel.innerHTML = DENGE_SECENEK[k].map(([v, a]) => `<option value="${v}">${a}</option>`).join(''); sel.value = String(d[k]); } }
@@ -218,14 +219,37 @@ document.addEventListener('visibilitychange', arkaSesAyarla);
 /* ---------- Dünya listesi ---------- */
 const tarih = t => new Date(t).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* 0.29.2: dünya kartları: arama, sıralama, rozetler */
+let dunyaVeri = [];
+const DUNYA_RENK = ['#4f8f4a', '#3f7fa8', '#a8743f', '#8a5aa8', '#a84f5a', '#3f9a8f', '#9a8a3f', '#5a6aa8'];
 async function dunyaListesi() {
   const kap = $('#dunyaListe');
-  let l = [];
-  try { l = await Kayit.listele(); } catch (e) { kap.innerHTML = '<div class="bos">Tarayıcı depolaması kullanılamıyor; dünyalar kaydedilemez.</div>'; return; }
-  if (!l.length) { kap.innerHTML = '<div class="bos">Henüz kayıtlı dünya mevcut değil. Yeni bir dünya oluşturun.</div>'; return; }
-  kap.innerHTML = l.map(d => `<div class="dunya"><b>${esc(d.ad)}</b><small>${d.gun}. gün · Son oynama ${tarih(d.son)} · Tohum ${d.tohum}${d.komutlar ? ' · Komutlar açık' : ''} · ${d.zorluk === 'hardcore' ? (d.bitti ? '<em class="hc">Hardcore · sona erdi</em>' : '<em class="hc">Hardcore</em>') : (ZORLUKLAR[d.zorluk] || ZORLUKLAR.normal).ad}</small>
-    <div class="islem"><button class="dugme kucuk ana" data-oyna="${d.id}">Oyna</button><button class="dugme kucuk" data-indir="${d.id}" title="Dünyayı dosya olarak indir">Yedekle</button>${d.yedek ? `<button class="dugme kucuk" data-geri="${d.id}" title="Dünyayı bir önceki açılışındaki hâline döndürür">Önceki oturum</button>` : ''}<button class="dugme kucuk tehlike" data-sil="${d.id}">Sil</button></div></div>`).join('');
+  try { dunyaVeri = await Kayit.listele(); } catch (e) { dunyaVeri = []; $('#dunyaSayi').textContent = ''; kap.innerHTML = '<div class="bos">Tarayıcı depolaması kullanılamıyor; dünyalar kaydedilemez.</div>'; return; }
+  dunyaCiz();
 }
+function dunyaCiz() {
+  const kap = $('#dunyaListe'), ara = ($('#dunyaAra').value || '').trim().toLocaleLowerCase('tr'), sira = $('#dunyaSira').value;
+  $('#dunyaSayi').textContent = dunyaVeri.length ? `${dunyaVeri.length} dünya` : '';
+  if (!dunyaVeri.length) { kap.innerHTML = '<div class="bos"><b>Henüz kayıtlı dünya mevcut değil.</b><span>"Yeni Dünya" ile ilk dünyanızı oluşturunuz ya da bir yedek yükleyiniz.</span></div>'; return; }
+  let l = dunyaVeri.filter(d => !ara || String(d.ad).toLocaleLowerCase('tr').includes(ara) || String(d.tohum).includes(ara));
+  l = l.sort(sira === 'ad' ? (a, b) => String(a.ad).localeCompare(String(b.ad), 'tr') : sira === 'gun' ? (a, b) => b.gun - a.gun : sira === 'yeni' ? (a, b) => (b.olusturma || 0) - (a.olusturma || 0) : (a, b) => b.son - a.son);
+  if (!l.length) { kap.innerHTML = '<div class="bos">Aramaya uyan dünya mevcut değil.</div>'; return; }
+  kap.innerHTML = l.map(d => {
+    const z = ZORLUKLAR[d.zorluk] || ZORLUKLAR.normal, renk = DUNYA_RENK[(d.tohum >>> 0) % DUNYA_RENK.length], harf = esc((String(d.ad).trim()[0] || '?').toLocaleUpperCase('tr'));
+    const rozet = [`<span class="rozet z-${esc(d.zorluk)}">${z.ad}${d.zorluk === 'hardcore' && d.bitti ? ' · sona erdi' : ''}</span>`,
+      d.komutlar ? '<span class="rozet">Komutlar</span>' : '', d.konsol ? '<span class="rozet">Konsol</span>' : '', d.vucutIsisi === false ? '<span class="rozet soluk">Vücut ısısı kapalı</span>' : ''].join('');
+    return `<article class="dunya${d.bitti ? ' bitti' : ''}">
+      <div class="dunyaRozet" style="--r:${renk}">${harf}</div>
+      <div class="dunyaBilgi"><b title="${esc(d.ad)}">${esc(d.ad)}</b><div class="rozetler">${rozet}</div>
+        <dl><dt>Gün</dt><dd>${d.gun}</dd><dt>Son oynama</dt><dd>${tarih(d.son)}</dd><dt>Tohum</dt><dd><button type="button" class="tohumKopya" data-tohum="${esc(d.tohum)}" title="Tohumu kopyala">${esc(d.tohum)}</button></dd></dl></div>
+      <div class="islem"><button class="dugme ana" data-oyna="${d.id}">${d.bitti ? 'İzle' : 'Oyna'}</button><button class="dugme kucuk" data-indir="${d.id}" title="Dünyayı dosya olarak indir">Yedekle</button>${d.yedek ? `<button class="dugme kucuk" data-geri="${d.id}" title="Dünyayı bir önceki açılışındaki hâline döndürür">Önceki oturum</button>` : ''}<button class="dugme kucuk tehlike" data-sil="${d.id}">Sil</button></div>
+    </article>`;
+  }).join('');
+}
+$('#dunyaAra').addEventListener('input', dunyaCiz);
+$('#dunyaAra').addEventListener('keydown', e => e.stopPropagation());
+$('#dunyaSira').addEventListener('change', () => { ses.tik(); dunyaCiz(); });
+$('#tohumZar').onclick = () => { ses.tik(); $('#yeniTohum').value = String((Math.random() * 4294967296) >>> 0); };
 $('#yedekYukle').onclick = () => { ses.tik(); $('#yedekDosya').value = ''; $('#yedekDosya').click(); };
 $('#yedekDosya').onchange = async () => {
   const f = $('#yedekDosya').files[0]; if (!f) return;
@@ -236,6 +260,8 @@ $('#yedekDosya').onchange = async () => {
   } catch (e) { $('#dunyaListe').insertAdjacentHTML('afterbegin', `<div class="bos">Yedek yüklenemedi: ${esc(e.message || 'dosya okunamadı')}</div>`); }
 };
 $('#dunyaListe').addEventListener('click', async e => {
+  const tk = e.target.closest('[data-tohum]');
+  if (tk) { try { await navigator.clipboard.writeText(tk.dataset.tohum); tk.classList.add('kopyalandi'); setTimeout(() => tk.classList.remove('kopyalandi'), 1200); } catch (x) { /* pano kapalı */ } return; }
   const o = e.target.closest('[data-oyna]'), s = e.target.closest('[data-sil]');
   ses.baslat();
   if (o) { ses.tik(); const v = await Kayit.yukle(o.dataset.oyna); if (v) { Kayit.kaydet({ ...v, id: v.id + '~yedek' }).catch(() => {}); const s = sunucuIstek; oyunBaslat(v); if (oyun) oyun.sunucuIstek = s; } }

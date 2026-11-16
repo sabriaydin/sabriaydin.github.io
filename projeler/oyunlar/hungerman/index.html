@@ -247,14 +247,21 @@
 
 <!-- Dünya listesi -->
 <div id="dunyalarEkrani" class="ekran menuArka" hidden>
-  <div class="pencere orta">
-    <header><h2 id="dunyalarBaslik">Dünyalar</h2></header>
-    <div id="dunyaListe" class="liste"></div>
-    <div class="altDugmeler">
-      <button class="dugme ana" data-git="yeni">Yeni Dünya</button>
-      <button class="dugme" id="yedekYukle">Yedekten Yükle</button><input type="file" id="yedekDosya" accept=".hmdunya,.json,.gz,application/json,application/gzip" hidden>
-      <button class="dugme" data-git="ana">Geri</button>
+  <!-- 0.29.2: geniş dünya listesi: araç çubuğu, arama, sıralama ve kartlar -->
+  <div class="pencere menuPencere">
+    <header class="menuBaslik">
+      <div><h2 id="dunyalarBaslik">Dünyalar</h2><span class="menuAlt" id="dunyaSayi"></span></div>
+      <div class="menuIslem">
+        <button class="dugme" id="yedekYukle">Yedekten Yükle</button><input type="file" id="yedekDosya" accept=".hmdunya,.json,.gz,application/json,application/gzip" hidden>
+        <button class="dugme ana" data-git="yeni">Yeni Dünya</button>
+      </div>
+    </header>
+    <div class="dunyaArac">
+      <input type="search" id="dunyaAra" placeholder="Dünya ara (ad ya da tohum)" autocomplete="off">
+      <label>Sırala<select id="dunyaSira"><option value="son">Son oynanan</option><option value="ad">Ada göre</option><option value="gun">Gün sayısı</option><option value="yeni">Oluşturma tarihi</option></select></label>
     </div>
+    <div id="dunyaListe" class="dunyaIzgara"></div>
+    <div class="altDugmeler menuAltDugme"><button class="dugme" data-git="ana">Ana Menü</button></div>
   </div>
 </div>
 
@@ -287,26 +294,45 @@
   </div>
 </div>
 
-<!-- Yeni dünya -->
+<!-- Yeni dünya (0.29.2: iki sütunlu geniş düzen) -->
 <div id="yeniEkrani" class="ekran menuArka" hidden>
-  <div class="pencere orta dar">
-    <header><h2>Yeni Dünya</h2></header>
-    <label class="alan">Dünya adı<input id="yeniAd" maxlength="32" value="Yeni Dünya"></label>
-    <label class="alan">Tohum <small>(boş bırakılırsa rastgele)</small><input id="yeniTohum" maxlength="40" placeholder="Rastgele"></label>
-    <div class="zorlukSec" id="yeniZorluk"></div>
-    <details class="gelismis"><summary>Denge ayarları</summary>
-      <label class="alan">Kanlı Ay<select id="yeniKanli" data-denge="kanliAy"></select></label>
-      <label class="alan">Meteor<select id="yeniMeteor" data-denge="meteor"></select></label>
-      <label class="alan">Vücut ısısı değişimi<select id="yeniIsi" data-denge="isiHizi"></select></label>
-    </details>
-    <!-- 0.29.1: vücut ısısı ve geliştirici konsolu dünya ayarıdır -->
-    <label class="secim"><input type="checkbox" id="yeniVucut" checked><span>Vücut ısısı<small>Soğuk ve sıcak etkileri: üşüme, bunalma, donma ve sıcak çarpması.</small></span></label>
-    <label class="secim"><input type="checkbox" id="yeniKonsol"><span>Geliştirici konsolu (F8)<small>Bu dünyada F8 ile geliştirici konsolu açılabilir.</small></span></label>
-    <label class="secim"><input type="checkbox" id="yeniKomut" disabled><span>Komutlara izin ver<small>Geliştirici konsolundaki (F8) eşya verme, ışınlanma, zaman ve uçma gibi komutlar bu dünyada kullanılabilir.</small></span></label>
-    <p class="aciklama">Her dünya, tohum değerinden üretilir. Aynı tohum aynı haritayı verir.</p>
-    <div class="altDugmeler">
-      <button class="dugme ana" id="yeniOlustur">Dünyayı Oluştur</button>
+  <div class="pencere menuPencere">
+    <header class="menuBaslik"><div><h2>Yeni Dünya</h2><span class="menuAlt">Her dünya tohum değerinden üretilir; aynı tohum aynı haritayı verir.</span></div></header>
+    <div class="yeniIzgara">
+      <div class="yeniSutun">
+        <section class="yeniKart">
+          <h3>Dünya</h3>
+          <label class="alan">Dünya adı<input id="yeniAd" maxlength="32" value="Yeni Dünya"></label>
+          <label class="alan">Tohum <small>Boş bırakılırsa rastgele seçilir</small>
+            <span class="tohumSatir"><input id="yeniTohum" maxlength="40" placeholder="Rastgele"><button type="button" class="dugme kucuk" id="tohumZar" title="Rastgele tohum">Rastgele</button></span></label>
+        </section>
+        <section class="yeniKart">
+          <h3>Zorluk</h3>
+          <div class="zorlukSec zorlukKart" id="yeniZorluk"></div>
+        </section>
+      </div>
+      <div class="yeniSutun">
+        <section class="yeniKart">
+          <h3>Kurallar</h3>
+          <!-- 0.29.1: vücut ısısı ve geliştirici konsolu dünya ayarıdır -->
+          <label class="secim"><input type="checkbox" id="yeniVucut" checked><span>Vücut ısısı<small>Soğuk ve sıcak etkileri: üşüme, bunalma, donma ve sıcak çarpması.</small></span></label>
+          <label class="secim"><input type="checkbox" id="yeniKonsol"><span>Geliştirici konsolu (F8)<small>Bu dünyada F8 ile geliştirici konsolu açılabilir.</small></span></label>
+          <label class="secim"><input type="checkbox" id="yeniKomut" disabled><span>Komutlara izin ver<small>Konsoldaki eşya verme, ışınlanma, zaman ve uçma gibi komutlar kullanılabilir. Konsol açıkken seçilebilir.</small></span></label>
+        </section>
+        <section class="yeniKart">
+          <h3>Denge</h3>
+          <div class="dengeIzgara">
+            <label class="alan">Kanlı Ay<select id="yeniKanli" data-denge="kanliAy"></select></label>
+            <label class="alan">Meteor<select id="yeniMeteor" data-denge="meteor"></select></label>
+            <label class="alan">Vücut ısısı değişimi<select id="yeniIsi" data-denge="isiHizi"></select></label>
+          </div>
+          <p class="aciklama">Zorluk ve denge ayarları sonradan duraklatma menüsündeki Dünya Ayarları'ndan değiştirilebilir (Hardcore hariç).</p>
+        </section>
+      </div>
+    </div>
+    <div class="altDugmeler menuAltDugme">
       <button class="dugme" data-git="dunyalar">Geri</button>
+      <button class="dugme ana" id="yeniOlustur">Dünyayı Oluştur</button>
     </div>
   </div>
 </div>

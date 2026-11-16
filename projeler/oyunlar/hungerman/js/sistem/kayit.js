@@ -25,7 +25,7 @@ function islem(mod, f) {
 export const Kayit = {
   /* 0.23.0: "~yedek" ile biten kayıtlar, dünyanın bir önceki oturumdaki kopyasıdır; listede ayrı gösterilmez */
   listele: () => islem('readonly', s => s.getAll()).then(l => { l = l || []; const yedek = new Set(l.filter(d => String(d.id).endsWith('~yedek')).map(d => String(d.id).slice(0, -6)));
-    return l.filter(d => !String(d.id).endsWith('~yedek')).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar, zorluk: d.zorluk || 'normal', bitti: !!d.hardcoreBitti, yedek: yedek.has(d.id) })).sort((a, b) => b.son - a.son); }),
+    return l.filter(d => !String(d.id).endsWith('~yedek')).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar, konsol: d.konsol, vucutIsisi: d.vucutIsisi, zorluk: d.zorluk || 'normal', bitti: !!d.hardcoreBitti, yedek: yedek.has(d.id) })).sort((a, b) => b.son - a.son); }),
   yukle: id => islem('readonly', s => s.get(id)),
   kaydet: veri => islem('readwrite', s => s.put(veri)),
   sil: id => islem('readwrite', s => { s.delete(id + '~yedek'); return s.delete(id); })
