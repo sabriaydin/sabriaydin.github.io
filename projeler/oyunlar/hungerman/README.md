@@ -117,6 +117,13 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 28. aşama (0.28.0): Jeneratör, otomatik taret, hareket algılayıcı, sulama fıskiyesi
+- **Yakıtlı Jeneratör:** kızaklı motor, yakıt tankı, egzoz ve kontrol paneli. Sağ tık yakıt deposunu (sandık) açar; kömür 40, kütük 15, kalas 4, çubuk 1 saniye yanar. Çıkışına talep varken en çok 20 E/sn üretir ve yakıt harcar (talep yokken yakıt korunur); çalışırken egzozdan duman çıkar ve paneldeki ışık yeşil yanar. Bilgi panelinde kalan yakıt süresi görünür.
+- **Otomatik Taret (giriş + geçiş çıkışı, 8 E/sn):** çalışırken 16 blok içinde görüş hattındaki en yakın canavara ya da öfkeli hayvana döner, namluyu eğer ve 0,8 saniyede bir ok atar (4 hasar). Oyunculara, evcil hayvanlara ve köylülere ateş etmez; hedef yokken yavaşça tarar, gücü kesilince namlusu aşağı eğilir. Çok oyunculuda ateşi sunucu yapar.
+- **Hareket Algılayıcı (0,5 E/sn):** duvara ya da ayağıyla zemine konur. 7 blok içinde canlı varken gücü çıkışına geçirir ve algılayıcı başı kırmızı yanar. Sağ tık kipi değiştirir: herkes / yalnızca oyuncular / yalnızca canavarlar. Örnek: hareketle yanan lamba, yaklaşan canavarda çalışan taret.
+- **Sulama Fıskiyesi (2 E/sn):** çalışırken 2 saniyede bir 9 × 9 alandaki kuru tarlaları ıslatır ve ekinlerin büyümesini hızlandırır; çevresine su serper.
+- Tarifler Üretim Masasında (Elektrik kategorisi); Geliştirici Modu elektrik seti yeni cihazları içerir.
+
 ## 27. aşama (0.27.0): Giriş / çıkış noktaları, yönlü güç akışı, kablo sarkması
 - **Bağlantı noktaları:** her elektrikli cihazın ayrı giriş (mavi) ve çıkış (turuncu) soketleri vardır; dolu soketin ortası koyudur. Üreticilerde yalnızca çıkış; bataryada giriş (şarj) ve çıkış; şalter, lamba, ocak ve ısıtıcıda giriş ve geçiş çıkışı bulunur. Her sokete tek kablo takılır.
 - **Yeni bloklar:** Dağıtıcı (1 giriş, 3 çıkış; gücü bağlı cihazların talebine göre böler) ve Birleştirici (2 giriş, 1 çıkış; güçleri toplar).

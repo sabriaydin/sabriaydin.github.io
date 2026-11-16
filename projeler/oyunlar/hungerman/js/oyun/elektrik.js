@@ -9,7 +9,7 @@
       birleştirici girişlerini toplar. Kablonun her bloğu taşıdığı gücü %0,1 azaltır.
    3. Batarya girişine gelen güç (en çok şarj hızı) depoya eklenir, çıkışa verilen düşülür.
    Hesap tek oyunculuda ve sunucuda yapılır; tüketici durumları blok değişikliği, batarya doluluğu 'bo' iletisiyle dağıtılır. */
-import { BLOKLAR, SIVI, LAV, KATI } from '../bloklar.js';
+import { BLOKLAR, SIVI, LAV, KATI, EKIN_SONRAKI } from '../bloklar.js';
 import { DENIZ, diyarMi } from '../sabitler.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
 import { portlar } from './kablolar.js';
@@ -18,6 +18,8 @@ const ADIM = 0.5;
 const C = k => k.split(',').map(Number);
 /* Bataryaların şarj ve çıkış hızı (E/sn) */
 export const BATARYA_HIZ = { bataryaK: 10, bataryaO: 25, bataryaB: 60 };
+/* 0.28.0: jeneratör yakıtları: eşya -> yanma süresi (sn) */
+export const YAKIT = { 257: 40, 8: 15, 10: 15, 12: 15, 144: 15, 14: 4, 38: 4, 39: 4, 256: 1 };
 export const kokAnahtari = (b, x, y, z) => (b && b.cihaz && b.parca ? kokKonumu(b, x, y, z).join(',') : x + ',' + y + ',' + z);
 
 /* Kök hücresi (x, y, z) olan üreticinin bu anki üretimi (E/sn) ve durmasının nedeni; çizici de dönüş hızı için kullanır.
@@ -61,7 +63,8 @@ export function cihazUretim(d, b, x, y, z, O) {
 
 export class Elektrik {
   constructor(o) {
-    Object.assign(this, o);   // dunya, ortam(): { gunIsigi, yogunluk, firtina, mevsim, sure }, kablolar, kabloKoptu(w, nokta)
+    Object.assign(this, o);   // dunya, ortam(): { gunIsigi, yogunluk, firtina, mevsim, sure }, kablolar, kabloKoptu(w, nokta), canlilar(): [[x, y, z, 'o' | 'c' | 'h'], ...]
+    this.sulamaSayac = 0;
     this.sayac = 0;
     this.dugumler = new Map();   // kök anahtarı -> son hesabın özeti
     this.oranlar = new Map();    // batarya kök anahtarı -> doluluk (0..1)
@@ -127,7 +130,8 @@ export class Elektrik {
       yolda.add(n.k);
       const b = n.b, alt = () => n.cik.reduce((t, c) => t + talep(c.n), 0);
       let t = 0;
-      if (b.tuketim) t = b.tuketim + alt();
+      if (b.elektrik === 'algilayici') t = b.tuketim + (b.acik ? alt() : 0);   // 0.28.0: yalnızca algılarken geçirir
+      else if (b.tuketim) t = b.tuketim + alt();
       else if (b.elektrik === 'salter') t = b.acik ? alt() : 0;
       else if (b.elektrik === 'dagitici' || b.elektrik === 'birlestirici') t = alt();
       else if (b.elektrik === 'batarya') { const e = d.enerji.get(n.k) || 0; t = e < b.kapasite - 0.5 ? BATARYA_HIZ[b.cihaz] : 0; }
@@ -150,8 +154,10 @@ export class Elektrik {
       islendi.add(n.k);
       const b = n.b;
       let P = 0;
-      if (b.uretim) { const r = cihazUretim(d, b, n.x, n.y, n.z, O); n.uretim = r.u; n.neden = r.neden; P = r.u; }
+      if (b.elektrik === 'jenerator') P = this.jenerator(n, dt);
+      else if (b.uretim) { const r = cihazUretim(d, b, n.x, n.y, n.z, O); n.uretim = r.u; n.neden = r.neden; P = r.u; }
       else if (b.elektrik === 'batarya') { const e = d.enerji.get(n.k) || 0, cik = n.cik.reduce((t, c) => t + c.talep, 0); P = Math.min(BATARYA_HIZ[b.cihaz], cik, e / dt); }
+      else if (b.elektrik === 'algilayici') { n.calisiyor = n.gelen >= b.tuketim * 0.95; P = n.calisiyor && b.acik ? Math.max(0, n.gelen - b.tuketim) : 0; }
       else if (b.tuketim) { n.calisiyor = n.gelen >= b.tuketim * 0.95; P = n.calisiyor ? Math.max(0, n.gelen - b.tuketim) : 0; }   // kablo kaybı için %5 pay
       else if (b.elektrik === 'salter') P = b.acik ? n.gelen : 0;
       else P = n.gelen;   // dağıtıcı, birleştirici
@@ -171,13 +177,69 @@ export class Elektrik {
         const e = Math.max(0, Math.min(b.kapasite, e0 + (sarj - n.giden) * dt));
         d.enerji.set(n.k, e); n.depo = e; n.sarj = sarj;
         this.oranlar.set(n.k, Math.round(e / b.kapasite * 100) / 100);
-      } else if (b.tuketim) {
+      } else if (b.elektrik === 'algilayici') this.algila(n);
+      else if (b.cihaz && b.tuketim) this.oranlar.set(n.k, n.calisiyor ? 1 : 0);   // 0.28.0: çok bloklu tüketici (taret): durum 'bo' ile dağıtılır
+      else if (b.tuketim) {
         const c = !!n.calisiyor;
+        if (!!b.acik !== c) d.blokKoy(n.x, n.y, n.z, b.taban + (c ? 1 : 0), 'elektrik');
+      } else if (b.elektrik === 'jenerator') {
+        const c = n.uretim > 0;
         if (!!b.acik !== c) d.blokKoy(n.x, n.y, n.z, b.taban + (c ? 1 : 0), 'elektrik');
       }
     }
     for (const k of this.oranlar.keys()) if (!D.has(k)) this.oranlar.delete(k);
     this.dugumler = D;
+    /* 0.28.0: çalışan fıskiyeler 2 saniyede bir sular */
+    this.sulamaSayac -= dt;
+    if (this.sulamaSayac <= 0) { this.sulamaSayac = 2; for (const n of D.values()) if (n.b.elektrik === 'fiskiye' && n.calisiyor) this.sula(n); }
+  }
+
+  /* ---------- 0.28.0: Yakıtlı Jeneratör ----------
+     Çıkışına talep varken yakıt yakar: kömür 40, kütük 15, kalas 4, çubuk 1 saniye. Kalan yanma süresi 'y:' anahtarıyla saklanır. */
+  jenerator(n, dt) {
+    const d = this.dunya, b = n.b, talep = n.cik.reduce((t, c) => t + c.talep, 0), yk = 'y:' + n.k;
+    let kalan = d.enerji.get(yk) || 0;
+    n.yakit = kalan + this.yakitSuresi(d.sandiklar.get(n.k));
+    if (talep <= 0) { n.uretim = 0; n.neden = n.yakit > 0 ? 'talep yok' : 'yakıt yok'; return 0; }
+    if (kalan <= 0) {
+      const l = d.sandiklar.get(n.k);
+      if (l) for (let i = 0; i < l.length; i++) {
+        const s = l[i], t = s && YAKIT[s.id];
+        if (!t) continue;
+        s.adet--; if (s.adet <= 0) l[i] = null;
+        kalan = t; break;
+      }
+    }
+    if (kalan <= 0) { d.enerji.delete(yk); n.uretim = 0; n.neden = 'yakıt yok'; return 0; }
+    kalan -= dt; d.enerji.set(yk, Math.max(0, kalan));
+    n.uretim = Math.min(b.uretim, talep); n.neden = '';
+    return n.uretim;
+  }
+  yakitSuresi(l) { let t = 0; if (l) for (const s of l) if (s && YAKIT[s.id]) t += YAKIT[s.id] * s.adet; return t; }
+
+  /* ---------- 0.28.0: Hareket Algılayıcı: çalışırken 7 blok içindeki canlıları algılar (kip: herkes, oyuncular, canavarlar) ---------- */
+  algila(n) {
+    const b = n.b, d = this.dunya;
+    let var_ = false;
+    if (n.calisiyor && this.canlilar) {
+      const cx = n.x + 0.5, cy = n.y + 0.5, cz = n.z + 0.5;
+      for (const [x, y, z, t] of this.canlilar()) {
+        if ((b.kip === 1 && t !== 'o') || (b.kip === 2 && t !== 'c')) continue;
+        if ((x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2 < 49) { var_ = true; break; }
+      }
+    }
+    n.algiliyor = var_;
+    if (!!b.acik !== var_) d.blokKoy(n.x, n.y, n.z, b.taban + (var_ ? 1 : 0), 'elektrik');
+  }
+
+  /* ---------- 0.28.0: Sulama Fıskiyesi: 9 × 9 alandaki tarlalar ıslanır, ekinler daha hızlı büyür ---------- */
+  sula(n) {
+    const d = this.dunya;
+    for (let dx = -4; dx <= 4; dx++) for (let dz = -4; dz <= 4; dz++) for (let dy = -2; dy <= 1; dy++) {
+      const x = n.x + dx, y = n.y + dy, z = n.z + dz, id = d.blok(x, y, z);
+      if (id === 137) d.blokKoy(x, y, z, 138, 'elektrik');   // kuru tarla -> ıslak tarla
+      else if (EKIN_SONRAKI[id] && BLOKLAR[id] && BLOKLAR[id].ekin != null && Math.random() < 0.12) d.blokKoy(x, y, z, EKIN_SONRAKI[id], 'elektrik');
+    }
   }
 
   /* Yüklü cihazların toplamı (geliştirici penceresi için) */
@@ -197,6 +259,8 @@ export class Elektrik {
     const v = { g: r1(n.gelen), c: r1(n.giden), t: r1(n.talep), u: r1(n.uretim || 0), on: n.calisiyor ? 1 : 0, gb: n.gir.length, cb: n.cik.length };
     if (n.neden) v.ne = n.neden;
     if (n.b.elektrik === 'batarya') { v.d = Math.round(n.depo || 0); v.sj = r1(n.sarj || 0); }
+    if (n.b.elektrik === 'jenerator') v.yk = Math.round(n.yakit || 0);
+    if (n.b.elektrik === 'algilayici') v.al = n.algiliyor ? 1 : 0;
     return v;
   }
 }
@@ -209,7 +273,16 @@ export function enerjiMetni(b, v) {
   const l = [], P = portlar(b), gs = P.filter(p => p[0] === 'giris').length, cs = P.length - gs;
   const baglanti = `Bağlı: ${gs ? `giriş ${v.gb}/${gs}` : ''}${gs && cs ? ' · ' : ''}${cs ? `çıkış ${v.cb}/${cs}` : ''}`;
   let durum = '', oran = null;
-  if (b.uretim) {
+  if (b.elektrik === 'jenerator') {
+    l.push(`Üretim <b>${s(v.u)}</b> / ${b.uretim} E/sn` + (v.ne ? ` (${v.ne})` : ''));
+    l.push(`Yakıt: ${v.yk > 0 ? `yaklaşık <b>${v.yk >= 90 ? Math.round(v.yk / 60) + ' dk' : v.yk + ' sn'}</b>` : '<b>yok</b> (sağ tık: yakıt deposu)'}`);
+    if (!v.cb) l.push('Çıkışa kablo bağlı değil.');
+    durum = !v.cb ? 'bagsiz' : v.u > 0 ? 'calisiyor' : v.yk > 0 ? 'beklemede' : 'eksik';
+  } else if (b.elektrik === 'algilayici') {
+    l.push(`Kip: <b>${['herkes', 'oyuncular', 'canavarlar'][b.kip]}</b> · ${v.al ? '<b>canlı algılandı</b>' : 'algılanan yok'}`);
+    l.push(`Giriş <b>${s(v.g)}</b> · Çıkış <b>${s(v.c)}</b> E/sn (kendi ihtiyacı 0,5)`);
+    durum = !v.gb ? 'bagsiz' : !v.on ? 'eksik' : v.al ? 'calisiyor' : 'beklemede';
+  } else if (b.uretim) {
     l.push(`Üretim <b>${s(v.u)}</b> / ${b.uretim} E/sn` + (v.ne ? ` (${v.ne})` : ''));
     l.push(v.cb ? `Çıkıştan verilen <b>${s(v.c)}</b> E/sn (talep ${s(v.t || 0)})` : 'Çıkışa kablo bağlı değil.');
     durum = !v.cb ? 'bagsiz' : v.u <= 0 ? 'kapali' : v.c + 0.05 < v.u ? 'fazla' : 'calisiyor';

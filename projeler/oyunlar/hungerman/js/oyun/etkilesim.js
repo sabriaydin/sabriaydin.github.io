@@ -588,6 +588,7 @@ export class Etkilesim {
     if (eb.kovan) return 569 + ((f + 2) % 4) * 6;   // 0.21.0: arı kovanının girişi oyuncuya bakar
     if (eb.sekil === 'kapi') return 88 + f * 4;
     if (eb.sekil === 'dagitici') return eb.taban + f;   // 0.27.0: çıkışlar bakılan yöne
+    if (eb.sekil === 'jenerator') return 860 + ((f + 2) % 4) * 2;   // 0.28.0: kontrol paneli oyuncuya bakar
     return null;
   }
   /* ---------- 0.26.0 / 0.27.0: Rust tarzı kablo çekme ----------
@@ -690,13 +691,14 @@ export class Etkilesim {
 
   /* 0.26.0: tıklanan yüzeye göre biçim alan bloklar: şalter (duvar / ayaklı), lamba (zemin / tavan / duvar) */
   yuzeyId(eb, h, f) {
-    if (eb.sekil !== 'salter' && eb.sekil !== 'elamba') return null;
+    if (eb.sekil !== 'salter' && eb.sekil !== 'elamba' && eb.sekil !== 'algilayici') return null;
     const yi = h.ny === 0 ? YONLER.findIndex(([a, b]) => a === h.nx && b === h.nz) : -1, duvar = yi >= 0 && KATI[h.id] && OPAK[h.id];
+    if (eb.sekil === 'algilayici') return duvar ? 872 + yi * 6 : 872 + (4 + (f + 2) % 4) * 6;   // 0.28.0
     if (eb.sekil === 'salter') return duvar ? 826 + yi * 2 : 834 + ((f + 2) % 4) * 2;
     return h.ny === -1 && KATI[h.id] ? 842 : duvar ? 844 + yi * 2 : 620;
   }
   /* Elde tutulan eşya R ile döndürülebilir mi */
-  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (e.tur === 'cihaz' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter')))); }
+  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (e.tur === 'cihaz' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
   dondur() { this.donus = (this.donus + 1) % 4; return this.donus; }
 
   /* 0.25.0: cihazın kurulacağı yer ve kurulabilirliği: { yon, x, y, z (kök), hucreler, gecerli, neden } */
@@ -803,6 +805,8 @@ export class Etkilesim {
     }
     if (b.sekil === 'tuzak') { d.blokKoy(h.x, h.y, h.z, 121 + b.yon * 2 + (b.acik ? 0 : 1)); this.ses.kapi(!b.acik); return true; }
     /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
+    /* 0.28.0: Hareket algılayıcının kipi sağ tıkla değişir */
+    if (b.elektrik === 'algilayici') { const m = (b.kip + 1) % 3; d.blokKoy(h.x, h.y, h.z, h.id + (m - b.kip) * 2); this.ses.kol(true); this.arayuz.bildirim(`Hareket Algılayıcı: ${['herkesi', 'yalnızca oyuncuları', 'yalnızca canavarları'][m]} algılar.`); return true; }
     /* 0.24.0: Şalter elektrik ağını açar / keser */
     if (b.mekanik === 'salter') { d.blokKoy(h.x, h.y, h.z, b.taban + (b.acik ? 0 : 1)); this.ses.kol(!b.acik); this.arayuz.bildirim(b.acik ? 'Şalter kapatıldı: ağ kesildi.' : 'Şalter açıldı: ağ bağlandı.'); return true; }
     if (b.mekanik === 'kol') { d.blokKoy(h.x, h.y, h.z, b.acik ? 233 : 234); this.ses.kol(!b.acik); return true; }

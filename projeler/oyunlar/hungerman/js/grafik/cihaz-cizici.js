@@ -122,6 +122,15 @@ function modeller() {
       { k: [0.55, 1.9, 0.3, 1.45, 1.98, 0.7], t: HV }, { k: [0.9, 1.98, 0.42, 1.1, 2.0, 0.58], t: D }],
     gosterge: [[0.68, 0.8, 0.64, 1.2, 0.1, 6, false], [1.68, 1.8, 0.64, 1.2, 0.1, 6, false]]
   };
+  /* 0.28.0: Otomatik Taret: taban, dönen kafa (yaw) ve eğilen çift namlu (pitch); kafa ve namlu ayrıca döndürülür */
+  M.taret = {
+    statik: [{ k: [0.15, 0, 0.15, 0.85, 0.1, 0.85], t: yuzler(BU, KS) }, { k: [0.2, 0.1, 0.2, 0.8, 0.14, 0.8], t: UY }, { k: [0.38, 0.14, 0.38, 0.62, 0.52, 0.62], t: D },
+      { k: [0.33, 0.48, 0.33, 0.67, 0.56, 0.67], t: BU }],
+    kafa: { merkez: [0.5, 0.68, 0.5], kutular: [{ k: [-0.24, -0.12, -0.2, 0.24, 0.14, 0.24], t: yuzler(BU, KS) }, { k: [0.24, -0.1, -0.08, 0.34, 0.08, 0.16], t: HV },
+      { k: [-0.09, 0.02, -0.235, 0.09, 0.1, -0.2], t: KR }, { k: [-0.2, 0.14, 0.0, 0.2, 0.17, 0.2], t: HV }],
+      namlu: { merkez: [0, -0.01, -0.18], kutular: [{ k: [-0.14, -0.05, -0.42, -0.06, 0.03, 0.02], t: D }, { k: [0.06, -0.05, -0.42, 0.14, 0.03, 0.02], t: D },
+        { k: [-0.16, -0.07, -0.47, -0.04, 0.05, -0.42], t: KK }, { k: [0.04, -0.07, -0.47, 0.16, 0.05, -0.42], t: KK }] } }
+  };
   return M;
 }
 
@@ -149,6 +158,7 @@ export class CihazCizici {
     const m = this.M[tur], g = { statik: kutuGeo(m.statik) };
     if (m.donen) g.donen = kutuGeo(m.donen.kutular);
     if (m.egik) g.egik = m.egik.map(e => kutuGeo(e.kutular));
+    if (m.kafa) { g.kafa = kutuGeo(m.kafa.kutular); g.namlu = kutuGeo(m.kafa.namlu.kutular); }
     return (this.geo[tur] = g);
   }
   /* Modelin örneği: grup (kök hücre köşesinde, yöne göre döndürülmüş) */
@@ -159,6 +169,11 @@ export class CihazCizici {
     let donen = null;
     if (m.donen) { donen = new THREE.Mesh(g.donen, malz); donen.position.set(...m.donen.merkez); ic.add(donen); }
     if (m.egik) m.egik.forEach((e, i) => { const x = new THREE.Mesh(g.egik[i], malz); x.position.set(...e.merkez); x.rotation.x = e.rx; ic.add(x); });
+    let kafa = null, namlu = null;
+    if (m.kafa) {
+      kafa = new THREE.Group(); kafa.position.set(...m.kafa.merkez); kafa.add(new THREE.Mesh(g.kafa, malz)); ic.add(kafa);
+      namlu = new THREE.Group(); namlu.position.set(...m.kafa.namlu.merkez); namlu.add(new THREE.Mesh(g.namlu, malz)); kafa.add(namlu);
+    }
     const gostergeler = [];
     /* 0.26.0: LED göstergesi: koyu çerçeve ve ayrı ayrı yanan bölmeler */
     if (m.gosterge && malz === this.malz) for (const [x0, x1, y0, y1, z, n, yatay] of m.gosterge) {
@@ -172,7 +187,7 @@ export class CihazCizici {
       }
       gostergeler.push({ ledler });
     }
-    return { dis, donen, gostergeler };
+    return { dis, donen, gostergeler, kafa, namlu };
   }
   yerlestir(dis, yon, x, y, z) { dis.position.set(x + 0.5, y, z + 0.5); dis.rotation.y = -yon * Math.PI / 2; }
 
@@ -182,6 +197,7 @@ export class CihazCizici {
     this.sayac -= dt;
     if (this.sayac <= 0) { this.sayac = 0.5; this.tara(O, oran); }
     for (const o of this.liste.values()) {
+      if (o.kafa && this.taretAci) { const a = this.taretAci(o.k); if (a) { o.kafa.rotation.y = a.yaw + o.yon * Math.PI / 2; o.namlu.rotation.x = a.pitch; } }
       if (!o.donen) continue;
       o.hiz += (o.hedefHiz - o.hiz) * Math.min(1, dt * 0.6);
       o.aci = (o.aci + o.hiz * dt) % (Math.PI * 2);
@@ -198,7 +214,7 @@ export class CihazCizici {
       let o = this.liste.get(k);
       if (o && o.id !== id) { this.grup.remove(o.dis); this.liste.delete(k); o = null; }
       if (!o) {
-        o = { id, tur: b.cihaz, ...this.ornekKur(b.cihaz, this.malz), hiz: 0, hedefHiz: 0, aci: Math.random() * 6 };
+        o = { id, k, yon: b.yon, tur: b.cihaz, ...this.ornekKur(b.cihaz, this.malz), hiz: 0, hedefHiz: 0, aci: Math.random() * 6 };
         this.yerlestir(o.dis, b.yon, x, y, z); this.grup.add(o.dis); this.liste.set(k, o);
       }
       if (o.donen) { const r = cihazUretim(d, b, x, y, z, O), n = r.u / b.uretim; o.hedefHiz = r.u > 0 ? (b.cihaz === 'ruzgar' ? 0.5 + 2.4 * n : 0.7 + 1.2 * n) : 0; }

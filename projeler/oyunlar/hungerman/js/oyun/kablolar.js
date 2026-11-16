@@ -28,13 +28,18 @@ export const PORT = {
   ocak: [G(0.3, 1.02, 0.5), K(0.7, 1.02, 0.5)],
   isitici: [G(0.3, 1.02, 0.5), K(0.7, 1.02, 0.5)],
   dagitici: [G(0.5, 0.2, 0.86), K(0.24, 0.2, 0.14), K(0.5, 0.2, 0.14), K(0.76, 0.2, 0.14)],
-  birlestirici: [G(0.3, 0.2, 0.86), G(0.7, 0.2, 0.86), K(0.5, 0.2, 0.14)]
+  birlestirici: [G(0.3, 0.2, 0.86), G(0.7, 0.2, 0.86), K(0.5, 0.2, 0.14)],
+  jenerator: [K(0.84, 0.42, 0.16)],
+  taret: [G(0.3, 0.06, 0.87), K(0.7, 0.06, 0.87)],
+  algilayici0: [G(0.42, 0.3, 0.97), K(0.58, 0.3, 0.97)],
+  algilayici1: [G(0.36, 0.07, 0.5), K(0.64, 0.07, 0.5)],
+  fiskiye: [G(0.36, 0.07, 0.5), K(0.64, 0.07, 0.5)]
 };
 export const PORT_AD = { giris: 'Giriş', cikis: 'Çıkış' };
 /* Bloğun bağlantı noktası listesi (yoksa boş) */
 export function portlar(b) {
   if (!b || !b.elektrik || (b.cihaz && b.parca)) return [];
-  const k = b.cihaz || (b.elektrik === 'salter' ? (b.sekil === 'salter' ? 'salter' + b.cesit : 'salterEski') : b.elektrik === 'lamba' ? 'lamba' + (b.cesit || 0) : b.elektrik);
+  const k = b.cihaz || (b.elektrik === 'salter' ? (b.sekil === 'salter' ? 'salter' + b.cesit : 'salterEski') : b.elektrik === 'lamba' ? 'lamba' + (b.cesit || 0) : b.elektrik === 'algilayici' ? 'algilayici' + b.cesit : b.elektrik);
   return PORT[k] || [];
 }
 /* Anahtardaki cihazın i. bağlantı noktasının dünya konumu ve türü: { p, tur } ya da null */

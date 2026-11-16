@@ -24,6 +24,7 @@ import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
 import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
+import { Taretler } from './oyun/taret.js';
 import { Kablolar, kabloMaliyeti, KABLO } from './oyun/kablolar.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
@@ -563,7 +564,11 @@ function oyunBaslat(v) {
   oyun.bataryaOran = new Map();   // 0.25.0: istemcide sunucudan gelen batarya doluluğu
   oyun.kablolar = new Kablolar(dunya); oyun.kablolar.iceAktar(v.kablolar);   // 0.26.0: Rust tarzı kablolar
   oyun.cihazCizici.kablolar = oyun.kablolar;
-  if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
+  oyun.taretler = new Taretler({ dunya, varliklar, ses, yerel: () => oyun.oyuncu.konum, atesEder: !v.istemci });   // 0.28.0
+  oyun.cihazCizici.taretAci = k => oyun.taretler.aci(k);
+  if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar,
+    canlilar: () => { const l = []; if (!oyun.hayatta.olu) l.push([oyun.oyuncu.konum.x, oyun.oyuncu.konum.y + 1, oyun.oyuncu.konum.z, 'o']); if (oyun.ag && oyun.ag.konumlar) for (const q of oyun.ag.konumlar()) l.push([q.x, q.y + 1, q.z, 'o']);
+      for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }) });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
   const gorevler = new Gorevler({ uretici: dunya.uretici, koyler });
   gorevler.iceAktar(v.gorevler);
@@ -587,7 +592,7 @@ function oyunBaslat(v) {
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
       if (oyun.istemci) { oyun.ag.sandikIste(x, y, z); return; }
       if (oyun.ag && !oyun.ag.sandikKilitle(k)) { hud.bildirim('Bu sandığı başka bir oyuncu kullanıyor.'); return; }
-      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
+      let d = dunya.sandiklar.get(k); if (!d) { d = BLOKLAR[dunya.blok(x, y, z)].mezar || BLOKLAR[dunya.blok(x, y, z)].elektrik ? new Array(27).fill(null) : koyler.sandikGanimeti(x, y, z); dunya.sandiklar.set(k, d); } envanterAcKapa(null, { yuvalar: d, k });
       sandikBasarim(x, y, z);
     },
     /* 0.26.0: kablolar: çok oyunculu istemcide istek sunucuya gider; sökülen kablo envantere geri döner */
@@ -1032,6 +1037,20 @@ function adim(t) {
     o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure },
       k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k)));
     const etkin = kilitli && !gelPencere.acik && !o.hayatta.olu && !o.fotoModu && !o.izleyici;
+    /* 0.28.0: taretler; çalışan jeneratörlerden duman, fıskiyelerden su */
+    o.taretler.guncelle(dt, k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k)) === 1);
+    o.cihazParcacik = (o.cihazParcacik || 0) - dt;
+    if (o.cihazParcacik <= 0) {
+      o.cihazParcacik = 0.15;
+      const P = o.oyuncu.konum;
+      for (const [, [x, y, z]] of o.dunya.elektrikler) {
+        if (Math.abs(x - P.x) > 28 || Math.abs(z - P.z) > 28) continue;
+        const b = BLOKLAR[o.dunya.blok(x, y, z)];
+        if (!b || !b.acik) continue;
+        if (b.elektrik === 'jenerator' && Math.random() < 0.7) { const [ex, ez] = [[12.75, 10.75], [5.25, 12.75], [3.25, 5.25], [10.75, 3.25]][b.yon].map(v => v / 16); o.dusenler.atesParcacik(x + ex, y + 1, z + ez, true); }
+        else if (b.elektrik === 'fiskiye') for (let i = 0; i < 3; i++) { const a = Math.random() * Math.PI * 2, r = 1 + Math.random() * 3; o.dusenler.renkliParcacik([0.55, 0.75, 1], x + 0.5 + Math.cos(a) * r, y + 0.2, z + 0.5 + Math.sin(a) * r, 1); }
+      }
+    }
     o.cihazCizici.onizleme(ayar.onizleme !== false && etkin && !o.etkilesim.kablo ? o.etkilesim.onizlemeBilgisi() : null);
     /* 0.26.0: kablolar, çekilen kablonun önizlemesi ve elde kablo varken bakılan kablonun vurgusu */
     const E = o.etkilesim, kabloElde = o.envanter.seciliId() === KABLO.esya;

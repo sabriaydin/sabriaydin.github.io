@@ -51,7 +51,9 @@ export const DOKULAR = [
   'batarya_yan0', 'batarya_yan1', 'batarya_yan2', 'batarya_yan3', 'batarya_yan4', 'ekablo', 'salter_k', 'salter_a',
   'elamba', 'elamba_a', 'eocak_ust', 'eocak_ust_a', 'eocak_yan', 'isitici', 'isitici_a',
   /* 0.26.0: şalter, lamba ve batarya ayrıntıları */
-  'salter_govde', 'salter_on', 'led_yesil', 'led_kirmizi', 'lamba_kap', 'batarya_kasa', 'batarya_etiket', 'havalandirma', 'uyari', 'kablo_kilif'
+  'salter_govde', 'salter_on', 'led_yesil', 'led_kirmizi', 'lamba_kap', 'batarya_kasa', 'batarya_etiket', 'havalandirma', 'uyari', 'kablo_kilif',
+  /* 0.28.0: jeneratör ve algılayıcı */
+  'jen_govde', 'jen_on', 'sensor', 'sensor_a'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -328,7 +330,7 @@ for (let id = 596; id <= 616; id++) { const e = id === 596 ? 497 : id <= 600 ? 4
 for (const C of Object.values(CIHAZ)) for (let f = 0; f < 4; f++) for (let i = 0; i < C.n; i++) {
   const [lx, ly, lz] = hucreYerel(C, i);
   blok(C.taban + f * C.n + i, { ad: C.ad, dok: 'panel_yan', cizim: C_SEKIL, opak: false, sertlik: C.sertlik, alet: C.alet, ses: C.ses, sekil: 'cihaz', gorunmez: true, ustuneKonmaz: true,
-    cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: C.taban + f * C.n, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, gizli: true, dusur: () => [], harita: 2 });
+    cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: C.taban + f * C.n, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, tuketim: C.tuketim || 0, gizli: true, dusur: () => [], harita: 2 });
 }
 /* 0.26.0: kablolar Rust'taki gibi kablo aracıyla cihazdan cihaza çekilir (oyun/kablolar.js); eski yer kablosu (617) eski kayıtlar için iletmeye devam eder */
 blok(617, { ad: 'Eski Yer Kablosu', dok: 'ekablo', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'tas', sekil: 'ekablo', elektrik: 'kablo', gizli: true, dusur: () => [[503, 1]], harita: 2, port: [0.5, 0.1, 0.5] });
@@ -344,6 +346,15 @@ for (let f = 0; f < 4; f++) {
   blok(852 + f, { ad: 'Dağıtıcı', dok: 'salter_govde', cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'kazma', ses: 'tas', sekil: 'dagitici', yon: f, taban: 852, gizli: f > 0, elektrik: 'dagitici', dusur: () => [[852, 1]], harita: 2 });
   blok(856 + f, { ad: 'Birleştirici', dok: 'salter_govde', cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'kazma', ses: 'tas', sekil: 'dagitici', birlestir: true, yon: f, taban: 856, gizli: f > 0, elektrik: 'birlestirici', dusur: () => [[856, 1]], harita: 2 });
 }
+/* 0.28.0: Yakıtlı Jeneratör: 860 + yön * 2 + çalışıyor. Yakıt deposu sandık gibi açılır (kömür, kütük, kalas, çubuk yakar). Yön, kontrol panelinin baktığı yöndür. */
+for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(860 + f * 2 + a, { ad: 'Yakıtlı Jeneratör', dok: 'jen_govde', cizim: C_SEKIL, opak: false, sertlik: 3, alet: 'kazma', ses: 'tas', sekil: 'jenerator',
+  yon: f, acik: a, taban: 860 + f * 2, gizli: f + a > 0, elektrik: 'jenerator', uretim: 20, sandik: true, ustuneKonmaz: true, dusur: () => [[860, 1]], harita: 2 });
+/* 0.28.0: Hareket Algılayıcı: duvarda (çeşit 0) ya da ayaklı (1); 872 + ((çeşit * 4 + yön) * 3 + kip) * 2 + algılıyor. Kip: 0 herkes, 1 oyuncular, 2 canavarlar */
+for (let c = 0; c < 2; c++) for (let f = 0; f < 4; f++) for (let m = 0; m < 3; m++) for (let a = 0; a < 2; a++) blok(872 + ((c * 4 + f) * 3 + m) * 2 + a, { ad: 'Hareket Algılayıcı', dok: a ? 'sensor_a' : 'sensor', cizim: C_SEKIL, opak: false,
+  sertlik: 0.8, ses: 'tas', sekil: 'algilayici', cesit: c, yon: f, kip: m, acik: a, taban: 872 + ((c * 4 + f) * 3 + m) * 2, gizli: c + f + m + a > 0, elektrik: 'algilayici', tuketim: 0.5, dusur: () => [[872, 1]], harita: 2 });
+/* 0.28.0: Sulama Fıskiyesi: çevresindeki tarlaları sular, ekinleri hızlandırır (920 + çalışıyor) */
+for (let a = 0; a < 2; a++) blok(920 + a, { ad: 'Sulama Fıskiyesi', dok: 'demir_cubuk', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.8, ses: 'tas', sekil: 'fiskiye', acik: a, taban: 920, gizli: a > 0,
+  elektrik: 'fiskiye', tuketim: 2, dusur: () => [[920, 1]], harita: 2 });
 /* Elektrikli Lamba: zeminde ayaklı (620-621), tavanda sarkan (842-843), duvarda aplik (844 + yön * 2 + açık) */
 const LAMBA_IS = { mesale: true, isik: 15, lamba: true };
 for (let a = 0; a < 2; a++) {
@@ -577,10 +588,10 @@ esya(495, { ad: 'Devre Kartı', simge: 'devre', ozellik: 'Elektrikli cihazların
 esya(496, { ad: 'Bakır Bobin', simge: 'bobin', ozellik: 'Türbin, ocak ve ısıtıcı yapımında kullanılır' });
 esya(503, { ad: 'Elektrik Kablosu', tur: 'kablo', simge: 'kablo', ozellik: 'Bir çıkış noktasından bir giriş noktasına çekilir; yüzeye sağ tık ara nokta ekler. Shift: düz çek, Shift + tekerlek: sarkma, R: iptal. Her 3 blok için 1 kablo harcanır' });
 /* 0.25.0: çok bloklu cihazların eşyaları (sağ tıkla kurulur; R tuşu yönü çevirir) */
-const CIHAZ_SIMGE = { gunes: 'cihazGunes', ruzgar: 'cihazRuzgar', su: 'cihazSu', bataryaK: 'cihazBatarya', bataryaO: 'cihazBatarya', bataryaB: 'cihazBatarya' };
+const CIHAZ_SIMGE = { gunes: 'cihazGunes', ruzgar: 'cihazRuzgar', su: 'cihazSu', bataryaK: 'cihazBatarya', bataryaO: 'cihazBatarya', bataryaB: 'cihazBatarya', taret: 'cihazTaret' };
 for (const C of Object.values(CIHAZ)) esya(C.esya, { ad: C.ad, tur: 'cihaz', cihaz: C.tur, simge: CIHAZ_SIMGE[C.tur], boyut: { bataryaK: 0, bataryaO: 1, bataryaB: 2 }[C.tur], yigin: 16,
   ozellik: `${C.aciklama} · ${C.w} × ${C.d} taban, ${C.h} blok yükseklik` });
-for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakır tel sinyali. Duvara ya da zemine konur'], [852, 'Bir girişteki gücü üç çıkışa, bağlı cihazların talebine göre böler'], [856, 'İki girişteki gücü toplayıp tek çıkıştan verir (ör. güneş panellerini birleştirmek için)'], [620, '0,5 E/sn harcar · Zemine, tavana ya da duvara konur'],
+for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakır tel sinyali. Duvara ya da zemine konur'], [860, 'Kömür, kütük, kalas ya da çubuk yakarak 20 E/sn üretir; çıkışına talep varken yakıt harcar. Sağ tık: yakıt deposu'], [872, 'Yakınında (7 blok) canlı varken gücü çıkışına geçirir; 0,5 E/sn harcar. Sağ tık: kip (herkes / oyuncular / canavarlar)'], [920, 'Çevresindeki 9 × 9 tarlayı sular ve ekinleri hızlandırır; 2 E/sn harcar'], [852, 'Bir girişteki gücü üç çıkışa, bağlı cihazların talebine göre böler'], [856, 'İki girişteki gücü toplayıp tek çıkıştan verir (ör. güneş panellerini birleştirmek için)'], [620, '0,5 E/sn harcar · Zemine, tavana ya da duvara konur'],
   [622, '4 E/sn harcar · Fırın ve kamp ateşi yerine geçer, kömür gerektirmez'], [624, '3 E/sn harcar · Çevresini ısıtır']]) E[id].ozellik = oz;
 for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
 E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';

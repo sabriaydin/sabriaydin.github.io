@@ -221,7 +221,7 @@ export class SunucuOyun {
         const sahip = this.kilit.get(s);
         if (sahip != null && sahip !== c.id) { k.gonder({ t: 'sandik', k: s, kilitli: 1 }); return; }
         let d = o.dunya.sandiklar.get(s);
-        if (!d) { d = BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].mezar ? new Array(27).fill(null) : o.koyler.sandikGanimeti(m.x, m.y, m.z); o.dunya.sandiklar.set(s, d); }
+        if (!d) { d = BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].mezar || BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].elektrik ? new Array(27).fill(null) : o.koyler.sandikGanimeti(m.x, m.y, m.z); o.dunya.sandiklar.set(s, d); }
         this.kilit.set(s, c.id);
         k.gonder({ t: 'sandik', k: s, y: sandikDizi(d) });
         break;

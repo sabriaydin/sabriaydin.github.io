@@ -169,6 +169,29 @@ export function sekilKutulari(id, komsu, carp = false) {
       if (b.cesit) L.push([4 * P, 0, 5 * P, 12 * P, P, 13 * P, T.panel_yan], [7 * P, P, 8.5 * P, 9 * P, 4 * P, 10.5 * P, T.demir_cubuk]);
       return dondur(L, b.yon);
     }
+    /* 0.28.0: Yakıtlı Jeneratör: kızak, motor gövdesi, yakıt tankı, egzoz borusu, önde kontrol paneli */
+    case 'jenerator': {
+      if (carp) return dondur([[P, 0, 2 * P, 15 * P, 13 * P, 14 * P]], b.yon);
+      const D = T.demir_cubuk;
+      return dondur([[P, 0, 2 * P, 15 * P, 1.5 * P, 3.5 * P, D], [P, 0, 12.5 * P, 15 * P, 1.5 * P, 14 * P, D], [2 * P, 1.5 * P, 3 * P, 14 * P, 2.5 * P, 13 * P, T.batarya_kasa],
+        [2 * P, 2.5 * P, 3 * P, 14 * P, 10.5 * P, 13 * P], [3 * P, 10.5 * P, 4 * P, 13 * P, 13 * P, 12 * P, T.batarya_ust], [7 * P, 13 * P, 7 * P, 9 * P, 13.6 * P, 9 * P, D],
+        [12 * P, 10.5 * P, 10 * P, 13.5 * P, 15 * P, 11.5 * P, D], [4 * P, 4 * P, 2.6 * P, 12 * P, 9 * P, 3 * P, T.jen_on], [b.acik ? 13 * P : 13 * P, 4 * P, 1.4 * P, 15 * P, 6 * P, 2.6 * P, b.acik ? T.led_yesil : T.led_kirmizi]], b.yon);
+    }
+    /* 0.28.0: Hareket Algılayıcı: duvar plakası ya da ayak üstünde kubbeli algılayıcı başı (ışığı algılarken yanar) */
+    case 'algilayici': {
+      const D = T.demir_cubuk;
+      if (b.cesit === 0) {
+        if (carp) return dondur([[5 * P, 5 * P, 12 * P, 11 * P, 11 * P, 1]], b.yon);
+        return dondur([[5 * P, 5 * P, 15 * P, 11 * P, 11 * P, 1, T.salter_govde], [6 * P, 6 * P, 13 * P, 10 * P, 10 * P, 15 * P], [7 * P, 7 * P, 12.4 * P, 9 * P, 9 * P, 13 * P]], b.yon);
+      }
+      if (carp) return [[5 * P, 0, 5 * P, 11 * P, 9 * P, 11 * P]];
+      return dondur([[5 * P, 0, 5 * P, 11 * P, P, 11 * P, D], [7.5 * P, P, 7.5 * P, 8.5 * P, 4 * P, 8.5 * P, D], [6 * P, 4 * P, 6 * P, 10 * P, 8 * P, 10 * P, T.salter_govde], [6.5 * P, 4.5 * P, 5.4 * P, 9.5 * P, 7.5 * P, 6 * P]], b.yon);
+    }
+    /* 0.28.0: Sulama Fıskiyesi: taban, boru, dönen başlık ve kollar */
+    case 'fiskiye':
+      if (carp) return [];
+      return [[6 * P, 0, 6 * P, 10 * P, P, 10 * P], [7.5 * P, P, 7.5 * P, 8.5 * P, 6 * P, 8.5 * P], [6.5 * P, 6 * P, 6.5 * P, 9.5 * P, 7.5 * P, 9.5 * P, T.batarya_ust],
+        [3.5 * P, 6.5 * P, 7.6 * P, 12.5 * P, 7 * P, 8.4 * P], [7.6 * P, 6.5 * P, 3.5 * P, 8.4 * P, 7 * P, 12.5 * P], [7 * P, 7.5 * P, 7 * P, 9 * P, 8 * P, 9 * P, b.acik ? T.led_yesil : T.led_kirmizi]];
     /* 0.27.0: Dağıtıcı ve Birleştirici: alçak metal kutu, üstte yön oku etiketi */
     case 'dagitici':
       if (carp) return [[2 * P, 0, 2 * P, 14 * P, 5 * P, 14 * P]];
