@@ -117,6 +117,12 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 30.1 (0.30.1): Üretim paneli
+- Araç çubuğu: tarif ya da malzeme adıyla arama, sıralama (önerilen, ad, yapılabilir miktar), "Yapılabilenler" süzgeci.
+- Sekmelerde yapılabilir tarif sayısı; yeni "Favoriler" sekmesi (favoriler tarayıcıda saklanır).
+- Sade liste: malzeme simgeleri ve sayıları, eksik istasyon uyarısı, kaç kez yapılabileceği; Üret düğmesine Shift + tık olabildiğince çok üretir.
+- Ayrıntı paneli: büyük simge, kategori ve çantadaki sayı, istasyon durumu, eşya özellikleri (hasar, dayanım, zırh, besin vb.), seçilen miktara göre malzeme tablosu, eksik malzemenin tarifine geçiş, miktar seçici (−, +, En çok), "Üret × N", "Takip et", "Bununla yapılanlar" ve "Son üretilenler" kısayolları.
+
 ## 30. aşama (0.30.0): Envanter ekranı ve canlı karakter önizlemesi
 - Karakter bölümü: dikey zırh yuvaları, ortada canlı 3B karakter önizlemesi, yanında durum paneli.
 - Önizleme: giyilen zırhlar karakterin üzerinde malzeme rengiyle görünür (büyülü zırh parıldar; dalış maskesi ve palet kendine özgü), eldeki eşya sağ elde durur. Kafa ve gövde fare imlecini izler (Minecraft gibi); önizleme sürüklenerek döndürülür, çift tıkla öne döner. Pencere kapalıyken çizim durur.

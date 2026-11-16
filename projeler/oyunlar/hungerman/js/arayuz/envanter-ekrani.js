@@ -35,9 +35,17 @@ export class EnvanterEkrani {
     $('#envAra').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { e.target.value = ''; this.aranan = ''; this.aramaCiz(); e.target.blur(); } });
     addEventListener('keydown', e => this.tus(e), true);
     $('#envZirh').innerHTML = ZIRH_PARCALARI.map((a, z) => `<div class="yuva zirhYuva" data-z="${z}" title="${a}"></div>`).join('');
-    $('#tarifSekme').innerHTML = KATEGORILER.map(([k, a]) => `<button type="button" data-k="${k}">${a}</button>`).join('');
-    $('#tarifSekme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; this.kategori = b.dataset.k; this.ses.tik(); [...$('#tarifSekme').children].forEach(x => x.classList.toggle('on', x === b)); this.tarifCiz(); });
+    /* 0.30.1: üretim: favoriler, sıralama, yapılabilir süzgeci, seçili tarif ayrıntısı ve miktar seçimi */
+    this.sekmeler = [['hepsi', 'Tümü'], ['favori', '★ Favoriler'], ...KATEGORILER.filter(([k]) => k !== 'hepsi')];
+    try { this.favoriler = new Set(JSON.parse(localStorage.getItem('hungerman_tarif_favori') || '[]')); } catch (e) { this.favoriler = new Set(); }
+    this.secTarif = -1; this.miktar = 1; this.sira = 'oneri'; this.yalnizYapilir = false;
+    $('#tarifSekme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; this.kategori = b.dataset.k; this.ses.tik(); this.tarifCiz(); });
     $('#tarifAra').addEventListener('input', e => { this.arama = e.target.value.trim().toLocaleLowerCase('tr'); this.tarifCiz(); });
+    $('#tarifSira').addEventListener('change', e => { this.sira = e.target.value; this.ses.tik(); this.tarifCiz(); });
+    $('#tarifYapilir').addEventListener('change', e => { this.yalnizYapilir = e.target.checked; this.ses.tik(); this.tarifCiz(); });
+    $('#tarifAyrinti').addEventListener('click', e => this.ayrintiTikla(e));
+    $('#tarifAyrinti').addEventListener('input', e => { if (e.target.id === 'tarifMiktar') { this.miktar = Math.max(1, Math.min(this.miktarUst(), Math.floor(+e.target.value) || 1)); this.ayrintiCiz(true); } });
+    $('#tarifAyrinti').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter' && e.target.id === 'tarifMiktar') this.uretSec(this.secTarif, this.miktar); });
     $('#tarifAra').addEventListener('keydown', e => e.stopPropagation());
     $('#envKapat').addEventListener('click', () => this.kapatIste && this.kapatIste());
     this.kok.addEventListener('contextmenu', e => e.preventDefault());
@@ -69,18 +77,10 @@ export class EnvanterEkrani {
     $('#envSirala').addEventListener('click', () => { this.sirala(this.envanter.yuvalar, 9, 36); this.ses.tik(); this.envanter.bildir(); this.ciz(); });
     this.kok.querySelector('.sandikIslem').addEventListener('click', e => { const b = e.target.closest('button[data-sandik]'); if (b) this.sandikIslem(b.dataset.sandik); });
     $('#tarifListe').addEventListener('click', e => {
-      const b = e.target.closest('button[data-t]'); if (!b) return;
-      const t = TARIFLER[+b.dataset.t];
-      const kez = b.dataset.kez === 'hepsi' ? 64 : 1;
-      const n = uret(this.envanter, t, kez);
-      if (n) {
-        this.ses.uretim(); this.hud.bildirim(`${ESYALAR[t.cikti].ad} × ${n * t.adet} üretildi`, t.cikti);
-        /* Eritme, pişirme ve iksir yapımı deneyim kazandırır */
-        const ist = istasyonlar(t);
-        if (this.hayatta && (ist.includes('firin') || ist.includes('simya'))) this.hayatta.xpEkle(n * (ist.includes('simya') ? 2 : 0.35));
-      }
-      else this.hud.bildirim('Envanterde yer yok.');
-      this.ciz();
+      const fv = e.target.closest('[data-fav]'); if (fv) { this.favori(+fv.dataset.fav); return; }
+      const b = e.target.closest('button[data-t]');
+      if (b) { this.uretSec(+b.dataset.t, e.shiftKey ? 64 : 1); return; }
+      const r = e.target.closest('.tarif[data-sec]'); if (r) { this.sec(+r.dataset.sec); this.ses.tik(); }
     });
   }
 
@@ -175,7 +175,6 @@ export class EnvanterEkrani {
     this.aramaCiz();
     const ist = this.istasyonlar();
     $('#istasyonDurum').innerHTML = Object.entries(ISTASYON_ADI).map(([k, a]) => `<span class="rozet ${ist.has(k) ? 'var' : 'yok'}">${a}${ist.has(k) ? ' yakında' : ''}</span>`).join('') + (ist.has('elocak') ? '<span class="rozet var">Elektrikli Ocak çalışıyor · kömür gerekmez</span>' : '');
-    [...$('#tarifSekme').children].forEach(b => b.classList.toggle('on', b.dataset.k === this.kategori));
     this.tarifCiz();
     this.tasimaCiz();
   }
@@ -226,31 +225,128 @@ export class EnvanterEkrani {
     e.preventDefault(); e.stopImmediatePropagation();
     this.ses.tik(); env.bildir(); this.ciz();
   }
+  /* ---------- 0.30.1: üretim paneli ---------- */
+  /* Tarifin durumu: kaç kez yapılabilir, istasyon hazır mı */
+  tarifDurum(i) { const t = TARIFLER[i], n = kacKez(this.envanter, t), istOk = istasyonVar(t, this.ist || this.istasyonlar()); return { t, i, n, istOk, yapilir: n > 0 && istOk }; }
   tarifCiz() {
-    const env = this.envanter, ist = this.istasyonlar();
-    const liste = TARIFLER.map((t, i) => ({ t, i, n: kacKez(env, t), istOk: istasyonVar(t, ist) }))
-      .filter(o => this.kategori === 'hepsi' || o.t.kategori === this.kategori)
-      .filter(o => !this.arama || ESYALAR[o.t.cikti].ad.toLocaleLowerCase('tr').includes(this.arama))
-      .sort((a, b) => ((b.n > 0 && b.istOk) - (a.n > 0 && a.istOk)) || (a.istOk === b.istOk ? 0 : a.istOk ? -1 : 1));
-    if (!liste.length) { $('#tarifListe').innerHTML = '<div class="bos">Eşleşen tarif mevcut değil.</div>'; return; }
-    $('#tarifListe').innerHTML = liste.map(({ t, i, n, istOk }) => {
-      const e = ESYALAR[t.cikti];
-      const gir = girdiListesi(t).map(([g, a]) => {
-        const var_ = girdiSay(env, g), id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g;
-        return `<span class="${var_ >= a ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt="">${girdiAdi(g)} ${Math.min(var_, a)}/${a}</span>`;
-      }).join('');
-      const yapilir = n > 0 && istOk;
-      return `<div class="tarif${yapilir ? '' : ' olmaz'}">
-        <div class="tSimge"><img src="${simge(t.cikti).url}" alt="">${t.adet > 1 ? `<span>${t.adet}</span>` : ''}</div>
-        <div><b>${e.ad}</b><div class="gir">${gir}</div>${t.istasyon ? `<div class="ist ${istOk ? '' : 'eksik'}">${istasyonMetni(t)} gerekli${istOk ? '' : ' (yakında değil)'}</div>` : ''}</div>
-        <div class="uretBtn"><button type="button" data-t="${i}" ${yapilir ? '' : 'disabled'}>Üret</button>${yapilir && n > 1 && e.yigin > 1 ? `<button type="button" class="cok" data-t="${i}" data-kez="hepsi">Tümü (${Math.min(n, Math.floor(64 / t.adet) || 1)})</button>` : ''}</div>
-      </div>`;
+    const env = this.envanter; this.ist = this.istasyonlar();
+    const a = this.arama, hepsi = TARIFLER.map((t, i) => this.tarifDurum(i));
+    const uyar = o => !a || ESYALAR[o.t.cikti].ad.toLocaleLowerCase('tr').includes(a) || girdiListesi(o.t).some(([g]) => girdiAdi(g).toLocaleLowerCase('tr').includes(a));
+    const kat = (o, k) => k === 'hepsi' || (k === 'favori' ? this.favoriler.has(o.i) : o.t.kategori === k);
+    /* Sekmeler: her kategoride yapılabilir tarif sayısı */
+    $('#tarifSekme').innerHTML = this.sekmeler.map(([k, ad]) => {
+      const l = hepsi.filter(o => kat(o, k) && uyar(o)), y = l.filter(o => o.yapilir).length;
+      return `<button type="button" data-k="${k}" class="${k === this.kategori ? 'on' : ''}${!l.length ? ' bosSekme' : ''}">${ad}${y ? `<em>${y}</em>` : ''}</button>`;
     }).join('');
+    let liste = hepsi.filter(o => kat(o, this.kategori) && uyar(o) && (!this.yalnizYapilir || o.yapilir));
+    const ad = o => ESYALAR[o.t.cikti].ad;
+    if (this.sira === 'ad') liste.sort((x, y) => ad(x).localeCompare(ad(y), 'tr'));
+    else if (this.sira === 'adet') liste.sort((x, y) => (y.yapilir ? y.n : -1) - (x.yapilir ? x.n : -1));
+    else liste.sort((x, y) => (y.yapilir - x.yapilir) || (y.istOk - x.istOk) || (this.favoriler.has(y.i) - this.favoriler.has(x.i)));
+    this.gorunen = liste.map(o => o.i);
+    if (!liste.length) {
+      $('#tarifListe').innerHTML = `<div class="bos">${this.kategori === 'favori' && !this.favoriler.size ? 'Favori tarif mevcut değil. Tarif ayrıntısındaki ☆ düğmesiyle eklenir.' : 'Eşleşen tarif mevcut değil.'}</div>`;
+    } else {
+      $('#tarifListe').innerHTML = liste.map(({ t, i, n, istOk, yapilir }) => {
+        const e = ESYALAR[t.cikti];
+        const gir = girdiListesi(t).map(([g, k]) => { const v = girdiSay(env, g), id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g; return `<span class="${v >= k ? 'ok' : 'eksik'}" title="${girdiAdi(g)}: ${v} / ${k}"><img src="${simge(id).url}" alt="">${k}</span>`; }).join('');
+        return `<div class="tarif${yapilir ? '' : ' olmaz'}${i === this.secTarif ? ' secili' : ''}" data-sec="${i}">
+          <div class="tSimge"><img src="${simge(t.cikti).url}" alt="">${t.adet > 1 ? `<span>${t.adet}</span>` : ''}</div>
+          <div class="tOrta"><b>${this.favoriler.has(i) ? '<i class="yildiz">★</i>' : ''}${e.ad}</b><div class="gir">${gir}${t.istasyon && !istOk ? `<span class="istEksik" title="${istasyonMetni(t)} gerekli">${istasyonMetni(t)}</span>` : ''}</div></div>
+          <div class="uretBtn">${yapilir ? `<small>×${n > 99 ? '99+' : n}</small>` : ''}<button type="button" data-t="${i}" ${yapilir ? '' : 'disabled'} title="Shift + tık: olabildiğince çok üret">Üret</button></div>
+        </div>`;
+      }).join('');
+    }
+    if (!TARIFLER[this.secTarif] && liste.length) { this.secTarif = liste[0].i; this.miktar = 1; }   // seçim, süzgeç dışında kalsa da korunur
+    this.ayrintiCiz();
+  }
+  /* Seçilebilecek en büyük miktar (kaç kez) */
+  miktarUst() { const t = TARIFLER[this.secTarif]; if (!t) return 1; const n = kacKez(this.envanter, t); return Math.max(1, Math.min(n, Math.ceil(64 / t.adet) * 9)); }
+  sec(i, kaydir) {
+    if (!TARIFLER[i]) return;
+    this.secTarif = i; this.miktar = 1;
+    if (!this.gorunen || !this.gorunen.includes(i)) { this.kategori = 'hepsi'; this.arama = ''; $('#tarifAra').value = ''; this.yalnizYapilir = false; $('#tarifYapilir').checked = false; this.tarifCiz(); }
+    else { this.kok.querySelectorAll('.tarif[data-sec]').forEach(el => el.classList.toggle('secili', +el.dataset.sec === i)); this.ayrintiCiz(); }
+    if (kaydir !== false) { const el = this.kok.querySelector(`.tarif[data-sec="${i}"]`); if (el) el.scrollIntoView({ block: 'nearest' }); }
+  }
+  favori(i) {
+    if (this.favoriler.has(i)) this.favoriler.delete(i); else this.favoriler.add(i);
+    try { localStorage.setItem('hungerman_tarif_favori', JSON.stringify([...this.favoriler])); } catch (e) { /* depolama kapalı */ }
+    this.ses.tik(); this.tarifCiz();
+  }
+  uretSec(i, kez) {
+    const t = TARIFLER[i]; if (!t) return;
+    const d = this.tarifDurum(i);
+    if (!d.istOk) { this.ses.hataSes(); this.hud.bildirim(`${istasyonMetni(t)} yakınında üretilir.`); return; }
+    const n = uret(this.envanter, t, kez);
+    if (n) {
+      this.ses.uretim(); this.hud.bildirim(`${ESYALAR[t.cikti].ad} × ${n * t.adet} üretildi`, t.cikti);
+      /* Eritme, pişirme ve iksir yapımı deneyim kazandırır */
+      const ist = istasyonlar(t);
+      if (this.hayatta && (ist.includes('firin') || ist.includes('simya'))) this.hayatta.xpEkle(n * (ist.includes('simya') ? 2 : 0.35));
+      this.son = [i, ...(this.son || []).filter(x => x !== i)].slice(0, 6);
+    } else if (kacKez(this.envanter, t) > 0) this.hud.bildirim('Envanterde yer yok.');
+    else { this.ses.hataSes(); this.hud.bildirim('Malzeme yetersiz.'); }
+    this.miktar = Math.max(1, Math.min(this.miktar, this.miktarUst()));
+    this.ciz();
+  }
+  /* Eşyanın kısa özellik satırları */
+  ozellikler(id) {
+    const e = ESYALAR[id], l = [];
+    if (!e) return l;
+    if (e.alet && e.alet.hasar != null && e.alet.tur !== 'yay' && e.alet.tur !== 'olta') l.push(`Saldırı ${e.alet.hasar / 2} kalp · Hız ${e.alet.hiz}`);
+    if (e.alet && e.alet.dayanim) l.push(`Dayanım ${e.alet.dayanim}${e.alet.seviye != null ? ` · Kazma seviyesi ${e.alet.seviye}` : ''}`);
+    if (e.zirh) l.push(`Zırh +${e.zirh.puan} (${ZIRH_PARCALARI[e.zirh.parca]}) · Dayanım ${e.zirh.dayanim}`);
+    if (e.yemek) l.push(`Açlığı ${e.yemek / 2} birim giderir`);
+    if (e.iyilestir) l.push(`${e.iyilestir / 2} kalp iyileştirir`);
+    if (e.ozellik) l.push(e.ozellik);
+    if (e.yigin && e.yigin > 1) l.push(`Yığın: ${e.yigin}`); else l.push('Yığılmaz');
+    return l;
+  }
+  ayrintiCiz(sadeceMiktar) {
+    const kap = $('#tarifAyrinti'), i = this.secTarif, t = TARIFLER[i];
+    if (!t) { kap.innerHTML = '<div class="bos">Ayrıntı için listeden bir tarif seçiniz.</div>'; return; }
+    const env = this.envanter, d = this.tarifDurum(i), e = ESYALAR[t.cikti], ust = this.miktarUst();
+    this.miktar = Math.max(1, Math.min(this.miktar, ust));
+    const m = this.miktar, ok = d.yapilir && m <= d.n;
+    const girdiler = girdiListesi(t).map(([g, k]) => {
+      const v = girdiSay(env, g), gerek = k * m, id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g;
+      const kaynak = !GRUPLAR[g] && v < gerek ? TARIFLER.findIndex(x => x.cikti === g) : -1;
+      return `<li class="${v >= gerek ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt=""><span>${girdiAdi(g)}</span><b>${v} / ${gerek}</b>${kaynak >= 0 ? `<button type="button" class="tLink" data-git="${kaynak}" title="Bu malzemenin tarifine git">tarif ›</button>` : ''}</li>`;
+    }).join('');
+    if (sadeceMiktar && kap.querySelector('#tarifMiktar')) {
+      kap.querySelector('.tGirdi').innerHTML = girdiler;
+      const b = kap.querySelector('[data-uret]'); b.disabled = !ok; b.textContent = `Üret × ${m * t.adet}`;
+      return;
+    }
+    const kullanim = [...new Set(TARIFLER.map((x, j) => [x, j]).filter(([x]) => x.girdi.some(([g]) => g === t.cikti || (GRUPLAR[g] && GRUPLAR[g].idler.includes(t.cikti)))).map(([x, j]) => j))].slice(0, 12);
+    const takip = this.takip && this.takip.get() === i;
+    const elde = env.say(t.cikti);
+    kap.innerHTML = `
+      <div class="tBas"><div class="tBuyuk"><img src="${simge(t.cikti).url}" alt="">${t.adet > 1 ? `<span>${t.adet}</span>` : ''}</div>
+        <div><b>${e.ad}</b><small>${(KATEGORILER.find(([k]) => k === t.kategori) || [0, ''])[1]}${elde ? ` · Çantada ${elde}` : ''}</small></div>
+        <button type="button" class="tYildiz${this.favoriler.has(i) ? ' on' : ''}" data-favori="${i}" title="${this.favoriler.has(i) ? 'Favorilerden çıkar' : 'Favorilere ekle'}">${this.favoriler.has(i) ? '★' : '☆'}</button></div>
+      <div class="tIst ${d.istOk ? 'ok' : 'eksik'}">${t.istasyon ? `${istasyonMetni(t)} ${d.istOk ? 'yakında ✓' : 'gerekli (yakında değil)'}` : 'İstasyon gerekmez'}</div>
+      <ul class="tOzellik">${this.ozellikler(t.cikti).map(x => `<li>${x}</li>`).join('')}</ul>
+      <h4>Malzemeler</h4><ul class="tGirdi">${girdiler}</ul>
+      <div class="tMiktar"><button type="button" data-m="-1" title="Azalt">−</button><input id="tarifMiktar" type="number" min="1" max="${ust}" value="${m}"><button type="button" data-m="1" title="Artır">+</button><button type="button" data-m="max" class="tMaks" title="Malzemenin yettiği kadar">En çok (${d.n > 0 ? ust : 0})</button></div>
+      <div class="tIslem"><button type="button" class="tUret" data-uret ${ok ? '' : 'disabled'}>Üret × ${m * t.adet}</button><button type="button" class="tTakip${takip ? ' on' : ''}" data-takip title="Gereken malzemeler ekranın solunda gösterilir">${takip ? 'Takibi bırak' : 'Takip et'}</button></div>
+      ${kullanim.length ? `<h4>Bununla yapılanlar</h4><div class="tKullanim">${kullanim.map(j => `<button type="button" data-git="${j}" title="${ESYALAR[TARIFLER[j].cikti].ad}"><img src="${simge(TARIFLER[j].cikti).url}" alt=""></button>`).join('')}</div>` : ''}
+      ${this.son && this.son.length ? `<h4>Son üretilenler</h4><div class="tKullanim">${this.son.map(j => `<button type="button" data-git="${j}" title="${ESYALAR[TARIFLER[j].cikti].ad}"><img src="${simge(TARIFLER[j].cikti).url}" alt=""></button>`).join('')}</div>` : ''}`;
+  }
+  ayrintiTikla(e) {
+    const b = e.target.closest('button'); if (!b) return;
+    const i = this.secTarif;
+    if (b.dataset.git != null) { this.sec(+b.dataset.git); this.ses.tik(); }
+    else if (b.dataset.favori != null) this.favori(i);
+    else if (b.dataset.m != null) { this.miktar = b.dataset.m === 'max' ? this.miktarUst() : this.miktar + +b.dataset.m; this.ses.tik(); this.ayrintiCiz(true); const g = $('#tarifMiktar'); if (g) g.value = this.miktar; }
+    else if (b.dataset.uret != null) this.uretSec(i, this.miktar);
+    else if (b.dataset.takip != null && this.takip) { this.takip.set(this.takip.get() === i ? -1 : i); this.ses.tik(); this.ayrintiCiz(); }
   }
 
   /* ---------- Yuva tıklamaları ---------- */
   fare(e) {
-    if (e.target.closest('#tarifListe, #tarifSekme, #tarifAra, .kapat')) return;
+    if (e.target.closest('#tarifListe, #tarifSekme, #tarifAra, #tarifAyrinti, .uretimUst, .kapat')) return;
     const el = e.target.closest('.izgara .yuva');
     const env = this.envanter;
     if (el && el.dataset.o != null) { e.preventDefault(); this.orsTikla(+el.dataset.o, e); return; }

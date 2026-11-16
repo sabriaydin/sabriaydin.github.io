@@ -105,11 +105,17 @@
     </section>
     <section class="envSag">
       <header class="uretimBaslik"><h2>Üretim</h2><span id="istasyonDurum"></span></header>
+      <!-- 0.30.1: arama, sıralama, süzgeç, ayrıntı paneli -->
       <div class="uretimUst">
-        <input id="tarifAra" type="search" placeholder="Tarif ara" autocomplete="off">
+        <input id="tarifAra" type="search" placeholder="Tarif ya da malzeme ara" autocomplete="off">
+        <select id="tarifSira" title="Sıralama"><option value="oneri">Önerilen</option><option value="ad">Ada göre</option><option value="adet">Yapılabilir miktar</option></select>
+        <label class="uretimSecim" title="Yalnızca malzemesi ve istasyonu hazır olan tarifler"><input type="checkbox" id="tarifYapilir"><span>Yapılabilenler</span></label>
       </div>
       <div id="tarifSekme" class="sekmeler"></div>
-      <div id="tarifListe"></div>
+      <div class="uretimGovde">
+        <div id="tarifListe"></div>
+        <aside id="tarifAyrinti" class="tarifAyrinti"></aside>
+      </div>
     </section>
     <section class="envSandik" hidden>
       <header><h2>Sandık</h2><span class="ipucuMetin">Shift + tık: sandık ile envanter arasında taşı</span></header>
