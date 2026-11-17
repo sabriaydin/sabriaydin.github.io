@@ -1,5 +1,6 @@
 /* HungerMan - canlı türleri: özellikler, yaşadıkları biyomlar, düşürdükleri eşyalar */
 import { BY } from '../dunya/uretici.js';
+import { ESYA39 } from '../bloklar.js';
 
 const ar = (r, a, b) => a + Math.floor(r() * (b - a + 1));
 
@@ -40,6 +41,9 @@ export const TURLER = {
     dusur: r => [[459, 1], [22, ar(r, 4, 8)], [264, ar(r, 1, 2)], [61, ar(r, 2, 5)], [288, ar(r, 8, 16)]], ses: 'buziskelet', xp: 50 },
   reis: { ad: 'Haydut Reisi', model: 'reis', gen: 0.38, boy: 2.15, can: 150, hiz: 1.2, kosu: 3.4, dusman: true, boss: 'reis', hasar: 7, menzil: 1.3, gorus: 30,
     dusur: r => [[460, 1], [288, ar(r, 15, 30)], [261, ar(r, 3, 6)], [290, ar(r, 1, 2)], [264, ar(r, 0, 2)]], ses: 'haydut', xp: 50 },
+  /* 0.39.0: Lanetli Ada'nın tek bekçisi: mutasyon geçirmiş dev Kül Zombisi. Adaya bağlıdır (oyun/ada-bekcisi.js); yetenekleri: yere vuruş, magma yağmuru, kül fırtınası, hamle, kül zombisi çağırma */
+  kuldev: { ad: 'Kül Devi', model: 'kuldev', aile: 'zombi', gen: 0.62, boy: 3.05, can: 260, hiz: 0.85, kosu: 2.3, dusman: true, boss: 'kuldev', atesBagisik: true, hasar: 8, menzil: 1.9, gorus: 30, yakar: 4,
+    dusur: r => [[ESYA39.anahtar, 2], [515, ar(r, 3, 6)], [471, ar(r, 4, 8)], [472, ar(r, 1, 3)], [264, ar(r, 1, 3)], [288, ar(r, 15, 30)]], ses: 'zombi', xp: 120 },
   muhafiz: { ad: 'Taş Muhafız', model: 'muhafiz', gen: 0.6, boy: 2.8, can: 180, hiz: 0.8, kosu: 1.9, dusman: true, boss: 'muhafiz', hasar: 9, menzil: 1.6, gorus: 24,
     dusur: r => [[461, 1, { koruma: 3 }], [261, ar(r, 4, 8)], [264, ar(r, 2, 4)], [61, ar(r, 3, 6)], [288, ar(r, 10, 20)]], ses: 'muhafiz', xp: 70 },
   hamsi: { ad: 'Hamsi', model: 'hamsi', gen: 0.12, boy: 0.25, can: 2, hiz: 2.0, kosu: 4.8, su: true, grup: [4, 8], dusur: () => [[297, 1]], ses: 'balik', xp: 1 },

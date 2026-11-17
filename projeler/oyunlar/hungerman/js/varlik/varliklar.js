@@ -850,6 +850,12 @@ export class Varliklar {
         if (yatay < 3.6) return ['savurma', 2.8, 3];
         if (yatay > 4 && yatay < 13) return ['hamle', 3.2, 4];
         return null;
+      /* 0.39.0: Kül Devi (Lanetli Ada bekçisi) */
+      case 'kuldev':
+        if (faz2 && !v.cagirdi) return ['cagir', 2.5, 1];
+        if (yatay < 4.5) return faz2 && r < 0.4 ? ['kulFirtina', 4.2, 3] : ['yerVurus', 3.2, 1];
+        if (yatay < 17) return r < 0.55 ? ['magmaYagmuru', 3, 2] : ['hamle', 3.4, 4];
+        return null;
       case 'muhafiz':
         if (yatay > 7 && yatay < 22 && r < 0.6) return ['kaya', 3, 2];
         if (yatay < 10) return ['sicra', 3.5, 1];
@@ -874,6 +880,7 @@ export class Varliklar {
         if (t < 1 && tikla('i', 0.25)) this.efekt({ t: 'halka', x: p.x, y: p.y + 0.1, z: p.z, r: 2.5, c: [0.95, 0.82, 0.5], n: 18 });
         if (t > 1 && bir('a')) {
           if (T.boss === 'reis') { v.cagirdi = true; this.cagir(v, 'haydut', 2, 4); this.efekt({ t: 'patlama', x: p.x, y: p.y + 1, z: p.z, c: [0.6, 0.45, 0.3], n: 20, ses: 'bagir' }); }
+          else if (T.boss === 'kuldev') { v.cagirdi = true; this.cagir(v, 'kulzombi', 2, 4); this.efekt({ t: 'patlama', x: p.x, y: p.y + 1.5, z: p.z, c: [1, 0.45, 0.15], n: 40, ses: 'gok' }); }
           else { this.cagir(v, 'mumya', faz2 ? 3 : 2, 5); this.efekt({ t: 'patlama', x: p.x, y: p.y + 1.5, z: p.z, c: [0.95, 0.82, 0.5], n: 40, ses: 'kum' }); }
         }
         return t > 1.3;
@@ -940,6 +947,42 @@ export class Varliklar {
           if (yakinda(p.x, p.z, 3.4)) ctx.oyuncuyaVur(faz2 ? 8 : 6, v);
         }
         return t > 1.3;
+      /* 0.39.0: Kül Devi */
+      case 'yerVurus':
+        /* Kollarını kaldırır (yerde turuncu uyarı halkası), iki yumruğuyla yere vurur: şok dalgası, ateş ve yerden fışkıran magma */
+        if (t < 0.85) { if (tikla('i', 0.18)) this.efekt({ t: 'halka', x: p.x, y: p.y + 0.1, z: p.z, r: 4.8, c: [1, 0.5, 0.15], n: 24 }); return false; }
+        if (bir('a')) {
+          this.animBaslat(v, 5);
+          this.efekt({ t: 'halka', x: p.x, y: p.y + 0.1, z: p.z, r: 5, c: [1, 0.45, 0.12], n: 46, ses: 'gok' });
+          this.efekt({ t: 'halka', x: p.x, y: p.y + 0.1, z: p.z, r: 2.6, c: [0.35, 0.32, 0.3], n: 24 });
+          for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; this.efekt({ t: 'sutun', x: p.x + Math.cos(a) * 3.2, y: p.y, z: p.z + Math.sin(a) * 3.2, h: 1.6, c: [1, 0.55, 0.15], n: 10 }); }
+          if (yakinda(p.x, p.z, 5.2, 2.8)) ctx.oyuncuyaVur(faz2 ? 9 : 7, v);
+          if (this.sarsinti) this.sarsinti(0.6, p);
+        }
+        return t > 1.35;
+      case 'magmaYagmuru':
+        /* Göğsündeki çekirdekten oyuncuya yay çizen magma topları fırlatır (öfkeliyken daha çok ve yelpaze biçiminde) */
+        if (t > 0.6 && bir('a')) {
+          const c = new THREE.Vector3(p.x, p.y + T.boy * 0.75, p.z), n = faz2 ? 5 : 3;
+          for (let k = 0; k < n; k++) {
+            const sap = (k - (n - 1) / 2) * 1.6, ax = op.x + Math.cos(v.yaw) * sap, az = op.z - Math.sin(v.yaw) * sap;
+            const hx = ax - c.x, hz = az - c.z, d = Math.hypot(hx, hz) || 1, hizY = 13, sure = d / hizY;
+            const vy = (op.y + 0.6 - c.y + 0.5 * 18 * sure * sure) / sure;
+            this.okAt(c.clone(), new THREE.Vector3(hx / d * hizY, vy, hz / d * hizY), faz2 ? 6 : 5, v, null, { tur: 'magma' });
+          }
+          this.efekt({ t: 'patlama', x: c.x, y: c.y, z: c.z, c: [1, 0.5, 0.15], n: 18, ses: 'buyu' });
+        }
+        return t > 1.05;
+      case 'kulFirtina':
+        /* Kollarını açıp döner; çevresine kül ve kor savurur: 3 saniye boyunca yakındakilere yarım saniyede bir hasar */
+        Y.hareket = t > 0.6 ? 0.45 : 0;
+        if (t < 0.6 && tikla('i', 0.15)) this.efekt({ t: 'halka', x: p.x, y: p.y + 0.15, z: p.z, r: 4.2, c: [0.45, 0.42, 0.4], n: 20 });
+        if (t >= 0.6 && tikla('f', 0.5)) {
+          this.efekt({ t: 'girdap', x: p.x, y: p.y, z: p.z, r: 4.2, c: [0.38, 0.35, 0.33], n: 32, ses: t < 1.1 ? 'kum' : null });
+          this.efekt({ t: 'girdap', x: p.x, y: p.y + 0.6, z: p.z, r: 3, c: [1, 0.5, 0.15], n: 14 });
+          if (yakinda(p.x, p.z, 4.5, 3)) ctx.oyuncuyaVur(faz2 ? 4 : 3, v);
+        }
+        return t > 3.6;
       /* Taş Muhafız */
       case 'sicra':
         /* Kollarını kaldırır, hedefin üstüne sıçrar; indiği yerde şok dalgası */
@@ -1421,7 +1464,7 @@ export class Varliklar {
       let sil = o.yas > 60;
       if (!o.saplandi) {
         const atesT = o.ek && o.ek.tur === 'ates';
-        if (!atesT) o.v.y -= 18 * dt; if (!(o.ek && (o.ek.tur === 'kaya' || atesT))) o.v.multiplyScalar(1 - 0.15 * dt);
+        if (!atesT) o.v.y -= 18 * dt; if (!(o.ek && (o.ek.tur === 'kaya' || o.ek.tur === 'magma' || atesT))) o.v.multiplyScalar(1 - 0.15 * dt);
         if (SIVI[this.dunya.blok(Math.floor(o.p.x), Math.floor(o.p.y), Math.floor(o.p.z))]) o.v.multiplyScalar(1 - 3 * dt);
         const adim = Math.max(1, Math.ceil(o.v.length() * dt / 0.2));
         const s = dt / adim;
@@ -1431,7 +1474,7 @@ export class Varliklar {
           const yon = o.v.clone().normalize();
           /* Canavar okları yalnızca oyunculara isabet eder (aynada isabeti sunucu hesaplar) */
           if (o.dusman && !this.ayna) {
-            const q = yeni, g = o.ek && o.ek.tur === 'kaya' ? 0.75 : 0.35;
+            const q = yeni, g = o.ek && (o.ek.tur === 'kaya' || o.ek.tur === 'magma') ? 0.75 : 0.35;
             for (const c of C) {
               const op = c.oyuncu.konum;
               if (q.x > op.x - g && q.x < op.x + g && q.z > op.z - g && q.z < op.z + g && q.y > op.y && q.y < op.y + 1.8) {
@@ -1449,8 +1492,8 @@ export class Varliklar {
           }
           /* Boss mermileri (kaya, buz, lanet) bloğa çarpınca dağılır */
           if (o.ek && o.ek.tur && this.dunya.kati(Math.floor(yeni.x), Math.floor(yeni.y), Math.floor(yeni.z))) {
-            const c = o.ek.tur === 'kaya' ? [0.5, 0.5, 0.52] : o.ek.tur === 'buz' ? [0.75, 0.95, 1] : o.ek.tur === 'ates' ? [1, 0.5, 0.15] : [1, 0.85, 0.3];
-            this.dusenler.renkliParcacik(c, o.p.x, o.p.y, o.p.z, o.ek.tur === 'kaya' ? 14 : 6); sil = true; break;
+            const c = o.ek.tur === 'kaya' ? [0.5, 0.5, 0.52] : o.ek.tur === 'buz' ? [0.75, 0.95, 1] : o.ek.tur === 'ates' || o.ek.tur === 'magma' ? [1, 0.5, 0.15] : [1, 0.85, 0.3];
+            this.dusenler.renkliParcacik(c, o.p.x, o.p.y, o.p.z, o.ek.tur === 'kaya' || o.ek.tur === 'magma' ? 14 : 6); sil = true; break;
           }
           if (this.dunya.kati(Math.floor(yeni.x), Math.floor(yeni.y), Math.floor(yeni.z))) { o.saplandi = true; o.blok = [Math.floor(yeni.x), Math.floor(yeni.y), Math.floor(yeni.z)]; o.p.lerp(yeni, 0.5); o.v.set(0, 0, 0); if (this.sesK(o.p) > 0.3) this.ses.okSaplandi(); break; }
           o.p.copy(yeni);
@@ -1466,7 +1509,7 @@ export class Varliklar {
         if (o.blok && !this.dunya.kati(o.blok[0], o.blok[1], o.blok[2])) { o.saplandi = false; o.blok = null; o.v.set(0, -1, 0); }
       }
       o.mesh.position.copy(o.p);
-      o.mesh.material.color.setScalar(o.ek && o.ek.tur === 'ates' ? 1 : ctx.isik);
+      o.mesh.material.color.setScalar(o.ek && (o.ek.tur === 'ates' || o.ek.tur === 'magma') ? 1 : ctx.isik);
       if (sil) { this.okSil(i); }
     }
   }

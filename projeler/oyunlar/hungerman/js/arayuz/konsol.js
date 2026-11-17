@@ -378,6 +378,20 @@ export class Konsol {
       if (a === 'ver') { const k = p[1] || ''; if (!BASARIM[k]) { this.hata('Anahtarlar: ' + BASARIMLAR.map(b => b.k).join(', ')); return; } if (B.ver(k)) this.tamam(`${BASARIM[k].ad} verildi.`); else this.yaz('Bu başarım zaten kazanılmış.', 'soluk'); return; }
       this.hata('Kullanım: basarim [liste | ver <anahtar> | hepsi | sifirla]');
     }, { hile: true, tamamla: () => ['liste', 'ver', 'hepsi', 'sifirla', ...BASARIMLAR.map(b => b.k)] });
+    /* 0.39.0: kadim geçit ve Ada Bekçisi */
+    ekle('gecit', 'Kadim geçidin durumunu gösterir, geçidi 30 dakika açar ya da kapatır', 'gecit [durum | ac | kapat]', (o, p) => {
+      const a = kucuk(p[0] || 'durum'), G = o.gecit;
+      if (o.istemci) { this.hata('Geçidi dünyayı açan oyuncu yönetir.'); return; }
+      if (a === 'ac') { G.kalan = 30 * 60; G.kapiYak(G.adaKapi()); if (G.diyarKapi) G.kapiYak(G.diyarKapi); this.tamam('Kadim geçit ve dönüş kapısı 30 dakika açık.'); return; }
+      if (a === 'kapat') { G.kalan = 0; G.kapiSondur(G.adaKapi()); G.kapiSondur(G.diyarKapi); this.tamam('Kadim geçit kapatıldı.'); return; }
+      this.yaz(G.acik() ? `Geçit açık: ${G.sureMetni()} kaldı.` : 'Geçit kapalı (Büyülü Anahtar ile açılır).', 'bilgi');
+    }, { hile: true, dunya: true, tamamla: () => ['durum', 'ac', 'kapat'] });
+    ekle('bekci', 'Ada Bekçisinin durumunu gösterir ya da bekleme süresini sıfırlar', 'bekci [durum | sifirla]', (o, p) => {
+      const a = kucuk(p[0] || 'durum'), B = o.adaBekcisi;
+      if (!B || o.istemci) { this.hata('Çok oyunculu istemcide kullanılamaz.'); return; }
+      if (a === 'sifirla') { B.kalan = 0; this.tamam('Bekleme süresi sıfırlandı; adaya yaklaşılınca Kül Devi doğar.'); return; }
+      this.yaz(B.canli() ? `Kül Devi hayatta: ${Math.ceil(B.v.can)} / ${B.v.tur.can} can.` : B.kalan > 0 ? `Yeni bekçiye ${Math.ceil(B.kalan / 60)} dakika var.` : 'Bekçi adaya yaklaşılınca doğar.', 'bilgi');
+    }, { hile: true, dunya: true, tamamla: () => ['durum', 'sifirla'] });
     ekle('boss', 'Yakındaki boss yerlerini listeler ya da yenilen bossları sıfırlar', 'boss [liste | sifirla]', (o, p) => {
       const a = kucuk(p[0] || 'liste'), Y = o.yapiOlaylari, u = o.dunya.uretici, P = o.oyuncu.konum;
       if (!Y) { this.hata('Çok oyunculu istemcide kullanılamaz.'); return; }

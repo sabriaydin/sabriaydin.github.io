@@ -4,7 +4,7 @@
 import { PB, PY, DENIZ, KITA_YARICAP, DUNYA_SINIRI, dizin, diyarMi } from '../sabitler.js';
 import { diyarUret } from './diyar-uretici.js';
 import { Gurultu, karistir, karma2, karma3, uretec, yumusak } from '../rastgele.js';
-import { yapiYaz } from './yapi-uretici.js';
+import { yapiYaz, yapilarAlan } from './yapi-uretici.js';
 import { koyYaz, koyIcinde, enYakinKoy } from './koy-uretici.js';
 import { zindanYaz } from './zindan-uretici.js';
 import { batikYaz } from './batik-uretici.js';
@@ -409,6 +409,8 @@ export class Uretici {
       this.kolon(x, z, o);
       if (o.c < 0.08 || !UYGUN.has(o.b) || o.h < DENIZ + 3 || o.h > DENIZ + 18 || this.girisMi(x, z)) continue;
       if (koyIcinde(this, x, z, 90) || this.yarik(x, z, o) != null) continue;
+      /* 0.39.0: keşfedilmesi gereken özel yapılardan (haydut kampı, tapınaklar, orman kampı, buzul kulesi) en az 200 blok uzakta doğulur */
+      if (yapilarAlan(this, x - 200, z - 200, x + 200, z + 200).some(Y => Math.hypot(Y.x - x, Y.z - z) < 200)) continue;
       /* Çevresi düz ve kara */
       let uygun = true;
       for (const [dx, dz] of [[6, 0], [-6, 0], [0, 6], [0, -6], [4, 4], [-4, -4]]) { this.kolon(x + dx, z + dz, q); if (q.h < DENIZ + 1 || Math.abs(q.h - o.h) > 3) { uygun = false; break; } }

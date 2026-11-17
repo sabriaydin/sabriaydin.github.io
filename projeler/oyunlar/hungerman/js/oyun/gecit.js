@@ -3,40 +3,99 @@
    Obsidyenden dikdörtgen bir çerçeve (iç kısmı en az 2 × 3, en çok 21 × 21) kurulur; içine Çakmakla sağ tıklanınca geçit açılır.
    Geçidin içinde 2,5 saniye durulunca dünya ile Yeraltı Diyarı arasında geçilir (diyardaki 1 blok dünyadaki 8 bloktur).
    Varılan yerde 20 blok çevrede bir geçit varsa ona çıkılır; yoksa obsidyen bir platform ve yeni bir geçit kurulur.
-   Çerçevesinden bir blok kırılınca geçit söner. */
+   Çerçevesinden bir blok kırılınca geçit söner.
+   0.39.0: Geçitler çakmakla yakılmaz. Ada Bekçisi'nin bıraktığı tek kullanımlık Büyülü Anahtar, Lanetli Ada'daki geçide ya da diyardaki
+   dönüş kapısına sağ tıklanınca iki geçidi birlikte 30 dakika açık tutar; süre dolunca ikisi de söner. Süre ve dönüş kapısının yeri kaydedilir. */
 import { BLOKLAR, KATI, OPAK, SIVI } from '../bloklar.js';
 import { PY, DENIZ, DIYAR_X, DIYAR_SINIR, DUNYA_SINIRI, diyarMi } from '../sabitler.js';
 import { lanetliAda, ADA_AD } from '../dunya/ada-uretici.js';
 
 const OBS = 515, GECIT = 516, BEKLE = 2.5;
+export const GECIT_SURE = 30 * 60;   // anahtarla açılan geçidin açık kalma süresi (sn)
 const gecitMi = id => !!(BLOKLAR[id] && BLOKLAR[id].gecit);
 
 export class Gecit {
   constructor(o) {
     Object.assign(this, o);   // dunya, oyuncu, ses, bildirim(m), gec(hedef)
     this.sayac = 0; this.cikmali = false; this.sesSayac = 0;
+    this.kalan = 0;            // 0.39.0: geçitlerin açık kalacağı süre (sn)
+    this.diyarKapi = null;     // diyardaki dönüş kapısının bir iç hücresi [x, y, z]
+    this.denetSayac = 0;
   }
+  get A() { return lanetliAda(this.dunya.uretici); }
+  /* Adadaki geçidin iç hücresi (sol alt) */
+  adaKapi() { const G = this.A.gecit; return [G.x, G.y, G.z]; }
+  acik() { return this.kalan > 0; }
+  sureMetni() { const s = Math.ceil(this.kalan), d = Math.floor(s / 60); return d ? `${d} dakika ${s % 60} saniye` : `${s} saniye`; }
 
-  /* ---------- Açma ---------- */
-  /* h: tıklanan blok (normaliyle); geçit açılırsa true */
-  yak(h) {
-    const d = this.dunya, x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
-    if (d.blok(x, y, z) !== 0) return false;
-    /* 0.30.6: Diyar'ın tek girişi Lanetli Ada'daki kadim geçittir; çakmak yalnızca onu (ya da diyardaki karşılığını) yeniden yakar */
-    const A = lanetliAda(d.uretici), ic = diyarMi(x);
-    const uzak = ic ? Math.hypot(x - (DIYAR_X + Math.floor(A.x / 8)), z - Math.floor(A.z / 8)) > 30 : Math.hypot(x - A.x, z - A.z) > 16;
-    if (uzak) return false;   // 0.38.5: uyarı gösterilmez
-    for (const e of [0, 1]) {
-      const l = this.cerceve(x, y, z, e);
-      if (!l) continue;
-      for (const [a, b, c] of l) d.blokKoy(a, b, c, GECIT + e, 'gecit');
-      this.ses.gecitAcil();
-      if (this.olay) this.olay('gecit');
-      return true;
+  /* ---------- 0.39.0: Büyülü Anahtar ---------- */
+  /* h: tıklanan blok; anahtar kullanıldıysa true (true dönünce anahtar harcanır) */
+  anahtar(h) {
+    const d = this.dunya, x = h.x, z = h.z, ada = this.adaKapi();
+    const yakin = (k, r) => k && Math.hypot(x - k[0], z - k[2]) <= r && Math.abs(h.y - k[1]) <= 6;
+    const adada = !diyarMi(x) && yakin(ada, 5), diyarda = diyarMi(x) && (yakin(this.diyarKapi, 5) || (!this.diyarKapi && this.kapiBul(h)));
+    if (!adada && !diyarda) { this.bildirim(`Büyülü Anahtar yalnızca ${ADA_AD}'daki kadim geçitte ya da diyardaki dönüş kapısında kullanılır.`); return false; }
+    if (this.acik()) { this.bildirim(`Geçit zaten açık: ${this.sureMetni()} kaldı.`); return false; }
+    this.kalan = GECIT_SURE;
+    this.kapiYak(ada); if (this.diyarKapi) this.kapiYak(this.diyarKapi);
+    this.ses.gecitAcil();
+    if (this.olay) this.olay('gecit');
+    this.bildirim('Büyülü Anahtar kadim geçidi uyandırdı: geçit ve dönüş kapısı 30 dakika açık kalacak.');
+    return true;
+  }
+  /* Diyarda tıklanan yerin çevresinde obsidyen çerçeveli bir kapı varsa iç hücresini dönüş kapısı olarak kaydeder */
+  kapiBul(h) {
+    for (let dy = -4; dy <= 4; dy++) for (let dz = -3; dz <= 3; dz++) for (let dx = -3; dx <= 3; dx++) {
+      const x = h.x + dx, y = h.y + dy, z = h.z + dz, id = this.dunya.blok(x, y, z);
+      if ((id === 0 || gecitMi(id)) && (gecitMi(id) || this.cerceve(x, y, z, 0) || this.cerceve(x, y, z, 1))) { this.diyarKapi = [x, y, z]; return true; }
     }
-    this.bildirim('Geçit için obsidyenden dikdörtgen bir çerçeve gerekir (iç kısmı en az 2 × 3 blok).');
     return false;
   }
+  /* Bir kapının içini doldurur (çerçeve sağlamsa) */
+  kapiYak(k) {
+    if (!k) return false;
+    const d = this.dunya, [x, y, z] = k;
+    if (!d.yuklu(x, z) || gecitMi(d.blok(x, y, z))) return false;
+    for (const e of [0, 1]) { const l = this.cerceve(x, y, z, e); if (!l) continue; for (const [a, b, c] of l) d.blokKoy(a, b, c, GECIT + e, 'gecit'); return true; }
+    return false;
+  }
+  /* Bir kapının içindeki geçit bloklarını kaldırır */
+  kapiSondur(k) {
+    if (!k) return false;
+    const d = this.dunya, [x, y, z] = k;
+    if (!d.yuklu(x, z) || !gecitMi(d.blok(x, y, z))) return false;
+    const kuyruk = [[x, y, z]], gor = new Set();
+    while (kuyruk.length && gor.size < 600) {
+      const [a, b, c] = kuyruk.pop(), q = a + ',' + b + ',' + c;
+      if (gor.has(q) || !gecitMi(d.blok(a, b, c))) continue;
+      gor.add(q); d.blokKoy(a, b, c, 0, 'gecit');
+      kuyruk.push([a + 1, b, c], [a - 1, b, c], [a, b + 1, c], [a, b - 1, c], [a, b, c + 1], [a, b, c - 1]);
+    }
+    return true;
+  }
+  /* Süre ve kapıların durumu (tek oyunculu ve sunucu; her karede) */
+  zamanGuncelle(dt) {
+    if (this.kalan > 0) {
+      this.kalan -= dt;
+      if (this.kalan <= 0) {
+        this.kalan = 0;
+        const s1 = this.kapiSondur(this.adaKapi()), s2 = this.kapiSondur(this.diyarKapi);
+        if (s1 || s2) this.ses.gecitSon();
+        this.bildirim('Kadim geçidin büyüsü söndü. Yeniden açmak için Büyülü Anahtar gerekir.');
+      }
+    }
+    this.denetSayac -= dt;
+    if (this.denetSayac > 0) return;
+    this.denetSayac = 2;
+    /* Yeni yüklenen parçalarda kapıların durumu süreye uydurulur */
+    for (const k of [this.adaKapi(), this.diyarKapi]) { if (this.kalan > 0) this.kapiYak(k); else this.kapiSondur(k); }
+  }
+  disaAktar() { return { kalan: Math.round(this.kalan), diyarKapi: this.diyarKapi }; }
+  iceAktar(o) {
+    this.kalan = o && Number.isFinite(o.kalan) ? Math.max(0, Math.min(GECIT_SURE, o.kalan)) : 0;
+    this.diyarKapi = o && Array.isArray(o.diyarKapi) && o.diyarKapi.length === 3 ? o.diyarKapi.map(Number) : null;
+  }
+
   /* Çerçevenin içindeki boş hücreler (eksen 0: x-y düzlemi, 1: z-y düzlemi); uygun değilse null */
   cerceve(x, y, z, e) {
     const d = this.dunya, ac = (u, w) => (e ? [x, w, u] : [u, w, z]);
@@ -109,13 +168,15 @@ export class Gecit {
   /* ---------- Varış: parçalar yüklenince çağrılır ---------- */
   yerlestir(h) {
     const d = this.dunya, P = this.oyuncu;
+    /* 0.39.0: dünyaya dönüş her zaman Lanetli Ada'daki geçidin önüne olur; dünyada yeni geçit kurulmaz */
+    if (!h.diyara) { const B = this.A.bekci; P.konum.set(B.x, B.y, B.z); this.cikmali = true; return; }
     /* Çevrede geçit var mı */
     let en = null, ed = Infinity;
     for (let dz = -20; dz <= 20; dz++) for (let dx = -20; dx <= 20; dx++) {
       if (dx * dx + dz * dz > 400) continue;
       for (let y = 2; y < PY - 2; y++) if (gecitMi(d.blok(h.x + dx, y, h.z + dz)) && !gecitMi(d.blok(h.x + dx, y - 1, h.z + dz))) { const m = dx * dx + dz * dz; if (m < ed) { ed = m; en = [h.x + dx, y, h.z + dz]; } }
     }
-    if (en) { P.konum.set(en[0] + 0.5, en[1], en[2] + 0.5); this.cikmali = true; return; }
+    if (en) { P.konum.set(en[0] + 0.5, en[1], en[2] + 0.5); this.cikmali = true; if (h.diyara) this.diyarKapi = en; return; }
     /* Yoksa kurulur */
     const [bx, by, bz] = this.yerBul(h);
     const K = (x, y, z, id) => d.blokKoy(x, y, z, id, 'gecit');
@@ -124,6 +185,7 @@ export class Gecit {
     for (let y = by - 1; y <= by + 3; y++) { K(bx - 1, y, bz, OBS); K(bx + 2, y, bz, OBS); }
     for (const x of [bx, bx + 1]) { K(x, by - 1, bz, OBS); K(x, by + 3, bz, OBS); }
     for (let y = by; y <= by + 2; y++) for (const x of [bx, bx + 1]) K(x, y, bz, GECIT);
+    if (h.diyara) this.diyarKapi = [bx, by, bz];
     P.konum.set(bx + 1, by, bz + 1.5);
     this.cikmali = true;
   }

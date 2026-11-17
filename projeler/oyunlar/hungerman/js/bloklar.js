@@ -884,7 +884,7 @@ esya(461, { ad: 'Muhafız Göğüslüğü', tur: 'zirh', yigin: 1, simge: 'zirh1
 /* 0.18.0: Yeraltı Diyarı eşyaları */
 esya(471, { ad: 'Işıltaş Tozu', simge: 'toz', renk: '#f2c84a' });
 esya(472, { ad: 'Kor Kristali', simge: 'kor_kristal' });
-esya(473, { ad: 'Çakmak', tur: 'cakmak', yigin: 1, simge: 'cakmak2', ozellik: 'Odun yığınını kamp ateşine çevirir · Şömineyi ve balkabağı fenerini yakar · Ot, çalı ve örümcek ağını yakıp temizler · Buzu eritir · Canlıları tutuşturur · Kadim geçidi yeniden yakar',
+esya(473, { ad: 'Çakmak', tur: 'cakmak', yigin: 1, simge: 'cakmak2', ozellik: 'Odun yığınını kamp ateşine çevirir · Şömineyi ve balkabağı fenerini yakar · Ot, çalı ve örümcek ağını yakıp temizler · Buzu eritir · Canlıları tutuşturur',
   alet: { tur: 'cakmak', seviye: 0, hiz: 1, dayanim: 128, hasar: 1 } });
 esya(474, { ad: 'Kor Kılıcı', tur: 'alet', yigin: 1, simge: 'kilic', renk: '#ff6a2a', yakar: true, ozellik: 'Vurulan canlıyı tutuşturur',
   alet: { tur: 'kilic', seviye: 5, hiz: 8, dayanim: 1300, hasar: 8 } });
@@ -954,6 +954,10 @@ E37('obsidyen_capa', { ad: 'Obsidyen Çapa', tur: 'alet', yigin: 1, simge: 'capa
 E37('durbun', { ad: 'Dürbün', simge: 'durbun', yigin: 1, ozellik: 'Sağ tık: yakınlaştırır / uzaklaştırır' });
 E37('cepSaati', { ad: 'Cep Saati', simge: 'cepSaati', yigin: 1, ozellik: 'Sağ tık: günün saatini ve mevsimi gösterir' });
 E37('havaiFisek', { ad: 'Havai Fişek', simge: 'fisek', yigin: 16, ozellik: 'Sağ tık: gökyüzüne fişek atar' });
+/* 0.39.0: Büyülü Anahtar: Ada Bekçisi bırakır; kadim geçidi 30 dakika açar (tek kullanımlık) */
+export const ESYA39 = {};
+ESYA39.anahtar = ayir(1);
+esya(ESYA39.anahtar, { ad: 'Büyülü Anahtar', simge: 'anahtar', yigin: 16, nadir: true, ozellik: 'Lanetli Ada’daki kadim geçide ya da diyardaki dönüş kapısına sağ tıklanınca iki geçidi 30 dakika açar · Tek kullanımlık' });
 yemek(486, 'Ayran', { simge: 'iksir', renk: '#f4f4ee', yemek: 3, kap: 331 }, 'hiz', 30);
 yemek(487, 'Kek', { simge: 'kek', yemek: 12 }, 'tokluk', 120);
 yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });

@@ -90,11 +90,11 @@ export function adaYaz(u, v, x0, z0) {
   /* Yıkık arka duvar ve yan duvar parçaları */
   for (let dx = -3; dx <= 3; dx++) { const boy = 1 + Math.floor(rk(dx, 0, 1, 4) * 3); for (let y = T + 1; y <= T + boy; y++) set(A.x + dx, y, A.z - 5, rk(dx, y, 2, 4) < 0.3 ? OBS : TUGLA); }
   for (const sx of [-5, 5]) for (let dz = -3; dz <= 1; dz += 2) { const boy = Math.floor(rk(sx, dz, 3, 4) * 3); for (let y = T + 1; y <= T + boy; y++) set(A.x + sx, y, A.z + dz, TUGLA); }
-  /* Kadim geçit: avlunun kuzeyinde, yanar hâlde (obsidyen çerçeve 4 × 5, iç 2 × 3) ve iki yanında kor taşı kaide */
+  /* Kadim geçit: avlunun kuzeyinde (obsidyen çerçeve 4 × 5, iç 2 × 3; sönük) ve iki yanında kor taşı kaide */
   const G = A.gecit;
   for (let y = T; y <= T + 4; y++) for (let x = G.x - 1; x <= G.x + 2; x++) {
     const kenar = x === G.x - 1 || x === G.x + 2 || y === T || y === T + 4;
-    set(x, y, G.z, kenar ? OBS : GECIT);
+    set(x, y, G.z, kenar ? OBS : 0);   // 0.39.0: geçit sönük doğar; Büyülü Anahtar ile açılır
   }
   for (const x of [G.x - 2, G.x + 3]) { set(x, T + 1, G.z, OYMA); set(x, T + 2, G.z, MAGMA); }
   set(G.x, T + 5, G.z, OBS); set(G.x + 1, T + 5, G.z, OBS);

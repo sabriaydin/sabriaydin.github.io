@@ -117,6 +117,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 39.0 (0.39.0): Kayıt noktası, Büyülü Anahtar, Kül Devi ve yeni Geliştirici Modu
+- **Doğma yeri:** oyuncu ilk girişte ve yeniden doğarken haydut kampı, çöl ve orman tapınağı, buzul kulesi, zindan gibi özel yapıların 200 blok yakınında doğmaz.
+- **Ölüm ekranı:** sırasıyla Son Kayıt Noktasında Doğ, Yeniden Doğ ve Ana Menü düğmeleri. Son kullanılan yatak (gündüz tıklansa da) son kayıt noktası olur; kayıt noktası yoksa ya da yatak kırılmışsa düğme görünür ama pasiftir. Yatak kırılınca kayıt noktası iptal edilir ve bildirilir. Dünyanın doğma noktası yatakla değişmez.
+- **Büyülü Anahtar:** çakmak artık geçidi yakmaz. Ada Bekçisi öldürülünce iki tek kullanımlık Büyülü Anahtar bırakır; anahtarla geçide sağ tıklanınca geçit açılır ve anahtar harcanır. Lanetli Ada'daki geçit ve diyardaki dönüş kapısı birlikte 30 dakika açık kalır, sonra kapanır; süre dünya kaydında saklanır.
+- **Kül Devi:** adayı yalnızca adaya özgü, mutasyon geçirmiş dev bir kül zombisi korur (3 blok boy, 260 can, ateşe bağışık). Saldırıları: yere vuruş (uyarı halkası, sarsıntı ve geri itme), yay çizen magma yağmuru, kül fırtınası (dönerek çekme), hamle ve yarı canda kül zombisi çağırma. Ağır adımlarla yeri sarsar ve kül tozu kaldırır; adadan ayrılamaz.
+- Lanetli Ada'ya yaklaşınca ekranın kararması kaldırıldı.
+- Magma bloğu ve ışıltaşın (ve diğer küp ışık kaynaklarının) titreyip sallanır gibi görünmesi kaldırıldı.
+- **Geliştirici Modu baştan yazıldı:** oyunun pencere temasında; düğme bulutları yerine ayarlar ekranındaki gibi satırlar (başlık, açıklama ve sağda tek denetim). Sekmeler: Oyuncu, Eşyalar, Dünya, Canlılar, Işınlanma, Köy ve Görev, Görünüm, Bilgi.
+  - Hazır setler amaca göre yeniden düzenlendi ve her biri envantere sığar: Başlangıç, Madenci, Elmas donanım, Obsidyen donanım, Diyar yolculuğu, İnşaatçı, Ev döşeme, Çiftçi, Aşçı, Denizci ve kâşif, Büyü ve simya, Elektrik.
+  - Eşya ver: arama, kategori ve adet seçimi; son verilenler kaldırıldı.
+  - Yeni: kadim geçit durumu ve aç / kapat, Ada Bekçisi durumu ve süre sıfırlama, son kayıt noktası bilgisi. Tehlikeli işlemler iki tıkla onaylanır.
+- Konsol: `gecit [durum|ac|kapat]` ve `bekci [durum|sifirla]` komutları.
+
 ## 38.5 (0.38.5): Çakmak uyarısı
 - Çakmakla Lanetli Ada dışında bir yere tıklanınca çıkan "Geçit burada açılamaz" uyarısı kaldırıldı.
 

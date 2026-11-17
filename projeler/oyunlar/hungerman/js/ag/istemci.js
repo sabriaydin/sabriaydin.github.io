@@ -189,7 +189,7 @@ export class IstemciOyun {
     const p = o.oyuncu.konum;
     this.gonder({ t: 'ky', v: {
       oyuncu: { x: r3(p.x), y: r3(p.y), z: r3(p.z), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
-      envanter: o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
+      envanter: o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
       gorevler: o.gorevler.disaAktar(), koyler: o.koyler.disaAktar(), yerler: o.yerler, basarimlar: o.basarimlar ? o.basarimlar.disaAktar() : undefined
     } });
   }

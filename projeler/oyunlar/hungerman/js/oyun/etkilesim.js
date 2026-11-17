@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37 } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37, ESYA39 } from '../bloklar.js';
 import { COKLU, cokluHucreler, cokluCapaKonumu, cokluYerel } from '../coklu.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
@@ -307,6 +307,7 @@ export class Etkilesim {
     for (const [dx, dy, dz] of [[0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]) { const n = d.blok(h.x + dx, h.y + dy, h.z + dz); if (n === 59 && !SU_SEVIYE[d.blok(h.x, h.y + 1, h.z)]) yeni = 59; }
     if (h.id === 31 || b.suIcinde) yeni = 7;
     if (!d.blokKoy(h.x, h.y, h.z, yeni)) return;
+    if (b.yatak && this.arayuz.yatakKirildi) this.arayuz.yatakKirildi(h.x, h.y, h.z);   // 0.39.0: kayıt noktası iptali
     /* 0.36.1: iki bloklu yatağın diğer parçası da kaldırılır (eşya bir kez düşer) */
     if (b.yatak2) { const [dx, dz] = YONLER[b.yon], k = b.parca ? -1 : 1, ox = h.x + dx * k, oz = h.z + dz * k, ob = BLOKLAR[d.blok(ox, h.y, oz)]; if (ob && ob.yatak2 && ob.yon === b.yon && ob.parca !== b.parca) d.blokKoy(ox, h.y, oz, 0); }
     /* Kapının diğer yarısı da kaldırılır */
@@ -508,10 +509,11 @@ export class Etkilesim {
     /* 0.18.0: Çakmak: obsidyen çerçevenin içinde Diyar Geçidi açar; 0.38.1: ateş yakar, yakıp temizler, buz eritir */
     if (h && e && e.tur === 'cakmak') {
       if (this.cakmakKullan(h)) return true;
-      if (this.gecit && this.gecit.yak(h)) { this.cakmakYipran(); return true; }
       this.cakmakSes();
       return true;
     }
+    /* 0.39.0: Büyülü Anahtar kadim geçidi açar ve harcanır */
+    if (h && s.id === ESYA39.anahtar && this.gecit) { if (this.gecit.anahtar(h)) env.seciliAzalt(1); return true; }
     /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
     if (h && BLOKLAR[h.id].oturak && !g.egil && !(e && e.tur === 'blok') && this.binek && this.binek.otur(h.x, h.y, h.z)) return true;
     /* Sandık */
@@ -1009,6 +1011,13 @@ export class Etkilesim {
     }
     return sonuc(true);
   }
+  /* 0.39.0: bir yatağın bütün hücreleri (kayıt noktasının iptali için) */
+  yatakHucreleri(h) {
+    const b = BLOKLAR[h.id] || BLOKLAR[this.dunya.blok(h.x, h.y, h.z)];
+    if (b && b.ck) { const D = COKLU[b.ck], [ax, ay, az] = cokluCapaKonumu(D, b, h.x, h.y, h.z); return cokluHucreler(D, b.yon, ax, ay, az).map(q => [q[0], q[1], q[2]]); }
+    if (b && b.yatak2) { const [dx, dz] = YONLER[b.yon], k = b.parca ? -1 : 1; return [[h.x, h.y, h.z], [h.x + dx * k, h.y, h.z + dz * k]]; }
+    return [[h.x, h.y, h.z]];
+  }
   /* Çok bloklu nesnenin kök hücresi (sandık içeriği burada tutulur); diğer bloklar için kendisi */
   kokHucre(x, y, z, b) {
     if (!b || !b.ck) return [x, y, z];
@@ -1020,6 +1029,7 @@ export class Etkilesim {
     const d = this.dunya, D = COKLU[b.ck], [ax, ay, az] = cokluCapaKonumu(D, b, h.x, h.y, h.z);
     const hucreler = cokluHucreler(D, b.yon, ax, ay, az), [kx, ky, kz] = hucreler[0];
     if (D.sandik) for (const s of this.arayuz.sandikKirildi(kx, ky, kz, false)) this.dusenler.birak(s.id, s.adet, kx + 0.5, ky + 0.5, kz + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
+    if (D.yatak && this.arayuz.yatakKirildi) this.arayuz.yatakKirildi(h.x, h.y, h.z);   // 0.39.0
     for (const [x, y, z, i] of hucreler.reverse()) { const q = BLOKLAR[d.blok(x, y, z)]; if (q && q.ck === b.ck && q.yon === b.yon && q.parca === i) { d.blokKoy(x, y, z, 0); if (i % 2 === 0) this.dusenler.parcacik(h.id, x, y, z, 4); } }
     this.dusenler.birak(D.taban, 1, h.x + 0.5, h.y + 0.4, h.z + 0.5);
     this.ses.kir(b.ses); this.istat('kirilan');

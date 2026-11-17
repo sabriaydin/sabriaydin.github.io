@@ -969,7 +969,7 @@ const CANLI = {
     if (h1(9, k) < 0.5) p.set(h1(11, k) < 0.5 ? 6 : 9, 4 - Math.floor(h1(5, k) * 2), hex('#ffcf4a'));
   }),
   lav: (p, k) => { RESSAM.lav(p); kaydir(p, Math.floor(k / 4) % 16, Math.floor(k / 8) % 16); },
-  magma: (p, k) => { RESSAM.magma(p); const t = (Math.sin(k * 0.4) + 1) * 0.08; for (let i = 0; i < D * D; i++) { const j = i * 4; if (p.d[j] > 180) { p.d[j + 1] = Math.min(255, p.d[j + 1] * (1 + t)); } } }
+  /* 0.39.0: magma bloğu artık titreşmez (sabit doku) */
 };
 function kaydir(p, dx, dy) { const e = p.d.slice(); for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const a = (y * D + x) * 4, b = (((y + dy) % D) * D + (x + dx) % D) * 4; p.d[b] = e[a]; p.d[b + 1] = e[a + 1]; p.d[b + 2] = e[a + 2]; p.d[b + 3] = e[a + 3]; } }
 let sonKare = -1;
@@ -1229,6 +1229,8 @@ const MAL_CIZ = {
   tugla: () => p => { cokgen(p, [[2, 6], [13, 6], [14, 11], [3, 11]], '#a84a32', 0.08); cizgi(p, 2, 6, 13, 6, [196, 100, 72]); cizgi(p, 3, 11, 14, 11, [110, 40, 26]); },
   durbun: () => p => { cokgen(p, [[1, 5], [7, 5], [7, 11], [1, 11]], '#2c2c30', 0.05); cokgen(p, [[9, 5], [15, 5], [15, 11], [9, 11]], '#2c2c30', 0.05); cokgen(p, [[6, 7], [10, 7], [10, 9], [6, 9]], '#c8a040', 0.05); cizgi(p, 1, 6, 1, 10, [120, 180, 220]); cizgi(p, 15, 6, 15, 10, [120, 180, 220]); },
   cepSaati: () => p => { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const d = Math.hypot(x - 8, y - 9); if (d < 5.2) p.set(x, y, d < 4.2 ? [244, 238, 220] : [220, 176, 60]); } cizgi(p, 8, 9, 8, 6, [30, 20, 10]); cizgi(p, 8, 9, 10, 10, [30, 20, 10]); cokgen(p, [[7, 2], [9, 2], [9, 4], [7, 4]], '#e8b830'); },
+  anahtar: () => p => { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const d = Math.hypot(x - 4.5, y - 4.5); if (d < 3.6 && d > 1.6) p.set(x, y, d < 2.4 ? [200, 120, 255] : [150, 70, 220]); }
+    kalinCizgi(p, [[7, 7], [14, 14]], '#9a5ae0'); for (const [x, y] of [[11, 13], [12, 12], [13, 15], [14, 13]]) p.set(x, y, [120, 50, 190]); p.set(4, 4, [255, 230, 120]); p.set(5, 4, [255, 210, 90]); p.set(3, 3, [240, 200, 255]); },
   fisek: () => p => { cokgen(p, [[6, 5], [10, 5], [10, 13], [6, 13]], '#c82a2a', 0.05); cokgen(p, [[6, 3], [8, 0], [10, 3], [10, 5], [6, 5]], '#e8b030', 0.05); for (let x = 6; x < 10; x++) p.set(x, 9, [240, 240, 240]); kalinCizgi(p, [[8, 13], [8, 15]], '#7b5a32'); },
   /* 0.36.0: mutfak eşyaları */
   cuval: e => p => { cokgen(p, [[4, 4], [12, 4], [14, 10], [12, 14], [4, 14], [2, 10]], '#c8a870', 0.08); cizgi(p, 5, 4, 11, 4, [120, 90, 50]); cokgen(p, [[5, 2], [11, 2], [10, 5], [6, 5]], e.renk, 0.06); cizgi(p, 6, 9, 10, 9, [150, 120, 70]); },

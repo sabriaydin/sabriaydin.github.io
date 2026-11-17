@@ -4,7 +4,7 @@
 import { THREE } from '../grafik/sahne.js';
 import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
 import { Uretici, agacKur, KARLI, karliZirve, BY } from './uretici.js';
-import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST, MEYVE_YAPRAK_ID } from '../bloklar.js';
+import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST, MEYVE_YAPRAK_ID, C_KUP } from '../bloklar.js';
 
 /* 0.18.0: mevsime göre ekin ve fidan büyüme hızı (ilkbahar, yaz, sonbahar, kış) */
 const MEVSIM_BUYUME = [1.4, 1.15, 0.85, 0.25];
@@ -112,7 +112,7 @@ export class Dunya {
       d.set(i, id);
     }
     const mk = x + ',' + y + ',' + z;
-    if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14, BLOKLAR[id].soguk ? 1 : 0]);
+    if (BLOKLAR[id] && BLOKLAR[id].mesale) this.mesaleler.set(mk, [x + 0.5, y + 0.6, z + 0.5, BLOKLAR[id].isik || 14, BLOKLAR[id].soguk ? 1 : 0, BLOKLAR[id].cizim === C_KUP ? 1 : 0]);   // 0.39.0: [5] titremeyen ışık (magma, ışıltaş)
     else this.mesaleler.delete(mk);
     if (EKIN_SONRAKI[id]) this.ekinler.add(mk); else this.ekinler.delete(mk);
     if (id === 58) this.yuvalar.set(mk, { x, y, z, sayac: 5 }); else this.yuvalar.delete(mk);
@@ -269,7 +269,7 @@ export class Dunya {
       if (BLOKLAR[id].kovan) this.kovanlar.set(k, { x, y, z, sayac: 2 });
       if (id === 58) this.yuvalar.set(k, { x, y, z, sayac: 5 });
       else if (EKIN_SONRAKI[id]) this.ekinler.add(k);
-      else if (BLOKLAR[id].mesale || id === 59) this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14), BLOKLAR[id].soguk ? 1 : 0]);
+      else if (BLOKLAR[id].mesale || id === 59) this.mesaleler.set(k, [x + 0.5, y + 0.6, z + 0.5, id === 59 ? 11 : (BLOKLAR[id].isik || 14), BLOKLAR[id].soguk ? 1 : 0, id === 59 || BLOKLAR[id].cizim === C_KUP ? 1 : 0]);
       p.kaynaklar.push(k);
     }
   }
