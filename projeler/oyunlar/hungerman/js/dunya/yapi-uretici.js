@@ -7,6 +7,7 @@ import { PB, PY, DENIZ, dizin, diyarMi } from '../sabitler.js';
 import { karistir, uretec, karma3 } from '../rastgele.js';
 import { BY, KARLI } from './uretici.js';
 import { koyIcinde } from './koy-uretici.js';
+import { YATAK } from '../bloklar.js';
 
 export const YAPI_HUCRE = 288;
 const YAYILMA = 14;
@@ -80,6 +81,9 @@ function yapiAday(u, gx, gz) {
 }
 
 /* Yerel (merkeze göre, yöne döndürülmemiş) noktayı dünya koordinatına çevirir */
+/* 0.36.1: yerel yönün (dx, dz) dünyadaki yön kodu ve iki bloklu yatak (ayak, baş) */
+function yatakYon(Y, dx, dz) { const [a, b] = don(Y, 0, 0), [c, e] = don(Y, dx, dz), px = c - a, pz = e - b; return pz < 0 ? 0 : px > 0 ? 1 : pz > 0 ? 2 : 3; }
+function yatakL(L, Y, ax, y, az, bx, bz) { const f = yatakYon(Y, bx - ax, bz - az); L(ax, y, az, YATAK + f * 2); L(bx, y, bz, YATAK + f * 2 + 1); }
 function don(Y, dx, dz) {
   switch (Y.f) {
     case 1: return [Y.x - dz, Y.z + dx];
@@ -699,7 +703,7 @@ function kuleYaz(L, temel, r, merdiven, A, Y) {
   for (const [a, c] of [[0, 0], [3, 3], [-3, 3], [3, -3], [-3, -3]]) L(a, 15, c, BF);
   /* Simya odası ve yatak */
   L(2, 17, -3, 140); L(-2, 17, -3, 140); L(0, 17, -3, 181); L(0, 18, -3, PK);
-  L(-3, 17, 2, 47); L(-3, 17, 3, 47); L(-4, 17, 2, KT); L(-4, 18, 2, KT);
+  yatakL(L, Y, -3, 17, 2, -3, 3); L(-4, 17, 2, KT); L(-4, 18, 2, KT);
   L(0, 17, 0, KS); L(0, 18, 0, KR);
   L(3, 17, -1, 181); L(3, 18, -1, 181); L(4, 17, 0, 181);
   for (const [a, c] of [[0, 0], [3, 2], [-3, -2], [-2, 3]]) L(a, 23, c, BF);
@@ -864,7 +868,9 @@ function kampYaz(L, temel, r, merdiven, Y) {
       C2(u, v, h, u === 0 ? KUT : BEZ);
       for (let dy = 1; dy < h; dy++) C2(u, v, dy, v === -2 || (v === 1 && u !== 0) ? BEZ : 0);
     }
-    C2(-1, -1, 1, 47); C2(1, -1, 1, sandik ? 0 : 47); C2(-1, 0, 1, 47); C2(1, 0, 1, sandik ? FIC : 47);
+    /* 0.36.1: iki bloklu yataklar; baş arka bezde (v = -1) */
+    const yatakC = u => { const [ax, az] = [u * rx, u * rz], [bx, bz] = [u * rx - fx, u * rz - fz]; yatakL(L, Y, cx + ax, 1, cz + az, cx + bx, cz + bz); };
+    yatakC(-1); if (sandik) { C2(1, -1, 1, 0); C2(1, 0, 1, FIC); } else yatakC(1);
     C2(0, -2, 4, CIT); C2(0, 1, 4, CIT);
     C2(2, 2, 1, CIT); C2(2, 2, 2, CIT); C2(2, 2, 3, F);
     C2(-2, 2, 1, SAM);

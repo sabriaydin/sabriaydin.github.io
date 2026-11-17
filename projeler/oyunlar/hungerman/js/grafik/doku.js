@@ -779,6 +779,17 @@ Object.assign(RESSAM, {
 
 /* 0.35.0: yanan fırının ön yüzü */
 RESSAM.firin_on_a = p => { RESSAM.firin_on(p); for (let y = 8; y < 14; y++) for (let x = 4; x < 12; x++) { const k = (13 - y) / 5 + p.r() * 0.3; p.set(x, y, k < 0.35 ? [255, 214, 90] : k < 0.75 ? [240, 130, 30] : [150, 50, 20]); } };
+/* 0.36.1: iki bloklu yatak dokuları */
+Object.assign(RESSAM, {
+  yatak_ahsap: p => { kalas(p, '#6e4626'); const k = hex('#4a2c16'); for (let x = 0; x < D; x++) { p.set(x, 0, karis(k, 1.1)); p.set(x, 15, k); } for (let i = 0; i < 6; i++) p.set(Math.floor(p.r() * 16), 2 + Math.floor(p.r() * 12), karis(k, 0.9)); },
+  yatak_yorgan: p => { p.doldur('#b02a26', 0.05); const k = hex('#841c1a'), a = hex('#cc4038');
+    for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) { const u = (x + y) % 8, v = (x - y + 16) % 8; if (u === 0 || v === 0) p.set(x, y, karis(k, 0.95 + p.r() * 0.1)); else if (u === 1 || v === 1) p.set(x, y, karis(a, 0.95 + p.r() * 0.08)); }
+    for (let y = 0; y < D; y += 8) for (let x = 0; x < D; x += 8) p.set(x + 4, y + 4, [236, 204, 120]); },
+  yatak_carsaf: p => { p.doldur('#efece4', 0.025); const k = hex('#d6d2c6'); for (let y = 2; y < D; y += 5) for (let x = 0; x < D; x++) if (p.r() < 0.55) p.set(x, y + (x % 6 < 3 ? 0 : 1), karis(k, 0.97 + p.r() * 0.05)); },
+  yatak_yastik: p => { p.doldur('#f6f3ec', 0.02); const k = hex('#d8d2c2'); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); }
+    for (let y = 2; y < 14; y++) for (let x = 2; x < 14; x++) { const d = Math.hypot((x - 7.5) / 6, (y - 7.5) / 6); if (d > 0.75) p.set(x, y, karis(hex('#e8e3d6'), 1 - (d - 0.75) * 0.3)); } },
+  yatak_dosek: p => { p.doldur('#f0eee6', 0.03); const m = hex('#6a86b8'); for (let x = 1; x < D; x += 4) for (let y = 0; y < D; y++) p.set(x, y, karis(m, 0.92 + p.r() * 0.1)); const k = hex('#c8c4b8'); for (let x = 0; x < D; x++) { p.set(x, 0, k); p.set(x, 15, k); } }
+});
 /* 0.36.0: mutfak dokuları */
 {
   const C = (p, c) => { const k = hex(c); for (let i = 0; i < D; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); } };
@@ -1207,6 +1218,10 @@ const BLOK_SIMGE = {
   vazo: p => { dokuBoya(p, T.vazo, [[4, 8, 12, 15], [5, 6, 11, 8]]); dokuBoya(p, T.yun_y, [[7, 2, 9, 6]]); dokuBoya(p, T.yun_k, [[5, 1, 8, 4]]); dokuBoya(p, T.yun_s, [[9, 2, 12, 4]]); },
   mum: p => { dokuBoya(p, T.demir_cubuk, [[4, 14, 12, 15]]); dokuBoya(p, T.mum_govde, [[6, 5, 10, 14]]); dokuBoya(p, T.mum_alev, [[7, 2, 9, 5]]); },
   sancak: (p, id) => { dokuBoya(p, T.kalas, [[1, 0, 15, 2]]); dokuBoya(p, YUZ_DOKU[id * 6], [[3, 2, 13, 13], [4, 13, 12, 14], [5, 14, 11, 15]]); dokuBoya(p, T.altin_blok, [[7, 5, 9, 9], [6, 6, 10, 8]]); },
+  /* 0.36.1: yatak (yandan görünüş: başlık, döşek, yastık, yorgan, ayaklık) */
+  yatakTek: p => { dokuBoya(p, T.yatak_ahsap, [[0, 3, 2, 15], [14, 7, 16, 15], [2, 11, 14, 13], [2, 13, 3, 15, 0.8], [13, 13, 14, 15, 0.8]]);
+    dokuBoya(p, T.yatak_dosek, [[2, 9, 14, 11]]); dokuBoya(p, T.yatak_yastik, [[2, 6, 6, 9]]); dokuBoya(p, T.yatak_yorgan, [[5, 7, 14, 10], [13, 7, 14, 11, 0.85]]); },
+  yatak2: p => BLOK_SIMGE.yatakTek(p),
   /* 0.36.0: mutfak */
   degirmen: p => { dokuBoya(p, T.degirmen_yan, [[1, 9, 15, 15], [2, 6, 14, 9, 0.9]]); dokuBoya(p, T.degirmen_ust, [[3, 4, 13, 6]]); dokuBoya(p, T.kalas, [[11, 1, 12, 5]]); },
   pasta: p => { dokuBoya(p, T.pasta_yan, [[2, 7, 14, 14]]); dokuBoya(p, T.pasta_ust, [[2, 4, 14, 7]]); },

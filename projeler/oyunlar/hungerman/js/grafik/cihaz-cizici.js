@@ -362,10 +362,18 @@ export class CihazCizici {
      b: null (gizle), { cihaz, yon, x, y, z, gecerli } ya da { id, x, y, z, gecerli } */
   onizleme(b) {
     if (!b) { if (this.hayalet) this.hayalet.visible = false; return; }
-    const anahtar = b.cihaz ? 'c:' + b.cihaz : 'b:' + b.id;
+    const anahtar = b.cihaz ? 'c:' + b.cihaz : b.parcalar ? 'p:' + b.parcalar.map(q => q[0]).join(',') : 'b:' + b.id;
     let h = this.hayaletler.get(anahtar);
     if (!h) {
       if (b.cihaz) h = this.ornekKur(b.cihaz, this.hayaletMalz).dis;
+      else if (b.parcalar) {   // 0.36.1: çok parçalı blok (yatak): parçalar ilk parçaya göre yerleşir
+        h = new THREE.Group();
+        const [, x0, y0, z0] = b.parcalar[0];
+        for (const [id, x, y, z] of b.parcalar) {
+          const kutular = sekilKutulari(id, () => 0).map(k => ({ k: k.slice(0, 6), t: k.length > 6 ? k[6] : [0, 1, 2, 3, 4, 5].map(f => YUZ_DOKU[id * 6 + f]) }));
+          const m = new THREE.Mesh(kutuGeo(kutular), this.hayaletMalz); m.position.set(x - x0, y - y0, z - z0); h.add(m);
+        }
+      }
       else {
         const kutular = sekilKutulari(b.id, () => 0).map(k => ({ k: k.slice(0, 6), t: k.length > 6 ? k[6] : [0, 1, 2, 3, 4, 5].map(f => YUZ_DOKU[b.id * 6 + f]) }));
         h = new THREE.Group(); const m = new THREE.Mesh(kutuGeo(kutular), this.hayaletMalz); m.position.set(-0.5, 0, -0.5); h.add(m);
@@ -375,7 +383,7 @@ export class CihazCizici {
     }
     if (this.hayalet && this.hayalet !== h) this.hayalet.visible = false;
     this.hayalet = h; h.visible = true;
-    if (b.cihaz) this.yerlestir(h, b.yon, b.x, b.y, b.z); else { h.position.set(b.x + 0.5, b.y, b.z + 0.5); h.rotation.y = 0; }
+    if (b.cihaz) this.yerlestir(h, b.yon, b.x, b.y, b.z); else if (b.parcalar) { h.position.set(b.parcalar[0][1], b.parcalar[0][2], b.parcalar[0][3]); h.rotation.y = 0; } else { h.position.set(b.x + 0.5, b.y, b.z + 0.5); h.rotation.y = 0; }
     /* uygun: hafif yeşil; uygun değil: kırmızı */
     const c = b.gecerli ? [0.75, 1.15, 0.8] : [1.35, 0.45, 0.4], i = Math.max(0.65, this.isik ?? 1);
     this.hayaletMalz.color.setRGB(c[0] * i, c[1] * i, c[2] * i);

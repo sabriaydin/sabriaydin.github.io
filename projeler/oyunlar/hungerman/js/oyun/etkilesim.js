@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
@@ -294,6 +294,8 @@ export class Etkilesim {
     for (const [dx, dy, dz] of [[0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]) { const n = d.blok(h.x + dx, h.y + dy, h.z + dz); if (n === 59 && !SU_SEVIYE[d.blok(h.x, h.y + 1, h.z)]) yeni = 59; }
     if (h.id === 31 || b.suIcinde) yeni = 7;
     if (!d.blokKoy(h.x, h.y, h.z, yeni)) return;
+    /* 0.36.1: iki bloklu yatağın diğer parçası da kaldırılır (eşya bir kez düşer) */
+    if (b.yatak2) { const [dx, dz] = YONLER[b.yon], k = b.parca ? -1 : 1, ox = h.x + dx * k, oz = h.z + dz * k, ob = BLOKLAR[d.blok(ox, h.y, oz)]; if (ob && ob.yatak2 && ob.yon === b.yon && ob.parca !== b.parca) d.blokKoy(ox, h.y, oz, 0); }
     /* Kapının diğer yarısı da kaldırılır */
     if (b.sekil === 'kapi') { const oy = h.y + (b.ust ? -1 : 1), ob = d.blok(h.x, oy, h.z); if (BLOKLAR[ob] && BLOKLAR[ob].sekil === 'kapi') d.blokKoy(h.x, oy, h.z, 0); }
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
@@ -643,6 +645,15 @@ export class Etkilesim {
       env.seciliAzalt(1); this.istat('konulan'); this.ses.koy(C.ses);
       return true;
     }
+    /* 0.36.1: yatak iki blok olarak kurulur (ayak hedefte, baş bakış yönünde; R ile döndürülür) */
+    if (s.id === 47 && h) {
+      const y = this.yatakYeri(h);
+      if (!y) return false;
+      if (!y.gecerli) { this.arayuz.bildirim(y.neden); return true; }
+      for (const [id, x, yy, z] of y.parcalar) this.dunya.blokKoy(x, yy, z, id);
+      env.seciliAzalt(1); this.istat('konulan'); this.ses.koy('yun');
+      return true;
+    }
     /* Blok koyma */
     if (e.tur === 'blok' && h) {
       let id = e.blok;
@@ -861,7 +872,7 @@ export class Etkilesim {
     return h.ny === -1 && KATI[h.id] ? 842 : duvar ? 844 + yi * 2 : 620;
   }
   /* Elde tutulan eşya R ile döndürülebilir mi */
-  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (e.tur === 'cihaz' || e.tur === 'plan' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
+  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (id === 47 || e.tur === 'cihaz' || e.tur === 'plan' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
   dondur() { this.donus = (this.donus + 1) % 4; return this.donus; }
 
   /* 0.25.0: cihazın kurulacağı yer ve kurulabilirliği: { yon, x, y, z (kök), hucreler, gecerli, neden } */
@@ -895,6 +906,25 @@ export class Etkilesim {
     if (C.elektrik === 'su' && !su) return sonuc(false, 'Su çarkının alt kısmı suya değmelidir (çarkı suyun içine ya da kıyısına kurunuz).');
     if (C.elektrik === 'ruzgar') for (const [px, py, pz] of pervaneHucreleri(yon, ax, y, az)) {
       if (py >= 127 || KATI[d.blok(px, py, pz)]) return sonuc(false, 'Pervanenin döneceği alan boş olmalıdır (yaklaşık 7 blok çapında).');
+    }
+    return sonuc(true);
+  }
+  /* 0.36.1: iki bloklu yatağın kurulacağı yer: { yatak, yon, x, y, z, parcalar: [[id, x, y, z], ...], gecerli, neden } */
+  yatakYeri(h) {
+    if (!h) return null;
+    const d = this.dunya, hb = BLOKLAR[h.id];
+    let x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
+    if (hb && hb.degistirilebilir) { x = h.x; y = h.y; z = h.z; }
+    const yon = (this.bakisYonu4() + this.donus) % 4, [dx, dz] = YONLER[yon];
+    const parcalar = [[YATAK + yon * 2, x, y, z], [YATAK + yon * 2 + 1, x + dx, y, z + dz]];
+    const sonuc = (gecerli, neden = '') => ({ yatak: true, yon, x, y, z, parcalar, gecerli, neden });
+    for (const [, px, py, pz] of parcalar) {
+      if (py < 1 || py >= 127 || !d.yuklu(px, pz)) return sonuc(false, 'Yatak buraya sığmaz.');
+      const q = d.blok(px, py, pz), qb = BLOKLAR[q];
+      if (!(q === 0 || (qb && qb.degistirilebilir && !qb.cihaz))) return sonuc(false, 'Yatak için iki blok boş yer gerekir.');
+      if (this.oyuncu.hucreyiKapliyor(px, py, pz)) return sonuc(false, 'Yatağın kurulacağı yerde durulmaktadır.');
+      const alt = d.blok(px, py - 1, pz), altB = BLOKLAR[alt];
+      if (!KATI[alt] || (altB && altB.ustuneKonmaz)) return sonuc(false, 'Yatak düz ve katı bir zemine kurulur.');
     }
     return sonuc(true);
   }
@@ -935,6 +965,7 @@ export class Etkilesim {
     const s = this.envanter.seciliYuva(), e = s && ESYALAR[s.id], h = this.hedef;
     if (!e || !h || this.hedefCanli || this.hedefTekne) return null;
     if (e.tur === 'cihaz') return this.cihazYeri(e.cihaz, h);
+    if (s.id === 47) return this.yatakYeri(h);   // 0.36.1
     if (e.tur !== 'blok') return null;
     const eb = BLOKLAR[e.blok], f = (this.bakisYonu4() + this.donus) % 4, id = this.yuzeyId(eb, h, f) ?? this.yonluId(eb, f);
     if (id == null) return null;

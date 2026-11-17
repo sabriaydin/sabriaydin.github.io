@@ -71,7 +71,9 @@ export const DOKULAR = [
   'kompost_yan', 'kompost_ic', 'kompost_hazir',
   'firin_on_a',   // 0.35.0
   /* 0.36.0: mutfak */
-  'degirmen_ust', 'degirmen_yan', 'tezgah_ust', 'tezgah_on', 'kiler_on', 'fici_yan', 'fici_ust', 'pasta_ust', 'pasta_yan', 'pasta_ic', 'cuval_un', 'cuval_tuz', 'semaver', 'sepet', 'tandir', 'tabak', 'feslegen', 'sarimsak', 'kavanoz', 'kavanoz_bal', 'baharat'
+  'degirmen_ust', 'degirmen_yan', 'tezgah_ust', 'tezgah_on', 'kiler_on', 'fici_yan', 'fici_ust', 'pasta_ust', 'pasta_yan', 'pasta_ic', 'cuval_un', 'cuval_tuz', 'semaver', 'sepet', 'tandir', 'tabak', 'feslegen', 'sarimsak', 'kavanoz', 'kavanoz_bal', 'baharat',
+  /* 0.36.1: iki bloklu yatak */
+  'yatak_ahsap', 'yatak_yorgan', 'yatak_carsaf', 'yatak_yastik', 'yatak_dosek'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -140,7 +142,8 @@ blok(44, { ad: 'Peygamber Çiçeği', dok: 'mavi_cicek', cizim: C_CAPRAZ, kati: 
 blok(45, { ad: 'Karlı Çimen', dok: ['kar', 'kar_yan', 'toprak'], sertlik: 0.6, alet: 'kurek', ses: 'kar', dusur: () => [[3, 1]] });
 
 blok(46, { ad: 'Meşale', dok: 'mesale', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'odun', bitki: false, isik: 14, mesale: true });
-blok(47, { ad: 'Yatak', dok: { ust: 'yatak_ust', yan: 'yatak_yan', on: 'yatak_yan', alt: 'kalas' }, sertlik: 0.4, alet: 'balta', ses: 'yun', yatak: true });
+/* 0.36.1: Yatak eşyası iki bloklu yatak kurar (YATAK); tek bloklu 47 eski kayıtlar ve yapılar için küçük yatak olarak kalır */
+blok(47, { ad: 'Yatak', dok: { ust: 'yatak_yorgan', yan: 'yatak_ahsap', on: 'yatak_ahsap', alt: 'yatak_ahsap' }, cizim: C_SEKIL, opak: false, sekil: 'yatakTek', sertlik: 0.4, alet: 'balta', ses: 'yun', yatak: true });
 blok(48, { ad: 'Kamp Ateşi', dok: 'kamp_atesi', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1, alet: 'balta', ses: 'odun', isik: 15, mesale: true, istasyon: 'ates', firinKap: 'ates' });
 blok(49, { ad: 'Yün', dok: 'yun', sertlik: 0.8, ses: 'yun' });
 blok(50, { ad: 'Sandık', dok: { ust: 'sandik_ust', yan: 'sandik_yan', on: 'sandik_on', alt: 'sandik_ust' }, cizim: 5, opak: false, sertlik: 2.5, alet: 'balta', ses: 'odun', sandik: true, sekil: 'sandik' });
@@ -576,6 +579,11 @@ MUTFAK.kavanoz = ayir(1); blok(MUTFAK.kavanoz, { ...MB, ad: 'Kavanozlar', dok: '
 MUTFAK.bal = ayir(1); blok(MUTFAK.bal, { ...MB, ad: 'Bal Kavanozu', dok: 'kavanoz_bal', sekil: 'balKavanoz', kati: false, sertlik: 0.2, alet: null, ses: 'cam', harita: 2 });
 MUTFAK.unCuval = ayir(1); blok(MUTFAK.unCuval, { ...MB, ad: 'Un Çuvalı', dok: 'cuval_un', sekil: 'cuval', sertlik: 0.5, alet: null, ses: 'yun', harita: 49 });
 MUTFAK.tuzCuval = ayir(1); blok(MUTFAK.tuzCuval, { ...MB, ad: 'Tuz Çuvalı', dok: 'cuval_tuz', sekil: 'cuval', sertlik: 0.5, alet: null, ses: 'yun', harita: 49 });
+/* ---------- 0.36.1: iki bloklu yatak ----------
+   Kimlik: YATAK + yön * 2 + parça (0 ayak, 1 baş). Yön, ayaktan başa doğrudur (0 kuzey, 1 doğu, 2 güney, 3 batı). */
+export const YATAK = ayir(8);
+for (let f = 0; f < 4; f++) for (let p = 0; p < 2; p++) blok(YATAK + f * 2 + p, { ad: 'Yatak', dok: { ust: 'yatak_yorgan', yan: 'yatak_ahsap', on: 'yatak_ahsap', alt: 'yatak_ahsap' }, cizim: C_SEKIL, opak: false,
+  sekil: 'yatak2', yatak: true, yatak2: true, yon: f, parca: p, taban: YATAK, gizli: true, sertlik: 0.4, alet: 'balta', ses: 'yun', dusur: () => [[47, 1]], harita: 14 });
 
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 2048;   // 0.31.0: 1024'ten 2048'e

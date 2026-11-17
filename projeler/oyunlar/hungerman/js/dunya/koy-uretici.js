@@ -5,6 +5,7 @@
    Kıyıya yakın köylerde iskele, deniz feneri, balıkçı kulübesi ve tekneleriyle bir liman bulunur. */
 import { PB, PY, DENIZ, DUNYA_SINIRI, dizin } from '../sabitler.js';
 import { karistir, uretec } from '../rastgele.js';
+import { YATAK } from '../bloklar.js';
 
 export const KOY_BOLGE = 384;
 const KENAR = 80;
@@ -406,11 +407,12 @@ function binaYaz(b, M, set, al, k) {
     if (a >= bx || a >= bz) break;
     for (let lz = a; lz < bz; lz++) for (let lx = a; lx < bx; lx++) L(lx, 4 + kat, lz, M.cati);
   }
-  /* İç düzen */
-  if (b.tur === 'ev_kucuk') { L(1, 1, d - 2, 47); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 46); }
-  else if (b.tur === 'ev_buyuk') { L(1, 1, d - 2, 47); L(2, 1, d - 2, 47); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 32); L(1, 1, 1, 46); L(w - 2, 1, (d - 1) / 2, 33); }
+  /* İç düzen (0.36.1: yataklar iki bloktur; baş arka duvara dayanır) */
+  const yatak = lx => { const f = dunyaYonu(b, 0, 1); L(lx, 1, d - 3, YATAK + f * 2); L(lx, 1, d - 2, YATAK + f * 2 + 1); };
+  if (b.tur === 'ev_kucuk') { yatak(1); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 46); }
+  else if (b.tur === 'ev_buyuk') { yatak(1); yatak(2); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 32); L(1, 1, 1, 46); L(w - 2, 1, (d - 1) / 2, 33); }
   else if (b.tur === 'demirci') { L(1, 1, d - 2, 33); L(2, 1, d - 2, 33); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 32); L(ox, 1, d - 2, 46); }
-  else if (b.tur === 'kulube') { L(1, 1, d - 2, 47); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 46); L(1, 1, 1, 52); L(1, 2, 1, 52); }
+  else if (b.tur === 'kulube') { yatak(1); L(w - 2, 1, d - 2, 50); L(w - 2, 1, 1, 46); L(1, 1, 1, 52); L(1, 2, 1, 52); }
 }
 
 /* Yerel yönden dünya yönüne (0 -z, 1 +x, 2 +z, 3 -x) */

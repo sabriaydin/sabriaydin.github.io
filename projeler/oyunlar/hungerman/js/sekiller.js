@@ -345,6 +345,41 @@ export function sekilKutulari(id, komsu, carp = false) {
       return [[5 * P, 0, 5 * P, 11 * P, 7 * P, 11 * P], [6 * P, 7 * P, 6 * P, 10 * P, 10 * P, 10 * P], [7.5 * P, 10 * P, 7.5 * P, 8.5 * P, 14 * P, 8.5 * P, Y], [6 * P, 10 * P, 9 * P, 7 * P, 13 * P, 10 * P, Y],
         [6.5 * P, 13.5 * P, 6.5 * P, 9.5 * P, 15.5 * P, 9.5 * P, T.yun_k], [5 * P, 12 * P, 9 * P, 7 * P, 13.5 * P, 11 * P, T.yun_s], [9 * P, 11 * P, 5.5 * P, 11 * P, 12.5 * P, 7.5 * P, T.mavi_cicek]];
     }
+    /* ---------- 0.36.1: iki bloklu yatak ----------
+       Kuzeye (yön 0) göre: baş parçası kuzeyde (başlık, yastık, yorganın kıvrık ucu), ayak parçası güneyde (yorgan, ayaklık).
+       Ahşap çerçeve ve dört köşe direği, yanlarda karyola kirişi, üstte çizgili döşek ve beyaz çarşaf; yorgan yanlardan sarkar. */
+    case 'yatak2': {
+      if (carp) return dondur(b.parca ? [[0.5 * P, 0, 0, 15.5 * P, 9 * P, 1], [0.5 * P, 0, 0, 15.5 * P, 14.5 * P, 2.5 * P]] : [[0.5 * P, 0, 0, 15.5 * P, 9 * P, 1]], b.yon);
+      const A = T.yatak_ahsap, Y = T.yatak_yorgan, C = T.yatak_carsaf, D = T.yatak_dosek, S = T.yatak_yastik, l = [];
+      if (b.parca) {
+        l.push([0.5 * P, 0, 0.5 * P, 2.5 * P, 15 * P, 2.5 * P, A], [13.5 * P, 0, 0.5 * P, 15.5 * P, 15 * P, 2.5 * P, A],   // başlık direkleri
+          [2.5 * P, 4 * P, 1 * P, 13.5 * P, 13 * P, 2 * P, A], [0.2 * P, 15 * P, 0.2 * P, 15.8 * P, 16 * P, 2.8 * P, A],    // başlık paneli ve üst kapak
+          [5 * P, 8 * P, 0.8 * P, 11 * P, 11 * P, 1 * P, A],                                                                // oyma
+          [1 * P, 3 * P, 2.5 * P, 2 * P, 6 * P, 1, A], [14 * P, 3 * P, 2.5 * P, 15 * P, 6 * P, 1, A],                       // yan kirişler
+          [2 * P, 3 * P, 2 * P, 14 * P, 7 * P, 1, D], [2 * P, 7 * P, 2 * P, 14 * P, 8 * P, 1, C],                          // döşek ve çarşaf
+          [3 * P, 8 * P, 2.6 * P, 13 * P, 10.5 * P, 7 * P, S], [3.5 * P, 10.5 * P, 3.2 * P, 12.5 * P, 11.2 * P, 6.4 * P, S], // yastık
+          [1.6 * P, 8 * P, 9 * P, 14.4 * P, 9 * P + 0.6 * P, 1, Y], [1.6 * P, 8.6 * P, 8 * P, 14.4 * P, 9.4 * P, 10 * P, C], // yorgan ve kıvrık çarşaf ucu
+          [1.4 * P, 4.5 * P, 9 * P, 1.6 * P, 9.2 * P, 1, Y], [14.4 * P, 4.5 * P, 9 * P, 14.6 * P, 9.2 * P, 1, Y]);           // yanlardan sarkan yorgan
+      } else {
+        l.push([0.5 * P, 0, 13.5 * P, 2.5 * P, 10 * P, 15.5 * P, A], [13.5 * P, 0, 13.5 * P, 15.5 * P, 10 * P, 15.5 * P, A], // ayaklık direkleri
+          [2.5 * P, 3 * P, 14 * P, 13.5 * P, 9 * P, 15 * P, A], [0.2 * P, 10 * P, 13.2 * P, 15.8 * P, 11 * P, 15.8 * P, A],  // ayaklık paneli ve kapak
+          [1 * P, 3 * P, 0, 2 * P, 6 * P, 13.5 * P, A], [14 * P, 3 * P, 0, 15 * P, 6 * P, 13.5 * P, A],                      // yan kirişler
+          [2 * P, 3 * P, 0, 14 * P, 7 * P, 14 * P, D], [2 * P, 7 * P, 0, 14 * P, 8 * P, 13.6 * P, C],                        // döşek ve çarşaf
+          [1.6 * P, 8 * P, 0, 14.4 * P, 8.6 * P, 13.8 * P, Y],                                                               // yorgan
+          [1.4 * P, 4.5 * P, 0, 1.6 * P, 8.6 * P, 13.8 * P, Y], [14.4 * P, 4.5 * P, 0, 14.6 * P, 8.6 * P, 13.8 * P, Y],      // yanlardan sarkan yorgan
+          [1.6 * P, 5 * P, 13.6 * P, 14.4 * P, 8.6 * P, 13.8 * P, Y]);                                                       // ayak ucunda sarkan yorgan
+      }
+      return dondur(l, b.yon);
+    }
+    /* Eski tek bloklu yatak (0.36.1 öncesi kayıtlar ve yapılar): küçük karyola */
+    case 'yatakTek': {
+      if (carp) return [[P, 0, 0, 15 * P, 9 * P, 1]];
+      const A = T.yatak_ahsap, Y = T.yatak_yorgan, C = T.yatak_carsaf, D = T.yatak_dosek, S = T.yatak_yastik;
+      return [[1 * P, 0, 0.5 * P, 3 * P, 12 * P, 2.5 * P, A], [13 * P, 0, 0.5 * P, 15 * P, 12 * P, 2.5 * P, A], [3 * P, 4 * P, 1 * P, 13 * P, 11 * P, 2 * P, A],
+        [1 * P, 0, 14 * P, 3 * P, 8 * P, 15.5 * P, A], [13 * P, 0, 14 * P, 15 * P, 8 * P, 15.5 * P, A], [3 * P, 3 * P, 14.5 * P, 13 * P, 7 * P, 15 * P, A],
+        [2 * P, 3 * P, 2.5 * P, 14 * P, 6 * P, 14 * P, D], [2 * P, 6 * P, 2.5 * P, 14 * P, 7 * P, 14 * P, C], [3.5 * P, 7 * P, 3 * P, 12.5 * P, 9 * P, 6 * P, S],
+        [1.6 * P, 7 * P, 7 * P, 14.4 * P, 7.6 * P, 14.2 * P, Y], [1.4 * P, 4 * P, 7 * P, 1.6 * P, 7.6 * P, 14.2 * P, Y], [14.4 * P, 4 * P, 7 * P, 14.6 * P, 7.6 * P, 14.2 * P, Y]];
+    }
     /* ---------- 0.36.0: mutfak ---------- */
     /* Değirmen taşı: taş kaide, üstte iki öğütme taşı ve döndürme kolu */
     case 'degirmen':
