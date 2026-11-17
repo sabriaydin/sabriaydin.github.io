@@ -625,7 +625,7 @@ export class EnvanterEkrani {
     if (es.iyilestir) alt += `<span>${es.iyilestir / 2} kalp iyileştirir</span>`;
     if (es.iyilestirme) alt += `<span>Ayrıca ${es.iyilestirme / 2} kalp iyileştirir</span>`;
     if (es.ekin) {
-      alt += '<span>Toprak, çimen veya tarla toprağına ekilir; tarlada daha hızlı büyür · Shift ile 3 × 3 tarlaya ekilir</span>';
+      alt += '<span>Yalnızca çapayla işlenmiş tarla toprağına ekilir; suya yakın tarlada daha hızlı büyür · Shift ile 3 × 3 tarlaya ekilir</span>';
       /* 0.34.0: ekine özgü mevsim */
       const eb = BLOKLAR[es.ekin], MV = ['İlkbahar', 'Yaz', 'Sonbahar', 'Kış'];
       if (eb && eb.mevsim) alt += `<span>En iyi: ${MV.filter((m, i) => eb.mevsim[i] >= 1).join(', ') || '—'} · ${eb.mevsim[3] ? 'kışın yavaş büyür' : 'kışın büyümez'}</span>`;

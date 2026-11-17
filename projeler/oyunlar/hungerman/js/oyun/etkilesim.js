@@ -12,7 +12,8 @@ const hexRgb = h => { h = (h || '#ffffff').replace('#', ''); return [0, 2, 4].ma
 const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
 const ERISIM = 5;
-const TOPRAK = new Set([3, 4, 45, 137, 138]);   // ekim yapılabilen zeminler
+const TOPRAK = new Set([3, 4, 45, 137, 138]);   // fidan ve bitki dikilebilen zeminler
+const TARLA = new Set([137, 138]);   // 0.38.4: tohum yalnızca çapalanmış tarlaya ekilir
 /* 0.34.0: ekinin tohumu (evre 0 bloğunu eken eşya) */
 let TOHUMLAR = null;
 const tohumBul = taban => { if (!TOHUMLAR) { TOHUMLAR = new Map(); for (const e of Object.values(ESYALAR)) if (e && e.ekin && !TOHUMLAR.has(e.ekin)) TOHUMLAR.set(e.ekin, e); } return TOHUMLAR.get(taban); };
@@ -568,9 +569,8 @@ export class Etkilesim {
     if (e.alet && e.alet.tur === 'capa') {
       if (!h || ![3, 4, 45, 57].includes(h.id) || h.ny === -1) return false;
       const d = this.dunya;
-      /* 0.34.0: demir çapa önüne doğru 3 blok, elmas çapa 3 × 3 alan işler */
-      const sev = e.alet.seviye, [fx, fz] = YONLER[this.bakisYonu4()];
-      const alan = sev >= 5 ? [-1, 0, 1].flatMap(a => [-1, 0, 1].map(c => [a, c])) : sev >= 4 ? [[0, 0], [fx, fz], [fx * 2, fz * 2]] : [[0, 0]];
+      /* 0.38.4: her çapa yalnızca tıklanan bloğu işler (çapanın malzemesi dayanıklılığı ve hızı belirler) */
+      const alan = [[0, 0]];
       let n = 0;
       for (const [a, c] of alan) {
         const x = h.x + a, z = h.z + c, id = d.blok(x, h.y, z);
@@ -586,8 +586,10 @@ export class Etkilesim {
       if (env.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       return true;
     }
+    /* 0.38.4: çapalanmamış toprağa tohum ekilmez (havuç, patates ve soğan bu durumda yenir) */
+    if (e.ekin && h && TOPRAK.has(h.id) && !TARLA.has(h.id) && h.ny === 1 && !e.yemek) { this.arayuz.bildirim('Tohum yalnızca çapayla işlenmiş tarla toprağına ekilir.'); return true; }
     /* Tohum ekme (havuç ve patates hem ekilir hem yenir) */
-    if (e.ekin && h && TOPRAK.has(h.id) && h.ny === 1 && this.dunya.blok(h.x, h.y + 1, h.z) === 0) {
+    if (e.ekin && h && TARLA.has(h.id) && h.ny === 1 && this.dunya.blok(h.x, h.y + 1, h.z) === 0) {
       this.dunya.blokKoy(h.x, h.y + 1, h.z, e.ekin); env.seciliAzalt(1); this.ses.koy('bitki');
       /* 0.34.0: Shift basılıyken çevredeki 3 × 3 tarlaya da ekilir */
       if (this.shift) for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
