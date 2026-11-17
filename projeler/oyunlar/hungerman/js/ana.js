@@ -3,7 +3,7 @@ import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl,
 import { Sahne, THREE } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
 import { BIYOMLAR, BY } from './dunya/uretici.js';
-import { BLOKLAR, ESYALAR, KATI, buyuluMu, ESYA37 } from './bloklar.js';
+import { BLOKLAR, ESYALAR, KATI, buyuluMu, ESYA37, dusmeHasari } from './bloklar.js';
 import { metinTohum } from './rastgele.js';
 import { Oyuncu } from './oyun/oyuncu.js';
 import { Envanter } from './oyun/envanter.js';
@@ -572,7 +572,7 @@ function oyunBaslat(v) {
   ekran('yukleme');
   $('#yukleBaslik').textContent = v.istemci ? 'Dünyaya katılınıyor' : v.yeni ? 'Dünya oluşturuluyor' : 'Dünya yükleniyor';
   $('#yukleCubuk').style.width = '0%';
-  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır; son kullanılan yatak doğma noktası olur.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.', 'Arı kovanının altına kamp ateşi yakılırsa bal toplarken arılar kızmaz.', 'Süt kovası içilince zehir ve olumsuz etkiler geçer.', 'Kırkılan koyunun yünü zamanla yeniden uzar.', 'Şeker kamışı yalnızca suya komşu zemine dikilir.', 'Kanlı Ay her mevsimin son gecesinde doğar; o gece uyunamaz.', 'Ölünce eşyalarınız mezar taşında saklanır.', 'Karlı bölgelerde deri zırh ve sıcak çorba hayat kurtarır.', 'Bandaj kanamayı durdurur; atel kırık bacağı hızla iyileştirir.', 'Düşen meteorların kraterinde Yıldız Parçası veren Gök Taşı bulunur.', 'Eve Dönüş Tılsımı son kullanılan yatağa ışınlar.', 'Doğma noktası son kullanılan yataktır; yatak yoksa ölünce rastgele bir yerde doğulur.', 'Ada Bekçisi Kül Devi yenilince iki Büyülü Anahtar bırakır; anahtar kadim geçidi 30 dakika açar.', 'F1 göstergeleri gizler, F2 ekran görüntüsü kaydeder.', 'Dünyalar listesindeki Yedekle düğmesi dünyayı dosya olarak indirir.', 'Envanterdeki Sırala düğmesi çantayı düzenler.', 'Hardcore dünyada tek can vardır.',
+  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır; son kullanılan yatak doğma noktası olur.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.', 'Arı kovanının altına kamp ateşi yakılırsa bal toplarken arılar kızmaz.', 'Süt kovası içilince zehir ve olumsuz etkiler geçer.', 'Kırkılan koyunun yünü zamanla yeniden uzar.', 'Şeker kamışı yalnızca suya komşu zemine dikilir.', 'Kanlı Ay her mevsimin son gecesinde doğar; o gece uyunamaz.', 'Ölünce eşyalarınız mezar taşında saklanır.', 'Karlı bölgelerde deri zırh ve sıcak çorba hayat kurtarır.', 'Bandaj kanamayı durdurur; atel kırık bacağı hızla iyileştirir.', 'Düşen meteorların kraterinde Yıldız Parçası veren Gök Taşı bulunur.', 'Eve Dönüş Tılsımı son kullanılan yatağa ışınlar.', 'Yüksekten düşmek ölümcüldür; yün, saman balyası, yaprak ve kar düşüşü yumuşatır, suya düşmek zarar vermez.', 'Doğma noktası son kullanılan yataktır; yatak yoksa ölünce rastgele bir yerde doğulur.', 'Ada Bekçisi Kül Devi yenilince iki Büyülü Anahtar bırakır; anahtar kadim geçidi 30 dakika açar.', 'F1 göstergeleri gizler, F2 ekran görüntüsü kaydeder.', 'Dünyalar listesindeki Yedekle düğmesi dünyayı dosya olarak indirir.', 'Envanterdeki Sırala düğmesi çantayı düzenler.', 'Hardcore dünyada tek can vardır.',
     'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C tuşuna basılır.', 'F8 ile açılan geliştirici konsolunda “yardim” komutu tüm komutları listeler.',
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.',
@@ -755,10 +755,14 @@ function oyunBaslat(v) {
   /* Tüy Düşüşü büyüsü (botlarda) düşme hasarını seviye başına %12 azaltır */
   oyuncu.olaylar.dustu = d => {
     if (oyuncu.suda) return;
-    const n = Math.floor(d - 3) * (1 - 0.12 * Math.min(4, envanter.zirhBuyu('tuy')));
+    /* 0.40.4: gerçekçi düşme hasarı; inilen zemin yumuşaksa azalır, tüy düşüşü büyüsü %12'şer azaltır */
+    const P = oyuncu.konum, x = Math.floor(P.x), z = Math.floor(P.z), ayak = dunya.blok(x, Math.floor(P.y + 0.05), z);
+    const alt = BLOKLAR[ayak] && BLOKLAR[ayak].ses === 'kar' ? ayak : dunya.blok(x, Math.floor(P.y - 0.05), z);
+    const n = Math.round(dusmeHasari(d, alt) * (1 - 0.12 * Math.min(4, envanter.zirhBuyu('tuy'))));
+    if (n <= 0) return;
     hayatta.hasar(n, 'dusme');
-    /* 0.22.0: sert düşüş bacağı kırabilir */
-    if (n >= 6 && !hayatta.olu && !hayatta.olumsuz && !hayatta.etki('kirik') && (n >= 9 || Math.random() < 0.5)) {
+    /* 0.22.0: sert düşüş bacağı kırabilir (0.40.4: 7 bloktan yüksekte yarı olasılıkla, 9 bloktan yüksekte kesin) */
+    if (n >= 6 && !hayatta.olu && !hayatta.olumsuz && !hayatta.etki('kirik') && (d >= 9 || (d >= 7 && Math.random() < 0.5))) {
       hayatta.etkiEkle('kirik', 180); hayatta.atel = false; ses.kemik();
       hud.bildirim('Bacağınız kırıldı! Atel (3 çubuk, 1 ip) sarılınca daha hızlı iyileşir.');
     }

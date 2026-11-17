@@ -983,6 +983,16 @@ for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozel
 E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
 
 /* Örste onarım malzemesi */
+/* 0.40.4: gerçekçi düşme hasarı (yarım kalp cinsinden; oyuncu canı 20). 3 bloğa kadar hasar yoktur, sonra yükseklikle hızla artar:
+   4 blok 1,6 · 6 blok 5,2 · 8 blok 9,5 · 10 blok 14,4 · 12 blok 20 (tam can). Yumuşak zemin azaltır: yün, halı, yatak, minder ve
+   saman balyası %80, yapraklar %50, kar %40. altId: inilen blok (kar katmanı varsa o). */
+export function dusmeHasari(d, altId) {
+  const a = d - 3; if (a <= 0) return 0;
+  let n = a * 1.5 + 0.08 * a * a;
+  const b = BLOKLAR[altId];
+  if (b) { if (b.ses === 'yun' || altId === 52) n *= 0.2; else if (b.ses === 'kar') n *= 0.6; else if (/Yaprağı$/.test(b.ad || '')) n *= 0.5; }
+  return n;
+}
 export function onarimMalzemesi(id) {
   if (id >= 300 && id < 320) return [[14, 38, 39], [15], [259], [261], [264]][Math.floor((id - 300) / 4)];
   if (id >= 340 && id < 345) return [[14, 38, 39], [15], [259], [261], [264]][id - 340];

@@ -5,7 +5,7 @@ import { THREE } from '../grafik/sahne.js';
 import { MODELLER, okModeli } from './modeller.js';
 import { TURLER, HAYVANLAR } from './turler.js';
 import { BY, KARLI } from '../dunya/uretici.js';
-import { KATI, SIVI, KESIK, BITKI, LAV, BLOKLAR } from '../bloklar.js';
+import { KATI, SIVI, KESIK, BITKI, LAV, BLOKLAR, dusmeHasari } from '../bloklar.js';
 import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
 import { adaYakin } from '../dunya/ada-uretici.js';
@@ -1192,9 +1192,23 @@ export class Varliklar {
       if (this.carpisiyor(v, p.x, p.y, nz)) { h.z = 0; v.engel = true; } else p.z = nz;
     }
     if (!yerde && h.y === 0 && this.carpisiyor(v, p.x, p.y - 0.03, p.z)) yerde = true;
+    const havada = !v.yerde;
     v.yerde = yerde;
     const ic = this.dunya.blok(Math.floor(p.x), Math.floor(p.y + v.tur.boy * 0.4), Math.floor(p.z));
     v.suda = !!SIVI[ic] && !LAV[ic];
+    /* 0.40.4: canlılar da yüksekten düşünce hasar alır (oyuncuyla aynı kural; uçan ve suda yaşayan canlılar hariç) */
+    if (!v.tur.ucar && !v.tur.su && !v.tur.yavasDus && !this.ayna) {
+      if (v.suda || v.lavda || yerde && !havada) v.dusTepe = null;
+      else if (!yerde) { if (v.dusTepe == null || p.y > v.dusTepe) v.dusTepe = p.y; }
+      else if (v.dusTepe != null) {
+        const d = v.dusTepe - p.y; v.dusTepe = null;
+        if (d > 3.4) {
+          const x = Math.floor(p.x), z = Math.floor(p.z), ayak = this.dunya.blok(x, Math.floor(p.y + 0.05), z);
+          const n = Math.round(dusmeHasari(d, BLOKLAR[ayak] && BLOKLAR[ayak].ses === 'kar' ? ayak : this.dunya.blok(x, Math.floor(p.y - 0.05), z)));
+          if (n > 0) this.hasarVer(v, n, null, { sessiz: true, dusme: true });
+        }
+      }
+    }
     v.lavda = !!LAV[ic] || !!LAV[this.dunya.blok(Math.floor(p.x), Math.floor(p.y + 0.1), Math.floor(p.z))];
     if (v.yerde) { h.x *= 0.92; h.z *= 0.92; }
     if (p.y < -10) p.y = -100;

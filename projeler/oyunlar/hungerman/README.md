@@ -117,6 +117,12 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.4 (0.40.4): Gerçekçi düşme hasarı
+- Düşme hasarı yükseklikle hızla artar: 3 bloğa kadar hasar yoktur; 4 blok yaklaşık 1 kalp, 6 blok 2,5 kalp, 8 blok yaklaşık 5 kalp, 10 blok 7 kalp alır; 12 bloktan düşüş tam canlı oyuncuyu öldürür (önceden ölmek için yaklaşık 23 blok gerekiyordu).
+- Yumuşak zemin hasarı azaltır: yün, halı, yatak, minder ve saman balyası %80, yapraklar %50, kar %40. Suya düşüş hasarsızdır; tüy düşüşü büyüsü de hasarı azaltmaya devam eder.
+- Bacak kırılması 7 bloktan yüksek düşüşlerde yarı olasılıkla, 9 bloktan yüksekte kesin olur.
+- Hayvanlar, canavarlar, köylüler ve bosslar da aynı kurala göre düşme hasarı alır (uçan canlılar, deniz canlıları ve süzülerek inen tavuk hariç).
+
 ## 40.3 (0.40.3): Doğma noktası yalnızca yatak
 - Yeni dünyada oyuna başlanan yer artık doğma noktası değildir. Doğma noktası yalnızca son kullanılan yataktır (köyde konaklamada köylünün kapısı).
 - Ölüm ekranında **Yeniden Doğ** her seferinde rastgele, güvenli bir konumda doğurur (düz kara, köy ve özel yapılardan uzak). **Son Kayıt Noktasında Doğ** son kullanılan yatakta doğurur; yatak yoksa pasiftir.
