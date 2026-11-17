@@ -117,6 +117,9 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 35.1 (0.35.1): Köy baskınları kapatıldı
+- Köy baskınları şimdilik devre dışıdır (kod korunur; `js/koy/baskin.js` içindeki `BASKIN_ACIK` true yapılınca yeniden açılır). İlgili başarım listeden kaldırıldı.
+
 ## 35.0 (0.35.0): Köy uzmanlıkları, baskınlar ve kapsamlı düzeltmeler
 - **Köy uzmanlıkları:** her köy tek bir alanda ünlüdür: Tarım köyü, Demirci köyü, Ticaret kasabası, Bilgelik köyü, Çoban obası, Oduncu kampı, Balıkçı limanı. Uzmanlık biyoma uygun seçilir ve köyün binalarını, mesleklerini (yalnızca 2-3 meslek; ticaret kasabasında hepsi), meydan süslerini, fiyatlarını ve köye özgü takaslarını belirler.
   - Önde gelen meslekte alış %30, diğer uzmanlık mesleklerinde %15 ucuz; satışta daha az mal istenir.

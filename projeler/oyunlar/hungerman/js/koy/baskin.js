@@ -3,6 +3,8 @@
    Köyün çevresinden iki dalga hâlinde zombi, iskelet ve haydutlar gelir. Dalgalar püskürtülürse köy ödül verir (itibar, sikke, nadir eşya).
    Oyuncu köyden uzaklaşırsa ya da sabah olursa baskın başarısız sayılır: itibar düşer, köylüler kaçıştığı için o gün ticaret yapılmaz.
    Yalnızca tek oyunculuda ve sunucuda çalışır. */
+/* 0.35.1: baskınlar şimdilik kapalı; yeniden açmak için true yapılması yeterlidir */
+export const BASKIN_ACIK = false;
 const TURLER = ['zombi', 'zombi', 'iskelet', 'haydut'];
 const ODUL = [[264, 1], [290, 1], [61, 3], [336, 1], [493, 1], [492, 1]];
 
@@ -15,6 +17,7 @@ export class Baskinlar {
   }
   gece(o) { return o.zaman > 0.58 && o.zaman < 0.92; }
   guncelle(dt, o) {
+    if (!BASKIN_ACIK) return;
     this.sayac -= dt;
     if (this.sayac > 0) return;
     this.sayac = 1;

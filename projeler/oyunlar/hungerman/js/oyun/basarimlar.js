@@ -93,7 +93,8 @@ export const BASARIMLAR = [
   { k: 'zincir', ad: 'Destan', aciklama: 'Bir zincir görevi sonuna kadar tamamla.', ikon: 294, grup: 'Köyler' },
   { k: 'kahraman', ad: 'Kahraman', aciklama: 'Bir köyde Kahraman itibarına ulaş.', ikon: 290, grup: 'Köyler' },
   { k: 'gezgin', ad: 'Gezgin Tüccar', aciklama: 'Dört farklı uzmanlıktaki köyü ziyaret et.', ikon: 347, grup: 'Köyler' },
-  { k: 'baskin', ad: 'Köyün Kalkanı', aciklama: 'Bir köy baskınını püskürt.', ikon: 308, grup: 'Köyler' },
+  /* 0.35.1: baskınlar kapalıyken başarım listede yer almaz */
+  // { k: 'baskin', ad: 'Köyün Kalkanı', aciklama: 'Bir köy baskınını püskürt.', ikon: 308, grup: 'Köyler' },
   { k: 'meyve', ad: 'Meyve Bahçesi', aciklama: 'Kiraz, portakal ya da zeytin topla.', ikon: 378, grup: 'Zanaat' },
   { k: 'tirpan', ad: 'Orakçı', aciklama: 'Bir tırpan üret.', ikon: 388, grup: 'Zanaat' },
   { k: 'gubre', ad: 'Geri Dönüşüm', aciklama: 'Kompost kutusundan gübre al.', ikon: 390, grup: 'Zanaat' },
