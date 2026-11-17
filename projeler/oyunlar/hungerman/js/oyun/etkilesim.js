@@ -111,7 +111,7 @@ export class Etkilesim {
     /* 0.21.0: eldeki bir eşya başka bir eşyaya dönüşür (kova -> süt kovası); alet yıpranır */
     if (S.degistir) { this.envanter.seciliAzalt(1); this.envanter.ekle(S.degistir, 1); this.vurus = 0.01; }
     if (S.yipran) { this.aletYipran(); this.vurus = 0.01; }
-    if (S.ses === 'sut') this.ses.sicrama(0.4); else if (S.ses === 'kirp') this.ses.zirhGiy();
+    if (S.ses === 'sut') this.ses.sut(); else if (S.ses === 'kirp') this.ses.kirp();
     if (S.mesaj) this.arayuz.bildirim(S.mesaj);
     if (S.olay) this.olay(S.olay);
     if (S.bin && v && this.binek) { this.binek.bin(v); this.olay('binici'); }
@@ -513,7 +513,7 @@ export class Etkilesim {
       return true;
     }
     /* 0.39.0: Büyülü Anahtar kadim geçidi açar ve harcanır */
-    if (h && s.id === ESYA39.anahtar && this.gecit) { if (this.gecit.anahtar(h)) env.seciliAzalt(1); return true; }
+    if (h && s && s.id === ESYA39.anahtar && this.gecit) { if (this.gecit.anahtar(h)) env.seciliAzalt(1); return true; }
     /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
     if (h && BLOKLAR[h.id].oturak && !g.egil && !(e && e.tur === 'blok') && this.binek && this.binek.otur(h.x, h.y, h.z)) return true;
     /* Sandık */
@@ -686,11 +686,11 @@ export class Etkilesim {
     }
     if (s.id === ESYA37.havaiFisek) {
       const P = this.oyuncu.konum, R = [[1, 0.3, 0.3], [0.4, 0.8, 1], [1, 0.9, 0.3], [0.5, 1, 0.5], [0.9, 0.5, 1]];
-      env.seciliAzalt(1); this.ses.patlama && this.ses.patlama(900, 0.4, 0.12, 'highpass', 1);
+      env.seciliAzalt(1); this.ses.fisekAt();
       for (let i = 0; i < 3; i++) setTimeout(() => {
         const c = R[Math.floor(Math.random() * R.length)], x = P.x + (Math.random() - 0.5) * 6, y = P.y + 12 + Math.random() * 5, z = P.z + (Math.random() - 0.5) * 6;
         this.dusenler.renkliParcacik(c, x, y, z, 40); this.dusenler.renkliParcacik([1, 1, 0.9], x, y, z, 12);
-        this.ses.patlama && this.ses.patlama(220, 0.7, 0.3, 'lowpass', 1);
+        this.ses.fisekPatla();
       }, 700 + i * 380);
       this.olay && this.olay('fisek');
       return true;

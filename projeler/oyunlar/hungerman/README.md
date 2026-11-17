@@ -117,6 +117,15 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.0 (0.40.0): Gerçek sesler
+- Kodla üretilen seslerin neredeyse tamamı gerçek ses kayıtlarıyla değiştirildi (174 yeni kayıt). Hepsi ücretsizdir; CC0, CC BY, MIT ve yalnızca yağmur döngüsü CC BY-SA lisanslıdır; yazarlar ve kaynaklar `ses/LISANS.md` dosyasındadır.
+- **Canlı sesleri:** inek, koyun, domuz, tavuk, tavşan, kurt, köpek, kedi, at, köylü, zombi, boğulmuş zombi, kül zombisi, mumya, iskelet, buz iskeleti, örümcek, yarasa, haydut, balık, ahtapot, köpekbalığı ve kor ruhu; bosslardan Firavun, Buz Büyücüsü, Haydut Reisi, Taş Muhafız ve Kül Devi. Her canlının ayrı ortam, acıma ve ölüm sesi vardır; örümcek, Buz Büyücüsü ve Kül Devi'nin ayrıca saldırı sesi vardır. Türlerin ortak kayıtları perdeyle ayrılır (ör. buz iskeleti daha ince, Kül Devi daha derin).
+- **Doğa:** yağmur döngüsü, gök gürültüsü (uzaklığa göre boğuklaşır), rüzgâr, mağarada damla ve lav, deniz dalgası, kürek, diyar mağara uğultusu.
+- **Eşya ve eylemler:** eşya toplama, yemek yeme, iksir içme, suya düşme, aletin kırılması, yay ve ok, olta (atma, şamandıra, makara, yakalama), çakmak, ateş, ateş topu, inek sağma, koyun kırkma, yumurtlama, düğme, örs, cam kırılması, savurma.
+- **Olaylar:** geçidin açılması ve sönmesi, geçiş, Kanlı Ay, meteorun düşmesi ve patlaması, havai fişek, tılsım, köylüyle takas.
+- Müzik kutusu ezgileri gerçek piyano, bas gitar, zil, flüt ve davul kayıtlarıyla çalar.
+- Yalnızca kaydı bulunmayan birkaç ince ses (arı vızıltısı, kalp atışı, titreme, kayan yıldız, geçit uğultusu) kodla üretilir. Kayıt yüklenemezse her sesin yerine eski sentez biçimi çalar.
+
 ## 39.2 (0.39.2): Kül zombisi lavda yüzer
 - Kül zombisi lava düşünce dibe batmaz; yüzeye çıkıp yüzer ve kenara gelince lavdan çıkar.
 - Lavdaki ilk 10 saniye hasar almaz; 10 saniyeden uzun kalırsa yanmaya ve hasar almaya başlar. Lavdan çıkınca süre sıfırlanır.

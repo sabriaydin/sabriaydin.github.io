@@ -53,7 +53,7 @@ export class AdaBekcisi {
           this.adim = 1.4;
           this.varliklar.dusenler.renkliParcacik([0.4, 0.37, 0.35], p.x, p.y + 0.1, p.z, 6);
           if (this.sarsinti) this.sarsinti(0.12, p);
-          if (this.ses && this.ses.patlama && en < 24) this.ses.patlama(90, 0.18, 0.12 * (1 - en / 24), 'lowpass', 1);
+          if (this.ses && this.ses.agirAdim && en < 24) this.ses.agirAdim(1 - en / 24);
         }
       }
       return;

@@ -652,7 +652,7 @@ export class Varliklar {
     if (v.turAd === 'tavuk' && !(v.yavru > 0)) {
       if (v.yumurtaSayac == null) v.yumurtaSayac = 60 + Math.random() * 360;
       v.yumurtaSayac -= dt;
-      if (v.yumurtaSayac <= 0) { v.yumurtaSayac = 300 + Math.random() * 300; this.dusenler.birak(480, 1, v.konum.x, v.konum.y + 0.3, v.konum.z); if (this.sesK(v.konum) > 0.1) this.ses.canli('tavuk', 'normal', this.sesK(v.konum)); }
+      if (v.yumurtaSayac <= 0) { v.yumurtaSayac = 300 + Math.random() * 300; this.dusenler.birak(480, 1, v.konum.x, v.konum.y + 0.3, v.konum.z); if (this.sesK(v.konum) > 0.1 && !this.ses.cal('tavuk_yumurta', 0.5 * this.sesK(v.konum))) this.ses.canli('tavuk', 'normal', this.sesK(v.konum)); }
     }
     if (v.dinlen > 0) v.dinlen -= dt;
     v.izle = null;
@@ -753,7 +753,7 @@ export class Varliklar {
       let yx = 0, yy = 0, yz = 0, hiz = 0;
       if (T.dusman && !this.barisci && ctx.oyuncuSuda && !ctx.oyuncuOlu && dd < T.gorus) {
         yx = dx / dd; yy = dy / dd; yz = dz / dd; hiz = T.kosu;
-        if (dd < T.menzil + 0.6 && v.saldiriBek <= 0 && this.yakinErisim(v, op)) { v.saldiriBek = 1.5; ctx.oyuncuyaVur(T.hasar, v); const k = this.sesK(p); if (k > 0) this.ses.canli(T.ses, 'acima', 0.8 * k); }
+        if (dd < T.menzil + 0.6 && v.saldiriBek <= 0 && this.yakinErisim(v, op)) { v.saldiriBek = 1.5; ctx.oyuncuyaVur(T.hasar, v); const k = this.sesK(p); if (k > 0) this.ses.canli(T.ses, 'saldiri', 0.8 * k); }
       } else if (v.kacZaman > 0 || (!T.dusman && dd < (v.turAd === 'hamsi' ? 4.5 : 3) && ctx.oyuncuSuda)) {
         yx = -dx / dd; yy = -dy / dd * 0.5; yz = -dz / dd; hiz = T.kosu;
       } else {

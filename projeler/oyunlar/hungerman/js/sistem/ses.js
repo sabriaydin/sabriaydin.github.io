@@ -1,16 +1,54 @@
 /* HungerMan - sesler
    0.19.0: adım, kazma, kırma, koyma, vuruş, kapı, sandık, para, kumaş, kitap, arayüz ve ödül sesleri gerçek kayıtlardır
    (Kenney ses paketleri, CC0; ses/efekt). Kayıt yüklenemezse ya da henüz yüklenmediyse aynı ses Web Audio ile üretilir.
-   Hayvan, canavar, hava, su, lav, büyü ve mekanik sesler Web Audio ile anlık sentezlenir. */
+   0.40.0: hayvan, canavar, köylü ve boss sesleri; yağmur, gök gürültüsü, rüzgâr, su, lav, ateş, damla, olta, yay, geçit, iksir,
+   patlama, tılsım ve müzik kutusu notaları da gerçek kayıtlardır (VoxeLibre, Minetest Game ve AmbientSounds kaynaklı; CC0, CC BY 3.0
+   ve MIT lisanslı; ayrıntı: ses/LISANS.md). Sentez yalnızca kaydı olmayan birkaç ince ses (arı vızıltısı, kalp atışı, titreme,
+   kayan yıldız, geçit uğultusu) ve kayıt yüklenemediğinde yedek olarak kullanılır. */
 /* Kayıt grupları ve her grubun değişke sayısı (ses/efekt/<grup>_<n>.mp3) */
 const ORNEK = { adim_cim: 5, adim_tas: 5, adim_odun: 5, adim_kar: 5, adim_kum: 5, kaz_tas: 5, kaz_odun: 4, kaz_toprak: 4, kaz_cam: 3, kaz_metal: 3, kir_odun: 3, kir_toprak: 3,
   kir_cam: 3, kir_metal: 2, koy_odun: 3, koy_tas: 3, koy_metal: 3, vurus: 3, hasar: 3, kapi_ac: 2, kapi_kapa: 4, sandik: 3, para: 2, kumas: 4, kitap_ac: 1, kitap_kapa: 1,
-  sayfa: 3, tencere: 3, balta: 1, kol: 2, kilic: 3, deri: 2, tik: 3, sec: 2, pencere_ac: 2, pencere_kapa: 2, onay: 2, hata: 1, basarim: 1, gorev: 1, seviye: 1, buyu: 1, olum: 1 };
+  sayfa: 3, tencere: 3, balta: 1, kol: 2, kilic: 3, deri: 2, tik: 3, sec: 2, pencere_ac: 2, pencere_kapa: 2, onay: 2, hata: 1, basarim: 1, gorev: 1, seviye: 1, buyu: 1, olum: 1,
+  /* 0.40.0 */
+  sut: 1, kirp: 1, ahtapot_acima: 2, ahtapot_olum: 1, alet_kir: 3, at: 2, at_acima: 1, at_olum: 1, ates: 3, ates_topu: 1, balik: 4, buyucu: 2, buyucu_acima: 2, buyucu_olum: 1, buyucu_saldiri: 3, cakmak: 1, damla: 3, domuz: 1, domuz_acima: 1, dugme: 1, firavun: 1, firlat: 1, gecis: 1, gecit_ac: 1, gok: 4, haydut: 2, haydut_acima: 2, hayvan_ye: 1, ic: 1, inek: 1, inek_acima: 1, isinlanma: 2, iskelet: 2, iskelet_acima: 1, iskelet_olum: 1, kanli_ay: 1, kedi: 2, kedi_acima: 1, kedi_olum: 1, kopek: 3, kopekbaligi: 1, kopekbaligi_acima: 2, kopekbaligi_olum: 1, korruhu: 1, korruhu_acima: 1, korruhu_olum: 1, koylu: 7, koylu_acima: 2, koylu_evet: 2, koyun: 3, koyun_acima: 1, kuldev: 3, kuldev_acima: 1, kuldev_olum: 1, kuldev_saldiri: 2, kurt: 1, kurt_acima: 3, kurt_olum: 1, lav: 3, lav_ortam: 2, magara: 2, muhafiz: 2, muhafiz_acima: 3, muhafiz_olum: 1, mumya: 2, mumya_acima: 3, mumya_olum: 2, nota_bas: 1, nota_davul: 1, nota_flut: 1, nota_piyano: 1, nota_zil: 1, ok_isabet: 1, olta_cek: 1, olta_dus: 1, orumcek: 2, orumcek_acima: 3, orumcek_olum: 1, orumcek_saldiri: 2, patlama: 1, roket: 1, ruzgar: 2, sicrama: 1, su: 4, su_adim: 3, tavsan: 4, tavsan_acima: 3, tavsan_olum: 3, tavuk: 3, tavuk_acima: 1, tavuk_yumurta: 1, tilsim: 1, topla: 1, yagmur: 1, yarasa: 1, yarasa_acima: 3, yarasa_olum: 1, yay_at: 1, zombi: 1, zombi_acima: 1, zombi_olum: 1 };
 /* Blok ses türlerinin kayıt grupları */
 const ADIM = { cimen: 'adim_cim', toprak: 'adim_cim', bitki: 'adim_cim', tas: 'adim_tas', cam: 'adim_tas', odun: 'adim_odun', kar: 'adim_kar', kum: 'adim_kum', yun: 'adim_kum' };
 const KAZ = { tas: 'kaz_tas', odun: 'kaz_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', cam: 'kaz_cam' };
 const KIR = { tas: 'kaz_tas', odun: 'kir_odun', toprak: 'kir_toprak', cimen: 'kir_toprak', kum: 'kir_toprak', kar: 'kir_toprak', yun: 'kir_toprak', cam: 'kir_cam' };
 const KOY = { tas: 'koy_tas', odun: 'koy_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', bitki: 'kaz_toprak', cam: 'koy_tas' };
+/* 0.40.0: canlı sesleri. Her tür için [grup, hız, düzey]; 'acima' (canı yanınca), 'olum' ve 'saldiri' yoksa en yakın grup kullanılır */
+const CANLI = {
+  inek: { normal: ['inek'], acima: ['inek_acima'], olum: ['inek_acima', 0.85] },
+  koyun: { normal: ['koyun'], acima: ['koyun_acima'], olum: ['koyun_acima', 0.85] },
+  domuz: { normal: ['domuz'], acima: ['domuz_acima'], olum: ['domuz_acima', 0.82] },
+  tavuk: { normal: ['tavuk', 1, 0.7], acima: ['tavuk_acima'], olum: ['tavuk_acima', 0.85] },
+  tavsan: { normal: ['tavsan', 1, 0.6], acima: ['tavsan_acima'], olum: ['tavsan_olum'] },
+  kurt: { normal: ['kurt', 1, 0.8], acima: ['kurt_acima'], olum: ['kurt_olum'], saldiri: ['kopek', 0.85] },
+  kopek: { normal: ['kopek'], acima: ['kurt_acima', 1.12], olum: ['kurt_olum', 1.1] },
+  kedi: { normal: ['kedi', 1, 0.8], acima: ['kedi_acima'], olum: ['kedi_olum'] },
+  at: { normal: ['at', 1, 0.8], acima: ['at_acima'], olum: ['at_olum'] },
+  koylu: { normal: ['koylu', 1, 0.7], acima: ['koylu_acima'], olum: ['koylu_acima', 0.8] },
+  zombi: { normal: ['zombi'], acima: ['zombi_acima'], olum: ['zombi_olum'], saldiri: ['zombi', 1.1] },
+  bogulmus: { normal: ['zombi', 0.8], acima: ['zombi_acima', 0.82], olum: ['zombi_olum', 0.8], saldiri: ['zombi', 0.9] },
+  kulzombi: { normal: ['zombi', 0.72], acima: ['zombi_acima', 0.75], olum: ['zombi_olum', 0.72], saldiri: ['zombi', 0.8] },
+  mumya: { normal: ['mumya'], acima: ['mumya_acima'], olum: ['mumya_olum'] },
+  firavun: { normal: ['firavun'], acima: ['mumya_acima', 0.75], olum: ['mumya_olum', 0.7], saldiri: ['mumya', 0.75] },
+  iskelet: { normal: ['iskelet'], acima: ['iskelet_acima'], olum: ['iskelet_olum'] },
+  buziskelet: { normal: ['iskelet', 1.18], acima: ['iskelet_acima', 1.18], olum: ['iskelet_olum', 1.15] },
+  orumcek: { normal: ['orumcek'], acima: ['orumcek_acima'], olum: ['orumcek_olum'], saldiri: ['orumcek_saldiri'] },
+  yarasa: { normal: ['yarasa', 1, 0.6], acima: ['yarasa_acima'], olum: ['yarasa_olum'] },
+  haydut: { normal: ['haydut'], acima: ['haydut_acima'], olum: ['haydut_acima', 0.8] },
+  reis: { normal: ['haydut', 0.82], acima: ['haydut_acima', 0.82], olum: ['haydut_acima', 0.7] },
+  buyucu: { normal: ['buyucu'], acima: ['buyucu_acima'], olum: ['buyucu_olum'], saldiri: ['buyucu_saldiri'] },
+  muhafiz: { normal: ['muhafiz'], acima: ['muhafiz_acima'], olum: ['muhafiz_olum'] },
+  kuldev: { normal: ['kuldev', 0.72], acima: ['kuldev_acima', 0.7], olum: ['kuldev_olum', 0.65], saldiri: ['kuldev_saldiri', 0.7] },
+  korruhu: { normal: ['korruhu', 1, 0.7], acima: ['korruhu_acima'], olum: ['korruhu_olum'] },
+  balik: { normal: ['balik', 1.2, 0.35], acima: ['balik', 1.1, 0.7], olum: ['balik', 0.9, 0.8] },
+  ahtapot: { normal: ['balik', 0.8, 0.45], acima: ['ahtapot_acima'], olum: ['ahtapot_olum'] },
+  kopekbaligi: { normal: ['kopekbaligi', 0.7, 0.5], acima: ['kopekbaligi_acima', 0.75], olum: ['kopekbaligi_olum', 0.7] }
+};
+/* Müzik kutusu çalgıları (0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
+const CALGI = ['nota_piyano', 'nota_bas', 'nota_zil', 'nota_flut', 'nota_davul'];
 export class Ses {
   constructor() { this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; this.ornekler = {}; }
   baslat() {
@@ -43,6 +81,20 @@ export class Ses {
     k.connect(s); s.connect(this.ana); k.start();
     return true;
   }
+  calTam(g, ses = 1, hiz = 1) {
+    const c = this.ctx, l = g && this.ornekler[g];
+    if (!c || !l || !l.length) return false;
+    const k = c.createBufferSource(); k.buffer = l[0]; k.playbackRate.value = hiz;
+    const s = c.createGain(); s.gain.value = ses; k.connect(s); s.connect(this.ana); k.start();
+    return true;
+  }
+  /* Ağır adım (Kül Devi): kaya darbesi alçak perdede */
+  sut() { if (!this.cal('sut', 0.5)) this.sicrama(0.4); }
+  kirp() { if (!this.cal('kirp', 0.55)) this.zirhGiy(); }
+  agirAdim(h = 1) { if (this.cal('koy_tas', 0.5 * h, 0.5)) return; this.patlama(90, 0.18, 0.12 * h, 'lowpass', 1); }
+  /* Havai fişek: fırlatma ve patlama */
+  fisekAt() { if (this.cal('roket', 0.45)) return; this.patlama(900, 0.4, 0.12, 'highpass', 1); }
+  fisekPatla() { if (this.cal('patlama', 0.35, 1.4)) return; this.patlama(220, 0.7, 0.3, 'lowpass', 1); }
   duzeyAyarla(v) { this.duzey = v; if (this.ana) this.ana.gain.value = v; }
 
   /* Filtrelenmiş gürültü patlaması */
@@ -85,16 +137,22 @@ export class Ses {
   }
   koy(tur) { if (this.cal(KOY[tur], 0.6)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f * 0.8, s * 1.4, 0.45, 'bandpass', q, 0.7); }
   adim(tur) { if (this.cal(ADIM[tur], 0.3)) return; const [f, , q] = this.malzeme(tur); this.patlama(f * 0.7, 0.07, 0.14, 'bandpass', q); }
-  topla() { this.ton(780 + Math.random() * 120, 0.08, 0.1, 'sine', 1300); }
-  ye() { for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(1800, 0.06, 0.25, 'bandpass', 1.4), i * 110); }
+  topla() { if (this.cal('topla', 0.45, 1.1)) return; this.ton(780 + Math.random() * 120, 0.08, 0.1, 'sine', 1300); }
+  ye() { if (this.cal('hayvan_ye', 0.5, 1.15)) return; for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(1800, 0.06, 0.25, 'bandpass', 1.4), i * 110); }
   hasar() { if (this.cal('hasar', 0.7)) { this.ton(200, 0.12, 0.1, 'sawtooth', 120); return; } this.ton(220, 0.18, 0.25, 'sawtooth', 110); this.patlama(500, 0.12, 0.3, 'lowpass', 1); }
-  zipla() { this.patlama(600, 0.05, 0.08, 'lowpass', 1); }
-  sicrama(g = 1) { this.patlama(1200, 0.4 * g, 0.4, 'lowpass', 0.7, 0.4); }
-  aletKirildi() { this.cal('kir_metal', 0.5); this.ton(900, 0.12, 0.2, 'square', 300); this.patlama(2500, 0.2, 0.3, 'highpass', 1); }
-  uretim() { this.ton(520, 0.06, 0.1, 'triangle', 700); setTimeout(() => this.ton(780, 0.08, 0.1, 'triangle', 1040), 60); }
+  zipla() { if (this.cal('adim_cim', 0.18, 0.85)) return; this.patlama(600, 0.05, 0.08, 'lowpass', 1); }
+  sicrama(g = 1) { if (this.cal('sicrama', 0.55 * Math.min(1, g))) return; this.patlama(1200, 0.4 * g, 0.4, 'lowpass', 0.7, 0.4); }
+  aletKirildi() { if (this.cal('alet_kir', 0.6)) return; this.cal('kir_metal', 0.5); this.ton(900, 0.12, 0.2, 'square', 300); this.patlama(2500, 0.2, 0.3, 'highpass', 1); }
+  uretim() { if (this.cal('koy_odun', 0.35, 1.25)) return; this.ton(520, 0.06, 0.1, 'triangle', 700); setTimeout(() => this.ton(780, 0.08, 0.1, 'triangle', 1040), 60); }
   /* Canlı sesleri: tip 'normal' | 'acima' | 'olum'; hacim 0..1 (uzaklığa göre) */
   canli(tur, tip = 'normal', hacim = 1) {
     if (!this.ctx || hacim <= 0.02) return;
+    const C = CANLI[tur];
+    if (C) {
+      const k = C[tip] || (tip === 'saldiri' ? C.normal : C.acima) || C.normal;
+      if (this.cal(k[0], Math.min(1, hacim) * (k[2] ?? 1) * 0.9, k[1] ?? 1)) return;
+    }
+    if (tip === 'saldiri') tip = 'acima';
     const h = Math.min(1, hacim), y = tip === 'acima' ? 1.35 : tip === 'olum' ? 0.8 : 1;
     switch (tur) {
       case 'inek': this.ton(150 * y, 0.7, 0.16 * h, 'sawtooth', 105 * y); this.patlama(300, 0.5, 0.05 * h, 'lowpass', 1); break;
@@ -125,81 +183,102 @@ export class Ses {
       case 'yarasa': for (let i = 0; i < (tip === 'normal' ? 2 : 3); i++) setTimeout(() => this.ton((3400 + Math.random() * 900) * y, 0.05, 0.05 * h, 'square', 2800), i * 85); break;
     }
   }
-  yayGer() { this.patlama(900, 0.25, 0.08, 'bandpass', 3, 1.4); }
-  yayAt() { this.ton(180, 0.18, 0.18, 'triangle', 90); this.patlama(2000, 0.12, 0.15, 'highpass', 1); }
-  okIsabet() { this.patlama(700, 0.12, 0.3, 'bandpass', 1.5); }
-  okSaplandi() { this.patlama(450, 0.1, 0.22, 'bandpass', 2); this.ton(160, 0.08, 0.1, 'triangle', 120); }
+  yayGer() { if (this.cal('deri', 0.35, 0.8)) return; this.patlama(900, 0.25, 0.08, 'bandpass', 3, 1.4); }
+  yayAt() { if (this.cal('yay_at', 0.55)) return; this.ton(180, 0.18, 0.18, 'triangle', 90); this.patlama(2000, 0.12, 0.15, 'highpass', 1); }
+  okIsabet() { if (this.cal('ok_isabet', 0.55)) return; this.patlama(700, 0.12, 0.3, 'bandpass', 1.5); }
+  okSaplandi() { if (this.cal('ok_isabet', 0.45, 0.8)) return; this.patlama(450, 0.1, 0.22, 'bandpass', 2); this.ton(160, 0.08, 0.1, 'triangle', 120); }
   vurus() { if (this.cal('vurus', 0.6)) return; this.patlama(800, 0.08, 0.25, 'bandpass', 1); }
   zirhGiy() { if (this.cal('kumas', 0.6)) return; this.patlama(1800, 0.15, 0.2, 'bandpass', 2); }
-  takas() { if (this.cal('para', 0.6)) return; this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }
+  takas() { this.cal('koylu_evet', 0.35); if (this.cal('para', 0.6)) return; this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }
   gorev() { if (this.cal('gorev', 0.5)) return; [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.ton(f, 0.16, 0.07, 'triangle', f), i * 90)); }
   /* Mağara ortam sesleri */
-  damla(h = 1) { this.ton(1500 + Math.random() * 900, 0.18, 0.05 * h, 'sine', 900); }
-  lav(h = 1) { this.patlama(180 + Math.random() * 120, 0.25, 0.12 * h, 'lowpass', 2, 0.5); }
-  atesTopu() { this.patlama(600, 0.45, 0.2, 'bandpass', 0.7, 0.5); this.ton(160, 0.35, 0.08, 'sawtooth', 70); }
-  yanma() { this.patlama(900, 0.3, 0.12, 'bandpass', 0.8, 1.5); }
+  damla(h = 1) { if (this.cal('damla', 0.35 * h)) return; this.ton(1500 + Math.random() * 900, 0.18, 0.05 * h, 'sine', 900); }
+  lav(h = 1) { if (this.cal(Math.random() < 0.5 ? 'lav_ortam' : 'lav', 0.4 * h)) return; this.patlama(180 + Math.random() * 120, 0.25, 0.12 * h, 'lowpass', 2, 0.5); }
+  atesTopu() { if (this.cal('ates_topu', 0.6)) return; this.patlama(600, 0.45, 0.2, 'bandpass', 0.7, 0.5); this.ton(160, 0.35, 0.08, 'sawtooth', 70); }
+  yanma() { if (this.cal('ates', 0.5)) return; this.patlama(900, 0.3, 0.12, 'bandpass', 0.8, 1.5); }
   /* Deniz: olta, tekne, dalış */
   olta(tip) {
+    if (tip === 'at' && this.cal('firlat', 0.5)) return;
+    if ((tip === 'dusme' || tip === 'isirma') && this.cal('olta_dus', tip === 'isirma' ? 0.7 : 0.45, tip === 'isirma' ? 0.8 : 1)) return;
+    if (tip === 'cek' && this.cal('olta_cek', 0.45)) return;
+    if (tip === 'yakala' && this.cal('sicrama', 0.6, 1.1)) return;
     if (tip === 'at') { this.patlama(2600, 0.22, 0.1, 'highpass', 1, 0.5); this.ton(500, 0.2, 0.04, 'triangle', 250); }
     else if (tip === 'dusme') this.patlama(900, 0.18, 0.18, 'lowpass', 1.2, 0.5);
     else if (tip === 'isirma') { this.patlama(1300, 0.3, 0.3, 'lowpass', 0.8, 0.4); this.patlama(2600, 0.15, 0.12, 'bandpass', 1); }
     else if (tip === 'cek') for (let i = 0; i < 4; i++) setTimeout(() => this.ton(1800, 0.025, 0.05, 'square', 1500), i * 45);
     else if (tip === 'yakala') { this.patlama(1100, 0.35, 0.3, 'lowpass', 0.8, 0.4); setTimeout(() => this.ton(880, 0.1, 0.08, 'triangle', 1320), 120); }
   }
-  kurek(h = 1) { this.patlama(700 + Math.random() * 200, 0.32, 0.16 * h, 'lowpass', 0.9, 0.45); }
-  dalga(h = 1) { this.patlama(420 + Math.random() * 120, 1.2, 0.07 * h, 'lowpass', 0.6, 0.6); }
+  kurek(h = 1) { if (this.cal('su_adim', 0.4 * h)) return; this.patlama(700 + Math.random() * 200, 0.32, 0.16 * h, 'lowpass', 0.9, 0.45); }
+  dalga(h = 1) { if (this.cal('su', 0.3 * h)) return; this.patlama(420 + Math.random() * 120, 1.2, 0.07 * h, 'lowpass', 0.6, 0.6); }
   /* 0.11.0: kapı, deneyim, iksir, örs, hava */
   kapi(acik) { if (this.cal(acik ? 'kapi_ac' : 'kapi_kapa', 0.55)) return; this.patlama(acik ? 700 : 520, 0.14, 0.3, 'bandpass', 2.2, acik ? 1.3 : 0.7); this.ton(acik ? 200 : 150, 0.08, 0.12, 'triangle', acik ? 260 : 110); }
-  xp() { this.ton(1600 + Math.random() * 500, 0.09, 0.05, 'sine', 2300); }
+  xp() { if (this.cal('nota_zil', 0.12, 1.6 + Math.random() * 0.5)) return; this.ton(1600 + Math.random() * 500, 0.09, 0.05, 'sine', 2300); }
   seviye() { if (this.cal('seviye', 0.45)) return; [660, 880, 1320].forEach((f, i) => setTimeout(() => this.ton(f, 0.22, 0.07, 'triangle', f * 1.01), i * 80)); }
-  ic() { for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(900, 0.08, 0.18, 'lowpass', 2, 0.6), i * 130); }
-  ors() { this.ton(1250, 0.5, 0.12, 'triangle', 1180); this.ton(1890, 0.4, 0.05, 'sine', 1850); this.patlama(3000, 0.1, 0.25, 'highpass', 1); }
+  ic() { if (this.cal('ic', 0.55)) return; for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(900, 0.08, 0.18, 'lowpass', 2, 0.6), i * 130); }
+  ors() { if (this.cal('koy_metal', 0.6, 0.75)) { this.cal('nota_zil', 0.12, 0.9); return; } this.ton(1250, 0.5, 0.12, 'triangle', 1180); this.ton(1890, 0.4, 0.05, 'sine', 1850); this.patlama(3000, 0.1, 0.25, 'highpass', 1); }
   /* 0.14.0: büyüleme ve başarım */
   buyu() { if (this.cal('buyu', 0.4)) { this.patlama(4000, 0.6, 0.05, 'highpass', 0.6, 1.4); return; } [784, 1175, 1568, 2093].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.05, 'sine', f * 1.02), i * 70)); this.patlama(4000, 0.6, 0.06, 'highpass', 0.6, 1.4); }
   basarim() { if (this.cal('basarim', 0.5)) return; [523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.28, 0.07, 'triangle', f), i * 85)); }
   /* 0.15.1: boss efektleri */
-  ruzgar(h = 1) { this.patlama(900, 1.4, 0.12 * h, 'bandpass', 0.7, 0.9); this.patlama(2400, 1.0, 0.05 * h, 'highpass', 0.6, 0.8); }
-  cam(h = 1) { for (let i = 0; i < 4; i++) setTimeout(() => this.ton(2600 + Math.random() * 1400, 0.18, 0.05 * h, 'triangle', 3400), i * 45); this.patlama(5000, 0.25, 0.07 * h, 'highpass', 1.2); }
-  savur(h = 1) { this.patlama(600, 0.35, 0.14 * h, 'bandpass', 1.4, 0.4); this.patlama(1400, 0.25, 0.08 * h, 'bandpass', 1.4, 0.4); }
+  ruzgar(h = 1) { if (this.cal('ruzgar', 0.5 * h)) return; this.patlama(900, 1.4, 0.12 * h, 'bandpass', 0.7, 0.9); this.patlama(2400, 1.0, 0.05 * h, 'highpass', 0.6, 0.8); }
+  cam(h = 1) { if (this.cal('kir_cam', 0.6 * h)) return; for (let i = 0; i < 4; i++) setTimeout(() => this.ton(2600 + Math.random() * 1400, 0.18, 0.05 * h, 'triangle', 3400), i * 45); this.patlama(5000, 0.25, 0.07 * h, 'highpass', 1.2); }
+  savur(h = 1) { if (this.cal('kilic', 0.55 * h, 0.85)) return; this.patlama(600, 0.35, 0.14 * h, 'bandpass', 1.4, 0.4); this.patlama(1400, 0.25, 0.08 * h, 'bandpass', 1.4, 0.4); }
   /* 0.17.0: mekanik sesler ve müzik kutusu ezgileri (tur: 0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
   kol(acik) { if (this.cal('kol', 0.5, acik ? 1.1 : 0.9)) return; this.ton(acik ? 900 : 700, 0.04, 0.08, 'square', acik ? 1100 : 500); this.patlama(2200, 0.03, 0.08, 'highpass', 1); }
   /* 0.18.0: Diyar Geçidi */
-  gecitAcil() { this.ton(140, 1.4, 0.16, 'sawtooth', 420); this.ton(210, 1.2, 0.08, 'sine', 630); this.patlama(500, 1.0, 0.18, 'bandpass', 1.4, 2); }
-  gecitSon() { this.ton(420, 0.8, 0.12, 'sawtooth', 120); this.patlama(700, 0.5, 0.12, 'bandpass', 1.2, 0.5); }
+  gecitAcil() { if (this.cal('gecit_ac', 0.6)) return; this.ton(140, 1.4, 0.16, 'sawtooth', 420); this.ton(210, 1.2, 0.08, 'sine', 630); this.patlama(500, 1.0, 0.18, 'bandpass', 1.4, 2); }
+  gecitSon() { if (this.cal('isinlanma', 0.5, 0.7)) return; this.ton(420, 0.8, 0.12, 'sawtooth', 120); this.patlama(700, 0.5, 0.12, 'bandpass', 1.2, 0.5); }
   gecitUgultu() { this.ton(95 + Math.random() * 10, 1.2, 0.07, 'sine', 120); this.ton(190, 1.2, 0.03, 'triangle', 240); }
-  gecis() { this.patlama(400, 1.2, 0.3, 'bandpass', 1.0, 3); this.ton(660, 0.9, 0.1, 'sine', 110); }
-  diyarUgultu() { this.ton(48 + Math.random() * 8, 3.5, 0.05, 'sine', 40); this.patlama(160, 2.5, 0.05, 'lowpass', 0.8, 0.6); }
+  gecis() { if (this.cal('gecis', 0.6)) return; this.patlama(400, 1.2, 0.3, 'bandpass', 1.0, 3); this.ton(660, 0.9, 0.1, 'sine', 110); }
+  diyarUgultu() { const s = this.ctx ? this.ctx.currentTime : 0; if (s > (this.magaraSon || 0) + 14 && Math.random() < 0.3 && this.cal('magara', 0.22, 0.85)) { this.magaraSon = s; return; } this.ton(48 + Math.random() * 8, 3.5, 0.05, 'sine', 40); this.patlama(160, 2.5, 0.05, 'lowpass', 0.8, 0.6); }
   /* 0.38.1: çakmak çakma sesi: iki kısa kıvılcım */
-  cakmak() { if (!this.ctx) return; this.patlama(3200, 0.04, 0.16, 'highpass', 2); setTimeout(() => this.patlama(2600, 0.06, 0.12, 'highpass', 2), 70); }
-  dugme() { this.ton(1000, 0.03, 0.07, 'square', 800); }
+  cakmak() { if (!this.ctx) return; if (this.cal('cakmak', 0.55)) return; this.patlama(3200, 0.04, 0.16, 'highpass', 2); setTimeout(() => this.patlama(2600, 0.06, 0.12, 'highpass', 2), 70); }
+  dugme() { if (this.cal('dugme', 0.5)) return; this.ton(1000, 0.03, 0.07, 'square', 800); }
   melodi(tur = 0, h = 1) {
     if (!this.ctx) return;
     const notalar = [[523, 659, 784, 1047], [131, 165, 196, 262], [1047, 1319, 1568, 2093], [587, 740, 880, 1175], [0, 0, 0, 0]][tur] || [523, 659, 784, 1047];
+    /* 0.40.0: çalgı kaydı notaya göre perdelenir (ilk nota kaydın kendi perdesidir) */
+    const cg = CALGI[tur] || CALGI[0];
+    if (this.ornekler[cg] && this.ornekler[cg].length) {
+      notalar.forEach((n, i) => setTimeout(() => this.calTam(cg, 0.45 * h, tur === 4 ? (i % 2 ? 1.6 : 1) : n / notalar[0]), i * 150));
+      return;
+    }
     const dalga = ['triangle', 'sawtooth', 'sine', 'sine', 'square'][tur] || 'triangle';
     notalar.forEach((n, i) => setTimeout(() => { if (tur === 4) this.patlama(i % 2 ? 1800 : 160, 0.12, 0.3 * h, i % 2 ? 'highpass' : 'lowpass', 1); else this.ton(n, tur === 2 ? 0.5 : 0.22, (tur === 1 ? 0.16 : 0.1) * h, dalga, n); }, i * 150));
   }
   /* Nal sesi: iki vuruş; h hıza göre */
-  nal(h = 1) { this.patlama(900, 0.05, 0.12 * h + 0.04, 'bandpass', 3); setTimeout(() => this.patlama(760, 0.05, 0.1 * h + 0.03, 'bandpass', 3), 110); }
-  kalp() { this.ton(880, 0.12, 0.05, 'sine', 1100); }
+  nal(h = 1) { if (this.cal('adim_tas', 0.12 * h + 0.06, 1.35)) { setTimeout(() => this.cal('adim_tas', 0.1 * h + 0.05, 1.25), 110); return; } this.patlama(900, 0.05, 0.12 * h + 0.04, 'bandpass', 3); setTimeout(() => this.patlama(760, 0.05, 0.1 * h + 0.03, 'bandpass', 3), 110); }
+  kalp() { if (this.cal('nota_zil', 0.14, 1.4)) return; this.ton(880, 0.12, 0.05, 'sine', 1100); }
   /* Yağmur: sürekli çalan süzülmüş gürültü; hacim 0..1, boguk: çatı altında */
   yagmurAyarla(hacim, boguk) {
     const c = this.ctx; if (!c) return;
     if (!this.yagmur) {
       if (hacim <= 0.01) return;
-      const k = c.createBufferSource(); k.buffer = this.gurultu; k.loop = true;
-      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 2400; f.Q.value = 0.4;
-      const b = c.createBiquadFilter(); b.type = 'highpass'; b.frequency.value = 300;
+      const kayit = this.ornekler.yagmur && this.ornekler.yagmur[0];
+      const k = c.createBufferSource(); k.buffer = kayit || this.gurultu; k.loop = true;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = kayit ? 16000 : 2400; f.Q.value = 0.4;
+      const b = c.createBiquadFilter(); b.type = 'highpass'; b.frequency.value = kayit ? 40 : 300;
       const g = c.createGain(); g.gain.value = 0;
       k.connect(b); b.connect(f); f.connect(g); g.connect(this.ana); k.start();
       this.yagmur = { k, f, g };
     }
     const Y = this.yagmur, t = c.currentTime;
-    Y.g.gain.setTargetAtTime(Math.max(0, hacim) * 0.16, t, 0.4);
-    Y.f.frequency.setTargetAtTime(boguk ? 700 : 2400, t, 0.3);
+    const kayitli = Y.k.buffer !== this.gurultu;
+    Y.g.gain.setTargetAtTime(Math.max(0, hacim) * (kayitli ? 0.5 : 0.16), t, 0.4);
+    Y.f.frequency.setTargetAtTime(boguk ? 700 : kayitli ? 16000 : 2400, t, 0.3);
     if (hacim <= 0.01 && Y.g.gain.value < 0.002) { try { Y.k.stop(); } catch (e) { /* durmuş */ } this.yagmur = null; }
   }
   gokGurultusu(h = 1, yakin = false) {
     if (!this.ctx || h <= 0.02) return;
+    /* Kayıt: uzaktaysa alçak geçiren süzgeçle boğuklaşır */
+    if (this.ornekler.gok && this.ornekler.gok.length) {
+      const c = this.ctx, k = c.createBufferSource(), l = this.ornekler.gok;
+      k.buffer = l[Math.floor(Math.random() * l.length)]; k.playbackRate.value = 0.9 + Math.random() * 0.2;
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = yakin ? 18000 : 700 + h * 2500;
+      const g = c.createGain(); g.gain.value = Math.min(1, 0.9 * h);
+      k.connect(f); f.connect(g); g.connect(this.ana); k.start();
+      return;
+    }
     if (yakin) { this.patlama(3800, 0.25, 0.45 * h, 'highpass', 0.7, 0.5); this.patlama(900, 0.5, 0.4 * h, 'lowpass', 0.8, 0.4); }
     this.patlama(160, 2.8, 0.55 * h, 'lowpass', 1.4, 0.5);
     setTimeout(() => this.patlama(110, 2.2, 0.35 * h, 'lowpass', 1.2, 0.6), 350);
@@ -214,13 +293,13 @@ export class Ses {
   tencere() { this.cal('tencere', 0.45); }
   olum() { this.cal('olum', 0.5); }
   /* 0.22.0: gök olayları ve hayatta kalma */
-  meteorUguldu(h = 1) { this.patlama(300, 3.0, 0.22 * h, 'lowpass', 0.7, 0.35); this.ton(220, 3.0, 0.05 * h, 'sawtooth', 60); this.patlama(1800, 2.6, 0.06 * h, 'bandpass', 0.6, 0.5); }
-  meteorCarpma(h = 1) { this.patlama(140, 2.4, 0.9 * h, 'lowpass', 0.8, 0.3); this.patlama(900, 0.8, 0.5 * h, 'bandpass', 0.6, 0.4); this.ton(55, 1.8, 0.3 * h, 'sine', 30); if (h > 0.3) this.gokGurultusu(h, true); }
+  meteorUguldu(h = 1) { if (this.cal('roket', 0.4 * h, 0.45)) { this.cal('ruzgar', 0.35 * h, 0.6); return; } this.patlama(300, 3.0, 0.22 * h, 'lowpass', 0.7, 0.35); this.ton(220, 3.0, 0.05 * h, 'sawtooth', 60); this.patlama(1800, 2.6, 0.06 * h, 'bandpass', 0.6, 0.5); }
+  meteorCarpma(h = 1) { if (this.cal('patlama', 0.9 * h, 0.8)) { if (h > 0.3) this.gokGurultusu(h * 0.6, true); return; } this.patlama(140, 2.4, 0.9 * h, 'lowpass', 0.8, 0.3); this.patlama(900, 0.8, 0.5 * h, 'bandpass', 0.6, 0.4); this.ton(55, 1.8, 0.3 * h, 'sine', 30); if (h > 0.3) this.gokGurultusu(h, true); }
   kayanYildiz() { this.ton(2400 + Math.random() * 600, 0.5, 0.012, 'sine', 1400); }
-  kanliAy() { [110, 104, 98, 82].forEach((f, i) => setTimeout(() => { this.ton(f, 1.6, 0.14, 'sawtooth', f * 0.97); this.ton(f * 1.5, 1.4, 0.05, 'triangle', f * 1.45); }, i * 900)); this.patlama(200, 4, 0.12, 'lowpass', 0.6, 0.5); }
+  kanliAy() { if (this.cal('kanli_ay', 0.6, 0.85)) return; [110, 104, 98, 82].forEach((f, i) => setTimeout(() => { this.ton(f, 1.6, 0.14, 'sawtooth', f * 0.97); this.ton(f * 1.5, 1.4, 0.05, 'triangle', f * 1.45); }, i * 900)); this.patlama(200, 4, 0.12, 'lowpass', 0.6, 0.5); }
   kalpAtisi(h = 1) { this.ton(60, 0.12, 0.25 * h, 'sine', 40); setTimeout(() => this.ton(55, 0.14, 0.2 * h, 'sine', 38), 180); }
   titreme() { this.patlama(2600, 0.25, 0.03, 'bandpass', 4, 1.1); }
-  kemik() { this.patlama(2200, 0.06, 0.5, 'highpass', 1); this.patlama(600, 0.1, 0.4, 'bandpass', 2); }
-  tilsim() { [392, 523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.06, 'sine', f * 1.02), i * 120)); this.patlama(3000, 1.2, 0.05, 'highpass', 0.6, 1.6); }
+  kemik() { if (this.cal('iskelet_acima', 0.6, 0.9)) return; this.patlama(2200, 0.06, 0.5, 'highpass', 1); this.patlama(600, 0.1, 0.4, 'bandpass', 2); }
+  tilsim() { if (this.cal('tilsim', 0.6)) return; [392, 523, 659, 784, 1046, 1318].forEach((f, i) => setTimeout(() => this.ton(f, 0.5, 0.06, 'sine', f * 1.02), i * 120)); this.patlama(3000, 1.2, 0.05, 'highpass', 0.6, 1.6); }
   hataSes() { if (!this.cal('hata', 0.4)) this.ton(220, 0.12, 0.06, 'square', 180); }
 }
