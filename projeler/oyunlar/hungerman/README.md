@@ -117,6 +117,9 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.1 (0.40.1): Pencere açılma sesleri
+- Envanter, istasyon, harita, başarım, görev ve tarif kitabı gibi pencereler açılırken çalan ses kaldırıldı. Sandık ve tencere açılma sesleri (nesne sesi) korunmuştur.
+
 ## 40.0 (0.40.0): Gerçek sesler
 - Kodla üretilen seslerin neredeyse tamamı gerçek ses kayıtlarıyla değiştirildi (174 yeni kayıt). Hepsi ücretsizdir; CC0, CC BY, MIT ve yalnızca yağmur döngüsü CC BY-SA lisanslıdır; yazarlar ve kaynaklar `ses/LISANS.md` dosyasındadır.
 - **Canlı sesleri:** inek, koyun, domuz, tavuk, tavşan, kurt, köpek, kedi, at, köylü, zombi, boğulmuş zombi, kül zombisi, mumya, iskelet, buz iskeleti, örümcek, yarasa, haydut, balık, ahtapot, köpekbalığı ve kor ruhu; bosslardan Firavun, Buz Büyücüsü, Haydut Reisi, Taş Muhafız ve Kül Devi. Her canlının ayrı ortam, acıma ve ölüm sesi vardır; örümcek, Buz Büyücüsü ve Kül Devi'nin ayrıca saldırı sesi vardır. Türlerin ortak kayıtları perdeyle ayrılır (ör. buz iskeleti daha ince, Kül Devi daha derin).

@@ -514,7 +514,7 @@ function panelAc(panel, ...a) {
   if (!oyun || oyun.hayatta.olu || panelAcik()) return;
   if (kilitli) { bilerekBirak = true; kilitBirak(); }
   fare.sol = fare.sag = false;
-  panel.ac(...a); if (panel === tarifKitabi || panel === gorevEkrani) ses.kitap(true); else if (panel !== konsol) ses.ac(); tiklaGuncelle();   // 0.30.5: konsol sessiz açılır
+  panel.ac(...a); tiklaGuncelle();   // 0.30.5: konsol sessiz açılır
 }
 function panelKapat(kilitlensin) {
   if (koyluEkrani.acik) koyluEkrani.kapat();

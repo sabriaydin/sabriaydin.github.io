@@ -284,7 +284,8 @@ export class Ses {
     setTimeout(() => this.patlama(110, 2.2, 0.35 * h, 'lowpass', 1.2, 0.6), 350);
   }
   tik() { if (this.cal('tik', 0.35)) return; this.ton(1200, 0.03, 0.06, 'square', 900); }
-  ac() { if (this.cal('pencere_ac', 0.35)) return; this.ton(440, 0.06, 0.06, 'triangle', 660); }
+  /* 0.40.1: pencere açılma sesi kaldırıldı */
+  ac() { }
   kapa() { if (this.cal('pencere_kapa', 0.35)) return; this.ton(660, 0.06, 0.06, 'triangle', 440); }
   /* 0.19.0: yalnızca kayıtla çalan sesler (kayıt yoksa en yakın sentez ses) */
   sandik() { if (!this.cal('sandik', 0.55)) this.ac(); }
