@@ -87,7 +87,7 @@ export const COKLU = {
       [0.5, 9.5, 2.6, 31.5, 11, 3.6, K], [0.5, 12, 2.6, 31.5, 13.5, 3.6, K], [0.5, 14.5, 2.6, 31.5, 15.8, 3.6, K]);
     return l; })() },
   yemekMasasi: { ad: 'Yemek Masası', w: 2, d: 1, h: 1, ses: 'odun', sertlik: 1.5, alet: 'balta', harita: 14, kutular: [
-    [0, 14.5, 0.5, 32, 16, 15.5, C], [1.5, 12.5, 1.5, 30.5, 14.5, 14.5, C], ...bacak4(32, 16, 12.5, C, 2, 1.5), ...bacak4(32, 16, 1.5, C, 3, 1), [11, 15.95, 0.5, 21, 16, 15.5, 'yun_k']] },
+    [0, 14.5, 0.5, 11, 16, 15.5, C], [11, 14.5, 0.5, 21, 16, 15.5, [C, C, 'yun_k', C, 'yun_k', 'yun_k']], [21, 14.5, 0.5, 32, 16, 15.5, C], [1.5, 12.5, 1.5, 30.5, 14.5, 14.5, C], ...bacak4(32, 16, 12.5, C, 2, 1.5), ...bacak4(32, 16, 1.5, C, 3, 1)] },
   calismaMasasi: { ad: 'Çalışma Masası', w: 2, d: 1, h: 1, ses: 'odun', sertlik: 1.5, alet: 'balta', sandik: true, harita: 14, kutular: [
     [0, 14.5, 0, 32, 16, 15, C], [1, 0, 1, 13, 14.5, 14.5, on(C, 'cekmece_on')], [28.5, 0, 1, 30.5, 14.5, 3, C], [28.5, 0, 12.5, 30.5, 14.5, 14.5, C], [13, 7, 1, 28.5, 14.5, 2, C]] },
   gardirop: { ad: 'Gardırop', w: 1, d: 1, h: 2, ses: 'odun', sertlik: 2, alet: 'balta', sandik: true, harita: 14, kutular: [
@@ -251,10 +251,13 @@ export function cokluCapaKonumu(D, b, x, y, z) { const [cx, cz] = cokluCapa(D), 
 /* Hücrenin kutuları (yön 0, hücre içi 0..1); doku adları korunur */
 export function cokluHucreKutulari(D, i) {
   const [lx, ly, lz] = cokluYerel(D, i), out = [];
-  for (const k of D.kutular) {
-    const a = [Math.max(k[0] / 16, lx), Math.max(k[1] / 16, ly), Math.max(k[2] / 16, lz)], b = [Math.min(k[3] / 16, lx + 1), Math.min(k[4] / 16, ly + 1), Math.min(k[5] / 16, lz + 1)];
-    if (a[0] >= b[0] - 1e-4 || a[1] >= b[1] - 1e-4 || a[2] >= b[2] - 1e-4) continue;
+  D.kutular.forEach((k, j) => {
+    /* 0.38.3: üst üste gelen yüzlerin titreşmesini (z-fighting) önlemek için her kutu sırasına göre çok az büyütülür; sonraki kutular öne çıkar */
+    const e = (1 + (j % 8)) * 0.0025, h = [lx, ly, lz];
+    const a = [0, 1, 2].map(i => Math.max(k[i] / 16, h[i])), b = [0, 1, 2].map(i => Math.min(k[i + 3] / 16, h[i] + 1));
+    if (a[0] >= b[0] - 1e-4 || a[1] >= b[1] - 1e-4 || a[2] >= b[2] - 1e-4) return;
+    for (let i = 0; i < 3; i++) { a[i] = Math.max(h[i], a[i] - e); b[i] = Math.min(h[i] + 1, b[i] + e); }
     out.push([a[0] - lx, a[1] - ly, a[2] - lz, b[0] - lx, b[1] - ly, b[2] - lz, k[6]]);
-  }
+  });
   return out;
 }

@@ -117,6 +117,10 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 38.3 (0.38.3): Mobilya görüntü düzeltmesi
+- Yemek Masası'nın üstündeki örtü masa yüzeyiyle aynı düzlemde çizildiği için titreşerek bozuk görünüyordu; örtü masa tablasının parçası yapıldı.
+- Aynı sorun (üst üste gelen yüzeylerin titreşmesi) bütün çok bloklu ve tek bloklu mobilyalarda genel olarak giderildi: portmantodaki şapka bandı, bahçe cücesinin kemeri, teleskop, pazar tezgâhı ve diğerleri.
+
 ## 38.2 (0.38.2): Kaydırma çubukları
 - Üretim listesi başta olmak üzere bütün pencerelerdeki tarayıcı varsayılanı beyaz kaydırma çubukları, oyunun koyu temasına uygun ince ve yuvarlak çubuklarla değiştirildi (üzerine gelince turuncu vurgulanır).
 
