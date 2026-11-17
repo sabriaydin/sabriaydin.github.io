@@ -117,6 +117,9 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 38.2 (0.38.2): Kaydırma çubukları
+- Üretim listesi başta olmak üzere bütün pencerelerdeki tarayıcı varsayılanı beyaz kaydırma çubukları, oyunun koyu temasına uygun ince ve yuvarlak çubuklarla değiştirildi (üzerine gelince turuncu vurgulanır).
+
 ## 38.1 (0.38.1): Elde tutma ve işlevsel çakmak
 - Envanterdeki karakter önizlemesinde eşya artık yumrukta tutulur: aletler ve silahlar sapından kavranır, ucu ileri ve yukarı bakar; eşya birinci şahıstaki gibi kalınlıklı piksel modeliyle çizilir.
 - **Çakmak:** odun yığınını tutuşturup kamp ateşine çevirir; sönük şömineyi yakar; oyma balkabağını balkabağı fenerine çevirir; ot, çalı, sarmaşık ve örümcek ağını 3 × 3 alanda yakarak temizler; buzu eritip suya, karı ve kar katmanını yok eder; canlıları tutuşturur (ateşe dayanıklılar ve köylüler hariç); kadim geçidi yeniden yakar. Kıvılcım sesi eklendi, dayanıklılık 64'ten 128'e çıktı.
