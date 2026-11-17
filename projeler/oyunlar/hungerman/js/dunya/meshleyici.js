@@ -149,7 +149,7 @@ function sekil(P, gok, i, id, x, y, z, T) {
         if (n === id && AYNI_GIZLE[id]) continue;
         g = Math.max(g, gok[i + Y.komsu] || 0);
       }
-      const doku = k.length > 6 ? k[6] : YUZ_DOKU[id * 6 + f];
+      const doku = k.length > 6 ? (typeof k[6] === 'number' ? k[6] : k[6][f]) : YUZ_DOKU[id * 6 + f];   // 0.37.0: yüz başına doku
       const b = T.n;
       for (let c = 0; c < 4; c++) {
         const kc = Y.k[c];

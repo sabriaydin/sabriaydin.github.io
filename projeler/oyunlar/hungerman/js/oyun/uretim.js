@@ -1,14 +1,14 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
   kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144] }
 };
-export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere', degirmen: 'Değirmen Taşı' };
-export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencere: 232, degirmen: MUTFAK.degirmen };
+export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere', degirmen: 'Değirmen Taşı', taskesme: 'Taş Kesme Tezgâhı' };
+export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencere: 232, degirmen: MUTFAK.degirmen, taskesme: COKLU_ID.tasKesme };
 /* Tarifin istasyon koşulu: yok, tek istasyon ya da istasyonlardan biri */
 export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? t.istasyon : [t.istasyon]);
 export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
@@ -362,6 +362,117 @@ t(448, 1, [[485, 1], [397, 1], [478, 1], [270, 1]], 'masa', 'yiyecek');
 t(508, 2, [[479, 1], [476, 1], [374, 2], [22, 1]], 'masa', 'yiyecek');
 t(511, 1, [[363, 2], [365, 1], [397, 1], [331, 1]], 'masa', 'yiyecek');
 t(M.pasta, 1, [[396, 3], [480, 2], [476, 2], [374, 3], [399, 1]], 'firin', 'yiyecek');
+
+/* ---------- 0.37.0: mobilya, dekor, yapı blokları ve yeni eşyalar (sona eklenir) ---------- */
+const C = COKLU_ID, Y7 = YAPI37, E7 = ESYA37;
+/* Malzemeler ve aletler */
+t(E7.kagit, 3, [[568, 3]], 'masa', 'malzeme');
+t(E7.kitap, 1, [[E7.kagit, 3], [282, 1]], null, 'malzeme');
+t(E7.murekkep, 1, [[257, 1], [331, 1], [478, 1]], null, 'malzeme');
+t(E7.civi, 8, [[261, 1]], 'masa', 'malzeme');
+t(E7.halat, 1, [[284, 3]], null, 'malzeme');
+t(E7.tugla, 1, [[23, 1]], 'firin', 'malzeme');
+t(E7.hancer, 1, [[261, 1], [256, 1]], 'masa', 'savas');
+t(E7.mizrak, 1, [[261, 1], [256, 3], [285, 1]], 'masa', 'savas');
+t(E7.cekic, 1, [[261, 5], [256, 2]], 'masa', 'savas');
+t(E7.obsidyen_kazma, 1, [[515, 3], [264, 1], [256, 2]], 'masa', 'alet');
+t(E7.obsidyen_balta, 1, [[515, 3], [264, 1], [256, 2]], 'masa', 'alet');
+t(E7.obsidyen_kurek, 1, [[515, 1], [264, 1], [256, 2]], 'masa', 'alet');
+t(E7.obsidyen_kilic, 1, [[515, 2], [264, 1], [256, 1]], 'masa', 'savas');
+t(E7.obsidyen_capa, 1, [[515, 2], [264, 1], [256, 2]], 'masa', 'alet');
+t(E7.durbun, 1, [[34, 2], [259, 2]], 'masa', 'alet');
+t(E7.cepSaati, 1, [[263, 4], [471, 1]], 'masa', 'alet');
+t(E7.havaiFisek, 3, [[E7.kagit, 1], [257, 1], [471, 1]], null, 'malzeme');
+/* İstasyon */
+t(C.tasKesme, 1, [[2, 3], [261, 1], [37, 2]], 'masa', 'blok');
+/* Yapı blokları: Taş Kesme Tezgâhında taş türleri */
+t(Y7.kirectasi, 4, [[2, 4], [296, 1]], 'taskesme', 'yapi');
+t(Y7.mermer, 1, [[Y7.kirectasi, 1]], 'firin', 'yapi');
+t(Y7.cilaliMermer, 1, [[Y7.mermer, 1]], 'taskesme', 'yapi');
+t(Y7.mermerTugla, 4, [[Y7.mermer, 4]], 'taskesme', 'yapi');
+t(Y7.mermerSutun, 2, [[Y7.mermer, 2]], 'taskesme', 'yapi');
+t(Y7.granit, 2, [[2, 2], [285, 1]], 'taskesme', 'yapi');
+t(Y7.cilaliGranit, 1, [[Y7.granit, 1]], 'taskesme', 'yapi');
+t(Y7.bazalt, 4, [[2, 4], [257, 1]], 'taskesme', 'yapi');
+t(Y7.cilaliBazalt, 1, [[Y7.bazalt, 1]], 'taskesme', 'yapi');
+t(Y7.kayrak, 4, [[2, 4], [23, 1]], 'taskesme', 'yapi');
+t(Y7.kayrakKiremit, 4, [[Y7.kayrak, 4]], 'taskesme', 'yapi');
+t(Y7.catlakTugla, 1, [[35, 1]], 'firin', 'yapi');
+t(Y7.yosunluTugla, 1, [[35, 1], [147, 1]], 'masa', 'yapi');
+t(Y7.altinSuslu, 4, [[943, 4], [263, 1]], 'taskesme', 'yapi');
+t(Y7.fayans, 4, [[960, 4], [346, 1]], 'taskesme', 'yapi');
+t(Y7.mozaik, 4, [[960, 1], [961, 1], [963, 1], [965, 1]], 'taskesme', 'yapi');
+t(Y7.iznik, 2, [[164, 2], [321, 1]], 'taskesme', 'yapi');
+t(Y7.kerpic, 2, [[23, 2], [52, 1]], 'masa', 'yapi');
+t(Y7.eskiTugla, 1, [[E7.tugla, 4]], 'masa', 'yapi');
+t(Y7.lambri, 4, [['kalas', 3], [256, 1]], 'masa', 'yapi');
+t(Y7.kamis, 1, [[568, 9]], null, 'yapi');
+t(Y7.hasir, 2, [[568, 4], [284, 1]], 'masa', 'yapi');
+t(Y7.samanCati, 4, [[52, 2]], 'masa', 'yapi');
+t(Y7.demirLevha, 4, [[261, 4], [E7.civi, 2]], 'masa', 'yapi');
+t(Y7.bakirLevha, 4, [[259, 4], [E7.civi, 2]], 'masa', 'yapi');
+t(Y7.pasliBakir, 1, [[Y7.bakirLevha, 1], [478, 1]], null, 'yapi');
+t(Y7.camTugla, 4, [[34, 4]], 'taskesme', 'yapi');
+t(Y7.ahsapKasa, 1, [['kalas', 4], [E7.civi, 2]], 'masa', 'blok');
+YAPI_MALZEME37.forEach(m => { t(m.merdiven, 4, [[m.taban, 6]], 'masa', 'yapi'); t(m.yarim, 6, [[m.taban, 3]], 'masa', 'yapi'); });
+DUVAR_MALZEME37.forEach(m => t(m.duvar, 6, [[m.taban, 6]], 'masa', 'yapi'));
+/* Çok bloklu mobilya ve yapılar */
+t(C.kanepe, 1, [['kalas', 4], [117, 6], [49, 3], [E7.civi, 4]], 'masa', 'mobilya');
+t(C.ikiliKoltuk, 1, [['kalas', 3], [282, 6], [49, 2], [E7.civi, 3]], 'masa', 'mobilya');
+t(C.bank, 1, [['kalas', 4], [261, 3]], 'masa', 'mobilya');
+t(C.yemekMasasi, 1, [['kalas', 6], [256, 4], [E7.civi, 2]], 'masa', 'mobilya');
+t(C.calismaMasasi, 1, [['kalas', 7], [256, 2], [E7.civi, 2]], 'masa', 'mobilya');
+t(C.gardirop, 1, [['kalas', 8], [261, 1], [E7.civi, 2]], 'masa', 'mobilya');
+t(C.buyukGardirop, 1, [['kalas', 14], [261, 2], [E7.civi, 4]], 'masa', 'mobilya');
+t(C.dedeSaati, 1, [['kalas', 6], [263, 2], [34, 1], [471, 1]], 'masa', 'mobilya');
+t(C.piyano, 1, [['kalas', 10], [261, 4], [120, 2], [49, 2]], 'masa', 'mobilya');
+t(C.buzdolabi, 1, [[261, 8], [22, 4], [495, 1]], 'masa', 'mobilya');
+t(C.kuvet, 1, [[960, 8], [259, 2]], 'masa', 'mobilya');
+t(C.ciftYatak, 1, [['kalas', 6], [49, 6], [114, 2], [E7.civi, 2]], 'masa', 'mobilya');
+t(C.ranza, 1, [['kalas', 8], [49, 6], [118, 1], [114, 1]], 'masa', 'mobilya');
+t(C.uykuTulumu, 1, [[391, 4], [49, 2], [117, 1]], 'masa', 'mobilya');
+t(C.hamak, 1, [['kutuk', 2], [391, 4], [E7.halat, 2]], 'masa', 'mobilya');
+t(C.bilardo, 1, [['kalas', 12], [117, 6], [E7.civi, 4]], 'masa', 'mobilya');
+t(C.ayakliLamba, 1, [[259, 3], [391, 2], [1190, 1]], 'masa', 'mobilya');
+t(C.sokakLambasi, 1, [[261, 6], [34, 2], [471, 1]], 'masa', 'mobilya');
+t(C.bayrakDiregi, 1, [[261, 4], [391, 3], [321, 2], [37, 2]], 'masa', 'mobilya');
+t(C.kuyu, 1, [[15, 16], ['kalas', 4], [51, 5], [E7.halat, 1], [478, 1]], 'masa', 'mobilya');
+t(C.pazarTezgahi, 1, [['kalas', 8], [391, 4], [321, 1], [266, 2]], 'masa', 'mobilya');
+t(C.cardak, 1, [['kalas', 16], ['kutuk', 4], [51, 12], [E7.civi, 6]], 'masa', 'mobilya');
+t(C.sovalyeHeykeli, 1, [[Y7.mermer, 3], [37, 8]], 'taskesme', 'mobilya');
+t(C.cesme, 1, [[Y7.mermer, 12], [Y7.cilaliMermer, 4], [478, 1], [263, 1]], 'taskesme', 'mobilya');
+t(C.boyAynasi, 1, [['kalas', 3], [34, 2], [261, 1]], 'masa', 'mobilya');
+t(C.portmanto, 1, [['kalas', 2], [256, 4]], 'masa', 'mobilya');
+t(C.teleskop, 1, [[259, 4], [34, 2], [256, 3]], 'masa', 'mobilya');
+/* Tek bloklu dekor */
+t(C.tabure, 1, [['kalas', 2], [256, 2], [282, 1]], 'masa', 'mobilya');
+t(C.barTaburesi, 1, [[261, 2], [114, 1]], 'masa', 'mobilya');
+t(C.minder, 2, [[114, 2], [49, 1]], null, 'mobilya');
+t(C.sallananSandalye, 1, [['kalas', 4], [256, 4], [114, 1]], 'masa', 'mobilya');
+t(C.daktilo, 1, [[261, 3], [E7.kagit, 1], [120, 1]], 'masa', 'mobilya');
+t(C.gramofon, 1, [['kalas', 2], [259, 3], [120, 1]], 'masa', 'mobilya');
+t(C.kure, 1, [[259, 2], [325, 1], [324, 1], [E7.kagit, 2]], 'masa', 'mobilya');
+t(C.samdan, 1, [[259, 2], [1190, 3]], 'masa', 'mobilya');
+t(C.kumSaati, 1, [[34, 2], [5, 1], ['kalas', 1]], 'masa', 'mobilya');
+t(C.duvarSaati, 1, [['kalas', 2], [263, 1], [E7.kagit, 1]], 'masa', 'mobilya');
+t(C.kitapYigini, 1, [[E7.kitap, 4]], null, 'mobilya');
+t(C.kaktus, 1, [[960, 1], [5, 1], [324, 1]], 'masa', 'mobilya');
+t(C.monstera, 1, [[960, 1], [3, 1], [9, 4]], 'masa', 'mobilya');
+t(C.bonsai, 1, [[961, 1], [3, 1], [8, 1], [9, 2]], 'masa', 'mobilya');
+t(C.semsiyelik, 1, [[259, 2], [391, 2]], 'masa', 'mobilya');
+t(C.paspas, 2, [[267, 3]], null, 'mobilya');
+t(C.copKovasi, 1, [[261, 3]], 'masa', 'mobilya');
+t(C.metalVaril, 1, [[261, 6], [325, 1]], 'masa', 'mobilya');
+t(C.kusKafesi, 1, [[259, 4], [283, 1]], 'masa', 'mobilya');
+t(C.postaKutusu, 1, [[261, 3], [321, 1], [256, 1]], 'masa', 'mobilya');
+t(C.bahceCucesi, 1, [[960, 2], [321, 1], [325, 1]], 'masa', 'mobilya');
+t(C.lavabo, 1, [['kalas', 3], [Y7.mermer, 1], [259, 2]], 'masa', 'mobilya');
+t(C.dikisMakinesi, 1, [[261, 4], ['kalas', 2], [284, 2]], 'masa', 'mobilya');
+t(C.mangal, 1, [[261, 5], [257, 2]], 'masa', 'mobilya');
+t(C.camasirSepeti, 1, [[568, 6], [391, 1]], 'masa', 'mobilya');
+t(C.odunYigini, 1, [['kutuk', 6]], null, 'mobilya');
+t(C.tabela, 1, [['kalas', 3], [256, 1]], null, 'mobilya');
+t(C.gazLambasi, 1, [[259, 2], [34, 1], [1190, 1]], 'masa', 'mobilya');
 
 export const TARIFLER = R;
 

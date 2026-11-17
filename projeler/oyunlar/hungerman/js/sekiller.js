@@ -3,6 +3,7 @@
    Aynı tanımlar meshleme (işçi), çarpışma (oyuncu ve canlılar), ışın izleme ve seçim kutusu için kullanılır. */
 import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T, BLOK_UST } from './bloklar.js';
 import { CIHAZ, cihazHucreKutulari } from './cihazlar.js';
+import { COKLU, cokluHucreKutulari } from './coklu.js';
 
 const P = 1 / 16;
 /* Yönler: 0 kuzey (-z), 1 doğu (+x), 2 güney (+z), 3 batı (-x) */
@@ -52,6 +53,25 @@ function dondur(l, f) {
     const [ax, az] = n([k[0], k[2]]), [bx, bz] = n([k[3], k[5]]);
     return [Math.min(ax, bx), k[1], Math.min(az, bz), Math.max(ax, bx), k[4], Math.max(az, bz), ...k.slice(6)];
   });
+}
+/* 0.37.0: çok bloklu nesnelerin hücre kutuları (doku adları çözülür, yöne göre döndürülür; önbellekli) */
+const YATAY = [5, 0, 4, 1];   // kuzey, doğu, güney, batı yüzlerinin dizinleri
+const dokuCoz = (t, f) => {
+  if (!Array.isArray(t)) return T[t] ?? T.kalas;
+  const r = t.map(n => T[n] ?? T.kalas);
+  if (!f) return r;
+  const o = r.slice();
+  for (let k = 0; k < 4; k++) o[YATAY[(k + f) % 4]] = r[YATAY[k]];
+  return o;
+};
+const COKLU_KUTU = [], COKLU_CARP = [];
+function cokluKutular(id, b, carp) {
+  if (!COKLU_KUTU[id]) {
+    const D = COKLU[b.ck], ham = cokluHucreKutulari(D, b.parca);
+    COKLU_KUTU[id] = dondur(ham.map(k => k.slice(0, 6)), b.yon).map((k, j) => [...k, dokuCoz(ham[j][6], b.yon)]);
+    COKLU_CARP[id] = COKLU_KUTU[id].map(k => k.slice(0, 6));
+  }
+  return carp ? COKLU_CARP[id] : COKLU_KUTU[id];
 }
 export function sekilKutulari(id, komsu, carp = false) {
   const b = BLOKLAR[id];
@@ -345,6 +365,7 @@ export function sekilKutulari(id, komsu, carp = false) {
       return [[5 * P, 0, 5 * P, 11 * P, 7 * P, 11 * P], [6 * P, 7 * P, 6 * P, 10 * P, 10 * P, 10 * P], [7.5 * P, 10 * P, 7.5 * P, 8.5 * P, 14 * P, 8.5 * P, Y], [6 * P, 10 * P, 9 * P, 7 * P, 13 * P, 10 * P, Y],
         [6.5 * P, 13.5 * P, 6.5 * P, 9.5 * P, 15.5 * P, 9.5 * P, T.yun_k], [5 * P, 12 * P, 9 * P, 7 * P, 13.5 * P, 11 * P, T.yun_s], [9 * P, 11 * P, 5.5 * P, 11 * P, 12.5 * P, 7.5 * P, T.mavi_cicek]];
     }
+    case 'coklu': return cokluKutular(id, b, carp);
     /* ---------- 0.36.1: iki bloklu yatak ----------
        Kuzeye (yön 0) göre: baş parçası kuzeyde (başlık, yastık, yorganın kıvrık ucu), ayak parçası güneyde (yorgan, ayaklık).
        Ahşap çerçeve ve dört köşe direği, yanlarda karyola kirişi, üstte çizgili döşek ve beyaz çarşaf; yorgan yanlardan sarkar. */

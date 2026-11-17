@@ -1,6 +1,7 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37 } from '../bloklar.js';
+import { COKLU, cokluHucreler, cokluCapaKonumu, cokluYerel } from '../coklu.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
@@ -93,7 +94,7 @@ export class Etkilesim {
     if (b.oturak && this.binek) return this.binek.otur(h.x, h.y, h.z);
     if (b.firinKap && !this.shift) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }   // 0.33.0
     if (b.istasyon) { this.arayuz.envanterAc(b.istasyon); return true; }
-    if (b.sandik || b.firinKap) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }   // 0.33.0: fırın ve kamp ateşi haznesi
+    if (b.sandik || b.firinKap) { const [kx, ky, kz] = this.kokHucre(h.x, h.y, h.z, b); this.arayuz.sandikAc(kx, ky, kz); return true; }   // 0.33.0: fırın ve kamp ateşi haznesi; 0.37.0: çok bloklu dolapta kök hücre
     if (b.yatak) { this.arayuz.uyu(h); return true; }
     if (this.ac(h)) { this.vurus = 0.01; return true; }
     return false;
@@ -286,6 +287,7 @@ export class Etkilesim {
     const ta = this.aletBilgi();
     if (ta && ta.tur === 'tirpan' && BITKI[h.id] && !b.fidan) { this.bic(h, ta.alan || 1); return; }
     if (b.cihaz) { this.cihazKir(h, b); return; }
+    if (b.ck) { this.cokluKir(h, b); return; }   // 0.37.0
     const d = this.dunya, r = Math.random;
     const ust = d.blok(h.x, h.y + 1, h.z);
     /* Yan veya üstte su varsa boşluk suyla dolar */
@@ -500,7 +502,9 @@ export class Etkilesim {
     /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
     if (h && BLOKLAR[h.id].oturak && !g.egil && !(e && e.tur === 'blok') && this.binek && this.binek.otur(h.x, h.y, h.z)) return true;
     /* Sandık */
-    if (h && BLOKLAR[h.id].sandik && !g.egil) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
+    /* 0.37.0: piyano ve gramofon çalar */
+    if (h && BLOKLAR[h.id].muzik && !g.egil) { this.ses.melodi([0, 3, 2][Math.floor(Math.random() * 3)]); this.dusenler.renkliParcacik([0.95, 0.85, 0.4], h.x + 0.5, h.y + 1.1, h.z + 0.5, 6); return true; }
+    if (h && BLOKLAR[h.id].sandik && !g.egil) { const [kx, ky, kz] = this.kokHucre(h.x, h.y, h.z, BLOKLAR[h.id]); this.arayuz.sandikAc(kx, ky, kz); return true; }
     /* Yatak */
     if (h && BLOKLAR[h.id].yatak) { this.arayuz.uyu(h); return true; }
     /* Kapı, çit kapısı ve tuzak kapı açılıp kapanır (eğilirken blok konur) */
@@ -643,6 +647,36 @@ export class Etkilesim {
       const C = CIHAZ[e.cihaz], d = this.dunya;
       for (const [x, yy, z, i] of y.hucreler) d.blokKoy(x, yy, z, C.taban + y.yon * C.n + i);   // kök hücre önce konur
       env.seciliAzalt(1); this.istat('konulan'); this.ses.koy(C.ses);
+      return true;
+    }
+    /* 0.37.0: çok bloklu / tek bloklu mobilya: önizlemeli kurulum */
+    if (e.tur === 'blok' && h && BLOKLAR[e.blok].ck) {
+      const y = this.cokluYeri(h, COKLU[BLOKLAR[e.blok].ck]);
+      if (!y) return false;
+      if (!y.gecerli) { this.arayuz.bildirim(y.neden); return true; }
+      for (const [id, x, yy, z] of y.parcalar) this.dunya.blokKoy(x, yy, z, id);
+      const D = COKLU[BLOKLAR[e.blok].ck];
+      if (D.sandik && this.arayuz.sandikYerlesti) this.arayuz.sandikYerlesti(y.parcalar[0][1], y.parcalar[0][2], y.parcalar[0][3]);
+      env.seciliAzalt(1); this.istat('konulan'); this.ses.koy(D.ses || 'odun');
+      if (this.arayuz.blokKondu) this.arayuz.blokKondu(e.blok);
+      return true;
+    }
+    /* 0.37.0: dürbün, cep saati, havai fişek */
+    if (s.id === ESYA37.durbun) { this.durbun = !this.durbun; this.ses.tik && this.ses.tik(); return true; }
+    if (s.id === ESYA37.cepSaati) {
+      const z = this.arayuz.zaman ? this.arayuz.zaman() : null;
+      if (z) { const dk = Math.floor(((z.zaman * 24 + 6) % 24) * 60); this.arayuz.bildirim(`Saat ${String(Math.floor(dk / 60)).padStart(2, '0')}:${String(dk % 60).padStart(2, '0')} · ${z.gun}. gün${z.mevsim ? ' · ' + z.mevsim : ''}`, s.id); }
+      return true;
+    }
+    if (s.id === ESYA37.havaiFisek) {
+      const P = this.oyuncu.konum, R = [[1, 0.3, 0.3], [0.4, 0.8, 1], [1, 0.9, 0.3], [0.5, 1, 0.5], [0.9, 0.5, 1]];
+      env.seciliAzalt(1); this.ses.patlama && this.ses.patlama(900, 0.4, 0.12, 'highpass', 1);
+      for (let i = 0; i < 3; i++) setTimeout(() => {
+        const c = R[Math.floor(Math.random() * R.length)], x = P.x + (Math.random() - 0.5) * 6, y = P.y + 12 + Math.random() * 5, z = P.z + (Math.random() - 0.5) * 6;
+        this.dusenler.renkliParcacik(c, x, y, z, 40); this.dusenler.renkliParcacik([1, 1, 0.9], x, y, z, 12);
+        this.ses.patlama && this.ses.patlama(220, 0.7, 0.3, 'lowpass', 1);
+      }, 700 + i * 380);
+      this.olay && this.olay('fisek');
       return true;
     }
     /* 0.36.1: yatak iki blok olarak kurulur (ayak hedefte, baş bakış yönünde; R ile döndürülür) */
@@ -872,7 +906,7 @@ export class Etkilesim {
     return h.ny === -1 && KATI[h.id] ? 842 : duvar ? 844 + yi * 2 : 620;
   }
   /* Elde tutulan eşya R ile döndürülebilir mi */
-  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (id === 47 || e.tur === 'cihaz' || e.tur === 'plan' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
+  dondurulebilir(id) { const e = ESYALAR[id]; return !!(e && (id === 47 || (e.tur === 'blok' && BLOKLAR[e.blok].ck) || e.tur === 'cihaz' || e.tur === 'plan' || (e.tur === 'blok' && (this.yonluId(BLOKLAR[e.blok], 0) != null || BLOKLAR[e.blok].sekil === 'salter' || BLOKLAR[e.blok].sekil === 'algilayici')))); }
   dondur() { this.donus = (this.donus + 1) % 4; return this.donus; }
 
   /* 0.25.0: cihazın kurulacağı yer ve kurulabilirliği: { yon, x, y, z (kök), hucreler, gecerli, neden } */
@@ -908,6 +942,44 @@ export class Etkilesim {
       if (py >= 127 || KATI[d.blok(px, py, pz)]) return sonuc(false, 'Pervanenin döneceği alan boş olmalıdır (yaklaşık 7 blok çapında).');
     }
     return sonuc(true);
+  }
+  /* 0.37.0: çok bloklu nesnenin kurulacağı yer: { coklu, yon, parcalar: [[id, x, y, z], ...], gecerli, neden } */
+  cokluYeri(h, D) {
+    if (!h || !D) return null;
+    const d = this.dunya, hb = BLOKLAR[h.id];
+    let x = h.x + h.nx, y = h.y + h.ny, z = h.z + h.nz;
+    if (hb && hb.degistirilebilir) { x = h.x; y = h.y; z = h.z; }
+    const yon = (this.bakisYonu4() + this.donus) % 4, hucreler = cokluHucreler(D, yon, x, y, z), kati = BLOKLAR[D.taban].kati;
+    const parcalar = hucreler.map(([hx, hy, hz, i]) => [D.taban + yon * D.n + i, hx, hy, hz]);
+    const sonuc = (gecerli, neden = '') => ({ coklu: D.tur, yon, x, y, z, parcalar, gecerli, neden });
+    const boyut = D.n > 1 ? `${D.w} × ${D.d} taban ve ${D.h} blok yükseklik` : 'bir blok';
+    for (const [hx, hy, hz, i] of hucreler) {
+      if (hy < 1 || hy >= 127 || !d.yuklu(hx, hz)) return sonuc(false, `${D.ad} buraya sığmaz.`);
+      const q = d.blok(hx, hy, hz), qb = BLOKLAR[q];
+      if (!(q === 0 || (qb && qb.degistirilebilir && !qb.cihaz))) return sonuc(false, `${D.ad} için ${boyut} boş yer gerekir.`);
+      if (kati && this.oyuncu.hucreyiKapliyor(hx, hy, hz)) return sonuc(false, `${D.ad} kurulacak yerde durulmaktadır.`);
+      if (this.pervaneAlaninda(hx, hy, hz)) return sonuc(false, 'Burası bir rüzgâr türbininin pervane alanı.');
+      if (!D.zeminsiz && cokluYerel(D, i)[1] === 0) { const alt = d.blok(hx, hy - 1, hz), altB = BLOKLAR[alt]; if (!KATI[alt] || (altB && altB.ustuneKonmaz)) return sonuc(false, `${D.ad} düz ve katı bir zemine kurulur.`); }
+    }
+    return sonuc(true);
+  }
+  /* Çok bloklu nesnenin kök hücresi (sandık içeriği burada tutulur); diğer bloklar için kendisi */
+  kokHucre(x, y, z, b) {
+    if (!b || !b.ck) return [x, y, z];
+    const D = COKLU[b.ck], [ax, ay, az] = cokluCapaKonumu(D, b, x, y, z), k = cokluHucreler(D, b.yon, ax, ay, az)[0];
+    return [k[0], k[1], k[2]];
+  }
+  /* Herhangi bir hücresi kırılınca bütün nesne kalkar, eşyası bir kez düşer */
+  cokluKir(h, b) {
+    const d = this.dunya, D = COKLU[b.ck], [ax, ay, az] = cokluCapaKonumu(D, b, h.x, h.y, h.z);
+    const hucreler = cokluHucreler(D, b.yon, ax, ay, az), [kx, ky, kz] = hucreler[0];
+    if (D.sandik) for (const s of this.arayuz.sandikKirildi(kx, ky, kz, false)) this.dusenler.birak(s.id, s.adet, kx + 0.5, ky + 0.5, kz + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
+    for (const [x, y, z, i] of hucreler.reverse()) { const q = BLOKLAR[d.blok(x, y, z)]; if (q && q.ck === b.ck && q.yon === b.yon && q.parca === i) { d.blokKoy(x, y, z, 0); if (i % 2 === 0) this.dusenler.parcacik(h.id, x, y, z, 4); } }
+    this.dusenler.birak(D.taban, 1, h.x + 0.5, h.y + 0.4, h.z + 0.5);
+    this.ses.kir(b.ses); this.istat('kirilan');
+    const a = this.aletBilgi();
+    if (a && b.sertlik > 0 && this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+    this.hayatta.yor(0.03);
   }
   /* 0.36.1: iki bloklu yatağın kurulacağı yer: { yatak, yon, x, y, z, parcalar: [[id, x, y, z], ...], gecerli, neden } */
   yatakYeri(h) {
@@ -966,6 +1038,7 @@ export class Etkilesim {
     if (!e || !h || this.hedefCanli || this.hedefTekne) return null;
     if (e.tur === 'cihaz') return this.cihazYeri(e.cihaz, h);
     if (s.id === 47) return this.yatakYeri(h);   // 0.36.1
+    if (e.tur === 'blok' && BLOKLAR[e.blok].ck) return this.cokluYeri(h, COKLU[BLOKLAR[e.blok].ck]);   // 0.37.0
     if (e.tur !== 'blok') return null;
     const eb = BLOKLAR[e.blok], f = (this.bakisYonu4() + this.donus) % 4, id = this.yuzeyId(eb, h, f) ?? this.yonluId(eb, f);
     if (id == null) return null;

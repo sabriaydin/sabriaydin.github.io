@@ -1,5 +1,6 @@
 /* HungerMan - blok, eşya ve alet tanımları (ana iş parçacığı ve işçiler ortak kullanır) */
 import { CIHAZ, hucreYerel } from './cihazlar.js';
+import { COKLU, cokluYerel } from './coklu.js';
 
 /* ---------- Doku atlası döşeme dizinleri (0.31.0: 32 x 32 döşeme, 512 piksel) ---------- */
 export const ATLAS_N = 32;
@@ -73,7 +74,16 @@ export const DOKULAR = [
   /* 0.36.0: mutfak */
   'degirmen_ust', 'degirmen_yan', 'tezgah_ust', 'tezgah_on', 'kiler_on', 'fici_yan', 'fici_ust', 'pasta_ust', 'pasta_yan', 'pasta_ic', 'cuval_un', 'cuval_tuz', 'semaver', 'sepet', 'tandir', 'tabak', 'feslegen', 'sarimsak', 'kavanoz', 'kavanoz_bal', 'baharat',
   /* 0.36.1: iki bloklu yatak */
-  'yatak_ahsap', 'yatak_yorgan', 'yatak_carsaf', 'yatak_yastik', 'yatak_dosek'
+  'yatak_ahsap', 'yatak_yorgan', 'yatak_carsaf', 'yatak_yastik', 'yatak_dosek',
+  /* 0.37.0: mobilya, dekor ve yapı blokları */
+  'ahsap_cilali', 'doseme_yesil', 'doseme_kahve', 'doseme_kirmizi', 'demir_siyah', 'cekmece_on', 'kagit', 'murekkep', 'gardirop_alt', 'gardirop_ust', 'sarkac', 'saat_yuz',
+  'piyano_govde', 'piyano_tus', 'pirinc', 'beyaz_emaye', 'buzdolabi_alt', 'buzdolabi_ust', 'krom', 'yorgan_mavi', 'tulum', 'tulum_ic', 'hamak_bez', 'halat', 'lambri',
+  'bilardo_cuha', 'abajur', 'sokak_cam', 'bayrak_sol', 'bayrak_sag', 'kuyu_tas', 'kasa_elma', 'kasa_portakal', 'kasa_ekmek', 'tente', 'heykel', 'mermer', 'mermer_cilali',
+  'ayna', 'teleskop_govde', 'kitap_sayfa', 'daktilo_tus', 'kure', 'duvar_saat', 'kaktus', 'monstera', 'paspas', 'varil_yan', 'varil_ust', 'posta_kirmizi', 'posta_on', 'ten',
+  'kor_yatak', 'izgara', 'kebap_sis', 'tabela_on', 'tas_kesme_yan', 'tas_kesme_ust',
+  'mermer_tugla', 'mermer_sutun_yan', 'mermer_sutun_ust', 'granit', 'granit_cilali', 'bazalt_yan', 'bazalt_ust', 'bazalt_cilali', 'kayrak', 'kayrak_kiremit', 'kirectasi',
+  'kerpic', 'eski_tugla', 'catlak_tugla', 'yosunlu_tugla', 'fayans', 'mozaik', 'iznik', 'kamis_yan', 'kamis_ust', 'hasir', 'saman_cati', 'demir_levha', 'bakir_levha',
+  'pasli_bakir', 'cam_tugla', 'altin_suslu', 'kasa_yan', 'kasa_ust'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -585,8 +595,52 @@ export const YATAK = ayir(8);
 for (let f = 0; f < 4; f++) for (let p = 0; p < 2; p++) blok(YATAK + f * 2 + p, { ad: 'Yatak', dok: { ust: 'yatak_yorgan', yan: 'yatak_ahsap', on: 'yatak_ahsap', alt: 'yatak_ahsap' }, cizim: C_SEKIL, opak: false,
   sekil: 'yatak2', yatak: true, yatak2: true, yon: f, parca: p, taban: YATAK, gizli: true, sertlik: 0.4, alet: 'balta', ses: 'yun', dusur: () => [[47, 1]], harita: 14 });
 
+/* ---------- 0.37.0: çok bloklu ve tek bloklu mobilya, dekor ve yapılar (coklu.js) ----------
+   Her nesne 4 yön × hücre sayısı kimlik kullanır; eşyası taban kimliğidir (yön 0, hücre 0). */
+export const COKLU_ID = {};
+for (const D of Object.values(COKLU)) {
+  const taban = ayir(4 * D.n), ilk = D.kutular.find(k => typeof k[6] === 'string');
+  D.taban = taban; COKLU_ID[D.tur] = taban;
+  for (let f = 0; f < 4; f++) for (let i = 0; i < D.n; i++) {
+    const [lx, ly, lz] = cokluYerel(D, i);
+    blok(taban + f * D.n + i, { ad: D.ad, dok: D.dok || (ilk ? ilk[6] : 'kalas'), cizim: C_SEKIL, opak: false, kati: D.kati !== false, sertlik: D.sertlik ?? 1, alet: D.alet ?? null, seviye: D.seviye || 0, ses: D.ses || 'odun',
+      sekil: 'coklu', ck: D.tur, yon: f, parca: i, lx, ly, lz, taban, gizli: f > 0 || i > 0, dusur: () => [], harita: D.harita || 14, ikon3b: true,
+      ...(D.oturak && ly === 0 ? { oturak: D.oturak } : {}), ...(D.yatak ? { yatak: true } : {}), ...(D.sandik ? { sandik: true, dolap: true } : {}),
+      ...(D.isik && ly === D.h - 1 ? { isik: D.isik } : {}), ...(D.istasyon ? { istasyon: D.istasyon } : {}), ...(D.muzik ? { muzik: true } : {}) });
+  }
+}
+/* 0.37.0: yeni yapı blokları */
+export const YAPI37 = {};
+const Y37 = (k, ad, dok, o = {}) => { const id = ayir(1); YAPI37[k] = id; blok(id, { ad, dok, sertlik: 1.8, alet: 'kazma', seviye: 1, ses: 'tas', harita: 2, ...o }); return id; };
+Y37('mermer', 'Mermer', 'mermer', { harita: 49 }); Y37('cilaliMermer', 'Cilalı Mermer', 'mermer_cilali', { harita: 49 }); Y37('mermerTugla', 'Mermer Tuğla', 'mermer_tugla', { harita: 49 });
+Y37('mermerSutun', 'Mermer Sütun', ['mermer_sutun_ust', 'mermer_sutun_yan', 'mermer_sutun_ust'], { harita: 49 });
+Y37('granit', 'Granit', 'granit', { harita: 163 }); Y37('cilaliGranit', 'Cilalı Granit', 'granit_cilali', { harita: 163 });
+Y37('bazalt', 'Bazalt', ['bazalt_ust', 'bazalt_yan', 'bazalt_ust'], { sertlik: 2 }); Y37('cilaliBazalt', 'Cilalı Bazalt', 'bazalt_cilali', { sertlik: 2 });
+Y37('kayrak', 'Kayrak', 'kayrak'); Y37('kayrakKiremit', 'Kayrak Kiremit', 'kayrak_kiremit'); Y37('kirectasi', 'Kireçtaşı', 'kirectasi', { sertlik: 1.5, harita: 49 });
+Y37('kerpic', 'Kerpiç', 'kerpic', { sertlik: 1, alet: 'kurek', seviye: 0, ses: 'toprak', harita: 163 });
+Y37('eskiTugla', 'Eski Tuğla', 'eski_tugla', { harita: 163 }); Y37('catlakTugla', 'Çatlak Taş Tuğla', 'catlak_tugla'); Y37('yosunluTugla', 'Yosunlu Taş Tuğla', 'yosunlu_tugla');
+Y37('fayans', 'Beyaz Fayans', 'fayans', { sertlik: 1.2, ses: 'cam', harita: 49 }); Y37('mozaik', 'Mozaik Zemin', 'mozaik', { sertlik: 1.2 }); Y37('iznik', 'İznik Çinisi', 'iznik', { sertlik: 1.2, ses: 'cam', harita: 114 });
+Y37('lambri', 'Ahşap Lambri', 'lambri', { sertlik: 2, alet: 'balta', seviye: 0, ses: 'odun', harita: 14 });
+Y37('kamis', 'Kamış Demeti', ['kamis_ust', 'kamis_yan', 'kamis_ust'], { sertlik: 0.8, alet: 'balta', seviye: 0, ses: 'bitki', harita: 4 });
+Y37('hasir', 'Hasır Örgü', 'hasir', { sertlik: 0.6, alet: 'balta', seviye: 0, ses: 'yun', harita: 14 });
+Y37('samanCati', 'Saman Çatı', 'saman_cati', { sertlik: 0.5, alet: null, seviye: 0, ses: 'bitki', harita: 49 });
+Y37('demirLevha', 'Demir Levha', 'demir_levha', { sertlik: 3, seviye: 2 }); Y37('bakirLevha', 'Bakır Levha', 'bakir_levha', { sertlik: 3, seviye: 1, harita: 163 }); Y37('pasliBakir', 'Paslı Bakır Levha', 'pasli_bakir', { sertlik: 3, seviye: 1, harita: 114 });
+Y37('camTugla', 'Cam Tuğla', 'cam_tugla', { opak: false, kesik: true, ayniGizle: true, sertlik: 0.6, alet: null, seviye: 0, ses: 'cam', harita: 34 });
+Y37('altinSuslu', 'Altın Süslemeli Taş', 'altin_suslu', { sertlik: 2 }); Y37('ahsapKasa', 'Ahşap Kasa', ['kasa_ust', 'kasa_yan', 'kasa_ust'], { sertlik: 1.5, alet: 'balta', seviye: 0, ses: 'odun', harita: 14 });
+/* Merdiven, yarım blok ve duvar çeşitleri */
+export const YAPI_MALZEME37 = [{ ad: 'Mermer', taban: YAPI37.mermer }, { ad: 'Granit', taban: YAPI37.cilaliGranit }, { ad: 'Bazalt', taban: YAPI37.cilaliBazalt }, { ad: 'Kayrak', taban: YAPI37.kayrakKiremit }, { ad: 'Eski Tuğla', taban: YAPI37.eskiTugla }];
+YAPI_MALZEME37.forEach(m => {
+  const t = B[m.taban], o = yapiOrtak({ ...t, dok: t.dok }), mt = ayir(8), yt = ayir(2);
+  m.merdiven = mt; m.yarim = yt;
+  for (let f = 0; f < 4; f++) blok(mt + f, { ...o, ad: `${m.ad} Merdiven`, sekil: 'merdiven', yon: f, taban: mt, ters: mt + 4, gizli: f > 0, dusur: () => [[mt, 1]] });
+  for (let f = 0; f < 4; f++) blok(mt + 4 + f, { ...o, ad: `${m.ad} Merdiven`, sekil: 'merdiven', yon: f, ust: 1, taban: mt, ters: mt + 4, gizli: true, dusur: () => [[mt, 1]] });
+  for (let u = 0; u < 2; u++) blok(yt + u, { ...o, ad: `${m.ad} Yarım Blok`, sekil: 'yarim', ust: u, taban: yt, cift: m.taban, gizli: u > 0, dusur: () => [[yt, 1]] });
+});
+export const DUVAR_MALZEME37 = [{ ad: 'Mermer Tuğla', taban: YAPI37.mermerTugla }, { ad: 'Eski Tuğla', taban: YAPI37.eskiTugla }, { ad: 'Granit', taban: YAPI37.granit }];
+DUVAR_MALZEME37.forEach(m => { m.duvar = ayir(1); blok(m.duvar, { ...yapiOrtak(B[m.taban]), ad: `${m.ad} Duvar`, sekil: 'duvar' }); });
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
-export const BLOK_UST = 2048;   // 0.31.0: 1024'ten 2048'e
+export const BLOK_UST = 4096;   // 0.31.0: 1024'ten 2048'e; 0.37.0: 4096'ya
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
 export const AYNI_GIZLE = new Uint8Array(BLOK_UST), SIVI = new Uint8Array(BLOK_UST), BITKI = new Uint8Array(BLOK_UST), LAV = new Uint8Array(BLOK_UST);
 /* 0.30.5: SU_SEVIYE: su yüksekliği (0 su değil, 8 kaynak / düşen / su içi bitki, 1-7 akan su) */
@@ -878,6 +932,28 @@ Y36y(337, 'Peynirli Omlet', 'tabak', '#f2d050', 7, [['odak', 90]]);
 Y36y(338, 'Kahvaltı Tabağı', 'tabak', '#e8a03a', 12, [['tokluk', 180], ['yenilenme', 30]]);
 Y36y(339, 'Kuzu Tandır', 'tabak', '#8a4a2a', 12, [['direnc', 180], ['guc', 60]]);
 esya(320, { ad: 'Tarif Defteri', simge: 'defter', renk: '#8a3a2a', yigin: 1, ozellik: 'Sağ tık: aşçılık seviyesi ve yemek etkileri' });
+/* ---------- 0.37.0: yeni eşyalar (kimlikleri sona ayrılır) ---------- */
+export const ESYA37 = {};
+const E37 = (k, o) => { const id = ayir(1); ESYA37[k] = id; esya(id, o); return id; };
+E37('kagit', { ad: 'Kağıt', simge: 'kagit' });
+E37('kitap', { ad: 'Kitap', simge: 'kitap', renk: '#8a3a2a' });
+E37('murekkep', { ad: 'Mürekkep', simge: 'murekkep', yigin: 16 });
+E37('civi', { ad: 'Çivi', simge: 'civi' });
+E37('halat', { ad: 'Halat', simge: 'halat' });
+E37('tugla', { ad: 'Tuğla', simge: 'tugla' });
+E37('hancer', { ad: 'Hançer', tur: 'alet', yigin: 1, simge: 'hancer', renk: '#dcdcdc', ozellik: 'Kısa ve hafif bıçak',
+  alet: { tur: 'kilic', seviye: 4, hiz: 6, dayanim: 220, hasar: 5 } });
+E37('mizrak', { ad: 'Mızrak', tur: 'alet', yigin: 1, simge: 'mizrak', renk: '#dcdcdc', ozellik: 'Uzun saplı, ağır darbeli silah',
+  alet: { tur: 'kilic', seviye: 4, hiz: 5, dayanim: 300, hasar: 8 } });
+E37('cekic', { ad: 'Savaş Çekici', tur: 'alet', yigin: 1, simge: 'cekic', renk: '#b8b8c0', ozellik: 'En ağır yakın dövüş silahı',
+  alet: { tur: 'kilic', seviye: 4, hiz: 4, dayanim: 420, hasar: 9.5 } });
+const OBS = { seviye: 5, hiz: 9, dayanim: 2600, renk: '#3a2a5a' };
+ALET_TURLERI.forEach(t => E37('obsidyen_' + t.tur, { ad: 'Obsidyen ' + t.ad, tur: 'alet', yigin: 1, simge: t.tur, renk: OBS.renk,
+  alet: { tur: t.tur, seviye: OBS.seviye, hiz: OBS.hiz, dayanim: OBS.dayanim, hasar: t.hasar + 5 } }));
+E37('obsidyen_capa', { ad: 'Obsidyen Çapa', tur: 'alet', yigin: 1, simge: 'capa', renk: OBS.renk, alet: { tur: 'capa', seviye: OBS.seviye, hiz: OBS.hiz, dayanim: OBS.dayanim, hasar: 3.5 } });
+E37('durbun', { ad: 'Dürbün', simge: 'durbun', yigin: 1, ozellik: 'Sağ tık: yakınlaştırır / uzaklaştırır' });
+E37('cepSaati', { ad: 'Cep Saati', simge: 'cepSaati', yigin: 1, ozellik: 'Sağ tık: günün saatini ve mevsimi gösterir' });
+E37('havaiFisek', { ad: 'Havai Fişek', simge: 'fisek', yigin: 16, ozellik: 'Sağ tık: gökyüzüne fişek atar' });
 yemek(486, 'Ayran', { simge: 'iksir', renk: '#f4f4ee', yemek: 3, kap: 331 }, 'hiz', 30);
 yemek(487, 'Kek', { simge: 'kek', yemek: 12 }, 'tokluk', 120);
 yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });
