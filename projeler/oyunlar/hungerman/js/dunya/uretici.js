@@ -399,8 +399,9 @@ export class Uretici {
 
   /* Oyuncunun doğacağı nokta: rastgele seçilen, köylerden uzak, düz ve kuru bir arazi */
   dogumNoktasi() { return this.dogumAday(); }
-  dogumAday() {
-    const r = uretec(this.tohum ^ 0xabcdef);
+  /* 0.40.3: doğma noktası (yatak) yoksa yeniden doğuşta kullanılan rastgele güvenli konum (aynı kurallarla) */
+  rastgeleDogum() { return this.dogumAday(uretec((Math.random() * 2147483647) | 0)); }
+  dogumAday(r = uretec(this.tohum ^ 0xabcdef)) {
     const o = {}, q = {};
     const UYGUN = new Set([BY.CAYIR, BY.ORMAN, BY.HUS, BY.SAVAN]);
     for (let deneme = 0; deneme < 600; deneme++) {

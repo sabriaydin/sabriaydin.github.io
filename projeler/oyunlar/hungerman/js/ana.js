@@ -572,7 +572,7 @@ function oyunBaslat(v) {
   ekran('yukleme');
   $('#yukleBaslik').textContent = v.istemci ? 'Dünyaya katılınıyor' : v.yeni ? 'Dünya oluşturuluyor' : 'Dünya yükleniyor';
   $('#yukleCubuk').style.width = '0%';
-  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır; son kullanılan yatak son kayıt noktası olur.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.', 'Arı kovanının altına kamp ateşi yakılırsa bal toplarken arılar kızmaz.', 'Süt kovası içilince zehir ve olumsuz etkiler geçer.', 'Kırkılan koyunun yünü zamanla yeniden uzar.', 'Şeker kamışı yalnızca suya komşu zemine dikilir.', 'Kanlı Ay her mevsimin son gecesinde doğar; o gece uyunamaz.', 'Ölünce eşyalarınız mezar taşında saklanır.', 'Karlı bölgelerde deri zırh ve sıcak çorba hayat kurtarır.', 'Bandaj kanamayı durdurur; atel kırık bacağı hızla iyileştirir.', 'Düşen meteorların kraterinde Yıldız Parçası veren Gök Taşı bulunur.', 'Eve Dönüş Tılsımı son kayıt noktasına, yoksa doğma noktasına ışınlar.', 'Ada Bekçisi Kül Devi yenilince iki Büyülü Anahtar bırakır; anahtar kadim geçidi 30 dakika açar.', 'F1 göstergeleri gizler, F2 ekran görüntüsü kaydeder.', 'Dünyalar listesindeki Yedekle düğmesi dünyayı dosya olarak indirir.', 'Envanterdeki Sırala düğmesi çantayı düzenler.', 'Hardcore dünyada tek can vardır.',
+  const ipuclari = ['İlk gece gelmeden bir sığınak yapmak akıllıca olur.', 'Üretim masası birçok tarifin kilidini açar.', 'Elmas, derin mağaralarda bulunur.', 'Böğürtlen çalıları zamanla yeniden meyve verir.', 'Fırın yanında kütük yakarak kömür elde edilir.', 'Meşaleler karanlık mağaraları aydınlatır.', 'Zombiler meşale ve kamp ateşi çevresinde doğmaz.', 'Yatakta uyumak geceyi atlatır; son kullanılan yatak doğma noktası olur.', 'Çiğ et kamp ateşinde pişirilince çok daha doyurucu olur.', 'Düşerken yapılan vuruş kritik hasar verir.', 'Köylülerle sikke karşılığında ticaret yapılabilir.', 'Pusuladaki ev simgesi yakındaki köyleri gösterir.', 'Görev günlüğü J tuşuyla açılır.', 'Derin mağaralarda lav bulunur; lava düşen eşyalar yanar.', 'Zindanlardaki sandıklar değerli ganimet saklar.', 'Örümcek zehri canınızı 1 kalbin altına düşürmez.', 'Kemik tozu ekinleri hızla büyütür.', 'Arı kovanının altına kamp ateşi yakılırsa bal toplarken arılar kızmaz.', 'Süt kovası içilince zehir ve olumsuz etkiler geçer.', 'Kırkılan koyunun yünü zamanla yeniden uzar.', 'Şeker kamışı yalnızca suya komşu zemine dikilir.', 'Kanlı Ay her mevsimin son gecesinde doğar; o gece uyunamaz.', 'Ölünce eşyalarınız mezar taşında saklanır.', 'Karlı bölgelerde deri zırh ve sıcak çorba hayat kurtarır.', 'Bandaj kanamayı durdurur; atel kırık bacağı hızla iyileştirir.', 'Düşen meteorların kraterinde Yıldız Parçası veren Gök Taşı bulunur.', 'Eve Dönüş Tılsımı son kullanılan yatağa ışınlar.', 'Doğma noktası son kullanılan yataktır; yatak yoksa ölünce rastgele bir yerde doğulur.', 'Ada Bekçisi Kül Devi yenilince iki Büyülü Anahtar bırakır; anahtar kadim geçidi 30 dakika açar.', 'F1 göstergeleri gizler, F2 ekran görüntüsü kaydeder.', 'Dünyalar listesindeki Yedekle düğmesi dünyayı dosya olarak indirir.', 'Envanterdeki Sırala düğmesi çantayı düzenler.', 'Hardcore dünyada tek can vardır.',
     'Olta ile balık tutulur; şamandıra suya daldığında sağ tıklayınız.', 'Dalış maskesi su altında daha uzun kalmayı sağlar.', 'Palet ile su altında çok daha hızlı yüzülür.', 'Batık gemilerin sandıkları inci ve sikke saklar.', 'Köpekbalıkları derin açık denizlerde dolaşır.', 'Kıyı köylerinin limanlarında tekneler ve bir balıkçı bulunur.', 'Deniz fenerleri geceleri kıyının yerini gösterir.', 'Tekneden inmek için C tuşuna basılır.', 'F8 ile açılan geliştirici konsolunda “yardim” komutu tüm komutları listeler.',
     'Duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” ile arkadaşlarınız aynı dünyaya katılabilir.', 'Çok oyunculuda sohbet için T, oyuncu listesi için Tab tuşu kullanılır.', 'Çok oyunculuda gece, tüm oyuncular yatağa yattığında atlanır.',
     'Büyük harita M tuşuyla açılır; haritaya tıklanarak işaret eklenir.', 'Haritaya eklenen işaretler pusulada da görünür.',
@@ -706,7 +706,7 @@ function oyunBaslat(v) {
   Object.assign(koyluEkrani, { koyler, gorevler, envanter, hud, oyuncu, xp: n => { hayatta.xpEkle(n); basarimlar.ver('ticaret'); },
     /* 0.32.0: konuşmalar için ortam ve Dost itibarında köyde konaklama (doğma noktası köylünün kapısı, gece ise uyunur) */
     ortam: () => { const z = oyun.zaman, H = oyun.hava; return { gece: z > 0.55 && z < 0.95, sabah: z < 0.12, yagis: H && H.yagiyor ? (H.yagisTuru ? H.yagisTuru(oyuncu.konum) : 1) : 0 }; },
-    konakla: w => { const k = w.koylu.kapi; uyu({ x: k.x, y: k.y - 1, z: k.z }); } });
+    konakla: w => { const k = w.koylu.kapi; uyu({ x: k.x, y: k.y - 1, z: k.z }, true); } });
   Object.assign(gorevEkrani, { gorevler, envanter, oyuncu });
   /* vuran: çok oyunculuda canlıya vuran uzak oyuncu (görev ve itibar onun oyununda işlenir) */
   varliklar.olaylar.vurus = (w, vuran) => { if (vuran) { if (oyun.ag && oyun.ag.vurusOlayi) oyun.ag.vurusOlayi(w, vuran); return; } if (w.tur.koylu) koyler.koyluVuruldu(w); };
@@ -863,11 +863,11 @@ function olum(sebep) {
   o.olumAnim = 0.001; o.olumBas = performance.now(); $('#olumPerde').classList.add('acik'); tiklaGuncelle();
   oyunKaydet();
 }
-/* 0.39.0: yeniden doğma: 'dunya' dünyanın doğma noktası, 'yatak' son kullanılan yatak */
+/* 0.39.0: yeniden doğma: 'yatak' son kullanılan yatak (doğma noktası); 0.40.3: 'dunya' rastgele güvenli bir konum */
 function yenidenDog(nereye) {
   const o = oyun; ses.tik();
   if (nereye === 'yatak') { yatakDenetle(o); if (!o.yatakNoktasi) { $('#sonKayitDog').disabled = true; return; } }
-  const d = nereye === 'yatak' ? o.yatakNoktasi : o.dogum;
+  const d = nereye === 'yatak' ? o.yatakNoktasi : o.dunya.uretici.rastgeleDogum();
   o.olumAnim = 0; $('#olumPerde').classList.remove('acik');
   o.hayatta.sifirla(); o.hayatBasi = o.gun + o.zaman;
   o.oyuncu.konum.set(d.x, d.y, d.z); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0;
@@ -883,6 +883,7 @@ $('#sonKayitDog').onclick = () => yenidenDog('yatak');
 /* Yatak kayıt noktası: yatağın bulunduğu parça yüklüyse yatak hâlâ yerinde mi */
 function yatakDenetle(o) {
   const Y = o.yatakNoktasi; if (!Y) return;
+  if (!Y.hucreler || !Y.hucreler.length) return;   // köyde konaklama: kapı önü
   const [x, y, z] = Y.hucreler[0];
   if (o.dunya.yuklu(x, z) && !(BLOKLAR[o.dunya.blok(x, y, z)] && BLOKLAR[o.dunya.blok(x, y, z)].yatak)) { o.yatakNoktasi = null; }
 }
@@ -891,14 +892,14 @@ function yatakKirildi(x, y, z) {
   const o = oyun, Y = o && o.yatakNoktasi;
   if (!Y || !Y.hucreler.some(([a, b, c]) => a === x && b === y && c === z)) return;
   o.yatakNoktasi = null;
-  o.hud.bildirim('Yatak kırıldı: son kayıt noktası iptal edildi.');
+  o.hud.bildirim('Yatak kırıldı: doğma noktası iptal edildi.');
 }
 $('#izleyiciOl').onclick = () => {
   const o = oyun; ses.tik(); o.olumAnim = 0; $('#olumPerde').classList.remove('acik');
   o.hayatta.sifirla(); izleyiciYap(o); o.oyuncu.konum.y += 2; o.oyuncu.hiz.set(0, 0, 0);
   ekran('oyun'); kilitle();
 };
-$('#olumCik').onclick = async () => { ses.tik(); oyun.olumAnim = 0; $('#olumPerde').classList.remove('acik'); oyun.hayatta.sifirla(); oyun.oyuncu.konum.set(oyun.dogum.x, oyun.dogum.y, oyun.dogum.z); await oyunKaydet(); oyunBitir(); ekran('ana'); };
+$('#olumCik').onclick = async () => { ses.tik(); oyun.olumAnim = 0; $('#olumPerde').classList.remove('acik'); oyun.hayatta.sifirla(); yatakDenetle(oyun); { const d = oyun.yatakNoktasi || oyun.dunya.uretici.rastgeleDogum(); oyun.oyuncu.konum.set(d.x, d.y, d.z); } await oyunKaydet(); oyunBitir(); ekran('ana'); };
 
 async function oyunKaydet() {
   const o = oyun;
@@ -1284,7 +1285,7 @@ function adim(t) {
       if (hedef && hd > 12) isaret.push({ aci: yonAci(hedef.x - p.x, hedef.z - p.z), sinif: 'gorev', metin: '◆', baslik: q.kisa, mesafe: hd, kenar: true });
     }
     const nokta = (n, sinif, metin, baslik) => { if (!n) return; const d = Math.hypot(n.x - p.x, n.z - p.z); if (d > 8) isaret.push({ aci: yonAci(n.x - p.x, n.z - p.z), sinif, metin, baslik, mesafe: d, kenar: sinif === 'olum' }); };
-    nokta(o.dogum, 'dogum', '★', 'Doğma noktası');
+    nokta(o.yatakNoktasi, 'dogum', '★', 'Doğma noktası (yatak)');   // 0.40.3: doğma noktası son kullanılan yataktır
     nokta(o.olumNoktasi, 'olum', '✖', 'Son ölüm noktası');
     /* 0.22.0: düşen meteorun yeri pusulada 15 dakika gösterilir */
     const mn = o.meteorNoktasi;
@@ -1353,11 +1354,12 @@ function haritaAlanYaz(o) {
 function varlikGuncelle(o, dt, ctx, sunucu) { o.varliklar.guncelle(dt, sunucu ? o.ag.ctxler(ctx) : ctx); }
 const ogretici = new Ogretici(ses);
 const KANATAN = new Set(['zombi', 'kurt', 'orumcek', 'haydut', 'kopekbaligi', 'bogulmus', 'mumya', 'kulzombi', 'reis', 'muhafiz', 'firavun']);
-/* 0.22.0: Eve Dönüş Tılsımı: sağ tık 3 saniye basılı tutulur, kımıldanmaz; doğma noktasına ışınlar */
+/* 0.22.0: Eve Dönüş Tılsımı: sağ tık 3 saniye basılı tutulur, kımıldanmaz; doğma noktasına (son kullanılan yatak) ışınlar */
 function tilsimBaslat() {
   const o = oyun;
   if (!o || o.tilsim > 0 || o.hayatta.olu) return;
   if (diyarMi(o.oyuncu.konum.x)) { o.hud.bildirim('Tılsım Yeraltı Diyarı’nda çalışmaz.'); return; }
+  yatakDenetle(o); if (!o.yatakNoktasi) { o.hud.bildirim('Doğma noktası yok: tılsım yalnızca son kullanılan yatağa ışınlar.'); return; }
   o.tilsim = 3; o.tilsimYer = o.oyuncu.konum.clone(); $('#tilsimHalka').hidden = false;
   o.hud.bildirim('Tılsım ısınıyor… Kımıldamadan sağ tıkı basılı tutunuz.');
 }
@@ -1375,7 +1377,8 @@ function tilsimGuncelle(o, dt) {
   if (o.tekneler.binilen) o.tekneler.in(o.oyuncu);
   if (o.binek.biniyor) o.binek.in();
   if (o.binek.oturak) o.binek.kalk();
-  yatakDenetle(o); const ev = o.yatakNoktasi || o.dogum;   // 0.39.0: kayıtlı yatak varsa ona
+  yatakDenetle(o); const ev = o.yatakNoktasi;   // 0.40.3: yalnızca son kullanılan yatak
+  if (!ev) { o.hud.bildirim('Doğma noktası (yatak) bulunamadı.'); return; }
   o.oyuncu.konum.set(ev.x, ev.y, ev.z); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0;
   o.hazir = false;
   if (kilitli) { bilerekBirak = true; kilitBirak(); }
@@ -1420,13 +1423,13 @@ Düşen eşya: ${o.dusenler.liste.length}   Canlı: ${o.varliklar.liste.length} 
 }
 
 /* Yatakta uyuma */
-function uyu(h) {
+function uyu(h, konak = false) {
   const o = oyun;
   if (diyarMi(h.x)) { o.hud.bildirim('Yeraltı Diyarı’nda uyunamaz.'); return; }
-  /* 0.39.0: son kullanılan yatak kayıt noktası olur (dünyanın doğma noktası değişmez) */
-  o.yatakNoktasi = { x: h.x + 0.5, y: h.y + 1, z: h.z + 0.5, hucreler: o.etkilesim.yatakHucreleri(h) };
+  /* 0.39.0: son kullanılan yatak doğma noktası (son kayıt noktası) olur; köyde konaklamada köylünün kapısı */
+  o.yatakNoktasi = { x: h.x + 0.5, y: h.y + 1, z: h.z + 0.5, hucreler: konak ? [] : o.etkilesim.yatakHucreleri(h) };
   const gece = (o.zaman > 0.52 && o.zaman < 0.97) || o.hava.firtina;
-  if (!gece) { o.hud.bildirim('Yalnızca geceleri ve fırtınada uyunabilir. Son kayıt noktası bu yatak oldu.'); return; }
+  if (!gece) { o.hud.bildirim('Yalnızca geceleri ve fırtınada uyunabilir. Doğma noktası bu yatak oldu.'); return; }
   if (o.varliklar.yakinDusman(o.oyuncu.konum, 10)) { o.hud.bildirim('Yakında canavarlar varken uyunamaz.'); return; }
   if (o.gok && o.gok.kanliAyMi(o)) { o.hud.bildirim('Kanlı Ay gecesinde gözünüze uyku girmiyor. Sabaha kadar dayanınız!'); return; }
   if (o.uyku > 0) return;

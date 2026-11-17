@@ -246,7 +246,7 @@ export class Konsol {
         if (!en) { this.hata('Yakında batık gemi bulunamadı.'); return; }
         this.isinla(o, en.x + 0.5, en.y + 3, en.z + 0.5); return;
       }
-      if (a === 'dogum') { const d = o.dogum; this.isinla(o, d.x, d.y + 0.5, d.z); return; }
+      if (a === 'dogum') { const d = o.yatakNoktasi; if (!d) { this.hata('Doğma noktası (yatak) yok.'); return; } this.isinla(o, d.x, d.y + 0.5, d.z); return; }
       /* 0.30.4: Yeraltı Diyarı: en yakın Kül Kalesi'nin burcuna (dünyadayken 8:1 oranlı konuma göre en yakını) */
       if (a === 'ada') { const A = lanetliAda(u); this.isinla(o, A.gecit.x + 1, A.ust + 1, A.gecit.z + 2.5); this.yaz(`${ADA_AD} · ${Math.round(Math.hypot(A.x - P.x, A.z - P.z))} blok`, 'soluk'); return; }
       if (a === 'kale') {
@@ -267,10 +267,12 @@ export class Konsol {
       if (x == null || z == null || (p.length >= 3 && y == null)) { this.hata('Kullanım: isinla <x> [y] <z> | koy | liman | zindan | maden | batik | dogum | isaret <ad>'); return; }
       this.isinla(o, x, y, z);
     }, { hile: true, tamamla: () => ['koy', 'liman', 'zindan', 'maden', 'batik', 'tapinak', 'ormantapinak', 'kule', 'kamp', 'kale', 'ada', 'dogum', 'olum', 'geri', 'biyom', 'oyuncu', 'isaret', ...BIYOMLAR.map(b => b.replace(/ /g, '_'))] });
-    ekle('dogum', 'Doğma noktasını bulunulan yere ayarlar', 'dogum', o => {
-      const P = o.oyuncu.konum; o.dogum = { x: P.x, y: P.y, z: P.z };
-      this.tamam(`Doğma noktası: X ${Math.round(P.x)} · Y ${Math.round(P.y)} · Z ${Math.round(P.z)}`);
-    }, { hile: true });
+    /* 0.40.3: doğma noktası yalnızca son kullanılan yatakla belirlenir */
+    ekle('dogum', 'Doğma noktasını (son kullanılan yatak) gösterir', 'dogum', o => {
+      const d = o.yatakNoktasi;
+      if (d) this.yaz(`Doğma noktası (yatak): X ${Math.round(d.x)} · Y ${Math.round(d.y)} · Z ${Math.round(d.z)}`, 'bilgi');
+      else this.yaz('Doğma noktası yok: ölünce rastgele bir konumda doğulur.', 'bilgi');
+    });
     ekle('zaman', 'Günün saatini ayarlar ya da zamanı hızlandırır', 'zaman <saat 0-24 | sabah | ogle | aksam | gece> | zaman hiz <çarpan>', (o, p) => {
       const a = kucuk(p[0] || '');
       if (a === 'hiz') { const h = Math.max(0, Math.min(200, this.sayi(p[1], 1))); o.zamanHizi = h; this.tamam(`Zaman hızı ${h}×.`); return; }

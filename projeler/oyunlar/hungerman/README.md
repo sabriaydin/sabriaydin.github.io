@@ -117,6 +117,15 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.3 (0.40.3): Doğma noktası yalnızca yatak
+- Yeni dünyada oyuna başlanan yer artık doğma noktası değildir. Doğma noktası yalnızca son kullanılan yataktır (köyde konaklamada köylünün kapısı).
+- Ölüm ekranında **Yeniden Doğ** her seferinde rastgele, güvenli bir konumda doğurur (düz kara, köy ve özel yapılardan uzak). **Son Kayıt Noktasında Doğ** son kullanılan yatakta doğurur; yatak yoksa pasiftir.
+- Ölüm ekranından Ana Menü'ye dönülürse oyun yatakta, yatak yoksa rastgele bir konumda devam eder.
+- Eve Dönüş Tılsımı yalnızca son kullanılan yatağa ışınlar; yatak yoksa kullanılamaz ve tükenmez.
+- Pusula ve haritadaki yıldız işareti artık yatağı gösterir; başlangıç yeri işaretlenmez.
+- Köyde konaklanınca kaydedilen kapı önü noktası ölümde yanlışlıkla iptal ediliyordu; düzeltildi.
+- Konsol: `dogum` komutu doğma noktasını (yatak) gösterir, `isinla dogum` yatağa ışınlar.
+
 ## 40.2 (0.40.2): Ses denetimi ve düzey dengesi
 - Bütün ses kayıtları (292 dosya) tek tek denetlendi; bulunan sorunlar giderildi:
   - Baştaki sessizlik kırpıldı (ör. gök gürültüsü şimşekten 0,5 saniye geç, mağara uğultusu 1 saniye geç başlıyordu).

@@ -77,7 +77,7 @@ export const BASARIMLAR = [
   { k: 'kanliAy', ad: 'Kızıl Gece', aciklama: 'Kanlı Ay gecesini sabaha kadar atlat.', ikon: 472, grup: 'Hayatta Kalma' },
   { k: 'kanliAy3', ad: 'Ay Avcısı', aciklama: '3 Kanlı Ay gecesini atlat.', ikon: 474, hedef: 3, grup: 'Hayatta Kalma' },
   { k: 'yildiz', ad: 'Gökten Gelen', aciklama: 'Bir yıldız parçası bul.', ikon: 492, grup: 'Hayatta Kalma' },
-  { k: 'tilsim', ad: 'Eve Dönüş', aciklama: 'Eve Dönüş Tılsımı ile doğma noktasına dön.', ikon: 493, grup: 'Hayatta Kalma' },
+  { k: 'tilsim', ad: 'Eve Dönüş', aciklama: 'Eve Dönüş Tılsımı ile yatağına dön.', ikon: 493, grup: 'Hayatta Kalma' },
   { k: 'aurora', ad: 'Kutup Işıkları', aciklama: 'Kuzey ışıklarını seyret.', ikon: 595, grup: 'Hayatta Kalma' },
   { k: 'isinma', ad: 'Ateş Başında', aciklama: 'Üşürken bir ateşin başında ısın.', ikon: 48, grup: 'Hayatta Kalma' },
   { k: 'ilkYardim', ad: 'İlk Yardım', aciklama: 'Kanamayı bandajla durdur.', ikon: 268, grup: 'Hayatta Kalma' },

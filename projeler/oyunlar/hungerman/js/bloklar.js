@@ -966,7 +966,7 @@ yemek(490, 'Baklava', { simge: 'baklava', yemek: 9 }, 'hiz', 45);
 yemek(491, 'Haşlanmış Yumurta', { simge: 'yumurta', renk: '#f6f2e6', yemek: 4 });
 /* 0.22.0: hayatta kalma */
 esya(492, { ad: 'Yıldız Parçası', simge: 'yildiz', ozellik: 'Düşen meteorlardan elde edilir' });
-esya(493, { ad: 'Eve Dönüş Tılsımı', tur: 'alet', yigin: 1, simge: 'tilsim', ozellik: 'Sağ tık basılı tutulunca doğma noktasına ışınlar', alet: { tur: 'tilsim', seviye: 0, hiz: 1, dayanim: 8, hasar: 1 } });
+esya(493, { ad: 'Eve Dönüş Tılsımı', tur: 'alet', yigin: 1, simge: 'tilsim', ozellik: 'Sağ tık basılı tutulunca doğma noktasına (son kullanılan yatak) ışınlar', alet: { tur: 'tilsim', seviye: 0, hiz: 1, dayanim: 8, hasar: 1 } });
 esya(494, { ad: 'Atel', simge: 'atel', yigin: 16, tur: 'atel', ozellik: 'Kırık bacağı sarar: iyileşme hızlanır, yavaşlık azalır' });
 /* Sıcak çorbalar soğuğa karşı ısıtır; ayran serinletir */
 /* 0.24.0: elektrik parçaları */

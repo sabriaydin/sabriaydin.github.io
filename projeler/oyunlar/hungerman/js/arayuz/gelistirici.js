@@ -54,7 +54,7 @@ const SETLER = [
 ];
 
 /* Işınlanma yerleri (konsoldaki isinla anahtar sözcükleri) */
-const YERLER = [['dogum', 'Doğma noktası'], ['olum', 'Son ölüm yeri'], ['geri', 'Bir önceki konum'], ['koy', 'En yakın köy'], ['liman', 'En yakın liman'], ['zindan', 'En yakın zindan'], ['maden', 'En yakın terk edilmiş maden'],
+const YERLER = [['dogum', 'Doğma noktası (yatak)'], ['olum', 'Son ölüm yeri'], ['geri', 'Bir önceki konum'], ['koy', 'En yakın köy'], ['liman', 'En yakın liman'], ['zindan', 'En yakın zindan'], ['maden', 'En yakın terk edilmiş maden'],
   ['batik', 'En yakın batık gemi'], ['tapinak', 'En yakın çöl tapınağı'], ['ormantapinak', 'En yakın orman tapınağı'], ['kule', 'En yakın buzul kulesi'], ['kamp', 'En yakın haydut kampı'], ['ada', 'Lanetli Ada (kadim geçit)'], ['kale', 'En yakın kül kalesi (diyar)']];
 
 export class GelistiriciPenceresi {
@@ -138,7 +138,6 @@ export class GelistiriciPenceresi {
       etkiVer: () => k(`etki ${d('dvEtkiSec')} ${d('dvEtkiSure')}`), etkiSil: () => k('etki temizle'),
       durumVer: () => k(`durum ${d('dvDurumSec')}`), durumSil: () => k('durum temizle'),
       hasar: () => k(`hasar ${d('dvHasarSec')}`),
-      dogumAyarla: () => k('dogum'),
       setVer: (o, b) => this.setVer(o, +b.dataset.set),
       onar: () => k('onar'), doldur: () => k('eldeki doldur'), eldekiSil: () => k('eldeki sil'),
       buyuHepsi: () => k('buyu hepsi'), buyuSil: () => k('buyu temizle'), envanterBosalt: () => k('envanter temizle'),
@@ -178,7 +177,7 @@ export class GelistiriciPenceresi {
   }
 
   oyuncuSekmesi(o) {
-    const h = o.hayatta, P = o.oyuncu, dg = o.dogum;
+    const h = o.hayatta, P = o.oyuncu;
     const etkiler = Object.entries(ETKILER).map(([k, e]) => [k, e.ad]);
     return this.bolum('Yetenekler', ['olumsuz', 'ucus', 'hayalet', 'aninda', 'sinirsiz', 'tok'].map(a => this.anahtar(a, o)).join('')) +
       this.bolum('Değerler',
@@ -198,7 +197,7 @@ export class GelistiriciPenceresi {
         this.satir('Durumları kaldır', '', this.islem('durumSil', 'Kaldır')) +
         this.satir('Hasar ver', '', this.secim('dvHasarSec', [[2, '1 kalp'], [4, '2 kalp'], [10, '5 kalp'], [99, 'Öldür']], 4) + this.islem('hasar', 'Ver'))) +
       this.bolum('Doğma noktası',
-        this.satir('Dünyanın doğma noktası', `X ${Math.round(dg.x)} · Y ${Math.round(dg.y)} · Z ${Math.round(dg.z)}${o.yatakNoktasi ? ` · son kayıt noktası (yatak): ${Math.round(o.yatakNoktasi.x)}, ${Math.round(o.yatakNoktasi.z)}` : ' · son kayıt noktası yok'}`, this.islem('dogumAyarla', 'Buraya ayarla')));
+        this.satir('Son kullanılan yatak', o.yatakNoktasi ? `X ${Math.round(o.yatakNoktasi.x)} · Y ${Math.round(o.yatakNoktasi.y)} · Z ${Math.round(o.yatakNoktasi.z)}` : 'Yok · ölünce rastgele bir konumda doğulur', ''));
   }
 
   esyaSekmesi(o) {
@@ -324,7 +323,7 @@ export class GelistiriciPenceresi {
     }
     if (b.dataset.bekle) { delete b.dataset.bekle; b.textContent = b.dataset.eski; b.classList.remove('onay'); }
     f(o, b);
-    if (['dogumAyarla', 'saatUygula', 'zamanHiz', 'havaUygula', 'gorus', 'gunUygula'].includes(ad)) setTimeout(() => this.ciz(), 60);
+    if (['saatUygula', 'zamanHiz', 'havaUygula', 'gorus', 'gunUygula'].includes(ad)) setTimeout(() => this.ciz(), 60);
   }
   girdi(e) {
     const t = e.target, o = this.oyun(); if (!o) return;

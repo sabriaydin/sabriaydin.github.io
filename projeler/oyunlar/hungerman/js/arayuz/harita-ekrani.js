@@ -26,8 +26,7 @@ export function haritaIsaretleri(o, x0, z0, x1, z1) {
       if (L && H.kesfedildi(L.iskeleX, L.iskeleZ)) l.push({ tur: 'liman', x: L.iskeleX, z: L.iskeleZ, ad: `${k.ad} limanı` });
     }
   }
-  if (o.dogum) l.push({ tur: 'dogum', x: o.dogum.x, z: o.dogum.z, ad: 'Doğma noktası' });
-  if (o.yatakNoktasi) l.push({ tur: 'dogum', x: o.yatakNoktasi.x, z: o.yatakNoktasi.z, ad: 'Son kayıt noktası (yatak)' });   // 0.39.0
+  if (o.yatakNoktasi) l.push({ tur: 'dogum', x: o.yatakNoktasi.x, z: o.yatakNoktasi.z, ad: 'Doğma noktası (yatak)' });   // 0.39.0; 0.40.3: doğma noktası yalnızca yataktır
   if (o.olumNoktasi) l.push({ tur: 'olum', x: o.olumNoktasi.x, z: o.olumNoktasi.z, ad: 'Son ölüm noktası' });
   for (const q of o.gorevler.aktif) {
     const h = o.gorevler.hedef(q, o.envanter);
