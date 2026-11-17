@@ -130,6 +130,7 @@ export class Etkilesim {
     if (a && a.tur === 'kilic' && b.ses === 'bitki') hiz = 2;
     /* Verimlilik büyüsü: doğru aletle kazma hızı seviye başına %30 artar */
     if (dogru) hiz *= 1 + 0.3 * buyuSeviye(this.envanter.seciliYuva(), 'verim');
+    if (this.hayatta.etki('kazmaHiz')) hiz *= 1.35;   // 0.36.0: Maden Gücü
     let s = b.sertlik * (alabilir ? 1.5 : 5) / hiz;
     if (this.oyuncu.basSuda) s *= 3;
     else if (!this.oyuncu.yerde && !this.oyuncu.suda) s *= 2;
@@ -256,7 +257,7 @@ export class Etkilesim {
     /* Savurma: geri itme seviye başına %60 artar; Yağma: ganimet artar */
     const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma'));
     /* Güneş Kılıcı vurulan canlıyı tutuşturur */
-    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma'), ates: !!(es && (es.id === 458 || (ESYALAR[es.id] && ESYALAR[es.id].yakar))) })) {
+    if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma') + (this.hayatta.etki('sans') ? 1 : 0), ates: !!(es && (es.id === 458 || (ESYALAR[es.id] && ESYALAR[es.id].yakar))) })) {
       this.ses.vurus();
       if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       this.hayatta.yor(0.1);
@@ -301,7 +302,7 @@ export class Etkilesim {
     if (b.sandik || b.firinKap) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z, !b.elektrik && !b.mezar && !b.dolap && !b.firinKap)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
-    if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z, b.xp ? buyuSeviye(this.envanter.seciliYuva(), 'servet') : 0);
+    if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z, b.xp ? buyuSeviye(this.envanter.seciliYuva(), 'servet') + (this.hayatta.etki('sans') ? 1 : 0) : 0);
     const a = this.aletBilgi();
     if (a && b.sertlik > 0) {
       if (this.envanter.aletYipran(a.tur === 'kilic' ? 2 : 1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
@@ -360,6 +361,15 @@ export class Etkilesim {
       const n = b.urunAdet[0] + Math.floor(Math.random() * (b.urunAdet[1] - b.urunAdet[0] + 1));
       d.blokKoy(h.x, h.y, h.z, b.tekrar); this.dusenler.birak(b.urun, n, h.x + 0.5, h.y + 0.5, h.z + 0.5);
       this.ses.koy('bitki'); this.olay('hasat'); return true;
+    }
+    /* 0.36.0: pasta: her sağ tıkta bir dilim yenir (4 dilim) */
+    if (b.sekil === 'pasta') {
+      if (this.hayatta.aclik >= 20) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      this.hayatta.ye(4); this.hayatta.etkiEkle('hiz', Math.round(40 * this.hayatta.asciCarpan));
+      d.blokKoy(h.x, h.y, h.z, b.dilim >= 3 ? 0 : h.id + 1);
+      this.ses.ye(); this.yemeAnim = 1; this.istat('yemek');
+      this.dusenler.renkliParcacik([0.95, 0.85, 0.8], h.x + 0.5, h.y + 0.5, h.z + 0.5, 6);
+      return true;
     }
     /* 0.35.0: vazoya çiçek konur ya da çiçek alınır */
     if (b.sekil === 'vazo') {
@@ -509,6 +519,12 @@ export class Etkilesim {
       else this.arayuz.bildirim('Tekne yalnızca açık su yüzeyine konabilir.', 'tekne');
       return true;
     }
+    /* 0.36.0: Tarif Defteri: aşçılık seviyesi */
+    if (s.id === 320) {
+      const H = this.hayatta, L = H.asciSeviye;
+      this.arayuz.bildirim(`Aşçılık seviyesi ${L}/10${L < 10 ? ` (%${Math.floor(H.asciIlerleme * 100)})` : ''}: yemek etkileri %${L * 8} uzun sürer${L >= 3 ? `, pişirmede %${L * 4} fazladan ürün olasılığı` : ''}.`);
+      this.ses.topla(); return true;
+    }
     /* Yiyecek ve bakım */
     if (e.zirh) { env.zirhGiy(); this.ses.zirhGiy(); return true; }
     if (e.kiyafet) { env.kiyafetGiy(); this.ses.zirhGiy(); return true; }   // 0.33.0
@@ -572,7 +588,13 @@ export class Etkilesim {
       return true;
     }
     if ((e.tur === 'yiyecek' || e.yenir) && e.yemek) {
-      if (this.hayatta.aclik >= 20 && !e.iyilestirme && !e.etki && !e.temizle && !e.zehirGider) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      if (this.hayatta.aclik >= 20 && !e.iyilestirme && !e.etki && !(e.etkiler && e.etkiler.length) && !e.temizle && !e.zehirGider && !e.sicak && !e.serin) { this.arayuz.bildirim('Açlık çubuğu dolu.'); return true; }
+      /* 0.36.0: çoklu yemek etkileri; süre aşçılık seviyesiyle uzar */
+      if (e.etkiler && e.etkiler.length) {
+        const c = this.hayatta.asciCarpan;
+        for (const [k, t] of e.etkiler) this.hayatta.etkiEkle(k, Math.round(t * c));
+        this.arayuz.bildirim(e.etkiler.map(([k, t]) => `${ETKILER[k].ad} ${Math.round(t * c)} sn`).join(', '), s.id);
+      }
       if (e.etki) { this.hayatta.etkiEkle(e.etki.tur, e.etki.sure); this.arayuz.bildirim(`${ETKILER[e.etki.tur].ad} etkisi: ${e.etki.sure} saniye.`, s.id); }
       if (e.iyilestirme) this.hayatta.iyiles(e.iyilestirme);
       if (this.hayatta.ye(e.yemek, e.zehir || 0)) this.arayuz.bildirim('Mide bulantısı: açlık bir süre daha hızlı azalır.');

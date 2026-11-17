@@ -3,12 +3,20 @@
 export const seviyeIcin = L => (L < 15 ? 2 * L + 7 : L < 30 ? 5 * L - 38 : 9 * L - 158);
 
 export class Hayatta {
-  constructor() { this.xp = 0; this.etkiler = {}; this.buyuTohum = (Math.random() * 4294967295) >>> 0 || 1; this.sifirla(); this.olaylar = { hasar: null, olum: null, xp: null, seviye: null }; }
+  constructor() { this.xp = 0; this.mutfak = 0; this.etkiler = {}; this.buyuTohum = (Math.random() * 4294967295) >>> 0 || 1; this.sifirla(); this.olaylar = { hasar: null, olum: null, xp: null, seviye: null }; }
   /* Toplam deneyimden seviye ve ilerleme */
   get seviye() { let L = 0, x = this.xp; while (x >= seviyeIcin(L)) { x -= seviyeIcin(L); L++; } return L; }
   get ilerleme() { let L = 0, x = this.xp; while (x >= seviyeIcin(L)) { x -= seviyeIcin(L); L++; } return x / seviyeIcin(L); }
+  /* 0.36.0: aşçılık seviyesi (0-10): L. seviye için toplam 12·L² puan */
+  get asciSeviye() { return Math.min(10, Math.floor(Math.sqrt((this.mutfak || 0) / 12))); }
+  get asciIlerleme() { const L = this.asciSeviye; if (L >= 10) return 1; const a = 12 * L * L, b = 12 * (L + 1) * (L + 1); return ((this.mutfak || 0) - a) / (b - a); }
+  /* Yemek pişirince puan eklenir; seviye atlanırsa yeni seviye döner */
+  mutfakEkle(n) { const once = this.asciSeviye; this.mutfak = (this.mutfak || 0) + n; return this.asciSeviye > once ? this.asciSeviye : 0; }
+  /* Yemek etkilerinin süre çarpanı: her seviye %8 */
+  get asciCarpan() { return 1 + this.asciSeviye * 0.08; }
   xpEkle(n) {
     if (!(n > 0) || this.olu) return;
+    if (this.etki('odak')) n *= 1.5;   // 0.36.0: Odak etkisi
     const once = this.seviye;
     this.xp += n;
     if (this.olaylar.xp) this.olaylar.xp(n);
@@ -68,6 +76,9 @@ export class Hayatta {
     if (zirhli && this.zirhFn) { const p = Math.min(20, this.zirhFn()); n = n * (1 - p * 0.04); if (this.zirhYipran) this.zirhYipran(); }
     /* Koruma büyüsü (giyilen zırhlardaki toplam seviye; en çok %64): açlık ve boğulma dışındaki hasarları azaltır */
     if (this.buyuFn && sebep !== 'aclik' && sebep !== 'bogulma') { const k = Math.min(16, this.buyuFn('koruma')); if (k) n *= 1 - k * 0.04; }
+    /* 0.36.0: Direnç (%20) ve Hafiflik (düşmede yarı hasar) yemek etkileri */
+    if (this.etki('direnc') && sebep !== 'aclik') n *= 0.8;
+    if (sebep === 'dusme' && this.etki('tuy')) n *= 0.5;
     n = Math.round(n);
     if (n <= 0) return;
     this.can = Math.max(0, this.can - n);
@@ -120,12 +131,13 @@ export class Hayatta {
       this.bogSayac = 0;
     }
   }
-  disaAktar() { return { vucut: Math.round(this.vucut * 100) / 100, can: this.can, aclik: this.aclik, oksijen: this.oksijen, yorgunluk: this.yorgunluk, zehir: Math.max(0, this.zehir), xp: Math.round(this.xp * 10) / 10, etkiler: { ...this.etkiler }, buyuTohum: this.buyuTohum }; }
+  disaAktar() { return { vucut: Math.round(this.vucut * 100) / 100, can: this.can, aclik: this.aclik, oksijen: this.oksijen, yorgunluk: this.yorgunluk, zehir: Math.max(0, this.zehir), xp: Math.round(this.xp * 10) / 10, etkiler: { ...this.etkiler }, buyuTohum: this.buyuTohum, mutfak: Math.round(this.mutfak || 0) }; }
   iceAktar(o) {
     if (!o) return;
     this.can = o.can ?? 20; this.aclik = o.aclik ?? 20; this.oksijen = o.oksijen ?? 10; this.yorgunluk = o.yorgunluk ?? 0; this.zehir = o.zehir ?? 0; this.olu = this.can <= 0;
     this.xp = o.xp || 0; this.etkiler = o.etkiler && typeof o.etkiler === 'object' ? { ...o.etkiler } : {};
     if (o.buyuTohum) this.buyuTohum = o.buyuTohum >>> 0 || 1;
+    this.mutfak = Number.isFinite(o.mutfak) ? o.mutfak : 0;
     this.vucut = Number.isFinite(o.vucut) ? Math.min(42, Math.max(30, o.vucut)) : 37;
   }
 }

@@ -219,7 +219,7 @@ export class EnvanterEkrani {
     const cubuk = (ad, deger, oran, sinif, ek = '') => `<div class="kbSatir ${sinif}"><span>${ad}</span><b>${deger}</b><i><em style="width:${Math.max(0, Math.min(100, oran * 100)).toFixed(1)}%"></em></i>${ek}</div>`;
     const v = h.vucut ?? 37, isiAd = ['Donuyor', 'Üşüyor', 'Normal', 'Bunalıyor', 'Sıcak çarpması'][(h.isiDurum ?? 0) + 2];
     let html = cubuk('Can', `${h.can / 2} / 10`, h.can / 20, 'kbCan') + cubuk('Açlık', `${h.aclik / 2} / 10`, h.aclik / 20, 'kbAclik')
-      + cubuk('Seviye', h.seviye, h.ilerleme, 'kbXp') + cubuk('Zırh', `${zp} / 20`, zp / 20, 'kbZirh', `<small>Hasar azaltma %${zp * 4}</small>`);
+      + cubuk('Seviye', h.seviye, h.ilerleme, 'kbXp') + cubuk('Aşçılık', `${h.asciSeviye ?? 0} / 10`, h.asciIlerleme ?? 0, 'kbAsci', `<small>Etki süresi +%${(h.asciSeviye ?? 0) * 8}</small>`) + cubuk('Zırh', `${zp} / 20`, zp / 20, 'kbZirh', `<small>Hasar azaltma %${zp * 4}</small>`);
     if (h.isiAcik !== false) html += cubuk('Vücut ısısı', `${v.toFixed(1).replace('.', ',')}°C`, (v - 32) / 10, 'kbIsi isi' + (h.isiDurum ?? 0), `<small>${isiAd}</small>`);
     /* 0.33.0: giysilerin ısı etkisi */
     const G = env.giysiIsi();
@@ -359,6 +359,14 @@ export class EnvanterEkrani {
       /* Eritme, pişirme ve iksir yapımı deneyim kazandırır */
       const ist = istasyonlar(t);
       if (this.hayatta && (ist.includes('firin') || ist.includes('simya'))) this.hayatta.xpEkle(n * (ist.includes('simya') ? 2 : 0.35));
+      /* 0.36.0: yemek üretimi aşçılık puanı kazandırır; 3. seviyeden sonra fazladan ürün olasılığı */
+      const ce = ESYALAR[t.cikti];
+      if (this.hayatta && ce && ce.tur === 'yiyecek' && (ce.pismis || ce.etkiler || t.girdi.length > 1)) {
+        const L0 = this.hayatta.asciSeviye;
+        if (L0 >= 3) { let ek = 0; for (let k = 0; k < n; k++) if (Math.random() < L0 * 0.04) ek += t.adet; if (ek) { const r = this.envanter.ekle(t.cikti, ek); if (r && this.birak) this.birak(t.cikti, r); this.hud.bildirim(`Usta aşçı: fazladan ${ce.ad} × ${ek}`, t.cikti); } }
+        const yeni = this.hayatta.mutfakEkle(n * (ce.etkiler ? 3 : 1));
+        if (yeni) { this.hud.bildirim(`Aşçılık seviyesi ${yeni} oldu: yemek etkileri %${yeni * 8} uzun sürer.`); if (this.olay) this.olay('asci' + yeni); }
+      }
       this.son = [i, ...(this.son || []).filter(x => x !== i)].slice(0, 6);
     } else if (kacKez(this.envanter, t) > 0) this.hud.bildirim('Envanterde yer yok.');
     else { this.ses.hataSes(); this.hud.bildirim('Malzeme yetersiz.'); }

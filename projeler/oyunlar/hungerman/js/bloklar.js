@@ -69,7 +69,9 @@ export const DOKULAR = [
   'fidan_elma', 'fidan_kiraz', 'fidan_portakal', 'fidan_zeytin',
   'yaprak_elma', 'yaprak_elma_m', 'yaprak_kiraz', 'yaprak_kiraz_m', 'yaprak_portakal', 'yaprak_portakal_m', 'yaprak_zeytin', 'yaprak_zeytin_m',
   'kompost_yan', 'kompost_ic', 'kompost_hazir',
-  'firin_on_a'   // 0.35.0
+  'firin_on_a',   // 0.35.0
+  /* 0.36.0: mutfak */
+  'degirmen_ust', 'degirmen_yan', 'tezgah_ust', 'tezgah_on', 'kiler_on', 'fici_yan', 'fici_ust', 'pasta_ust', 'pasta_yan', 'pasta_ic', 'cuval_un', 'cuval_tuz', 'semaver', 'sepet', 'tandir', 'tabak', 'feslegen', 'sarimsak', 'kavanoz', 'kavanoz_bal', 'baharat'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -553,6 +555,27 @@ blok(VAZO_BOS, { ad: 'Vazo', dok: 'vazo', cizim: C_SEKIL, opak: false, sertlik: 
 export const FIRIN_YANAN = ayir(1);
 blok(FIRIN_YANAN, { ad: 'Fırın', dok: { ust: 'firin_ust', yan: 'firin_yan', on: 'firin_on_a', alt: 'firin_ust' }, sertlik: 3.5, alet: 'kazma', seviye: 1, istasyon: 'firin', firinKap: 'firin', gizli: true, taban: 33,
   mesale: true, destekSiz: true, isik: 12, isi: [8, 4], dusur: () => [[33, 1]], harita: 2 });
+/* ---------- 0.36.0: mutfak blokları ---------- */
+export const MUTFAK = {};
+const MB = { cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'balta', ses: 'odun' };
+MUTFAK.degirmen = ayir(1); blok(MUTFAK.degirmen, { ad: 'Değirmen Taşı', dok: ['degirmen_ust', 'degirmen_yan', 'degirmen_ust'], cizim: C_SEKIL, opak: false, sekil: 'degirmen', istasyon: 'degirmen', sertlik: 2.5, alet: 'kazma', ses: 'tas', harita: 2 });
+MUTFAK.tezgah = ayir(4); for (let f = 0; f < 4; f++) blok(MUTFAK.tezgah + f, { ad: 'Mutfak Tezgâhı', dok: { ust: 'tezgah_ust', yan: 'dolap_yan', alt: 'dolap_ust', on: 'tezgah_on' }, onYon: f, dolap: true, yon: f, taban: MUTFAK.tezgah, gizli: f > 0, istasyon: 'masa', sertlik: 2, alet: 'balta', ses: 'odun', dusur: () => [[MUTFAK.tezgah, 1]], harita: 14 });
+MUTFAK.kiler = ayir(4); for (let f = 0; f < 4; f++) blok(MUTFAK.kiler + f, { ad: 'Kiler Dolabı', dok: { ust: 'dolap_ust', yan: 'dolap_yan', alt: 'dolap_ust', on: 'kiler_on' }, onYon: f, dolap: true, yon: f, taban: MUTFAK.kiler, gizli: f > 0, sandik: true, sertlik: 2, alet: 'balta', ses: 'odun', dusur: () => [[MUTFAK.kiler, 1]], harita: 14 });
+MUTFAK.fici = ayir(1); blok(MUTFAK.fici, { ad: 'Turşu Fıçısı', dok: ['fici_ust', 'fici_yan', 'fici_ust'], sandik: true, dolap: true, sertlik: 2, alet: 'balta', ses: 'odun', harita: 14 });
+/* Çilekli pasta: sağ tıkla dilim yenir (4 dilim) */
+MUTFAK.pasta = ayir(4); for (let d = 0; d < 4; d++) blok(MUTFAK.pasta + d, { ...MB, ad: 'Çilekli Pasta', dok: ['pasta_ust', 'pasta_yan', 'pasta_ic'], sekil: 'pasta', dilim: d, taban: MUTFAK.pasta, gizli: d > 0, sertlik: 0.5, alet: null, ses: 'yun', dusur: () => (d === 0 ? [[MUTFAK.pasta, 1]] : []), harita: 116 });
+MUTFAK.semaver = ayir(1); blok(MUTFAK.semaver, { ...MB, ad: 'Semaver', dok: 'semaver', sekil: 'semaver', alet: 'kazma', ses: 'cam', mesale: true, isik: 7, harita: 2 });
+MUTFAK.sepet = ayir(1); blok(MUTFAK.sepet, { ...MB, ad: 'Ekmek Sepeti', dok: 'sepet', sekil: 'sepet', sertlik: 0.4, harita: 14 });
+MUTFAK.piknik = ayir(1); blok(MUTFAK.piknik, { ...MB, ad: 'Piknik Sepeti', dok: 'sepet', sekil: 'piknik', sandik: true, dolap: true, sertlik: 0.5, harita: 14 });
+MUTFAK.tandir = ayir(1); blok(MUTFAK.tandir, { ...MB, ad: 'Tandır', dok: 'tandir', sekil: 'tandir', istasyon: 'firin', alet: 'kazma', ses: 'tas', sertlik: 2.5, mesale: true, destekSiz: true, isik: 9, isi: [10, 4], harita: 35 });
+MUTFAK.tabak = ayir(1); blok(MUTFAK.tabak, { ...MB, ad: 'Yemek Tabağı', dok: 'tabak', sekil: 'tabak', kati: false, sertlik: 0.2, alet: null, ses: 'cam', harita: 2 });
+MUTFAK.feslegen = ayir(1); blok(MUTFAK.feslegen, { ...MB, ad: 'Fesleğen Saksısı', dok: 'feslegen', sekil: 'feslegen', kati: false, sertlik: 0.2, alet: null, ses: 'bitki', harita: 4 });
+MUTFAK.sarimsak = ayir(4); for (let f = 0; f < 4; f++) blok(MUTFAK.sarimsak + f, { ...MB, ad: 'Sarımsak Örgüsü', dok: 'sarimsak', sekil: 'sarimsak', duvara: true, kati: false, yon: f, taban: MUTFAK.sarimsak, gizli: f > 0, sertlik: 0.2, alet: null, ses: 'bitki', dusur: () => [[MUTFAK.sarimsak, 1]], harita: 2 });
+MUTFAK.baharat = ayir(4); for (let f = 0; f < 4; f++) blok(MUTFAK.baharat + f, { ...MB, ad: 'Baharat Rafı', dok: 'kalas', sekil: 'baharat', duvara: true, kati: false, yon: f, taban: MUTFAK.baharat, gizli: f > 0, sertlik: 0.5, dusur: () => [[MUTFAK.baharat, 1]], harita: 14 });
+MUTFAK.kavanoz = ayir(1); blok(MUTFAK.kavanoz, { ...MB, ad: 'Kavanozlar', dok: 'kavanoz', sekil: 'kavanoz', kati: false, sertlik: 0.2, alet: null, ses: 'cam', harita: 2 });
+MUTFAK.bal = ayir(1); blok(MUTFAK.bal, { ...MB, ad: 'Bal Kavanozu', dok: 'kavanoz_bal', sekil: 'balKavanoz', kati: false, sertlik: 0.2, alet: null, ses: 'cam', harita: 2 });
+MUTFAK.unCuval = ayir(1); blok(MUTFAK.unCuval, { ...MB, ad: 'Un Çuvalı', dok: 'cuval_un', sekil: 'cuval', sertlik: 0.5, alet: null, ses: 'yun', harita: 49 });
+MUTFAK.tuzCuval = ayir(1); blok(MUTFAK.tuzCuval, { ...MB, ad: 'Tuz Çuvalı', dok: 'cuval_tuz', sekil: 'cuval', sertlik: 0.5, alet: null, ses: 'yun', harita: 49 });
 
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 2048;   // 0.31.0: 1024'ten 2048'e
@@ -721,7 +744,13 @@ export const ETKILER = {
   kanama: { ad: 'Kanama', renk: '#c81e1e', aciklama: 'Can azalır; bandaj durdurur', kotu: true },
   kirik: { ad: 'Kırık Bacak', renk: '#b8a890', aciklama: 'Yavaş yürünür, koşulamaz; atel iyileşmeyi hızlandırır', kotu: true },
   sicak: { ad: 'Isınma', renk: '#ff9a4a', aciklama: 'Soğuğa karşı korur' },
-  serin: { ad: 'Serinlik', renk: '#8ad8f0', aciklama: 'Sıcağa karşı korur' }
+  serin: { ad: 'Serinlik', renk: '#8ad8f0', aciklama: 'Sıcağa karşı korur' },
+  /* 0.36.0: yemeklerin verdiği yeni etkiler */
+  kazmaHiz: { ad: 'Maden Gücü', renk: '#c8a04a', aciklama: 'Kazma ve kesme hızı %35 artar' },
+  direnc: { ad: 'Direnç', renk: '#8a9aa8', aciklama: 'Alınan hasar %20 azalır' },
+  sans: { ad: 'Şans', renk: '#5ad86a', aciklama: 'Cevher ve ganimetten fazladan ürün düşebilir' },
+  tuy: { ad: 'Hafiflik', renk: '#e8e8f8', aciklama: 'Düşme hasarı yarıya iner' },
+  odak: { ad: 'Odak', renk: '#b07aff', aciklama: 'Kazanılan deneyim %50 artar' }
 };
 [['hiz', 'Hız İksiri'], ['gece', 'Gece Görüşü İksiri'], ['nefes', 'Su Altında Nefes İksiri'], ['ates', 'Ateşe Dayanıklılık İksiri'], ['guc', 'Güç İksiri']].forEach(([k, ad], i) =>
   esya(332 + i, { ad, simge: 'iksir', renk: ETKILER[k].renk, tur: 'iksir', etki: { tur: k, sure: 180 }, yigin: 16, ozellik: `${ETKILER[k].aciklama} (3 dakika)` }));
@@ -802,7 +831,7 @@ esya(474, { ad: 'Kor Kılıcı', tur: 'alet', yigin: 1, simge: 'kilic', renk: '#
 esya(475, { ad: 'Balkabağı Çekirdeği', simge: 'cekirdek', ekin: 555 });
 esya(476, { ad: 'Şeker', simge: 'toz', renk: '#f6f4ee' });
 esya(477, { ad: 'Kova', simge: 'kova', yigin: 16, kova: true, ozellik: 'Sudan su alır, inekten süt sağar' });
-esya(478, { ad: 'Su Kovası', simge: 'kova', ic: '#3a6ad8', yigin: 1, suKovasi: true, ozellik: 'Suyu koyar; lavı obsidyene çevirir' });
+esya(478, { ad: 'Su Kovası', simge: 'kova', ic: '#3a6ad8', yigin: 1, suKovasi: true, kap: 477, ozellik: 'Suyu koyar; lavı obsidyene çevirir' });
 esya(479, { ad: 'Süt Kovası', simge: 'kova', ic: '#f4f4ee', yigin: 1, tur: 'yiyecek', yenir: true, yemek: 1, temizle: true, kap: 477, ozellik: 'İçilince zehri ve olumsuz etkileri giderir' });
 esya(480, { ad: 'Yumurta', simge: 'yumurta', yigin: 16 });
 esya(481, { ad: 'Makas', tur: 'alet', yigin: 1, simge: 'makas', ozellik: 'Koyunu kırkar, yaprak keser, kovandan petek alır', alet: { tur: 'makas', seviye: 0, hiz: 6, dayanim: 238, hasar: 1 } });
@@ -810,6 +839,37 @@ esya(482, { ad: 'Bal Şişesi', simge: 'iksir', renk: '#e8a020', tur: 'yiyecek',
 esya(483, { ad: 'Bal Peteği', simge: 'petek' });
 yemek(484, 'Peynir', { simge: 'peynir', yemek: 4 });
 yemek(485, 'Yoğurt', { simge: 'corba2', renk: '#f2f0e6', yemek: 5, kase: true }, 'yenilenme', 6);
+/* ---------- 0.36.0: mutfak malzemeleri ve etkili yemekler ----------
+   etkiler: [[etki, saniye], ...] — süreler aşçılık seviyesiyle uzar */
+const Y36 = (id, ad, simge, renk, ek) => esya(id, { ad, simge, renk, ...ek });
+Y36(396, 'Un', 'cuval', '#f2ede0'); Y36(397, 'Tuz', 'cuval', '#e8eef2'); Y36(398, 'Tereyağı', 'tereyag', '#f2d76a'); Y36(399, 'Kaymak', 'kavanoz', '#f6f0dc');
+Y36(432, 'Hamur', 'hamur', '#efe2c0'); Y36(433, 'Salça', 'kavanoz', '#c8301e'); Y36(434, 'Pul Biber', 'baharat', '#b8281e'); Y36(435, 'Kıyma', 'kiyma', '#b8484a'); Y36(436, 'Bulgur', 'cuval', '#c8a050');
+const Y36y = (id, ad, simge, renk, yemek, etkiler, ek = {}) => esya(id, { ad, simge, renk, tur: 'yiyecek', yemek, etkiler, pismis: true, yigin: ek.kase || ek.kap ? 1 : 16, ...ek,
+  ozellik: [...etkiler.map(([k, t]) => `${ETKILER[k].ad} (${t} sn)`), ek.sicak ? 'Isıtır' : '', ek.serin ? 'Serinletir' : '', ek.temizle ? 'Olumsuz etkileri giderir' : ''].filter(Boolean).join(' · ') || null });
+Y36y(437, 'Pide', 'pide', '#d8902a', 7, [['tokluk', 90]]);
+Y36y(438, 'Simit', 'simit', '#b86a2a', 5, [['hiz', 45]]);
+Y36y(439, 'Börek', 'pide', '#e8b860', 8, [['direnc', 120]]);
+Y36y(440, 'Mantı', 'corba2', '#f2ead8', 11, [['guc', 120], ['tokluk', 60]], { kase: true });
+Y36y(441, 'Lahmacun', 'pide', '#c8502a', 9, [['kazmaHiz', 150]]);
+Y36y(442, 'Tavuk Sote', 'corba2', '#d8702a', 10, [['odak', 120]], { kase: true });
+Y36y(443, 'Adana Kebap', 'kebap', '#a83a22', 10, [['guc', 150]]);
+Y36y(444, 'Balık Ekmek', 'tabak', '#c89a5a', 9, [['nefes', 150]]);
+Y36y(445, 'Hamsi Tava', 'tabak', '#9aa8b8', 7, [['nefes', 240]]);
+Y36y(446, 'Kumpir', 'tabak', '#e8c060', 10, [['direnc', 150]]);
+Y36y(447, 'Bulgur Pilavı', 'corba2', '#c8a050', 8, [['tokluk', 150]], { kase: true });
+Y36y(448, 'Cacık', 'corba2', '#e8f2e0', 4, [['yenilenme', 20]], { kase: true, serin: 180, pismis: false });
+Y36y(449, 'Sütlaç', 'corba2', '#f6ecd0', 6, [['yenilenme', 45]], { kase: true });
+Y36y(505, 'Lokum', 'tatli', '#f0a0b8', 2, [['hiz', 60]]);
+Y36y(506, 'Kurabiye', 'tatli', '#c88a4a', 2, [['odak', 45]]);
+Y36y(507, 'Elmalı Turta', 'pide', '#c87a3a', 8, [['yenilenme', 40], ['sans', 60]]);
+Y36y(508, 'Dondurma', 'tatli', '#f6e8e8', 4, [['tuy', 60]], { serin: 240, pismis: false });
+Y36y(509, 'Bitki Çayı', 'icecek', '#8aa83a', 2, [['yenilenme', 15]], { kap: 331, temizle: true, pismis: false });
+Y36y(510, 'Salep', 'icecek', '#f2e6cc', 3, [], { kap: 331, sicak: 300 });
+Y36y(511, 'Turşu', 'kavanoz', '#7a9a3a', 3, [['tokluk', 90]], { kap: 331, pismis: false });
+Y36y(337, 'Peynirli Omlet', 'tabak', '#f2d050', 7, [['odak', 90]]);
+Y36y(338, 'Kahvaltı Tabağı', 'tabak', '#e8a03a', 12, [['tokluk', 180], ['yenilenme', 30]]);
+Y36y(339, 'Kuzu Tandır', 'tabak', '#8a4a2a', 12, [['direnc', 180], ['guc', 60]]);
+esya(320, { ad: 'Tarif Defteri', simge: 'defter', renk: '#8a3a2a', yigin: 1, ozellik: 'Sağ tık: aşçılık seviyesi ve yemek etkileri' });
 yemek(486, 'Ayran', { simge: 'iksir', renk: '#f4f4ee', yemek: 3, kap: 331 }, 'hiz', 30);
 yemek(487, 'Kek', { simge: 'kek', yemek: 12 }, 'tokluk', 120);
 yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });

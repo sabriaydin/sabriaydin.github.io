@@ -12,7 +12,7 @@ export const ADIMLAR = [
   { baslik: 'Yemek', metin: 'Açlık azalınca yemek yiyiniz: et kamp ateşinde pişirilir, yiyecek sağ tıkla yenir.', tamam: o => (o.basarimlar.istat.yemek || 0) > 0 },
   { baslik: 'İlk gece', metin: 'Geceyi bir barınakta ya da yatakta geçiriniz. Soğuk bölgelerde ateşin yanında kalınız. İyi şanslar!', tamam: o => o.gun > 1 && o.zaman > 0.05 && o.zaman < 0.4 },
   /* 0.35.0: sonraki adımlar */
-  { baslik: 'Fırın', metin: 'Sekiz parke taştan Fırın yapınız ve yere koyunuz. Fırına sağ tıklanınca penceresi açılır: üste malzeme, alta yakıt konur; fırın kendiliğinden çalışır.', tamam: o => yakinda(o, 33) || yakinda(o, 1277) },
+  { baslik: 'Fırın', metin: 'Sekiz parke taştan Fırın yapınız ve yere koyunuz. Fırına sağ tıklanınca penceresi açılır: üste malzeme, alta yakıt konur; fırın kendiliğinden çalışır.', tamam: o => yakinda(o, 33) || yakinda(o, 1278) },
   { baslik: 'Kıyafet', metin: 'Yün ya da ipten bir kıyafet üretiniz (Üretim > Giyim) ve giyiniz. Kıyafetler soğuktan korur; çölde ince giysiler serinletir.', tamam: o => o.envanter.kiyafet.some(Boolean) },
   { baslik: 'Tarla', metin: 'Çapa ile toprağı işleyip tohum ekiniz. Suya yakın tarlada ekinler daha hızlı büyür; olgun ekin hasat edilir.', tamam: o => !!o.basarimlar.acik.hasat },
   { baslik: 'Köyler', metin: 'Bir köy bulup köylüyle ticaret yapınız. Her köyün bir uzmanlığı vardır: aradığınız mal için doğru köyü keşfediniz.', tamam: o => !!o.basarimlar.acik.ticaret }

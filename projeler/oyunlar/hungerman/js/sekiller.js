@@ -345,6 +345,63 @@ export function sekilKutulari(id, komsu, carp = false) {
       return [[5 * P, 0, 5 * P, 11 * P, 7 * P, 11 * P], [6 * P, 7 * P, 6 * P, 10 * P, 10 * P, 10 * P], [7.5 * P, 10 * P, 7.5 * P, 8.5 * P, 14 * P, 8.5 * P, Y], [6 * P, 10 * P, 9 * P, 7 * P, 13 * P, 10 * P, Y],
         [6.5 * P, 13.5 * P, 6.5 * P, 9.5 * P, 15.5 * P, 9.5 * P, T.yun_k], [5 * P, 12 * P, 9 * P, 7 * P, 13.5 * P, 11 * P, T.yun_s], [9 * P, 11 * P, 5.5 * P, 11 * P, 12.5 * P, 7.5 * P, T.mavi_cicek]];
     }
+    /* ---------- 0.36.0: mutfak ---------- */
+    /* Değirmen taşı: taş kaide, üstte iki öğütme taşı ve döndürme kolu */
+    case 'degirmen':
+      if (carp) return [[0, 0, 0, 1, 12 * P, 1]];
+      return [[P, 0, P, 15 * P, 6 * P, 15 * P], [2 * P, 6 * P, 2 * P, 14 * P, 9 * P, 14 * P], [2.5 * P, 9 * P, 2.5 * P, 13.5 * P, 12 * P, 13.5 * P], [7 * P, 12 * P, 7 * P, 9 * P, 13 * P, 9 * P, T.kalas], [8 * P, 12 * P, 7.5 * P, 13 * P, 13 * P, 8.5 * P, T.kalas], [12 * P, 13 * P, 7.5 * P, 13 * P, 16 * P, 8.5 * P, T.kalas]];
+    /* Çilekli pasta: dilim yendikçe kısalır */
+    case 'pasta': {
+      const x1 = (15 - (b.dilim || 0) * 3.5) * P;
+      return [[P, 0, P, x1, 8 * P, 15 * P]];
+    }
+    /* Semaver: pirinç gövde, musluk, üstte demlik */
+    case 'semaver':
+      if (carp) return [[4 * P, 0, 4 * P, 12 * P, 15 * P, 12 * P]];
+      return [[5 * P, 0, 5 * P, 11 * P, P, 11 * P], [4 * P, P, 4 * P, 12 * P, 10 * P, 12 * P], [5 * P, 10 * P, 5 * P, 11 * P, 11 * P, 11 * P], [7.5 * P, 4 * P, 12 * P, 8.5 * P, 5 * P, 14 * P],
+        [6 * P, 11 * P, 6 * P, 10 * P, 14 * P, 10 * P, T.tabak], [7.5 * P, 14 * P, 7.5 * P, 8.5 * P, 15 * P, 8.5 * P], [3 * P, 7 * P, 7.5 * P, 4 * P, 9 * P, 8.5 * P], [12 * P, 7 * P, 7.5 * P, 13 * P, 9 * P, 8.5 * P]];
+    /* Ekmek sepeti: hasır sepet, içinde ekmekler */
+    case 'sepet':
+      if (carp) return [[3 * P, 0, 3 * P, 13 * P, 5 * P, 13 * P]];
+      return [[3 * P, 0, 3 * P, 13 * P, P, 13 * P], [3 * P, P, 3 * P, 13 * P, 5 * P, 4 * P], [3 * P, P, 12 * P, 13 * P, 5 * P, 13 * P], [3 * P, P, 4 * P, 4 * P, 5 * P, 12 * P], [12 * P, P, 4 * P, 13 * P, 5 * P, 12 * P],
+        [4 * P, P, 5 * P, 12 * P, 6 * P, 8 * P, T.cuval_un], [5 * P, P, 8.5 * P, 11 * P, 5.5 * P, 11 * P, T.cuval_un]];
+    /* Piknik sepeti: kapaklı hasır sandık, kulp */
+    case 'piknik':
+      if (carp) return [[2 * P, 0, 4 * P, 14 * P, 9 * P, 12 * P]];
+      return [[2 * P, 0, 4 * P, 14 * P, 8 * P, 12 * P], [1.5 * P, 8 * P, 3.5 * P, 14.5 * P, 9 * P, 12.5 * P, T.kalas], [4 * P, 9 * P, 7.5 * P, 5 * P, 12 * P, 8.5 * P, T.kalas], [11 * P, 9 * P, 7.5 * P, 12 * P, 12 * P, 8.5 * P, T.kalas], [4 * P, 12 * P, 7.5 * P, 12 * P, 13 * P, 8.5 * P, T.kalas]];
+    /* Tandır: kil kubbe, üstte ağız, yanında ateş deliği */
+    case 'tandir':
+      if (carp) return [[0, 0, 0, 1, 14 * P, 1]];
+      return [[P, 0, P, 15 * P, 10 * P, 15 * P], [2 * P, 10 * P, 2 * P, 14 * P, 13 * P, 14 * P], [4 * P, 13 * P, 4 * P, 6 * P, 14 * P, 12 * P], [10 * P, 13 * P, 4 * P, 12 * P, 14 * P, 12 * P], [6 * P, 13 * P, 4 * P, 10 * P, 14 * P, 6 * P], [6 * P, 13 * P, 10 * P, 10 * P, 14 * P, 12 * P],
+        [6 * P, 1 * P, 0.5 * P, 10 * P, 5 * P, P, T.kamp_atesi]];
+    /* Yemek tabağı: yassı tabak, üstünde yemek */
+    case 'tabak':
+      if (carp) return [];
+      return [[3 * P, 0, 3 * P, 13 * P, P, 13 * P], [5 * P, P, 5 * P, 11 * P, 2.5 * P, 11 * P, T.pasta_ic]];
+    /* Fesleğen saksısı: pişmiş kil saksı, yeşil yapraklar */
+    case 'feslegen':
+      if (carp) return [];
+      return [[5 * P, 0, 5 * P, 11 * P, 6 * P, 11 * P, T.tandir], [4 * P, 6 * P, 4 * P, 12 * P, 11 * P, 12 * P], [6 * P, 11 * P, 6 * P, 10 * P, 13 * P, 10 * P]];
+    /* Sarımsak örgüsü: duvara asılı örgü */
+    case 'sarimsak':
+      if (carp) return [];
+      return dondur([[7.5 * P, 13 * P, 0, 8.5 * P, 16 * P, P, T.kalas], [6 * P, 9 * P, 0.2 * P, 10 * P, 13 * P, 4 * P], [5 * P, 5 * P, 0.2 * P, 11 * P, 9 * P, 4.5 * P], [6 * P, P, 0.2 * P, 10 * P, 5 * P, 4 * P]], b.yon);
+    /* Baharat rafı: duvar rafı, üstünde dört renkli kavanoz */
+    case 'baharat':
+      if (carp) return [];
+      return dondur([[0, 5 * P, 0, 1, 6 * P, 5 * P], [P, 2 * P, 0, 2 * P, 5 * P, 4 * P, T.demir_cubuk], [14 * P, 2 * P, 0, 15 * P, 5 * P, 4 * P, T.demir_cubuk],
+        [1 * P, 6 * P, 0.5 * P, 15 * P, 11 * P, 4 * P, T.baharat]], b.yon);
+    /* Kavanozlar: iki boy turşu ve salça kavanozu */
+    case 'kavanoz':
+      if (carp) return [];
+      return [[3 * P, 0, 4 * P, 8 * P, 8 * P, 9 * P], [9 * P, 0, 7 * P, 13 * P, 6 * P, 11 * P], [3.5 * P, 8 * P, 4.5 * P, 7.5 * P, 9 * P, 8.5 * P, T.kalas], [9.5 * P, 6 * P, 7.5 * P, 12.5 * P, 7 * P, 10.5 * P, T.kalas]];
+    case 'balKavanoz':
+      if (carp) return [];
+      return [[5 * P, 0, 5 * P, 11 * P, 8 * P, 11 * P], [5.5 * P, 8 * P, 5.5 * P, 10.5 * P, 9 * P, 10.5 * P]];
+    /* Çuval: dolgun çuval, bağlı ağız */
+    case 'cuval':
+      if (carp) return [[2 * P, 0, 2 * P, 14 * P, 13 * P, 14 * P]];
+      return [[2 * P, 0, 2 * P, 14 * P, 10 * P, 14 * P], [3 * P, 10 * P, 3 * P, 13 * P, 12 * P, 13 * P], [5 * P, 12 * P, 5 * P, 11 * P, 13 * P, 11 * P], [6 * P, 13 * P, 6 * P, 10 * P, 14 * P, 10 * P]];
     case 'mum':
       if (carp) return [];
       return [[5.5 * P, 0, 5.5 * P, 10.5 * P, P, 10.5 * P, T.demir_cubuk], [7 * P, P, 7 * P, 9 * P, 7 * P, 9 * P], [7.5 * P, 7 * P, 7.5 * P, 8.5 * P, 9 * P, 8.5 * P, T.mum_alev]];

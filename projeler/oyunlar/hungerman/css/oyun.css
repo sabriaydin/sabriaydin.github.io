@@ -1050,6 +1050,7 @@ body.gostergesiz #ogretici { display: none; }
 .kbCan { --c: linear-gradient(90deg, #c0392b, #ff6b5a); }
 .kbAclik { --c: linear-gradient(90deg, #b8742a, #f0a64a); }
 .kbXp { --c: linear-gradient(90deg, #4f9a2c, #9be27d); }
+.kbAsci { --c: linear-gradient(90deg, #b8742e, #f2c06a); }
 .kbZirh { --c: linear-gradient(90deg, #7b8a96, #d8e2ea); }
 .kbOks { --c: linear-gradient(90deg, #2b7cc0, #7fd0ff); }
 .kbIsi { --c: linear-gradient(90deg, #5aa86a, #8ad87a); }

@@ -117,6 +117,15 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 36.0 (0.36.0): Mutfak ve yemek etkileri
+- **50 yeni eşya ve blok:** 9 malzeme (Un, Tuz, Tereyağı, Kaymak, Hamur, Salça, Pul Biber, Kıyma, Bulgur), 23 yemek ve tatlı, Tarif Defteri ve 17 mutfak bloğu.
+- **Mutfak blokları:** Değirmen Taşı (yeni istasyon: un, pul biber, kıyma öğütür), Mutfak Tezgâhı (üretim masası yerine geçer), Tandır (fırın yerine geçer, ısı ve ışık verir), Kiler Dolabı, Turşu Fıçısı ve Piknik Sepeti (sandık), Çilekli Pasta (yere konur, 4 dilimde yenir), Semaver, Ekmek Sepeti, Yemek Tabağı, Fesleğen Saksısı, Sarımsak Örgüsü ve Baharat Rafı (duvara asılır), Kavanozlar, Bal Kavanozu, Un ve Tuz Çuvalı.
+- **Yeni yemekler:** Pide, Simit, Börek, Mantı, Lahmacun, Tavuk Sote, Adana Kebap, Balık Ekmek, Hamsi Tava, Kumpir, Bulgur Pilavı, Cacık, Sütlaç, Lokum, Kurabiye, Elmalı Turta, Dondurma, Bitki Çayı, Salep, Turşu, Peynirli Omlet, Kahvaltı Tabağı, Kuzu Tandır. Her yemek bir ya da iki etki verir.
+- **Yeni yemek etkileri:** Maden Gücü (kazma ve kesme %35 hızlı), Direnç (alınan hasar %20 az), Şans (cevher ve ganimette fazladan ürün), Hafiflik (düşme hasarı yarıya iner), Odak (deneyim %50 fazla).
+- **Aşçılık seviyesi (0-10):** yemek üretildikçe yükselir; her seviye yemek etkilerini %8 uzatır, 3. seviyeden sonra üretimde fazladan ürün olasılığı doğar. Karakter panelinde ve Tarif Defteri ile görülür.
+- Su kovası kullanılan tariflerde boş kova geri verilir. Öğretici adımında yanan fırının kimliği düzeltildi.
+- Geliştirici penceresine Mutfak ve Etkili yemekler setleri eklendi.
+
 ## 35.1 (0.35.1): Köy baskınları kapatıldı
 - Köy baskınları şimdilik devre dışıdır (kod korunur; `js/koy/baskin.js` içindeki `BASKIN_ACIK` true yapılınca yeniden açılır). İlgili başarım listeden kaldırıldı.
 
