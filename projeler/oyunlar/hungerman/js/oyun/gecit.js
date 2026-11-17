@@ -25,7 +25,7 @@ export class Gecit {
     /* 0.30.6: Diyar'ın tek girişi Lanetli Ada'daki kadim geçittir; çakmak yalnızca onu (ya da diyardaki karşılığını) yeniden yakar */
     const A = lanetliAda(d.uretici), ic = diyarMi(x);
     const uzak = ic ? Math.hypot(x - (DIYAR_X + Math.floor(A.x / 8)), z - Math.floor(A.z / 8)) > 30 : Math.hypot(x - A.x, z - A.z) > 16;
-    if (uzak) { this.bildirim(`Geçit burada açılamaz. Yeraltı Diyarı'nın tek girişi, Issız Deniz'in ortasındaki ${ADA_AD}'daki kadim geçittir.`); return false; }
+    if (uzak) return false;   // 0.38.5: uyarı gösterilmez
     for (const e of [0, 1]) {
       const l = this.cerceve(x, y, z, e);
       if (!l) continue;

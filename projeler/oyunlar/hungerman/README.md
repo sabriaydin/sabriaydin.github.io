@@ -117,6 +117,9 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 38.5 (0.38.5): Çakmak uyarısı
+- Çakmakla Lanetli Ada dışında bir yere tıklanınca çıkan "Geçit burada açılamaz" uyarısı kaldırıldı.
+
 ## 38.4 (0.38.4): Çapa ve ekim
 - Bütün çapalar (demir ve elmas dahil) artık yalnızca tıklanan tek bloğu tarla toprağına çevirir; malzeme yalnızca dayanıklılığı belirler.
 - Tohum, fide ve çekirdekler yalnızca çapayla işlenmiş tarla toprağına ekilir; toprak ya da çimene ekilmeye çalışılınca uyarı verilir. Havuç, patates ve soğan çapalanmamış zemine tıklanınca ekilmez, yenir.
