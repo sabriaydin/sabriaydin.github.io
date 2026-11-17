@@ -1,7 +1,7 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
@@ -281,6 +281,20 @@ const KIYAFET_TARIF = { 348: [[49, 2]], 349: [[291, 8]], 350: [[49, 3], [282, 1]
   356: [[284, 4]], 357: [[49, 4]], 358: [[49, 4], [282, 3]], 359: [[284, 3]], 360: [[282, 1], [284, 1]], 361: [[282, 2]], 362: [[49, 2], [282, 2]] };
 KIYAFETLER.forEach(([id]) => t(id, 1, KIYAFET_TARIF[id], 'masa', 'giyim'));
 ZIRH_MALZEME.slice(4).forEach((m, j) => ZIRH_ADET.forEach((a, pi) => t(416 + j * 4 + pi, 1, [[m.mal, a], ...(m.ek ? [[m.ek[0], Math.max(1, Math.round(m.ek[1] * a / 6))]] : [])], 'masa', 'savas')));
+
+/* ---------- 0.34.0: tarım (sona eklenir) ---------- */
+t(388, 1, [[261, 3], [256, 2]], 'masa', 'alet');
+t(389, 1, [[264, 3], [256, 2]], 'masa', 'alet');
+t(TARIM.kompost, 1, [['kalas', 7]], 'masa', 'blok');
+t(284, 3, [[372, 2]], null, 'malzeme');
+t(381, 1, [[380, 6], [331, 1]], 'masa', 'malzeme');
+t(384, 1, [[367, 1]], 'ates', 'yiyecek');
+t(385, 2, [[368, 4]], 'firin', 'yiyecek');
+t(386, 1, [[379, 3], [331, 1]], 'masa', 'yiyecek');
+t(382, 1, [[363, 2], [365, 1], [480, 2], [270, 1]], 'tencere', 'yiyecek');
+t(383, 1, [[363, 1], [365, 1], [369, 1], [270, 1]], null, 'yiyecek');
+t(387, 1, [[266, 1], [378, 2], [374, 2], [270, 1]], null, 'yiyecek');
+t(377, 2, [[376, 1]], null, 'malzeme');
 
 export const TARIFLER = R;
 

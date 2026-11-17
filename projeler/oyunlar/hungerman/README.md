@@ -117,6 +117,17 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 34.0 (0.34.0): Tarım
+- **Yeni ekinler (4 evre):** Domates, Biber, Mısır, Soğan, Lahana, Pamuk ve Çilek; Karpuz (sap, yanına karpuz verir). Tohumlar uzun ottan düşer, çiftçilerden alınır; soğan kendisiyle ekilir.
+- **Ekine özgü mevsim:** her ekinin iyi büyüdüğü mevsim vardır; çoğu kışın büyümez, soğan ve lahana kışın yavaş büyür. Eşya açıklamasında gösterilir.
+- **Tekrar hasat:** olgun domates, biber ve çilek sağ tıkla toplanır; bitki 3. evreye döner ve yeniden ürün verir.
+- **Meyve ağaçları:** Elma, Kiraz, Portakal ve Zeytin. Çayırlarda elma ve kiraz, savanlarda zeytin ve portakal ağaçları kendiliğinden bulunur (yeni keşfedilen bölgelerde). Meyveli yapraklar sağ tıkla toplanır; meyve mevsimine göre zamanla yeniden olur. Yapraklardan fidan düşer; fidanlar dikilip büyütülür. Çiftçiler Usta ve Üstat seviyesinde fidan satar.
+- **Çapa:** demir çapa önüne doğru 3, elmas çapa 3 × 3 blok tarla açar.
+- **Ekim:** Shift basılıyken tohum, çevredeki 3 × 3 tarlaya birden ekilir.
+- **Biçme:** Demir Tırpan (3 × 3) ve Elmas Tırpan (5 × 5) olgun ekinleri biçer, düşen ya da çantadaki tohumla yeniden eker, otları temizler.
+- **Kompost Kutusu ve Gübre:** bitkisel atıklar (tohum, sebze, meyve, yaprak) konunca dolar; dolunca Gübre verir. Gübre, kemik tozu gibi ekinleri ve fidanları hızla büyütür.
+- **Yeni yiyecekler:** Menemen (tencere), Çoban Salatası, Közlenmiş Mısır (kamp ateşi), Patlamış Mısır (fırın), Portakal Suyu, Meyve Salatası, Karpuz Dilimi; Zeytinyağı; pamuktan ip.
+
 ## 33.0 (0.33.0): İstasyonlar, bölgesel hava, kıyafetler
 - **İşleyen istasyonlar:** Fırın ve Kamp Ateşine sağ tıklanınca kendi penceresi açılır (Shift + sağ tık: üretim penceresi). Fırının girdi, yakıt ve çıktı yuvaları vardır; yakıt (kömür, kütük, kalas, çubuk) yandıkça malzemeler partiler hâlinde pişer / erir. Kamp ateşi çiğ yiyecekleri yakıtsız pişirir. İlerleme oku, alev göstergesi ve durum metni gösterilir; oyuncu yanında beklemek zorunda değildir (parça yüklü kaldığı sürece işlem sürer). Kırılınca içindekiler düşer. Diğer istasyonların tarifleri yine üretim penceresinden yapılır.
 - **Bölgesel hava:** hava artık tüm dünyada aynı değildir; rüzgârla sürüklenen, büyüyüp dağılan yağış ve fırtına alanları vardır. Bir yerde güneşliyken birkaç yüz blok ötede yağmur ya da fırtına olabilir; yağış alanının kenarında yağmur perdesi uzaktan görünür. Konsoldaki `hava` komutu her yerde geçerli, süreli bir hava ayarlar.

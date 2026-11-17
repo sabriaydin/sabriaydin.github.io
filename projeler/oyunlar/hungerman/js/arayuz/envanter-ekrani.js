@@ -610,7 +610,15 @@ export class EnvanterEkrani {
     if (es.yemek) alt += `<span>Açlığı ${es.yemek / 2} birim giderir</span>`;
     if (es.iyilestir) alt += `<span>${es.iyilestir / 2} kalp iyileştirir</span>`;
     if (es.iyilestirme) alt += `<span>Ayrıca ${es.iyilestirme / 2} kalp iyileştirir</span>`;
-    if (es.ekin) alt += '<span>Toprak, çimen veya tarla toprağına ekilir; tarlada daha hızlı büyür</span>';
+    if (es.ekin) {
+      alt += '<span>Toprak, çimen veya tarla toprağına ekilir; tarlada daha hızlı büyür · Shift ile 3 × 3 tarlaya ekilir</span>';
+      /* 0.34.0: ekine özgü mevsim */
+      const eb = BLOKLAR[es.ekin], MV = ['İlkbahar', 'Yaz', 'Sonbahar', 'Kış'];
+      if (eb && eb.mevsim) alt += `<span>En iyi: ${MV.filter((m, i) => eb.mevsim[i] >= 1).join(', ') || '—'} · ${eb.mevsim[3] ? 'kışın yavaş büyür' : 'kışın büyümez'}</span>`;
+      if (eb && (eb.tekrar != null || (BLOKLAR[es.ekin + 3] && BLOKLAR[es.ekin + 3].tekrar != null))) alt += '<span>Olgunlaşınca sağ tıkla toplanır; bitki yeniden ürün verir</span>';
+    }
+    if (es.blok && BLOKLAR[es.blok] && BLOKLAR[es.blok].fidan) alt += '<span>Toprağa ya da çimene dikilir; zamanla ağaç olur</span>';
+    if (es.blok && BLOKLAR[es.blok] && BLOKLAR[es.blok].kompost != null) alt += '<span>Bitkisel atıklar (tohum, sebze, meyve, yaprak) sağ tıkla konur; dolunca gübre verir</span>';
     if (es.alet && es.alet.tur === 'capa') alt = `<span>Toprağa sağ tıklanınca tarla toprağı açar</span><span>Dayanım: ${s.dayanim} / ${es.alet.dayanim}</span>`;
     if (es.tur === 'iksir') alt += '<span>Sağ tıkla içilir</span>';
     if (s.id === 139) alt += '<span>Sağ tıkla açılır: eşya onarımı ve birleştirme</span>';

@@ -289,7 +289,9 @@ export class Dunya {
       if (!EKIN_SONRAKI[id]) { this.ekinler.delete(k); continue; }
       let alt = this.blok(x, y - 1, z);
       if (alt === 137 && (this.suYakin(x, y - 1, z) || (this.yagiyor && this.ustKati(x, z) <= y))) { this.blokKoy(x, y - 1, z, 138, 'tik'); alt = 138; }
-      const k2 = (alt === 138 ? 3 : alt === 137 ? 1.5 : 1) * MEVSIM_BUYUME[this.mevsim || 0];   // 0.18.0: mevsime göre büyüme
+      const B = BLOKLAR[id], mv = B.mevsim ? B.mevsim[this.mevsim || 0] : MEVSIM_BUYUME[this.mevsim || 0];   // 0.34.0: ekine özgü mevsim
+      if (!mv) continue;
+      const k2 = (alt === 138 ? 3 : alt === 137 ? 1.5 : 1) * mv;   // 0.18.0: mevsime göre büyüme
       if (r > 0.012 * k2) continue;
       /* 0.21.0: olgun balkabağı sapı meyve verir, şeker kamışı uzar */
       if (BLOKLAR[id].meyve) { if (r < 0.005 * k2) this.meyveVer(x, y, z); continue; }
@@ -300,10 +302,11 @@ export class Dunya {
   /* 0.21.0: olgun sapın yanındaki boş toprağa (yanında balkabağı yoksa) balkabağı çıkar */
   meyveVer(x, y, z) {
     const Y = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-    if (Y.some(([a, c]) => this.blok(x + a, y, z + c) === 559)) return false;
+    const M = BLOKLAR[this.blok(x, y, z)].meyveBlok || 559;   // 0.34.0: karpuz
+    if (Y.some(([a, c]) => this.blok(x + a, y, z + c) === M)) return false;
     const [a, c] = Y[Math.floor(Math.random() * 4)];
     if (this.blok(x + a, y, z + c) !== 0 || ![3, 4, 45, 137, 138, 142, 143].includes(this.blok(x + a, y - 1, z + c))) return false;
-    this.blokKoy(x + a, y, z + c, 559, 'tik');
+    this.blokKoy(x + a, y, z + c, M, 'tik');
     return true;
   }
   /* Şeker kamışı en çok 3 boy uzar */
@@ -368,6 +371,8 @@ export class Dunya {
         const id = p.v[dizin(lx, y, lz)];
         if (id === 29 && r() < 0.06) this.blokKoy(p.cx * PB + lx, y, p.cz * PB + lz, 28, 'tik');
         else if (BLOKLAR[id] && BLOKLAR[id].fidan && r() < 0.04 * MEVSIM_BUYUME[this.mevsim || 0]) this.fidanBuyut(p.cx * PB + lx, y, p.cz * PB + lz, BLOKLAR[id].fidan);
+        /* 0.34.0: meyve ağaçlarında mevsimine göre yeniden meyve olur */
+        else if (BLOKLAR[id] && BLOKLAR[id].meyveAgaci && !BLOKLAR[id].meyveli && r() < 0.5 * BLOKLAR[id].mevsim[this.mevsim || 0]) this.blokKoy(p.cx * PB + lx, y, p.cz * PB + lz, BLOKLAR[id].dolu, 'tik');
       }
     }
   }

@@ -12,6 +12,11 @@ const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   /
 
 const ERISIM = 5;
 const TOPRAK = new Set([3, 4, 45, 137, 138]);   // ekim yapılabilen zeminler
+/* 0.34.0: ekinin tohumu (evre 0 bloğunu eken eşya) */
+let TOHUMLAR = null;
+const tohumBul = taban => { if (!TOHUMLAR) { TOHUMLAR = new Map(); for (const e of Object.values(ESYALAR)) if (e && e.ekin && !TOHUMLAR.has(e.ekin)) TOHUMLAR.set(e.ekin, e); } return TOHUMLAR.get(taban); };
+/* 0.34.0: kompost kutusuna konabilen bitkisel atıklar */
+const organikMi = id => { const e = ESYALAR[id], b = BLOKLAR[id]; return !!(e && (e.ekin || [363, 365, 367, 369, 370, 374, 376, 378, 379, 380, 266, 291, 328, 329, 267, 559].includes(id) || (b && (b.bitki || b.kesik) && b.ses === 'bitki'))); };
 
 export class Etkilesim {
   constructor(o) {
@@ -276,6 +281,9 @@ export class Etkilesim {
   kir(h) {
     const b = BLOKLAR[h.id];
     if (this.solBekleme > 0 && b.sertlik === 0) return;
+    /* 0.34.0: tırpan: bitkiye vurulunca çevresindeki olgun ekinler biçilir (tohum varsa yeniden ekilir), otlar temizlenir */
+    const ta = this.aletBilgi();
+    if (ta && ta.tur === 'tirpan' && BITKI[h.id] && !b.fidan) { this.bic(h, ta.alan || 1); return; }
     if (b.cihaz) { this.cihazKir(h, b); return; }
     const d = this.dunya, r = Math.random;
     const ust = d.blok(h.x, h.y + 1, h.z);
@@ -316,6 +324,56 @@ export class Etkilesim {
   }
 
   /* servet: Servet büyüsü seviyesi (cevherlerde blok dışındaki ürünler çoğalır) */
+  /* 0.34.0: tırpanla biçme */
+  bic(h, R) {
+    const d = this.dunya, env = this.envanter;
+    let n = 0;
+    for (let dz = -R; dz <= R; dz++) for (let dx = -R; dx <= R; dx++) for (let dy = -1; dy <= 1; dy++) {
+      const x = h.x + dx, y = h.y + dy, z = h.z + dz, id = d.blok(x, y, z), b = BLOKLAR[id];
+      if (!b || !BITKI[id] || b.fidan || b.meyve) continue;
+      const olgun = b.ekin === 3, ot = b.degistirilebilir && b.ekin == null;
+      if (!olgun && !ot) continue;
+      const liste = b.dusur ? b.dusur(Math.random) : [];
+      d.blokKoy(x, y, z, 0);
+      /* Yeniden ekim: düşenlerden ya da çantadan bir tohum */
+      if (olgun) {
+        const taban = id - 3, tohum = tohumBul(taban);
+        if (tohum) {
+          const i = liste.findIndex(([e, k]) => e === tohum.id && k > 0);
+          if (i >= 0) { liste[i][1]--; d.blokKoy(x, y, z, taban); }
+          else if (env.say(tohum.id) > 0) { env.harca(tohum.id, 1); d.blokKoy(x, y, z, taban); }
+        }
+        this.olay('hasat');
+      }
+      for (const [e, k] of liste) if (k > 0) this.dusenler.birak(e, k, x + 0.5, y + 0.4, z + 0.5);
+      this.dusenler.parcacik(id, x, y, z, 3);
+      n++;
+    }
+    if (n) { this.ses.kir('bitki'); this.vurus = 0.01; if (env.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); } }
+  }
+  /* 0.34.0: olgun ekinden (domates, biber, çilek) ve meyveli yapraktan sağ tıkla toplama; kompost kutusu */
+  topla(h) {
+    const d = this.dunya, b = BLOKLAR[h.id], env = this.envanter;
+    if (b.tekrar != null && b.ekin === 3) {
+      const n = b.urunAdet[0] + Math.floor(Math.random() * (b.urunAdet[1] - b.urunAdet[0] + 1));
+      d.blokKoy(h.x, h.y, h.z, b.tekrar); this.dusenler.birak(b.urun, n, h.x + 0.5, h.y + 0.5, h.z + 0.5);
+      this.ses.koy('bitki'); this.olay('hasat'); return true;
+    }
+    if (b.meyveli) {
+      d.blokKoy(h.x, h.y, h.z, b.bos); this.dusenler.birak(b.meyveId, 1 + (Math.random() < 0.35 ? 1 : 0), h.x + 0.5, h.y + 0.3, h.z + 0.5);
+      this.ses.koy('bitki'); return true;
+    }
+    if (b.kompost != null) {
+      if (b.kompost >= 8) { d.blokKoy(h.x, h.y, h.z, b.taban); this.dusenler.birak(390, 1 + (Math.random() < 0.5 ? 1 : 0), h.x + 0.5, h.y + 1, h.z + 0.5); this.ses.topla(); return true; }
+      const s = env.seciliYuva(), e = s && ESYALAR[s.id];
+      if (!e || !organikMi(s.id)) return false;
+      env.seciliAzalt(1);
+      if (Math.random() < (e.yemek ? 0.65 : 0.4)) d.blokKoy(h.x, h.y, h.z, h.id + 1);
+      this.dusenler.renkliParcacik([0.45, 0.65, 0.3], h.x + 0.5, h.y + 0.9, h.z + 0.5, 6); this.ses.koy('bitki');
+      return true;
+    }
+    return false;
+  }
   dusur(id, x, y, z, servet = 0) {
     const b = BLOKLAR[id];
     const liste = b.dusur ? b.dusur(Math.random) : [[id, 1]];
@@ -402,6 +460,8 @@ export class Etkilesim {
         return true;
       }
     }
+    /* 0.34.0: ekin ve meyve toplama, kompost */
+    if (h && !g.egil && this.topla(h)) return true;
     /* İstasyonlar */
     /* 0.33.0: fırın ve kamp ateşi kendi haznesini açar (Shift ile üretim penceresi) */
     if (h && BLOKLAR[h.id].firinKap && !g.egil && !this.shift) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
@@ -463,17 +523,34 @@ export class Etkilesim {
     /* Çapa: toprak ve çimen tarla toprağına çevrilir */
     if (e.alet && e.alet.tur === 'capa') {
       if (!h || ![3, 4, 45, 57].includes(h.id) || h.ny === -1) return false;
-      const d = this.dunya, ust = d.blok(h.x, h.y + 1, h.z);
-      if (ust && !(BLOKLAR[ust].degistirilebilir)) return false;
-      if (ust) d.blokKoy(h.x, h.y + 1, h.z, 0);
-      d.blokKoy(h.x, h.y, h.z, this.suYakin(h.x, h.y, h.z) ? 138 : 137);
-      this.ses.koy('toprak'); this.dusenler.parcacik(3, h.x, h.y, h.z, 4);
+      const d = this.dunya;
+      /* 0.34.0: demir çapa önüne doğru 3 blok, elmas çapa 3 × 3 alan işler */
+      const sev = e.alet.seviye, [fx, fz] = YONLER[this.bakisYonu4()];
+      const alan = sev >= 5 ? [-1, 0, 1].flatMap(a => [-1, 0, 1].map(c => [a, c])) : sev >= 4 ? [[0, 0], [fx, fz], [fx * 2, fz * 2]] : [[0, 0]];
+      let n = 0;
+      for (const [a, c] of alan) {
+        const x = h.x + a, z = h.z + c, id = d.blok(x, h.y, z);
+        if (![3, 4, 45, 57].includes(id)) continue;
+        const ust = d.blok(x, h.y + 1, z);
+        if (ust && !(BLOKLAR[ust].degistirilebilir)) continue;
+        if (ust) d.blokKoy(x, h.y + 1, z, 0);
+        d.blokKoy(x, h.y, z, this.suYakin(x, h.y, z) ? 138 : 137); n++;
+        this.dusenler.parcacik(3, x, h.y, z, 3);
+      }
+      if (!n) return false;
+      this.ses.koy('toprak');
       if (env.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       return true;
     }
     /* Tohum ekme (havuç ve patates hem ekilir hem yenir) */
     if (e.ekin && h && TOPRAK.has(h.id) && h.ny === 1 && this.dunya.blok(h.x, h.y + 1, h.z) === 0) {
       this.dunya.blokKoy(h.x, h.y + 1, h.z, e.ekin); env.seciliAzalt(1); this.ses.koy('bitki');
+      /* 0.34.0: Shift basılıyken çevredeki 3 × 3 tarlaya da ekilir */
+      if (this.shift) for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) {
+        if ((!dx && !dz) || !env.seciliYuva() || env.seciliYuva().id !== s.id) continue;
+        const x = h.x + dx, z = h.z + dz;
+        if ((this.dunya.blok(x, h.y, z) === 137 || this.dunya.blok(x, h.y, z) === 138) && this.dunya.blok(x, h.y + 1, z) === 0) { this.dunya.blokKoy(x, h.y + 1, z, e.ekin); env.seciliAzalt(1); }
+      }
       return true;
     }
     if (e.ekin && !e.yemek) return false;

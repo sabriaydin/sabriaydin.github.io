@@ -2,7 +2,7 @@
    Geliştirici kodu konsolda girildikten sonra açılır. Sol taraftaki sekmeler konulara göre ayrılmıştır; her sekme
    başlıklı bölümlerden oluşur. İşlemler konsol komutları üzerinden yürür (aynı izin kuralları geçerlidir ve konsol
    kaydına yazılır); anahtarlar ve kaydırıcılar değerleri hemen uygular ve pencere her açılışta gerçek durumu gösterir. */
-import { ESYALAR, BLOKLAR, ETKILER, YAPI_ID } from '../bloklar.js';
+import { ESYALAR, BLOKLAR, ETKILER, YAPI_ID, TARIM, MEYVE_AGACLARI } from '../bloklar.js';
 import { TURLER } from '../varlik/turler.js';
 import { BIYOMLAR } from '../dunya/uretici.js';
 import { koylerAlan } from '../dunya/koy-uretici.js';
@@ -74,6 +74,7 @@ const SETLER = {
   insaat: { ad: 'İnşaat', esya: [[14, 64], [38, 64], [35, 64], [37, 64], [34, 64], [51, 64], [46, 64], [50, 4]] },
   yapi: { ad: 'Yapı blokları', esya: [[70, 32], [82, 32], [78, 32], [86, 32], [88, 4], [121, 4], [104, 32], [105, 2], [109, 32], [110, 16]] },
   dekor: { ad: 'Yapı ve dekorasyon', esya: [[345, 1], [YAPI_ID.cilaliTas, 64], [YAPI_ID.parkeZemin, 64], [YAPI_ID.kareliZemin, 64], [YAPI_ID.beton, 64], [YAPI_ID.kil, 64], [YAPI_ID.raf, 8], [YAPI_ID.perde, 8], [YAPI_ID.avize, 4], [YAPI_ID.somine, 2], [YAPI_ID.dolap, 4], [YAPI_ID.sehpa, 4], [YAPI_ID.vazo, 8], [YAPI_ID.mum, 16], [YAPI_ID.sancak + 4, 8], [321, 16], [325, 16], [346, 16]] },
+  tarim: { ad: 'Tarım', esya: [[344, 1], [389, 1], [364, 16], [366, 16], [368, 16], [369, 16], [371, 16], [373, 16], [375, 16], [377, 16], [292, 16], [390, 32], [TARIM.kompost, 2], ...MEYVE_AGACLARI.map(M => [M.fidan, 2]), [3, 64]] },
   giyim: { ad: 'Kıyafet ve yeni zırhlar', esya: [[348, 1], [349, 1], [350, 1], [351, 1], [352, 1], [353, 1], [354, 1], [355, 1], [356, 1], [357, 1], [358, 1], [359, 1], [360, 1], [361, 1], [362, 1], [416, 1], [417, 1], [418, 1], [419, 1], [420, 1], [421, 1], [422, 1], [423, 1], [424, 1], [425, 1], [426, 1], [427, 1], [428, 1], [429, 1], [430, 1], [431, 1]] },
   maden: { ad: 'Madenci', esya: [[312, 1], [313, 1], [314, 1], [46, 64], [276, 16], [408, 1], [409, 1], [410, 1], [411, 1]] },
   denizci: { ad: 'Denizci', esya: [[454, 1], [455, 1], [453, 1], [456, 1], [457, 1], [298, 16]] },

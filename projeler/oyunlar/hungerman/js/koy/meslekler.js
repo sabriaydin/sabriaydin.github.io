@@ -2,7 +2,7 @@
    Takas: ver = oyuncunun verdikleri, al = oyuncunun aldığı. 288 = Sikke.
    0.32.0: seviye: köylü Kalfa, Usta ve Üstat olunca açılan takaslar; ozel: köyde Dost itibarına ulaşınca açılan takas;
    hediye: Kahraman itibarında köylünün günde bir kez verdiği hediyeler. Görev türleri: getir, oldur, mektup, teslimat, kesif, koruma, insa. */
-import { YAPI_ID as Y, DUVAR_MALZEME, CIT_MALZEME } from '../bloklar.js';
+import { YAPI_ID as Y, DUVAR_MALZEME, CIT_MALZEME, MEYVE_YAPRAK as M } from '../bloklar.js';
 const S = 288;
 const tk = (ver, al) => ({ ver, al });
 
@@ -13,7 +13,9 @@ export const MESLEKLER = {
     havuz: [tk([[265, 16]], [S, 1]), tk([[S, 1]], [266, 4]), tk([[S, 1]], [292, 10]), tk([[36, 6]], [S, 1]), tk([[S, 2]], [52, 2]),
       tk([[328, 15]], [S, 1]), tk([[329, 15]], [S, 1]), tk([[S, 1]], [328, 6]), tk([[S, 1]], [330, 4]), tk([[S, 3]], [342, 1]), tk([[S, 2]], [104, 6])],
     gorev: [['getir', 291, 16], ['getir', 265, 20], ['getir', 266, 6], ['oldur', 'zombi', 4], ['mektup'], ['getir', 328, 16], ['getir', 329, 16], ['insa', 104, 12], ['koruma', 4], ['teslimat']],
-    seviye: [[tk([[S, 3]], [475, 4]), tk([[559, 4]], [S, 1])], [tk([[S, 4]], [343, 1]), tk([[S, 3]], [484, 2])], [tk([[S, 6]], [290, 1]), tk([[S, 10]], [344, 1])]],
+    seviye: [[tk([[S, 3]], [475, 4]), tk([[559, 4]], [S, 1]), tk([[S, 1]], [364, 4]), tk([[S, 1]], [371, 4]), tk([[363, 10]], [S, 1])],
+      [tk([[S, 4]], [343, 1]), tk([[S, 3]], [484, 2]), tk([[S, 4]], [M.elma.fidan, 1]), tk([[S, 4]], [M.kiraz.fidan, 1])],
+      [tk([[S, 6]], [290, 1]), tk([[S, 10]], [344, 1]), tk([[S, 5]], [M.portakal.fidan, 1]), tk([[S, 5]], [M.zeytin.fidan, 1]), tk([[S, 8]], [388, 1])]],   // 0.34.0: tohum, fidan, tırpan
     ozel: tk([[S, 1]], [296, 8]), hediye: [[293, 4], [266, 4], [330, 4]],
     soz: ['Hasat zamanı bütün köy tarladadır.', 'Toprağı iyi işleyen, ekmeğini eksik etmez.', 'Tohum ekmeyi unutmayınız; buğday kendiliğinden yetişmez.']
   },

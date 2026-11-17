@@ -286,6 +286,12 @@ export function sekilKutulari(id, komsu, carp = false) {
       }
       return l;
     }
+    /* 0.34.0: kompost kutusu: tahta çerçeve, içi doluluk seviyesine göre yükselir */
+    case 'kompost': {
+      if (carp) return [[0, 0, 0, 1, 1, 1]];
+      const W = T.kompost_yan, h = 2 * P + Math.min(8, b.kompost) * 1.5 * P;
+      return [[0, 0, 0, 1, 1, 2 * P, W], [0, 0, 14 * P, 1, 1, 1, W], [0, 0, 2 * P, 2 * P, 1, 14 * P, W], [14 * P, 0, 2 * P, 1, 1, 14 * P, W], [2 * P, 0, 2 * P, 14 * P, h, 14 * P]];
+    }
     /* ---------- 0.31.0: yapı ve dekorasyon ---------- */
     case 'duvar': {
       const bag = [0, 1, 2, 3].map(f => baglanir(id, komsu(f), f)), h = carp ? 1.5 : 14 * P;

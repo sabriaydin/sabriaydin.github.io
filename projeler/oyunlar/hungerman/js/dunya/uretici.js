@@ -10,6 +10,7 @@ import { zindanYaz } from './zindan-uretici.js';
 import { batikYaz } from './batik-uretici.js';
 import { adaYaz } from './ada-uretici.js';
 import { madenYaz } from './maden-uretici.js';
+import { MEYVE_YAPRAK } from '../bloklar.js';
 
 export const BIYOMLAR = ['Okyanus', 'Derin Okyanus', 'Nehir', 'Kumsal', 'Karlı Kumsal', 'Dağlar', 'Tayga', 'Çöl', 'Orman', 'Huş Ormanı', 'Çayır', 'Savan', 'Bataklık', 'Karlı Ova'];
 export const BY = { OKYANUS: 0, DERIN: 1, NEHIR: 2, KUMSAL: 3, KARLI_KUMSAL: 4, DAG: 5, TAYGA: 6, COL: 7, ORMAN: 8, HUS: 9, CAYIR: 10, SAVAN: 11, BATAKLIK: 12, KARLI_OVA: 13 };
@@ -281,6 +282,11 @@ export class Uretici {
       else if (o.b === BY.BATAKLIK) tur = 'bataklik';
       else if (o.b === BY.HUS) tur = s2 < 0.85 ? 'hus' : 'mese';
       else if (o.b === BY.ORMAN) tur = s2 < 0.2 ? 'hus' : 'mese';
+      /* 0.34.0: çayırda elma ve kiraz, savanda zeytin ve portakal, ormanda seyrek elma ağaçları */
+      const s3 = karma2(this.tohum ^ 0x6d65, x, z);
+      if (o.b === BY.CAYIR && s3 < 0.22) tur = s3 < 0.13 ? 'elma' : 'kiraz';
+      else if (o.b === BY.SAVAN && s3 < 0.2) tur = s3 < 0.12 ? 'zeytin' : 'portakal';
+      else if (o.b === BY.ORMAN && s3 < 0.03) tur = 'elma';
       liste.push([x, o.h + 1, z, tur, o.b]);
     }
     /* Önce yapraklar, sonra gövdeler: komşu parçalarda aynı sonucu verir */
@@ -422,6 +428,22 @@ export function agacKur(set, x, y, z, tur, r, kisim = 'hepsi') {
   else if (tur === 'ladin') { kutuk = 10; yaprak = 11; boy = 6 + Math.floor(r() * 4); }
   else if (tur === 'akasya') { kutuk = 144; yaprak = 145; boy = 4 + Math.floor(r() * 2); }
   else boy = 4 + Math.floor(r() * 3);
+  /* 0.34.0: meyve ağaçları (elma, kiraz, portakal, zeytin): meşe gövdeli, küçük taçlı; yaprakların bir kısmı meyveli */
+  const M = MEYVE_YAPRAK[tur];
+  if (M) {
+    boy = 3 + Math.floor(r() * 2);
+    const ust = y + boy;
+    if (yap) for (let yy = ust - 2; yy <= ust + 1; yy++) {
+      const ry = yy >= ust ? 1 : 2;
+      for (let dz = -ry; dz <= ry; dz++) for (let dx = -ry; dx <= ry; dx++) {
+        const kose = Math.abs(dx) === ry && Math.abs(dz) === ry;
+        if (kose && (yy >= ust || karma3(78, x + dx, yy, z + dz) < 0.6)) continue;
+        set(x + dx, yy, z + dz, karma3(79, x + dx, yy, z + dz) < 0.3 ? M.dolu : M.bos, true);
+      }
+    }
+    if (gov) for (let k = 0; k < boy; k++) set(x, y + k, z, 8, false);
+    return;
+  }
   /* Akasya: gövde yukarıda bir yana eğilir, tepesi yassı ve geniş bir taç */
   if (tur === 'akasya') {
     const yon = Math.floor(r() * 4), [ax, az] = [[1, 0], [-1, 0], [0, 1], [0, -1]][yon], kayma = 1 + Math.floor(r() * 2);

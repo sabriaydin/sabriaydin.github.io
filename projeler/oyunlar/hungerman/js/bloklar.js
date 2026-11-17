@@ -62,7 +62,13 @@ export const DOKULAR = [
   'cam_k', 'cam_t', 'cam_s', 'cam_y', 'cam_m', 'cam_mo', 'cam_si',
   'kil_0', 'kil_k', 'kil_t', 'kil_s', 'kil_y', 'kil_m', 'kil_mo', 'kil_si',
   'beton_0', 'beton_k', 'beton_t', 'beton_s', 'beton_y', 'beton_m', 'beton_mo', 'beton_si',
-  'dolap_on', 'dolap_yan', 'dolap_ust', 'somine_ic', 'mum_govde', 'mum_alev', 'kitap_sirt', 'vazo'
+  'dolap_on', 'dolap_yan', 'dolap_ust', 'somine_ic', 'mum_govde', 'mum_alev', 'kitap_sirt', 'vazo',
+  /* 0.34.0: tarım */
+  ...['domates', 'biber', 'misir', 'sogan', 'lahana', 'pamuk', 'cilek'].flatMap(k => [0, 1, 2, 3].map(e => k + e)),
+  'karpuz_ust', 'karpuz_yan', 'karpuz_sap0', 'karpuz_sap1', 'karpuz_sap2', 'karpuz_sap3',
+  'fidan_elma', 'fidan_kiraz', 'fidan_portakal', 'fidan_zeytin',
+  'yaprak_elma', 'yaprak_elma_m', 'yaprak_kiraz', 'yaprak_kiraz_m', 'yaprak_portakal', 'yaprak_portakal_m', 'yaprak_zeytin', 'yaprak_zeytin_m',
+  'kompost_yan', 'kompost_ic', 'kompost_hazir'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -105,7 +111,7 @@ blok(22, { ad: 'Buz', dok: 'buz', opak: false, kesik: true, ayniGizle: true, ser
 blok(23, { ad: 'Kil', dok: 'kil', sertlik: 0.6, alet: 'kurek', ses: 'toprak' });
 blok(24, { ad: 'Kum Taşı', dok: ['kumtasi_ust', 'kumtasi_yan', 'kumtasi_ust'], sertlik: 0.8, alet: 'kazma', seviye: 1 });
 blok(25, { ad: 'Uzun Ot', dok: 'uzun_ot', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, degistirilebilir: true,
-  dusur: r => { const s = r(); return s < 0.3 ? [[267, 1]] : s < 0.42 ? [[292, 1]] : []; } });
+  dusur: r => { const s = r(); return s < 0.3 ? [[267, 1]] : s < 0.42 ? [[292, 1]] : s < 0.48 ? [[[364, 366, 368, 371, 373, 375, 377][Math.floor(r() * 7)], 1]] : []; } });   // 0.34.0: yeni tohumlar
 blok(26, { ad: 'Gelincik', dok: 'gelincik', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true });
 blok(27, { ad: 'Karahindiba', dok: 'karahindiba', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true });
 blok(28, { ad: 'Böğürtlen Çalısı', dok: 'cali_dolu', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0.1, ses: 'bitki', bitki: true,
@@ -493,6 +499,52 @@ for (const id of [34, 109, 182, 188]) B[id].bolmeAile = true;
 export const YAPI_ID = Y;
 export const YAPI_SON = YENI_ID;
 
+/* ---------- 0.34.0: Tarım ----------
+   Yeni ekinler (4 evre): tohumla ya da ürünün kendisiyle tarlaya / toprağa ekilir. tekrar: olgun bitkiye sağ tıklanınca ürün toplanır, bitki 3. evreye döner.
+   mevsim: [ilkbahar, yaz, sonbahar, kış] büyüme çarpanı (0: o mevsimde büyümez). */
+const T0 = { cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true };
+export const TARIM = {};
+export const EKIN_TURLERI = [
+  { k: 'domates', ad: 'Domates', urun: 363, tohum: 364, adet: [2, 4], tekrar: true, mevsim: [0.8, 1.3, 0.6, 0] },
+  { k: 'biber', ad: 'Biber', urun: 365, tohum: 366, adet: [2, 3], tekrar: true, mevsim: [0.8, 1.3, 0.6, 0] },
+  { k: 'misir', ad: 'Mısır', urun: 367, tohum: 368, adet: [1, 3], mevsim: [0.9, 1.3, 0.7, 0] },
+  { k: 'sogan', ad: 'Soğan', urun: 369, tohum: 369, adet: [2, 4], mevsim: [1, 0.8, 1, 0.5] },
+  { k: 'lahana', ad: 'Lahana', urun: 370, tohum: 371, adet: [1, 1], mevsim: [1, 0.6, 1.1, 0.6] },
+  { k: 'pamuk', ad: 'Pamuk', urun: 372, tohum: 373, adet: [2, 4], mevsim: [0.8, 1.3, 0.7, 0] },
+  { k: 'cilek', ad: 'Çilek', urun: 374, tohum: 375, adet: [2, 4], tekrar: true, mevsim: [1.3, 1, 0.5, 0] }
+];
+EKIN_TURLERI.forEach(E => {
+  const b = E.taban = ayir(4);
+  for (let e = 0; e < 4; e++) blok(b + e, { ...T0, ad: e === 3 ? `Olgun ${E.ad}` : `${E.ad} Fidesi`, dok: E.k + e, ekin: e, sonraki: e < 3 ? b + e + 1 : 0, gizli: true, mevsim: E.mevsim, tarimTur: E.k,
+    ...(E.tekrar && e === 3 ? { tekrar: b + 2, urun: E.urun, urunAdet: E.adet } : {}), harita: 4,
+    dusur: r => (e === 3 ? [[E.urun, E.adet[0] + Math.floor(r() * (E.adet[1] - E.adet[0] + 1))], ...(E.tohum !== E.urun ? [[E.tohum, 1 + Math.floor(r() * 2)]] : [])] : [[E.tohum, 1]]) });
+  TARIM[E.k] = E;
+});
+/* Karpuz: sap 4 evre; olgun sap yanındaki boş toprağa karpuz verir */
+TARIM.karpuzSap = ayir(4); TARIM.karpuz = ayir(1);
+for (let e = 0; e < 4; e++) blok(TARIM.karpuzSap + e, { ...T0, ad: e === 3 ? 'Olgun Karpuz Sapı' : 'Karpuz Sapı', dok: 'karpuz_sap' + e, ekin: e, sonraki: e < 3 ? TARIM.karpuzSap + e + 1 : TARIM.karpuzSap + 3,
+  meyve: e === 3, meyveBlok: TARIM.karpuz, taban: TARIM.karpuzSap, gizli: e > 0, mevsim: [0.7, 1.4, 0.5, 0], dusur: r => [[377, e === 3 ? 1 + (r() < 0.5 ? 1 : 0) : 1]], harita: 4 });
+blok(TARIM.karpuz, { ad: 'Karpuz', dok: ['karpuz_ust', 'karpuz_yan', 'karpuz_ust'], sertlik: 1, alet: 'balta', ses: 'odun', harita: 117, dusur: r => [[376, 3 + Math.floor(r() * 4)]] });
+/* Meyve ağaçları: fidan, meyvesiz yaprak ve meyveli yaprak (sağ tıkla toplanır; meyve zamanla yeniden olur) */
+export const MEYVE_AGACLARI = [
+  { k: 'elma', ad: 'Elma', meyve: 266, mevsim: [0.4, 1, 1.4, 0] }, { k: 'kiraz', ad: 'Kiraz', meyve: 378, mevsim: [1.2, 1.3, 0.2, 0] },
+  { k: 'portakal', ad: 'Portakal', meyve: 379, mevsim: [0.6, 0.8, 1.2, 0.6] }, { k: 'zeytin', ad: 'Zeytin', meyve: 380, mevsim: [0.3, 0.8, 1.3, 0.2] }
+];
+export const MEYVE_YAPRAK = {};
+MEYVE_AGACLARI.forEach(M => {
+  const f = M.fidan = ayir(1), y = M.bos = ayir(1), d = M.dolu = ayir(1);
+  blok(f, { ...T0, ad: `${M.ad} Fidanı`, dok: 'fidan_' + M.k, fidan: M.k, harita: 4 });
+  const ort = { opak: false, kesik: true, sertlik: 0.2, alet: 'makas', ses: 'bitki', meyveAgaci: M.k, mevsim: M.mevsim, harita: 9, taban: y };
+  blok(y, { ...ort, ad: `${M.ad} Ağacı Yaprağı`, dok: 'yaprak_' + M.k, dolu: d, dusur: r => { const o = []; if (r() < 1 / 14) o.push([f, 1]); if (r() < 1 / 30) o.push([256, 1]); return o; } });
+  blok(d, { ...ort, ad: `${M.ad} Ağacı Yaprağı`, dok: 'yaprak_' + M.k + '_m', meyveli: true, bos: y, meyveId: M.meyve, gizli: true,
+    dusur: r => { const o = [[M.meyve, 1 + (r() < 0.4 ? 1 : 0)]]; if (r() < 1 / 14) o.push([f, 1]); return o; } });
+  MEYVE_YAPRAK[M.k] = M;
+});
+/* Kompost Kutusu: bitkisel atıklar konunca dolar (0-7), dolunca (8) gübre verir */
+TARIM.kompost = ayir(9);
+for (let s = 0; s < 9; s++) blok(TARIM.kompost + s, { ad: 'Kompost Kutusu', dok: s === 8 ? ['kompost_hazir', 'kompost_yan', 'kalas'] : ['kompost_ic', 'kompost_yan', 'kalas'], cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'balta', ses: 'odun',
+  sekil: 'kompost', kompost: s, taban: TARIM.kompost, gizli: s > 0, dusur: () => [[TARIM.kompost, 1]], harita: 14 });
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 2048;   // 0.31.0: 1024'ten 2048'e
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
@@ -602,6 +654,37 @@ esya(346, { ad: 'Beyaz Boya', simge: 'boya', renk: '#ecebe4' });
 esya(345, { ad: 'Yapı Planı', simge: 'plan', tur: 'plan', yigin: 1 });
 /* 0.32.0: teslimat görevlerinde taşınan koli */
 esya(347, { ad: 'Köy Kolisi', simge: 'koli', yigin: 1 });
+/* ---------- 0.34.0: tarım ürünleri, tohumlar, yemekler ve aletler ---------- */
+esya(363, { ad: 'Domates', simge: 'domates', tur: 'yiyecek', yemek: 3 });
+esya(364, { ad: 'Domates Tohumu', simge: 'tohum', renk: '#e8d080', ekin: TARIM.domates.taban });
+esya(365, { ad: 'Biber', simge: 'biber', tur: 'yiyecek', yemek: 2 });
+esya(366, { ad: 'Biber Tohumu', simge: 'tohum', renk: '#f0e0a0', ekin: TARIM.biber.taban });
+esya(367, { ad: 'Mısır', simge: 'misir', tur: 'yiyecek', yemek: 2 });
+esya(368, { ad: 'Mısır Tanesi', simge: 'tohum', renk: '#f2c43c', ekin: TARIM.misir.taban });
+esya(369, { ad: 'Soğan', simge: 'sogan', tur: 'yiyecek', yemek: 1, ekin: TARIM.sogan.taban });
+esya(370, { ad: 'Lahana', simge: 'lahana', tur: 'yiyecek', yemek: 3 });
+esya(371, { ad: 'Lahana Tohumu', simge: 'tohum', renk: '#7a8a5a', ekin: TARIM.lahana.taban });
+esya(372, { ad: 'Pamuk', simge: 'pamuk' });
+esya(373, { ad: 'Pamuk Tohumu', simge: 'tohum', renk: '#5a4a3a', ekin: TARIM.pamuk.taban });
+esya(374, { ad: 'Çilek', simge: 'cilek', tur: 'yiyecek', yemek: 2 });
+esya(375, { ad: 'Çilek Fidesi', simge: 'fide', renk: '#3a8a3a', ekin: TARIM.cilek.taban });
+esya(376, { ad: 'Karpuz Dilimi', simge: 'karpuz', tur: 'yiyecek', yemek: 2, serin: 20 });
+esya(377, { ad: 'Karpuz Çekirdeği', simge: 'cekirdek', renk: '#2a2a2a', ekin: TARIM.karpuzSap });
+esya(378, { ad: 'Kiraz', simge: 'kiraz', tur: 'yiyecek', yemek: 2 });
+esya(379, { ad: 'Portakal', simge: 'portakal', tur: 'yiyecek', yemek: 3 });
+esya(380, { ad: 'Zeytin', simge: 'zeytin', tur: 'yiyecek', yemek: 1 });
+esya(381, { ad: 'Zeytinyağı', simge: 'iksir', renk: '#c8b830' });
+esya(382, { ad: 'Menemen', simge: 'corba2', renk: '#d8542a', tur: 'yiyecek', yemek: 9, kase: true, pismis: true, sicak: 20 });
+esya(383, { ad: 'Çoban Salatası', simge: 'corba2', renk: '#6aa83a', tur: 'yiyecek', yemek: 7, kase: true, serin: 30 });
+esya(384, { ad: 'Közlenmiş Mısır', simge: 'misir', renk: '#c8902a', tur: 'yiyecek', yemek: 5, pismis: true });
+esya(385, { ad: 'Patlamış Mısır', simge: 'patlamis', tur: 'yiyecek', yemek: 3, pismis: true });
+esya(386, { ad: 'Portakal Suyu', simge: 'iksir', renk: '#f0901a', tur: 'yiyecek', yemek: 4, kap: 331, serin: 40 });
+esya(387, { ad: 'Meyve Salatası', simge: 'corba2', renk: '#e85a6a', tur: 'yiyecek', yemek: 7, kase: true, iyilestirme: 2 });
+esya(388, { ad: 'Demir Tırpan', tur: 'alet', yigin: 1, simge: 'tirpan', renk: '#dcdcdc', ozellik: 'Olgun ekinleri 3 × 3 alanda biçer ve tohum varsa yeniden eker; otları temizler',
+  alet: { tur: 'tirpan', seviye: 4, hiz: 6, dayanim: 300, hasar: 4, alan: 1 } });
+esya(389, { ad: 'Elmas Tırpan', tur: 'alet', yigin: 1, simge: 'tirpan', renk: '#52e3d6', ozellik: 'Olgun ekinleri 5 × 5 alanda biçer ve tohum varsa yeniden eker; otları temizler',
+  alet: { tur: 'tirpan', seviye: 5, hiz: 8, dayanim: 1500, hasar: 6, alan: 2 } });
+esya(390, { ad: 'Gübre', simge: 'kemik_tozu', renk: '#6a4a2a', gubre: true, ozellik: 'Ekinleri ve fidanları hızla büyütür' });
 esya(328, { ad: 'Havuç', simge: 'havuc', tur: 'yiyecek', yemek: 3, ekin: 129 });
 esya(329, { ad: 'Patates', simge: 'patates', renk: '#c8a25a', tur: 'yiyecek', yemek: 1, ekin: 133 });
 esya(330, { ad: 'Fırınlanmış Patates', simge: 'patates', renk: '#b8742e', pismis: true, tur: 'yiyecek', yemek: 5 });
