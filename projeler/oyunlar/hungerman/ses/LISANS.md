@@ -3,7 +3,7 @@
 ## Ses efektleri (`efekt/`)
 Kenney (www.kenney.nl) ses paketlerinden alınmıştır: Impact Sounds, RPG Audio, Interface Sounds, Music Jingles.
 Lisans: Creative Commons Zero (CC0 1.0), kamu malı. Ticari ve kişisel projelerde serbestçe kullanılabilir.
-Özgün dosyalar Ogg Vorbis'ten MP3'e dönüştürülmüş, baştaki sessizlik kırpılmıştır.
+Özgün dosyalar Ogg Vorbis'ten MP3'e dönüştürülmüş, baştaki ve sondaki sessizlik kırpılmış, ses düzeyleri türüne göre dengelenmiştir (0.40.2).
 
 ## Müzikler (`muzik/`)
 Besteci: Tanner Helland — https://github.com/tannerhelland/free-music (https://tannerhelland.com/music)
@@ -23,7 +23,7 @@ Parçalar ses düzeyi eşitlenerek MP3'e dönüştürülmüştür (başka deği�
 | menu.mp3 | Daybreak | Ana menü |
 
 ## Gerçek kayıtlı canlı, doğa ve eşya sesleri (0.40.0)
-Aşağıdaki dosyalar `efekt/` klasöründedir. Özgün dosyalar Ogg Vorbis'ten tek kanallı MP3'e dönüştürülmüş, baştaki sessizlik kırpılmış ve ses düzeyleri eşitlenmiştir. Gök gürültüsü ve rüzgâr kısa parçalara bölünmüştür. Bunun dışında değişiklik yapılmamıştır.
+Aşağıdaki dosyalar `efekt/` klasöründedir. Özgün dosyalar Ogg Vorbis'ten tek kanallı MP3'e dönüştürülmüş, baştaki ve sondaki sessizlik kırpılmış, doğru akım kayması giderilmiş ve ses düzeyleri türüne göre dengelenmiştir. Gök gürültüsü ve rüzgâr kısa parçalara bölünmüştür. Bunun dışında değişiklik yapılmamıştır.
 Lisanslar: [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (kamu malı), [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) ve [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (yazar adı belirtilerek serbest kullanım), MIT; yalnızca yağmur döngüsü [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) (yazar adı belirtilerek ve aynı lisansla paylaşılarak serbest kullanım). Ticari olmayan (NC) ya da türetilemez (ND) lisanslı dosya kullanılmamıştır.
 
 ### VoxeLibre (https://github.com/VoxeLibre/VoxeLibre) üzerinden

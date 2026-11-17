@@ -117,6 +117,18 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.2 (0.40.2): Ses denetimi ve düzey dengesi
+- Bütün ses kayıtları (292 dosya) tek tek denetlendi; bulunan sorunlar giderildi:
+  - Baştaki sessizlik kırpıldı (ör. gök gürültüsü şimşekten 0,5 saniye geç, mağara uğultusu 1 saniye geç başlıyordu).
+  - Sondaki uzun sessizlikler kırpıldı (dosyalar kısaldı).
+  - Ateş ve lav kayıtlarındaki doğru akım kayması giderildi.
+  - Kırpılmış (bozuk) tepeler içeren adım, kapı, vuruş, hasar ve tencere kayıtlarının düzeyi düşürüldü.
+  - Kılıç savurma sesi neredeyse duyulmayacak kadar kısıktı; düzeltildi.
+- Ses düzeyleri türüne göre doğal bir dengeye getirildi. En yüksekten en düşüğe: patlama ve gök gürültüsü; Kanlı Ay, tılsım, Kül Devi ve Taş Muhafız; canlıların acıma ve ölüm sesleri; vuruş, kazma ve canlı ortam sesleri; kapı, sandık ve köylü; küçük hayvanlar ve yağmur; adım, damla, dalga ve arayüz tıklamaları.
+- Aynı anda çok ses çalınca oluşan cızırtıyı önlemek için ana çıkışa sıkıştırıcı eklendi.
+- Dalga, lav, mağara, rüzgâr ve meteor gibi uzun kayıtların üst üste binip birikmesi engellendi (sandalla giderken dalga kayıtları üst üste biniyordu).
+- Hasar ve büyüleme kayıtlarının üstüne ayrıca çalan sentez sesler kaldırıldı.
+
 ## 40.1 (0.40.1): Pencere açılma sesleri
 - Envanter, istasyon, harita, başarım, görev ve tarif kitabı gibi pencereler açılırken çalan ses kaldırıldı. Sandık ve tencere açılma sesleri (nesne sesi) korunmuştur.
 

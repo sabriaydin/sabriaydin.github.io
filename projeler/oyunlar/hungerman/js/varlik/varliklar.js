@@ -652,7 +652,7 @@ export class Varliklar {
     if (v.turAd === 'tavuk' && !(v.yavru > 0)) {
       if (v.yumurtaSayac == null) v.yumurtaSayac = 60 + Math.random() * 360;
       v.yumurtaSayac -= dt;
-      if (v.yumurtaSayac <= 0) { v.yumurtaSayac = 300 + Math.random() * 300; this.dusenler.birak(480, 1, v.konum.x, v.konum.y + 0.3, v.konum.z); if (this.sesK(v.konum) > 0.1 && !this.ses.cal('tavuk_yumurta', 0.5 * this.sesK(v.konum))) this.ses.canli('tavuk', 'normal', this.sesK(v.konum)); }
+      if (v.yumurtaSayac <= 0) { v.yumurtaSayac = 300 + Math.random() * 300; this.dusenler.birak(480, 1, v.konum.x, v.konum.y + 0.3, v.konum.z); if (this.sesK(v.konum) > 0.1 && !this.ses.cal('tavuk_yumurta', this.sesK(v.konum))) this.ses.canli('tavuk', 'normal', this.sesK(v.konum)); }
     }
     if (v.dinlen > 0) v.dinlen -= dt;
     v.izle = null;
