@@ -1,103 +1,225 @@
-/* HungerMan - hava durumu: açık, yağmurlu, fırtınalı
-   Yağmur ve kar parçacıkları kameranın çevresinde, her sütunun en üst bloğuna kadar düşer (çatı altına yağmaz).
-   Soğuk yerlerde (karlı biyomlar, soğuk iklimdeki yüksek dağlar) kar, diğer her yerde yağmur yağar. Fırtınada şimşek çakar ve gök gürler.
-   Durum tek oyunculuda ve sunucuda yürütülür; çok oyunculu istemciye anlık durum ile gelir. */
+/* HungerMan - hava durumu (0.33.0: bölgesel hava)
+   Hava artık tüm dünyada aynı değildir: dünyanın üzerinde rüzgârla yavaşça sürüklenen ve zamanla büyüyüp dağılan yağış alanları (cepheler) vardır.
+   Bir yerde güneş açıkken birkaç yüz blok ötede yağmur, daha ötede fırtına olabilir; yağış alanının kenarına yaklaşıldığında yağmur perdesi görünür.
+   Oyuncunun bulunduğu yerdeki değerler (yogunluk, firtinaK, durum) gökyüzü, ses, ısı ve oyun kuralları için kullanılır.
+   Parçacıklar (yağmur çizgileri, kar taneleri) tamamen ekran kartında hareket eder: her karede işlemci yükü yoktur.
+   - Kaba doku (48 x 48 hücre, hücre 8 blok): zemin yüksekliği, yağmur ve kar yoğunluğu (biyoma göre: karlı yerlerde kar, çölde yağış yok).
+   - İnce doku (96 x 96 sütun): kameranın çevresinde sütunların en üst bloğu; çatı ve ağaç altına yağmaz. Kareler arasında parça parça yenilenir.
+   Durum tek oyunculuda ve sunucuda yürütülür; hava saati (t) ve elle ayarlanan hava çok oyunculu istemciye gönderilir. */
 import { THREE } from './sahne.js';
 import { BY, KARLI, karliZirve } from '../dunya/uretici.js';
 import { KATI, SIVI } from '../bloklar.js';
-import { PY } from '../sabitler.js';
+import { PY, PB } from '../sabitler.js';
 
 export const HAVA = ['acik', 'yagmur', 'firtina'];
 export const HAVA_ADI = { acik: 'Açık', yagmur: 'Yağmurlu', firtina: 'Fırtınalı' };
-/* Sütunun yağış türü: 2 kar, 1 yağmur */
+/* Sütunun yağış türü: 2 kar, 1 yağmur, 0 yok (çöl) */
 const karMi = k => KARLI.has(k.b) || k.te < -0.27 || (k.b === BY.DAG && karliZirve(k));
-const YAGMUR_N = 2800, KAR_N = 1500, R = 30;
-/* Durum süreleri (saniye) */
-const SURE = { acik: [420, 1100], yagmur: [150, 420], firtina: [110, 280] };
-const rastSure = d => SURE[d][0] + Math.random() * (SURE[d][1] - SURE[d][0]);
+const KH = 8, KN = 48, FN = 96;   // kaba hücre boyu, kaba doku boyu, ince doku boyu
+const RUZGAR = [0.55, 0.22];      // yağış alanlarının sürüklenme hızı (blok / sn)
+const smooth = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+/* ---------- Gürültü (değer gürültüsü) ---------- */
+function karma(x, z, s) { let h = Math.imul(x, 374761393) ^ Math.imul(z, 668265263) ^ Math.imul(s, 982451653); h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+function gurultu(x, z, s) {
+  const xi = Math.floor(x), zi = Math.floor(z), fx = x - xi, fz = z - zi;
+  const u = fx * fx * (3 - 2 * fx), v = fz * fz * (3 - 2 * fz);
+  const a = karma(xi, zi, s), b = karma(xi + 1, zi, s), c = karma(xi, zi + 1, s), d = karma(xi + 1, zi + 1, s);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+
+/* ---------- Parçacık gölgelendiricileri ---------- */
+const VS = `
+attribute vec4 tohum;
+uniform vec3 kam; uniform float zaman, R, H, hiz, boy, tur, uzak, olcek;
+uniform vec2 ruz;
+uniform sampler2D kaba, ince;
+varying float vA;
+float sar(float b, float c, float L) { return b + L * floor((c - b) / L + 0.5); }
+void main() {
+  float x = sar(tohum.x * 2.0 * R + ruz.x * zaman, kam.x, 2.0 * R);
+  float z = sar(tohum.z * 2.0 * R + ruz.y * zaman, kam.z, 2.0 * R);
+  float y = sar(tohum.y * H - zaman * hiz * (0.85 + 0.3 * fract(tohum.x * 13.7)), kam.y + H * 0.15, H);
+  if (tur > 1.5) { float f = tohum.x * 40.0 + tohum.z * 23.0; x += sin(zaman * 0.8 + f) * 0.6; z += cos(zaman * 0.6 + f) * 0.5; }
+  vec2 kc = floor(vec2(x, z) / ${KH}.0);
+  vec4 k = texture2D(kaba, (mod(kc, ${KN}.0) + 0.5) / ${KN}.0);
+  float yog = tur < 1.5 ? k.g : k.b;
+  float d = length(vec2(x, z) - kam.xz);
+  float tepe = k.r * 255.0;
+  if (uzak < 0.5 && d < ${FN / 2 - 2}.0) tepe = texture2D(ince, (mod(floor(vec2(x, z)), ${FN}.0) + 0.5) / ${FN}.0).r * 255.0;
+  float gor = step(fract(tohum.x * 91.3 + tohum.z * 17.1), yog) * step(tepe + 1.0, y);
+  vA = gor * (1.0 - smoothstep(R * 0.7, R, d)) * smoothstep(uzak > 0.5 ? 30.0 : 0.8, uzak > 0.5 ? 50.0 : 2.5, d);
+  vec3 p = vec3(x, y, z) + tohum.w * vec3(-ruz.x * 0.05 * boy, boy, -ruz.y * 0.05 * boy);
+  if (vA <= 0.001) p = vec3(kam.x, -1000.0, kam.z);
+  vec4 mv = viewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mv;
+  gl_PointSize = clamp(olcek / max(0.5, -mv.z), 1.0, 6.0);
+}`;
+const FS_CIZGI = `
+uniform vec3 renk; uniform float opak;
+varying float vA;
+void main() { if (vA <= 0.001) discard; gl_FragColor = vec4(renk, opak * vA); }`;
+const FS_NOKTA = `
+uniform vec3 renk; uniform float opak;
+varying float vA;
+void main() { vec2 c = gl_PointCoord - 0.5; float r = dot(c, c); if (vA <= 0.001 || r > 0.25) discard; gl_FragColor = vec4(renk, opak * vA * (1.0 - r * 2.4)); }`;
 
 export class Hava {
   constructor(sahne, dunya) {
     this.sahne = sahne; this.dunya = dunya;
-    this.durum = 'acik'; this.sure = rastSure('acik') * 0.6;
+    this.tohum = dunya.uretici ? dunya.uretici.tohum | 0 : 1;
+    this.t = ((this.tohum >>> 0) % 5000) * 3.7;   // hava saati (sn)
+    this.zorla = null;   // elle ayarlanan hava: { d, k (kalan sn) }
+    this.durum = 'acik'; this.sure = 0; this.hedefY = 0; this.hedefF = 0;
     this.yogunluk = 0; this.firtinaK = 0; this.simsekParla = 0; this.simsekSayac = 8;
-    this.kolonlar = new Map(); this.kolonZaman = 0;
+    this.merkez = { x: 0, z: 0 };
+    this.turOnbellek = new Map();
     this.grup = new THREE.Group(); this.grup.frustumCulled = false;
     sahne.sahne.add(this.grup);
-    /* Yağmur çizgileri */
-    this.yP = new Float32Array(YAGMUR_N * 6);
-    this.yD = Array.from({ length: YAGMUR_N }, () => ({ x: 0, y: -999, z: 0, v: 0, alt: 0 }));
-    const yg = new THREE.BufferGeometry(); yg.setAttribute('position', new THREE.BufferAttribute(this.yP, 3));
-    this.yagmurMalzeme = new THREE.LineBasicMaterial({ color: 0xaab8cc, transparent: true, opacity: 0.5, depthWrite: false });
-    this.yagmurCizgi = new THREE.LineSegments(yg, this.yagmurMalzeme); this.yagmurCizgi.frustumCulled = false;
-    /* Kar taneleri */
-    this.kP = new Float32Array(KAR_N * 3);
-    this.kD = Array.from({ length: KAR_N }, () => ({ x: 0, y: -999, z: 0, v: 0, alt: 0, f: Math.random() * 6 }));
-    const kg = new THREE.BufferGeometry(); kg.setAttribute('position', new THREE.BufferAttribute(this.kP, 3));
-    this.karMalzeme = new THREE.PointsMaterial({ color: 0xffffff, size: 0.09, transparent: true, opacity: 0.9, depthWrite: false });
-    this.karNokta = new THREE.Points(kg, this.karMalzeme); this.karNokta.frustumCulled = false;
+    /* Dokular */
+    this.kabaV = new Uint8Array(KN * KN * 4);
+    this.kaba = new THREE.DataTexture(this.kabaV, KN, KN, THREE.RGBAFormat); this.kaba.magFilter = this.kaba.minFilter = THREE.NearestFilter; this.kaba.needsUpdate = true;
+    this.inceV = new Uint8Array(FN * FN * 4);
+    this.ince = new THREE.DataTexture(this.inceV, FN, FN, THREE.RGBAFormat); this.ince.magFilter = this.ince.minFilter = THREE.NearestFilter; this.ince.needsUpdate = true;
+    this.inceAnahtar = new Float64Array(FN * FN).fill(NaN); this.inceSira = 0; this.kabaSayac = 0;
+    /* Katmanlar: yakın yağmur, uzak yağmur perdesi, yakın kar, uzak kar */
+    this.katmanlar = [
+      this.katman('cizgi', 7000, { R: 40, H: 40, hiz: 19, boy: 0.62, tur: 1, uzak: 0, renk: 0xaab8cc, opak: 0.5 }),
+      this.katman('cizgi', 6000, { R: 150, H: 110, hiz: 30, boy: 3.2, tur: 1, uzak: 1, renk: 0x9aa6b8, opak: 0.2 }),
+      this.katman('nokta', 5000, { R: 36, H: 34, hiz: 1.9, boy: 0, tur: 2, uzak: 0, renk: 0xffffff, opak: 0.92, olcek: 34 }),
+      this.katman('nokta', 4000, { R: 120, H: 80, hiz: 2.4, boy: 0, tur: 2, uzak: 1, renk: 0xf2f4f8, opak: 0.55, olcek: 30 })
+    ];
     /* Yıldırım çizgisi */
     const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(48 * 6), 3));
     this.simsekMalzeme = new THREE.LineBasicMaterial({ color: 0xf2f6ff, transparent: true, opacity: 0, depthWrite: false });
     this.simsekCizgi = new THREE.LineSegments(sg, this.simsekMalzeme); this.simsekCizgi.frustumCulled = false; this.simsekCizgi.visible = false;
-    this.grup.add(this.yagmurCizgi, this.karNokta, this.simsekCizgi);
+    this.grup.add(this.simsekCizgi);
     this.simsekOmur = 0;
     this.olaylar = { simsek: null };   // sunucu: yıldırım düştüğünde (x, y, z)
+  }
+  katman(tip, n, o) {
+    const g = new THREE.BufferGeometry(), cizgi = tip === 'cizgi', v = cizgi ? 2 : 1;
+    const t = new Float32Array(n * v * 4), p = new Float32Array(n * v * 3);
+    for (let i = 0; i < n; i++) { const a = Math.random(), b = Math.random(), c = Math.random(); for (let j = 0; j < v; j++) t.set([a, b, c, j], (i * v + j) * 4); }
+    g.setAttribute('position', new THREE.BufferAttribute(p, 3)); g.setAttribute('tohum', new THREE.BufferAttribute(t, 4));
+    const u = { kam: { value: new THREE.Vector3() }, zaman: { value: 0 }, R: { value: o.R }, H: { value: o.H }, hiz: { value: o.hiz }, boy: { value: o.boy }, tur: { value: o.tur }, uzak: { value: o.uzak },
+      olcek: { value: o.olcek || 0 }, ruz: { value: new THREE.Vector2() }, kaba: { value: this.kaba }, ince: { value: this.ince }, renk: { value: new THREE.Color(o.renk) }, opak: { value: o.opak } };
+    const m = new THREE.ShaderMaterial({ uniforms: u, vertexShader: VS, fragmentShader: cizgi ? FS_CIZGI : FS_NOKTA, transparent: true, depthWrite: false });
+    const nesne = cizgi ? new THREE.LineSegments(g, m) : new THREE.Points(g, m);
+    nesne.frustumCulled = false; nesne.visible = false; nesne.taban = o.opak;
+    this.grup.add(nesne);
+    return nesne;
   }
   get yagiyor() { return this.durum !== 'acik'; }
   get firtina() { return this.durum === 'firtina'; }
 
-  /* Durum değiştir (konsol, uyku, ağ) */
+  /* ---------- Bölgesel hava alanı ----------
+     Döndürür: [yağış 0-1, fırtına 0-1]. Alanlar rüzgârla sürüklenir, uzun dalgalı bir gürültü de onları zamanla büyütüp küçültür. */
+  alan(x, z) {
+    if (this.zorla) { const d = this.zorla.d; return d === 'firtina' ? [1, 1] : d === 'yagmur' ? [1, 0] : [0, 0]; }
+    const t = this.t, s = this.tohum;
+    const ax = (x - t * RUZGAR[0]) / 620, az = (z - t * RUZGAR[1]) / 620;
+    const a = gurultu(ax, az, s) * 0.68 + gurultu(ax * 2.3 + 17, az * 2.3 - 9, s ^ 0x55) * 0.32;
+    const b = gurultu(x / 1700 + t / 2600, z / 1700 - t / 3300, s ^ 0x9e37);
+    const v = a * 0.66 + b * 0.34 + (this.kis ? 0.03 : 0);
+    return [smooth(0.57, 0.64, v), smooth(0.69, 0.75, v)];
+  }
+  /* Elle hava ayarı (konsol, uyku, geliştirici): her yerde geçerli; süre dolunca bölgesel havaya dönülür */
   ayarla(durum, sure) {
     if (!HAVA.includes(durum)) return false;
-    this.durum = durum; this.sure = sure > 0 ? sure : rastSure(durum);
+    this.zorla = { d: durum, k: sure > 0 ? sure : 300 };
     if (durum === 'firtina') this.simsekSayac = 3 + Math.random() * 6;
+    this.durumHesapla();
     return true;
   }
-  disaAktar() { return { d: this.durum, s: Math.round(this.sure) }; }
-  iceAktar(v) { if (v && HAVA.includes(v.d)) { this.durum = v.d; this.sure = v.s > 0 ? v.s : rastSure(v.d); this.yogunluk = this.durum === 'acik' ? 0 : 1; this.firtinaK = this.firtina ? 1 : 0; } }
+  disaAktar() { return { t: Math.round(this.t), z: this.zorla ? [this.zorla.d, Math.round(this.zorla.k)] : null }; }
+  iceAktar(v) {
+    if (!v) return;
+    if (typeof v.t === 'number') { this.t = v.t; this.zorla = v.z && HAVA.includes(v.z[0]) ? { d: v.z[0], k: v.z[1] } : null; }
+    else if (HAVA.includes(v.d) && v.d !== 'acik') this.zorla = { d: v.d, k: v.s > 0 ? v.s : 300 };   // eski kayıt: tüm dünyada aynı hava
+  }
+  /* Çok oyunculu: sunucunun gönderdiği hava saati ve elle ayarlanan hava */
+  agVeri() { return [Math.round(this.t * 10) / 10, this.zorla ? this.zorla.d : 0, this.zorla ? Math.round(this.zorla.k) : 0]; }
+  agUygula(m) {
+    if (!Array.isArray(m)) return;
+    if (Math.abs(m[0] - this.t) > 3) this.t = m[0];
+    this.zorla = m[1] ? { d: m[1], k: m[2] } : null;
+  }
+  /* Oyuncunun yerindeki hava */
+  durumHesapla() {
+    const [y, f] = this.alan(this.merkez.x, this.merkez.z), tur = this.turAl(this.merkez.x, this.merkez.z);
+    this.hedefY = tur === 0 ? 0 : y; this.hedefF = tur === 0 ? 0 : f;
+    this.durum = this.hedefF > 0.5 ? 'firtina' : this.hedefY > 0.5 ? 'yagmur' : 'acik';
+    this.sure = this.zorla ? this.zorla.k : 0;
+  }
 
-  /* Tek oyunculu ve sunucu: süre dolunca hava değişir; fırtınada yıldırım düşer */
+  /* Tek oyunculu ve sunucu: hava saati ilerler; fırtına alanlarında yıldırım düşer. merkezler: oyuncu konumları */
   zamanla(dt, merkezler) {
-    if (!this.kilit) this.sure -= dt;   // kilit: geliştirici modunda hava kendiliğinden değişmez
-    if (this.sure <= 0) {
-      if (this.durum === 'acik') this.ayarla(Math.random() < 0.72 ? 'yagmur' : 'firtina');
-      else if (this.durum === 'yagmur' && Math.random() < 0.18) this.ayarla('firtina');
-      else this.ayarla('acik');
+    if (!this.kilit) {
+      this.t += dt;
+      if (this.zorla) { this.zorla.k -= dt; if (this.zorla.k <= 0) this.zorla = null; }
     }
-    if (this.firtina && this.yogunluk > 0.6) {
-      this.simsekSayac -= dt;
-      if (this.simsekSayac <= 0) {
-        this.simsekSayac = 7 + Math.random() * 16;
-        const m = merkezler[Math.floor(Math.random() * merkezler.length)];
-        if (m) {
-          const a = Math.random() * Math.PI * 2, r = 12 + Math.random() * 70;
-          const x = Math.floor(m.x + Math.cos(a) * r), z = Math.floor(m.z + Math.sin(a) * r);
-          if (this.dunya.yuklu(x, z)) {
-            const y = this.ustBlok(x, z) + 1;
-            if (this.olaylar.simsek) this.olaylar.simsek(x + 0.5, y, z + 0.5);
-          }
+    this.simsekSayac -= dt;
+    if (this.simsekSayac <= 0) {
+      this.simsekSayac = 5 + Math.random() * 12;
+      const m = merkezler[Math.floor(Math.random() * merkezler.length)];
+      if (m) {
+        const a = Math.random() * Math.PI * 2, r = 12 + Math.random() * 90;
+        const x = Math.floor(m.x + Math.cos(a) * r), z = Math.floor(m.z + Math.sin(a) * r);
+        if (this.alan(x, z)[1] > 0.6 && this.turAl(x, z) && this.dunya.yuklu(x, z)) {
+          const y = this.ustBlok(x, z) + 1;
+          if (this.olaylar.simsek) this.olaylar.simsek(x + 0.5, y, z + 0.5);
         }
       }
     }
   }
 
-  /* Sütunun en üst katı ya da sıvı bloğu (önbellekli) */
+  /* Sütunun en üst katı ya da sıvı bloğu (parça dizisine doğrudan erişim) */
   ustBlok(x, z) {
-    for (let y = PY - 1; y > 0; y--) { const b = this.dunya.blok(x, y, z); if (KATI[b] || SIVI[b]) return y; }
+    const p = this.dunya.parca(Math.floor(x / PB), Math.floor(z / PB));
+    if (!p || !p.v) return 0;
+    const v = p.v, b = (((z % PB) + PB) % PB) * PB + (((x % PB) + PB) % PB);
+    for (let y = PY - 1; y > 0; y--) { const id = v[b + y * PB * PB]; if (KATI[id] || SIVI[id]) return y; }
     return 0;
   }
-  kolon(x, z) {
-    const k = x + ',' + z;
-    let c = this.kolonlar.get(k);
+  /* Kaba hücrenin yağış türü ve zemin yüksekliği (önbellekli; kışın çöl ve savan dışında her yere kar) */
+  hucre(cx, cz) {
+    const k = cx * 100003 + cz;
+    let c = this.turOnbellek.get(k);
     if (!c) {
-      const yuklu = this.dunya.yuklu(x, z);
-      const k = yuklu ? this.dunya.uretici.kolon(x, z, {}) : null;
-      /* 0.18.0: kışın çöl ve savan dışında her yere kar yağar */
-      c = { u: yuklu ? this.ustBlok(x, z) : PY, tur: yuklu ? (karMi(k) || (this.kis && k.b !== BY.COL && k.b !== BY.SAVAN) ? 2 : 1) : 0 };
-      this.kolonlar.set(k, c);
+      if (this.turOnbellek.size > 30000) this.turOnbellek.clear();
+      const o = this.dunya.uretici.kolon(cx * KH + 4, cz * KH + 4, {});
+      const tur = o.b === BY.COL ? 0 : karMi(o) || (this.kis && o.b !== BY.SAVAN) ? 2 : 1;
+      c = [tur, Math.max(0, Math.min(250, o.h + 4))];
+      this.turOnbellek.set(k, c);
     }
     return c;
+  }
+  turAl(x, z) { return this.hucre(Math.floor(x / KH), Math.floor(z / KH))[0]; }
+  /* Kaba doku: kamera çevresindeki 48 x 48 hücre (toroidal dizin) */
+  kabaGuncelle(c) {
+    const V = this.kabaV, bx = Math.floor(c.x / KH) - KN / 2, bz = Math.floor(c.z / KH) - KN / 2;
+    if (this.kisOnce !== !!this.kis) { this.kisOnce = !!this.kis; this.turOnbellek.clear(); }
+    for (let j = 0; j < KN; j++) for (let i = 0; i < KN; i++) {
+      const cx = bx + i, cz = bz + j, [tur, h] = this.hucre(cx, cz);
+      const y = tur ? this.alan(cx * KH + 4, cz * KH + 4)[0] : 0;
+      const o = ((((cz % KN) + KN) % KN) * KN + (((cx % KN) + KN) % KN)) * 4;
+      V[o] = h; V[o + 1] = tur === 1 ? Math.round(y * 255) : 0; V[o + 2] = tur === 2 ? Math.round(y * 255) : 0; V[o + 3] = 255;
+    }
+    this.kaba.needsUpdate = true;
+  }
+  /* İnce doku: kamera çevresindeki 96 x 96 sütunun en üst bloğu; her karede bir bölümü yenilenir */
+  inceGuncelle(c, butce) {
+    const V = this.inceV, A = this.inceAnahtar, bx = Math.floor(c.x) - FN / 2, bz = Math.floor(c.z) - FN / 2;
+    let n = 0, degisti = false;
+    for (let s = 0; s < FN * FN && n < butce; s++) {
+      const i = this.inceSira; this.inceSira = (this.inceSira + 1) % (FN * FN);
+      const x = bx + (i % FN), z = bz + Math.floor(i / FN);
+      const o = (((z % FN) + FN) % FN) * FN + (((x % FN) + FN) % FN), anahtar = x * 65536 + z;
+      if (A[o] === anahtar && (s & 7)) continue;   // aynı sütun: sekizde bir yeniden okunur (yeni blok, kırılan çatı)
+      A[o] = anahtar; V[o * 4] = this.dunya.yuklu(x, z) ? this.ustBlok(x, z) : 0; n++; degisti = true;
+    }
+    if (degisti) this.ince.needsUpdate = true;
   }
 
   /* Yıldırım görüntüsü: zikzak çizgi, gök parlaması ve uzaklığa göre gecikmeli gök gürültüsü */
@@ -119,74 +241,38 @@ export class Hava {
     if (ses) setTimeout(() => ses.gokGurultusu(Math.max(0.15, 1 - d / 200), d < 30), Math.min(4000, d * 9));
   }
 
-  /* Her karede: yoğunluk geçişi, parçacıklar, parlama */
+  /* Her karede: oyuncunun yerindeki havaya geçiş, dokular ve gölgelendirici değerleri, parlama */
   guncelle(dt, kamera, suda) {
-    const hedef = this.durum === 'acik' ? 0 : 1;
-    this.yogunluk += Math.sign(hedef - this.yogunluk) * Math.min(Math.abs(hedef - this.yogunluk), dt / 12);
-    const fh = this.firtina ? 1 : 0;
-    this.firtinaK += Math.sign(fh - this.firtinaK) * Math.min(Math.abs(fh - this.firtinaK), dt / 10);
+    const c = kamera.position;
+    this.merkez.x = c.x; this.merkez.z = c.z;
+    this.durumHesapla();
+    this.yogunluk += Math.sign(this.hedefY - this.yogunluk) * Math.min(Math.abs(this.hedefY - this.yogunluk), dt / 10);
+    this.firtinaK += Math.sign(this.hedefF - this.firtinaK) * Math.min(Math.abs(this.hedefF - this.firtinaK), dt / 10);
     this.simsekParla = Math.max(0, this.simsekParla - dt * 3.2);
     if (this.simsekOmur > 0) {
       this.simsekOmur -= dt;
       this.simsekMalzeme.opacity = this.simsekOmur > 0 ? (Math.sin(this.simsekOmur * 60) > -0.3 ? 1 : 0.3) : 0;
       if (this.simsekOmur <= 0) this.simsekCizgi.visible = false;
     }
-    this.kolonZaman -= dt;
-    if (this.kolonZaman <= 0 || this.kolonlar.size > 6000) { this.kolonZaman = 2.5; this.kolonlar.clear(); }
-    const Y = this.yogunluk;
-    const gor = Y > 0.02 && !suda;
-    this.yagmurCizgi.visible = gor; this.karNokta.visible = gor;
-    if (!gor) return;
-    const c = kamera.position;
-    const yN = Math.floor(YAGMUR_N * Y), kN = Math.floor(KAR_N * Y);
-    const ruzgar = 1.5 + this.firtinaK * 4;
-    /* Yağmur */
-    const yp = this.yP;
-    for (let i = 0; i < YAGMUR_N; i++) {
-      const d = this.yD[i];
-      if (i >= yN) { if (d.y > -900) { d.y = -999; yp.fill(-999, i * 6, i * 6 + 6); } continue; }
-      d.y -= d.v * dt; d.x += ruzgar * 0.25 * dt;
-      if (d.y < d.alt || Math.abs(d.x - c.x) > R + 2 || Math.abs(d.z - c.z) > R + 2) this.dogur(d, c, 1, 18 + this.firtinaK * 6);
-      const L = 0.55 + this.firtinaK * 0.3;
-      yp[i * 6] = d.x; yp[i * 6 + 1] = d.y; yp[i * 6 + 2] = d.z;
-      yp[i * 6 + 3] = d.x - ruzgar * 0.02; yp[i * 6 + 4] = d.y + L; yp[i * 6 + 5] = d.z;
+    this.kabaSayac -= dt;
+    if (this.kabaSayac <= 0) { this.kabaSayac = 0.5; this.kabaGuncelle(c); }
+    this.inceGuncelle(c, 700);
+    const k = 2.4 * (1 + this.firtinaK * 2), zs = this.t % 3600;
+    for (const K of this.katmanlar) {
+      K.visible = !suda;
+      const u = K.material.uniforms;
+      u.kam.value.copy(c); u.zaman.value = zs; u.ruz.value.set(RUZGAR[0] * k, RUZGAR[1] * k);
+      u.opak.value = K.taban * (u.tur.value < 1.5 ? 0.7 + this.firtinaK * 0.3 : 1);
     }
-    this.yagmurCizgi.geometry.attributes.position.needsUpdate = true;
-    /* Kar */
-    const kp = this.kP, t = performance.now() / 1000;
-    for (let i = 0; i < KAR_N; i++) {
-      const d = this.kD[i];
-      if (i >= kN) { if (d.y > -900) { d.y = -999; kp[i * 3 + 1] = -999; } continue; }
-      d.y -= d.v * dt; d.x += (Math.sin(t * 0.8 + d.f) * 0.5 + ruzgar * 0.15) * dt; d.z += Math.cos(t * 0.6 + d.f) * 0.4 * dt;
-      if (d.y < d.alt || Math.abs(d.x - c.x) > R + 2 || Math.abs(d.z - c.z) > R + 2) this.dogur(d, c, 2, 1.6 + Math.random() * 0.8);
-      kp[i * 3] = d.x; kp[i * 3 + 1] = d.y; kp[i * 3 + 2] = d.z;
-    }
-    this.karNokta.geometry.attributes.position.needsUpdate = true;
-    this.yagmurMalzeme.opacity = 0.32 + 0.25 * Y;
-  }
-  /* Parçacığı kameranın çevresinde, kendi türüne (yağmur / kar) uygun bir sütunda yeniden başlat */
-  dogur(d, c, tur, hiz) {
-    for (let k = 0; k < 4; k++) {
-      const x = c.x + (Math.random() * 2 - 1) * R, z = c.z + (Math.random() * 2 - 1) * R;
-      const kol = this.kolon(Math.floor(x), Math.floor(z));
-      if (kol.tur !== tur) continue;
-      const alt = kol.u + 1;
-      const tepe = Math.max(c.y + 10 + Math.random() * 8, alt + 0.5);
-      if (alt > c.y + 18) continue;
-      d.x = x; d.z = z; d.alt = alt; d.v = hiz;
-      d.y = d.y < -900 ? alt + Math.random() * (tepe - alt) : tepe;
-      return;
-    }
-    d.y = -999; d.alt = -998;
   }
   /* Kamera açıkta mı (yağmur sesi boğuk mu) */
   acikta(p) { return this.ustBlok(Math.floor(p.x), Math.floor(p.z)) < p.y; }
-  /* Kameranın bulunduğu sütunda yağış türü: 0 yok (çöl), 1 yağmur, 2 kar */
-  yagisTuru(p) { return this.kolon(Math.floor(p.x), Math.floor(p.z)).tur; }
+  /* Bulunulan yerde yağış türü: 0 yok (çöl), 1 yağmur, 2 kar */
+  yagisTuru(p) { return this.turAl(p.x, p.z); }
 
   temizle() {
     this.sahne.sahne.remove(this.grup);
-    for (const m of [this.yagmurCizgi, this.karNokta, this.simsekCizgi]) { m.geometry.dispose(); m.material.dispose(); }
+    for (const m of [...this.katmanlar, this.simsekCizgi]) { m.geometry.dispose(); m.material.dispose(); }
+    this.kaba.dispose(); this.ince.dispose();
   }
 }
-

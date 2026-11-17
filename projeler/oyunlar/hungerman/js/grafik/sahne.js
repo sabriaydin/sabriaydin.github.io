@@ -13,6 +13,7 @@ const BLOK_VS = `
 attribute vec2 isik;
 uniform float zaman;
 uniform float ruzgar;
+uniform float yaprakSal;
 varying vec2 vUv;
 varying float vAo;
 varying float vGok;
@@ -20,7 +21,7 @@ varying vec3 vDunya;
 varying float vUzak;
 void main() {
   float a = isik.x, sal = 0.0;
-  if (a < -1.0) { sal = 1.0; a = -a - 1.0; } else if (a < 0.0) { sal = 0.3; a = -a; }
+  if (a < -1.0) { sal = 1.0; a = -a - 1.0; } else if (a < 0.0) { sal = 0.3 * yaprakSal; a = -a; }   // 0.33.0: ağaç yaprakları yalnızca fırtınada salınır
   vUv = uv; vAo = a; vGok = isik.y;
   vec4 d = modelMatrix * vec4(position, 1.0);
   if (sal > 0.0) {
@@ -137,7 +138,7 @@ export class Sahne {
     this.atlasDoku = doku;
     const ortak = () => ({
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
-      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, magara: { value: 0.07 }, islak: { value: 0 },
+      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 },
       isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 }
     });
     this.opakMalzeme = new THREE.ShaderMaterial({ uniforms: ortak(), vertexShader: BLOK_VS, fragmentShader: BLOK_FS });
@@ -293,6 +294,7 @@ export class Sahne {
       const u = m.uniforms;
       u.gun.value = diyar ? 0 : gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
       u.ruzgar.value += ((diyar ? 0 : 0.25 + hy * 0.5 + hf * 1.0) - u.ruzgar.value) * 0.01;
+      u.yaprakSal.value += ((diyar ? 0 : Math.max(0, (hf - 0.2) / 0.8)) - u.yaprakSal.value) * 0.01;
       /* Gece görüşü iksiri: en düşük ışık yükselir */
       u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.07;
       u.islak.value = m === this.opakMalzeme && !suda && !diyar ? hy : 0;
@@ -458,7 +460,10 @@ export class Sahne {
     else { px -= ke * 0.05; py -= s * 0.05; pz -= ke * 0.2; rx -= ke * 0.7; }
     this.el.position.set(px, py, pz);
     this.el.rotation.set(rx, ry, rz);
-    const c = this.elKol.material.color; c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
+    /* 0.33.0: kol rengi: giyilen göğüs zırhı ya da uzun kollu üst kıyafet, yoksa ten */
+    const c = this.elKol.material.color;
+    if (this.kolRengi) { if (this.kolRenkHex !== this.kolRengi) { this.kolRenkHex = this.kolRengi; this.kolRenk = new THREE.Color(this.kolRengi); } c.copy(this.kolRenk).multiplyScalar(isik); }
+    else c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
     this.elBlokMalzeme.color.setScalar(isik);
     this.elEsyaMalzeme.color.setScalar(isik);
     /* Büyülü eşya: hafif mor parıltı nabzı */

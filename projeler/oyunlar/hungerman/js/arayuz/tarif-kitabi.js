@@ -138,6 +138,8 @@ export class TarifKitabi {
     if (e.alet && e.alet.dayanim) l.push(`Dayanıklılık ${e.alet.dayanim}`);
     if (e.alet && e.alet.hasar > 1) l.push(`Hasar ${SAYI(e.alet.hasar)}`);
     if (e.zirh) l.push(`Zırh ${e.zirh.puan}`, `Dayanıklılık ${e.zirh.dayanim}`);
+    if (e.kiyafet) l.push('Kıyafet (zırhın altına giyilir)');
+    if (e.isi) l.push([e.isi.y ? `Soğuktan koruma +${e.isi.y}°` : '', e.isi.s ? `Serinlik −${e.isi.s}°` : '', e.isi.g ? `Sıcakta +${e.isi.g}°` : ''].filter(Boolean).join(' · '));
     if (e.ozellik && !(e.etki && ETKILER[e.etki.tur])) l.push(e.ozellik);
     l.push(`Yığın ${e.yigin}`);
     return l.map(s => `<span>${esc(s)}</span>`).join('');

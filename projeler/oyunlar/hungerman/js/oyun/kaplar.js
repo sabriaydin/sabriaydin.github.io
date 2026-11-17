@@ -24,6 +24,15 @@ export function kapFiltresi(b) {
   if (b.elektrik === 'jenerator') return { ad: 'Yakıt Deposu', not: 'Yalnızca yakıt konabilir: kömür, kütük, kalas, çubuk.', izin: id => !!YAKIT[id] };
   if (b.elektrik === 'ocak') return { ad: 'Elektrikli Ocak', not: 'Pişirilecek malzemeleri koyunuz; ocak çalışırken sırayla pişirir (parti başına 5 sn).', izin: id => !!PISIRME[id] };
   if (b.cihaz === 'taret') return { ad: 'Taret Ok Haznesi', not: 'Yalnızca ok konabilir; her atış 1 ok harcar.', izin: id => OK_ESYALARI.has(id) };
+  /* 0.33.0: fırın ve kamp ateşi: yuvaya göre kural (girdi, yakıt, çıktı) */
+  if (b.firinKap === 'firin') return { ad: 'Fırın', firin: 'firin', not: 'Girdi: pişirilecek ya da eritilecek malzeme · Yakıt: kömür, kütük, kalas, çubuk. Fırın, yanında beklenmeden çalışır.',
+    izin: id => !!PISIRME[id] || !!YAKIT[id], yuva: (i, id) => (i === 0 ? !!PISIRME[id] : i === 1 ? !!YAKIT[id] : false) };
+  if (b.firinKap === 'ates') return { ad: 'Kamp Ateşi', firin: 'ates', not: 'Çiğ yiyecekler yakıt gerekmeden pişer (8 sn). Kamp ateşi, yanında beklenmeden çalışır.',
+    izin: atesteMi, yuva: (i, id) => i === 0 && atesteMi(id) };
   return null;
 }
 export const kapFiltresiId = id => kapFiltresi(BLOKLAR[id]);
+/* 0.33.0: hazne boyu (fırın 3, kamp ateşi 2, diğerleri 27) ve hazne olan bloklar */
+export const kapBoyu = b => (b && b.firinKap === 'firin' ? 3 : b && b.firinKap === 'ates' ? 2 : 27);
+export const kapMi = b => !!(b && (b.sandik || b.firinKap));
+const atesteMi = id => { const q = PISIRME[id]; if (!q) return false; const e = ESYALAR[q.cikti]; return !!(e && (e.yemek || e.tur === 'yiyecek')); };

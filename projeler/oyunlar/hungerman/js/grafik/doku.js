@@ -926,6 +926,35 @@ const MAL_CIZ = {
   zirh1: e => p => { cokgen(p, [[2, 3], [6, 3], [8, 5], [10, 3], [14, 3], [14, 7], [12, 7], [12, 14], [4, 14], [4, 7], [2, 7]], e.renk, 0.08); },
   zirh2: e => p => { cokgen(p, [[4, 2], [12, 2], [12, 14], [9, 14], [8, 6], [7, 14], [4, 14]], e.renk, 0.08); },
   zirh3: e => p => { cokgen(p, [[2, 7], [5, 7], [5, 11], [7, 11], [7, 14], [2, 14]], e.renk, 0.08); cokgen(p, [[9, 7], [12, 7], [12, 11], [14, 11], [14, 14], [9, 14]], e.renk, 0.08); },
+  /* 0.33.0: kıyafet simgeleri (biçime göre) */
+  kiyafet0: e => p => {
+    const k = e.kiyafet.sekil, c = hex(e.renk), d = karis(c, 0.7);
+    if (k === 'hasir') { cokgen(p, [[1, 10], [15, 10], [14, 12], [2, 12]], e.renk, 0.05); cokgen(p, [[5, 5], [11, 5], [11, 10], [5, 10]], e.renk, 0.06); cizgi(p, 5, 9, 10, 9, [138, 58, 42]); }
+    else if (k === 'kurk') { cokgen(p, [[3, 5], [13, 5], [13, 13], [11, 13], [11, 9], [5, 9], [5, 13], [3, 13]], e.renk, 0.06); cokgen(p, [[3, 4], [13, 4], [13, 6], [3, 6]], '#efe8dc', 0.04); }
+    else { cokgen(p, [[3, 12], [3, 8], [5, 5], [11, 5], [13, 8], [13, 12]], e.renk, 0.06); cizgi(p, 3, 11, 12, 11, d); cizgi(p, 3, 12, 12, 12, d); cokgen(p, [[7, 2], [9, 2], [9, 4], [7, 4]], '#f2f2f2', 0.02); }
+  },
+  kiyafet1: e => p => {
+    const k = e.kiyafet.sekil, d = karis(hex(e.renk), 0.7);
+    const uzun = k === 'cuppe', kol = k === 'gomlek' ? 6 : 10;
+    cokgen(p, [[1, 3], [5, 2], [8, 4], [11, 2], [15, 3], [15, kol], [12, kol], [12, uzun ? 15 : 14], [4, uzun ? 15 : 14], [4, kol], [1, kol]], e.renk, 0.07);
+    if (k === 'mont') { cokgen(p, [[4, 2], [12, 2], [11, 4], [5, 4]], '#efe8dc', 0.03); cizgi(p, 8, 5, 8, 13, d); }
+    else if (k === 'cuppe') cizgi(p, 4, 9, 11, 9, [184, 68, 42]);
+    else if (k === 'kazak') { cizgi(p, 4, 7, 11, 7, karis(hex(e.renk), 1.25)); cizgi(p, 4, 13, 11, 13, d); }
+    else cizgi(p, 8, 4, 8, 13, d);
+  },
+  kiyafet2: e => p => {
+    const k = e.kiyafet.sekil, alt = k === 'sort' ? 9 : 15, d = karis(hex(e.renk), 0.7);
+    cokgen(p, [[4, 2], [12, 2], [12, alt], [9, alt], [8, 6], [7, alt], [4, alt]], e.renk, 0.07); cizgi(p, 4, 3, 11, 3, d);
+    if (k === 'kurkPantolon') { cizgi(p, 4, 14, 6, 14, [239, 232, 220]); cizgi(p, 9, 14, 11, 14, [239, 232, 220]); }
+  },
+  kiyafet3: e => p => {
+    const k = e.kiyafet.sekil, ust = k === 'cizme' ? 4 : k === 'sandalet' ? 11 : 8;
+    for (const ox of [0, 7]) {
+      cokgen(p, [[2 + ox, ust], [5 + ox, ust], [5 + ox, 11], [8 + ox, 11], [8 + ox, 14], [2 + ox, 14]], e.renk, 0.08);
+      if (k === 'cizme') cokgen(p, [[2 + ox, 3], [5 + ox, 3], [5 + ox, 5], [2 + ox, 5]], '#efe8dc', 0.03);
+      if (k === 'sandalet') cizgi(p, 2 + ox, 12, 7 + ox, 12, [90, 60, 30]);
+    }
+  },
   sikke: () => p => { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const d = Math.hypot(x - 7.5, y - 7.5); if (d < 6) p.set(x, y, d > 4.8 ? [190, 140, 30] : karis([245, 200, 60], 0.95 + p.r() * 0.1)); } cizgi(p, 6, 5, 6, 10, [190, 140, 30]); cizgi(p, 9, 5, 9, 10, [190, 140, 30]); p.set(5, 5, [255, 240, 170]); },
   iksir: e => p => { cokgen(p, [[6, 2], [10, 2], [10, 5], [13, 8], [13, 13], [3, 13], [3, 8], [6, 5]], '#cfe6f0', 0.02); cokgen(p, [[4, 8], [12, 8], [12, 12], [4, 12]], e.renk || '#d8263a', 0.08); cizgi(p, 6, 2, 9, 2, [150, 100, 60]); p.set(5, 9, [255, 180, 190]); },
   altin_elma: () => p => { cokgen(p, [[4, 6], [7, 5], [8, 6], [9, 5], [12, 6], [13, 10], [11, 14], [8, 13], [5, 14], [3, 10]], '#f4c63a', 0.08); cizgi(p, 8, 5, 8, 3, hex('#5a3d1f')); p.set(9, 3, hex('#3f8a2d')); p.set(5, 8, [255, 250, 200]); },

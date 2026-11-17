@@ -108,7 +108,7 @@ export class IstemciOyun {
         o.varliklar.aynaUygula(m.v, (v, meta) => this.koyluCoz(v, meta));
         for (const b of m.b) { const t = o.tekneler.liste.find(x => x.ni === b[0]); if (t && t !== o.tekneler.binilen) t.hedef = b.slice(1); }
         /* Hava durumu sunucudan gelir */
-        if (m.h && o.hava && o.hava.durum !== m.h) o.hava.ayarla(m.h, 9999);
+        if (m.h && o.hava) o.hava.agUygula(m.h);   // 0.33.0: bölgesel hava: hava saati ve elle ayarlanan hava
         break;
       }
       case 'b': {

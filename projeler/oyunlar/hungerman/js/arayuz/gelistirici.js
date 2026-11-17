@@ -61,7 +61,7 @@ const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${SIMGE[k] || ''}<
 /* Eşya kategorileri */
 const KATEGORI = [['hepsi', 'Hepsi'], ['blok', 'Bloklar'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik'], ['alet', 'Aletler'], ['zirh', 'Zırh'], ['yiyecek', 'Yiyecek ve iksir'], ['diger', 'Diğer']];
 function kategori(e) {
-  if (e.zirh) return 'zirh';
+  if (e.zirh || e.kiyafet) return 'zirh';
   const b = e.tur === 'blok' && BLOKLAR[e.blok];
   if (e.tur === 'cihaz' || e.id === 495 || e.id === 496 || (b && b.elektrik)) return 'elektrik';
   if (b && b.mekanik) return 'mekanik';
@@ -74,6 +74,7 @@ const SETLER = {
   insaat: { ad: 'İnşaat', esya: [[14, 64], [38, 64], [35, 64], [37, 64], [34, 64], [51, 64], [46, 64], [50, 4]] },
   yapi: { ad: 'Yapı blokları', esya: [[70, 32], [82, 32], [78, 32], [86, 32], [88, 4], [121, 4], [104, 32], [105, 2], [109, 32], [110, 16]] },
   dekor: { ad: 'Yapı ve dekorasyon', esya: [[345, 1], [YAPI_ID.cilaliTas, 64], [YAPI_ID.parkeZemin, 64], [YAPI_ID.kareliZemin, 64], [YAPI_ID.beton, 64], [YAPI_ID.kil, 64], [YAPI_ID.raf, 8], [YAPI_ID.perde, 8], [YAPI_ID.avize, 4], [YAPI_ID.somine, 2], [YAPI_ID.dolap, 4], [YAPI_ID.sehpa, 4], [YAPI_ID.vazo, 8], [YAPI_ID.mum, 16], [YAPI_ID.sancak + 4, 8], [321, 16], [325, 16], [346, 16]] },
+  giyim: { ad: 'Kıyafet ve yeni zırhlar', esya: [[348, 1], [349, 1], [350, 1], [351, 1], [352, 1], [353, 1], [354, 1], [355, 1], [356, 1], [357, 1], [358, 1], [359, 1], [360, 1], [361, 1], [362, 1], [416, 1], [417, 1], [418, 1], [419, 1], [420, 1], [421, 1], [422, 1], [423, 1], [424, 1], [425, 1], [426, 1], [427, 1], [428, 1], [429, 1], [430, 1], [431, 1]] },
   maden: { ad: 'Madenci', esya: [[312, 1], [313, 1], [314, 1], [46, 64], [276, 16], [408, 1], [409, 1], [410, 1], [411, 1]] },
   denizci: { ad: 'Denizci', esya: [[454, 1], [455, 1], [453, 1], [456, 1], [457, 1], [298, 16]] },
   ciftci: { ad: 'Çiftçi', esya: [[343, 1], [292, 32], [328, 16], [329, 16], [291, 32], [104, 32], [105, 2], [296, 16]] },

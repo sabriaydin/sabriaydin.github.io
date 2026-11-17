@@ -1,7 +1,7 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
@@ -17,7 +17,7 @@ export const istasyonMetni = t => istasyonlar(t).map(k => ISTASYON_ADI[k]).join(
 export const ELOCAK = { aktif: false };
 export const girdiListesi = t => (ELOCAK.aktif && istasyonlar(t).some(k => k === 'firin' || k === 'ates') && t.girdi.length > 1 ? t.girdi.filter(([g]) => g !== 257) : t.girdi);
 
-export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['yapi', 'Yapı'], ['mobilya', 'Mobilya'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik']];
+export const KATEGORILER = [['hepsi', 'Tümü'], ['alet', 'Aletler'], ['savas', 'Savaş'], ['blok', 'Bloklar'], ['malzeme', 'Malzemeler'], ['yiyecek', 'Yiyecek ve Bakım'], ['yapi', 'Yapı'], ['mobilya', 'Mobilya'], ['giyim', 'Giyim'], ['mekanik', 'Mekanik'], ['elektrik', 'Elektrik']];
 
 const R = [];
 const t = (cikti, adet, girdi, istasyon, kategori) => R.push({ cikti, adet, girdi, istasyon: istasyon || null, kategori });
@@ -64,7 +64,7 @@ t(284, 1, [[267, 3]], null, 'malzeme');
 t(286, 1, [[256, 3], [284, 3]], 'masa', 'savas');
 t(287, 4, [[256, 1], [283, 1], [285, 1]], null, 'savas');
 const ZIRH_ADET = [5, 8, 7, 4];
-ZIRH_MALZEME.forEach((m, mi) => ZIRH_ADET.forEach((a, pi) => t(400 + mi * 4 + pi, 1, [[m.mal, a]], 'masa', 'savas')));
+ZIRH_MALZEME.slice(0, 4).forEach((m, mi) => ZIRH_ADET.forEach((a, pi) => t(400 + mi * 4 + pi, 1, [[m.mal, a]], 'masa', 'savas')));   // 0.33.0: yeni zırhların tarifleri dosyanın sonunda
 /* Pişirme: kamp ateşi veya fırın */
 for (const [cig, pismis] of [[271, 272], [273, 274], [275, 276], [277, 278], [279, 280]]) t(pismis, 1, [[cig, 1]], ['ates', 'firin'], 'yiyecek');
 
@@ -275,6 +275,12 @@ t(Y.sehpa, 1, [['kalas', 2], [256, 2]], 'masa', 'mobilya');
 t(Y.vazo, 1, [[Y.kil, 2], [26, 1], [27, 1]], 'masa', 'mobilya');
 /* Yapı Planı */
 t(345, 1, [[256, 2], [282, 1], [325, 1]], 'masa', 'alet');
+
+/* ---------- 0.33.0: kıyafetler ve yeni zırhlar (sona eklenir) ---------- */
+const KIYAFET_TARIF = { 348: [[49, 2]], 349: [[291, 8]], 350: [[49, 3], [282, 1]], 351: [[284, 5]], 352: [[49, 5]], 353: [[282, 6]], 354: [[49, 5], [282, 4]], 355: [[284, 7]],
+  356: [[284, 4]], 357: [[49, 4]], 358: [[49, 4], [282, 3]], 359: [[284, 3]], 360: [[282, 1], [284, 1]], 361: [[282, 2]], 362: [[49, 2], [282, 2]] };
+KIYAFETLER.forEach(([id]) => t(id, 1, KIYAFET_TARIF[id], 'masa', 'giyim'));
+ZIRH_MALZEME.slice(4).forEach((m, j) => ZIRH_ADET.forEach((a, pi) => t(416 + j * 4 + pi, 1, [[m.mal, a], ...(m.ek ? [[m.ek[0], Math.max(1, Math.round(m.ek[1] * a / 6))]] : [])], 'masa', 'savas')));
 
 export const TARIFLER = R;
 

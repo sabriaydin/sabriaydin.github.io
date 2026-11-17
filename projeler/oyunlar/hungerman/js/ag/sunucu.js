@@ -10,7 +10,7 @@ import { SURUM, PB } from '../sabitler.js';
 import { BLOKLAR, ESYALAR } from '../bloklar.js';
 import { OTURMA } from '../oyun/binek.js';
 import { mezarKoy, mezarBosalt } from '../oyun/mezar.js';
-import { kapFiltresiId } from '../oyun/kaplar.js';
+import { kapFiltresiId, kapBoyu, kapMi } from '../oyun/kaplar.js';
 
 const MAKS = 8;                 // sunucu dahil en çok oyuncu
 const ANLIK = 0.1;              // anlık durum gönderim aralığı (sn)
@@ -222,7 +222,7 @@ export class SunucuOyun {
         const sahip = this.kilit.get(s);
         if (sahip != null && sahip !== c.id) { k.gonder({ t: 'sandik', k: s, kilitli: 1 }); return; }
         let d = o.dunya.sandiklar.get(s);
-        if (!d) { d = BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].mezar || BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].elektrik || BLOKLAR[o.dunya.blok(m.x, m.y, m.z)].dolap ? new Array(27).fill(null) : o.koyler.sandikGanimeti(m.x, m.y, m.z); o.dunya.sandiklar.set(s, d); }
+        if (!d) { const B0 = BLOKLAR[o.dunya.blok(m.x, m.y, m.z)]; d = B0.firinKap ? new Array(kapBoyu(B0)).fill(null) : B0.mezar || B0.elektrik || B0.dolap ? new Array(27).fill(null) : o.koyler.sandikGanimeti(m.x, m.y, m.z); o.dunya.sandiklar.set(s, d); }
         this.kilit.set(s, c.id);
         k.gonder({ t: 'sandik', k: s, y: sandikDizi(d) });
         break;
@@ -231,12 +231,13 @@ export class SunucuOyun {
         if (this.kilit.get(m.k) !== c.id) return;
         this.kilit.delete(m.k);
         const [x, y, z] = m.k.split(',').map(Number);
-        const yuvalar = sandikKur(m.y).slice(0, 27);
-        while (yuvalar.length < 27) yuvalar.push(null);
-        if (o.dunya.yuklu(x, z) && !BLOKLAR[o.dunya.blok(x, y, z)].sandik) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
+        const B0 = o.dunya.yuklu(x, z) ? BLOKLAR[o.dunya.blok(x, y, z)] : null, boy = kapBoyu(B0);   // 0.33.0: fırın ve kamp ateşi haznesi
+        const yuvalar = sandikKur(m.y).slice(0, boy);
+        while (yuvalar.length < boy) yuvalar.push(null);
+        if (B0 && !kapMi(B0)) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
         /* 0.29.0: cihaz haznesine uymayan eşyalar (ör. jeneratöre yakıt dışı) yere düşer */
         const kural = kapFiltresiId(o.dunya.blok(x, y, z)), eski = o.dunya.sandiklar.get(m.k) || [];
-        if (kural) for (let i = 0; i < yuvalar.length; i++) { const e = yuvalar[i]; if (e && !kural.izin(e.id) && !eski.some(q => q && q.id === e.id)) { o.dusenler.birak(e.id, e.adet, x + 0.5, y + 1, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); yuvalar[i] = null; } }
+        if (kural) for (let i = 0; i < yuvalar.length; i++) { const e = yuvalar[i]; if (e && !(kural.yuva ? kural.yuva(i, e.id) || (eski[i] && eski[i].id === e.id) : kural.izin(e.id)) && !eski.some(q => q && q.id === e.id)) { o.dusenler.birak(e.id, e.adet, x + 0.5, y + 1, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); yuvalar[i] = null; } }
         o.dunya.sandiklar.set(m.k, yuvalar);
         mezarBosalt(o.dunya, m.k);   // 0.22.0: boşaltılan mezar kaybolur
         break;
@@ -390,7 +391,7 @@ export class SunucuOyun {
       c.bilinen = bilinen;
       const t = [];
       for (const b of o.tekneler.liste) if ((b.p.x - cx) ** 2 + (b.p.z - cz) ** 2 < TEKNE_MENZIL * TEKNE_MENZIL) t.push([b.ni, r2(b.p.x), r2(b.p.y), r2(b.p.z), r3(b.yaw), r2(b.hiz)]);
-      c.k.gonder({ t: 's', z: Math.round(o.zaman * 1e6) / 1e6, g: o.gun, o: [ben, ...digerleri.filter(a => a[0] !== c.id)], v, b: t, h: o.hava ? o.hava.durum : 'acik' });
+      c.k.gonder({ t: 's', z: Math.round(o.zaman * 1e6) / 1e6, g: o.gun, o: [ben, ...digerleri.filter(a => a[0] !== c.id)], v, b: t, h: o.hava ? o.hava.agVeri() : 0 });
     }
   }
 

@@ -7,6 +7,7 @@ export class Envanter {
   constructor() {
     this.yuvalar = new Array(YUVA).fill(null);
     this.zirh = [null, null, null, null];
+    this.kiyafet = [null, null, null, null];   // 0.33.0: başlık, üst, alt, ayakkabı
     this.secili = 0;
     this.degisti = null;
   }
@@ -90,16 +91,34 @@ export class Envanter {
     this.bildir();
     return true;
   }
+  /* 0.33.0: elde tutulan kıyafeti giy (sağ tık) */
+  kiyafetGiy() {
+    const s = this.yuvalar[this.secili], e = s && ESYALAR[s.id];
+    if (!e || !e.kiyafet) return false;
+    const p = e.kiyafet.parca, eski = this.kiyafet[p];
+    this.kiyafet[p] = s; this.yuvalar[this.secili] = eski;
+    this.bildir();
+    return true;
+  }
+  /* 0.33.0: giyilen kıyafet ve zırhların ısı değerleri: y soğuktan koruma, s serinlik, g sıcakta ek ısınma; ust / alt: kıyafet giyili mi */
+  giysiIsi() {
+    let y = 0, s = 0, g = 0;
+    for (const z of [...this.zirh, ...this.kiyafet]) { const i = z && ESYALAR[z.id] && ESYALAR[z.id].isi; if (i) { y += i.y || 0; s += i.s || 0; g += i.g || 0; } }
+    const u = this.kiyafet[1], cuppe = !!(u && ESYALAR[u.id].kiyafet.sekil === 'cuppe');   // çöl cüppesi bacakları da örter
+    return { y, s, g, ust: !!u, alt: !!this.kiyafet[2] || cuppe };
+  }
   /* Giyilen zırhlardaki bir büyünün toplam seviyesi */
   zirhBuyu(k) { let n = 0; for (const z of this.zirh) n += buyuSeviye(z, k); return n; }
-  temizle() { this.yuvalar.fill(null); this.zirh = [null, null, null, null]; this.bildir(); }
-  tumEsyalar() { return [...this.yuvalar, ...this.zirh].filter(Boolean); }
-  disaAktar() { const f = s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null); return { yuvalar: this.yuvalar.map(f), zirh: this.zirh.map(f), secili: this.secili }; }
+  temizle() { this.yuvalar.fill(null); this.zirh = [null, null, null, null]; this.kiyafet = [null, null, null, null]; this.bildir(); }
+  tumEsyalar() { return [...this.yuvalar, ...this.zirh, ...this.kiyafet].filter(Boolean); }
+  disaAktar() { const f = s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null); return { yuvalar: this.yuvalar.map(f), zirh: this.zirh.map(f), kiyafet: this.kiyafet.map(f), secili: this.secili }; }
   iceAktar(o) {
     this.yuvalar = new Array(YUVA).fill(null);
     this.zirh = [null, null, null, null];
     if (o && o.yuvalar) o.yuvalar.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < YUVA) this.yuvalar[i] = this.yeni(s[0], s[1], s[2] ?? undefined, s[3]); });
     if (o && o.zirh) o.zirh.forEach((s, i) => { if (s && ESYALAR[s[0]] && i < 4) this.zirh[i] = this.yeni(s[0], s[1], s[2] ?? undefined, s[3]); });
+    this.kiyafet = [null, null, null, null];
+    if (o && o.kiyafet) o.kiyafet.forEach((s, i) => { if (s && ESYALAR[s[0]] && ESYALAR[s[0]].kiyafet && i < 4) this.kiyafet[i] = this.yeni(s[0], s[1], s[2] ?? undefined, s[3]); });
     this.secili = (o && o.secili) || 0;
     this.bildir();
   }

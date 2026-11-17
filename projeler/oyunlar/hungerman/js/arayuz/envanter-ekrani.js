@@ -1,6 +1,6 @@
 /* HungerMan - envanter ve üretim ekranı: sürükle-bırak yerine tıkla-al / tıkla-bırak, tarif arama ve kategori */
 import { simge } from '../grafik/doku.js';
-import { BLOKLAR, ESYALAR, ZIRH_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER, BUYULER, buyuMetinleri, buyuluMu, uygunBuyuler, romaRakam } from '../bloklar.js';
+import { BLOKLAR, ESYALAR, ZIRH_PARCALARI, KIYAFET_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER, BUYULER, buyuMetinleri, buyuluMu, uygunBuyuler, romaRakam } from '../bloklar.js';
 import { uretec } from '../rastgele.js';
 import { KarakterOnizleme } from './karakter-onizleme.js';
 
@@ -9,6 +9,8 @@ const BUYU_BEDEL = [2, 5, 9];
 const KRISTAL = 61;
 import { TARIFLER, KATEGORILER, ISTASYON_ADI, ISTASYON_BLOK, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar, girdiListesi } from '../oyun/uretim.js';
 
+/* 0.33.0: kıyafet ve zırh ısı değerleri metni */
+export const isiMetni = i => [i.y ? `Soğuktan koruma +${String(i.y).replace('.', ',')}°` : '', i.s ? `Serinlik −${i.s}°` : '', i.g ? `Sıcakta +${String(i.g).replace('.', ',')}°` : ''].filter(Boolean).join(' · ');
 const $ = s => document.querySelector(s);
 /* 0.30.3: içerik değişmediyse öğeleri yeniden kurmaz (tıklama sırasında öğenin yerinden sökülmesini ve titremeyi önler) */
 const yaz = (el, html) => { if (el && el._html !== html) { el._html = html; el.innerHTML = html; } };
@@ -36,7 +38,10 @@ export class EnvanterEkrani {
     $('#envAra').addEventListener('input', e => { this.aranan = e.target.value.trim().toLocaleLowerCase('tr'); this.aramaCiz(); });
     $('#envAra').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { e.target.value = ''; this.aranan = ''; this.aramaCiz(); e.target.blur(); } });
     addEventListener('keydown', e => this.tus(e), true);
-    $('#envZirh').innerHTML = ZIRH_PARCALARI.map((a, z) => `<div class="yuva zirhYuva" data-z="${z}" title="${a}"></div>`).join('');
+    $('#envZirh').innerHTML = ZIRH_PARCALARI.map((a, z) => `<div class="yuva zirhYuva" data-z="${z}" title="Zırh: ${a} (kıyafetin üstüne giyilir)"></div>`).join('');
+    /* 0.33.0: kıyafet yuvaları (zırhın altına giyilir) */
+    this.KIYAFET_BOS = [348, 351, 356, 361];
+    $('#envKiyafet').innerHTML = KIYAFET_PARCALARI.map((a, k) => `<div class="yuva zirhYuva kiyafetYuva" data-k="${k}" title="Kıyafet: ${a} (zırhın altına giyilir)"></div>`).join('');
     /* 0.30.1: üretim: favoriler, sıralama, yapılabilir süzgeci, seçili tarif ayrıntısı ve miktar seçimi */
     this.sekmeler = [['hepsi', 'Tümü'], ['favori', '★ Favoriler'], ...KATEGORILER.filter(([k]) => k !== 'hepsi')];
     try { this.favoriler = new Set(JSON.parse(localStorage.getItem('hungerman_tarif_favori') || '[]')); } catch (e) { this.favoriler = new Set(); }
@@ -101,11 +106,17 @@ export class EnvanterEkrani {
       $('.envSandik h2').textContent = K ? K.ad : B && B.ad ? B.ad : 'Sandık';
       $('#sandikSimge').innerHTML = this.sandik.blok && ESYALAR[this.sandik.blok] ? `<img src="${simge(this.sandik.blok).url}" alt="">` : '';
       $('#sandikKural').hidden = !K; $('#sandikKural').textContent = K ? K.not : '';
+      /* 0.33.0: fırın ve kamp ateşi: girdi, yakıt ve çıktı yuvaları, ilerleme ve alev göstergesi */
+      const F = K && K.firin, kutu = this.kok.querySelector('.envSandik');
+      kutu.classList.toggle('firinMod', !!F);
+      if (F === 'firin') $('#sandikIzgara').innerHTML = `<div class="firinDuzen"><div class="fSol"><label>Girdi<div class="yuva" data-s="0"></div></label><div class="fAlev" data-balon="<b>Yakıt</b><em>Kalan yanma</em>"><i id="fAlev"></i></div><label>Yakıt<div class="yuva" data-s="1"></div></label></div><div class="fOk"><i id="fOk"></i></div><label class="fCikti">Çıktı<div class="yuva" data-s="2"></div></label></div><p class="fDurum" id="fDurum"></p>`;
+      else if (F === 'ates') $('#sandikIzgara').innerHTML = `<div class="firinDuzen ates"><div class="fSol"><label>Çiğ yiyecek<div class="yuva" data-s="0"></div></label><div class="fAlev yanar"><i style="height:100%"></i></div></div><div class="fOk"><i id="fOk"></i></div><label class="fCikti">Pişmiş<div class="yuva" data-s="1"></div></label></div><p class="fDurum" id="fDurum"></p>`;
+      else if (!$('#sandikIzgara .yuva[data-s="26"]')) $('#sandikIzgara').innerHTML = Array.from({ length: 27 }, (_, i) => `<div class="yuva" data-s="${i}"></div>`).join('');
     } $('.envOrs').hidden = !ors; $('.envBuyu').hidden = !buyu;
     this.kok.hidden = false;
     if (this.renk) this.onizleme.renkAyarla(this.renk());
     this.onizleme.baslat();
-    clearInterval(this.durumSayac); this.durumSayac = setInterval(() => this.durumCiz(), 400);
+    clearInterval(this.durumSayac); this.durumSayac = setInterval(() => { this.durumCiz(); if (this.sandik) this.firinCiz(); }, 250);
     this.ciz();
   }
   kapat() {
@@ -137,9 +148,9 @@ export class EnvanterEkrani {
     for (let i = bas; i < son; i++) l[i] = birlesik[i - bas] || null;
   }
   /* 0.29.0: eşya açık hazneye konabilir mi; konamazsa uyarır */
-  uyar(id) {
+  uyar(id, i) {
     const K = this.sandik && this.sandik.kural;
-    if (!K || K.izin(id)) return true;
+    if (!K || (K.yuva && i != null ? K.yuva(i, id) : K.izin(id))) return true;
     this.ses.hataSes();
     this.hud.bildirim(`${K.ad}: ${K.not}`);
     return false;
@@ -152,9 +163,10 @@ export class EnvanterEkrani {
       const varolan = new Set(Y.filter(Boolean).map(s => s.id));
       for (let i = 9; i < 36; i++) {
         const s = env.yuvalar[i]; if (!s || (tur === 'benzer' && !varolan.has(s.id)) || (S.kural && !S.kural.izin(s.id))) continue;
+        const uy = j => !S.kural || !S.kural.yuva || S.kural.yuva(j, s.id);
         let kalan = s.adet;
-        if (s.dayanim == null && !s.buyu) for (const b of Y) if (b && b.id === s.id && b.dayanim == null && !b.buyu && b.adet < env.yigin(s.id)) { const n = Math.min(kalan, env.yigin(s.id) - b.adet); b.adet += n; kalan -= n; if (!kalan) break; }
-        if (kalan) { const j = Y.indexOf(null); if (j >= 0) { Y[j] = { ...s, adet: kalan }; kalan = 0; } }
+        if (s.dayanim == null && !s.buyu) for (let j = 0; j < Y.length; j++) { const b = Y[j]; if (b && b.id === s.id && b.dayanim == null && !b.buyu && b.adet < env.yigin(s.id) && uy(j)) { const n = Math.min(kalan, env.yigin(s.id) - b.adet); b.adet += n; kalan -= n; if (!kalan) break; } }
+        if (kalan) { const j = Y.findIndex((b, m) => !b && uy(m)); if (j >= 0) { Y[j] = { ...s, adet: kalan }; kalan = 0; } }
         env.yuvalar[i] = kalan ? { ...s, adet: kalan } : null;
       }
     }
@@ -170,12 +182,17 @@ export class EnvanterEkrani {
       yaz(el, this.hud.yuvaIc(env.yuvalar[i]));
       el.classList.toggle('secili', i === env.secili);
     });
-    this.kok.querySelectorAll('.zirhYuva').forEach(el => {
+    this.kok.querySelectorAll('.kiyafetYuva').forEach(el => {
+      const k = +el.dataset.k, s = env.kiyafet[k];
+      el.classList.toggle('bosZirh', !s);
+      yaz(el, s ? this.hud.yuvaIc(s) : `<img src="${simge(this.KIYAFET_BOS[k]).url}" alt="">`);
+    });
+    this.kok.querySelectorAll('.zirhYuva:not(.kiyafetYuva)').forEach(el => {
       const z = +el.dataset.z, s = env.zirh[z];
       el.classList.toggle('bosZirh', !s);
       yaz(el, s ? this.hud.yuvaIc(s) : `<img src="${simge(400 + z).url}" alt="">`);
     });
-    if (this.sandik) { this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { yaz(el, this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s])); }); this.sandikOzetCiz(); }
+    if (this.sandik) { this.kok.querySelectorAll('.yuva[data-s]').forEach(el => { yaz(el, this.hud.yuvaIc(this.sandik.yuvalar[+el.dataset.s])); }); this.sandikOzetCiz(); this.firinCiz(); }
     if (this.istasyon === 'ors') this.orsCiz();
     if (this.istasyon === 'buyu') this.buyuCiz();
     this.durumCiz();
@@ -194,12 +211,15 @@ export class EnvanterEkrani {
   durumCiz() {
     if (!this.acik || !this.hayatta) return;
     const env = this.envanter, h = this.hayatta, zp = env.zirhPuani();
-    this.onizleme.giydir(env.zirh, env.yuvalar[env.secili]);
+    this.onizleme.giydir(env.zirh, env.yuvalar[env.secili], env.kiyafet);
     const cubuk = (ad, deger, oran, sinif, ek = '') => `<div class="kbSatir ${sinif}"><span>${ad}</span><b>${deger}</b><i><em style="width:${Math.max(0, Math.min(100, oran * 100)).toFixed(1)}%"></em></i>${ek}</div>`;
     const v = h.vucut ?? 37, isiAd = ['Donuyor', 'Üşüyor', 'Normal', 'Bunalıyor', 'Sıcak çarpması'][(h.isiDurum ?? 0) + 2];
     let html = cubuk('Can', `${h.can / 2} / 10`, h.can / 20, 'kbCan') + cubuk('Açlık', `${h.aclik / 2} / 10`, h.aclik / 20, 'kbAclik')
       + cubuk('Seviye', h.seviye, h.ilerleme, 'kbXp') + cubuk('Zırh', `${zp} / 20`, zp / 20, 'kbZirh', `<small>Hasar azaltma %${zp * 4}</small>`);
     if (h.isiAcik !== false) html += cubuk('Vücut ısısı', `${v.toFixed(1).replace('.', ',')}°C`, (v - 32) / 10, 'kbIsi isi' + (h.isiDurum ?? 0), `<small>${isiAd}</small>`);
+    /* 0.33.0: giysilerin ısı etkisi */
+    const G = env.giysiIsi();
+    html += `<div class="kbGiysi"><span>Giysi</span><b data-balon="<b>Soğuktan koruma</b><em>Soğukta hissedilen sıcaklığı artırır</em>">❄ +${G.y.toFixed(1).replace('.0', '').replace('.', ',')}°</b><b data-balon="<b>Serinlik</b><em>Sıcakta (ör. çölde) serinletir</em>">☀ −${G.s}°</b>${!G.ust || !G.alt ? `<em data-balon="<b>Çıplak</b><em>Üst ve alt kıyafet giyilmezse soğukta daha çok üşünür</em>">${!G.ust && !G.alt ? 'Çıplak' : !G.ust ? 'Üst yok' : 'Alt yok'}</em>` : ''}</div>`;
     if (h.oksijen < 10) html += cubuk('Oksijen', `${Math.ceil(h.oksijen)} / 10`, h.oksijen / 10, 'kbOks');
     const et = Object.entries(h.etkiler || {}).filter(([k, t]) => t > 0 && ETKILER[k]);
     if (et.length) html += `<div class="kbEtkiler">${et.map(([k, t]) => `<span style="--r:${ETKILER[k].renk}" title="${ETKILER[k].aciklama}">${ETKILER[k].ad} <b>${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}</b></span>`).join('')}</div>`;
@@ -215,6 +235,23 @@ export class EnvanterEkrani {
     $('#sandikDolulukMetin').textContent = `${dolu} / ${Y.length} yuva dolu`;
     $('#sandikAlt').textContent = top.size ? `${top.size} çeşit · ${[...top.values()].reduce((a, b) => a + b, 0)} eşya` : 'Boş';
     yaz($('#sandikOzet'), top.size ? [...top].sort((a, b) => b[1] - a[1]).map(([id, n]) => `<button type="button" data-ozet="${id}" data-balon="<b>${ESYALAR[id].ad}</b><em>Toplam ${n} · tıklanınca çantaya alınır</em>"><img src="${simge(id).url}" alt=""><span>${ESYALAR[id].ad}</span><b>${n}</b></button>`).join('') : '<p class="bos">Sandık boş. Eşya koymak için çantadaki eşyaya Shift + tık yapınız.</p>');
+  }
+  /* 0.33.0: fırın / kamp ateşi göstergeleri (ilerleme oku, alev, durum metni) */
+  firinCiz() {
+    const S = this.sandik, K = S && S.kural;
+    if (!K || !K.firin) return;
+    const D = (this.firinDurum && this.firinDurum(S.k)) || null, Y = S.yuvalar;
+    const ok = $('#fOk'), alev = $('#fAlev'), m = $('#fDurum');
+    if (ok) ok.style.width = Math.round((D ? D.ilerleme : 0) * 100) + '%';
+    if (alev) alev.style.height = Math.round((D && D.yaniyor ? D.yakit : 0) * 100) + '%';
+    const g = Y[0], c = Y[Y.length - 1];
+    let t;
+    if (!g) t = K.firin === 'firin' ? 'Girdi yuvasına eritilecek ya da pişirilecek bir malzeme konmalıdır.' : 'Çiğ yiyecek konunca pişmeye başlar.';
+    else if (D && D.pisen) t = `${ESYALAR[D.pisen].ad} işleniyor…`;
+    else if (K.firin === 'firin' && !(D && D.yaniyor) && !Y[1]) t = 'Yakıt yuvası boş: kömür, kütük ya da kalas konmalıdır.';
+    else if (c && c.adet >= ESYALAR[c.id].yigin) t = 'Çıktı yuvası dolu.';
+    else t = 'Bekliyor';
+    if (m && m.textContent !== t) m.textContent = t;
   }
   /* Özetten bir eşya türünün tamamını çantaya alır */
   ozetAl(id) {
@@ -262,8 +299,8 @@ export class EnvanterEkrani {
     const kat = (o, k) => k === 'hepsi' || (k === 'favori' ? this.favoriler.has(o.i) : o.t.kategori === k);
     /* Sekmeler: her kategoride yapılabilir tarif sayısı */
     /* 0.30.2: kategori şeridi: simge, kısa ad ve yapılabilir sayısı */
-    const KISA = { hepsi: 'Tümü', favori: 'Favori', alet: 'Alet', savas: 'Savaş', blok: 'Blok', malzeme: 'Malzeme', yiyecek: 'Yiyecek', yapi: 'Yapı', mobilya: 'Mobilya', mekanik: 'Mekanik', elektrik: 'Elektrik' };
-    const SIMGE = { hepsi: 32, alet: 300, yapi: 70 };
+    const KISA = { hepsi: 'Tümü', favori: 'Favori', alet: 'Alet', savas: 'Savaş', blok: 'Blok', malzeme: 'Malzeme', yiyecek: 'Yiyecek', yapi: 'Yapı', mobilya: 'Mobilya', giyim: 'Giyim', mekanik: 'Mekanik', elektrik: 'Elektrik' };
+    const SIMGE = { hepsi: 32, alet: 300, yapi: 70, giyim: 352 };
     yaz($('#tarifSekme'), this.sekmeler.map(([k, ad]) => {
       const l = hepsi.filter(o => kat(o, k) && uyar(o)), y = l.filter(o => o.yapilir).length;
       const id = SIMGE[k] && ESYALAR[SIMGE[k]] ? SIMGE[k] : (TARIFLER.find(t => t.kategori === k) || {}).cikti;
@@ -330,6 +367,8 @@ export class EnvanterEkrani {
     if (e.alet && e.alet.hasar != null && e.alet.tur !== 'yay' && e.alet.tur !== 'olta') l.push(`Saldırı ${e.alet.hasar / 2} kalp · Hız ${e.alet.hiz}`);
     if (e.alet && e.alet.dayanim) l.push(`Dayanım ${e.alet.dayanim}${e.alet.seviye != null ? ` · Kazma seviyesi ${e.alet.seviye}` : ''}`);
     if (e.zirh) l.push(`Zırh +${e.zirh.puan} (${ZIRH_PARCALARI[e.zirh.parca]}) · Dayanım ${e.zirh.dayanim}`);
+    if (e.kiyafet) l.push(`Kıyafet · ${KIYAFET_PARCALARI[e.kiyafet.parca]}`);
+    if (e.isi) l.push(isiMetni(e.isi));
     if (e.yemek) l.push(`Açlığı ${e.yemek / 2} birim giderir`);
     if (e.iyilestir) l.push(`${e.iyilestir / 2} kalp iyileştirir`);
     if (e.ozellik) l.push(e.ozellik);
@@ -400,6 +439,7 @@ export class EnvanterEkrani {
       return;
     }
     e.preventDefault();
+    if (el.dataset.k != null) { this.kiyafetTikla(+el.dataset.k, e); return; }
     if (el.dataset.z != null) { this.zirhTikla(+el.dataset.z, e); return; }
     const sandikta = el.dataset.s != null;
     const D = sandikta ? this.sandik.yuvalar : env.yuvalar;
@@ -411,12 +451,17 @@ export class EnvanterEkrani {
       if (sandikta) { const k = env.ekle(s.id, s.adet, s.dayanim, s.buyu); if (k) s.adet = k; else D[i] = null; }
       else {
         if (!this.uyar(s.id)) return;
-        const S = this.sandik.yuvalar; let kalan = s.adet;
-        if (s.dayanim == null) for (let j = 0; j < 27 && kalan; j++) { const t = S[j]; if (t && t.id === s.id && t.adet < max) { const k = Math.min(kalan, max - t.adet); t.adet += k; kalan -= k; } }
-        for (let j = 0; j < 27 && kalan; j++) if (!S[j]) { S[j] = { ...s, adet: kalan }; kalan = 0; }
+        const S = this.sandik.yuvalar, Kr = this.sandik.kural, uy = j => !Kr || !Kr.yuva || Kr.yuva(j, s.id); let kalan = s.adet;
+        if (s.dayanim == null) for (let j = 0; j < S.length && kalan; j++) { const t = S[j]; if (t && t.id === s.id && t.adet < max && uy(j)) { const k = Math.min(kalan, max - t.adet); t.adet += k; kalan -= k; } }
+        for (let j = 0; j < S.length && kalan; j++) if (!S[j] && uy(j)) { S[j] = { ...s, adet: kalan }; kalan = 0; }
         if (kalan) s.adet = kalan; else D[i] = null;
       }
       this.ses.tik(); env.bildir(); this.ciz(); return;
+    }
+    if (e.shiftKey && s && !this.tasinan && ESYALAR[s.id].kiyafet) {
+      const k = ESYALAR[s.id].kiyafet.parca;
+      D[i] = env.kiyafet[k]; env.kiyafet[k] = s;
+      this.ses.zirhGiy(); env.bildir(); this.ciz(); return;
     }
     if (e.shiftKey && s && !this.tasinan && ESYALAR[s.id].zirh) {
       const z = ESYALAR[s.id].zirh.parca;
@@ -441,7 +486,7 @@ export class EnvanterEkrani {
       for (const [L, a, b] of kaynak) for (let j = a; j < b && T.adet < max; j++) { const u = L[j]; if (u && u.id === T.id && u.dayanim == null && !u.buyu) { const k = Math.min(u.adet, max - T.adet); T.adet += k; u.adet -= k; if (!u.adet) L[j] = null; } }
       this.sonTik = null; this.ses.tik(); env.bildir(); this.ciz(); this.hareket(e); return;
     }
-    if (sandikta && T && !this.uyar(T.id)) return;   // 0.29.0: hazneye uymayan eşya konamaz
+    if (sandikta && T && !this.uyar(T.id, i)) return;   // 0.29.0: hazneye uymayan eşya konamaz (0.33.0: yuvaya göre)
     if (e.button === 2) {
       if (!T && s) { const yarim = Math.ceil(s.adet / 2); this.tasinan = { ...s, adet: yarim }; s.adet -= yarim; if (!s.adet) D[i] = null; }
       else if (T && !s) { D[i] = { ...T, adet: 1 }; T.adet--; if (!T.adet) this.tasinan = null; }
@@ -520,6 +565,17 @@ export class EnvanterEkrani {
     this.ses.tik(); this.envanter.bildir(); this.ciz(); this.hareket(e);
   }
 
+  /* 0.33.0: kıyafet yuvası */
+  kiyafetTikla(k, e) {
+    const env = this.envanter, T = this.tasinan, s = env.kiyafet[k];
+    if (e.shiftKey && s && !T) { const n = env.ekle(s.id, 1, s.dayanim, s.buyu); if (!n) env.kiyafet[k] = null; }
+    else if (T) {
+      const ke = ESYALAR[T.id].kiyafet;
+      if (!ke || ke.parca !== k) { this.hud.bildirim(`Bu yuvaya yalnızca ${KIYAFET_PARCALARI[k].toLocaleLowerCase('tr')} kıyafeti giyilebilir.`); return; }
+      env.kiyafet[k] = T; this.tasinan = s || null; this.ses.zirhGiy();
+    } else if (s) { this.tasinan = s; env.kiyafet[k] = null; }
+    this.ses.tik(); env.bildir(); this.ciz(); this.hareket(e);
+  }
   zirhTikla(z, e) {
     const env = this.envanter, T = this.tasinan, s = env.zirh[z];
     if (e.shiftKey && s && !T) { const k = env.ekle(s.id, 1, s.dayanim, s.buyu); if (!k) env.zirh[z] = null; }
@@ -537,7 +593,7 @@ export class EnvanterEkrani {
     const ip = $('#ipucu');
     const el = e.target.closest && e.target.closest('.izgara .yuva');
     this.uzerinde = el || null;
-    const s = el && (el.dataset.o != null ? (+el.dataset.o < 2 ? this.ors[+el.dataset.o] : this.orsHesap().sonuc) : el.dataset.b != null ? this.buyuYuva[+el.dataset.b] : el.dataset.z != null ? this.envanter.zirh[+el.dataset.z] : el.dataset.s != null ? this.sandik && this.sandik.yuvalar[+el.dataset.s] : this.envanter.yuvalar[+el.dataset.i]);
+    const s = el && (el.dataset.o != null ? (+el.dataset.o < 2 ? this.ors[+el.dataset.o] : this.orsHesap().sonuc) : el.dataset.b != null ? this.buyuYuva[+el.dataset.b] : el.dataset.k != null ? this.envanter.kiyafet[+el.dataset.k] : el.dataset.z != null ? this.envanter.zirh[+el.dataset.z] : el.dataset.s != null ? this.sandik && this.sandik.yuvalar[+el.dataset.s] : this.envanter.yuvalar[+el.dataset.i]);
     if (!s || this.tasinan) { ip.hidden = true; return; }
     const es = ESYALAR[s.id];
     let alt = '';
@@ -545,6 +601,8 @@ export class EnvanterEkrani {
     else if (es.alet && es.alet.tur === 'olta') alt += `<span>Sağ tıkla atılır; şamandıra dalınca sağ tıkla çekilir</span><span>Dayanım: ${s.dayanim} / ${es.alet.dayanim}</span>`;
     else if (es.alet) alt += `<span>Hız: ${es.alet.hiz} · Saldırı hasarı: ${es.alet.hasar / 2} kalp · Seviye ${es.alet.seviye}</span><span>Dayanım: ${s.dayanim} / ${es.alet.dayanim}</span>`;
     if (es.zirh) alt += `<span>Zırh +${es.zirh.puan} · ${ZIRH_PARCALARI[es.zirh.parca]}</span><span>Dayanım: ${s.dayanim} / ${es.zirh.dayanim}</span>`;
+    if (es.kiyafet) alt += `<span>Kıyafet · ${KIYAFET_PARCALARI[es.kiyafet.parca]} (zırhın altına giyilir)</span>`;
+    if (es.isi) alt += `<span>${isiMetni(es.isi)}</span>`;
     if (es.ozellik) alt += `<span>${es.ozellik}</span>`;
     if (es.tekne) alt += '<span>Su yüzeyine sağ tıkla konur; binmek için sağ, inmek için C</span>';
     if (s.id === 299) alt += '<span>Balıkçılar iyi fiyat verir</span>';

@@ -280,15 +280,15 @@ export class Konsol {
       o.zaman = ((((s - 6) / 24) % 1) + 1) % 1;
       this.tamam(`Saat ${String(Math.floor(s)).padStart(2, '0')}:${String(Math.round((s % 1) * 60)).padStart(2, '0')} olarak ayarlandı.`);
     }, { hile: true, dunya: true, tamamla: () => ['safak', 'sabah', 'ogle', 'ikindi', 'aksam', 'gece', 'hiz'] });
-    ekle('hava', 'Hava durumunu değiştirir ya da şimşek çaktırır', 'hava <acik | yagmur | firtina> [süre sn] | hava simsek | hava kilit', (o, p) => {
+    ekle('hava', 'Hava durumunu her yerde belirli bir süre için ayarlar (süre sonunda bölgesel havaya dönülür) ya da şimşek çaktırır', 'hava <acik | yagmur | firtina> [süre sn] | hava simsek | hava kilit', (o, p) => {
       const a = kucuk(p[0] || '');
-      if (!a) { this.yaz(`Hava: ${HAVA_ADI[o.hava.durum]} · yoğunluk %${Math.round(o.hava.yogunluk * 100)} · ${Math.round(o.hava.sure)} sn sonra değişir.`, 'bilgi'); return; }
+      if (!a) { this.yaz(`Hava (bulunulan yer): ${HAVA_ADI[o.hava.durum]} · yoğunluk %${Math.round(o.hava.yogunluk * 100)} · ${o.hava.zorla ? `elle ayarlı, ${Math.round(o.hava.sure)} sn sonra bölgesel havaya döner` : 'bölgesel hava'}.`, 'bilgi'); return; }
       if (a === 'simsek') {
         const P = o.oyuncu.konum, ang = Math.random() * Math.PI * 2, x = Math.floor(P.x + Math.cos(ang) * 12), z = Math.floor(P.z + Math.sin(ang) * 12);
         if (o.hava.olaylar.simsek) o.hava.olaylar.simsek(x + 0.5, o.hava.ustBlok(x, z) + 1, z + 0.5);
         this.tamam('Şimşek çaktı.'); return;
       }
-      if (a === 'kilit') { o.hava.kilit = !o.hava.kilit; this.tamam(`Hava ${o.hava.kilit ? 'kilitlendi: kendiliğinden değişmez' : 'kilidi açıldı'}.`); return; }
+      if (a === 'kilit') { o.hava.kilit = !o.hava.kilit; this.tamam(`Hava ${o.hava.kilit ? 'kilitlendi: yağış alanları yerinde durur' : 'kilidi açıldı'}.`); return; }
       if (!HAVA.includes(a)) { this.hata('Kullanım: hava <acik | yagmur | firtina> [süre sn] | hava simsek | hava kilit'); return; }
       const sure = this.sayi(p[1], 0);
       o.hava.ayarla(a, sure > 0 ? sure : undefined);

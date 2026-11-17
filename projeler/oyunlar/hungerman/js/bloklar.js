@@ -115,7 +115,7 @@ blok(30, { ad: 'Kuru Çalı', dok: 'kuru_cali', cizim: C_CAPRAZ, kati: false, op
   dusur: r => (r() < 0.5 ? [[256, 1]] : []) });
 blok(31, { ad: 'Deniz Yosunu', dok: 'yosun', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, suIcinde: true, sivi: true, dusur: () => [] });
 blok(32, { ad: 'Üretim Masası', dok: { ust: 'masa_ust', yan: 'masa_yan', on: 'masa_on', alt: 'kalas' }, sertlik: 2.5, alet: 'balta', ses: 'odun', istasyon: 'masa' });
-blok(33, { ad: 'Fırın', dok: { ust: 'firin_ust', yan: 'firin_yan', on: 'firin_on', alt: 'firin_ust' }, sertlik: 3.5, alet: 'kazma', seviye: 1, istasyon: 'firin' });
+blok(33, { ad: 'Fırın', dok: { ust: 'firin_ust', yan: 'firin_yan', on: 'firin_on', alt: 'firin_ust' }, sertlik: 3.5, alet: 'kazma', seviye: 1, istasyon: 'firin', firinKap: 'firin' });
 blok(34, { ad: 'Cam', dok: 'cam', opak: false, kesik: true, ayniGizle: true, sertlik: 0.3, ses: 'cam', dusur: () => [] });
 blok(35, { ad: 'Taş Tuğla', dok: 'tas_tugla', sertlik: 1.5, alet: 'kazma', seviye: 1 });
 blok(36, { ad: 'Mantar', dok: 'mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true });
@@ -132,7 +132,7 @@ blok(45, { ad: 'Karlı Çimen', dok: ['kar', 'kar_yan', 'toprak'], sertlik: 0.6,
 
 blok(46, { ad: 'Meşale', dok: 'mesale', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'odun', bitki: false, isik: 14, mesale: true });
 blok(47, { ad: 'Yatak', dok: { ust: 'yatak_ust', yan: 'yatak_yan', on: 'yatak_yan', alt: 'kalas' }, sertlik: 0.4, alet: 'balta', ses: 'yun', yatak: true });
-blok(48, { ad: 'Kamp Ateşi', dok: 'kamp_atesi', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1, alet: 'balta', ses: 'odun', isik: 15, mesale: true, istasyon: 'ates' });
+blok(48, { ad: 'Kamp Ateşi', dok: 'kamp_atesi', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 1, alet: 'balta', ses: 'odun', isik: 15, mesale: true, istasyon: 'ates', firinKap: 'ates' });
 blok(49, { ad: 'Yün', dok: 'yun', sertlik: 0.8, ses: 'yun' });
 blok(50, { ad: 'Sandık', dok: { ust: 'sandik_ust', yan: 'sandik_yan', on: 'sandik_on', alt: 'sandik_ust' }, cizim: 5, opak: false, sertlik: 2.5, alet: 'balta', ses: 'odun', sandik: true, sekil: 'sandik' });
 blok(51, { ad: 'Kiremit', dok: 'kiremit', sertlik: 1.5, alet: 'kazma', seviye: 1 });
@@ -643,16 +643,33 @@ yemek(470, 'Sebze Çorbası', { simge: 'corba2', renk: '#d0803a', yemek: 8, kase
 /* Zırhlar: 400 + malzeme * 4 + parça (0 kask, 1 göğüslük, 2 pantolon, 3 bot) */
 export const ZIRH_PARCALARI = ['Kask', 'Göğüslük', 'Pantolon', 'Bot'];
 export const ZIRH_MALZEME = [
-  { ad: 'Deri', puan: [1, 3, 2, 1], carpan: 5, renk: '#8a5a32', mal: 282 },
-  { ad: 'Bakır', puan: [2, 4, 3, 1], carpan: 10, renk: '#d0773d', mal: 259 },
-  { ad: 'Demir', puan: [2, 6, 5, 2], carpan: 15, renk: '#d8d8d8', mal: 261 },
-  { ad: 'Elmas', puan: [3, 8, 6, 3], carpan: 33, renk: '#52e3d6', mal: 264 }
+  { ad: 'Deri', puan: [1, 3, 2, 1], carpan: 5, renk: '#8a5a32', mal: 282, isi: { y: 3 } },
+  { ad: 'Bakır', puan: [2, 4, 3, 1], carpan: 10, renk: '#d0773d', mal: 259, isi: { y: 1, g: 0.7 } },
+  { ad: 'Demir', puan: [2, 6, 5, 2], carpan: 15, renk: '#d8d8d8', mal: 261, isi: { y: 1, g: 0.8 } },
+  { ad: 'Elmas', puan: [3, 8, 6, 3], carpan: 33, renk: '#52e3d6', mal: 264, isi: { y: 1, g: 0.4 } },
+  /* 0.33.0: farklı görünümlü yeni zırhlar (416-431). isi: y soğuktan koruma, s serinlik, g sıcakta ek ısınma (parça başına) */
+  { ad: 'Zincir', puan: [2, 5, 4, 1], carpan: 12, renk: '#a8adb4', mal: 261, ek: [284, 2], isi: { y: 0.5, s: 0.5, g: 0.4 }, gorunum: 'zincir' },
+  { ad: 'Altın', puan: [2, 5, 3, 1], carpan: 7, renk: '#f2c43c', mal: 263, isi: { y: 1, g: 1 }, gorunum: 'altin' },
+  { ad: 'Kürk', puan: [1, 3, 2, 1], carpan: 6, renk: '#e8e0d0', mal: 49, ek: [282, 2], isi: { y: 6, g: 1.2 }, gorunum: 'kurk' },
+  { ad: 'Obsidyen', puan: [3, 8, 6, 3], carpan: 42, renk: '#2a1d3a', mal: 515, ek: [264, 1], isi: { y: 2, g: 0.6 }, gorunum: 'obsidyen' }
 ];
 const ZIRH_TABAN = [11, 16, 15, 13];
 ZIRH_MALZEME.forEach((m, mi) => ZIRH_PARCALARI.forEach((pa, pi) => {
   esya(400 + mi * 4 + pi, { ad: m.ad + ' ' + pa, tur: 'zirh', yigin: 1, simge: 'zirh' + pi, renk: m.renk,
-    zirh: { parca: pi, puan: m.puan[pi], dayanim: ZIRH_TABAN[pi] * m.carpan }, alet: null });
+    zirh: { parca: pi, puan: m.puan[pi], dayanim: ZIRH_TABAN[pi] * m.carpan, gorunum: m.gorunum || null }, isi: m.isi, alet: null });
 }));
+
+/* 0.33.0: kıyafetler: zırhın altına giyilir (başlık, üst, alt, ayakkabı). isi: y soğuktan koruma (°C), s serinlik (sıcakta serinletir) */
+export const KIYAFET_PARCALARI = ['Başlık', 'Üst', 'Alt', 'Ayakkabı'];
+export const KIYAFETLER = [
+  [348, 'Yün Bere', 0, '#b8423a', 'bere', { y: 3 }], [349, 'Hasır Şapka', 0, '#d8b860', 'hasir', { s: 3 }], [350, 'Kürk Başlık', 0, '#7a5a3e', 'kurk', { y: 5, g: 0.6 }],
+  [351, 'Keten Gömlek', 1, '#e8e2d0', 'gomlek', { y: 1, s: 2 }], [352, 'Yün Kazak', 1, '#3a6ea5', 'kazak', { y: 4, g: 0.6 }], [353, 'Deri Ceket', 1, '#7a4a2a', 'ceket', { y: 3, g: 0.4 }],
+  [354, 'Kürklü Mont', 1, '#6a4a32', 'mont', { y: 7, g: 1.4 }], [355, 'Çöl Cüppesi', 1, '#e8dcc0', 'cuppe', { y: 1, s: 4 }],
+  [356, 'Keten Pantolon', 2, '#b8a888', 'pantolon', { y: 1, s: 1 }], [357, 'Yün Pantolon', 2, '#4a4a5a', 'pantolon', { y: 3, g: 0.4 }], [358, 'Kürklü Pantolon', 2, '#6a4a32', 'kurkPantolon', { y: 5, g: 1 }],
+  [359, 'Şort', 2, '#3a6ea5', 'sort', { s: 2 }],
+  [360, 'Sandalet', 3, '#a07040', 'sandalet', { s: 1 }], [361, 'Deri Ayakkabı', 3, '#5a3a22', 'ayakkabi', { y: 1 }], [362, 'Kürklü Çizme', 3, '#7a5a3e', 'cizme', { y: 4, g: 0.6 }]
+];
+KIYAFETLER.forEach(([id, ad, parca, renk, sekil, isi]) => esya(id, { ad, tur: 'kiyafet', yigin: 1, simge: 'kiyafet' + parca, renk, kiyafet: { parca, sekil }, isi, alet: null }));
 
 /* Mantar bloğu da yenebilir */
 E[36].yemek = 1; E[36].yenir = true;
@@ -722,7 +739,7 @@ E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
 export function onarimMalzemesi(id) {
   if (id >= 300 && id < 320) return [[14, 38, 39], [15], [259], [261], [264]][Math.floor((id - 300) / 4)];
   if (id >= 340 && id < 345) return [[14, 38, 39], [15], [259], [261], [264]][id - 340];
-  if (id >= 400 && id < 416) return [ZIRH_MALZEME[Math.floor((id - 400) / 4)].mal];
+  if (id >= 400 && id < 432) return [ZIRH_MALZEME[Math.floor((id - 400) / 4)].mal];
   if (id === 286 || id === 453) return [284];
   if (id === 456) return [259];
   if (id === 457) return [282];

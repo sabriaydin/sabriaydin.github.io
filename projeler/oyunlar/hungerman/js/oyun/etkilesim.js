@@ -86,8 +86,9 @@ export class Etkilesim {
     if (!h) return false;
     const b = BLOKLAR[h.id];
     if (b.oturak && this.binek) return this.binek.otur(h.x, h.y, h.z);
+    if (b.firinKap && !this.shift) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }   // 0.33.0
     if (b.istasyon) { this.arayuz.envanterAc(b.istasyon); return true; }
-    if (b.sandik) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
+    if (b.sandik || b.firinKap) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }   // 0.33.0: fırın ve kamp ateşi haznesi
     if (b.yatak) { this.arayuz.uyu(h); return true; }
     if (this.ac(h)) { this.vurus = 0.01; return true; }
     return false;
@@ -289,7 +290,7 @@ export class Etkilesim {
     if (b.xp && this.alabilir(h.id)) this.hayatta.xpEkle(b.xp);
     if (b.ekin === 3) this.olay('hasat');
     this.istat('kirilan');
-    if (b.sandik) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z, !b.elektrik && !b.mezar && !b.dolap)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
+    if (b.sandik || b.firinKap) for (const s of this.arayuz.sandikKirildi(h.x, h.y, h.z, !b.elektrik && !b.mezar && !b.dolap && !b.firinKap)) this.dusenler.birak(s.id, s.adet, h.x + 0.5, h.y + 0.5, h.z + 0.5, 0, 0, 0, s.dayanim, 0.5, s.buyu);
     this.ses.kir(b.ses);
     this.dusenler.parcacik(h.id, h.x, h.y, h.z);
     if (this.alabilir(h.id)) this.dusur(h.id, h.x, h.y, h.z, b.xp ? buyuSeviye(this.envanter.seciliYuva(), 'servet') : 0);
@@ -402,6 +403,8 @@ export class Etkilesim {
       }
     }
     /* İstasyonlar */
+    /* 0.33.0: fırın ve kamp ateşi kendi haznesini açar (Shift ile üretim penceresi) */
+    if (h && BLOKLAR[h.id].firinKap && !g.egil && !this.shift) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }
     if (h && BLOKLAR[h.id].istasyon && !g.egil) { this.arayuz.envanterAc(BLOKLAR[h.id].istasyon); return true; }
     /* ---------- 0.21.0: tarım ve hayvancılık ---------- */
     if (e && (e.kova || e.suKovasi)) { if (this.kovaKullan(h, e)) return true; }
@@ -438,6 +441,7 @@ export class Etkilesim {
     }
     /* Yiyecek ve bakım */
     if (e.zirh) { env.zirhGiy(); this.ses.zirhGiy(); return true; }
+    if (e.kiyafet) { env.kiyafetGiy(); this.ses.zirhGiy(); return true; }   // 0.33.0
     /* Kemik tozu: ekinleri ve fidanları hızla büyütür, çimende çiçek açtırır */
     if (e.gubre && h) {
       const d = this.dunya;

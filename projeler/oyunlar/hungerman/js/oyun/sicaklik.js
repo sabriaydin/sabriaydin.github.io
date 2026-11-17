@@ -16,8 +16,7 @@ const KAYNAK = { 48: [20, 6], 46: [5, 3], 59: [24, 5], 521: [12, 4], 159: [3, 3]
 for (let k = 0; k < 4; k++) KAYNAK[564 + k] = [4, 3];
 for (let f = 0; f < 4; f++) { KAYNAK[ISITICI_ID(f, 1)] = [16, 6]; KAYNAK[OCAK_ID(f, 1)] = [6, 3]; }   // 0.24.0: çalışan ısıtıcı ve elektrikli ocak (0.29.0: yönlü)
 for (const b of BLOKLAR) if (b && b.isi) KAYNAK[b.id] = b.isi;   // 0.31.0: yanan şömine
-/* Zırh yalıtımı: deri sıcak tutar, metal az */
-const YALITIM = id => (id >= 400 && id <= 403 ? 3 : id >= 404 && id <= 415 ? 1 : 0);
+/* 0.33.0: giysi ısısı kıyafet ve zırh tanımlarındaki isi değerlerinden gelir (Envanter.giysiIsi) */
 
 /* o: oyun nesnesi; dönen: { t: hissedilen, ortam, ates: yakında ısı kaynağı var mı } */
 export function hissedilenSicaklik(o) {
@@ -55,8 +54,16 @@ export function hissedilenSicaklik(o) {
   }
   t += Math.max(-12, Math.min(30, ek));
   const ortam = t;
-  /* Giysi yalıtımı */
-  const yal = o.envanter.zirh.reduce((n, s) => n + (s ? YALITIM(s.id) : 0), 0);
-  if (t < 18) t = Math.min(18, t + yal); else if (t > 28) t += yal * 0.15;
-  return { t, ortam, ates };
+  /* 0.33.0: giysiler: soğukta yalıtım ısıtır (çıplak beden daha çok üşür); sıcakta (ör. çölde) kalın giysi ve metal zırh ısıtır, ince giysi serinletir */
+  const G = o.envanter.giysiIsi ? o.envanter.giysiIsi() : { y: 0, s: 0, g: 0, ust: true, alt: true };
+  if (t < 18) {
+    t = Math.min(18, t + G.y);
+    if (!G.ust) t -= 2.5;
+    if (!G.alt) t -= 1.5;
+  } else if (t > 26) {
+    const sicak = Math.min(1, (t - 26) / 8);
+    t += (G.y * 0.35 + G.g - G.s * 1.3) * sicak;
+    if (!G.ust && sicak > 0.3) t += 1;   // güneşte çıplak ten yanar
+  }
+  return { t, ortam, ates, giysi: G };
 }

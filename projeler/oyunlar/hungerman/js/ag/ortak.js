@@ -7,7 +7,7 @@ export const r3 = n => Math.round(n * 1000) / 1000;
 export const v3 = p => [r2(p.x), r2(p.y), r2(p.z)];
 export const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-/* Yerel oyuncunun ağa gönderilen durumu: [x, y, z, yaw, pitch, eldeki, bayrak, tekne, at] */
+/* Yerel oyuncunun ağa gönderilen durumu: [x, y, z, yaw, pitch, eldeki, bayrak, tekne, at, giysiler] (0.33.0: giysiler: 4 kıyafet + 4 zırh kimliği, büyülüyse eksi) */
 export function durumDizisi(o) {
   const P = o.oyuncu, p = P.konum;
   let b = 0;
@@ -23,7 +23,8 @@ export function durumDizisi(o) {
   if (BN && BN.oturak) b |= B.OTUR;
   if (BN && BN.at) b |= B.ATLI;
   const t = o.tekneler.binilen;
-  return [r2(p.x), r2(p.y), r2(p.z), r3(P.yaw), r3(P.pitch), o.envanter.seciliId(), b, t && t.ni != null ? t.ni : -1, BN && BN.at ? BN.at.id : -1];
+  const E = o.envanter, gk = s => (s ? (s.buyu ? -s.id : s.id) : 0);
+  return [r2(p.x), r2(p.y), r2(p.z), r3(P.yaw), r3(P.pitch), E.seciliId(), b, t && t.ni != null ? t.ni : -1, BN && BN.at ? BN.at.id : -1, [...(E.kiyafet || []), ...E.zirh].map(gk)];
 }
 
 /* Başka bir oyuncunun kırdığı / koyduğu blok yakındaysa ses ve parçacık */

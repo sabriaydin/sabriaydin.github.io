@@ -1,6 +1,7 @@
 /* HungerMan - diğer oyuncuların görünümü: insan modeli, isim etiketi, eldeki eşya, yürüme / vurma / eğilme canlandırması */
 import { THREE } from '../grafik/sahne.js';
-import { parca, gurultu } from '../varlik/modeller.js';
+import { gurultu } from '../varlik/modeller.js';
+import { insanModeli, giydir } from '../varlik/giysiler.js';
 import { simge } from '../grafik/doku.js';
 import { ESYALAR } from '../bloklar.js';
 
@@ -15,17 +16,8 @@ function esyaDoku(id) {
   return DOKU.get(id);
 }
 
-function model(renk) {
-  const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
-  const kok = new THREE.Group();
-  const ten = '#d9a982', sac = '#3b2a1d', pantolon = '#34495e', ayakkabi = '#2a2420';
-  const govde = parca(kok, malzeme, [0, 1.12, 0], [[0.5, 0.75, 0.26, renk], [0.52, 0.08, 0.28, '#2c2c2c', 0, -0.33, 0], [0.16, 0.12, 0.02, '#f2f2f2', 0, 0.22, -0.135]]);
-  const kafa = parca(kok, malzeme, [0, 1.5, 0], [[0.48, 0.48, 0.48, ten, 0, 0.24, 0], [0.5, 0.12, 0.5, sac, 0, 0.45, 0], [0.5, 0.3, 0.1, sac, 0, 0.3, 0.21],
-    [0.08, 0.07, 0.02, '#1e1e24', -0.11, 0.27, -0.245], [0.08, 0.07, 0.02, '#1e1e24', 0.11, 0.27, -0.245], [0.16, 0.03, 0.02, '#8a4a3a', 0, 0.11, -0.245]]);
-  const kollar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.37, 1.45, 0], [[0.22, 0.3, 0.24, renk, 0, -0.1, 0], [0.2, 0.46, 0.22, ten, 0, -0.48, 0]]));
-  const bacaklar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.125, 0.75, 0], [[0.24, 0.75, 0.24, pantolon, 0, -0.375, 0], [0.25, 0.12, 0.27, ayakkabi, 0, -0.69, -0.01]]));
-  return { kok, malzeme, govde, kafa, kollar, bacaklar };
-}
+/* 0.33.0: çıplak insan modeli (don oyuncunun rengindedir); kıyafetler ve zırhlar durum dizisiyle gelir */
+function model(renk) { return insanModeli(renk, new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() })); }
 
 function etiket(ad, renk) {
   const cv = document.createElement('canvas');
@@ -74,6 +66,7 @@ export class UzakOyuncular {
     if (!o) return;
     this.grup.remove(o.m.kok);
     o.m.kok.traverse(n => { if (n.geometry) n.geometry.dispose(); });
+    for (const g of o.m.giysiMesh) if (g.material !== o.m.malzeme) g.material.dispose();
     o.m.malzeme.dispose(); o.et.material.map.dispose(); o.et.material.dispose(); o.el.material.dispose();
     this.harita.delete(id);
   }
@@ -90,6 +83,7 @@ export class UzakOyuncular {
       if (o.elId && ESYALAR[o.elId]) { o.el.material.map = esyaDoku(o.elId); o.el.material.needsUpdate = true; o.el.visible = true; }
       else o.el.visible = false;
     }
+    if (Array.isArray(a[9])) { const im = a[9].join(','); if (im !== o.giysi) { o.giysi = im; giydir(o.m, a[9].map(i => (i ? { id: Math.abs(i), buyu: i < 0 } : null))); } }   // 0.33.0
     if ((a[6] & B.VURUS) && !(o.bayrak & B.VURUS)) o.vurus = 0.01;
     o.bayrak = a[6]; o.tk = a[7] ?? -1;
     o.yeni = 0;
@@ -142,6 +136,7 @@ export class UzakOyuncular {
       }
       o.isik += (o.isikHedef - o.isik) * Math.min(1, dt * 4);
       m.malzeme.color.setScalar(o.isik);
+      for (const g of m.giysiMesh) if (g.material !== m.malzeme) g.material.color.setScalar(o.isik * (1.1 + 0.15 * Math.sin(performance.now() / 300)));
       o.el.material.color.setScalar(o.isik);
     }
   }
