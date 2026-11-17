@@ -117,6 +117,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 39.2 (0.39.2): Kül zombisi lavda yüzer
+- Kül zombisi lava düşünce dibe batmaz; yüzeye çıkıp yüzer ve kenara gelince lavdan çıkar.
+- Lavdaki ilk 10 saniye hasar almaz; 10 saniyeden uzun kalırsa yanmaya ve hasar almaya başlar. Lavdan çıkınca süre sıfırlanır.
+
+## 39.1 (0.39.1): Hata düzeltmesi
+- Eli boşken bir bloğa sağ tıklanınca çıkan "s is null" hatası giderildi.
+- Hata kutusu hızlı erişim çubuğunun üstüne binmeyecek şekilde ekranın üst ortasına taşındı.
+
 ## 39.0 (0.39.0): Kayıt noktası, Büyülü Anahtar, Kül Devi ve yeni Geliştirici Modu
 - **Doğma yeri:** oyuncu ilk girişte ve yeniden doğarken haydut kampı, çöl ve orman tapınağı, buzul kulesi, zindan gibi özel yapıların 200 blok yakınında doğmaz.
 - **Ölüm ekranı:** sırasıyla Son Kayıt Noktasında Doğ, Yeniden Doğ ve Ana Menü düğmeleri. Son kullanılan yatak (gündüz tıklansa da) son kayıt noktası olur; kayıt noktası yoksa ya da yatak kırılmışsa düğme görünür ama pasiftir. Yatak kırılınca kayıt noktası iptal edilir ve bildirilir. Dünyanın doğma noktası yatakla değişmez.

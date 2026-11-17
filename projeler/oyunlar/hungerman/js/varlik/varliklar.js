@@ -405,7 +405,24 @@ export class Varliklar {
     /* Zıplama */
     if (v.yerde && hiz > 0 && v.engel && !this.carpisiyor(v, p.x, p.y + 1.1, p.z)) v.hiz.y = 8.2;
     if (T.ziplar && v.yerde && hiz > 0) { v.zipSayac -= dt; if (v.zipSayac <= 0) { v.zipSayac = 0.45; v.hiz.y = 5.5; } }
+    /* 0.39.2: lavda yüzen canlı (kül zombisi) ilk 10 saniye hasar almaz; daha uzun kalırsa yanar ve hasar alır (yüzeyde sallanırken de lavda sayılır) */
+    if (T.lavYuzer) {
+      if (v.lavda || LAV[this.dunya.blok(Math.floor(p.x), Math.floor(p.y - 0.3), Math.floor(p.z))]) {
+        v.lavSure = (v.lavSure || 0) + dt;
+        if (v.lavSure > 10) {
+          v.atesSure = Math.max(v.atesSure || 0, 3);
+          v.lavSayac = (v.lavSayac || 0) - dt;
+          if (v.lavSayac <= 0) { v.lavSayac = 0.5; this.hasarVer(v, 2, null, { sessiz: true }); }
+        }
+      } else v.lavSure = 0;
+    }
     if (v.lavda && !T.atesBagisik) { v.hiz.y = Math.min(v.hiz.y + 14 * dt, 1.2); v.hiz.x *= 0.85; v.hiz.z *= 0.85; v.lavSayac = (v.lavSayac || 0) - dt; if (v.lavSayac <= 0) { v.lavSayac = 0.5; this.hasarVer(v, 4, null, { sessiz: true }); } }
+    /* 0.39.2: Kül zombisi lavda batmaz, yüzer; kenara gelince lavdan çıkar */
+    else if (v.lavda && T.lavYuzer) {
+      v.hiz.y = Math.min(v.hiz.y + 26 * dt, 2.2);
+      if (v.engel && hiz > 0) v.hiz.y = Math.max(v.hiz.y, 5.5);
+      const s = 1 - Math.min(1, dt * 3); v.hiz.x *= s; v.hiz.z *= s;
+    }
     else if (v.suda && T.dalgic) {
       /* Boğulmuş zombi suda batar; kovalarken hedefin yüksekliğine doğru yüzer */
       const hy = kovaliyor ? Math.max(-2.5, Math.min(2.5, (op.y - p.y) * 1.5)) : -1.2;
