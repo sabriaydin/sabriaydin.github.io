@@ -1341,3 +1341,20 @@ body.gostergesiz #ogretici { display: none; }
 .envSandik.firinMod .firinDuzen { min-height: 150px; }
 .envSandik.firinMod .sandikKutu, .envSandik.firinMod #sandikIzgara { width: 100%; box-sizing: border-box; }
 .envSandik.firinMod .fOk { min-width: 140px; }
+/* 0.34.1: giysi değerleri tek satırda kalır */
+.kbGiysi { display: grid; grid-template-columns: auto 1fr; gap: 2px 6px; align-items: center; }
+.kbGiysi > span { min-width: 0; }
+.kbGiysiDeger { display: flex; gap: 4px; flex-wrap: nowrap; justify-content: flex-end; min-width: 0; }
+.kbGiysiDeger b { white-space: nowrap; padding: 1px 6px; font-size: .72rem; }
+.kbGiysi > em { grid-column: 1 / -1; justify-self: end; }
+/* 0.35.0: istasyon filtresi */
+.istSimge { cursor: pointer; }
+.istSimge.filtre { outline: 2px solid var(--vurgu2); outline-offset: 1px; }
+/* 0.35.0: köy uzmanlığı */
+.kUzman { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-bottom: 8px; border: 2px solid #6a5a2a; border-radius: 6px; background: rgba(160, 120, 30, .12); }
+.kUzman img { width: 30px; height: 30px; image-rendering: pixelated; }
+.kUzman b { display: block; color: #ffd76a; font: 700 .9rem var(--baslik); }
+.kUzman small { color: #e6dccb; font-size: .76rem; }
+.kOnarim { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; margin-bottom: 8px; border: 2px dashed #4a4034; border-radius: 6px; font-size: .82rem; }
+.tRozet.uzman { color: #ffd76a; border-color: #8a6a22; background: rgba(160, 120, 30, .2); }
+.tRozet.gezgin { color: #d8b8ff; border-color: #6b4a9a; background: rgba(100, 60, 150, .2); }

@@ -341,6 +341,7 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'vazo': {
       if (carp) return [[5 * P, 0, 5 * P, 11 * P, 10 * P, 11 * P]];
       const Y = T.yun_y;
+      if (b.bosVazo) return [[5 * P, 0, 5 * P, 11 * P, 7 * P, 11 * P], [6 * P, 7 * P, 6 * P, 10 * P, 10 * P, 10 * P]];   // 0.35.0: boş vazo
       return [[5 * P, 0, 5 * P, 11 * P, 7 * P, 11 * P], [6 * P, 7 * P, 6 * P, 10 * P, 10 * P, 10 * P], [7.5 * P, 10 * P, 7.5 * P, 8.5 * P, 14 * P, 8.5 * P, Y], [6 * P, 10 * P, 9 * P, 7 * P, 13 * P, 10 * P, Y],
         [6.5 * P, 13.5 * P, 6.5 * P, 9.5 * P, 15.5 * P, 9.5 * P, T.yun_k], [5 * P, 12 * P, 9 * P, 7 * P, 13.5 * P, 11 * P, T.yun_s], [9 * P, 11 * P, 5.5 * P, 11 * P, 12.5 * P, 7.5 * P, T.mavi_cicek]];
     }

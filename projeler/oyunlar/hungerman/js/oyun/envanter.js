@@ -79,6 +79,8 @@ export class Envanter {
   zirhYipran(n = 1) {
     let kirildi = false;
     for (let i = 0; i < 4; i++) { const z = this.zirh[i]; if (!z) continue; const k = buyuSeviye(z, 'kirilmaz'); if (k && Math.random() < k / (k + 1) * 0.6) continue; z.dayanim -= n; if (z.dayanim <= 0) { this.zirh[i] = null; kirildi = true; } }
+    /* 0.35.0: kıyafetler de yıpranır (zırhın altındaysa daha yavaş) */
+    for (let i = 0; i < 4; i++) { const z = this.kiyafet[i]; if (!z || z.dayanim == null || Math.random() > (this.zirh[i] ? 0.25 : 0.6)) continue; const k = buyuSeviye(z, 'kirilmaz'); if (k && Math.random() < k / (k + 1) * 0.6) continue; z.dayanim -= n; if (z.dayanim <= 0) { this.kiyafet[i] = null; kirildi = true; } }
     this.bildir();
     return kirildi;
   }

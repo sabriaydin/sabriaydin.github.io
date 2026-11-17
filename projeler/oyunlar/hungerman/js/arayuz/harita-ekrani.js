@@ -1,7 +1,7 @@
 /* HungerMan - büyük harita ekranı (M) ve mini harita
    Keşfedilen bölgeler ölçeklenerek çizilir; köyler, limanlar, doğma / ölüm noktaları, görev hedefleri,
    oyuncunun eklediği işaretler ve (çok oyunculuda) diğer oyuncular simgelerle gösterilir. */
-import { koylerAlan } from '../dunya/koy-uretici.js';
+import { koylerAlan, UZMANLIK } from '../dunya/koy-uretici.js';
 import { BIYOMLAR } from '../dunya/uretici.js';
 import { BOLGE_BLOK } from '../harita/harita.js';
 import { ikon, okIkon, yazi, IKON_RENK } from './ikonlar.js';
@@ -21,7 +21,7 @@ export function haritaIsaretleri(o, x0, z0, x1, z1) {
   if (s) {
     const ax0 = Math.max(x0, s[0]), az0 = Math.max(z0, s[1]), ax1 = Math.min(x1, s[2]), az1 = Math.min(z1, s[3]);
     if (ax0 <= ax1 && az0 <= az1) for (const k of koylerAlan(o.dunya.uretici, ax0, az0, ax1, az1)) {
-      if (H.kesfedildi(k.x, k.z)) l.push({ tur: 'koy', x: k.x, z: k.z, ad: k.ad });
+      if (H.kesfedildi(k.x, k.z)) l.push({ tur: 'koy', x: k.x, z: k.z, ad: UZMANLIK[k.uzmanlik] ? `${k.ad} · ${UZMANLIK[k.uzmanlik].kisa}` : k.ad });   // 0.35.0: uzmanlık
       const L = k.liman;
       if (L && H.kesfedildi(L.iskeleX, L.iskeleZ)) l.push({ tur: 'liman', x: L.iskeleX, z: L.iskeleZ, ad: `${k.ad} limanı` });
     }

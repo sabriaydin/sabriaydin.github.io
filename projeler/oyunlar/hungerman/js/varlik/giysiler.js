@@ -112,14 +112,20 @@ export function giydir(m, liste) {
   m.giysiImz = imz;
   for (const g of m.giysiMesh) { g.parent.remove(g); g.geometry.dispose(); if (g.material !== m.malzeme) g.material.dispose(); }
   m.giysiMesh = [];
+  /* 0.34.1: kask giyiliyken başlık kıyafeti gizlenir; zırhlar kıyafetin içine girmesin diye eklemine göre biraz büyütülür */
+  const cuppe = liste.some(s => s && ESYALAR[s.id] && ESYALAR[s.id].kiyafet && ESYALAR[s.id].kiyafet.sekil === 'cuppe');
+  const kask = liste.some(s => s && ESYALAR[s.id] && ESYALAR[s.id].zirh && ESYALAR[s.id].zirh.parca === 0);
   for (const s of liste) {
     const E = s && ESYALAR[s.id];
     if (!E || !(E.zirh || E.kiyafet)) continue;
+    if (E.kiyafet && E.kiyafet.parca === 0 && kask) continue;
+    if (E.kiyafet && E.kiyafet.parca === 2 && cuppe) continue;   // 0.35.0: çöl cüppesi bacakları örter; alttaki pantolon çizilmez
     let mal = m.malzeme;
     if (s.buyu) { mal = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() }); mal.userData.parilti = true; mal.color.copy(m.malzeme.color); }
     for (const [ek, kutular] of (E.kiyafet ? kiyafetKutulari(s.id) : zirhKutulari(s.id))) {
       if (!kutular.length) continue;
       const g = new THREE.Mesh(birlestir(kutular.map(k => kutuGeo(...k))), mal);
+      if (E.zirh) g.scale.set(1.09, 1.025, 1.09);
       m.eklem[ek].add(g); m.giysiMesh.push(g);
     }
   }

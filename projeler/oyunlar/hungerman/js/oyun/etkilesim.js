@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS } from '../bloklar.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
@@ -333,6 +333,8 @@ export class Etkilesim {
       if (!b || !BITKI[id] || b.fidan || b.meyve) continue;
       const olgun = b.ekin === 3, ot = b.degistirilebilir && b.ekin == null;
       if (!olgun && !ot) continue;
+      /* 0.35.0: yeniden ürün veren bitkiler (domates, biber, çilek) sökülmez, toplanır */
+      if (b.tekrar != null && olgun) { const k = b.urunAdet[0] + Math.floor(Math.random() * (b.urunAdet[1] - b.urunAdet[0] + 1)); d.blokKoy(x, y, z, b.tekrar); this.dusenler.birak(b.urun, k, x + 0.5, y + 0.4, z + 0.5); this.olay('hasat'); n++; continue; }
       const liste = b.dusur ? b.dusur(Math.random) : [];
       d.blokKoy(x, y, z, 0);
       /* Yeniden ekim: düşenlerden ya da çantadan bir tohum */
@@ -359,6 +361,13 @@ export class Etkilesim {
       d.blokKoy(h.x, h.y, h.z, b.tekrar); this.dusenler.birak(b.urun, n, h.x + 0.5, h.y + 0.5, h.z + 0.5);
       this.ses.koy('bitki'); this.olay('hasat'); return true;
     }
+    /* 0.35.0: vazoya çiçek konur ya da çiçek alınır */
+    if (b.sekil === 'vazo') {
+      const s = env.seciliYuva();
+      if (b.bosVazo && s && [26, 27, 44].includes(s.id)) { env.seciliAzalt(1); d.blokKoy(h.x, h.y, h.z, YAPI_ID.vazo); this.ses.koy('bitki'); return true; }
+      if (!b.bosVazo && !s) { d.blokKoy(h.x, h.y, h.z, VAZO_BOS); this.dusenler.birak(26, 1, h.x + 0.5, h.y + 0.8, h.z + 0.5); this.ses.koy('bitki'); return true; }
+      return false;
+    }
     if (b.meyveli) {
       d.blokKoy(h.x, h.y, h.z, b.bos); this.dusenler.birak(b.meyveId, 1 + (Math.random() < 0.35 ? 1 : 0), h.x + 0.5, h.y + 0.3, h.z + 0.5);
       this.ses.koy('bitki'); return true;
@@ -368,7 +377,8 @@ export class Etkilesim {
       const s = env.seciliYuva(), e = s && ESYALAR[s.id];
       if (!e || !organikMi(s.id)) return false;
       env.seciliAzalt(1);
-      if (Math.random() < (e.yemek ? 0.65 : 0.4)) d.blokKoy(h.x, h.y, h.z, h.id + 1);
+      d.blokKoy(h.x, h.y, h.z, h.id + 1);   // 0.35.0: her atık bir seviye doldurur
+      this.arayuz.bildirim(b.kompost + 1 >= 8 ? 'Kompost doldu: gübre almak için sağ tıklayınız.' : `Kompost: ${b.kompost + 1} / 8`);
       this.dusenler.renkliParcacik([0.45, 0.65, 0.3], h.x + 0.5, h.y + 0.9, h.z + 0.5, 6); this.ses.koy('bitki');
       return true;
     }
@@ -966,6 +976,7 @@ export class Etkilesim {
   at(hepsi) {
     const s = this.envanter.seciliYuva();
     if (!s) return;
+    if (ESYALAR[s.id].gorevEsyasi) { this.arayuz.bildirim('Görev eşyası atılamaz.'); return; }   // 0.35.0
     const n = hepsi ? s.adet : 1;
     const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu();
     this.dusenler.birak(s.id, n, goz.x + yon.x * 0.5, goz.y - 0.3 + yon.y * 0.5, goz.z + yon.z * 0.5, yon.x * 5, yon.y * 5 + 2, yon.z * 5, s.dayanim, 1.5, s.buyu);

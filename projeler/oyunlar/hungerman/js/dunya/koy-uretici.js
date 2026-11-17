@@ -28,6 +28,19 @@ function koyAdi(u, rx, rz) {
 const ERKEK = ['Ahmet', 'Mehmet', 'Hasan', 'Ali', 'Mustafa', 'Hüseyin', 'İbrahim', 'Osman', 'Yusuf', 'Murat', 'Kemal', 'Halil', 'Ramazan', 'Selim', 'Kadir', 'Recep', 'Emin', 'Cemal', 'Rıza', 'Şükrü'];
 const KADIN = ['Ayşe', 'Fatma', 'Emine', 'Hatice', 'Zeynep', 'Elif', 'Meryem', 'Şerife', 'Zehra', 'Hacer', 'Esra', 'Selin', 'Derya', 'Gülsüm', 'Nuriye', 'Saadet', 'Havva', 'Sevim', 'Nazlı', 'Dilek'];
 export const MESLEK_ADI = { ciftci: 'Çiftçi', kasap: 'Kasap', demirci: 'Demirci', oduncu: 'Oduncu', sifaci: 'Şifacı', avci: 'Avcı', balikci: 'Balıkçı', mimar: 'Mimar', kutuphaneci: 'Kütüphaneci', coban: 'Çoban', asci: 'Aşçı' };
+/* 0.35.0: köy uzmanlıkları: her köy tek bir alanda ünlüdür. Uzmanlık köyün binalarını, mesleklerini, meydan süsünü, fiyatlarını ve özel takaslarını belirler.
+   meslekler[0]: köyün önde gelen mesleği (en ucuz fiyatlar); binalar: bina türü ağırlıkları; biyom: uygun biyomlar (BY değerleri) */
+export const UZMANLIK = {
+  tarim: { ad: 'Tarım köyü', kisa: 'Tarım', ozet: 'Tohum, fidan ve sebze ucuz; ürünlerinize yüksek fiyat', simge: 291, meslekler: ['ciftci', 'asci', 'coban'], binalar: { ciftlik: 4, ev_kucuk: 3, ev_buyuk: 2, tezgah: 1 }, biyom: [10, 8, 9, 11] },
+  demirci: { ad: 'Demirci köyü', kisa: 'Demircilik', ozet: 'Alet ve zırh ucuz; eşya onarımı', simge: 139, meslekler: ['demirci', 'mimar', 'avci'], binalar: { demirci: 4, ev_kucuk: 3, ev_buyuk: 2, tezgah: 1 }, biyom: [10, 8, 9, 7, 6, 11, 13] },
+  ticaret: { ad: 'Ticaret kasabası', kisa: 'Ticaret', ozet: 'Her meslekten tüccar; daha çok takas hakkı ve günlük gezgin tüccar malları', simge: 288,
+    meslekler: ['ciftci', 'kasap', 'demirci', 'oduncu', 'sifaci', 'avci', 'mimar', 'kutuphaneci', 'coban', 'asci'], binalar: { tezgah: 5, ev_kucuk: 2, ev_buyuk: 3 }, biyom: [10, 8, 9, 7, 11] },
+  bilgelik: { ad: 'Bilgelik köyü', kisa: 'Büyü ve bilgi', ozet: 'İksir, kristal, tılsım ve büyü malzemesi ucuz', simge: 156, meslekler: ['kutuphaneci', 'sifaci', 'mimar'], binalar: { ev_buyuk: 4, ev_kucuk: 3, tezgah: 2 }, biyom: [10, 8, 9, 7, 6, 13] },
+  coban: { ad: 'Çoban obası', kisa: 'Hayvancılık', ozet: 'Yün, boya, et ve kalın kıyafetler ucuz', simge: 49, meslekler: ['coban', 'kasap', 'avci'], binalar: { ciftlik: 2, ev_kucuk: 4, ev_buyuk: 2, tezgah: 2 }, biyom: [10, 6, 13, 11, 9] },
+  oduncu: { ad: 'Oduncu kampı', kisa: 'Kereste', ozet: 'Kereste, mobilya ve yapı malzemesi ucuz', simge: 301, meslekler: ['oduncu', 'mimar', 'avci'], binalar: { ev_kucuk: 4, ev_buyuk: 3, tezgah: 2 }, biyom: [8, 9, 6, 13] },
+  liman: { ad: 'Balıkçı limanı', kisa: 'Denizcilik', ozet: 'Balık, tekne ve dalış takımı ucuz', simge: 453, meslekler: ['balikci', 'asci', 'kasap'], binalar: { ev_kucuk: 4, ev_buyuk: 2, tezgah: 2 }, biyom: [] }
+};
+export const UZMANLIK_ANAHTAR = Object.keys(UZMANLIK);
 const MARJ = 128;   // köy ve limanın bölge dışına taşabileceği en büyük mesafe
 
 const BOYUT = { ev_kucuk: [5, 5], ev_buyuk: [7, 7], demirci: [7, 5], ciftlik: [9, 7], tezgah: [3, 3], kulube: [5, 5], fener: [5, 5] };
@@ -84,13 +97,22 @@ function koyKur0(u, rx, rz, yer) {
   const stil = o.b === 7 ? 'col' : o.b === 6 || o.b === 13 ? 'tayga' : 'mese';
   r(); r();   // eski ad seçiminin rastgele sırası korunur (köy yerleşimi değişmez)
   const ad = koyAdi(u, rx, rz);
-  const koy = { id: rx + ',' + rz, rx, rz, x, z, y: o.h, ad, stil, binalar: [], yollar: [], lambalar: [], koylular: [], yaricap: 0 };
+  /* 0.35.0: uzmanlık (biyoma uygun olanlar arasından, ayrı karmayla); kıyıda liman kurulursa çoğunlukla balıkçı limanı olur */
+  const uyg = UZMANLIK_ANAHTAR.filter(k => UZMANLIK[k].biyom.includes(o.b));
+  let uzmanlik = uyg[Math.floor(karma2(u.tohum ^ 0x757a, rx * 7919 + rz) * uyg.length)] || 'tarim';
+  const koy = { id: rx + ',' + rz, rx, rz, x, z, y: o.h, ad, stil, uzmanlik, binalar: [], yollar: [], lambalar: [], koylular: [], yaricap: 0 };
+  const agirlik = Object.entries(UZMANLIK[uzmanlik].binalar), agTop = agirlik.reduce((n, [, a]) => n + a, 0);
   /* Kuyu ve meydan */
   koy.binalar.push({ tur: 'kuyu', x, z, w: 5, d: 5, f: 0, y: o.h });
   for (let dz = -4; dz <= 4; dz++) for (let dx = -4; dx <= 4; dx++) if (Math.abs(dx) > 2 || Math.abs(dz) > 2) koy.yollar.push([x + dx, z + dz]);
   /* Dört yönde yol ve yol boyunca binalar */
   const turler = [], uzun = [];
   let enUzun = 0;
+  /* 0.34.1: binaların kapladığı alanlar (1 blok payla). Dört yolun köşelerinde iki binanın iç içe geçmesi yapısal bozulmalara yol açıyordu:
+     sonradan yazılan bina öncekinin duvarlarını siliyordu. Çakışan bina artık kurulmaz (rastgele sayı sırası korunur). */
+  const alanlar = [[x - 3, z - 3, x + 3, z + 3]];
+  const alanAl = b => { const [ax, az] = donustur(b, -1, -1), [bx, bz] = donustur(b, b.w, b.d); return [Math.min(ax, bx), Math.min(az, bz), Math.max(ax, bx), Math.max(az, bz)]; };
+  const cakisir = A => alanlar.some(B => A[0] <= B[2] && A[2] >= B[0] && A[1] <= B[3] && A[3] >= B[1]);
   for (let yi = 0; yi < 4; yi++) {
     const [ax, az] = YON[yi];
     const L = 20 + Math.floor(r() * 18);
@@ -100,13 +122,10 @@ function koyKur0(u, rx, rz, yer) {
       if (t + 3 > L) break;
       for (const s of [-1, 1]) {
         if (r() > 0.78) continue;
-        let tur;
-        const q = r();
-        if (!turler.includes('demirci') && q < 0.25) tur = 'demirci';
-        else if (q < 0.5) tur = 'ev_kucuk';
-        else if (q < 0.7) tur = 'ev_buyuk';
-        else if (q < 0.87) tur = 'ciftlik';
-        else tur = 'tezgah';
+        /* 0.35.0: bina türü köyün uzmanlığına göre */
+        let tur = 'ev_kucuk', q = r() * agTop;
+        for (const [k, a] of agirlik) { if (q < a) { tur = k; break; } q -= a; }
+        if (tur === 'demirci' && turler.filter(t => t === 'demirci').length >= (uzmanlik === 'demirci' ? 3 : 1)) tur = 'ev_buyuk';
         const [w, d] = BOYUT[tur];
         const px = -az * s, pz = ax * s;              // yol eksenine dik yön
         const uz = 3 + (d - 1) / 2;
@@ -117,6 +136,9 @@ function koyKur0(u, rx, rz, yer) {
         for (const [cx, cz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) egim = Math.max(egim, Math.abs(u.kolon(bx + cx * (w >> 1), bz + cz * (d >> 1), {}).h - bo.h));
         if (egim > 5) continue;
         const b = { tur, x: bx, z: bz, w, d, f: yonF(-px, -pz), y: bo.h };
+        const A = alanAl(b);
+        if (cakisir(A)) continue;
+        alanlar.push(A);
         const [kx, kz] = donustur(b, (w - 1) / 2, -1);
         b.kapi = { x: kx, y: bo.h + 1, z: kz };
         koy.binalar.push(b); turler.push(tur);
@@ -127,37 +149,33 @@ function koyKur0(u, rx, rz, yer) {
   }
   koy.yaricap = enUzun + 10;
   limanKur(u, koy, uzun);
+  if (koy.liman && karma2(u.tohum ^ 0x6c69, rx - rz * 31) < 0.7) koy.uzmanlik = uzmanlik = 'liman';
+  const U = UZMANLIK[uzmanlik], UM = U.meslekler;
   /* Köylüler */
   const isim = () => (r() < 0.5 ? ERKEK : KADIN)[Math.floor(r() * 20)];
-  const genel = ['ciftci', 'oduncu', 'avci', 'sifaci', 'kasap'];
+  /* 0.35.0: köyde yalnızca uzmanlığın meslekleri bulunur; önde gelen meslek (UM[0]) daha sık görülür */
+  const sec = () => (r() < 0.45 ? UM[0] : UM[Math.floor(r() * UM.length)]);
   koy.binalar.forEach((b, bi) => {
     let meslekler = [];
-    if (b.tur === 'ev_kucuk') meslekler = [genel[Math.floor(r() * genel.length)]];
-    else if (b.tur === 'ev_buyuk') meslekler = [genel[Math.floor(r() * genel.length)], genel[Math.floor(r() * genel.length)]];
-    else if (b.tur === 'demirci') meslekler = ['demirci'];
-    else if (b.tur === 'ciftlik') meslekler = ['ciftci'];
-    else if (b.tur === 'tezgah') meslekler = [r() < 0.5 ? 'kasap' : 'sifaci'];
+    if (b.tur === 'ev_kucuk') meslekler = [sec()];
+    else if (b.tur === 'ev_buyuk') meslekler = [sec(), sec()];
+    else if (b.tur === 'demirci') meslekler = [UM.includes('demirci') ? 'demirci' : sec()];
+    else if (b.tur === 'ciftlik') meslekler = [UM.includes('ciftci') ? 'ciftci' : UM.includes('coban') ? 'coban' : sec()];
+    else if (b.tur === 'tezgah') meslekler = [sec()];
     else if (b.tur === 'kulube') meslekler = ['balikci'];
     for (const m of meslekler) if (koy.koylular.length < 12 || m === 'demirci' || m === 'balikci') koy.koylular.push({ idx: koy.koylular.length, meslek: m, ad: isim(), bina: bi, kapi: b.kapi });
   });
   if (koy.koylular.length < 3) return null;
   /* 0.23.0: köyler kalabalık görünüyordu: her binada bir köylü, demirci ve balıkçı her zaman; köye göre en çok 4-7 */
   const binada = new Set(), secilen = [];
-  for (const kl of koy.koylular) if (kl.meslek === 'demirci' || kl.meslek === 'balikci') { secilen.push(kl); binada.add(kl.bina); }
+  /* Önde gelen meslekten en az bir köylü her zaman bulunur */
+  for (const kl of koy.koylular) if (kl.meslek === UM[0] && !secilen.some(s => s.meslek === UM[0])) { secilen.push(kl); binada.add(kl.bina); }
+  for (const kl of koy.koylular) if (kl.meslek === 'balikci' && !secilen.includes(kl) && !binada.has(kl.bina)) { secilen.push(kl); binada.add(kl.bina); }
   const sinir = 4 + (koy.binalar.length + koy.rx * 3 + koy.rz * 7 & 3);
   for (const kl of koy.koylular) if (secilen.length < sinir && !binada.has(kl.bina) && !secilen.includes(kl)) { secilen.push(kl); binada.add(kl.bina); }
   koy.koylular = secilen.sort((a, b) => a.idx - b.idx).map((kl, i) => ({ ...kl, idx: i }));
-  /* 0.32.0: yeni meslekler (mimar, kütüphaneci, çoban, aşçı): evlerdeki genel meslekli köylülerin bir kısmı ayrı bir karmayla dönüştürülür
-     (köyün yeri, binaları ve köylü adları değişmez); her köyde her yeni meslekten en çok bir tane bulunur */
-  const YENI = ['mimar', 'kutuphaneci', 'coban', 'asci'], kullanilan = new Set();
-  for (const kl of koy.koylular) {
-    if (!genel.includes(kl.meslek)) continue;
-    const h = karma2(koy.rx * 31 + kl.idx ^ u.tohum, koy.rz * 17 - kl.idx * 7);
-    if (h > 0.42) continue;
-    const m = YENI[Math.floor(h / 0.42 * 4) % 4];
-    if (kullanilan.has(m)) continue;
-    kullanilan.add(m); kl.meslek = m;
-  }
+  /* 0.35.0: önde gelen meslek hiç çıkmadıysa ilk köylüye verilir */
+  if (!koy.koylular.some(kl => kl.meslek === UM[0]) && koy.koylular.length) koy.koylular[0].meslek = UM[0];
   koy.bbox = [x - koy.yaricap, z - koy.yaricap, x + koy.yaricap, z + koy.yaricap];
   if (koy.liman) { const L = koy.liman.kutu; koy.bbox = [Math.min(koy.bbox[0], L[0]), Math.min(koy.bbox[1], L[1]), Math.max(koy.bbox[2], L[2]), Math.max(koy.bbox[3], L[3])]; }
   return koy;
@@ -343,6 +361,10 @@ function binaYaz(b, M, set, al, k) {
     for (const [lx, lz] of [[0, 0], [4, 0], [0, 4], [4, 4]]) for (let ly = 2; ly <= 3; ly++) L(lx, ly, lz, M.kutuk);
     for (let lz = 0; lz < 5; lz++) for (let lx = 0; lx < 5; lx++) L(lx, 4, lz, M.cati);
     for (let lz = 1; lz < 4; lz++) for (let lx = 1; lx < 4; lx++) L(lx, 5, lz, M.cati);
+    /* 0.35.0: meydanın dört köşesinde köyün uzmanlığını gösteren süsler */
+    const S = { tarim: [[52, 52], [52], [52, 52], [559]], demirci: [[139], [15, 15], [139], [50]], ticaret: [[50], [50, 159], [50], [50, 159]], bilgelik: [[187, 187], [156], [187, 187], [140]],
+      coban: [[49, 49], [114], [49], [52]], oduncu: [[8, 8, 8], [10, 10], [12, 12], [8]], liman: [[50], [159], [50], [564]] }[k && k.uzmanlik] || [];
+    S.forEach((yigin, i) => { const [lx, lz] = [[-2, -2], [6, -2], [-2, 6], [6, 6]][i]; yigin.forEach((id, h) => L(lx, 1 + h, lz, id)); });
     return;
   }
   if (b.tur === 'ciftlik') {

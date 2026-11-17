@@ -1,7 +1,7 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
+import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
@@ -295,6 +295,15 @@ t(382, 1, [[363, 2], [365, 1], [480, 2], [270, 1]], 'tencere', 'yiyecek');
 t(383, 1, [[363, 1], [365, 1], [369, 1], [270, 1]], null, 'yiyecek');
 t(387, 1, [[266, 1], [378, 2], [374, 2], [270, 1]], null, 'yiyecek');
 t(377, 2, [[376, 1]], null, 'malzeme');
+
+/* ---------- 0.35.0: kumaş, yeni yemekler (sona eklenir) ---------- */
+t(391, 1, [[372, 3]], 'masa', 'malzeme');
+t(351, 1, [[391, 3]], 'masa', 'giyim'); t(356, 1, [[391, 3]], 'masa', 'giyim'); t(355, 1, [[391, 4]], 'masa', 'giyim'); t(359, 1, [[391, 2]], 'masa', 'giyim');
+t(392, 1, [[370, 1], [369, 1], [381, 1], [270, 1]], 'tencere', 'yiyecek');
+t(393, 1, [[369, 3], [270, 1]], 'tencere', 'yiyecek');
+t(394, 1, [[367, 3]], 'firin', 'yiyecek');
+t(VAZO_BOS, 1, [[YAPI_ID.kil, 2]], 'masa', 'mobilya');
+t(395, 1, [[365, 2], [381, 1], [270, 1]], null, 'yiyecek');
 
 export const TARIFLER = R;
 

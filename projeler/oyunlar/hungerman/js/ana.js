@@ -17,7 +17,7 @@ import { Varliklar } from './varlik/varliklar.js';
 import { TURLER } from './varlik/turler.js';
 import { Koyler } from './koy/koyler.js';
 import { Gorevler, yonAci } from './koy/gorevler.js';
-import { koylerAlan } from './dunya/koy-uretici.js';
+import { koylerAlan, UZMANLIK } from './dunya/koy-uretici.js';
 import { KoyluEkrani, GorevEkrani } from './arayuz/koylu-ekrani.js';
 import { ISTASYON_BLOK, ELOCAK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
@@ -37,6 +37,7 @@ import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
 import { hissedilenSicaklik } from './oyun/sicaklik.js';
 import { mezarKoy, mezarBosalt } from './oyun/mezar.js';
 import { Ogretici } from './arayuz/ogretici.js';
+import { Baskinlar } from './koy/baskin.js';
 import { ZORLUKLAR, dengeDuzelt, DENGE_SECENEK, VARSAYILAN_DENGE, zorlukUygula } from './oyun/zorluk.js';
 import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
@@ -537,9 +538,10 @@ function yakinIstasyonlar() {
   if (!oyun) return s;
   const p = oyun.oyuncu.konum;
   const x0 = Math.floor(p.x), y0 = Math.floor(p.y), z0 = Math.floor(p.z);
-  for (let y = -2; y <= 3; y++) for (let z = -4; z <= 4; z++) for (let x = -4; x <= 4; x++) {
+  for (let y = -3; y <= 3; y++) for (let z = -6; z <= 6; z++) for (let x = -6; x <= 6; x++) {   // 0.35.0: istasyon menzili 4'ten 6 bloğa
     const b = oyun.dunya.blok(x0 + x, y0 + y, z0 + z);
     for (const [k, id] of Object.entries(ISTASYON_BLOK)) if (b === id) s.add(k);
+    if (BLOKLAR[b] && BLOKLAR[b].firinKap === 'firin') s.add('firin');   // 0.35.0: yanan fırın da fırındır
     if (BLOKLAR[b] && BLOKLAR[b].elektrik === 'ocak' && BLOKLAR[b].acik) { s.add('elocak'); s.add('firin'); s.add('ates'); }   // 0.24.0: çalışan elektrikli ocak, fırın ve ateş yerine geçer
   }
   ELOCAK.aktif = s.has('elocak');
@@ -666,6 +668,7 @@ function oyunBaslat(v) {
     degisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
   oyun.cihazCizici.taretAci = k => oyun.taretler.aci(k);
   /* 0.30.5: akan su (tek oyunculu ve sunucu) */
+  if (v.yapiPlani && Array.isArray(v.yapiPlani.b)) oyun.etkilesim.plan.plan = v.yapiPlani;   // 0.35.0
   oyun.suAkisi = v.istemci ? null : new SuAkisi(dunya);
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar,
     canlilar: () => { const l = []; if (!oyun.hayatta.olu) l.push([oyun.oyuncu.konum.x, oyun.oyuncu.konum.y + 1, oyun.oyuncu.konum.z, 'o']); if (oyun.ag && oyun.ag.konumlar) for (const q of oyun.ag.konumlar()) l.push([q.x, q.y + 1, q.z, 'o']);
@@ -674,6 +677,8 @@ function oyunBaslat(v) {
     sandikKilitli: k => { const s = oyun.ag && oyun.ag.kilit && oyun.ag.kilit.get(k); return s != null && s !== 'yerel'; },
     sandikDegisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
   /* 0.33.0: fırın ve kamp ateşi (tek oyunculu ve sunucu) */
+  /* 0.35.0: köy baskınları */
+  oyun.baskinlar = v.istemci ? null : new Baskinlar({ koyler, varliklar, dunya, ses, bildirim: m => hud.bildirim(m), birak: (id, n, x, y, z) => dusenler.birak(id, n, x, y, z), basarim: k => basarimlar.ver(k) });
   oyun.firinlar = v.istemci ? null : new Firinlar({ dunya, sandikKilitli: k => { const s = oyun.ag && oyun.ag.kilit && oyun.ag.kilit.get(k); return s != null && s !== 'yerel'; },
     sandikDegisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
   varliklar.olaylar.bossOldu = w => yapiOlaylari.bossOldu(w);
@@ -684,6 +689,8 @@ function oyunBaslat(v) {
   /* 0.32.0: gün, deneyim ödülü ve görev bildirimleri */
   koyler.gun = gorevler.gun = () => (oyun && oyun.gun) || 1;
   gorevler.xpVer = n => hayatta.xpEkle(n);
+  koyler.seviyeAtladi = (k, kl, sv) => { if (sv >= 2) basarimlar.ver('usta'); if (sv >= 3) basarimlar.ver('ustat'); };   // 0.35.0
+  gorevler.zincirBitti = () => basarimlar.ver('zincir');
   gorevler.bildirim = m => { hud.bildirim(m); ses.gorev(); };
   dunya.sandiklariYukle(v.sandiklar);
   oyun.koyler = koyler; oyun.gorevler = gorevler;
@@ -877,6 +884,7 @@ async function oyunKaydet() {
     hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), kablolar: o.kablolar.disaAktar(), tekneler: o.tekneler.disaAktar(),
+    yapiPlani: o.etkilesim && o.etkilesim.plan ? o.etkilesim.plan.plan : null,   // 0.35.0: Yapı Planı dünyayla da kaydedilir
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, konsol: !!o.konsol, vucutIsisi: o.vucutIsisi !== false, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
     hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar()
   };
@@ -979,7 +987,7 @@ function adim(t) {
       if (!o.uyandi && o.uyku < 1.3) {
         o.uyandi = true; $('#uyku').classList.remove('acik'); o.basarimlar.ver('uyku');
         if (o.istemci) o.hud.bildirim('Doğma noktası yatağa ayarlandı.');
-        else { o.zaman = 0.0; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı. Doğma noktası yatağa ayarlandı.`); if (o.hava.yagiyor) o.hava.ayarla('acik'); }
+        else { o.zaman = 0.0; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı. Doğma noktası yatağa ayarlandı.`); o.hava.t += 300; }   // 0.35.0: uyurken hava tüm dünyada açılmaz; yağış alanları gece boyunca ilerler
       }
     }
     /* Çok oyunculu: yatakta beklerken hareket edilince kalkılır; gündüz olunca da kalkılır */
@@ -1067,6 +1075,7 @@ function adim(t) {
     if (o.mekanik) o.mekanik.guncelle(dt);
     if (o.elektrik) o.elektrik.guncelle(dt);
     if (o.firinlar) o.firinlar.guncelle(dt);   // 0.33.0: fırın ve kamp ateşi
+    if (o.baskinlar) o.baskinlar.guncelle(dt, o);   // 0.35.0: köy baskınları
     if (o.suAkisi) o.suAkisi.guncelle(dt);   // 0.30.5
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
@@ -1271,7 +1280,7 @@ function adim(t) {
     else if (o.tekneler.binilen) { const t = o.tekneler.binilen; o.konumMetni = `${t.T.ad} · ${Math.abs(t.hiz).toFixed(1)} blok/sn · ${BIYOMLAR[kol.b]}`; }
     else if (o.oyuncu.basSuda) o.konumMetni = `Su altı · Derinlik ${Math.max(0, DENIZ + 1 - Math.floor(g.y))} · ${BIYOMLAR[kol.b]}`;
     else if (o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) > g.y + 2 && g.y < kol.h - 2) o.konumMetni = `Yeraltı · Derinlik ${Math.max(0, kol.h - Math.floor(p.y))} · Y ${Math.floor(p.y)}`;
-    else if (o.koyler.icindeki) o.konumMetni = `${o.koyler.icindeki.ad} köyü · ${BIYOMLAR[kol.b]}`;
+    else if (o.koyler.icindeki) { const U = UZMANLIK[o.koyler.icindeki.uzmanlik]; o.konumMetni = `${o.koyler.icindeki.ad} köyü${U ? ` (${U.kisa})` : ''} · ${BIYOMLAR[kol.b]}`; }
     else o.konumMetni = BIYOMLAR[kol.b];
     /* Pusulada yalnızca oyuncunun haritada eklediği işaretler gösterilir (diğerleri mini haritada ve büyük haritada) */
     o.isaretler = isaret.filter(m => m.sinif === 'yer');

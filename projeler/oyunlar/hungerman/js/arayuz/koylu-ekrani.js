@@ -5,6 +5,7 @@ import { simge } from '../grafik/doku.js';
 import { ESYALAR } from '../bloklar.js';
 import { MESLEKLER, SEVIYELER, MESLEK_SIMGE, SOZ } from '../koy/meslekler.js';
 import { MAKS_AKTIF, yonAdi, TUR_ADI } from '../koy/gorevler.js';
+import { UZMANLIK } from '../dunya/koy-uretici.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -63,7 +64,7 @@ export class KoyluEkrani {
     const sv = K.koyluSeviye(k.id, kl.idx), xp = K.koyluXp(k.id, kl.idx), sonraki = SEVIYELER[sv + 1];
     $('#kAvatar').innerHTML = `<img src="${simge(MESLEK_SIMGE[kl.meslek] || 288).url}" alt="">`;
     $('#kAd').textContent = v.ad;
-    $('#kAlt').textContent = `${SEVIYELER[sv].ad} ${MESLEKLER[kl.meslek].ad.toLocaleLowerCase('tr')} · ${k.ad} köyü`;
+    $('#kAlt').textContent = `${SEVIYELER[sv].ad} ${MESLEKLER[kl.meslek].ad.toLocaleLowerCase('tr')} · ${k.ad} köyü${UZMANLIK[k.uzmanlik] ? ` · ${UZMANLIK[k.uzmanlik].ad}` : ''}`;
     const oran = sonraki ? (xp - SEVIYELER[sv].xp) / (sonraki.xp - SEVIYELER[sv].xp) : 1;
     $('#kSeviye').innerHTML = `<div class="kCubuk"><i style="width:${Math.round(oran * 100)}%"></i></div><small>${sonraki ? `${xp} / ${sonraki.xp} deneyim · sonraki: ${sonraki.ad}` : 'En yüksek seviye'}</small>`;
     const it = K.itibar(k.id), kd = K.kademe(k.id), sk = K.sonrakiKademe(k.id);
@@ -85,7 +86,7 @@ export class KoyluEkrani {
     const l = K.takasListesi(k, kl);
     const kart = (t, i) => {
       const yeter = t.ver.every(([id, n]) => env.say(id) >= n);
-      const rozet = [t.firsat ? '<span class="tRozet firsat">Günün fırsatı</span>' : '', t.ihtiyac ? '<span class="tRozet ihtiyac">Köyün ihtiyacı</span>' : '',
+      const rozet = [t.gezgin ? '<span class="tRozet gezgin">Gezgin tüccar</span>' : '', t.uzman ? '<span class="tRozet uzman">Köye özgü</span>' : '', t.firsat ? '<span class="tRozet firsat">Günün fırsatı</span>' : '', t.ihtiyac ? '<span class="tRozet ihtiyac">Köyün ihtiyacı</span>' : '',
         !t.firsat && !t.ihtiyac && t.fark ? `<span class="tRozet ${t.fark > 0 ? 'zam' : 'ucuz'}" title="Arz ve talebe göre fiyat değişimi">${t.fark > 0 ? '▲' : '▼'} %${Math.abs(t.fark)}</span>` : ''].join('');
       const kilitMetni = t.kilit === 'dost' ? 'Dost itibarında açılır' : `${SEVIYELER[t.kilit] ? SEVIYELER[t.kilit].ad : ''} seviyesinde açılır`;
       const stok = Math.max(0, t.kalan) / t.sinir;
@@ -100,7 +101,11 @@ export class KoyluEkrani {
     /* Çantadan bu köylüye satılabilecekler */
     const satis = [];
     l.forEach(t => { if (t.acik && !t.sikkeyle && t.al[0] === 288) for (const [id] of t.ver) { const n = env.say(id); if (n > 0 && !satis.some(s => s[0] === id)) satis.push([id, n]); } });
-    ic.innerHTML = `<div class="takasIzgara">${l.map(kart).join('')}</div>` +
+    /* 0.35.0: köyün uzmanlığı ve demirci köyünde onarım */
+    const U = UZMANLIK[k.uzmanlik], uz = K.uzman(k, kl), el = env.seciliYuva(), ucret = K.onarimUcreti(k, kl, el);
+    const ust = (U ? `<div class="kUzman"><img src="${simge(U.simge).url}" alt=""><div><b>${U.ad}</b><small>${U.ozet}${uz === 2 ? ' · bu köylü köyün önde gelen ustası' : uz ? ' · köyün uzmanlık mesleği' : ''}</small></div></div>` : '') +
+      (k.uzmanlik === 'demirci' && kl.meslek === 'demirci' ? `<div class="kOnarim"><span>Onarım: elinizdeki ${el && ucret != null ? `<b>${esc(ESYALAR[el.id].ad)}</b> tamamen onarılır` : 'eşya yıpranmış bir alet, zırh ya da kıyafet olmalıdır'}</span>${ucret != null ? `<button type="button" data-onar="1" ${env.say(288) >= ucret ? '' : 'disabled'}>${ucret} sikke · Onar</button>` : ''}</div>` : '');
+    ic.innerHTML = ust + `<div class="takasIzgara">${l.map(kart).join('')}</div>` +
       (satis.length ? `<div class="kSatis"><span>Çantadan satılabilecekler:</span>${satis.map(([id, n]) => esyaHtml(id, n)).join('')}</div>` : '') +
       '<p class="aciklama">Takas hakları her sabah yenilenir. Çok alınan eşyalar pahalanır; fiyatlar günler içinde eski hâline döner. Köylü takas yaptıkça seviye atlar ve yeni takaslar açar; itibar yükseldikçe fiyatlar düşer.</p>';
   }
@@ -138,6 +143,7 @@ export class KoyluEkrani {
   tikla(e) {
     const b = e.target.closest('button'); if (!b || b.disabled) return;
     const v = this.v, k = v.koy, kl = v.koylu;
+    if (b.dataset.onar) { const h = this.koyler.onar(k, kl, this.envanter.seciliYuva(), this.envanter); if (h) this.hud.bildirim(h); else { this.ses.takas(); this.hud.bildirim('Eşya onarıldı.'); } this.ciz(); return; }
     if (b.dataset.takas != null) {
       const i = +b.dataset.takas;
       let n = 0, hata = null;
@@ -172,6 +178,8 @@ export class GorevEkrani {
     $('#gKapat').addEventListener('click', () => this.kapatIste());
     this.kok.addEventListener('mousedown', e => { if (e.target === this.kok) this.kapatIste(); });
     $('#gorevListe').addEventListener('click', e => {
+      const t = e.target.closest('button[data-takip]');
+      if (t) { const q = this.gorevler.aktif[+t.dataset.takip]; q.gizli = !q.gizli; this.gorevler.bildir(); this.ses.tik(); this.ciz(); return; }   // 0.35.0
       const b = e.target.closest('button[data-birak]'); if (!b) return;
       this.gorevler.birak(this.gorevler.aktif[+b.dataset.birak]); this.ses.tik(); this.ciz();
     });
@@ -184,7 +192,7 @@ export class GorevEkrani {
     $('#gorevListe').innerHTML = G.aktif.map((q, i) => {
       const durum = `${q.tur === 'kesif' && !q.bulundu ? `Hedef: ${esc(q.hedef.ad)} · ` : q.hedefKoy ? `Hedef: ${esc(q.hedefKoy.ad)} köyü · ` : 'İlerleme: '}${esc(G.durumMetni(q, this.envanter, p))}`;
       const dx = q.koyX - p.x, dz = q.koyZ - p.z;
-      return `<div class="gorevKart"><div class="gBas"><span class="gTur">${TUR_ADI[q.tur] || ''}</span>${yildiz(q.yildiz || 1)}${q.zincir ? `<span class="gAktif">Zincir ${q.zincir.adim + 1}/${q.zincir.toplam}</span>` : ''}</div><b>${esc(q.kisa)}</b><small>${esc(q.koyluAd)} · ${esc(q.koyAd)} köyü (${yonAdi(dx, dz)}, ${Math.round(Math.hypot(dx, dz))} blok)</small><p>${esc(q.metin)}</p><p class="gDurum">${durum}</p><div class="gDugme"><button type="button" data-birak="${i}">Görevi Bırak</button></div></div>`;
+      return `<div class="gorevKart"><div class="gBas"><span class="gTur">${TUR_ADI[q.tur] || ''}</span>${yildiz(q.yildiz || 1)}${q.zincir ? `<span class="gAktif">Zincir ${q.zincir.adim + 1}/${q.zincir.toplam}</span>` : ''}</div><b>${esc(q.kisa)}</b><small>${esc(q.koyluAd)} · ${esc(q.koyAd)} köyü (${yonAdi(dx, dz)}, ${Math.round(Math.hypot(dx, dz))} blok)</small><p>${esc(q.metin)}</p><p class="gDurum">${durum}</p><div class="gDugme"><button type="button" data-takip="${i}">${q.gizli ? 'Takip Et' : 'Takibi Kapat'}</button><button type="button" data-birak="${i}">Görevi Bırak</button></div></div>`;
     }).join('') + `<p class="aciklama">Tamamlanan görev: ${G.tamamlanan} · Aynı anda en fazla ${MAKS_AKTIF} görev alınabilir.</p>`;
   }
 }

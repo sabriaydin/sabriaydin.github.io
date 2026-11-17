@@ -117,6 +117,30 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 35.0 (0.35.0): Köy uzmanlıkları, baskınlar ve kapsamlı düzeltmeler
+- **Köy uzmanlıkları:** her köy tek bir alanda ünlüdür: Tarım köyü, Demirci köyü, Ticaret kasabası, Bilgelik köyü, Çoban obası, Oduncu kampı, Balıkçı limanı. Uzmanlık biyoma uygun seçilir ve köyün binalarını, mesleklerini (yalnızca 2-3 meslek; ticaret kasabasında hepsi), meydan süslerini, fiyatlarını ve köye özgü takaslarını belirler.
+  - Önde gelen meslekte alış %30, diğer uzmanlık mesleklerinde %15 ucuz; satışta daha az mal istenir.
+  - Köye özgü takaslar başka köylerde bulunmaz (ör. demirci köyünde zincir zırh, bilgelik köyünde tılsım ve büyü masası, çoban obasında kürk kıyafetler, limanda tekne ve dalış takımı).
+  - Demirci köyünün demircisi elinizdeki aleti, zırhı ya da kıyafeti sikke karşılığında onarır.
+  - Ticaret kasabasında takas hakkı 12'dir ve her köylü her gün değişen iki gezgin tüccar malı satar.
+  - Köye girişte, köylü penceresinde, konum göstergesinde ve haritada uzmanlık yazar; köylüler başka köylerin uzmanlıkları hakkında söylenti verir.
+- **Köy baskınları:** gece köydeyken baskın olabilir; iki dalga canavar püskürtülürse itibar, sikke ve nadir eşya kazanılır. Kaçılırsa ya da sabah olursa köylüler kaçar ve o gün ticaret yapılmaz.
+- **Görev günlüğü:** görevlerin takibi kapatılıp açılabilir (pusula, harita ve göstergede gizlenir).
+- **İstasyonlar:** istasyona sağ tıklanınca yalnızca o istasyonun tarifleri listelenir; üstteki istasyon simgelerine tıklanarak filtre değiştirilir. İstasyon menzili 4'ten 6 bloğa çıktı.
+- **Fırın:** çalışırken ön yüzünde alev görünür ve ışık verir. Bölge yüklü değilken ya da pencere başka oyuncudayken geçen süre (en çok 15 dakika) telafi edilir.
+- **Grafik:** renkli camın içi de renkli görünür; meyve ağacı yapraklarına kar yağar; eldeki Yapı Planı küçültüldü; birinci kişide giyilen üst kıyafet ya da zırh kolda kol ağzı olarak görünür; çöl cüppesinin altındaki pantolon çizilmez.
+- **Düzeltmeler:** ekinlerin ara evreleri eşya listesinden gizlendi; Mektup ve Köy Kolisi atılamaz, sandığa konamaz; uyuyunca hava tüm dünyada açılmaz; Yapı Planı dünyayla da kaydedilir; tırpan domates, biber ve çileği sökmez, toplar; kompost her atıkla bir seviye dolar ve doluluk gösterilir.
+- **Denge:** giysilerin soğuktan koruma değerleri yaklaşık yarıya indirildi. Kıyafetler yıpranır, örste yün, deri, ip ya da kumaşla onarılır, Kırılmazlık büyüsü alabilir.
+- **Tarım:** kışın açıktaki ekinler, yakınında ışık / ısı kaynağı yoksa ara sıra bir evre geriler (don). Hayvanlar yeni ürünlerle de beslenir (mısır, lahana, karpuz, çilek, tohumlar).
+- **Yeni içerik:** Kumaş (pamuktan) ve kumaştan kıyafetler; Lahana Sarması, Soğan Çorbası, Mısır Ekmeği, Zeytinyağlı Biber; Vazo (çiçek konur, çiçek alınır); Duvar Rafı artık eşya saklar.
+- **Başarımlar:** 14 yeni başarım (köylü seviyeleri, zincir görev, Kahraman itibarı, dört uzmanlık gezme, baskın, tarım, giyim, yapı).
+- **Öğretici:** fırın, kıyafet, tarla ve köy ticareti adımları eklendi.
+
+## 34.1 (0.34.1): Düzeltmeler
+- Kıyafetin üstüne zırh giyildiğinde parçaların iç içe girmesi giderildi: zırhlar kıyafeti örtecek biçimde biraz daha geniş çizilir; kask giyiliyken başlık kıyafeti gizlenir.
+- Karakter bilgisindeki giysi değerleri (soğuktan koruma, serinlik) tek satırda kalır; serinlik değeri alt satıra kaymaz.
+- Köy yapılarındaki bozulmaların sebebi: dört yolun köşelerinde iki binanın aynı alana kurulabilmesi; sonradan yazılan bina öncekinin duvarlarını siliyor, iç içe geçmiş yapılar oluşuyordu. Binaların kapladığı alanlar artık denetlenir; çakışan bina kurulmaz. Düzeltme, daha önce keşfedilen köylerde de geçerlidir (oyuncunun değiştirdiği bloklar korunur); bu köylerde bazı binalar ve köylüler değişebilir.
+
 ## 34.0 (0.34.0): Tarım
 - **Yeni ekinler (4 evre):** Domates, Biber, Mısır, Soğan, Lahana, Pamuk ve Çilek; Karpuz (sap, yanına karpuz verir). Tohumlar uzun ottan düşer, çiftçilerden alınır; soğan kendisiyle ekilir.
 - **Ekine özgü mevsim:** her ekinin iyi büyüdüğü mevsim vardır; çoğu kışın büyümez, soğan ve lahana kışın yavaş büyür. Eşya açıklamasında gösterilir.

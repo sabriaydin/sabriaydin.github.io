@@ -219,6 +219,7 @@ export class Gorevler {
   tamamlanabilir(q, envanter) { return q.tur === 'mektup' || q.tur === 'teslimat' ? false : this.ilerleme(q, envanter) >= this.hedefAdet(q); }
   /* Pusula ve harita hedefi */
   hedef(q, envanter) {
+    if (q.gizli) return null;   // 0.35.0: takibi kapatılan görev pusulada ve haritada gösterilmez
     if (q.tur === 'mektup' || q.tur === 'teslimat') return q.hedefKoy;
     if (q.tur === 'kesif' && !q.bulundu) return q.hedef;
     return this.tamamlanabilir(q, envanter) ? { x: q.koyX, z: q.koyZ } : null;
@@ -326,7 +327,7 @@ export class Gorevler {
 
   /* Gösterge satırları */
   ozet(envanter, oyuncu) {
-    return this.aktif.map(q => ({ metin: q.kisa, durum: this.durumMetni(q, envanter, oyuncu), bitti: this.tamamlanabilir(q, envanter) }));
+    return this.aktif.filter(q => !q.gizli).map(q => ({ metin: q.kisa, durum: this.durumMetni(q, envanter, oyuncu), bitti: this.tamamlanabilir(q, envanter) }));
   }
 
   disaAktar() { return { aktif: this.aktif, tamamlanan: this.tamamlanan }; }

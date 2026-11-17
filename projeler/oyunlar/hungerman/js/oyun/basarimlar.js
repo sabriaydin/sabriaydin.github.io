@@ -86,7 +86,22 @@ export const BASARIMLAR = [
   { k: 'hayat10', ad: 'Ölümsüz Gibi', aciklama: 'Ölmeden 10 gün hayatta kal.', ikon: 289, grup: 'Hayatta Kalma' },
   { k: 'ticaret', ad: 'Pazarlıkçı', aciklama: 'Bir köylüyle ticaret yap.', ikon: 288, grup: 'Köyler' },
   { k: 'gorev', ad: 'Yardımsever', aciklama: 'Bir köy görevini tamamla.', ikon: 294, grup: 'Köyler' },
-  { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' }
+  { k: 'gorev10', ad: 'Köyün Kahramanı', aciklama: '10 köy görevi tamamla.', ikon: 294, hedef: 10, grup: 'Köyler' },
+  /* 0.35.0: köyler, tarım, giyim ve yapı */
+  { k: 'usta', ad: 'Sadık Müşteri', aciklama: 'Bir köylüyü Usta seviyesine çıkar.', ikon: 288, grup: 'Köyler' },
+  { k: 'ustat', ad: 'Üstadın Dostu', aciklama: 'Bir köylüyü Üstat seviyesine çıkar.', ikon: 264, grup: 'Köyler' },
+  { k: 'zincir', ad: 'Destan', aciklama: 'Bir zincir görevi sonuna kadar tamamla.', ikon: 294, grup: 'Köyler' },
+  { k: 'kahraman', ad: 'Kahraman', aciklama: 'Bir köyde Kahraman itibarına ulaş.', ikon: 290, grup: 'Köyler' },
+  { k: 'gezgin', ad: 'Gezgin Tüccar', aciklama: 'Dört farklı uzmanlıktaki köyü ziyaret et.', ikon: 347, grup: 'Köyler' },
+  { k: 'baskin', ad: 'Köyün Kalkanı', aciklama: 'Bir köy baskınını püskürt.', ikon: 308, grup: 'Köyler' },
+  { k: 'meyve', ad: 'Meyve Bahçesi', aciklama: 'Kiraz, portakal ya da zeytin topla.', ikon: 378, grup: 'Zanaat' },
+  { k: 'tirpan', ad: 'Orakçı', aciklama: 'Bir tırpan üret.', ikon: 388, grup: 'Zanaat' },
+  { k: 'gubre', ad: 'Geri Dönüşüm', aciklama: 'Kompost kutusundan gübre al.', ikon: 390, grup: 'Zanaat' },
+  { k: 'menemen', ad: 'Soğanlı mı Soğansız mı', aciklama: 'Menemen pişir.', ikon: 382, grup: 'Zanaat' },
+  { k: 'giyin', ad: 'Giyinik', aciklama: 'Dört kıyafet yuvasını da doldur.', ikon: 352, grup: 'Zanaat' },
+  { k: 'kumas', ad: 'Dokumacı', aciklama: 'Pamuktan kumaş dokut.', ikon: 391, grup: 'Zanaat' },
+  { k: 'plan', ad: 'Mimar', aciklama: 'Bir Yapı Planı edin.', ikon: 345, grup: 'Zanaat' },
+  { k: 'obsidyenZirh', ad: 'Gece Şövalyesi', aciklama: 'Bir obsidyen zırh parçası giy.', ikon: 429, grup: 'Zanaat' },
 ];
 export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
 export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler', 'Çiftlik', 'Hayatta Kalma'];
@@ -98,7 +113,7 @@ export const ISTATISTIKLER = [
 ];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
-const ESYA_BASARIM = [['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
+const ESYA_BASARIM = [['meyve', [378, 379, 380]], ['tirpan', [388, 389]], ['gubre', [390]], ['menemen', [382]], ['kumas', [391]], ['plan', [345]], ['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
 
 export class Basarimlar {
   constructor() {
@@ -161,6 +176,11 @@ export class Basarimlar {
     const z = env.zirh;
     if (!this.acik.zirh && z.every((s, i) => s && s.id === 408 + i)) this.ver('zirh');
     if (!this.acik.elmasZirh && z.some(s => s && s.id >= 412 && s.id <= 415)) this.ver('elmasZirh');
+    /* 0.35.0 */
+    if (!this.acik.obsidyenZirh && z.some(s => s && s.id >= 428 && s.id <= 431)) this.ver('obsidyenZirh');
+    if (!this.acik.giyin && env.kiyafet && env.kiyafet.every(Boolean)) this.ver('giyin');
+    if (!this.acik.kahraman && o.koyler && o.koyler.icindeki && o.koyler.kademe(o.koyler.icindeki.id) >= 4) this.ver('kahraman');
+    if (!this.acik.gezgin && o.koyler && o.koyler.gezilenUzmanlik && o.koyler.gezilenUzmanlik() >= 4) this.ver('gezgin');
     const L = o.hayatta.seviye;
     if (L >= 10) this.ver('seviye10');
     if (L >= 30) this.ver('seviye30');

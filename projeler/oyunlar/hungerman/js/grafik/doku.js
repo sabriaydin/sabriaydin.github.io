@@ -648,7 +648,8 @@ const renkliCam = renk => p => {
   for (let i = 0; i < D * D * 4; i++) p.d[i] = 0;
   const c = hex(renk), k = karis(c, 0.75), a = karisRenk(c, [255, 255, 255], 0.45);
   for (let i = 0; i < 16; i++) { p.set(i, 0, k); p.set(i, 15, k); p.set(0, i, k); p.set(15, i, k); }
-  for (let y = 2; y < 14; y++) for (let x = 2; x < 14; x++) if ((x * 3 + y * 5) % 7 === 0) p.set(x, y, karis(c, 0.9 + p.r() * 0.2));
+  /* 0.35.0: camın içi de renkli görünsün diye dama desenli yarı dolgu (kesik çizimde renkli cam etkisi) */
+  for (let y = 1; y < 15; y++) for (let x = 1; x < 15; x++) if ((x + y) % 2 === 0) p.set(x, y, karis(c, 0.92 + p.r() * 0.16));
   cizgi(p, 3, 6, 6, 3, a); cizgi(p, 3, 8, 8, 3, a); cizgi(p, 10, 13, 13, 10, a);
 };
 /* Pişmiş kil: mat, hafif lekeli; renkler toprak tonuna yaklaştırılır */
@@ -775,6 +776,9 @@ Object.assign(RESSAM, {
   kompost_ic: p => { p.doldur('#4a3a22', 0.12); p.lekeler('#6a8a3a', 10, 1, 0.1); p.lekeler('#2e2216', 14, 1, 0.05); },
   kompost_hazir: p => { p.doldur('#3a2a1a', 0.1); p.lekeler('#2a1e12', 18, 1, 0.05); for (let i = 0; i < 6; i++) p.set(Math.floor(p.r() * 16), Math.floor(p.r() * 16), hex('#8a7a4a')); }
 });
+
+/* 0.35.0: yanan fırının ön yüzü */
+RESSAM.firin_on_a = p => { RESSAM.firin_on(p); for (let y = 8; y < 14; y++) for (let x = 4; x < 12; x++) { const k = (13 - y) / 5 + p.r() * 0.3; p.set(x, y, k < 0.35 ? [255, 214, 90] : k < 0.75 ? [240, 130, 30] : [150, 50, 20]); } };
 
 /* ---------- Atlas ---------- */
 let ATLAS = null;
@@ -1050,6 +1054,7 @@ const MAL_CIZ = {
   patlamis: () => p => { cokgen(p, [[4, 7], [12, 7], [11, 15], [5, 15]], '#d84040', 0.05); for (let x = 5; x < 12; x += 2) cizgi(p, x, 7, x, 15, [245, 240, 230]); for (const [x, y] of [[5, 5], [8, 4], [11, 5], [7, 6], [10, 6], [6, 3], [9, 3]]) { p.set(x, y, [250, 245, 220]); p.set(x + 1, y, [240, 225, 170]); } },
   tirpan: e => p => { kalinCizgi(p, [[4, 15], [10, 3]], '#8a6034'); kalinCizgi(p, [[10, 3], [6, 2], [2, 3], [1, 5]], e.renk || '#dcdcdc'); cizgi(p, 7, 9, 5, 8, [110, 80, 50]); },
   fide: e => p => { cizgi(p, 8, 15, 8, 8, [70, 120, 50]); cokgen(p, [[8, 9], [3, 6], [6, 4]], e.renk || '#3a8a3a', 0.05); cokgen(p, [[8, 8], [13, 5], [11, 3]], e.renk || '#3a8a3a', 0.05); cokgen(p, [[6, 13], [10, 13], [10, 15], [6, 15]], '#6e4b2e', 0); },
+  kumas: () => p => { cokgen(p, [[2, 4], [13, 3], [14, 12], [3, 13]], '#e8e2d0', 0.05); for (let y = 5; y < 13; y += 2) cizgi(p, 3, y, 13, y - 1, [200, 192, 172]); for (let x = 4; x < 13; x += 3) cizgi(p, x, 4, x + 1, 12, [214, 206, 186]); },   // 0.35.0
   kemik: () => p => { kalinCizgi(p, [[4, 12], [11, 5]], '#e8e4d6'); for (const [x, y] of [[3, 11], [4, 13], [2, 12], [11, 3], [12, 5], [13, 4]]) p.set(x, y, [232, 228, 214]); },
   /* 0.18.0 */
   toz: e => p => { const c = hex(e.renk || '#f2c84a'); for (let i = 0; i < 46; i++) { const a = p.r() * Math.PI * 2, r = p.r() * 5; p.set(Math.round(8 + Math.cos(a) * r), Math.round(9 + Math.sin(a) * r * 0.7), karis(c, 0.75 + p.r() * 0.4)); } },

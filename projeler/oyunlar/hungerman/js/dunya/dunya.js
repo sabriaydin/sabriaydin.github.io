@@ -4,11 +4,11 @@
 import { THREE } from '../grafik/sahne.js';
 import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
 import { Uretici, agacKur, KARLI, karliZirve, BY } from './uretici.js';
-import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST } from '../bloklar.js';
+import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST, MEYVE_YAPRAK_ID } from '../bloklar.js';
 
 /* 0.18.0: mevsime göre ekin ve fidan büyüme hızı (ilkbahar, yaz, sonbahar, kış) */
 const MEVSIM_BUYUME = [1.4, 1.15, 0.85, 0.25];
-const YAPRAK = new Set([9, 11, 13, 145]);
+const YAPRAK = new Set([9, 11, 13, 145, ...MEYVE_YAPRAK_ID]);   // 0.35.0: meyve ağaçları
 import { uretec } from '../rastgele.js';
 
 /* Işık kaynağı sayılan bloklar (meşale niteliği taşıyanlar, örümcek yuvası ve lav) */
@@ -290,7 +290,11 @@ export class Dunya {
       let alt = this.blok(x, y - 1, z);
       if (alt === 137 && (this.suYakin(x, y - 1, z) || (this.yagiyor && this.ustKati(x, z) <= y))) { this.blokKoy(x, y - 1, z, 138, 'tik'); alt = 138; }
       const B = BLOKLAR[id], mv = B.mevsim ? B.mevsim[this.mevsim || 0] : MEVSIM_BUYUME[this.mevsim || 0];   // 0.34.0: ekine özgü mevsim
-      if (!mv) continue;
+      /* 0.35.0: don: kışın büyümeyen ekinler açıktaysa ve 5 blok yakınında ısı / ışık kaynağı (meşale, fener, kamp ateşi) yoksa ara sıra bir evre geriler */
+      if (!mv) {
+        if (this.mevsim === 3 && B.ekin > 0 && !B.meyve && r < 0.004 && this.ustKati(x, z) <= y && !this.yakinMesaleler(x + 0.5, y + 0.5, z + 0.5, 1).some(m => Math.hypot(m[0] - x, m[2] - z) < 5)) this.blokKoy(x, y, z, id - 1, 'tik');
+        continue;
+      }
       const k2 = (alt === 138 ? 3 : alt === 137 ? 1.5 : 1) * mv;   // 0.18.0: mevsime göre büyüme
       if (r > 0.012 * k2) continue;
       /* 0.21.0: olgun balkabağı sapı meyve verir, şeker kamışı uzar */

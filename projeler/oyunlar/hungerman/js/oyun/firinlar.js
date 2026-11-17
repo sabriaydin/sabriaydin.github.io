@@ -4,7 +4,7 @@
    Kamp Ateşi: [girdi, çıktı]. Yakıt gerekmez; yalnızca yiyecekleri pişirir (parti başına 8 sn).
    İçerik dünyadaki hazne olarak (dunya.sandiklar) saklanır; ilerleme ve kalan yanma süresi dunya.enerji içinde 'f:' ve 'y:' anahtarlarıyla tutulur.
    Oyuncu yanında beklemek zorunda değildir: parça yüklü kaldığı sürece işlem sürer. Tek oyunculuda ve sunucuda çalışır. */
-import { BLOKLAR, ESYALAR } from '../bloklar.js';
+import { BLOKLAR, ESYALAR, FIRIN_YANAN } from '../bloklar.js';
 import { YAKIT, PISIRME, PISIRME_SURE } from './kaplar.js';
 
 export const ATES_SURE = 8;
@@ -18,19 +18,32 @@ export class Firinlar {
     this.sayac = 0;
     this.durum = new Map();   // k -> { yaniyor, ilerleme (0-1), yakit (0-1), pisen }
   }
+  /* 0.35.0: fırın saati dünyayla kaydedilir; bölge yüklü değilken ya da pencere başka oyuncuda açıkken geçen süre (en çok 15 dakika)
+     fırın yeniden işlendiğinde telafi edilir. Yanan fırın, yanan fırın bloğuna dönüşür (ışık verir). */
   guncelle(dt) {
     this.sayac += dt;
     if (this.sayac < 0.25) return;
     const t = this.sayac; this.sayac = 0;
     const d = this.dunya;
+    const saat = (d.enerji.get('saat') || 0) + t;
+    d.enerji.set('saat', saat);
     for (const [k, l] of d.sandiklar) {
       if (!l || l.length > 3) continue;
       const [x, y, z] = k.split(',').map(Number);
       if (!d.yuklu(x, z)) continue;
-      const tur = firinTuru(d.blok(x, y, z));
+      const id = d.blok(x, y, z), tur = firinTuru(id);
       if (!tur) { this.durum.delete(k); continue; }
       if (this.sandikKilitli && this.sandikKilitli(k)) continue;
-      if (tur === 'firin') this.firin(k, l, t); else this.ates(k, l, t);
+      const son = d.enerji.get('z:' + k);
+      let kalan = son != null ? Math.min(900, Math.max(t, saat - son)) : t;
+      d.enerji.set('z:' + k, saat);
+      while (kalan > 0) { const a = Math.min(1, kalan); kalan -= a; if (tur === 'firin') this.firin(k, l, a); else this.ates(k, l, a); }
+      if (tur === 'firin') {
+        const D = this.durum.get(k), hedef = D && D.yaniyor ? FIRIN_YANAN : 33;
+        if (id !== hedef) d.blokKoy(x, y, z, hedef, 'tik');
+        /* Boş ve sönmüş fırının kaydı tutulmaz */
+        if (!D.yaniyor && !l[0] && !l[1] && !l[2]) d.enerji.delete('z:' + k);
+      }
     }
   }
   /* Girdi yuvasındaki malzeme çıktı yuvasına sığıyor mu */

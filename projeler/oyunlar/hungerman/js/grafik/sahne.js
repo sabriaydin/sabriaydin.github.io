@@ -400,6 +400,10 @@ export class Sahne {
     this.elEsyaMalzeme = new THREE.MeshBasicMaterial({ vertexColors: true });
     this.elEsya = null; this.elId = -1; this.elYay = null; this.yayOnceki = 0; this.yayBirak = 0;
     this.el.add(this.elKol);
+    /* 0.35.0: giysi kolu: üst kıyafet ya da göğüs zırhı giyiliyken kolun bilekten gerisini saran kol ağzı (el ten renginde kalır) */
+    this.elKolGiysi = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.17, 0.36), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    this.elKolGiysi.position.set(0, 0, 0.09); this.elKolGiysi.visible = false;
+    this.elKol.add(this.elKolGiysi);
     this.sallanma = 0;
   }
   elAyarla(id, buyulu = false) {
@@ -438,6 +442,7 @@ export class Sahne {
       /* 0.23.0: aletler sapından kavranmış gibi, ucu öne ve yukarı bakar */
       if (alet) { this.elEsya.rotation.set(0.15, -1.45, 0.62); this.elEsya.position.set(0.0, 0.13, -0.04); this.elTur = 'alet'; }
       else { this.elEsya.rotation.set(0.12, -0.55, 0); this.elEsya.position.set(0.02, 0.07, -0.02); }
+      if (e && e.tur === 'plan') { this.elEsya.scale.setScalar(0.6); this.elEsya.position.set(0.04, 0.02, -0.02); }   // 0.35.0: Yapı Planı ekranı kaplamasın
     }
     this.el.add(this.elEsya);
   }
@@ -462,8 +467,9 @@ export class Sahne {
     this.el.rotation.set(rx, ry, rz);
     /* 0.33.0: kol rengi: giyilen göğüs zırhı ya da uzun kollu üst kıyafet, yoksa ten */
     const c = this.elKol.material.color;
-    if (this.kolRengi) { if (this.kolRenkHex !== this.kolRengi) { this.kolRenkHex = this.kolRengi; this.kolRenk = new THREE.Color(this.kolRengi); } c.copy(this.kolRenk).multiplyScalar(isik); }
-    else c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
+    c.setRGB(0.78 * isik, 0.6 * isik, 0.44 * isik);
+    this.elKolGiysi.visible = !!this.kolRengi;
+    if (this.kolRengi) { if (this.kolRenkHex !== this.kolRengi) { this.kolRenkHex = this.kolRengi; this.kolRenk = new THREE.Color(this.kolRengi); } this.elKolGiysi.material.color.copy(this.kolRenk).multiplyScalar(isik); }
     this.elBlokMalzeme.color.setScalar(isik);
     this.elEsyaMalzeme.color.setScalar(isik);
     /* Büyülü eşya: hafif mor parıltı nabzı */

@@ -10,7 +10,7 @@ import { zindanYaz } from './zindan-uretici.js';
 import { batikYaz } from './batik-uretici.js';
 import { adaYaz } from './ada-uretici.js';
 import { madenYaz } from './maden-uretici.js';
-import { MEYVE_YAPRAK } from '../bloklar.js';
+import { MEYVE_YAPRAK, MEYVE_YAPRAK_ID } from '../bloklar.js';
 
 export const BIYOMLAR = ['Okyanus', 'Derin Okyanus', 'Nehir', 'Kumsal', 'Karlı Kumsal', 'Dağlar', 'Tayga', 'Çöl', 'Orman', 'Huş Ormanı', 'Çayır', 'Savan', 'Bataklık', 'Karlı Ova'];
 export const BY = { OKYANUS: 0, DERIN: 1, NEHIR: 2, KUMSAL: 3, KARLI_KUMSAL: 4, DAG: 5, TAYGA: 6, COL: 7, ORMAN: 8, HUS: 9, CAYIR: 10, SAVAN: 11, BATAKLIK: 12, KARLI_OVA: 13 };
@@ -25,7 +25,7 @@ const SICAK = { SOGUK: -0.3, SERIN: -0.08, ILIK: 0.22, SICAK: 0.4 };
 /* Ağaç yerleşim ızgarası */
 const HUCRE = 5;
 const AGAC_OLASILIK = { [BY.ORMAN]: 0.8, [BY.HUS]: 0.72, [BY.TAYGA]: 0.62, [BY.CAYIR]: 0.05, [BY.DAG]: 0.1, [BY.SAVAN]: 0.09, [BY.BATAKLIK]: 0.3, [BY.KARLI_OVA]: 0.03 };
-const YAPRAKLAR = new Set([9, 11, 13, 145]);
+const YAPRAKLAR = new Set([9, 11, 13, 145, ...MEYVE_YAPRAK_ID]);   // 0.35.0: meyve ağaçları
 
 /* Dağ zirvesi karla kaplı mı: yalnız serin iklimlerde ya da çok yüksek ve ılıman yerlerde */
 export const karliZirve = o => (o.h > DENIZ + 56 && o.te < -0.05) || (o.h > DENIZ + 70 && o.te < 0.08);

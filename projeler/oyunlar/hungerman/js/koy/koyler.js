@@ -1,13 +1,13 @@
 /* HungerMan - köy yöneticisi: köylülerin ortaya çıkması, köye giriş bildirimi, itibar, takas, sandık ganimetleri
    Köylerin yeri ve yapısı tohumdan hesaplanır; burada yalnızca oyuncuya bağlı durum (itibar, takas sayıları, ölen köylüler) tutulur. */
-import { koyBul, koylerAlan, KOY_BOLGE, MESLEK_ADI } from '../dunya/koy-uretici.js';
-import { MESLEKLER, SEVIYELER, seviyeBul } from './meslekler.js';
+import { koyBul, koylerAlan, KOY_BOLGE, MESLEK_ADI, UZMANLIK } from '../dunya/koy-uretici.js';
+import { MESLEKLER, SEVIYELER, seviyeBul, UZMAN_TAKAS, GEZGIN_MALLAR } from './meslekler.js';
 import { tekYapilar, YAPI_ADI } from '../dunya/yapi-uretici.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
 import { zindanlarAlan } from '../dunya/zindan-uretici.js';
 import { lanetliAda, ADA_AD } from '../dunya/ada-uretici.js';
 import { karistir, uretec } from '../rastgele.js';
-import { ESYALAR } from '../bloklar.js';
+import { ESYALAR, maksDayanim } from '../bloklar.js';
 import { zindanAt } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
 import { batikAt } from '../dunya/batik-uretici.js';
@@ -46,7 +46,12 @@ export class Koyler {
     const k = koyBul(this.uretici, Math.floor(p.x / KOY_BOLGE), Math.floor(p.z / KOY_BOLGE));
     /* Köyün altındaki mağaralarda ya da çok yukarıda köyde sayılmaz: köy zemininin 8 blok altı ile 24 blok üstü arası */
     const icinde = k && Math.max(Math.abs(p.x - k.x), Math.abs(p.z - k.z)) < k.yaricap && p.y > k.y - 8 && p.y < k.y + 24 ? k : null;
-    if (icinde && icinde !== this.icindeki) this.bildirim(`${icinde.ad} köyüne hoş geldiniz. ${this.itibarMetni(icinde.id)}`);
+    if (icinde && icinde !== this.icindeki) {
+      const U = UZMANLIK[icinde.uzmanlik];
+      this.bildirim(`${icinde.ad} köyüne hoş geldiniz${U ? ` (${U.ad}: ${U.ozet.toLocaleLowerCase('tr')})` : ''}. ${this.itibarMetni(icinde.id)}`);
+      /* 0.35.0: ziyaret edilen köy ve uzmanlığı (başarım ve söylentiler) */
+      const d = this.durum(icinde.id); d.ziyaret = true; d.uz = icinde.uzmanlik;
+    }
     this.icindeki = icinde;
     if (this.ayna) return;
     /* Köylüleri ortaya çıkar / kaldır */
@@ -120,7 +125,27 @@ export class Koyler {
     }
     return l.length ? l[Math.floor(this.gunKarma(koy, 999) * l.length)] : null;
   }
-  /* Ham liste: sabit + havuzdan 3 (eski kayıtlarla aynı sıra) + seviye takasları + Dost takası; kilit: gereken seviye ('dost': itibar) */
+  /* 0.35.0: ziyaret edilen farklı uzmanlık sayısı */
+  gezilenUzmanlik() { return new Set(Object.values(this.kayit).filter(d => d.ziyaret && d.uz).map(d => d.uz)).size; }
+  /* 0.35.0: köyün uzmanlık meslekleri arasındaki köylü mü; önde gelen meslek mi */
+  uzman(koy, kl) { const U = UZMANLIK[koy.uzmanlik]; if (!U) return 0; return U.meslekler[0] === kl.meslek ? 2 : U.meslekler.includes(kl.meslek) ? 1 : 0; }
+  /* 0.35.0: demirci köyünde onarım ücreti (eldeki eşya); onarılamıyorsa null */
+  onarimUcreti(koy, kl, s) {
+    if (koy.uzmanlik !== 'demirci' || kl.meslek !== 'demirci' || !s) return null;
+    const m = maksDayanim(ESYALAR[s.id]);
+    if (!m || s.dayanim == null || s.dayanim >= m) return null;
+    return Math.max(1, Math.ceil((1 - s.dayanim / m) * (ESYALAR[s.id].alet ? ESYALAR[s.id].alet.seviye + 3 : 6) * this.carpan(koy.id)));
+  }
+  onar(koy, kl, s, envanter) {
+    const u = this.onarimUcreti(koy, kl, s);
+    if (u == null) return 'Onarılacak eşya mevcut değil.';
+    if (envanter.say(288) < u) return `Onarım için ${u} sikke gerekli.`;
+    envanter.harca(288, u); s.dayanim = maksDayanim(ESYALAR[s.id]); envanter.bildir();
+    this.itibarDegistir(koy.id, 1); this.xpEkle(koy, kl, 2);
+    return null;
+  }
+  /* Ham liste: sabit + havuzdan 3 (eski kayıtlarla aynı sıra) + seviye takasları + Dost takası; kilit: gereken seviye ('dost': itibar)
+     0.35.0: + köy uzmanlığına özgü takaslar (uzmanlık mesleklerinde) + ticaret kasabasında günün gezgin tüccar malları */
   hamListe(koy, kl) {
     const M = MESLEKLER[kl.meslek];
     const r = uretec(karistir(this.uretici.tohum ^ Math.imul(koy.rx + 3, 7333) ^ Math.imul(koy.rz + 5, 9551) ^ Math.imul(kl.idx + 11, 104729)));
@@ -129,11 +154,20 @@ export class Koyler {
     const l = [...M.sabit, ...havuz.slice(0, 3)].map(t => ({ ...t, kilit: null }));
     (M.seviye || []).forEach((sv, k) => sv.forEach(t => l.push({ ...t, kilit: k + 1 })));
     if (M.ozel) l.push({ ...M.ozel, kilit: 'dost' });
+    const uz = this.uzman(koy, kl);
+    if (uz) for (const t of UZMAN_TAKAS[koy.uzmanlik] || []) l.push({ ...t, kilit: null, uzman: true });
+    if (koy.uzmanlik === 'ticaret') {
+      const g = GEZGIN_MALLAR.length, a = Math.floor(this.gunKarma(koy, kl.idx + 700) * g);
+      for (const i of [a, (a + 5) % g]) l.push({ ...GEZGIN_MALLAR[i], kilit: null, gezgin: true });
+    }
     return l;
   }
   takasListesi(koy, kl) {
     const c = this.carpan(koy.id), d = this.durum(koy.id), sv = this.koyluSeviye(koy.id, kl.idx), dost = this.kademe(koy.id) >= 3;
     const kullanim = d.takas[kl.idx] || [], talep = d.talep[kl.idx] || {};
+    /* 0.35.0: uzmanlık fiyatları: önde gelen meslek alışta %30, diğer uzmanlık meslekleri %15 ucuz; satışta daha az mal ister. Ticaret kasabasında takas hakkı 12 */
+    const uz = this.uzman(koy, kl), uzAl = koy.uzmanlik === 'ticaret' ? 0.9 : [1, 0.85, 0.7][uz], uzSat = koy.uzmanlik === 'ticaret' ? 0.9 : [1, 0.9, 0.8][uz];
+    const SINIR = koy.uzmanlik === 'ticaret' ? 12 : TAKAS_SINIRI;
     const ham = this.hamListe(koy, kl), ihtiyac = this.ihtiyac(koy);
     /* Günün fırsatı: açık, sikkeyle alınan takaslardan biri %25 indirimli */
     const alim = ham.map((t, i) => i).filter(i => ham[i].ver.some(([id]) => id === 288) && (ham[i].kilit == null || (typeof ham[i].kilit === 'number' && ham[i].kilit <= sv)));
@@ -144,15 +178,16 @@ export class Koyler {
       /* Arz ve talep: çok alınan pahalanır, çok satılan için daha fazla mal istenir (en çok %60); ertesi sabahlar yarıya iner */
       const tl = 1 + Math.min(0.6, 0.07 * (talep[i] || 0));
       const ozel = i === firsat ? 0.75 : ihtiyac && ihtiyac[0] === kl.idx && ihtiyac[1] === i ? 0.65 : 1;
-      const k = c * tl * ozel;
+      const k = c * tl * ozel * (sikkeyle ? uzAl : uzSat);
       const ver = t.ver.map(([id, n]) => [id, Math.max(1, Math.round(n * k))]);
       const taban = t.ver.map(([id, n]) => [id, Math.max(1, Math.round(n * c))]);
       const fark = Math.round((ver[0][1] / taban[0][1] - 1) * 100);
-      return { ver, al: t.al, kalan: TAKAS_SINIRI - (kullanim[i] || 0), sinir: TAKAS_SINIRI, acik, kilit: t.kilit, firsat: i === firsat, ihtiyac: ozel === 0.65, fark, sikkeyle };
+      return { ver, al: t.al, kalan: (t.gezgin ? 2 : SINIR) - (kullanim[i] || 0), sinir: t.gezgin ? 2 : SINIR, acik, kilit: t.kilit, firsat: i === firsat, ihtiyac: ozel === 0.65, fark, sikkeyle, uzman: !!t.uzman, gezgin: !!t.gezgin };
     });
   }
   takas(koy, kl, i, envanter) {
     if (this.itibar(koy.id) <= -40) return 'Köylüler sizinle ticaret yapmak istemiyor.';
+    if (this.durum(koy.id).kapali === this.gun()) return 'Köylüler baskından sonra kaçıştı; bugün ticaret yapılmıyor.';   // 0.35.0
     const t = this.takasListesi(koy, kl)[i];
     if (!t || !t.acik) return 'Bu takas henüz açılmadı.';
     if (t.kalan <= 0) return 'Bu takas bugün için tükendi.';
@@ -188,6 +223,8 @@ export class Koyler {
     for (const b of batiklarAlan(u, koy.x - 900, koy.z - 900, koy.x + 900, koy.z + 900)) ekle('batık bir gemi', b.x, b.z);
     for (const z of zindanlarAlan(u, koy.x - 700, koy.z - 700, koy.x + 700, koy.z + 700)) ekle('bir yeraltı zindanı', z.x, z.z);
     try { const A = lanetliAda(u); ekle(ADA_AD, A.x, A.z); } catch (e) { /* yok sayılır */ }
+    /* 0.35.0: başka köylerin uzmanlıkları (iki kat ağırlıkla) */
+    for (const o of koylerAlan(u, koy.x - 1500, koy.z - 1500, koy.x + 1500, koy.z + 1500)) if (o.id !== koy.id && UZMANLIK[o.uzmanlik]) { const ad = `${o.ad} köyü (${UZMANLIK[o.uzmanlik].kisa.toLocaleLowerCase('tr')} alanında ünlü)`; ekle(ad, o.x, o.z); ekle(ad, o.x, o.z); }
     if (!l.length) return null;
     return l[Math.floor(this.gunKarma(koy, (n || 0) + 300) * l.length)];
   }

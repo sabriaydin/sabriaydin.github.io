@@ -112,6 +112,20 @@ export const MESLEKLER = {
   }
 };
 
+/* 0.35.0: köy uzmanlığına özgü takaslar: köyün uzmanlık mesleklerindeki köylülerde her zaman açıktır (başka köylerde bulunmaz) */
+export const UZMAN_TAKAS = {
+  tarim: [tk([[S, 2]], [377, 4]), tk([[S, 2]], [375, 4]), tk([[S, 4]], [M.elma.fidan, 1]), tk([[S, 3]], [390, 6]), tk([[370, 4]], [S, 2])],
+  demirci: [tk([[S, 10]], [417, 1]), tk([[S, 14]], [313, 1]), tk([[S, 6]], [139, 1]), tk([[259, 6]], [S, 2])],
+  ticaret: [tk([[S, 2]], [331, 4]), tk([[S, 3]], [Y.mum, 4]), tk([[297, 6]], [S, 2])],
+  bilgelik: [tk([[S, 8]], [493, 1]), tk([[S, 3]], [333, 1]), tk([[S, 10]], [156, 1]), tk([[S, 4]], [61, 4]), tk([[S, 6]], [514, 4])],
+  coban: [tk([[S, 4]], [354, 1]), tk([[S, 3]], [358, 1]), tk([[S, 3]], [362, 1]), tk([[S, 2]], [352, 1]), tk([[S, 3]], [462, 1])],
+  oduncu: [tk([[S, 6]], [345, 1]), tk([[S, 2]], [Y.dolap, 1]), tk([[S, 1]], [Y.akasyaKalas, 16]), tk([[S, 3]], [313, 1])],
+  liman: [tk([[S, 10]], [455, 1]), tk([[S, 8]], [456, 1]), tk([[S, 8]], [457, 1]), tk([[S, 2]], [452, 4])]
+};
+/* Ticaret kasabasının gezgin tüccarı: her gün değişen nadir mallar */
+export const GEZGIN_MALLAR = [tk([[S, 14]], [264, 1]), tk([[S, 12]], [493, 1]), tk([[S, 9]], [515, 4]), tk([[S, 10]], [595, 2]), tk([[S, 7]], [290, 1]), tk([[S, 6]], [M.portakal.fidan, 1]),
+  tk([[S, 6]], [M.zeytin.fidan, 1]), tk([[S, 8]], [336, 2]), tk([[S, 5]], [492, 1]), tk([[S, 9]], [Y.avize, 1]), tk([[S, 12]], [421, 1]), tk([[S, 6]], [345, 1])];
+
 /* 0.32.0: köylü seviyeleri (takas deneyimine göre) */
 export const SEVIYELER = [{ ad: 'Çırak', xp: 0 }, { ad: 'Kalfa', xp: 12 }, { ad: 'Usta', xp: 36 }, { ad: 'Üstat', xp: 80 }];
 export const seviyeBul = xp => { let s = 0; for (let i = 0; i < SEVIYELER.length; i++) if (xp >= SEVIYELER[i].xp) s = i; return s; };

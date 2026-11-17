@@ -68,7 +68,8 @@ export const DOKULAR = [
   'karpuz_ust', 'karpuz_yan', 'karpuz_sap0', 'karpuz_sap1', 'karpuz_sap2', 'karpuz_sap3',
   'fidan_elma', 'fidan_kiraz', 'fidan_portakal', 'fidan_zeytin',
   'yaprak_elma', 'yaprak_elma_m', 'yaprak_kiraz', 'yaprak_kiraz_m', 'yaprak_portakal', 'yaprak_portakal_m', 'yaprak_zeytin', 'yaprak_zeytin_m',
-  'kompost_yan', 'kompost_ic', 'kompost_hazir'
+  'kompost_yan', 'kompost_ic', 'kompost_hazir',
+  'firin_on_a'   // 0.35.0
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -143,7 +144,7 @@ blok(49, { ad: 'Yün', dok: 'yun', sertlik: 0.8, ses: 'yun' });
 blok(50, { ad: 'Sandık', dok: { ust: 'sandik_ust', yan: 'sandik_yan', on: 'sandik_on', alt: 'sandik_ust' }, cizim: 5, opak: false, sertlik: 2.5, alet: 'balta', ses: 'odun', sandik: true, sekil: 'sandik' });
 blok(51, { ad: 'Kiremit', dok: 'kiremit', sertlik: 1.5, alet: 'kazma', seviye: 1 });
 blok(52, { ad: 'Saman Balyası', dok: ['saman_ust', 'saman_yan', 'saman_ust'], sertlik: 0.5, ses: 'bitki' });
-for (let e = 0; e < 4; e++) blok(53 + e, { ad: e === 3 ? 'Olgun Buğday' : 'Buğday Fidesi', dok: 'bugday' + e, cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, ekin: e, sonraki: e < 3 ? 54 + e : 0,
+for (let e = 0; e < 4; e++) blok(53 + e, { ad: e === 3 ? 'Olgun Buğday' : 'Buğday Fidesi', gizli: true, dok: 'bugday' + e, cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, ekin: e, sonraki: e < 3 ? 54 + e : 0,
   dusur: r => (e === 3 ? [[291, 1], [292, 1 + Math.floor(r() * 3)]] : [[292, 1]]) });
 blok(57, { ad: 'Toprak Yol', dok: ['yol_ust', 'yol_yan', 'toprak'], sertlik: 0.6, alet: 'kurek', ses: 'toprak', dusur: () => [[3, 1]] });
 /* Mağaralar (4. aşama) */
@@ -318,7 +319,7 @@ for (let f = 0; f < 4; f++) for (let g = 0; g < 4; g++) for (let a = 0; a < 2; a
 /* ---------- 0.21.0: Tarım ve hayvancılık ---------- */
 /* Balkabağı sapı: 4 evre; olgun sap (558) yanındaki boş toprağa balkabağı verir ve kalır */
 for (let e = 0; e < 4; e++) blok(555 + e, { ad: e === 3 ? 'Olgun Balkabağı Sapı' : 'Balkabağı Sapı', dok: 'kabak_sap' + e, cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true,
-  ekin: e, sonraki: e < 3 ? 556 + e : 558, meyve: e === 3, taban: 555, gizli: e > 0, dusur: r => [[475, e === 3 ? 1 + (r() < 0.5 ? 1 : 0) : 1]], harita: 4 });
+  ekin: e, sonraki: e < 3 ? 556 + e : 558, meyve: e === 3, taban: 555, gizli: true, dusur: r => [[475, e === 3 ? 1 + (r() < 0.5 ? 1 : 0) : 1]], harita: 4 });
 blok(559, { ad: 'Balkabağı', dok: { ust: 'balkabagi_ust', yan: 'balkabagi_yan', alt: 'balkabagi_ust', on: 'balkabagi_yan' }, sertlik: 1, alet: 'balta', ses: 'odun', harita: 114 });
 /* Oyma balkabağı ve balkabağı feneri: yüzü koyan oyuncuya döner */
 for (let k = 0; k < 4; k++) blok(560 + k, { ad: 'Oyma Balkabağı', dok: { ust: 'balkabagi_ust', yan: 'balkabagi_yan', alt: 'balkabagi_ust', on: 'balkabagi_yuz' }, onYon: (k + 2) % 4, yuzlu: true, taban: 560,
@@ -461,7 +462,7 @@ CIT_MALZEME.forEach(m => { m.cit = ayir(1); blok(m.cit, { ad: `${m.ad} Çit`, do
 /* Mobilya ve süs */
 const MOB = { cizim: C_SEKIL, opak: false, sertlik: 1.2, alet: 'balta', ses: 'odun' };
 Y.raf = ayir(4);
-for (let f = 0; f < 4; f++) blok(Y.raf + f, { ...MOB, ad: 'Duvar Rafı', dok: 'kalas', kati: false, sekil: 'raf', duvara: true, yon: f, taban: Y.raf, gizli: f > 0, dusur: () => [[Y.raf, 1]], harita: 14 });
+for (let f = 0; f < 4; f++) blok(Y.raf + f, { ...MOB, ad: 'Duvar Rafı', dok: 'kalas', kati: false, sekil: 'raf', duvara: true, sandik: true, dolap: true, yon: f, taban: Y.raf, gizli: f > 0, dusur: () => [[Y.raf, 1]], harita: 14 });
 /* Perde: taban + renk * 8 + yön * 2 + açık; sağ tıkla açılır / kapanır */
 Y.perde = ayir(64);
 RENK8.forEach((r, c) => { for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) {
@@ -523,7 +524,7 @@ EKIN_TURLERI.forEach(E => {
 /* Karpuz: sap 4 evre; olgun sap yanındaki boş toprağa karpuz verir */
 TARIM.karpuzSap = ayir(4); TARIM.karpuz = ayir(1);
 for (let e = 0; e < 4; e++) blok(TARIM.karpuzSap + e, { ...T0, ad: e === 3 ? 'Olgun Karpuz Sapı' : 'Karpuz Sapı', dok: 'karpuz_sap' + e, ekin: e, sonraki: e < 3 ? TARIM.karpuzSap + e + 1 : TARIM.karpuzSap + 3,
-  meyve: e === 3, meyveBlok: TARIM.karpuz, taban: TARIM.karpuzSap, gizli: e > 0, mevsim: [0.7, 1.4, 0.5, 0], dusur: r => [[377, e === 3 ? 1 + (r() < 0.5 ? 1 : 0) : 1]], harita: 4 });
+  meyve: e === 3, meyveBlok: TARIM.karpuz, taban: TARIM.karpuzSap, gizli: true, mevsim: [0.7, 1.4, 0.5, 0], dusur: r => [[377, e === 3 ? 1 + (r() < 0.5 ? 1 : 0) : 1]], harita: 4 });
 blok(TARIM.karpuz, { ad: 'Karpuz', dok: ['karpuz_ust', 'karpuz_yan', 'karpuz_ust'], sertlik: 1, alet: 'balta', ses: 'odun', harita: 117, dusur: r => [[376, 3 + Math.floor(r() * 4)]] });
 /* Meyve ağaçları: fidan, meyvesiz yaprak ve meyveli yaprak (sağ tıkla toplanır; meyve zamanla yeniden olur) */
 export const MEYVE_AGACLARI = [
@@ -531,6 +532,7 @@ export const MEYVE_AGACLARI = [
   { k: 'portakal', ad: 'Portakal', meyve: 379, mevsim: [0.6, 0.8, 1.2, 0.6] }, { k: 'zeytin', ad: 'Zeytin', meyve: 380, mevsim: [0.3, 0.8, 1.3, 0.2] }
 ];
 export const MEYVE_YAPRAK = {};
+export const MEYVE_YAPRAK_ID = new Set();   // 0.35.0: kar birikmesi için
 MEYVE_AGACLARI.forEach(M => {
   const f = M.fidan = ayir(1), y = M.bos = ayir(1), d = M.dolu = ayir(1);
   blok(f, { ...T0, ad: `${M.ad} Fidanı`, dok: 'fidan_' + M.k, fidan: M.k, harita: 4 });
@@ -538,12 +540,19 @@ MEYVE_AGACLARI.forEach(M => {
   blok(y, { ...ort, ad: `${M.ad} Ağacı Yaprağı`, dok: 'yaprak_' + M.k, dolu: d, dusur: r => { const o = []; if (r() < 1 / 14) o.push([f, 1]); if (r() < 1 / 30) o.push([256, 1]); return o; } });
   blok(d, { ...ort, ad: `${M.ad} Ağacı Yaprağı`, dok: 'yaprak_' + M.k + '_m', meyveli: true, bos: y, meyveId: M.meyve, gizli: true,
     dusur: r => { const o = [[M.meyve, 1 + (r() < 0.4 ? 1 : 0)]]; if (r() < 1 / 14) o.push([f, 1]); return o; } });
-  MEYVE_YAPRAK[M.k] = M;
+  MEYVE_YAPRAK[M.k] = M; MEYVE_YAPRAK_ID.add(y); MEYVE_YAPRAK_ID.add(d);
 });
 /* Kompost Kutusu: bitkisel atıklar konunca dolar (0-7), dolunca (8) gübre verir */
 TARIM.kompost = ayir(9);
 for (let s = 0; s < 9; s++) blok(TARIM.kompost + s, { ad: 'Kompost Kutusu', dok: s === 8 ? ['kompost_hazir', 'kompost_yan', 'kalas'] : ['kompost_ic', 'kompost_yan', 'kalas'], cizim: C_SEKIL, opak: false, sertlik: 1, alet: 'balta', ses: 'odun',
   sekil: 'kompost', kompost: s, taban: TARIM.kompost, gizli: s > 0, dusur: () => [[TARIM.kompost, 1]], harita: 14 });
+/* 0.35.0: boş vazo: çiçek (gelincik, karahindiba, peygamber çiçeği) konunca çiçekli vazoya döner */
+export const VAZO_BOS = ayir(1);
+blok(VAZO_BOS, { ad: 'Vazo', dok: 'vazo', cizim: C_SEKIL, opak: false, sertlik: 0.3, ses: 'cam', sekil: 'vazo', bosVazo: true, harita: 2 });
+/* 0.35.0: yanan fırın (çalışırken görünür, ışık verir); kırılınca fırın düşer */
+export const FIRIN_YANAN = ayir(1);
+blok(FIRIN_YANAN, { ad: 'Fırın', dok: { ust: 'firin_ust', yan: 'firin_yan', on: 'firin_on_a', alt: 'firin_ust' }, sertlik: 3.5, alet: 'kazma', seviye: 1, istasyon: 'firin', firinKap: 'firin', gizli: true, taban: 33,
+  mesale: true, destekSiz: true, isik: 12, isi: [8, 4], dusur: () => [[33, 1]], harita: 2 });
 
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 2048;   // 0.31.0: 1024'ten 2048'e
@@ -631,7 +640,7 @@ esya(290, { ad: 'Altın Elma', simge: 'altin_elma', tur: 'yiyecek', yemek: 4, iy
 esya(291, { ad: 'Buğday', simge: 'bugday' });
 esya(292, { ad: 'Buğday Tohumu', simge: 'tohum', ekin: 53 });
 esya(293, { ad: 'Ekmek', simge: 'ekmek', tur: 'yiyecek', yemek: 5 });
-esya(294, { ad: 'Mektup', simge: 'mektup', yigin: 16 });
+esya(294, { ad: 'Mektup', simge: 'mektup', yigin: 16, gorevEsyasi: true, ozellik: 'Görev eşyası: atılamaz, sandığa konamaz' });
 esya(295, { ad: 'Kemik', simge: 'kemik' });
 esya(296, { ad: 'Kemik Tozu', simge: 'kemik_tozu', gubre: true });
 /* Deniz (5. aşama) */
@@ -653,7 +662,7 @@ YUN_RENKLERI.forEach((r, i) => esya(321 + i, { ad: `${r.ad} Boya`, simge: 'boya'
 esya(346, { ad: 'Beyaz Boya', simge: 'boya', renk: '#ecebe4' });
 esya(345, { ad: 'Yapı Planı', simge: 'plan', tur: 'plan', yigin: 1 });
 /* 0.32.0: teslimat görevlerinde taşınan koli */
-esya(347, { ad: 'Köy Kolisi', simge: 'koli', yigin: 1 });
+esya(347, { ad: 'Köy Kolisi', simge: 'koli', yigin: 1, gorevEsyasi: true, ozellik: 'Görev eşyası: atılamaz, sandığa konamaz' });
 /* ---------- 0.34.0: tarım ürünleri, tohumlar, yemekler ve aletler ---------- */
 esya(363, { ad: 'Domates', simge: 'domates', tur: 'yiyecek', yemek: 3 });
 esya(364, { ad: 'Domates Tohumu', simge: 'tohum', renk: '#e8d080', ekin: TARIM.domates.taban });
@@ -684,6 +693,12 @@ esya(388, { ad: 'Demir Tırpan', tur: 'alet', yigin: 1, simge: 'tirpan', renk: '
   alet: { tur: 'tirpan', seviye: 4, hiz: 6, dayanim: 300, hasar: 4, alan: 1 } });
 esya(389, { ad: 'Elmas Tırpan', tur: 'alet', yigin: 1, simge: 'tirpan', renk: '#52e3d6', ozellik: 'Olgun ekinleri 5 × 5 alanda biçer ve tohum varsa yeniden eker; otları temizler',
   alet: { tur: 'tirpan', seviye: 5, hiz: 8, dayanim: 1500, hasar: 6, alan: 2 } });
+/* 0.35.0: kumaş ve yeni yemekler */
+esya(391, { ad: 'Kumaş', simge: 'kumas' });
+esya(392, { ad: 'Lahana Sarması', simge: 'corba2', renk: '#7aa84a', tur: 'yiyecek', yemek: 9, kase: true, pismis: true });
+esya(393, { ad: 'Soğan Çorbası', simge: 'corba2', renk: '#d8b060', tur: 'yiyecek', yemek: 6, kase: true, pismis: true, sicak: 40 });
+esya(394, { ad: 'Mısır Ekmeği', simge: 'ekmek', renk: '#e8c040', tur: 'yiyecek', yemek: 6, pismis: true });
+esya(395, { ad: 'Zeytinyağlı Biber', simge: 'corba2', renk: '#5aa83a', tur: 'yiyecek', yemek: 7, kase: true });
 esya(390, { ad: 'Gübre', simge: 'kemik_tozu', renk: '#6a4a2a', gubre: true, ozellik: 'Ekinleri ve fidanları hızla büyütür' });
 esya(328, { ad: 'Havuç', simge: 'havuc', tur: 'yiyecek', yemek: 3, ekin: 129 });
 esya(329, { ad: 'Patates', simge: 'patates', renk: '#c8a25a', tur: 'yiyecek', yemek: 1, ekin: 133 });
@@ -752,7 +767,8 @@ export const KIYAFETLER = [
   [359, 'Şort', 2, '#3a6ea5', 'sort', { s: 2 }],
   [360, 'Sandalet', 3, '#a07040', 'sandalet', { s: 1 }], [361, 'Deri Ayakkabı', 3, '#5a3a22', 'ayakkabi', { y: 1 }], [362, 'Kürklü Çizme', 3, '#7a5a3e', 'cizme', { y: 4, g: 0.6 }]
 ];
-KIYAFETLER.forEach(([id, ad, parca, renk, sekil, isi]) => esya(id, { ad, tur: 'kiyafet', yigin: 1, simge: 'kiyafet' + parca, renk, kiyafet: { parca, sekil }, isi, alet: null }));
+/* 0.35.0: kıyafetler de yıpranır (dayanım), örste onarılır ve Koruma dışındaki zırh büyülerini alabilir */
+KIYAFETLER.forEach(([id, ad, parca, renk, sekil, isi]) => esya(id, { ad, tur: 'kiyafet', yigin: 1, simge: 'kiyafet' + parca, renk, kiyafet: { parca, sekil, dayanim: [90, 140, 120, 100][parca] }, isi, alet: null }));
 
 /* Mantar bloğu da yenebilir */
 E[36].yemek = 1; E[36].yenir = true;
@@ -823,6 +839,7 @@ export function onarimMalzemesi(id) {
   if (id >= 300 && id < 320) return [[14, 38, 39], [15], [259], [261], [264]][Math.floor((id - 300) / 4)];
   if (id >= 340 && id < 345) return [[14, 38, 39], [15], [259], [261], [264]][id - 340];
   if (id >= 400 && id < 432) return [ZIRH_MALZEME[Math.floor((id - 400) / 4)].mal];
+  if (E[id] && E[id].kiyafet) return [49, 282, 284, 391];   // 0.35.0: kıyafetler yün, deri, ip ya da kumaşla onarılır
   if (id === 286 || id === 453) return [284];
   if (id === 456) return [259];
   if (id === 457) return [282];
@@ -851,7 +868,7 @@ export const BUYULER = {
   koruma: { ad: 'Koruma', maks: 4, uygun: e => ZIRH_P(e), aciklama: 'Alınan hasar azalır' },
   solunum: { ad: 'Solunum', maks: 3, uygun: e => ZIRH_P(e, 0), aciklama: 'Su altında oksijen daha yavaş azalır' },
   tuy: { ad: 'Tüy Düşüşü', maks: 4, uygun: e => ZIRH_P(e, 3), aciklama: 'Düşme hasarı azalır' },
-  kirilmaz: { ad: 'Kırılmazlık', maks: 3, uygun: e => !!(e && (e.alet || e.zirh)), aciklama: 'Eşya daha geç yıpranır' }
+  kirilmaz: { ad: 'Kırılmazlık', maks: 3, uygun: e => !!(e && (e.alet || e.zirh || e.kiyafet)), aciklama: 'Eşya daha geç yıpranır' }
 };
 const ROMA = ['', 'I', 'II', 'III', 'IV', 'V'];
 export const romaRakam = n => ROMA[n] || String(n);
@@ -862,6 +879,8 @@ export const uygunBuyuler = id => Object.keys(BUYULER).filter(k => BUYULER[k].uy
 /* Yığın kopyası için büyü nesnesi (boşsa undefined) */
 export const buyuKopya = b => (b && typeof b === 'object' && Object.keys(b).length ? { ...b } : undefined);
 
+/* 0.35.0: soğuk dengesi: giysilerin soğuktan koruma değerleri yaklaşık yarıya indirildi (tam kürk takım bile en soğuk bölgede tek başına yetmez) */
+for (const e of Object.values(E)) if (e && e.isi && e.isi.y) e.isi = { ...e.isi, y: Math.max(0.5, Math.round(e.isi.y * 0.55 * 2) / 2) };
 export const ESYALAR = E;
-export const maksDayanim = e => (e ? (e.alet ? e.alet.dayanim : e.zirh ? e.zirh.dayanim : null) : null);
+export const maksDayanim = e => (e ? (e.alet ? e.alet.dayanim : e.zirh ? e.zirh.dayanim : e.kiyafet ? e.kiyafet.dayanim : null) : null);
 export const esyaBilgi = id => E[id] || null;
