@@ -169,6 +169,8 @@ export class Ses {
   gecitUgultu() { this.ton(95 + Math.random() * 10, 1.2, 0.07, 'sine', 120); this.ton(190, 1.2, 0.03, 'triangle', 240); }
   gecis() { this.patlama(400, 1.2, 0.3, 'bandpass', 1.0, 3); this.ton(660, 0.9, 0.1, 'sine', 110); }
   diyarUgultu() { this.ton(48 + Math.random() * 8, 3.5, 0.05, 'sine', 40); this.patlama(160, 2.5, 0.05, 'lowpass', 0.8, 0.6); }
+  /* 0.38.1: çakmak çakma sesi: iki kısa kıvılcım */
+  cakmak() { if (!this.ctx) return; this.patlama(3200, 0.04, 0.16, 'highpass', 2); setTimeout(() => this.patlama(2600, 0.06, 0.12, 'highpass', 2), 70); }
   dugme() { this.ton(1000, 0.03, 0.07, 'square', 800); }
   melodi(tur = 0, h = 1) {
     if (!this.ctx) return;

@@ -884,8 +884,8 @@ esya(461, { ad: 'Muhafız Göğüslüğü', tur: 'zirh', yigin: 1, simge: 'zirh1
 /* 0.18.0: Yeraltı Diyarı eşyaları */
 esya(471, { ad: 'Işıltaş Tozu', simge: 'toz', renk: '#f2c84a' });
 esya(472, { ad: 'Kor Kristali', simge: 'kor_kristal' });
-esya(473, { ad: 'Çakmak', tur: 'cakmak', yigin: 1, simge: 'cakmak2', ozellik: 'Lanetli Ada’daki kadim geçidin çerçevesi bozulup sönerse onu yeniden yakar',
-  alet: { tur: 'cakmak', seviye: 0, hiz: 1, dayanim: 64, hasar: 1 } });
+esya(473, { ad: 'Çakmak', tur: 'cakmak', yigin: 1, simge: 'cakmak2', ozellik: 'Odun yığınını kamp ateşine çevirir · Şömineyi ve balkabağı fenerini yakar · Ot, çalı ve örümcek ağını yakıp temizler · Buzu eritir · Canlıları tutuşturur · Kadim geçidi yeniden yakar',
+  alet: { tur: 'cakmak', seviye: 0, hiz: 1, dayanim: 128, hasar: 1 } });
 esya(474, { ad: 'Kor Kılıcı', tur: 'alet', yigin: 1, simge: 'kilic', renk: '#ff6a2a', yakar: true, ozellik: 'Vurulan canlıyı tutuşturur',
   alet: { tur: 'kilic', seviye: 5, hiz: 8, dayanim: 1300, hasar: 8 } });
 

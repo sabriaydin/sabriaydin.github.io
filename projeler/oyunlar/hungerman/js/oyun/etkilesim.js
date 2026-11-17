@@ -178,6 +178,16 @@ export class Etkilesim {
       this.sahne.secimGoster(null, 0);
       return;
     }
+    /* 0.38.1: çakmakla canlı tutuşturulur (köylüler ve ateşe dayanıklılar hariç) */
+    if (g.sag && this.hedefCanli && this.sagBekleme <= 0 && eldeki === 473 && !this.hedefCanli.tur.koylu) {
+      this.sagBekleme = 0.6; this.germe = 0;
+      const v = this.hedefCanli;
+      this.cakmakSes();
+      if (v.tur.atesBagisik) this.arayuz.bildirim(`${v.tur.ad} ateşe dayanıklıdır.`);
+      else { v.atesSure = 6; v.ofkeli = !!v.tur.dusman || v.ofkeli; this.dusenler.renkliParcacik([1, 0.55, 0.15], v.konum.x, v.konum.y + v.tur.boy * 0.6, v.konum.z, 12); this.cakmakYipran(); }
+      this.sahne.secimGoster(null, 0);
+      return;
+    }
     /* 0.16.0: evcil hayvan ve at etkileşimi (evcilleştirme, oturtma, eyer, binme) */
     if (g.sag && this.hedefCanli && this.sagBekleme <= 0 && this.varliklar.etkilesimVar(this.hedefCanli, eldeki)) {
       this.sagBekleme = 0.4; this.germe = 0;
@@ -494,9 +504,11 @@ export class Etkilesim {
     if (e && (e.kova || e.suKovasi)) { if (this.kovaKullan(h, e)) return true; }
     if (h && e && e.alet && e.alet.tur === 'makas' && this.makasKullan(h)) return true;
     if (h && e && s.id === 331 && BLOKLAR[h.id].kovan && this.kovanHasat(h, 'sise')) return true;
-    /* 0.18.0: Çakmak: obsidyen çerçevenin içinde Diyar Geçidi açar */
-    if (h && e && e.tur === 'cakmak' && this.gecit) {
-      if (this.gecit.yak(h) && this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
+    /* 0.18.0: Çakmak: obsidyen çerçevenin içinde Diyar Geçidi açar; 0.38.1: ateş yakar, yakıp temizler, buz eritir */
+    if (h && e && e.tur === 'cakmak') {
+      if (this.cakmakKullan(h)) return true;
+      if (this.gecit && this.gecit.yak(h)) { this.cakmakYipran(); return true; }
+      this.cakmakSes();
       return true;
     }
     /* Sandalye ve koltuk: oturulur (elde blok tutulurken ya da eğilirken blok konur) */
@@ -942,6 +954,38 @@ export class Etkilesim {
       if (py >= 127 || KATI[d.blok(px, py, pz)]) return sonuc(false, 'Pervanenin döneceği alan boş olmalıdır (yaklaşık 7 blok çapında).');
     }
     return sonuc(true);
+  }
+  /* ---------- 0.38.1: Çakmak ----------
+     Odun yığını -> kamp ateşi; sönük şömine yanar; oyma balkabağı -> balkabağı feneri; örümcek ağı, ot, çalı ve kuru bitkiler 3 × 3 alanda yanarak temizlenir;
+     buz suya, kar ve kar katmanı yok olur; canlılar tutuşur. Her kullanım dayanıklılıktan 1 düşer. */
+  cakmakSes() { if (this.ses.cakmak) this.ses.cakmak(); else this.ses.tik(); }
+  cakmakYipran() { if (this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Çakmak tükendi.'); } }
+  cakmakKullan(h) {
+    const d = this.dunya, b = BLOKLAR[h.id];
+    if (!b) return false;
+    const alev = (x, y, z, n = 10) => this.dusenler.renkliParcacik([1, 0.55, 0.15], x + 0.5, y + 0.6, z + 0.5, n);
+    const bitti = m => { this.cakmakSes(); this.cakmakYipran(); if (m) this.arayuz.bildirim(m); this.olay('cakmak'); return true; };
+    /* Odun yığını tutuşturulunca kamp ateşi olur */
+    if (b.ck === 'odunYigini') { d.blokKoy(h.x, h.y, h.z, 48); alev(h.x, h.y, h.z, 18); return bitti('Odun yığını tutuştu: kamp ateşi yandı.'); }
+    /* Sönük şömine yanar */
+    if (b.sekil === 'somine' && !b.acik) { d.blokKoy(h.x, h.y, h.z, b.taban + b.yon * 2 + 1); alev(h.x, h.y, h.z); return bitti(); }
+    /* Oyma balkabağı -> balkabağı feneri */
+    if (h.id >= 560 && h.id <= 563) { d.blokKoy(h.x, h.y, h.z, h.id + 4); alev(h.x, h.y, h.z, 6); return bitti(); }
+    /* Örümcek ağı, ot, çalı ve kuru bitkiler: 3 × 3 alanda yanar (ekinler, fidanlar ve çiçekler korunur) */
+    const yanar = id => id === 148 || id === 25 || id === 29 || id === 30 || id === 43 || id === 147;
+    if (yanar(h.id)) {
+      let n = 0;
+      for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) for (let dz = -1; dz <= 1; dz++) {
+        const x = h.x + dx, y = h.y + dy, z = h.z + dz, q = d.blok(x, y, z);
+        if (!yanar(q)) continue;
+        d.blokKoy(x, y, z, 0); alev(x, y, z, 6); this.dusenler.renkliParcacik([0.25, 0.25, 0.25], x + 0.5, y + 0.8, z + 0.5, 4); n++;
+      }
+      return bitti(n > 1 ? `${n} bitki ve ağ yanarak temizlendi.` : null);
+    }
+    /* Buz eriyip su olur; kar ve kar katmanı yok olur */
+    if (h.id === 22 || h.id === 186) { d.blokKoy(h.x, h.y, h.z, 7); this.dusenler.renkliParcacik([0.7, 0.85, 1], h.x + 0.5, h.y + 0.6, h.z + 0.5, 10); return bitti(); }
+    if (h.id === 21 || h.id === 141) { d.blokKoy(h.x, h.y, h.z, 0); this.dusenler.renkliParcacik([0.95, 0.97, 1], h.x + 0.5, h.y + 0.6, h.z + 0.5, 10); return bitti(); }
+    return false;
   }
   /* 0.37.0: çok bloklu nesnenin kurulacağı yer: { coklu, yon, parcalar: [[id, x, y, z], ...], gecerli, neden } */
   cokluYeri(h, D) {

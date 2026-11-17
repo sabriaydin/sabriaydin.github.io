@@ -1,7 +1,7 @@
 /* HungerMan - envanterde canlı karakter önizlemesi (0.30.0)
    Oyuncu modeli kendi küçük çiziciyle çizilir; giyilen zırhlar (malzeme rengiyle, büyülüyse parıltılı) ve eldeki eşya üzerinde görünür.
    Minecraft'taki gibi kafa ve gövde fare imlecini izler; önizleme sürüklenerek döndürülür, çift tıkla öne döner. Pencere kapalıyken çizim durur. */
-import { THREE } from '../grafik/sahne.js';
+import { THREE, simgeHacmi } from '../grafik/sahne.js';
 import { gurultu } from '../varlik/modeller.js';
 import { insanModeli, giydir } from '../varlik/giysiler.js';
 import { simge } from '../grafik/doku.js';
@@ -43,9 +43,12 @@ export class KarakterOnizleme {
     const kok = this.kok = M.kok;
     this.govde = M.govde; this.kafa = M.kafa; this.kollar = M.kollar; this.bacaklar = M.bacaklar; this.eklem = M.eklem;
     /* Eldeki eşya: sağ elde (model önü -z, sağ el +x tarafında görünür) */
-    this.el = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.46), new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.3, side: THREE.DoubleSide }));
-    this.el.position.set(0, -0.74, -0.2); this.el.rotation.set(0, Math.PI / 2, Math.PI / 4); this.el.visible = false;
-    this.kollar[1].add(this.el);
+    /* 0.38.1: eşya yumrukta tutulur: tutma noktası el içindedir; aletler sapından tutulup ileri ve hafif yukarı bakar, diğer eşyalar elin önünde dik durur */
+    this.elTut = new THREE.Group(); this.elTut.position.set(0.06, -0.64, -0.06);
+    this.el = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ vertexColors: true }));   // kalınlıklı piksel modeli (birinci şahıstaki gibi)
+    this.el.visible = false;
+    this.elTut.add(this.el);
+    this.kollar[1].add(this.elTut);
     this.sahne.add(kok);
     this.hazir = true;
     return true;
@@ -64,10 +67,23 @@ export class KarakterOnizleme {
     if (imz === this.elImz) return;
     this.elImz = imz;
     if (elde && ESYALAR[elde.id]) {
-      const t = new THREE.CanvasTexture(simge(elde.id).cv); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.colorSpace = THREE.SRGBColorSpace;
-      if (this.el.material.map) this.el.material.map.dispose();
-      this.el.material.map = t; this.el.material.needsUpdate = true; this.el.visible = true;
+      this.el.geometry.dispose(); this.el.geometry = simgeHacmi(simge(elde.id).cv, 0.5); this.el.visible = true;
+      this.elDuzen(ESYALAR[elde.id]);
     } else this.el.visible = false;
+  }
+  /* Tutuş: alet simgesinde sap sol altta, uç sağ üsttedir; simge yan düzleme (y-z) konur, sap tutma noktasına gelir */
+  elDuzen(e) {
+    const alet = !!(e && (e.alet || e.tur === 'cakmak' || e.tur === 'yay' || e.tur === 'olta' || e.tur === 'kablo')), el = this.el;
+    if (alet) {
+      el.scale.setScalar(1);
+      el.rotation.set(0, Math.PI / 2 - 0.75, 12 * Math.PI / 180);   // simge çaprazı ileri (-z, biraz dışa) ve 57° yukarı bakar; önden de görünür
+      const sap = new THREE.Vector3((3.5 / 16 - 0.5) * 0.5, (0.5 - 12.5 / 16) * 0.5, 0).applyEuler(el.rotation);
+      el.position.copy(sap.negate());
+    } else {
+      el.scale.setScalar(e && e.tur === 'blok' ? 0.62 : 0.7);
+      el.rotation.set(0, Math.PI / 2 - 0.75, 0);
+      el.position.set(0, 0.02, -0.14);
+    }
   }
   baslat() {
     if (!this.kur()) return;

@@ -117,6 +117,10 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 38.1 (0.38.1): Elde tutma ve işlevsel çakmak
+- Envanterdeki karakter önizlemesinde eşya artık yumrukta tutulur: aletler ve silahlar sapından kavranır, ucu ileri ve yukarı bakar; eşya birinci şahıstaki gibi kalınlıklı piksel modeliyle çizilir.
+- **Çakmak:** odun yığınını tutuşturup kamp ateşine çevirir; sönük şömineyi yakar; oyma balkabağını balkabağı fenerine çevirir; ot, çalı, sarmaşık ve örümcek ağını 3 × 3 alanda yakarak temizler; buzu eritip suya, karı ve kar katmanını yok eder; canlıları tutuşturur (ateşe dayanıklılar ve köylüler hariç); kadim geçidi yeniden yakar. Kıvılcım sesi eklendi, dayanıklılık 64'ten 128'e çıktı.
+
 ## 38.0 (0.38.0): Lanetli Ada ve Ada Bekçisi
 - Lanetli Ada artık harita merkezinden ve ana karadan çok uzakta, kıtanın dışındaki ıssız açık okyanusta doğar (merkeze yaklaşık 2950-3300 blok; çevresinde en az 250 blok kara bulunmayan derin deniz). Her dünyada yalnızca bir tane vardır ve Yeraltı Diyarı'nın tek girişi buradaki kadim geçittir.
 - Yeni tasarım: daha büyük ada, dik obsidyen ve kül tuğlası yarlar, kül kumu kıyı şeridi, yüzeyde ışıldayan magma çatlakları; ortada 11 × 11 kül tuğlası tapınak avlusu, dört köşede kor mangallı direkler, yıkık duvarlar, iki yanı kor kaideli kadim geçit ve arkasında hazine sandığı; güneyde avludan inen yol, obsidyen iskele ve fenerler; kıyıda eğik obsidyen sivri kayalar, çatallı kurumuş ağaçlar, kızıl mantarlar, örümcek ağları ve iskelet yuvası.
