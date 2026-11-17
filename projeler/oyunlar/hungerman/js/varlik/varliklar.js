@@ -267,7 +267,7 @@ export class Varliklar {
       }
       /* Gündüz açıkta kalan yarasalar gibi sessizce kaldırılan canlılar */
       if (v.sil) { this.modelSil(v); this.liste.splice(i, 1); continue; }
-      const uzak = v.tur.koylu || v.evcil || v.tur.boss ? 1e9 : v.tur.su ? 64 : v.tur.dusman ? ZOMBI_UZAK : HAYVAN_UZAK;
+      const uzak = v.tur.koylu || v.evcil || v.tur.boss || v.bekci ? 1e9 : v.tur.su ? 64 : v.tur.dusman ? ZOMBI_UZAK : HAYVAN_UZAK;
       if (d2 > uzak * uzak || (v.olu && (v.olumZaman > 0.9 || !this.dunya.yuklu(v.konum.x, v.konum.z)))) {
         if (v.olu) this.dusenler.renkliParcacik([0.85, 0.85, 0.85], v.konum.x, v.konum.y + v.tur.boy * 0.5, v.konum.z, 16);
         this.modelSil(v); this.liste.splice(i, 1);
@@ -431,7 +431,7 @@ export class Varliklar {
       v.isikHedef = Math.max(0.08, l);
       v.yaniyor = (T.gunesteYanar && acik && ctx.gunIsigi > 0.55 && !v.suda && !ctx.yagmur) || (v.atesSure > 0 && !v.suda);
       /* Güneşte yanmayan canavarlar (örümcek, mumya) açık havada gündüz bir süre sonra, oyuncudan uzaktaysa kaybolur */
-      if (T.dusman && !T.gunesteYanar && !T.boss && v.turAd !== 'haydut' && acik && ctx.gunIsigi > 0.6 && !ctx.yagmur && !ctx.firtina) {
+      if (T.dusman && !T.gunesteYanar && !T.boss && !v.bekci && v.turAd !== 'haydut' && acik && ctx.gunIsigi > 0.6 && !ctx.yagmur && !ctx.firtina) {
         v.gunduz = (v.gunduz || 0) + 0.3;
         if (v.gunduz > 25 && Math.hypot(ctx.oyuncu.konum.x - p.x, ctx.oyuncu.konum.z - p.z) > 16) v.sil = true;
       } else v.gunduz = 0;

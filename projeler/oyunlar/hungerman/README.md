@@ -117,6 +117,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 38.0 (0.38.0): Lanetli Ada ve Ada Bekçisi
+- Lanetli Ada artık harita merkezinden ve ana karadan çok uzakta, kıtanın dışındaki ıssız açık okyanusta doğar (merkeze yaklaşık 2950-3300 blok; çevresinde en az 250 blok kara bulunmayan derin deniz). Her dünyada yalnızca bir tane vardır ve Yeraltı Diyarı'nın tek girişi buradaki kadim geçittir.
+- Yeni tasarım: daha büyük ada, dik obsidyen ve kül tuğlası yarlar, kül kumu kıyı şeridi, yüzeyde ışıldayan magma çatlakları; ortada 11 × 11 kül tuğlası tapınak avlusu, dört köşede kor mangallı direkler, yıkık duvarlar, iki yanı kor kaideli kadim geçit ve arkasında hazine sandığı; güneyde avludan inen yol, obsidyen iskele ve fenerler; kıyıda eğik obsidyen sivri kayalar, çatallı kurumuş ağaçlar, kızıl mantarlar, örümcek ağları ve iskelet yuvası.
+- **Ada Bekçisi:** geçidi rastgele seçilen bir diyar yaratığı (Kor Ruhu ya da Kül Zombisi) korur. Bekçi güçlendirilmiştir (6 kat can, daha fazla hasar, büyük gövde), güneşte yanmaz, boss çubuğunda görünür ve değerli ganimet bırakır.
+- Bekçi adaya bağlıdır: kıyıya varınca geri çekilir, suya düşer ya da adadan uzaklaşırsa geçidin önüne döner.
+- Bekçi öldürülünce yenisi 30 dakika sonra doğar; kalan süre dünya kaydında saklanır.
+- Eski dünyalarda ada yeni konumunda üretilir; eski konumdaki ada parçaları, üzerinde değişiklik yapılmamışsa denize döner.
+
 ## 37.0 (0.37.0): 115 yeni eşya ve blok
 - **Çok bloklu mobilya ve yapılar (27):** Kanepe (3 blok), İkili Deri Koltuk, Park Bankı, Yemek Masası, Çalışma Masası (çekmeceli, sandık), Gardırop ve Büyük Gardırop (2 blok yüksek, sandık), Dede Saati, Piyano (çalar), Buzdolabı (sandık), Küvet, Çift Kişilik Yatak (2 × 2), Ranza, Uyku Tulumu, Hamak, Bilardo Masası (3 × 2), Ayaklı Lamba, Sokak Lambası (3 blok), Bayrak Direği (4 blok), Su Kuyusu, Pazar Tezgâhı (tenteli, sandık), Bahçe Çardağı (3 × 3 × 3), Şövalye Heykeli, Mermer Çeşme (3 × 3), Boy Aynası, Portmanto, Teleskop.
 - **Tek bloklu dekor (29):** Tabure, Bar Taburesi, Yer Minderi, Sallanan Sandalye (oturulur), Daktilo, Gramofon (çalar), Dünya Küresi, Şamdan ve Gaz Lambası (ışık), Kum Saati, Duvar Saati (duvara asılır), Kitap Yığını, Kaktüs, Deve Tabanı, Bonsai, Şemsiyelik, Kapı Paspası, Çöp Kovası, Metal Varil ve Çamaşır Sepeti ve Posta Kutusu (sandık), Kuş Kafesi, Bahçe Cücesi, Lavabo, Dikiş Makinesi, Mangal (pişirme istasyonu), Odun Yığını, Ahşap Tabela, Taş Kesme Tezgâhı (yeni istasyon).

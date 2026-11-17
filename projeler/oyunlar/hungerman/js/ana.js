@@ -55,6 +55,7 @@ const URETIM_SURUMU = 10;
 import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';
+import { AdaBekcisi } from './oyun/ada-bekcisi.js';
 import { yapiAt } from './dunya/yapi-uretici.js';
 import { BasarimEkrani } from './arayuz/basarim-ekrani.js';
 import { TarifKitabi } from './arayuz/tarif-kitabi.js';
@@ -652,6 +653,9 @@ function oyunBaslat(v) {
   } });
   yapiOlaylari.iceAktar(v.bosslar);
   oyun.yapiOlaylari = yapiOlaylari;
+  /* 0.38.0: Lanetli Ada'nın bekçisi */
+  oyun.adaBekcisi = new AdaBekcisi({ uretici: dunya.uretici, varliklar, dunya, ses, bildirim: m => hud.bildirim(m) });
+  oyun.adaBekcisi.iceAktar(v.adaBekci);
   /* 0.18.0: Diyar Geçidi; çerçevesi bozulan geçidi tek oyunculuda ve sunucuda söndürür */
   oyun.gecit = new Gecit({ dunya, oyuncu, ses, bildirim: m => hud.bildirim(m), gec: h => gecitGec(h), olay: k => oyun.basarimlar && oyun.basarimlar.ver(k) });
   if (!v.istemci) dunya.dinleyiciler.push((x, y, z, id, eski) => { if (!oyun.gecit.sonduruyor) { oyun.gecit.sonduruyor = true; oyun.gecit.degisti(x, y, z, id, eski); oyun.gecit.sonduruyor = false; } });
@@ -888,7 +892,7 @@ async function oyunKaydet() {
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), kablolar: o.kablolar.disaAktar(), tekneler: o.tekneler.disaAktar(),
     yapiPlani: o.etkilesim && o.etkilesim.plan ? o.etkilesim.plan.plan : null,   // 0.35.0: Yapı Planı dünyayla da kaydedilir
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, konsol: !!o.konsol, vucutIsisi: o.vucutIsisi !== false, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
-    hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar()
+    hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar(), adaBekci: o.adaBekcisi ? o.adaBekcisi.disaAktar() : null
   };
   try { await Kayit.kaydet(veri); } catch (e) { o.hud.bildirim('Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.'); }
 }
@@ -1074,6 +1078,7 @@ function adim(t) {
     o.dunya.yagiyor = o.hava.yagiyor && o.hava.yogunluk > 0.5;
     o.koyler.guncelle(dt, o.oyuncu, ekKonumlar);
     if (!o.istemci) o.yapiOlaylari.guncelle(dt, (ekKonumlar ? [o.oyuncu.konum, ...ekKonumlar] : [o.oyuncu.konum]).filter(q => !diyarMi(q.x)));
+    if (!o.istemci && o.adaBekcisi) o.adaBekcisi.guncelle(dt, (ekKonumlar ? [o.oyuncu.konum, ...ekKonumlar] : [o.oyuncu.konum]).filter(q => !diyarMi(q.x)));   // 0.38.0
     if (o.mekanik) o.mekanik.guncelle(dt);
     if (o.elektrik) o.elektrik.guncelle(dt);
     if (o.firinlar) o.firinlar.guncelle(dt);   // 0.33.0: fırın ve kamp ateşi
@@ -1424,7 +1429,7 @@ function simsekOlayi(x, y, z) {
 function bossCubugu(o) {
   const p = o.oyuncu.konum;
   let en = null, ed = 40 * 40;
-  for (const v of o.varliklar.liste) { if (!v.tur.boss || v.olu) continue; const d = v.konum.distanceToSquared(p); if (d < ed) { ed = d; en = v; } }
+  for (const v of o.varliklar.liste) { if ((!v.tur.boss && !v.bekci) || v.olu) continue; const d = v.konum.distanceToSquared(p); if (d < ed) { ed = d; en = v; } }
   const k = $('#bossCubuk');
   o.bossVar = !!en;
   if (!en) { if (!k.hidden) k.hidden = true; return; }
