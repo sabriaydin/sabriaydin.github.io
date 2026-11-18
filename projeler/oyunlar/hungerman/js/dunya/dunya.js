@@ -104,6 +104,7 @@ export class Dunya {
     const eski = p.v[i];
     if (eski === id) return false;
     p.v[i] = id;
+    if (this.kayit) this.kayit(eski, id, x, y, z, kaynak);   // 0.40.5: olay kaydı
     const k = parcaAnahtar(cx, cz);
     /* 0.18.0: mevsimlik kar ve buz kayda geçmez (parça yeniden yüklenince kendiliğinden kalkar) */
     if (kaynak !== 'mevsim') {

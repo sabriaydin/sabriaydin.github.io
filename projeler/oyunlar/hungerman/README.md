@@ -117,6 +117,21 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.5 (0.40.5): Konsolda dünya olay kaydı
+- Geliştirici konsoluna (F8) dünyada olan her şey oyun saatiyle ve renkli türüyle yazılır:
+  - **Oyuncu:** alınan hasar ve sebebi, ölüm, yeniden doğma, doğma noktası (yatak) ayarlanması, bulunulan yerin değişmesi (biyom, köy, yeraltı, Lanetli Ada, diyar).
+  - **Blok:** kırılan, konan ve değiştirilen her blok, koordinatıyla (çok oyunculuda diğer oyuncuların yaptıkları da).
+  - **Canlı:** doğan, ölen (sebebiyle) ve dünyadan kaldırılan canlılar; Ada Bekçisi'nin uyanması.
+  - **Savaş:** canlıların aldığı her hasar, kaynağı ve kalan canı.
+  - **Eşya:** yerden toplanan eşyalar.
+  - **Dünya:** yeni gün, zaman dilimleri, hava değişimi, Kanlı Ay, kadim geçidin açılıp kapanması, diyara geçiş.
+  - **Köy:** itibar değişimleri.
+  - **Bildirim:** ekranda çıkan bütün bildirimler (üretim, başarım, görev, takas vb.).
+  - **Ağ:** sohbet ve sistem mesajları.
+  - **Doğal:** sıvı akışı, ekin büyümesi, mevsim ve elektrik kaynaklı blok değişimleri (çok sık olduğu için başta kapalıdır).
+- Art arda gelen aynı olay tek satırda sayılır (×n). Konsol yukarı kaydırılıp okunurken yeni olaylar okumayı bölmez.
+- Yeni komut: `kayit` (durum), `kayit ac` / `kayit kapat` (tümü), `kayit <tür> ac|kapat`, `kayit temizle`. Seçimler tarayıcıda saklanır.
+
 ## 40.4 (0.40.4): Gerçekçi düşme hasarı
 - Düşme hasarı yükseklikle hızla artar: 3 bloğa kadar hasar yoktur; 4 blok yaklaşık 1 kalp, 6 blok 2,5 kalp, 8 blok yaklaşık 5 kalp, 10 blok 7 kalp alır; 12 bloktan düşüş tam canlı oyuncuyu öldürür (önceden ölmek için yaklaşık 23 blok gerekiyordu).
 - Yumuşak zemin hasarı azaltır: yün, halı, yatak, minder ve saman balyası %80, yapraklar %50, kar %40. Suya düşüş hasarsızdır; tüy düşüşü büyüsü de hasarı azaltmaya devam eder.
