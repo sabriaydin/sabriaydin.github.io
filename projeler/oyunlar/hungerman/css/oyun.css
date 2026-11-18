@@ -49,23 +49,24 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 .kaplama .kapat { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border: 2px solid #000; border-radius: 4px; background: #463d33; cursor: pointer; }
 .kaplama .kapat:hover { background: #5a4f42; }
 
-/* ---------- Ana menü arka planı ---------- */
-.menuArka { background: linear-gradient(#5d8fd6 0%, #97bdf0 45%, #f5c68a 72%, #3c5e2e 72.2%); overflow: hidden; }
-.menuGok { position: absolute; inset: 0; pointer-events: none; }
-.bulut { position: absolute; display: block; width: 180px; height: 36px; background: #fff; opacity: .85; box-shadow: 36px -18px 0 #fff, 72px 0 0 #fff, 108px -18px 0 #fff, 54px -18px 0 #fff; animation: bulutKay 90s linear infinite; image-rendering: pixelated; }
-.bulut.b1 { top: 12%; left: -20%; }
-.bulut.b2 { top: 24%; left: -40%; transform: scale(.7); animation-duration: 130s; animation-delay: -40s; }
-.bulut.b3 { top: 6%; left: -30%; transform: scale(1.3); animation-duration: 160s; animation-delay: -90s; opacity: .7; }
-@keyframes bulutKay { to { left: 120%; } }
-.tepeler { position: absolute; left: -5%; right: -5%; bottom: 0; height: 40%; image-rendering: pixelated; }
-.tepeler.t1 { background: linear-gradient(transparent 40%, #3f6a35 40%) 0 0 / 96px 100%, #3f6a35; clip-path: polygon(0 55%, 8% 40%, 16% 48%, 26% 30%, 34% 38%, 44% 22%, 52% 34%, 62% 26%, 72% 40%, 80% 30%, 90% 44%, 100% 36%, 100% 100%, 0 100%); opacity: .55; filter: brightness(.8); }
-.tepeler.t2 { height: 30%; background: #4c7d39; clip-path: polygon(0 50%, 6% 50%, 6% 40%, 14% 40%, 14% 30%, 24% 30%, 24% 44%, 36% 44%, 36% 26%, 46% 26%, 46% 36%, 58% 36%, 58% 46%, 70% 46%, 70% 32%, 82% 32%, 82% 42%, 92% 42%, 92% 34%, 100% 34%, 100% 100%, 0 100%); }
-.tepeler.t3 { height: 16%; background: linear-gradient(#5f9b3a 0 14%, #7a5536 14% 100%); clip-path: polygon(0 30%, 10% 30%, 10% 20%, 30% 20%, 30% 34%, 50% 34%, 50% 18%, 66% 18%, 66% 28%, 84% 28%, 84% 22%, 100% 22%, 100% 100%, 0 100%); }
+/* ---------- Ana menü arka planı (0.40.8) ----------
+   Oyunun kendi motoruyla çekilmiş gün batımı manzarası (gorsel/menu-arka.webp). Ana menüde resim yavaşça kayar ve yakınlaşır,
+   üstte okunurluk için koyulaşma, altta kor parçacıkları yükselir. Diğer menü ekranlarında aynı resim sabit ve koyulaştırılmış durur. */
+.menuArka { background: linear-gradient(rgba(14, 10, 18, .58), rgba(14, 10, 18, .58)), #2a1e2e url(../gorsel/menu-arka.webp) center 60% / cover no-repeat; overflow: hidden; }
+#anaMenu { background: #2a1e2e; }
+.menuGok { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.menuResim { position: absolute; inset: -4%; background: url(../gorsel/menu-arka.webp) center 60% / cover no-repeat; animation: menuKay 60s ease-in-out infinite alternate; will-change: transform; }
+@keyframes menuKay { from { transform: scale(1.04) translate3d(-1.5%, 0, 0); } to { transform: scale(1.1) translate3d(1.5%, -1%, 0); } }
+.menuGolge { position: absolute; inset: 0; background:
+  radial-gradient(ellipse 60% 45% at 50% 42%, rgba(10, 8, 14, .38), transparent 70%),
+  linear-gradient(rgba(14, 10, 22, .45), transparent 30%, transparent 62%, rgba(10, 8, 12, .6)); }
+.menuKor i { position: absolute; bottom: -10px; left: var(--x); width: var(--k); height: var(--k); background: #ffcf6e; box-shadow: 0 0 6px 1px rgba(255, 180, 80, .8); opacity: 0; animation: korYuksel var(--s) linear var(--g) infinite; }
+@keyframes korYuksel { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 10% { opacity: .9; } 50% { transform: translate3d(28px, -45vh, 0); } 80% { opacity: .6; } 100% { transform: translate3d(-12px, -90vh, 0); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .menuResim, .menuKor i { animation: none; } .menuKor { display: none; } }
 .menuIc { position: relative; z-index: 1; width: min(760px, calc(100vw - 32px)); text-align: center; }
 .menuIc .menuDugmeler { width: min(420px, 100%); margin: 0 auto; }
-.logo { font-size: clamp(3rem, 9vw, 5.4rem); line-height: 1; color: #f7ecd6; letter-spacing: .04em; text-shadow: 0 4px 0 #3b2a17, 0 8px 0 #1c140b, 0 14px 30px rgba(0, 0, 0, .45); }
+.logo { margin-bottom: 38px; font-size: clamp(3rem, 9vw, 5.4rem); line-height: 1; color: #f7ecd6; letter-spacing: .04em; text-shadow: 0 4px 0 #3b2a17, 0 8px 0 #1c140b, 0 14px 30px rgba(0, 0, 0, .45); }
 .logo span { color: var(--vurgu); }
-.altBaslik { margin: 10px 0 28px; font: 600 1.05rem var(--baslik); color: #2a1d0f; letter-spacing: .12em; text-transform: uppercase; }
 .surum { margin-top: 18px; color: rgba(255, 255, 255, .75); font-size: .8rem; text-shadow: 0 1px 2px #000; }
 
 /* ---------- Dünya listesi ---------- */
