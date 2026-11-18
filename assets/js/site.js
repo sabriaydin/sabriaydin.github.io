@@ -56,12 +56,11 @@ window.SITE = {
       ]
     },
     { name: 'Araçlar', link: 'araclar' },
-    // Projeler: kategori değil, doğrudan bağlantılardan oluşan alt menüler. url alanına her projenin gerçek adresini yaz (Hunger hariç örnek adrestir).
+    // Projeler: kategori değil, doğrudan bağlantılardan oluşan alt menüler. url alanına her projenin gerçek adresini yaz.
     {
       name: 'Projeler',
       items: [
         { name: 'Oyunlar', items: [
-          { name: 'Hunger', url: 'projeler/oyunlar/hunger/' },
           { name: 'HungerMan', url: 'projeler/oyunlar/hungerman/' }
         ] },
         { name: 'Yazılımlarım', items: [

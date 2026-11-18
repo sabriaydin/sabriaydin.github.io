@@ -295,7 +295,7 @@ export class Uretici {
     /* 0.21.0: çiçekli bölgelerdeki meşe ve huşların bir kısmında gövdeye asılı arı kovanı (girişi dışa bakar) */
     for (const a of liste) {
       if ((a[3] !== 'mese' && a[3] !== 'hus') || !(a[4] === BY.CAYIR || a[4] === BY.ORMAN || a[4] === BY.HUS)) continue;
-      if (karma2(this.tohum ^ 0xbee5, a[0], a[2]) > 0.07) continue;
+      if (karma2(this.tohum ^ 0xbee5, a[0], a[2]) > 0.012) continue;   // 0.40.7: %7 yerine %1,2 (seyrek)
       const d = Math.floor(karma2(this.tohum ^ 0xbee6, a[0], a[2]) * 4) % 4, [dx, dz] = [[0, -1], [1, 0], [0, 1], [-1, 0]][d];
       set(a[0] + dx, a[1] + 1, a[2] + dz, 569 + d * 6 + 2, true);
     }
