@@ -117,6 +117,13 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.6 (0.40.6): Profesyonel olay kaydı
+- Konsoldaki olay kayıtları hizalı sütunlarla yazılır: oyun zamanı (ör. G3 14:20), düzey, tür, olay adı, ayrıntı alanları (ör. `tür Zombi · sebep oyuncu · konum -1403 52 268`) ve tekrar sayısı. Satırın üzerine gelince gerçek saat görünür.
+- **Düzeyler:** AYRINTI (canlı doğması, kaldırılması, canlıların aldığı hasar, doğal blok değişimleri), BİLGİ, UYARI (oyuncunun aldığı hasar, fırtına, itibar düşüşü) ve KRİTİK (oyuncu ölümü, Kanlı Ay, boss doğması ve yenilmesi, Ada Bekçisi). Uyarı ve kritik satırlar renkli kenarla ayrılır.
+- **Araç çubuğu:** kayıtlarda arama, en düşük düzey seçimi, tür seçimi (açılır listede onay kutuları), toplam olay, uyarı ve kritik sayacı, Duraklat (görünüm kaymaz, kayıt sürer), Temizle ve Dışa aktar (bütün olaylar sekmeyle ayrılmış .log dosyası olarak indirilir).
+- Bellekte en çok 5000 olay tutulur; dışa aktarma ekrandan silinmiş eski satırları da içerir.
+- `kayit disa` komutu da kaydı dışa aktarır.
+
 ## 40.5 (0.40.5): Konsolda dünya olay kaydı
 - Geliştirici konsoluna (F8) dünyada olan her şey oyun saatiyle ve renkli türüyle yazılır:
   - **Oyuncu:** alınan hasar ve sebebi, ölüm, yeniden doğma, doğma noktası (yatak) ayarlanması, bulunulan yerin değişmesi (biyom, köy, yeraltı, Lanetli Ada, diyar).

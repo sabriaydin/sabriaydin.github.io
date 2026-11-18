@@ -173,6 +173,15 @@
 <div id="konsol" hidden>
   <div class="konsolPencere">
     <header><b>Geliştirici Konsolu</b><span id="konsolBilgi"></span></header>
+    <div class="konsolArac" id="konsolArac">
+      <input type="search" id="kAra" placeholder="Kayıtlarda ara" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara">
+      <select id="kSev" aria-label="En düşük düzey"><option value="ayrinti">Tüm düzeyler</option><option value="bilgi">Bilgi ve üstü</option><option value="uyari">Uyarı ve üstü</option><option value="kritik">Yalnızca kritik</option></select>
+      <details class="kTurler" id="kTurler"><summary id="kTurlerAd">Türler</summary><div class="kTurListe" id="kTurListe"></div></details>
+      <span class="kSayac" id="kSayac"></span>
+      <button type="button" id="kDuraklat" title="Yeni olaylar kaydedilir ama görünüm en alta kaymaz">Duraklat</button>
+      <button type="button" id="kTemizle">Temizle</button>
+      <button type="button" id="kDisa" title="Bütün olayları .log dosyası olarak indir">Dışa aktar</button>
+    </div>
     <div id="konsolCikti"></div>
     <label class="konsolSatir"><span>&gt;</span><input id="konsolGirdi" autocomplete="off" spellcheck="false" placeholder="Komut yazınız (yardim)" aria-label="Komut"></label>
   </div>

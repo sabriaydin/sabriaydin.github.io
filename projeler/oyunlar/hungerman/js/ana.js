@@ -771,7 +771,7 @@ function oyunBaslat(v) {
   oyuncu.olaylar.adim = id => ses.adim(BLOKLAR[id] ? BLOKLAR[id].ses : 'tas');
   oyuncu.olaylar.ziplad = () => { hayatta.yor(oyuncu.kosuyor ? 0.2 : 0.05); };
   oyuncu.olaylar.suyaGirdi = h => ses.sicrama(Math.min(1.5, h / 8));
-  hayatta.olaylar.hasar = (n, sebep) => { ses.hasar(); hud.hasarParla(); basarimlar.istatEkle('hasar', n / 2); konsol.kayit('oyuncu', `${n} hasar alındı (${sebepAdi(sebep)}) · can ${hayatta.can}/20`); };
+  hayatta.olaylar.hasar = (n, sebep) => { ses.hasar(); hud.hasarParla(); basarimlar.istatEkle('hasar', n / 2); konsol.kayit('oyuncu', 'Oyuncu hasar aldı', { seviye: 'uyari', alan: { miktar: n, sebep: sebepAdi(sebep), can: `${Math.max(0, Math.ceil(hayatta.can))}/20` } }); };
   hayatta.olaylar.olum = sebep => olum(sebep);
   /* Deneyim sesleri (sık gelen küçük kazançlar seyreltilir) */
   let xpSesZaman = 0;
@@ -832,29 +832,33 @@ function gecitGec(h) {
 const SEBEP_AD = { dusme: 'düşme', aclik: 'açlık', bogulma: 'boğulma', lav: 'lav', yanma: 'yanma', donma: 'donma', sicak: 'sıcak çarpması', kanama: 'kanama', zehir: 'zehir', agu: 'örümcek zehri', bosluk: 'boşluk', yildirim: 'yıldırım', meteor: 'meteor', patlama: 'patlama', kaktus: 'kaktüs', ok: 'ok', tuzak: 'tuzak' };
 function sebepAdi(s) { return !s ? 'bilinmiyor' : SEBEP_AD[s] || (TURLER[s] && TURLER[s].ad) || s; }
 function olayKaydiKur(o, koyler) {
-  const K = (t, m) => konsol.kayit(t, m), acik = t => !konsol.kayitKapali.has(t), ad = id => (BLOKLAR[id] && BLOKLAR[id].ad) || '#' + id;
+  const K = (t, m, e) => konsol.kayit(t, m, e), acik = t => !konsol.kayitKapali.has(t), ad = id => (BLOKLAR[id] && BLOKLAR[id].ad) || '#' + id;
   /* Blok değişimleri: oyuncunun ve oyuncuların yaptıkları "Blok", sıvı akışı, büyüme, mevsim ve elektrik "Doğal" türündedir */
   o.dunya.kayit = (eski, yeni, x, y, z, kaynak) => {
     const tur = kaynak === 'yerel' || kaynak === 'ag' || kaynak === 'gecit' ? 'blok' : 'dogal';
     if (!acik(tur)) return;
     const bos = id => !id || (BLOKLAR[id] && BLOKLAR[id].sivi);
-    const m = bos(yeni) && !bos(eski) ? `${ad(eski)} kırıldı` : bos(eski) ? `${ad(yeni)} kondu` : `${ad(eski)} → ${ad(yeni)}`;
-    K(tur, `${kaynak === 'ag' ? 'Başka oyuncu: ' : kaynak === 'gecit' ? 'Geçit: ' : ''}${m} · ${x}, ${y}, ${z}`);
+    const kim = kaynak === 'ag' ? 'diğer oyuncu' : kaynak === 'gecit' ? 'geçit' : kaynak === 'yerel' ? undefined : kaynak;
+    const konum = `${x} ${y} ${z}`, sev = tur === 'dogal' ? 'ayrinti' : 'bilgi';
+    if (bos(yeni) && !bos(eski)) K(tur, 'Blok kırıldı', { seviye: sev, alan: { blok: ad(eski), konum, kaynak: kim } });
+    else if (bos(eski)) K(tur, 'Blok kondu', { seviye: sev, alan: { blok: ad(yeni), konum, kaynak: kim } });
+    else K(tur, 'Blok değişti', { seviye: sev, alan: { önce: ad(eski), sonra: ad(yeni), konum, kaynak: kim } });
   };
   o.varliklar.kayit = K;
   /* Ekranda çıkan bütün bildirimler */
   const hb = o.hud.bildirim.bind(o.hud); o.hud.bildirim = (m, id) => { K('bildirim', m); return hb(m, id); };
   /* Köy itibarı */
   const kd = koyler.itibarDegistir.bind(koyler);
-  koyler.itibarDegistir = (id, n) => { const once = koyler.itibar(id); kd(id, n); const son = koyler.itibar(id); const k = koyler.icindeki; if (son !== once) K('koy', `${k && k.id === id ? k.ad + ' köyü' : 'Köy'} itibarı ${n > 0 ? '+' : ''}${n} → ${son}`); };
+  koyler.itibarDegistir = (id, n) => { const once = koyler.itibar(id); kd(id, n); const son = koyler.itibar(id); const k = koyler.icindeki; if (son !== once) K('koy', 'Köy itibarı değişti', { seviye: son < once ? 'uyari' : 'bilgi', alan: { köy: k && k.id === id ? k.ad : '#' + id, değişim: (n > 0 ? '+' : '') + n, itibar: son } }); };
   o.kayitDurum = { sayac: 0 };
-  K('dunya', `Dünya yüklendi: ${o.ad} · tohum ${o.tohum}`);
+  K('dunya', 'Dünya yüklendi', { alan: { dünya: o.ad, tohum: o.tohum, sürüm: SURUM, mod: o.istemci ? 'istemci' : o.ag ? 'sunucu' : 'tek oyunculu' } });
 }
 /* Dünya durumundaki değişimler (gün, zaman dilimi, hava, bulunulan yer, diyar, geçit, Kanlı Ay, bekçi) */
 function olayKaydiDenetle(o, dt) {
   const D = o.kayitDurum; if (!D) return;
   D.sayac -= dt; if (D.sayac > 0) return; D.sayac = 0.5;
-  const K = (t, m) => konsol.kayit(t, m), saat = (o.zaman * 24 + 6) % 24, P = o.oyuncu.konum;
+  const K = (t, m, e) => konsol.kayit(t, m, e), saat = (o.zaman * 24 + 6) % 24, P = o.oyuncu.konum, konum = `${Math.round(P.x)} ${Math.round(P.y)} ${Math.round(P.z)}`;
+  const saatM = `${String(Math.floor(saat)).padStart(2, '0')}:${String(Math.floor((saat % 1) * 60)).padStart(2, '0')}`;
   const yeni = {
     gun: o.gun, dilim: saat < 5 ? 'gece' : saat < 7 ? 'şafak' : saat < 11 ? 'sabah' : saat < 15 ? 'öğle' : saat < 18 ? 'ikindi' : saat < 21 ? 'akşam' : 'gece',
     hava: o.hava.durum, yer: (o.konumMetni || '').split(' · ')[0], diyar: diyarMi(P.x), gecit: !!(o.gecit && o.gecit.acik()),
@@ -862,20 +866,20 @@ function olayKaydiDenetle(o, dt) {
   };
   if (D.son) {
     const S = D.son;
-    if (yeni.gun !== S.gun) K('dunya', `${yeni.gun}. gün başladı`);
-    if (yeni.dilim !== S.dilim) K('dunya', `Zaman: ${yeni.dilim} (${String(Math.floor(saat)).padStart(2, '0')}:${String(Math.floor((saat % 1) * 60)).padStart(2, '0')})`);
-    if (yeni.hava !== S.hava) K('dunya', `Hava: ${HAVA_ADI[yeni.hava] || yeni.hava}`);
-    if (yeni.yer && yeni.yer !== S.yer) K('oyuncu', `Bulunulan yer: ${yeni.yer} · ${Math.round(P.x)}, ${Math.round(P.y)}, ${Math.round(P.z)}`);
-    if (yeni.diyar !== S.diyar) K('dunya', yeni.diyar ? 'Yeraltı Diyarı’na geçildi' : 'Dünyaya dönüldü');
-    if (yeni.gecit !== S.gecit) K('dunya', yeni.gecit ? 'Kadim geçit açıldı (30 dakika)' : 'Kadim geçit kapandı');
-    if (yeni.kanli !== S.kanli) K('dunya', yeni.kanli ? 'Kanlı Ay başladı' : 'Kanlı Ay sona erdi');
-    if (yeni.bekci !== S.bekci) K('canli', yeni.bekci ? 'Ada Bekçisi Kül Devi uyandı' : 'Ada Bekçisi artık dünyada değil');
+    if (yeni.gun !== S.gun) K('dunya', 'Yeni gün başladı', { alan: { gün: yeni.gun, mevsim: MEVSIMLER[o.mevsim] } });
+    if (yeni.dilim !== S.dilim) K('dunya', 'Zaman dilimi değişti', { alan: { dilim: yeni.dilim, saat: saatM } });
+    if (yeni.hava !== S.hava) K('dunya', 'Hava değişti', { seviye: yeni.hava === 'firtina' ? 'uyari' : 'bilgi', alan: { önce: HAVA_ADI[S.hava] || S.hava, sonra: HAVA_ADI[yeni.hava] || yeni.hava } });
+    if (yeni.yer && yeni.yer !== S.yer) K('oyuncu', 'Bölge değişti', { alan: { bölge: yeni.yer, konum } });
+    if (yeni.diyar !== S.diyar) K('dunya', yeni.diyar ? 'Yeraltı Diyarı’na geçildi' : 'Dünyaya dönüldü', { alan: { konum } });
+    if (yeni.gecit !== S.gecit) K('dunya', yeni.gecit ? 'Kadim geçit açıldı' : 'Kadim geçit kapandı', { alan: yeni.gecit ? { süre: o.gecit.sureMetni() } : {} });
+    if (yeni.kanli !== S.kanli) K('dunya', yeni.kanli ? 'Kanlı Ay başladı' : 'Kanlı Ay sona erdi', { seviye: yeni.kanli ? 'kritik' : 'bilgi', alan: { gün: o.gun } });
+    if (yeni.bekci !== S.bekci) K('canli', yeni.bekci ? 'Ada Bekçisi uyandı' : 'Ada Bekçisi dünyadan ayrıldı', { seviye: yeni.bekci ? 'kritik' : 'bilgi', alan: { tür: 'Kül Devi' } });
   }
   D.son = yeni;
 }
 function olum(sebep) {
   const o = oyun;
-  konsol.kayit('oyuncu', `Öldünüz: ${OLUM_SEBEBI[sebep] || sebepAdi(sebep)} · ${Math.round(o.oyuncu.konum.x)}, ${Math.round(o.oyuncu.konum.y)}, ${Math.round(o.oyuncu.konum.z)}`);
+  konsol.kayit('oyuncu', 'Oyuncu öldü', { seviye: 'kritik', alan: { sebep: sebepAdi(sebep), konum: `${Math.round(o.oyuncu.konum.x)} ${Math.round(o.oyuncu.konum.y)} ${Math.round(o.oyuncu.konum.z)}`, gün: o.gun } });
   ses.olum();
   if (kilitli) { bilerekBirak = true; kilitBirak(); }
   if (envEkrani.acik) envEkrani.kapat();
@@ -919,7 +923,7 @@ function yenidenDog(nereye) {
   const o = oyun; ses.tik();
   if (nereye === 'yatak') { yatakDenetle(o); if (!o.yatakNoktasi) { $('#sonKayitDog').disabled = true; return; } }
   const d = nereye === 'yatak' ? o.yatakNoktasi : o.dunya.uretici.rastgeleDogum();
-  konsol.kayit('oyuncu', `Yeniden doğuldu (${nereye === 'yatak' ? 'yatakta' : 'rastgele konumda'}) · ${Math.round(d.x)}, ${Math.round(d.y)}, ${Math.round(d.z)}`);
+  konsol.kayit('oyuncu', 'Oyuncu yeniden doğdu', { alan: { yer: nereye === 'yatak' ? 'yatak' : 'rastgele konum', konum: `${Math.round(d.x)} ${Math.round(d.y)} ${Math.round(d.z)}` } });
   o.olumAnim = 0; $('#olumPerde').classList.remove('acik');
   o.hayatta.sifirla(); o.hayatBasi = o.gun + o.zaman;
   o.oyuncu.konum.set(d.x, d.y, d.z); o.oyuncu.hiz.set(0, 0, 0); o.oyuncu.dusus = 0;
@@ -1237,7 +1241,7 @@ function adim(t) {
   }
   o.dusenler.guncelle(dt, o.oyuncu.konum, (id, adet, dayanim, buyu) => {
     const k = o.envanter.ekle(id, adet, dayanim, buyu);
-    if (k < adet) { ses.topla(); konsol.kayit('esya', `Toplandı: ${adet - k} × ${ESYALAR[id] ? ESYALAR[id].ad : id}`); }
+    if (k < adet) { ses.topla(); konsol.kayit('esya', 'Eşya toplandı', { alan: { eşya: ESYALAR[id] ? ESYALAR[id].ad : '#' + id, adet: adet - k } }); }
     return k;
   }, o.isik, o.hayatta.olu || !o.hazir);
   sahne.el.visible = !o.hayatta.olu && !o.fotoModu;
@@ -1481,7 +1485,7 @@ function uyu(h, konak = false) {
   if (diyarMi(h.x)) { o.hud.bildirim('Yeraltı Diyarı’nda uyunamaz.'); return; }
   /* 0.39.0: son kullanılan yatak doğma noktası (son kayıt noktası) olur; köyde konaklamada köylünün kapısı */
   o.yatakNoktasi = { x: h.x + 0.5, y: h.y + 1, z: h.z + 0.5, hucreler: konak ? [] : o.etkilesim.yatakHucreleri(h) };
-  konsol.kayit('oyuncu', `Doğma noktası ${konak ? 'köydeki konağa' : 'yatağa'} ayarlandı · ${h.x}, ${h.y}, ${h.z}`);
+  konsol.kayit('oyuncu', 'Doğma noktası ayarlandı', { alan: { yer: konak ? 'köyde konak' : 'yatak', konum: `${h.x} ${h.y} ${h.z}` } });
   const gece = (o.zaman > 0.52 && o.zaman < 0.97) || o.hava.firtina;
   if (!gece) { o.hud.bildirim('Yalnızca geceleri ve fırtınada uyunabilir. Doğma noktası bu yatak oldu.'); return; }
   if (o.varliklar.yakinDusman(o.oyuncu.konum, 10)) { o.hud.bildirim('Yakında canavarlar varken uyunamaz.'); return; }
@@ -1652,7 +1656,7 @@ function sohbetKomutu(m) {
   else sohbetEkle(null, 'Bilinmeyen komut. /yardim yazınız.');
 }
 function sohbetEkle(ad, m, renk) {
-  konsol.kayit('ag', ad ? `${ad}: ${m}` : m);   // 0.40.5
+  konsol.kayit('ag', ad ? 'Sohbet mesajı' : m, { alan: ad ? { oyuncu: ad, mesaj: m } : {} });   // 0.40.5
   const l = $('#sohbetListe');
   const d = document.createElement('div');
   d.className = ad ? 'sMesaj' : 'sMesaj sistem';

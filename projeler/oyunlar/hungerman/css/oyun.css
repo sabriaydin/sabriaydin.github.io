@@ -1194,11 +1194,56 @@ body.gostergesiz #ogretici { display: none; }
 .tRozet.uzman { color: #ffd76a; border-color: #8a6a22; background: rgba(160, 120, 30, .2); }
 .tRozet.gezgin { color: #d8b8ff; border-color: #6b4a9a; background: rgba(100, 60, 150, .2); }
 
-/* ---------- 0.40.5: konsolda dünya olay kaydı ---------- */
-.kSatir.kOlay { color: rgba(236, 228, 214, .86); font-size: .92em; }
-.kOlay .kZaman { color: rgba(217, 226, 234, .45); margin-right: 8px; font-variant-numeric: tabular-nums; }
-.kOlay .kTur { display: inline-block; min-width: 64px; margin-right: 8px; padding: 0 6px; border-radius: 3px; background: rgba(255, 255, 255, .08); color: #cfc6b8; font-size: .85em; font-weight: 700; text-align: center; }
-.kOlay .kSay { color: #ffcf6e; font-weight: 700; }
-.kTur-oyuncu { color: #8fd0ff !important; } .kTur-blok { color: #d8b27a !important; } .kTur-canli { color: #9be38b !important; }
-.kTur-savas { color: #ff8a7a !important; } .kTur-esya { color: #ffcf6e !important; } .kTur-dunya { color: #b9a6ff !important; }
-.kTur-koy { color: #f0a96b !important; } .kTur-bildirim { color: #f2e6c9 !important; } .kTur-ag { color: #7fe0d0 !important; } .kTur-dogal { color: #8a9a8a !important; }
+/* ---------- 0.40.6: konsolda profesyonel olay kaydı ----------
+   Sütunlar: oyun zamanı · düzey · tür · olay ve ayrıntılar · tekrar sayısı. Düzeye göre sol kenar rengi. */
+.konsolPencere { grid-template-rows: auto auto 1fr auto; height: min(62vh, 560px); }
+.konsolArac { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-bottom: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .025); font-size: 12px; }
+.konsolArac input, .konsolArac select, .konsolArac button, .kTurler summary { height: 26px; padding: 0 8px; border: 1px solid rgba(255, 255, 255, .14); border-radius: 4px; background: rgba(0, 0, 0, .35); color: #d9e2ea; font: inherit; }
+.konsolArac input { flex: 1; min-width: 120px; }
+.konsolArac input:focus-visible, .konsolArac select:focus-visible, .konsolArac button:focus-visible { outline: 1px solid #ffd34e; }
+.konsolArac select option { background: #12161a; }
+.konsolArac button { cursor: pointer; white-space: nowrap; }
+.konsolArac button:hover, .kTurler summary:hover { border-color: rgba(255, 255, 255, .3); color: #fff; }
+.konsolArac button.on { border-color: #ffd34e; color: #ffd34e; }
+.kSayac { margin-left: auto; color: rgba(217, 226, 234, .55); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.kTurler { position: relative; }
+.kTurler summary { display: flex; align-items: center; list-style: none; cursor: pointer; white-space: nowrap; }
+.kTurler summary::-webkit-details-marker { display: none; }
+.kTurler summary::after { content: '▾'; margin-left: 6px; opacity: .6; }
+.kTurListe { position: absolute; top: 30px; left: 0; z-index: 3; min-width: 190px; padding: 6px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 6px; background: #0d1114; box-shadow: 0 10px 26px rgba(0, 0, 0, .55); }
+.kTurListe label { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+.kTurListe label:hover { background: rgba(255, 255, 255, .06); }
+.kTurListe i { width: 8px; height: 8px; border-radius: 2px; background: currentColor; }
+.kTurListe small { color: rgba(217, 226, 234, .45); }
+.kSatir.gizli { display: none; }
+.kSatir.kOlay { display: grid; grid-template-columns: 76px 64px 74px minmax(0, 1fr) auto; align-items: baseline; column-gap: 10px; margin: 0 -12px; padding: 1px 12px 1px 10px; border-left: 2px solid transparent; color: #d9e2ea; font-size: 12px; white-space: normal; }
+.kSatir.kOlay:hover { background: rgba(255, 255, 255, .04); }
+.kOlay .kZaman { color: rgba(217, 226, 234, .45); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kOlay .kSev { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+.kOlay .kTur { font-size: 10.5px; font-weight: 700; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kOlay .kMesaj { min-width: 0; }
+.kOlay .kOlayAd { color: #eef2f5; margin-right: 10px; }
+.kOlay .kAlan { display: inline-block; margin-right: 10px; white-space: nowrap; }
+.kOlay .kAlanAd { color: rgba(217, 226, 234, .42); }
+.kOlay .kAlanAd::after { content: ' '; }
+.kOlay .kAlanDeger { color: #b9c8d4; }
+.kOlay .kSay { min-width: 0; color: #ffd34e; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sev-ayrinti .kSev { color: rgba(217, 226, 234, .38); }
+.sev-ayrinti .kOlayAd { color: rgba(217, 226, 234, .72); }
+.sev-bilgi .kSev { color: #7fb7e6; }
+.sev-uyari { border-left-color: #e8a33d !important; background: rgba(232, 163, 61, .06); }
+.sev-uyari .kSev, .sev-uyari .kOlayAd { color: #ffc970; }
+.sev-kritik { border-left-color: #ff5a4e !important; background: rgba(255, 90, 78, .1); }
+.sev-kritik .kSev, .sev-kritik .kOlayAd { color: #ff8a7a; font-weight: 700; }
+.kTur-oyuncu { color: #8fd0ff; } .kTur-blok { color: #d8b27a; } .kTur-canli { color: #9be38b; }
+.kTur-savas { color: #ff8a7a; } .kTur-esya { color: #ffcf6e; } .kTur-dunya { color: #b9a6ff; }
+.kTur-koy { color: #f0a96b; } .kTur-bildirim { color: #e6dcc6; } .kTur-ag { color: #7fe0d0; } .kTur-dogal { color: #8a9a8a; }
+@media (max-width: 700px) {
+  .konsolArac { flex-wrap: wrap; }
+  .kSatir.kOlay { grid-template-columns: 64px 54px minmax(0, 1fr) auto; }
+  .kOlay .kTur { display: none; }
+}
+.kSatir.gizli, .kSatir.kOlay.gizli { display: none; }
+.kTurListe label { justify-content: flex-start; }
+.kTurListe input[type=checkbox] { appearance: auto; -webkit-appearance: checkbox; position: static; width: 14px; height: 14px; min-width: 0; margin: 0; padding: 0; flex: none; border: 0; background: none; box-shadow: none; accent-color: #ffd34e; cursor: pointer; }
+.kTurListe input[type=checkbox]::before, .kTurListe input[type=checkbox]::after { content: none; display: none; }

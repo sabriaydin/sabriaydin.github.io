@@ -26,6 +26,9 @@ const SAKLA = 'hungerman_konsol_gecmis';
    yeni satır açılmaz, sayısı artar (×n). */
 export const KAYIT_TUR = { oyuncu: 'Oyuncu', blok: 'Blok', canli: 'Canlı', savas: 'Savaş', esya: 'Eşya', dunya: 'Dünya', koy: 'Köy', bildirim: 'Bildirim', ag: 'Ağ', dogal: 'Doğal' };
 const KAYIT_SAKLA = 'hungerman_konsol_kayit';
+/* 0.40.6: olay düzeyleri */
+const SEVIYE = { ayrinti: 'AYRINTI', bilgi: 'BİLGİ', uyari: 'UYARI', kritik: 'KRİTİK' };
+const SEVIYE_SIRA = { ayrinti: 0, bilgi: 1, uyari: 2, kritik: 3 };
 /* Geliştirici kodu (açık metin olarak saklanmaz) */
 const KOD_OZET = 'f14e70f6';
 function ozet(s) { let h = 0x811c9dc5; for (const c of String(s).toUpperCase().trim()) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); }
@@ -43,8 +46,9 @@ export class Konsol {
     this.gSira = this.gecmis.length;
     this.kesif = null; this.bilgiSayac = 0;
     try { const k = JSON.parse(localStorage.getItem(KAYIT_SAKLA) || 'null'); this.kayitKapali = new Set(Array.isArray(k) ? k : ['dogal']); } catch (e) { this.kayitKapali = new Set(['dogal']); }
-    this.sonKayit = null;
+    this.sonKayit = null; this.kayitlar = []; this.sayac = {}; this.duraklat = false; this.suzgec = { ara: '', sev: 'ayrinti' };
     this.komutlar = this.komutlariKur();
+    this.aracKur();
     this.girdi.addEventListener('keydown', e => this.tus(e));
     this.kok.addEventListener('mousedown', e => { if (e.target === this.kok) e.preventDefault(); });
     this.yaz('HungerMan geliştirici konsolu. Komut listesi için <b>yardim</b> yazınız. Kapatmak için F8 veya Esc.', 'bilgi', true);
@@ -57,29 +61,90 @@ export class Konsol {
     const d = document.createElement('div');
     d.className = 'kSatir ' + sinif;
     if (html) d.innerHTML = m; else d.textContent = m;
+    if (this.suzgec && !this.gorunur(d)) d.classList.add('gizli');
     this.cikti.appendChild(d);
     if (this.mesajDinle && sinif !== 'girdi') this.mesajDinle(d.textContent, sinif);
     while (this.cikti.children.length > 600) this.cikti.firstChild.remove();
     this.cikti.scrollTop = this.cikti.scrollHeight;
     this.sonKayit = null;
   }
-  /* Dünya olay kaydı (tur: KAYIT_TUR anahtarı). Konsol kapalıyken de yazılır; okunurken yukarı kaydırılmışsa en alta atlanmaz. */
-  kayit(tur, m) {
+  /* ---------- 0.40.6: profesyonel olay kaydı ----------
+     kayit(tur, mesaj, { seviye, alan }): seviye 'ayrinti' | 'bilgi' | 'uyari' | 'kritik'; alan: { ad: değer } ayrıntı sütunları.
+     Satır düzeni: oyun zamanı · düzey · tür · olay · ayrıntılar · tekrar sayısı. Her kayıt bellekte de tutulur (en çok 5000),
+     araç çubuğundan aranır, düzeye ve türe göre süzülür, duraklatılır ve .log dosyası olarak dışa aktarılır. */
+  kayit(tur, m, ek = {}) {
     if (this.kayitKapali.has(tur) || !this.cikti) return;
-    const o = this.oyun && this.oyun();
-    const saat = o ? (() => { const s = (o.zaman * 24 + 6) % 24; return `${o.gun}. gün ${String(Math.floor(s)).padStart(2, '0')}:${String(Math.floor((s % 1) * 60)).padStart(2, '0')}`; })() : '';
+    const o = this.oyun && this.oyun(), sev = ek.seviye || 'bilgi', alan = ek.alan || {};
+    const saat = o ? (() => { const s = (o.zaman * 24 + 6) % 24; return `G${o.gun} ${String(Math.floor(s)).padStart(2, '0')}:${String(Math.floor((s % 1) * 60)).padStart(2, '0')}`; })() : '-';
+    const alanMetin = Object.entries(alan).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => `${k}: ${v}`).join(' · ');
+    const anahtar = tur + '|' + m + '|' + alanMetin;
     const S = this.sonKayit;
-    if (S && S.tur === tur && S.m === m && S.el.isConnected) { S.n++; S.say.textContent = ` ×${S.n}`; S.zaman.textContent = saat; return; }
+    if (S && S.anahtar === anahtar && S.el.isConnected) { S.n++; S.k.n = S.n; S.say.textContent = '×' + S.n; S.zaman.textContent = saat; return; }
+    const gercek = new Date();
+    const k = { zaman: saat, gercek: gercek.toLocaleTimeString('tr-TR'), sev, tur, m, alan: alanMetin, n: 1 };
+    this.kayitlar.push(k); if (this.kayitlar.length > 5000) this.kayitlar.splice(0, this.kayitlar.length - 5000);
+    this.sayac[sev] = (this.sayac[sev] || 0) + 1;
     const altta = this.cikti.scrollHeight - this.cikti.scrollTop - this.cikti.clientHeight < 40;
-    const d = document.createElement('div'); d.className = 'kSatir kOlay';
-    const z = document.createElement('span'); z.className = 'kZaman'; z.textContent = saat;
-    const e = document.createElement('span'); e.className = 'kTur kTur-' + tur; e.textContent = KAYIT_TUR[tur] || tur;
-    const say = document.createElement('span'); say.className = 'kSay';
-    d.append(z, e, document.createTextNode(m), say);
+    const d = document.createElement('div'); d.className = 'kSatir kOlay sev-' + sev; d.dataset.tur = tur; d.dataset.sev = sev;
+    d.title = `Gerçek saat ${k.gercek}`;
+    const hucre = (sinif, metin) => { const e = document.createElement('span'); e.className = sinif; e.textContent = metin; return e; };
+    const z = hucre('kZaman', saat), say = hucre('kSay', '');
+    const ic = document.createElement('span'); ic.className = 'kMesaj';
+    ic.appendChild(hucre('kOlayAd', m));
+    for (const [a, v] of Object.entries(alan)) {
+      if (v === undefined || v === null || v === '') continue;
+      const e = document.createElement('span'); e.className = 'kAlan';
+      e.append(hucre('kAlanAd', a), hucre('kAlanDeger', String(v)));
+      ic.appendChild(e);
+    }
+    d.append(z, hucre('kSev', SEVIYE[sev] || sev), hucre('kTur kTur-' + tur, (KAYIT_TUR[tur] || tur).toLocaleUpperCase('tr')), ic, say);
+    if (!this.gorunur(d)) d.classList.add('gizli');
     this.cikti.appendChild(d);
-    while (this.cikti.children.length > 600) this.cikti.firstChild.remove();
-    if (altta) this.cikti.scrollTop = this.cikti.scrollHeight;
-    this.sonKayit = { tur, m, n: 1, el: d, say, zaman: z };
+    while (this.cikti.children.length > 800) this.cikti.firstChild.remove();
+    if (altta && !this.duraklat) this.cikti.scrollTop = this.cikti.scrollHeight;
+    this.sonKayit = { anahtar, n: 1, el: d, say, zaman: z, k };
+    this.sayacYaz();
+  }
+  /* Süzgeç: arama metni, en düşük düzey, kapalı türler */
+  gorunur(d) {
+    if (!d.classList.contains('kOlay')) return !this.suzgec.ara;
+    if (SEVIYE_SIRA[d.dataset.sev] < SEVIYE_SIRA[this.suzgec.sev]) return false;
+    if (this.kayitKapali.has(d.dataset.tur)) return false;
+    return !this.suzgec.ara || kucuk(d.textContent).includes(this.suzgec.ara);
+  }
+  suz() { for (const d of this.cikti.children) d.classList.toggle('gizli', !this.gorunur(d)); this.cikti.scrollTop = this.cikti.scrollHeight; this.sayacYaz(); }
+  sayacYaz() {
+    const el = $('#kSayac'); if (!el) return;
+    const t = this.kayitlar.length, U = this.sayac.uyari || 0, K = this.sayac.kritik || 0;
+    el.textContent = `${t.toLocaleString('tr')} olay${U ? ` · ${U} uyarı` : ''}${K ? ` · ${K} kritik` : ''}`;
+  }
+  /* Araç çubuğu (index.html: #konsolArac) */
+  aracKur() {
+    const ara = $('#kAra'), sev = $('#kSev'), tur = $('#kTurler'), liste = $('#kTurListe');
+    if (!ara) return;
+    ara.addEventListener('input', () => { this.suzgec.ara = kucuk(ara.value); this.suz(); });
+    ara.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape') { ara.value = ''; this.suzgec.ara = ''; this.suz(); this.girdi.focus(); } });
+    sev.addEventListener('change', () => { this.suzgec.sev = sev.value; this.suz(); });
+    liste.innerHTML = Object.entries(KAYIT_TUR).map(([k, a]) => `<label><input type="checkbox" data-t="${k}"${this.kayitKapali.has(k) ? '' : ' checked'}><i class="kTur-${k}"></i>${a}${k === 'dogal' ? ' <small>(çok sık)</small>' : ''}</label>`).join('');
+    liste.addEventListener('change', e => { const t = e.target.dataset.t; if (!t) return; if (e.target.checked) this.kayitKapali.delete(t); else this.kayitKapali.add(t); this.kayitSakla(); this.suz(); this.turEtiket(); });
+    document.addEventListener('mousedown', e => { if (tur.open && !tur.contains(e.target)) tur.open = false; });
+    $('#kDuraklat').addEventListener('click', e => { this.duraklat = !this.duraklat; e.currentTarget.classList.toggle('on', this.duraklat); e.currentTarget.textContent = this.duraklat ? 'Sürdür' : 'Duraklat'; if (!this.duraklat) this.cikti.scrollTop = this.cikti.scrollHeight; });
+    $('#kTemizle').addEventListener('click', () => { this.cikti.innerHTML = ''; this.kayitlar = []; this.sayac = {}; this.sonKayit = null; this.sayacYaz(); this.girdi.focus(); });
+    $('#kDisa').addEventListener('click', () => this.disaAktar());
+    this.turEtiket(); this.sayacYaz();
+  }
+  turEtiketYenile() { for (const c of document.querySelectorAll('#kTurListe input[data-t]')) c.checked = !this.kayitKapali.has(c.dataset.t); this.turEtiket(); }
+  turEtiket() { const n = Object.keys(KAYIT_TUR).filter(k => !this.kayitKapali.has(k)).length, el = $('#kTurlerAd'); if (el) el.textContent = `Türler ${n}/${Object.keys(KAYIT_TUR).length}`; }
+  disaAktar() {
+    const o = this.oyun && this.oyun();
+    const bas = `HungerMan olay kaydı · ${o ? o.ad + ' · tohum ' + o.tohum : ''} · ${new Date().toLocaleString('tr-TR')}\n` +
+      ['Oyun zamanı', 'Gerçek saat', 'Düzey', 'Tür', 'Olay', 'Ayrıntılar', 'Tekrar'].join('\t') + '\n';
+    const govde = this.kayitlar.map(k => [k.zaman, k.gercek, SEVIYE[k.sev], KAYIT_TUR[k.tur] || k.tur, k.m, k.alan, k.n].join('\t')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([bas + govde + '\n'], { type: 'text/plain;charset=utf-8' }));
+    a.download = `hungerman-olaylar-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.log`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    this.tamam(`${this.kayitlar.length.toLocaleString('tr')} olay dışa aktarıldı.`);
   }
   kayitSakla() { try { localStorage.setItem(KAYIT_SAKLA, JSON.stringify([...this.kayitKapali])); } catch (e) { /* depolama kapalı */ } }
   hata(m) { this.yaz(m, 'hata'); }
@@ -301,16 +366,17 @@ export class Konsol {
       else this.yaz('Doğma noktası yok: ölünce rastgele bir konumda doğulur.', 'bilgi');
     });
     /* 0.40.5: dünya olay kaydı */
-    ekle('kayit', 'Dünya olay kaydını gösterir, türlerini açar ya da kapatır', 'kayit [ac | kapat | temizle | <tür> ac | <tür> kapat]', (o, p) => {
+    ekle('kayit', 'Dünya olay kaydını gösterir, türlerini açar ya da kapatır', 'kayit [ac | kapat | temizle | disa | <tür> ac | <tür> kapat]', (o, p) => {
       const a = kucuk(p[0] || ''), b = kucuk(p[1] || ''), turler = Object.keys(KAYIT_TUR);
       if (!a) { this.yaz('Olay kaydı: ' + turler.map(t => `${KAYIT_TUR[t]} ${this.kayitKapali.has(t) ? 'kapalı' : 'açık'}`).join(' · '), 'bilgi'); return; }
-      if (a === 'temizle') { this.cikti.innerHTML = ''; this.sonKayit = null; return; }
-      if (a === 'ac' || a === 'kapat') { if (a === 'ac') this.kayitKapali.clear(); else turler.forEach(t => this.kayitKapali.add(t)); this.kayitSakla(); this.tamam(`Tüm olay kaydı ${a === 'ac' ? 'açıldı' : 'kapatıldı'}.`); return; }
+      if (a === 'temizle') { this.cikti.innerHTML = ''; this.kayitlar = []; this.sayac = {}; this.sonKayit = null; this.sayacYaz(); return; }
+      if (a === 'disa') { this.disaAktar(); return; }
+      if (a === 'ac' || a === 'kapat') { if (a === 'ac') this.kayitKapali.clear(); else turler.forEach(t => this.kayitKapali.add(t)); this.kayitSakla(); this.suz(); this.turEtiketYenile(); this.tamam(`Tüm olay kaydı ${a === 'ac' ? 'açıldı' : 'kapatıldı'}.`); return; }
       const t = turler.find(x => x === a || kucuk(KAYIT_TUR[x]) === a);
       if (!t || (b !== 'ac' && b !== 'kapat')) { this.hata('Kullanım: kayit [ac | kapat | temizle | <tür> ac | <tür> kapat] · Türler: ' + turler.join(', ')); return; }
       if (b === 'ac') this.kayitKapali.delete(t); else this.kayitKapali.add(t);
-      this.kayitSakla(); this.tamam(`${KAYIT_TUR[t]} kaydı ${b === 'ac' ? 'açıldı' : 'kapatıldı'}.`);
-    }, { tamamla: () => ['ac', 'kapat', 'temizle', ...Object.keys(KAYIT_TUR)] });
+      this.kayitSakla(); this.suz(); this.turEtiketYenile(); this.tamam(`${KAYIT_TUR[t]} kaydı ${b === 'ac' ? 'açıldı' : 'kapatıldı'}.`);
+    }, { tamamla: () => ['ac', 'kapat', 'temizle', 'disa', ...Object.keys(KAYIT_TUR)] });
     ekle('zaman', 'Günün saatini ayarlar ya da zamanı hızlandırır', 'zaman <saat 0-24 | sabah | ogle | aksam | gece> | zaman hiz <çarpan>', (o, p) => {
       const a = kucuk(p[0] || '');
       if (a === 'hiz') { const h = Math.max(0, Math.min(200, this.sayi(p[1], 1))); o.zamanHizi = h; this.tamam(`Zaman hızı ${h}×.`); return; }

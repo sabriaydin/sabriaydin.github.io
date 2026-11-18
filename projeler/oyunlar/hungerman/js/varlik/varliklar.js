@@ -53,7 +53,7 @@ export class Varliklar {
     }
     return n;
   }
-  kaldir(v) { const i = this.liste.indexOf(v); if (i >= 0) { if (this.kayit && !v.olu) this.kayit('canli', `${v.tur.ad} dünyadan kaldırıldı · ${Math.round(v.konum.x)}, ${Math.round(v.konum.z)}`); this.modelSil(v); this.liste.splice(i, 1); } }
+  kaldir(v) { const i = this.liste.indexOf(v); if (i >= 0) { if (this.kayit && !v.olu) this.kayit('canli', 'Canlı kaldırıldı', { seviye: 'ayrinti', alan: { tür: v.tur.ad, konum: `${Math.round(v.konum.x)} ${Math.round(v.konum.y)} ${Math.round(v.konum.z)}` } }); this.modelSil(v); this.liste.splice(i, 1); } }
 
   temizle() {
     for (const v of this.liste) this.modelSil(v);
@@ -77,7 +77,7 @@ export class Varliklar {
     if (m.kollar.length && !m.insan && !tur.uzak) for (const k of m.kollar) k.rotation.x = Math.PI / 2 * 0.92;
     this.grup.add(m.kok);
     this.liste.push(v);
-    if (this.kayit) this.kayit('canli', `${tur.ad}${ek && ek.yavru ? ' (yavru)' : ''} doğdu · ${Math.round(x)}, ${Math.round(y)}, ${Math.round(z)}`);   // 0.40.5
+    if (this.kayit) this.kayit('canli', tur.boss ? 'Boss doğdu' : 'Canlı doğdu', { seviye: tur.boss ? 'kritik' : 'ayrinti', alan: { tür: tur.ad + (ek && ek.yavru ? ' (yavru)' : ''), konum: `${Math.round(x)} ${Math.round(y)} ${Math.round(z)}` } });   // 0.40.5
     return v;
   }
 
@@ -1240,8 +1240,8 @@ export class Varliklar {
     v.hasarZaman = 0.45;
     /* 0.40.5: olay kaydı */
     const kaynakAd = o.oyuncu ? (o.vuran ? o.vuran.ad : 'oyuncu') : o.dusme ? 'düşme' : kaynak ? 'saldırı' : v.lavda ? 'lav' : v.yaniyor ? 'yanma' : 'çevre';
-    if (this.kayit) this.kayit('savas', `${v.tur.ad} ${Math.round(n)} hasar aldı (${kaynakAd}) · can ${Math.max(0, Math.ceil(v.can))}/${v.tur.can}`);
-    if (this.kayit && v.can <= 0) this.kayit('canli', `${v.tur.ad} öldü (${kaynakAd}) · ${Math.round(v.konum.x)}, ${Math.round(v.konum.y)}, ${Math.round(v.konum.z)}`);
+    if (this.kayit) this.kayit('savas', 'Canlı hasar aldı', { seviye: v.tur.boss ? 'bilgi' : 'ayrinti', alan: { hedef: v.tur.ad, miktar: Math.round(n), kaynak: kaynakAd, can: `${Math.max(0, Math.ceil(v.can))}/${v.tur.can}` } });
+    if (this.kayit && v.can <= 0) this.kayit('canli', v.tur.boss ? 'Boss yenildi' : 'Canlı öldü', { seviye: v.tur.boss ? 'kritik' : 'bilgi', alan: { tür: v.tur.ad, sebep: kaynakAd, konum: `${Math.round(v.konum.x)} ${Math.round(v.konum.y)} ${Math.round(v.konum.z)}` } });
     if (o.ates && !v.tur.atesBagisik) v.atesSure = 4;
     if (o.yavas) v.yavasSure = 5;
     if (kaynak) {
