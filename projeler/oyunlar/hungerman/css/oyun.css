@@ -1253,3 +1253,25 @@ body.gostergesiz #ogretici { display: none; }
 #hasarSayilari .hs { position: absolute; left: 0; top: 0; font: 700 15px/1 'Pixelify Sans', Rubik, sans-serif; color: #fff; text-shadow: 0 2px 0 #000, 0 0 4px #000; will-change: transform, opacity; }
 #hasarSayilari .hs.kritik { color: #ffd24a; font-size: 19px; }
 body.gostergesiz #hasarSayilari { display: none; }
+/* 0.46.0: Yolculuk */
+.yolKart { position: relative; padding: 10px 14px 10px 50px; border: 2px solid #000; border-radius: 4px; background: #241f19; }
+.yolKart + .yolKart { margin-top: 6px; }
+.yolKart .yolNo { position: absolute; left: 12px; top: 10px; width: 26px; height: 26px; display: grid; place-items: center; border: 2px solid #000; border-radius: 50%; background: #352e26; font: 700 .85rem var(--baslik); color: var(--soluk); }
+.yolKart > b { display: block; font: 700 1rem var(--baslik); color: #e6dccb; }
+.yolKart small { color: var(--soluk); }
+.yolKart.bitti { opacity: .65; }
+.yolKart.bitti .yolNo { background: #3d6b2a; color: #fff; }
+.yolKart.simdi { background: #2b241b; border-color: var(--vurgu); }
+.yolKart.simdi .yolNo { background: var(--vurgu); color: #241608; }
+.yolKart.simdi > b { color: var(--vurgu2); }
+.yolKart.kapali { opacity: .45; }
+.yolAdim { list-style: none; margin: 8px 0; padding: 0; }
+.yolAdim li { display: flex; gap: 8px; padding: 3px 0; color: #e6dccb; }
+.yolAdim li > span { width: 16px; color: var(--soluk); }
+.yolAdim li.ok { color: var(--soluk); text-decoration: line-through; }
+.yolAdim li.ok > span { color: #8fd16a; text-decoration: none; }
+.yolAdim li.sira > span { color: var(--vurgu); }
+.yolAdim li em { display: block; font-style: normal; font-size: .82rem; color: var(--soluk); }
+.yolKart .odul { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.yolKart .odul span { color: var(--soluk); font-size: .85rem; }
+#gorevIzleyici .yolIz { display: block; font: 600 .68rem var(--govde); letter-spacing: .5px; color: #f3d27a; text-transform: uppercase; }

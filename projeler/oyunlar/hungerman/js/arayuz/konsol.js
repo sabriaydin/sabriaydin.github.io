@@ -480,7 +480,7 @@ export class Konsol {
       if (!B) { this.hata('Başarımlar kullanılamıyor.'); return; }
       if (a === 'liste') { this.yaz(`${B.kazanilan} / ${BASARIMLAR.length} kazanıldı. ` + BASARIMLAR.map(b => `${B.var(b.k) ? '✓' : '·'} ${b.k}`).join('  '), 'bilgi'); return; }
       if (a === 'hepsi') { for (const b of BASARIMLAR) B.ver(b.k); this.tamam('Tüm başarımlar verildi.'); return; }
-      if (a === 'sifirla') { B.iceAktar(null); if (B.degisti) B.degisti(); this.tamam('Başarımlar sıfırlandı.'); return; }
+      if (a === 'sifirla') { B.iceAktar(null); if (B.yolculuk) B.yolculuk.iceAktar(null); if (B.degisti) B.degisti(); this.tamam('Başarımlar sıfırlandı.'); return; }
       if (a === 'ver') { const k = p[1] || ''; if (!BASARIM[k]) { this.hata('Anahtarlar: ' + BASARIMLAR.map(b => b.k).join(', ')); return; } if (B.ver(k)) this.tamam(`${BASARIM[k].ad} verildi.`); else this.yaz('Bu başarım zaten kazanılmış.', 'soluk'); return; }
       this.hata('Kullanım: basarim [liste | ver <anahtar> | hepsi | sifirla]');
     }, { hile: true, tamamla: () => ['liste', 'ver', 'hepsi', 'sifirla', ...BASARIMLAR.map(b => b.k)] });

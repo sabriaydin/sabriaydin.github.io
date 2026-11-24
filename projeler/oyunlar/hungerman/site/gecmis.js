@@ -2,6 +2,15 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.46', b: 'Yolculuk', y: [
+  { s: '0.46.0', b: 'Yolculuk ve gece olayları', m: [
+    'Görev günlüğünde (J) yeni bir Yolculuk sekmesi var. İlk günden Yeraltı Diyarı\'na kadar sekiz bölüm; her bölüm bitince ödül veriyor.',
+    'Sıradaki adım ekranın sağında görünüyor, ne yapacağınızı düşünmeden ilerleyebilirsiniz.',
+    'Köylülerin anlattığı söylentiler artık haritanıza soru işaretiyle düşüyor.',
+    'Bazı geceler farklı: sisli geceler, sakin geceler ve yıldızların yağdığı geceler.',
+    'Günler geçtikçe zırhlı canavarlar ortaya çıkıyor. Daha sert ama daha değerli.'
+  ]}
+]},
 { g: '0.45', b: 'Savaş', y: [
   { s: '0.45.0', b: 'Savaş elden geçti', m: [
     'Her silahın kendi temposu var. Hançer hızlı ve arkadan iki kat vuruyor, mızrak uzağa erişiyor, savaş çekici yavaş ama çevresini de sarsıyor, kılıç yanındakilere de değiyor.',

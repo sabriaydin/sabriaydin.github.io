@@ -119,6 +119,21 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 46.0 (0.46.0): Oynanış döngüsü ve ilerleme (geliştirme planı 5. aşama)
+- **Yolculuk** (`js/oyun/yolculuk.js`): oyunun başından Yeraltı Diyarı'na uzanan, sırayla açılan 8 bölüm: İlk Gün, İlk Gece, İnsanlar, Demir Çağı, Derinlikler, Efsaneler, Lanetli Ada, Ateşin Eşiği. Her bölümün 3-4 adımı başarımlara bağlıdır (bir adım, listedeki başarımlardan biri kazanılınca tamamlanır). Bölüm bitince ödülü verilir (deneyim ve eşya; çanta doluysa yere bırakılır) ve sonraki bölüm açılır.
+  - Ödüller: İlk Gün 8 meşale, 3 ekmek; İlk Gece 3 bandaj, 4 pişmiş domuz eti; İnsanlar 12 sikke, 4 ekmek; Demir Çağı altın elma, şifa iksiri; Derinlikler 2 elmas, 3 parıltı kristali; Efsaneler 2 altın elma, Eve Dönüş Tılsımı; Lanetli Ada 2 şifa iksiri, 2 altın elma; Ateşin Eşiği 5 elmas, 3 altın elma (ve 8 ile 80 arasında deneyim).
+  - Görev günlüğünde (J) yeni "Yolculuk" sekmesi: biten bölümler, şu anki bölümün adımları (sıradaki adımın ipucuyla) ve ödülü, kapalı bölümler. Eski "Görevler" listesi "Köy Görevleri" sekmesindedir.
+  - Ekrandaki görev izleyicinin başında Yolculuk'un sıradaki adımı gösterilir (Ayarlar > Arayüz'den kapatılabilir).
+  - Durum başarımlarla birlikte kaydedilir. Eski dünyalarda kazanılmış başarımlara göre bölüm belirlenir; geçmiş bölümlerin ödülleri yeniden verilmez.
+- **Söylentiler haritada:** köylülerin anlattığı söylentiler (özel yapılar, batık gemiler, zindanlar, Lanetli Ada, uzak köyler) artık daha sık anlatılır (%30 yerine %42) ve haritaya "?" ile başlayan yaklaşık bir işaret olarak eklenir (50 blokluk ızgaraya yuvarlanır; aynı yer için tek işaret, işaret sınırı 30).
+- **Gece olayları** (3. günden sonra, Kanlı Ay geceleri hariç; gece başında bildirilir):
+  - Sisli Gece (%14): yaklaşık bir dakikada yoğunlaşan sis (yeraltında yok); canavarlar %30 fazla ama görüş menzilleri %45 kısa.
+  - Sakin Gece (%12): canavarlar yarı yarıya azdır.
+  - Yıldız Yağmuru (%8): gece boyunca 2-3 meteor düşer.
+- **Zırhlı canavarlar:** 4. günden sonra gece doğan canavarların bir kısmı (her gün %2,5 artarak en çok %25) zırhlıdır: çelik tonunda görünür, %15 hızlıdır, bir fazla hasar verir, yarı geri itilir, iki kat deneyim ve ek ganimet (demir ya da bakır külçe, sikke) bırakır.
+- Köy baskınları kapalı kalır. Ekonomi dengesi (sikke kaynakları ve harcama yerleri) 0.51'deki son denge çalışmasına bırakıldı.
+- **Sınama:** yeni dünyada Yolculuk başlangıcı ve görev izleyici, İlk Gün bölümünün ödülü (8 meşale, 3 ekmek), önceden kazanılmış başarımlarla üç bölümün birden geçilmesi (sikke ödülü dahil), Yolculuk sekmesi, kayıt ve yeniden açmada bölümün korunması, söylenti işaretinin bir kez eklenmesi, sisli gecenin başlaması ve sisin yoğunlaşması, zırhlı canavar; uzun oturum taraması tekrarlandı.
+
 ## 45.0 (0.45.0): Savaş (geliştirme planı 4. aşama)
 - **Silah profilleri** (`SILAHLAR`, `js/oyun/etkilesim.js`): önceden bütün silahların vuruş arası 0,5 saniye ve erişimi 3,6 bloktu. Artık her silahın temposu, erişimi, itmesi ve özelliği ayrıdır:
 

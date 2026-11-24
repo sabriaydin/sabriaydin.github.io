@@ -194,7 +194,7 @@ export class Basarimlar {
     if (o.biyom != null) this.kumeEkle('biyom', o.biyom);
   }
 
-  disaAktar() { return { a: { ...this.acik }, s: { ...this.sayac }, k: Object.fromEntries(Object.entries(this.kume).map(([k, l]) => [k, [...l]])), i: Object.fromEntries(Object.entries(this.istat).map(([k, n]) => [k, Math.round(n * 100) / 100])) }; }
+  disaAktar() { return { y: this.yolculuk ? this.yolculuk.disaAktar() : this.yolKayit, a: { ...this.acik }, s: { ...this.sayac }, k: Object.fromEntries(Object.entries(this.kume).map(([k, l]) => [k, [...l]])), i: Object.fromEntries(Object.entries(this.istat).map(([k, n]) => [k, Math.round(n * 100) / 100])) }; }
   iceAktar(v) {
     this.acik = {}; this.sayac = {}; this.kume = {}; this.istat = {};
     if (!v || typeof v !== 'object') return;
@@ -202,5 +202,6 @@ export class Basarimlar {
     for (const [k, t] of Object.entries(v.a || {})) if (BASARIM[k]) this.acik[k] = +t || 1;
     for (const [k, n] of Object.entries(v.s || {})) if (BASARIM[k]) this.sayac[k] = +n || 0;
     for (const [k, l] of Object.entries(v.k || {})) if (BASARIM[k] && Array.isArray(l)) this.kume[k] = l.slice(0, 200);
+    this.yolKayit = v.y || null;   // 0.46.0: yolculuk durumu
   }
 }

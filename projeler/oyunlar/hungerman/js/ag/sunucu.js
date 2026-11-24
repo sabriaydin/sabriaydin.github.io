@@ -340,7 +340,7 @@ export class SunucuOyun {
     ctx.oyuncular = l;
     return ctx;
   }
-  vur(c, n, v, kaynak) { const k = kaynak || v.konum; if (v.kanli) n += 1; c.k.gonder({ t: 'h', n, s: v.turAd, k: [r2(k.x), r2(k.z)], a: v.tur.agu ? 1 : 0 }); }
+  vur(c, n, v, kaynak) { const k = kaynak || v.konum; if (v.kanli) n += 1; if (v.elit) n += 1; c.k.gonder({ t: 'h', n, s: v.turAd, k: [r2(k.x), r2(k.z)], a: v.tur.agu ? 1 : 0 }); }
   /* Deneyim: uzak oyuncunun beslediği hayvan yavruladığında */
   xpVer(c, n) { c.k.gonder({ t: 'xp', n }); }
   /* Yıldırım: tüm oyunculara gösterilir, yakındaki oyuncular hasar alır */

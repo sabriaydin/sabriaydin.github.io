@@ -6,6 +6,7 @@ import { ESYALAR } from '../bloklar.js';
 import { MESLEKLER, SEVIYELER, MESLEK_SIMGE, SOZ } from '../koy/meslekler.js';
 import { MAKS_AKTIF, yonAdi, TUR_ADI } from '../koy/gorevler.js';
 import { UZMANLIK } from '../dunya/koy-uretici.js';
+import { BOLUMLER } from '../oyun/yolculuk.js';
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -28,9 +29,10 @@ export class KoyluEkrani {
   sozSec(v) {
     const M = MESLEKLER[v.koylu.meslek], K = this.koyler, kd = K.kademe(v.koy.id), o = this.ortam ? this.ortam() : {};
     const r = Math.random();
-    if (r < 0.3) {
+    if (r < 0.42) {
       const s = K.soylenti(v.koy, v.koylu.idx);
-      if (s) return `Gezginlerin anlattığına göre ${s.ad}, buradan ${yonAdi(s.x - v.koy.x, s.z - v.koy.z)} yönünde, yaklaşık ${Math.max(50, Math.round(s.m / 50) * 50)} blok uzakta.`;
+      /* 0.46.0: söylenti haritaya yaklaşık bir işaret olarak işlenir (tam yer değil, 50 blokluk ızgaraya yuvarlanır) */
+      if (s) { if (this.soylentiIsaretle) this.soylentiIsaretle(s); return `Gezginlerin anlattığına göre ${s.ad}, buradan ${yonAdi(s.x - v.koy.x, s.z - v.koy.z)} yönünde, yaklaşık ${Math.max(50, Math.round(s.m / 50) * 50)} blok uzakta. Haritanıza bir işaret koydum.`; }
     }
     if (r < 0.5) {
       if (kd >= 4) return sec(SOZ.kahraman);
@@ -174,8 +176,9 @@ export class GorevEkrani {
   constructor(o) {
     Object.assign(this, o); // gorevler, envanter, oyuncu, ses, kapatIste
     this.acik = false;
-    this.kok = $('#gorevEkrani');
+    this.kok = $('#gorevEkrani'); this.sekme = 'yol';
     $('#gKapat').addEventListener('click', () => this.kapatIste());
+    $('#gSekme').addEventListener('click', e => { const b = e.target.closest('button[data-s]'); if (!b) return; this.sekme = b.dataset.s; this.ses.tik(); this.ciz(); });
     this.kok.addEventListener('mousedown', e => { if (e.target === this.kok) this.kapatIste(); });
     $('#gorevListe').addEventListener('click', e => {
       const t = e.target.closest('button[data-takip]');
@@ -186,7 +189,22 @@ export class GorevEkrani {
   }
   ac() { this.acik = true; this.kok.hidden = false; this.ciz(); }
   kapat() { this.acik = false; this.kok.hidden = true; }
+  /* 0.46.0: Yolculuk sekmesi: biten bölümler, şu anki bölümün adımları (ipucuyla), sıradaki bölümler kapalı */
+  yolCiz() {
+    const Y = this.yolculuk;
+    if (!Y) { $('#gorevListe').innerHTML = '<div class="bos">Yolculuk bu dünyada mevcut değil.</div>'; return; }
+    $('#gorevListe').innerHTML = BOLUMLER.map((B, i) => {
+      const bitti = i < Y.bolum, simdi = i === Y.bolum;
+      if (!bitti && !simdi) return `<div class="yolKart kapali"><span class="yolNo">${i + 1}</span><b>${esc(B.ad)}</b><small>Önceki bölüm tamamlanınca açılır.</small></div>`;
+      const ilk = B.adimlar.findIndex(a => !Y.adimBitti(a));
+      const adim = B.adimlar.map((a, j) => { const ok = Y.adimBitti(a); return `<li class="${ok ? 'ok' : j === ilk ? 'sira' : ''}"><span>${ok ? '✓' : '○'}</span><div>${esc(a[0])}${!ok && j === ilk ? `<em>${esc(a[2])}</em>` : ''}</div></li>`; }).join('');
+      const odul = `<div class="odul"><span>Ödül:</span>${B.odul.esya.map(([id, n]) => esyaHtml(id, n)).join('')}<span>${B.odul.xp} deneyim</span></div>`;
+      return `<div class="yolKart${bitti ? ' bitti' : ' simdi'}"><span class="yolNo">${bitti ? '✓' : i + 1}</span><b>${esc(B.ad)}</b><small>${esc(B.aciklama)}</small>${simdi ? `<ul class="yolAdim">${adim}</ul>${odul}` : ''}</div>`;
+    }).join('') + (Y.bitti ? '<p class="aciklama">Yolculuğun bütün bölümleri tamamlandı. Dünya hâlâ keşfedilmeyi bekliyor.</p>' : '<p class="aciklama">Adımlar başarımlarla tamamlanır; sıradaki adım ekranın sağındaki görev izleyicide de görünür.</p>');
+  }
   ciz() {
+    [...$('#gSekme').children].forEach(b => b.classList.toggle('on', b.dataset.s === this.sekme));
+    if (this.sekme === 'yol') { this.yolCiz(); return; }
     const G = this.gorevler, p = this.oyuncu.konum;
     if (!G.aktif.length) { $('#gorevListe').innerHTML = `<div class="bos">Aktif görev mevcut değil. Köylerdeki köylülerle konuşarak görev alabilirsiniz.<br>Tamamlanan görev: ${G.tamamlanan}</div>`; return; }
     $('#gorevListe').innerHTML = G.aktif.map((q, i) => {

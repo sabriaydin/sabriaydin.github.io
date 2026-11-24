@@ -20,6 +20,7 @@ import { Koyler } from './koy/koyler.js';
 import { Gorevler, yonAci } from './koy/gorevler.js';
 import { koylerAlan, UZMANLIK } from './dunya/koy-uretici.js';
 import { KoyluEkrani, GorevEkrani } from './arayuz/koylu-ekrani.js';
+import { Yolculuk } from './oyun/yolculuk.js';
 import { ISTASYON_BLOK, ISTASYON_ADI, ELOCAK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
@@ -54,7 +55,7 @@ import { Harita } from './harita/harita.js';
 import { HaritaKayit } from './sistem/harita-kayit.js';
 /* Dünya üretiminin sürümü: arazi üretimi değişince artar (eski harita kayıtları geçersiz olur) */
 const URETIM_SURUMU = 10;
-import { HaritaEkrani, MiniHarita } from './arayuz/harita-ekrani.js';
+import { HaritaEkrani, MiniHarita, YER_SINIRI } from './arayuz/harita-ekrani.js';
 import { Basarimlar } from './oyun/basarimlar.js';
 import { YapiOlaylari } from './oyun/yapilar.js';
 import { AdaBekcisi } from './oyun/ada-bekcisi.js';
@@ -199,7 +200,7 @@ function ayarFormu() {
   bag('#aParlak', 'parlaklik', v => Math.round(v * 100) + '%');
   bag('#aOlcek', 'arayuzOlcek', v => Math.round(v * 100) + '%');
   bag('#aArkaSessiz', 'arkaSessiz', null, 'cb'); bag('#aEnerji', 'enerjiPanel', null, 'cb');
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aHasarSayi', 'hasarSayilari', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aHasarSayi', 'hasarSayilari', null, 'cb'); bag('#aYolculuk', 'yolculukIzle', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
 }
 /* 0.30.7: tuş atamaları listesi; tıklanan eylem bir sonraki tuşu bekler */
 let tusBekleyen = null;
@@ -668,6 +669,19 @@ function oyunBaslat(v) {
   basarimlar.iceAktar(v.basarimlar);
   basarimlar.kazanildi = b => basarimEkrani.goster(b);
   basarimlar.degisti = () => { if (basarimEkrani.acik) basarimEkrani.ciz(); };
+  /* 0.46.0: Yolculuk: bölüm bitince ödül (deneyim ve eşya; çanta doluysa yere bırakılır) */
+  const yolculuk = new Yolculuk(basarimlar);
+  yolculuk.iceAktar(basarimlar.yolKayit);
+  basarimlar.yolculuk = yolculuk;
+  yolculuk.tamamlandi = B => {
+    hayatta.xpEkle(B.odul.xp);
+    for (const [id, n] of B.odul.esya) { const k = envanter.ekle(id, n); if (k > 0) yereBirak(id, k); }
+    ses.gorev && ses.gorev();
+    hud.bildirim(`Yolculuk: "${B.ad}" tamamlandı. Ödül: ${B.odul.xp} deneyim, ${B.odul.esya.map(([id, n]) => `${n} ${ESYALAR[id].ad}`).join(', ')}.`, B.odul.esya[0][0]);
+    konsol.kayit('oyuncu', 'Yolculuk bölümü tamamlandı', { seviye: 'bilgi', alan: { bölüm: B.ad } });
+  };
+  yolculuk.degisti = () => { if (gorevEkrani.acik) gorevEkrani.ciz(); };
+  oyun.yolculuk = yolculuk; gorevEkrani.yolculuk = yolculuk;
   oyun.basarimlar = basarimlar; basarimEkrani.basarimlar = basarimlar; basarimEkrani.hayatFn = () => (oyun && !oyun.hayatta.olu ? Math.max(0, oyun.gun + oyun.zaman - oyun.hayatBasi) : 0); basarimEkrani.temizle(); oyun.basarimSayac = 2;
   /* 0.22.0: gök olayları (Kanlı Ay, kayan yıldızlar, meteor, kuzey ışıkları) */
   oyun.gok = new GokOlaylari({ oyun: () => oyun, sahne, ses, bildirim: m => hud.bildirim(m), olay: k => basarimlar.ver(k), istat: k => basarimlar.istatEkle(k),
@@ -741,10 +755,18 @@ function oyunBaslat(v) {
     /* 0.32.0: konuşmalar için ortam ve Dost itibarında köyde konaklama (doğma noktası köylünün kapısı, gece ise uyunur) */
     ortam: () => { const z = oyun.zaman, H = oyun.hava; return { gece: z > 0.55 && z < 0.95, sabah: z < 0.12, yagis: H && H.yagiyor ? (H.yagisTuru ? H.yagisTuru(oyuncu.konum) : 1) : 0 }; },
     konakla: w => { const k = w.koylu.kapi; uyu({ x: k.x, y: k.y - 1, z: k.z }, true); } });
+  /* 0.46.0: köylünün söylentisi haritaya "?" işaretiyle işlenir (aynı yer için tek işaret; işaret sınırı dolduysa eklenmez) */
+  koyluEkrani.soylentiIsaretle = s => {
+    const o = oyun; if (!o) return;
+    const ad = ('? ' + String(s.ad).replace(/\s*\(.*\)\s*/, '')).slice(0, 24), x = Math.round(s.x / 50) * 50, z = Math.round(s.z / 50) * 50;
+    if (o.yerler.some(y => y.ad === ad && Math.hypot(y.x - x, y.z - z) < 150) || o.yerler.length >= YER_SINIRI) return;
+    o.yerler.push({ x, z, ad, renk: '#ffb84d', soylenti: true });
+    o.hud.bildirim(`Söylenti haritaya işlendi: ${ad.slice(2)}`);
+  };
   Object.assign(gorevEkrani, { gorevler, envanter, oyuncu });
   /* vuran: çok oyunculuda canlıya vuran uzak oyuncu (görev ve itibar onun oyununda işlenir) */
   varliklar.olaylar.vurus = (w, vuran) => { if (vuran) { if (oyun.ag && oyun.ag.vurusOlayi) oyun.ag.vurusOlayi(w, vuran); return; } if (w.tur.koylu) koyler.koyluVuruldu(w); };
-  varliklar.olaylar.olum = (w, vuran, op) => { if (vuran) { if (oyun.ag && oyun.ag.olumOlayi) oyun.ag.olumOlayi(w, vuran, op); return; } gorevler.oldurme(w.turAd); oyun.basarimlar.oldurme(w.turAd, !!(op && op.ok)); if (w.tur.koylu) koyler.koyluOldu(w); if (w.tur.xp) hayatta.xpEkle(w.tur.xp * (w.kanli ? 2 : 1)); };
+  varliklar.olaylar.olum = (w, vuran, op) => { if (vuran) { if (oyun.ag && oyun.ag.olumOlayi) oyun.ag.olumOlayi(w, vuran, op); return; } gorevler.oldurme(w.turAd); oyun.basarimlar.oldurme(w.turAd, !!(op && op.ok)); if (w.tur.koylu) koyler.koyluOldu(w); if (w.tur.xp) hayatta.xpEkle(w.tur.xp * (w.kanli || w.elit ? 2 : 1)); };
   oyun.etkilesim = new Etkilesim({ dunya, oyuncu, envanter, hayatta, dusenler, ses, sahne, varliklar, olta, tekneler, binek: oyun.binek, gecit: oyun.gecit, oyuncuAdi: ayar.ad, arayuz: {
     bildirim: (m, id) => hud.bildirim(m, id), envanterAc: ist => envanterAcKapa(ist), uyu: h => uyu(h), yatakKirildi: (x, y, z) => yatakKirildi(x, y, z),
     olay: k => basarimlar.ver(k),
@@ -1090,6 +1112,27 @@ function otoCozunurluk(t) {
 }
 const gecici = new THREE.Vector3();
 let ziplaBasildi = false, atilIstek = null;
+/* 0.46.0: gece olayları. 3. günden sonra bazı geceler farklı geçer (Kanlı Ay geceleri hariç):
+   Sisli Gece (%14): yoğun sis; canavarlar %30 fazla ama oyuncuyu daha yakından görür.
+   Sakin Gece (%12): canavarlar yarı yarıya azdır.
+   Yıldız Yağmuru (%8): gece boyunca birkaç meteor düşer (gök taşından yıldız parçası çıkar). */
+const GECE_OLAYI = { sis: 'Ağır bir sis çöküyor. Bu gece canavarlar kalabalık ama sizi ancak yakından görebilirler.', sakin: 'Akşam oluyor. Hava durgun; bu gece canavarlar az görünüyor.', yildiz: 'Akşam oluyor. Gökyüzü bu gece hareketli; yıldızlar kayıyor.' };
+function geceOlayiSec(o) {
+  o.geceOlayi = null;
+  if (o.istemci || o.gun < 3 || diyarMi(o.oyuncu.konum.x)) return null;
+  const r = Math.random(), tur = r < 0.14 ? 'sis' : r < 0.26 ? 'sakin' : r < 0.34 ? 'yildiz' : null;
+  if (!tur) return null;
+  o.geceOlayi = { tur, gun: o.gun, meteor: tur === 'yildiz' ? 2 + Math.floor(Math.random() * 2) : 0, sayac: 20 };
+  o.hud.bildirim(GECE_OLAYI[tur]);
+  konsol.kayit('dunya', 'Gece olayı', { seviye: 'bilgi', alan: { olay: { sis: 'Sisli Gece', sakin: 'Sakin Gece', yildiz: 'Yıldız Yağmuru' }[tur], gün: o.gun } });
+  return tur;
+}
+/* Gece olayı sürüyor mu (akşamdan ertesi sabaha) */
+function geceOlayi(o) {
+  const G = o.geceOlayi; if (!G) return null;
+  if ((o.gun === G.gun && o.zaman >= 0.46) || (o.gun === G.gun + 1 && o.zaman < 0.04)) return G.tur;
+  o.geceOlayi = null; return null;
+}
 const ciftTus = {};
 /* 0.42.0: karede çıkan hata konsola ayrıntısıyla yazılır; aynı hata her karede tekrar bildirilmez */
 const kareHatalari = new Map();
@@ -1138,7 +1181,7 @@ function adim(t) {
       o.zaman += dt * (o.zamanHizi ?? 1) * zamanHizi(o.zaman, o.mevsim) / GUN_SURESI;
       if (o.zaman >= 1) { o.zaman -= 1; o.gun++; o.koyler.sabah(); o.hud.bildirim(`${o.gun}. gün başladı`); }
     }
-    if (oncekiZaman < 0.46 && o.zaman >= 0.46 && !kanliAyGunu(o.gun, o.denge.kanliAy)) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.');
+    if (oncekiZaman < 0.46 && o.zaman >= 0.46 && !kanliAyGunu(o.gun, o.denge.kanliAy)) { const g = geceOlayiSec(o); if (!g) o.hud.bildirim('Akşam oluyor. Gece zombiler ortaya çıkar.'); }
     /* 0.22.0: Kanlı Ay sabaha kadar atlatıldı mı */
     if (o.kanliIzlendi && o.kanliIzlendi === o.gun - 1 && o.zaman < 0.3 && !o.hayatta.olu) {
       o.kanliIzlendi = null; o.basarimlar.ver('kanliAy'); o.basarimlar.artir('kanliAy3'); o.basarimlar.istatEkle('kanliAy'); o.hayatta.xpEkle(25);
@@ -1221,6 +1264,12 @@ function adim(t) {
     { const gz = o.oyuncu.gozKonumu(), D = o.dunya; ses.dinleyiciAyarla(gz.x, gz.y, gz.z, o.oyuncu.yaw, (x, y, z) => OPAK[D.blok(x, y, z)] === 1);
       ses.ortamAyarla({ suAlti: !!o.oyuncu.basSuda, yanki: diyar ? 0.18 : ortamAtmosfer.yeralti ? 0.3 : 0 }); }
     ortamAtmosfer.guncelle(o, dt, ses, { gun: o.gunIsigi ?? 1, diyar, yagis: o.hava ? o.hava.yogunluk : 0, zamanSn: o.sure || 0 });
+    /* 0.46.0: gece olayları: sisli gecede yoğun sis (yeraltında yok), yıldız yağmurunda aralıklı meteor */
+    { const go = geceOlayi(o), hedef = go === 'sis' && !diyar && o.oyuncu.konum.y > o.dunya.uretici.kolon(Math.floor(o.oyuncu.konum.x), Math.floor(o.oyuncu.konum.z), {}).h - 6 ? 0.9 * Math.min(1, (o.zaman - 0.46) * 25 + (o.zaman < 0.1 ? 1 : 0)) : 0;
+      o.geceSis = (o.geceSis || 0) + (hedef - (o.geceSis || 0)) * Math.min(1, dt * 0.5);
+      if (o.geceSis > 0.01) sahne.ortamSis = Math.max(sahne.ortamSis || 0, o.geceSis);
+      const G = o.geceOlayi;
+      if (go === 'yildiz' && G.meteor > 0 && !o.istemci) { G.sayac -= dt; if (G.sayac <= 0) { G.sayac = 40 + Math.random() * 60; if (o.gok.meteorDusur(o, false)) G.meteor--; } } }
     /* Mağara ortam sesleri */
     o.ortamSayac -= dt;
     if (o.ortamSayac <= 0) {
@@ -1242,8 +1291,8 @@ function adim(t) {
     if (fare.sol && kilitli) gurultu = Math.max(gurultu, OY.egiliyor ? 6 : 10);
     varlikGuncelle(o, dt, {
       oyuncu: o.oyuncu, ad: ayar.ad, gurultu, egiliyor: OY.egiliyor, oyuncuOlu: o.hayatta.olu || !!o.izleyici, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
-      firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(), kanliAy: o.gok.kanliAyMi(o), zorlukCanavar: o.Z ? o.Z.canavar : 1,
-      oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n + (v.kanli ? 1 : 0), v.turAd, v.tur.agu, k.x, k.z, v); },
+      firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(), kanliAy: o.gok.kanliAyMi(o), zorlukCanavar: (o.Z ? o.Z.canavar : 1) * ({ sis: 1.3, sakin: 0.5 }[geceOlayi(o)] || 1), sisli: geceOlayi(o) === 'sis',
+      oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n + (v.kanli ? 1 : 0) + (v.elit ? 1 : 0), v.turAd, v.tur.agu, k.x, k.z, v); },
       okTopla: () => { const k = o.envanter.ekle(287, 1); if (!k) ses.topla(); return !k; }
     }, o.ag && !o.istemci);
     const ekKonumlar = o.ag && !o.istemci ? o.ag.konumlar() : null;
@@ -1453,6 +1502,7 @@ function adim(t) {
     if (o.basarimSayac <= 0 && !o.hayatta.olu) {
       o.basarimSayac = 1; o.biyom = diyar ? null : kol.b;
       o.basarimlar.denetle(o);
+      o.yolculuk.denetle();   // 0.46.0
       if (diyar && kaleAt(o.dunya.uretici, Math.floor(p.x), Math.floor(p.y), Math.floor(p.z))) o.basarimlar.ver('kale');
       if (!diyar && !o.basarimlar.var('maden') && p.y < kol.h - 4 && madenAt(o.dunya.uretici, Math.floor(p.x), Math.floor(p.y), Math.floor(p.z))) o.basarimlar.ver('maden');
     }
@@ -1471,7 +1521,9 @@ function adim(t) {
     /* Pusulada yalnızca oyuncunun haritada eklediği işaretler gösterilir (diğerleri mini haritada ve büyük haritada) */
     o.isaretler = isaret.filter(m => m.sinif === 'yer');
     o.gorevler.guncelle(dt, p);   // 0.32.0: keşif ve teslimat süresi
-    o.hud.gorevIzle(o.gorevler.ozet(o.envanter, p));
+    /* 0.46.0: görev izleyicinin başında Yolculuk'un sıradaki adımı (ayardan kapatılabilir) */
+    const yAdim = ayar.yolculukIzle !== false && o.yolculuk ? o.yolculuk.siradaki() : null;
+    o.hud.gorevIzle([...(yAdim ? [{ metin: `<i class="yolIz">Yolculuk</i> ${yAdim[0]}`, durum: '' }] : []), ...o.gorevler.ozet(o.envanter, p)]);
     o.hud.etkilerCiz(o.hayatta.etkiler);
     o.hud.hava(diyar ? 'acik' : H.durum, yagisTur);
     o.hud.zamanHizi(o.istemci ? 1 : (o.zamanHizi ?? 1));
@@ -1878,5 +1930,5 @@ $('#bilgiTamam').onclick = () => { ses.tik(); clearTimeout(baglanZaman); ekran('
 requestAnimationFrame(dongu);
 ekran('ana');
 /* Konsoldan inceleme için (oyun mantığını değiştirmez) */
-window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi, ses, muzik, dokun };
+window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, koyluEkrani, gorevEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi, ses, muzik, dokun };
 export { ESYALAR };
