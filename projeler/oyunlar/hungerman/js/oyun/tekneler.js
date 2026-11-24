@@ -4,6 +4,7 @@
 import { THREE } from '../grafik/sahne.js';
 import { SIVI, LAV, KATI } from '../bloklar.js';
 import { parca, gurultu } from '../varlik/modeller.js';
+import { akisVektoru } from '../dunya/su-akisi.js';
 
 /* gen/boy: yarım genişlik ve yarım uzunluk; oturma: oyuncu ayak yüksekliğinin su çizgisine göre konumu */
 /* Tekne kökünün su yüzeyine göre yüksekliği: taban tahtası suyun üstünde kalır (içine su dolmuş gibi görünmez) */
@@ -223,6 +224,11 @@ export class Tekneler {
       if (this.carpar(t, nx, p.y, p.z)) { t.hiz *= 0.5; } else p.x = nx;
       const nz = p.z + vz * h;
       if (this.carpar(t, p.x, p.y, nz)) { t.hiz *= 0.5; } else p.z = nz;
+    }
+    /* 0.43.0: akan su tekneyi akış yönünde yavaşça sürükler */
+    if (t.suda) {
+      const f = akisVektoru(this.dunya, Math.floor(p.x), Math.floor(p.y - 0.3), Math.floor(p.z));
+      if (f) { const nx = p.x + f[0] * 1.2 * dt, nz = p.z + f[1] * 1.2 * dt; if (!this.carpar(t, nx, p.y, nz)) { p.x = nx; p.z = nz; } }
     }
     let ny = p.y + t.vy * dt;
     if (KATI[this.dunya.blok(Math.floor(p.x), Math.floor(ny - 0.24), Math.floor(p.z))] && t.vy < 0) { ny = Math.floor(ny - 0.24) + 1.24; t.vy = 0; }

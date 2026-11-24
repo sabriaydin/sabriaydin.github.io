@@ -2,6 +2,17 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.43', b: 'Hareket', y: [
+  { s: '0.43.0', b: 'Fizik ve hareket', m: [
+    'Tuşu bırakınca karakter artık kayıp gitmiyor, net duruyor. Havada ise hızınız korunuyor.',
+    'Koşarak zıplayınca biraz daha uzağa gidiyorsunuz.',
+    'Kenardan çıktığınız anda zıplamaya bir an geç kalsanız da zıplıyorsunuz. Hızlıca basılan zıplama da kaybolmuyor.',
+    'Zıplarken başınız bir köşeye takılırsa yana kayıp yükselmeye devam ediyorsunuz.',
+    'Yüksekten inince kamera hafifçe çöküyor, ayak sesi duyuluyor.',
+    'Vuruşlar sizi gücüne göre savuruyor; boss darbeleri gerçekten fırlatıyor.',
+    'Suda yavaşça batıyorsunuz, dalmak için C. Suya düşen eşyalar yüzeye çıkıp akıntıyla sürükleniyor, tekneler de akıntıya kapılıyor.'
+  ]}
+]},
 { g: '0.42', b: 'Kararlılık', y: [
   { s: '0.42.0', b: 'Hatalar ve kararlılık', m: [
     'Bir dünyanın kaydı bozulursa oyun artık takılıp kalmıyor; dünya son sorunsuz açılıştaki hâliyle açılıyor.',

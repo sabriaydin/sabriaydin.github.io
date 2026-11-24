@@ -20,7 +20,11 @@ export class Oyuncu {
     this.yuruyenMesafe = 0;
     this.ucus = false; this.hizCarpani = 1; this.hayalet = false;   // geliştirici: uçma, hız çarpanı, duvardan geçme
     this.etkiHiz = 1; this.tirmaniyor = false;                      // hız iksiri çarpanı, tırmanma merdiveninde
-    this.olaylar = { dustu: null, adim: null, ziplad: null, suyaGirdi: null };
+    this.olaylar = { dustu: null, adim: null, ziplad: null, suyaGirdi: null, indi: null };
+    /* 0.43.0: hareket hissi: havada geçen süre (kenardan düşerken kısa süre zıplanabilir), zıplama tamponu (yere değmeden hemen önce
+       basılan zıplama sayılır), geri itme süresi (savrulurken kontrol azalır), iniş için kamera yayı */
+    this.havaSure = 0; this.ziplandi = false; this.ziplaTampon = 0; this._ziplaOnce = false; this.itme = 0;
+    this.kamDus = 0; this.kamHiz = 0;
   }
   get boy() { return this.egiliyor ? 1.5 : 1.8; }
   get goz() { return this.egiliyor ? 1.32 : 1.62; }
@@ -58,6 +62,13 @@ export class Oyuncu {
     return bx + 1 > p.x - YARIM && bx < p.x + YARIM && bz + 1 > p.z - YARIM && bz < p.z + YARIM && by + 1 > p.y && by < p.y + this.boy;
   }
 
+  /* 0.43.0: geri itme: kaynaktan uzağa savrulma; güç vuruşun ağırlığına göre */
+  geriIt(kx, kz, guc = 1) {
+    const p = this.konum, dx = p.x - kx, dz = p.z - kz, l = Math.hypot(dx, dz) || 1;
+    this.hiz.x = this.hiz.x * 0.3 + dx / l * 7.5 * guc; this.hiz.z = this.hiz.z * 0.3 + dz / l * 7.5 * guc;
+    this.hiz.y = Math.max(this.hiz.y, 3.2 + 1.6 * Math.min(1.5, guc));
+    this.itme = 0.18 + 0.12 * Math.min(1.5, guc);
+  }
   /* Kapı ya da tuzak kapı oyuncunun üzerine kapanırsa oyuncu en yakın boş konuma itilir (0.15.1) */
   kurtul() {
     const p = this.konum;
@@ -104,7 +115,11 @@ export class Oyuncu {
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
     let ix = -sy * ileri + cy * yan, iz = -cy * ileri - sy * yan;
     const l = Math.hypot(ix, iz); if (l > 0) { ix /= l; iz /= l; }
-    const ivme = this.ucus ? 10 : this.yerde ? 14 : this.suda ? (g.palet ? 7 : 5) : 3.2;
+    /* 0.43.0: yerde hızlanma ve durma ayrı (tuş bırakılınca daha çabuk durulur); havada tuşa basılmıyorsa hız korunur;
+       geri itme sırasında kontrol kısa süre zayıflar (savrulma hissedilir) */
+    const girdi = l > 0;
+    let ivme = this.ucus ? 10 : this.yerde ? (girdi ? 11 : 17) : this.suda ? (g.palet ? 7 : 5) : (girdi ? 3.4 : 0.9);
+    if (this.itme > 0 && !this.ucus) ivme *= this.yerde ? 0.18 : 0.3;
     const k = Math.min(1, ivme * dt);
     /* 0.30.5: akan su oyuncuyu akış yönüne sürükler */
     let ax = 0, az = 0;
@@ -112,6 +127,11 @@ export class Oyuncu {
     v.x += (ix * hizMax + ax - v.x) * k;
     v.z += (iz * hizMax + az - v.z) * k;
 
+    this.havaSure = this.yerde ? 0 : this.havaSure + dt;
+    if (this.yerde) this.ziplandi = false;
+    const ziplaBas = !!g.zipla && !this._ziplaOnce; this._ziplaOnce = !!g.zipla;
+    this.ziplaTampon = ziplaBas ? 0.15 : Math.max(0, this.ziplaTampon - dt);
+    this.itme = Math.max(0, this.itme - dt);
     if (this.ucus) {
       /* Uçma: Boşluk yükselir, C alçalır; yer çekimi ve düşme hasarı yoktur */
       const hedefY = ((g.zipla ? 1 : 0) - (g.egil ? 1 : 0)) * 9 * this.hizCarpani;
@@ -121,7 +141,10 @@ export class Oyuncu {
       v.y -= (this.lavda ? 14 : 9) * dt;
       if (g.zipla) v.y += (g.palet ? 26 : 22) * dt;
       else if (g.palet && g.egil) v.y -= 10 * dt;
-      v.y = Math.max(g.palet ? -4.5 : -3.5, Math.min(v.y, g.palet ? 4 : 3.2));
+      /* 0.43.0: tuşa basılmadan suda yavaşça batılır (önceden hızla dibe iniliyordu); C ile hızlı dalınır */
+      const dalis = g.egil || this.lavda, enAlt = dalis ? (g.palet ? -4.5 : -3.5) : -1.4;
+      v.y = Math.min(v.y, g.palet ? 4 : 3.2);
+      if (v.y < enAlt) v.y += (enAlt - v.y) * Math.min(1, 12 * dt);   // suya yüksekten girişte hız yumuşakça kesilir
       /* Sudan karaya çıkış: Boşluk basılıyken hareket yönündeki engelin üst yüzü erişilebilir yükseklikteyse (en çok ~1,9 blok)
          ve üstü boşsa, o yüksekliğe çıkacak kadar yukarı itilir. Sudan çıkınca tam yer çekimi başladığı için hız ona göre hesaplanır
          (çarpışmada hız sıfırlandığı için engel, hız değil girdi yönüyle aranır) */
@@ -135,7 +158,14 @@ export class Oyuncu {
     } else {
       v.y -= YER_CEKIMI * dt;
       if (v.y < -60) v.y = -60;
-      if (g.zipla && this.yerde) { v.y = 8.6; this.yerde = false; this.olaylar.ziplad && this.olaylar.ziplad(); }
+      /* 0.43.0: kenardan çıktıktan sonraki 0,12 saniyede de zıplanabilir; inişten hemen önce basılan zıplama inince uygulanır.
+         Koşarak zıplamada bakılan yöne küçük bir hız eklenir */
+      const zemin = this.yerde || (this.havaSure < 0.12 && !this.ziplandi && v.y <= 0);
+      if (zemin && (g.zipla || this.ziplaTampon > 0) && !this.egiliyor) {
+        v.y = 8.6; this.yerde = false; this.ziplandi = true; this.ziplaTampon = 0; this.havaSure = 1;
+        if (this.kosuyor && girdi) { v.x += ix * 1.1; v.z += iz * 1.1; }
+        this.olaylar.ziplad && this.olaylar.ziplad();
+      }
     }
     /* Tırmanma merdiveni (0.15.1): W ile bakılan yöne hareket edilir; yukarı ya da düz bakılırken tırmanılır, aşağı bakılırken inilir
        (yatay hareket de sürer, böylece merdivenden yana ya da öne kolayca çıkılır). S tersi yönde, Boşluk her zaman yukarı,
@@ -155,13 +185,19 @@ export class Oyuncu {
     /* Eksen eksen hareket ve çarpışma (alt adımlar ile) */
     const adim = Math.max(1, Math.ceil(Math.max(Math.abs(v.x), Math.abs(v.y), Math.abs(v.z)) * dt / 0.35));
     const h = dt / adim;
-    let yerde = false;
+    let yerde = false, inisHiz = 0;
     const oncekiY = p.y;
     for (let s = 0; s < adim; s++) {
       /* Y */
       let ny = p.y + v.y * h;
+      /* 0.43.0: zıplarken baş bir blok kenarına az bir payla takılırsa oyuncu yana kaydırılır ve yükselmeye devam eder */
+      if (v.y > 0 && !this.hayalet && this.carpisiyor(p.x, ny, p.z) && !this.carpisiyor(p.x, p.y, p.z)) {
+        let kay = null;
+        for (const m of [0.12, 0.22]) { for (const [ox, oz] of [[m, 0], [-m, 0], [0, m], [0, -m]]) if (!this.carpisiyor(p.x + ox, ny, p.z + oz) && !this.carpisiyor(p.x + ox, p.y, p.z + oz)) { kay = [ox, oz]; break; } if (kay) break; }
+        if (kay) { p.x += kay[0]; p.z += kay[1]; }
+      }
       if (this.carpisiyor(p.x, ny, p.z)) {
-        if (v.y < 0) { const u = this.carpanUst(p.x, ny, p.z); ny = u != null && u <= p.y + 1e-3 ? u : Math.floor(ny) + 1; yerde = true; }
+        if (v.y < 0) { inisHiz = Math.max(inisHiz, -v.y); const u = this.carpanUst(p.x, ny, p.z); ny = u != null && u <= p.y + 1e-3 ? u : Math.floor(ny) + 1; yerde = true; }
         else { const a = this.carpanAlt(p.x, ny, p.z); ny = (a != null ? a : Math.floor(ny + this.boy)) - this.boy - 1e-4; }
         if (this.carpisiyor(p.x, ny, p.z)) ny = p.y;
         v.y = 0;
@@ -183,10 +219,16 @@ export class Oyuncu {
     if (!yerde && !this.suda && !this.tirmaniyor && p.y < oncekiY) this.dusus += oncekiY - p.y;
     if (yerde && !this.yerde) {
       if (this.dusus > 3.4 && this.olaylar.dustu) this.olaylar.dustu(this.dusus);
+      /* 0.43.0: iniş: kamera hızla orantılı kısa bir çökme yapar; iniş sesi çalar */
+      if (inisHiz > 6.5) this.kamHiz -= Math.min(4.2, (inisHiz - 5.5) * 0.3);
+      if (inisHiz > 7 && this.olaylar.indi) this.olaylar.indi(inisHiz, d.blok(Math.floor(p.x), Math.floor(p.y - 0.1), Math.floor(p.z)));
       this.dusus = 0;
     }
     if (yerde || this.suda) this.dusus = yerde ? 0 : this.dusus;
     this.yerde = yerde;
+    /* Kamera yayı (iniş çökmesi) */
+    this.kamHiz += (-this.kamDus * 140 - this.kamHiz * 15) * dt;
+    this.kamDus = Math.max(-0.32, Math.min(0.08, this.kamDus + this.kamHiz * dt));
 
     /* Dünya sınırı */
     if (diyarMi(p.x)) { const S = DIYAR_SINIR - 1; p.x = Math.max(DIYAR_X - S, Math.min(DIYAR_X + S, p.x)); p.z = Math.max(-S, Math.min(S, p.z)); }
@@ -208,6 +250,7 @@ export class Oyuncu {
   kameraAyarla(kamera, sallanma) {
     this.gozKonumu(kamera.position);
     if (sallanma && this.yerde) kamera.position.y += Math.abs(Math.sin(this.adimFaz)) * 0.045;
+    kamera.position.y += this.kamDus * (sallanma ? 1 : 0.4);
     kamera.rotation.set(this.pitch, this.yaw, 0);
   }
 }

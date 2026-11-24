@@ -1,7 +1,8 @@
 /* HungerMan - yere düşen eşyalar ve kırılma parçacıkları */
 import { THREE, simgeHacmi } from '../grafik/sahne.js';
 import { simge, blokRengi } from '../grafik/doku.js';
-import { KATI, LAV, ESYALAR, CIZIM, C_KUP, YUZ_DOKU, ATLAS_N } from '../bloklar.js';
+import { KATI, LAV, SIVI, ESYALAR, CIZIM, C_KUP, YUZ_DOKU, ATLAS_N } from '../bloklar.js';
+import { akisVektoru } from '../dunya/su-akisi.js';
 
 /* 0.23.0: yere düşen eşyalar düz resim (sprite) yerine üç boyutlu çizilir: küp bloklar küçük küp, diğerleri simgesinden kalınlaştırılmış model.
    Eski sürümde doku sRGB işaretlenmediği için renkler soluk görünüyordu; köşe renkleri doğrusal uzaya çevrilerek giderildi. */
@@ -112,11 +113,23 @@ export class Dusenler {
           if (kalan !== d.adet) { d.adet = kalan; this.agAdet(d); }
         } else { d.v.x = dx / mes * 7; d.v.y = dy / mes * 7; d.v.z = dz / mes * 7; d.p.addScaledVector(d.v, dt); d.m.position.copy(d.p); continue; }
       }
-      d.v.y -= 20 * dt;
+      /* 0.43.0: yüklü olmayan parçada eşya bekler (önceden boşluğa düşüp kayboluyordu); bloğun içinde kalan eşya üste çıkar */
+      if (!this.dunya.yuklu(d.p.x, d.p.z)) continue;
+      const ic = this.dunya.blok(Math.floor(d.p.x), Math.floor(d.p.y), Math.floor(d.p.z));
+      if (KATI[ic]) { d.p.y = Math.floor(d.p.y) + 1.12; d.v.set(0, 0, 0); }
+      /* 0.43.0: suda eşya yüzeye çıkar, akıntıyla sürüklenir ve yavaşlar */
+      const suIc = SIVI[ic] && !LAV[ic];
+      if (suIc) {
+        const ust = this.dunya.blok(Math.floor(d.p.x), Math.floor(d.p.y + 0.35), Math.floor(d.p.z));
+        d.v.y += ((SIVI[ust] ? 2.2 : 0) - d.v.y) * Math.min(1, 4 * dt);
+        const f = akisVektoru(this.dunya, Math.floor(d.p.x), Math.floor(d.p.y), Math.floor(d.p.z));
+        const hx = f ? f[0] * 1.8 : 0, hz = f ? f[1] * 1.8 : 0;
+        d.v.x += (hx - d.v.x) * Math.min(1, 2.5 * dt); d.v.z += (hz - d.v.z) * Math.min(1, 2.5 * dt);
+      } else d.v.y -= 20 * dt;
       const nx = d.p.x + d.v.x * dt, ny = d.p.y + d.v.y * dt, nz = d.p.z + d.v.z * dt;
       if (KATI[this.dunya.blok(Math.floor(nx), Math.floor(d.p.y), Math.floor(d.p.z))]) d.v.x *= -0.3; else d.p.x = nx;
       if (KATI[this.dunya.blok(Math.floor(d.p.x), Math.floor(d.p.y), Math.floor(nz))]) d.v.z *= -0.3; else d.p.z = nz;
-      if (KATI[this.dunya.blok(Math.floor(d.p.x), Math.floor(ny - 0.12), Math.floor(d.p.z))]) { d.p.y = Math.floor(ny - 0.12) + 1.12; d.v.y = 0; d.v.x *= 0.82; d.v.z *= 0.82; }
+      if (KATI[this.dunya.blok(Math.floor(d.p.x), Math.floor(ny - 0.12), Math.floor(d.p.z))]) { d.p.y = Math.floor(ny - 0.12) + 1.12; d.v.y = 0; const sur = Math.pow(0.82, dt * 60); d.v.x *= sur; d.v.z *= sur; }
       else d.p.y = ny;
       d.m.position.set(d.p.x, d.p.y + Math.sin(d.yas * 2.5 + d.faz) * 0.05 + 0.08, d.p.z);
       d.m.rotation.y += dt * 1.4;

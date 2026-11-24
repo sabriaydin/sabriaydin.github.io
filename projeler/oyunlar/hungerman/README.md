@@ -119,6 +119,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 43.0 (0.43.0): Fizik ve hareket (geliştirme planı 2. aşama)
+- **Hareket:** yerde hızlanma ve durma ayrıldı; tuş bırakılınca daha çabuk ve kararlı durulur (yürürken yaklaşık 0,2 blok). Havada tuşa basılmıyorsa hız korunur (önceden havada kendiliğinden yavaşlanıyordu).
+- **Koşarak zıplama:** bakılan yöne küçük bir hız eklenir; koşarak yaklaşık 4,5 blok atlanır.
+- **Kenar payı:** kenardan çıktıktan sonraki 0,12 saniye içinde de zıplanabilir; yere değmeden hemen önce basılan zıplama iniş anında uygulanır. İki kare arasında basılıp bırakılan zıplama artık kaybolmaz.
+- **Baş çarpması:** zıplarken baş bir blok kenarına az bir payla takılırsa oyuncu yana kaydırılır ve yükselmeye devam eder.
+- **İniş:** yüksekten inişte kamera hızla orantılı kısa bir çökme yapar ve zemine göre iniş sesi çalar ("Yürürken kamera sallanması" kapalıysa çökme hafiftir).
+- **Geri itme:** vuruşun gücüne ve saldıranın iriliğine göre değişir (sıradan vuruşta yaklaşık 2, boss vuruşunda 4 blok); zırh savrulmayı biraz azaltır. Savrulurken kontrol kısa süre zayıflar; önceden itme bir anda sönüyordu.
+- **Su:** tuşa basılmadan suda yavaşça batılır (saniyede yaklaşık 1,4 blok; önceden hızla dibe iniliyordu), C ile hızlı dalınır. Yüksekten suya girişte hız yumuşakça kesilir.
+- **Yerdeki eşyalar:** suda yüzeye çıkar, akan suda sürüklenir; yüklü olmayan parçada bekler (önceden boşluğa düşüp kayboluyordu); bloğun içinde kalırsa üste çıkar.
+- **Tekneler** akan suda akış yönüne yavaşça sürüklenir.
+- Canlıların ve yerdeki eşyaların sürtünmesi kare hızından bağımsız hâle getirildi (düşük kare hızında savrulma daha uzun sürüyordu).
+- **Ölçüm:** havada kurulan sınama alanında yürüme, durma, koşarak zıplama, kenar sonrası zıplama, suya düşüş, suda batma, eşyanın yüzmesi, geri itme ve iniş çökmesi ölçüldü; uzun oturum taraması tekrarlandı, hata çıkmadı.
+
 ## 42.0 (0.42.0): Hatalar ve kararlılık (geliştirme planı 1. aşama)
 - **Kayıt güvenliği:** dünyanın yedek kopyası (`~yedek`) artık açılıştan önce değil, dünya hatasız yüklendikten sonra yazılır; bozuk bir kayıt yedeğin üzerine yazılmaz. Kayıt okunamaz ya da dünya kurulurken hata çıkarsa dünya son başarılı açılıştaki hâliyle açılır ve bildirim gösterilir; yedek de yoksa Dünyalar ekranına dönülür ve hata açıklanır (önceden yükleme ekranında kalınabiliyordu).
 - Kayıtlar sıraya girer; aynı anda iki kayıt yazılmaz. "Kaydet ve Çık" sürmekte olan kaydın ardından en güncel durumu yazar.
@@ -130,7 +143,7 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 - Tekneden inerken birikmiş düşüş mesafesi sıfırlanır (inişte beklenmeyen düşme hasarı alınmaz).
 - **Çok oyunculu:** sandık açıkken içeriği değişince sunucuya hemen bildirilir ve oyuncu kaydı da gönderilir. Bağlantı sandık açıkken koparsa önceden sandıktan alınan eşyalar hem sandıkta hem çantada kalabiliyor (çoğalma) ya da sandığa konanlar kaybolabiliyordu. İmleçteki eşya istemci kaydına da girer.
 - **Denetim:** uzun oturum taraması (yürüyüş, pencereler, gece savaşı, düşen kum, köy, liman, zindan, batık, tapınak, kule, kamp, Lanetli Ada, fırtına, Kanlı Ay, meteor, Yeraltı Diyarı'na gidiş-dönüş, hızlandırılmış 6 gün, 2400 blokluk gezinti, ölüm, yeniden doğma, kaydet ve yeniden açma) iki ayrı tohumda yapıldı: sayfa hatası 0, bellek kullanımı oturum boyunca sabit (sızıntı yok), kayıt ve yeniden açmada blok değişiklikleri eksiksiz. Bozuk kayıt, imleçte eşya, dünyanın altına düşme ve bloğa gömülme senaryoları ayrıca sınandı.
-- Köy baskınları geliştirme planına göre 0.46 sürümünde ele alınacaktır; şimdilik kapalıdır.
+- Köy baskınları kapalı kalır (ileride ayrıca değerlendirilecektir).
 
 ## 41.12 (0.41.12): Dünya oluşumu hata taraması ve akan su canlandırması
 Tohum 4122432088 başta olmak üzere üç tohumda doğma noktası çevresindeki yaklaşık 1900 parça otomatik olarak tarandı; bulunan hatalar düzeltildi:

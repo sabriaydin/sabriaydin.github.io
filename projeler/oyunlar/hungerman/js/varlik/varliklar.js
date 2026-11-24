@@ -432,7 +432,7 @@ export class Varliklar {
         }
       } else v.lavSure = 0;
     }
-    if (v.lavda && !T.atesBagisik) { v.hiz.y = Math.min(v.hiz.y + 14 * dt, 1.2); v.hiz.x *= 0.85; v.hiz.z *= 0.85; v.lavSayac = (v.lavSayac || 0) - dt; if (v.lavSayac <= 0) { v.lavSayac = 0.5; this.hasarVer(v, 4, null, { sessiz: true }); } }
+    if (v.lavda && !T.atesBagisik) { v.hiz.y = Math.min(v.hiz.y + 14 * dt, 1.2); { const s = Math.pow(0.85, dt * 60); v.hiz.x *= s; v.hiz.z *= s; } v.lavSayac = (v.lavSayac || 0) - dt; if (v.lavSayac <= 0) { v.lavSayac = 0.5; this.hasarVer(v, 4, null, { sessiz: true }); } }
     /* 0.39.2: Kül zombisi lavda batmaz, yüzer; kenara gelince lavdan çıkar */
     else if (v.lavda && T.lavYuzer) {
       v.hiz.y = Math.min(v.hiz.y + 26 * dt, 2.2);
@@ -788,7 +788,7 @@ export class Varliklar {
       if (!sudaMi(p.x, p.y + T.boy + 0.25, p.z)) v.hiz.y = Math.min(v.hiz.y, -0.4);
     } else {
       /* Sudan çıkan balık çırpınır ve can kaybeder */
-      v.hiz.y -= 28 * dt; v.hiz.x *= 0.9; v.hiz.z *= 0.9;
+      v.hiz.y -= 28 * dt; { const s = Math.pow(0.9, dt * 60); v.hiz.x *= s; v.hiz.z *= s; }
       v.zipSayac -= dt;
       if (v.yerde && v.zipSayac <= 0) { v.zipSayac = 0.6; v.hiz.y = 4; v.hiz.x = (Math.random() - 0.5) * 3; v.hiz.z = (Math.random() - 0.5) * 3; }
       v.kuru = (v.kuru || 0) + dt;
@@ -1230,7 +1230,7 @@ export class Varliklar {
       }
     }
     v.lavda = !!LAV[ic] || !!LAV[this.dunya.blok(Math.floor(p.x), Math.floor(p.y + 0.1), Math.floor(p.z))];
-    if (v.yerde) { h.x *= 0.92; h.z *= 0.92; }
+    if (v.yerde) { const sur = Math.pow(0.92, dt * 60); h.x *= sur; h.z *= sur; }   // 0.43.0: sürtünme kare hızından bağımsız
     if (p.y < -10) p.y = -100;
   }
 

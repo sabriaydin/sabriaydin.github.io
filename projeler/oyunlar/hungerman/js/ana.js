@@ -361,6 +361,7 @@ addEventListener('keydown', e => {
     if ((e.code === T.konsol || (e.code === 'Backquote' && !Object.values(T).includes('Backquote'))) && !e.repeat && oyun.konsol) { e.preventDefault(); if (konsol.acik) panelKapat(true); else if (!panelAcik() && !oyun.hayatta.olu) panelAc(konsol); return; }
     if (e.repeat) { tus[e.code] = true; return; }
     tus[e.code] = true;
+    if (e.code === T.zipla) ziplaBasildi = true;   // 0.43.0: iki kare arasında basılıp bırakılan zıplama kaybolmaz
     if (e.code === T.ileri) { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
     /* 0.15.1: Q envanter ve üretim, E nesnelerle etkileşim, G eşya atma */
     if (e.code === T.etkiles && !e.repeat && (envEkrani.acik || koyluEkrani.acik)) { if (envEkrani.acik) envanterAcKapa(); else panelKapat(true); return; }
@@ -798,6 +799,8 @@ function oyunBaslat(v) {
   };
   oyuncu.olaylar.adim = id => ses.adim(BLOKLAR[id] ? BLOKLAR[id].ses : 'tas');
   oyuncu.olaylar.ziplad = () => { hayatta.yor(oyuncu.kosuyor ? 0.2 : 0.05); };
+  /* 0.43.0: yüksekten inişte zemine göre iniş sesi */
+  oyuncu.olaylar.indi = (h, id) => { const t = BLOKLAR[id] ? BLOKLAR[id].ses : 'tas'; ses.adim(t); if (h > 11) setTimeout(() => ses.adim(t), 70); };
   oyuncu.olaylar.suyaGirdi = h => ses.sicrama(Math.min(1.5, h / 8));
   hayatta.olaylar.hasar = (n, sebep) => { ses.hasar(); hud.hasarParla(); basarimlar.istatEkle('hasar', n / 2); konsol.kayit('oyuncu', 'Oyuncu hasar aldı', { seviye: 'uyari', alan: { miktar: n, sebep: sebepAdi(sebep), can: `${Math.max(0, Math.ceil(hayatta.can))}/20` } }); };
   hayatta.olaylar.olum = sebep => olum(sebep);
@@ -1079,6 +1082,7 @@ function otoCozunurluk(t) {
   oto.t0 = t; oto.kare = 0;
 }
 const gecici = new THREE.Vector3();
+let ziplaBasildi = false;
 /* 0.42.0: karede çıkan hata konsola ayrıntısıyla yazılır; aynı hata her karede tekrar bildirilmez */
 const kareHatalari = new Map();
 function dongu(t) {
@@ -1142,9 +1146,10 @@ function adim(t) {
     /* Çok oyunculu: yatakta beklerken hareket edilince kalkılır; gündüz olunca da kalkılır */
     if (o.yatakta && (!kilitli ? false : (basili(tus, 'ileri') || basili(tus, 'sol') || basili(tus, 'geri') || basili(tus, 'sag') || basili(tus, 'zipla') || basili(tus, 'egil'))) || (o.yatakta && (((o.zaman < 0.52 || o.zaman > 0.97) && !o.hava.firtina) || o.hayatta.olu))) yataktanKalk();
     const g = kilitli && o.uyku <= 0 && !o.yatakta ? {
-      ileri: basili(tus, 'ileri'), geri: basili(tus, 'geri'), sol: basili(tus, 'sol'), sag: basili(tus, 'sag'), zipla: basili(tus, 'zipla'),   // 0.30.7: değiştirilebilir tuşlar
+      ileri: basili(tus, 'ileri'), geri: basili(tus, 'geri'), sol: basili(tus, 'sol'), sag: basili(tus, 'sag'), zipla: basili(tus, 'zipla') || ziplaBasildi,   // 0.30.7: değiştirilebilir tuşlar
       kos: basili(tus, 'kos') || kosKilit, egil: basili(tus, 'egil'), kosabilir: o.hayatta.aclik > 6 && !o.hayatta.etki('kirik')
     } : { kosabilir: false };
+    ziplaBasildi = false;
     const zirh = o.envanter.zirh;
     g.palet = !!(zirh[3] && zirh[3].id === 457);
     /* Tekne: binilirken oyuncu fiziği yerine tekne sürülür; C ile inilir */
@@ -1529,8 +1534,11 @@ function yerelHasar(n, turAd, agu, kx, kz) {
     H.etkiEkle('kanama', 40);
   }
   if (n > 0 && Number.isFinite(kx)) o.hud.hasarYonu(kx - o.oyuncu.konum.x, kz - o.oyuncu.konum.z, o.oyuncu.yaw);
-  const dx = o.oyuncu.konum.x - kx, dz = o.oyuncu.konum.z - kz, l = Math.hypot(dx, dz) || 1;
-  o.oyuncu.hiz.x += dx / l * 7; o.oyuncu.hiz.z += dz / l * 7; o.oyuncu.hiz.y = Math.max(o.oyuncu.hiz.y, 4.5);
+  /* 0.43.0: geri itme vuruşun gücüne ve saldıranın iriliğine göre; zırh savrulmayı biraz azaltır */
+  if (Number.isFinite(kx) && !o.oyuncu.ucus) {
+    const iri = T && (T.boss || T.boy > 2.2) ? 1.35 : 1, guc = Math.min(1.6, (0.7 + 0.08 * n) * iri) * (1 - Math.min(0.3, o.envanter.zirhPuani() / 60));
+    o.oyuncu.geriIt(kx, kz, guc);
+  }
 }
 function hataPaneli(o) {
   const p = o.oyuncu.konum, k = o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {});
