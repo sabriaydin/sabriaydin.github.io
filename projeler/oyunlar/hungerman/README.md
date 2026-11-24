@@ -2,6 +2,8 @@
 
 Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta kalma oyunu. Kurulum gerektirmez; dosyalar bir web sunucusundan (GitHub Pages dahil) yayınlandığında çalışır.
 
+> Tanıtım sitesi: klasörün `index.html` dosyası oyunun tanıtım sitesidir (rehber, güncellemeler, sık sorulanlar); oyun `oyna.html` sayfasında açılır. Yeni bir sürüm yayınlandığında `site/gecmis.js` dosyasının başına o sürümün kısa notu eklenir.
+
 > Not: Oyun `file://` ile (dosyaya çift tıklayarak) açılırsa tarayıcı arka plan işçilerini engeller. Sitede yayınlandığında veya yerel bir sunucuyla açıldığında sorunsuz çalışır.
 
 ## 1. aşama (0.1.0)
@@ -1021,7 +1023,12 @@ Yeni aşamalar istek üzerine belirlenir.
 ## Klasör yapısı
 
 ```
-index.html            Menüler ve oyun ekranı
+index.html            Tanıtım sitesinin ana sayfası (menüdeki HungerMan bağlantısı buraya gelir)
+rehber.html           Oyun rehberi
+guncellemeler.html    Güncelleme geçmişi (site/gecmis.js'den çizilir)
+404.html              Bulunamadı sayfası
+site/                 Tanıtım sitesinin stili (stil.css), betiği (site.js), güncelleme geçmişi (gecmis.js) ve ekran görüntüleri (gorsel/)
+oyna.html             Oyunun kendisi: menüler ve oyun ekranı
 css/oyun.css          Arayüz stilleri
 lib/                  Three.js (r169, MIT lisansı), PeerJS (1.5.4, MIT lisansı; yalnız çok oyunculuda yüklenir)
 ses/efekt/            Ses efekti kayıtları (Kenney, CC0)

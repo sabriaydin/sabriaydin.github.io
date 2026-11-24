@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Güncellemeler · HungerMan</title>
+<meta name="description" content="HungerMan'in ilk sürümden bugüne bütün güncellemeleri.">
+<meta name="theme-color" content="#0e1512">
+<script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site/stil.css">
+</head>
+<body>
+<nav><div class="kap">
+  <a class="marka" href="index.html"><i></i>HungerMan</a>
+  <button id="menuAc" type="button" aria-label="Menü" aria-expanded="false">☰</button>
+  <div class="baglar">
+    <a class="geri" href="../../../index.html">← Bloga Dön</a>
+    <a href="index.html#oyun">Oyun</a>
+    <a href="rehber.html">Rehber</a>
+    <a class="etkin" href="guncellemeler.html">Güncellemeler</a>
+    <a href="index.html#sss">SSS</a>
+    <a class="dugme" href="oyna.html">Oyna</a>
+  </div>
+</div></nav>
+
+<header class="sayfaBas"><div class="kap">
+  <h1>Güncellemeler</h1>
+  <p>İlk sürümden bugüne <span data-sayi>bütün</span> güncelleme. En yenisi en üstte. Belli bir şeyi arıyorsanız aşağıya yazın, "köpek" ya da "elektrik" gibi.</p>
+</div></header>
+
+<main class="kap" style="padding-top:34px;padding-bottom:80px;max-width:880px">
+  <div class="arac"><input id="ara" type="search" placeholder="Güncellemelerde ara…" aria-label="Güncellemelerde ara"></div>
+  <div data-gecmis></div>
+</main>
+
+<footer><div class="kap">
+  <span>© <span data-yil></span> HungerMan · Sürüm <span data-surum></span></span>
+  <span><a href="index.html">Ana sayfa</a> · <a href="rehber.html">Rehber</a> · <a href="oyna.html">Oyna</a></span>
+</div></footer>
+<script src="site/gecmis.js"></script>
+<script src="site/site.js"></script>
+</body>
+</html>

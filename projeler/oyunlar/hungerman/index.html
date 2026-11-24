@@ -2,464 +2,143 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>HungerMan</title>
-<meta name="description" content="HungerMan: tarayıcıda oynanan, her seferinde rastgele oluşan açık dünya hayatta kalma oyunu.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HungerMan: tarayıcıda açık dünya hayatta kalma oyunu</title>
+<meta name="description" content="HungerMan, tarayıcıda kurulum gerektirmeden oynanan, her dünyası tohumdan yeniden üretilen bir hayatta kalma oyunu. Rehberler, güncelleme geçmişi ve oyun bağlantısı.">
+<meta property="og:title" content="HungerMan">
+<meta property="og:description" content="Tarayıcıda oynanan açık dünya hayatta kalma oyunu. Kurulum yok, hesap yok.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0e1512">
+<script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/oyun.css">
+<link rel="stylesheet" href="site/stil.css">
 </head>
 <body>
-<canvas id="oyun"></canvas>
-
-<!-- Oyun içi gösterge -->
-<div id="hud" hidden>
-  <div id="pusulaKap">
-    <canvas id="pusulaTuval" aria-label="Pusula"></canvas>
-    <div id="pusulaDerece">K · 0°</div>
+<nav><div class="kap">
+  <a class="marka" href="index.html"><i></i>HungerMan</a>
+  <button id="menuAc" type="button" aria-label="Menü" aria-expanded="false">☰</button>
+  <div class="baglar">
+    <a class="geri" href="../../../index.html">← Bloga Dön</a>
+    <a href="#oyun">Oyun</a>
+    <a href="rehber.html">Rehber</a>
+    <a href="guncellemeler.html">Güncellemeler</a>
+    <a href="#sss">SSS</a>
+    <a class="dugme" href="oyna.html">Oyna</a>
   </div>
-  <div id="gorevIzleyici"></div>
-  <div id="tekneIpucu" hidden>İnmek için <b>C</b></div>
-  <div id="sagUst">
-    <div id="geceUyari" hidden></div>
-    <div id="konumDeger"></div>
-    <div id="miniHarita"><canvas id="miniTuval" aria-label="Mini harita"></canvas></div>
-    <div id="isiGosterge" hidden><i></i><b></b><small></small></div>
-    <div id="saat">
-      <svg id="gunHalka" viewBox="0 0 20 20" aria-hidden="true">
-        <circle class="iz" cx="10" cy="10" r="8"/>
-        <circle id="gunYay" class="yay" cx="10" cy="10" r="8" stroke-dasharray="50.27" stroke-dashoffset="50.27" transform="rotate(-90 10 10)"/>
-        <circle class="cisim" cx="10" cy="10" r="3.4"/>
-        <circle class="golge" cx="11.6" cy="8.6" r="2.9"/>
-      </svg>
-      <b id="saatDeger">06:00</b><i class="ayrac"></i><span id="gunDeger">1. gün</span><span id="evreDeger">Şafak</span><span id="havaDeger" class="hava" hidden></span><span id="zhizDeger" class="hava zhiz" hidden title="Zaman hızı (geliştirici)"></span>
+</div></nav>
+
+<header class="kahraman">
+  <div class="arka" aria-hidden="true"></div>
+  <div class="kap">
+    <h1>Hunger<span>Man</span></h1>
+    <p class="alt">Bir tohum yazıyorsunuz, karşınıza daha önce kimsenin görmediği bir kıta çıkıyor. Gerisi size kalmış.</p>
+    <div class="satir">
+      <a class="dugme" href="oyna.html">▶ Hemen Oyna</a>
+      <a class="dugme ikincil" href="rehber.html">Rehberi Oku</a>
+      <span class="rozet">Sürüm <b data-surum>0.41</b> · tarayıcıda çalışır</span>
     </div>
   </div>
-  <div id="yanmaEfekt"></div>
-  <div id="adaKarartma"></div>
-  <div id="ayazEfekt"></div>
-  <div id="sicakEfekt"></div>
-  <div id="gokParla"></div>
-  <div id="hasarYon"></div>
-  <div id="tilsimHalka" hidden></div>
-  <div id="olumPerde"></div>
-  <div id="gecitEfekt"></div>
-  <div id="bossCubuk" hidden><b id="bossAd"></b><div class="bossDis"><i id="bossCan"></i></div></div>
-  <div id="bakilanAd" hidden></div>
-  <div id="enerjiBilgi" hidden></div>
-  <div id="kabloIpucu" hidden></div>
-  <div id="ogretici" hidden><b></b><p></p><button type="button">Gizle</button></div>
-  <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><s id="hedefIz"></s><i id="hedefCan"></i></div></div>
-  <div id="uyku"></div>
-  <div id="nisan"></div>
-  <div id="suAlti"></div>
-  <div id="hasarParla"></div>
-  <div id="altPanel">
-    <div id="durumlar">
-      <div id="solDurum"><div id="zirhSira" class="simgeSira" aria-label="Zırh"></div><div id="canlar" class="simgeSira" aria-label="Can"></div></div>
-      <div id="sagDurum"><div id="oksijen" class="simgeSira" aria-label="Oksijen"></div><div id="aclik" class="simgeSira ters" aria-label="Açlık"></div></div>
-    </div>
-    <div id="xpCubuk" aria-label="Deneyim"><i id="xpDolu"></i><b id="xpSeviye"></b></div>
-    <div id="cubuk"></div>
+</header>
+
+<main>
+<section id="oyun"><div class="kap giris">
+  <div>
+    <span class="etiket">Nedir bu oyun?</span>
+    <h2>Elinizde hiçbir şey yokken başlarsınız</h2>
+    <p>HungerMan tarayıcıda açılan, bloklardan oluşan bir hayatta kalma oyunu. İndirmeniz, kurmanız ya da hesap açmanız gerekmiyor. Sayfayı açıp yeni bir dünya oluşturuyorsunuz, o kadar.</p>
+    <p>İlk gün ağaç kesip bir masa yaparsınız. Hava kararmadan bir sığınak bulsanız iyi olur, çünkü geceleri zombiler çıkıyor. Sonra madenler, köyler, uzak adalar, tapınaklardaki bosslar geliyor. Bir noktada kendinizi tarlanızı sulayan fıskiyeye kablo çekerken bulabilirsiniz.</p>
+    <p>Dünya kaydı tarayıcınızda tutulur. Kaldığınız yerden devam edersiniz.</p>
   </div>
-  <div id="etkiler"></div>
-  <div id="tarifTakip" hidden></div>
-  <div id="esyaAdi"></div>
-  <div id="bildirimler"></div>
-  <div id="basarimKutu" hidden><img alt=""><div><small>Başarım kazanıldı</small><b></b><span></span></div></div>
-  <pre id="hata" hidden></pre>
-  <div id="fps" hidden></div>
-  <div id="tikla" hidden><b>Devam etmek için tıklayın</b><span>Duraklatmak için Esc</span></div>
-  <!-- 0.19.0: dokunmatik kontroller -->
-  <div id="dokun" hidden>
-    <div id="dkKol"><div id="dkTopuz"></div></div>
-    <div id="dkUst">
-      <button type="button" data-dk="envanter" aria-label="Çanta">Çanta</button><button type="button" data-dk="etkiles" aria-label="Etkileşim">E</button><button type="button" data-dk="at" aria-label="Eşya at">At</button><button type="button" data-dk="harita" aria-label="Harita">Harita</button><button type="button" data-dk="kitap" aria-label="Tarif Kitabı">Kitap</button><button type="button" data-dk="menu" aria-label="Duraklat">❚❚</button>
-    </div>
-    <div id="dkSag">
-      <button type="button" data-dk="kir" class="dkBuyuk" aria-label="Kır">Kır</button><button type="button" data-dk="kullan" class="dkBuyuk" aria-label="Kullan">Kullan</button>
-      <button type="button" data-dk="egil" aria-label="Eğil">Eğil</button><button type="button" data-dk="zipla" class="dkBuyuk" aria-label="Zıpla">Zıpla</button>
-    </div>
-    <div id="dkYatay">Daha rahat oynamak için cihazı yatay çeviriniz.</div>
+  <figure class="kart" style="overflow:hidden;margin:0"><img src="site/gorsel/ekran-1.webp" alt="Bahar başında bir meşe ormanı" loading="lazy" width="1280" height="720"></figure>
+</div></section>
+
+<section class="koyu"><div class="kap">
+  <div class="ust">
+    <span class="etiket">Oyunda neler var</span>
+    <h2>Kısaca anlatmak zor, ama deneyelim</h2>
+    <p>Her sürümde üstüne bir şeyler ekleniyor. Bunlar sadece başlıcaları.</p>
   </div>
-  <div id="sohbet"><div id="sohbetListe"></div><input id="sohbetGiris" maxlength="200" placeholder="Mesaj yazınız · Enter: gönder · Esc: vazgeç" autocomplete="off" hidden></div>
-  <div id="oyuncuListesi" hidden></div>
+  <div class="izgara">
+    <div class="kart ozellik"><i class="sim" style="--u:#e8eef0;--a:#8a8f93"></i><h3>Her seferinde yeni bir kıta</h3><p>Sivri dağlar, kanyonlar, nehirler, göller ve 25 biyom. Aynı tohumu yazan herkes aynı dünyayı görür.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#d9694f;--a:#8c3a2a"></i><h3>Açlık ve soğuk</h3><p>Yemek bulmanız lazım. Vücut ısınız da önemli: karlı dağda gece üşür, çölde öğlen bunalırsınız.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#b98a55;--a:#7a5532"></i><h3>Yaşayan köyler</h3><p>Köylülerle takas yapın, görev alın. İtibarınız arttıkça fiyatlar düşer, yeni mallar açılır.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#6f4fa8;--a:#2a1e3d"></i><h3>Tapınaklar ve bosslar</h3><p>Firavun, Buz Büyücüsü, Haydut Reisi, Taş Muhafız. En sonda Lanetli Ada'da sizi bekleyen Kül Devi.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#f2913d;--a:#9b5326"></i><h3>Elektrik</h3><p>Güneş paneli, rüzgâr türbini, bataryalar, lambalar, otomatik taret. Kabloları siz çekersiniz.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#e3c45a;--a:#7a5532"></i><h3>Tarım ve mutfak</h3><p>Domatesten karpuza onlarca ekin, meyve ağaçları. Unu öğütüp pide de yapabilirsiniz.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#e07a2e;--a:#6b4a2b"></i><h3>Mevsimler</h3><p>28 günlük bir yıl. Sonbaharda yapraklar kızarır, kışın göller donar, ekinlerin çoğu büyümez.</p></div>
+    <div class="kart ozellik"><i class="sim" style="--u:#5fb3d6;--a:#2f5d70"></i><h3>Arkadaşlarla</h3><p>Dünyanızı bir kodla açın, 8 kişiye kadar birlikte oynayın. Ayrı bir sunucu gerekmiyor.</p></div>
+  </div>
+</div></section>
+
+<section><div class="kap">
+  <div class="ust">
+    <span class="etiket">Ekran görüntüleri</span>
+    <h2>Oyundan birkaç kare</h2>
+    <p>Hepsi oyunun içinden, olduğu gibi alındı. Büyütmek için üstüne tıklayın.</p>
+  </div>
+  <div class="galeri">
+    <figure><img src="site/gorsel/ekran-2.webp" alt="Karla kaplı tayga" loading="lazy"><figcaption>Karlı tayga</figcaption></figure>
+    <figure><img src="site/gorsel/ekran-3.webp" alt="Yamaçta kurulmuş bir köy" loading="lazy"><figcaption>Yamaçta bir köy, arkada deniz feneri</figcaption></figure>
+    <figure><img src="site/gorsel/ekran-4.webp" alt="Kızıl kayalıklar" loading="lazy"><figcaption>Kızıl Kayalıklar</figcaption></figure>
+    <figure><img src="site/gorsel/ekran-5.webp" alt="Savanda bir göl" loading="lazy"><figcaption>Savanda nilüferli bir göl</figcaption></figure>
+    <figure><img src="site/gorsel/ekran-6.webp" alt="Sonbahar ormanı" loading="lazy"><figcaption>Sonbahar Ormanı</figcaption></figure>
+  </div>
+</div></section>
+
+<section class="koyu"><div class="kap">
+  <div class="ust">
+    <span class="etiket">Başlarken</span>
+    <h2>İlk dakikalar</h2>
+  </div>
+  <div class="adimlar">
+    <div class="kart adim"><h3>Dünyanızı kurun</h3><p>Ana menüde Dünyalar &gt; Yeni Dünya. Tohumu boş bırakırsanız rastgele seçilir. Zorluğu sonradan değiştiremezsiniz, ona göre seçin.</p></div>
+    <div class="kart adim"><h3>Ağaca vurun</h3><p>Sol tıkı basılı tutup kütük toplayın. <kbd>Q</kbd> ile envanteri açıp kalas, çubuk ve Üretim Masası yapın.</p></div>
+    <div class="kart adim"><h3>Geceye hazırlanın</h3><p>Bir gün 20 dakika sürüyor. Karanlık çökmeden meşale yakın, kapısı olan bir yere girin.</p></div>
+    <div class="kart adim"><h3>Gerisi sizde</h3><p>Takıldığınız yerde <a href="rehber.html">rehbere</a> bakabilirsiniz. Her şeyi anlatmıyor ama işinizi görür.</p></div>
+  </div>
+</div></section>
+
+<section><div class="kap">
+  <div class="ust">
+    <span class="etiket">Son güncellemeler</span>
+    <h2>Neler değişti</h2>
+    <p>Bütün liste <a href="guncellemeler.html">güncellemeler sayfasında</a>.</p>
+  </div>
+  <div class="surumler" data-son="3"></div>
+</div></section>
+
+<section id="sss" class="koyu"><div class="kap">
+  <div class="ust">
+    <span class="etiket">Sık sorulanlar</span>
+    <h2>Sorular</h2>
+  </div>
+  <div class="sss">
+    <details class="kart"><summary>Ücretli mi?</summary><div><p>Hayır. Reklam da yok, hesap da yok.</p></div></details>
+    <details class="kart"><summary>Hangi tarayıcıda çalışır?</summary><div><p>Güncel Chrome, Edge, Firefox ve Safari'de çalışıyor. WebGL2 desteği gerekli. Klavye ve fareyle oynamak en rahatı ama telefon ve tablet için dokunmatik kontroller de var.</p></div></details>
+    <details class="kart"><summary>Kayıtlarım nerede duruyor?</summary><div><p>Tarayıcınızın kendi deposunda. Bizim tarafımıza bir şey gelmiyor. Tarayıcı verilerini temizlerseniz dünyalar da silinir, o yüzden önemli dünyalarınızı Dünyalar ekranından yedekleyin.</p></div></details>
+    <details class="kart"><summary>Oyun takılıyor, ne yapabilirim?</summary><div><p>Ayarlar &gt; Görüntü bölümünden görüş mesafesini düşürün, ilk fark orada hissedilir. Grafik ön ayarını bir kademe indirmek ve çözünürlüğü Otomatik'te bırakmak da işe yarar. Dizüstü bilgisayarda tarayıcının harici ekran kartını kullandığından emin olun.</p></div></details>
+    <details class="kart"><summary>Arkadaşlarımla nasıl oynarım?</summary><div><p>Biriniz dünyasını açar, duraklatma menüsünden "Dünyayı Arkadaşlara Aç" der. Çıkan 6 karakterlik kodu diğerleri Çok Oyunculu ekranına yazar. Ayrıntısı <a href="rehber.html#cok-oyunculu">rehberde</a>.</p></div></details>
+    <details class="kart"><summary>Eski dünyam yeni sürümde bozulur mu?</summary><div><p>Bozulmaz. 0.41 ile dünya üreticisi baştan yazıldı ama eski dünyalar eski üreticiyle açılmaya devam ediyor. Yeni araziyi görmek için yeni bir dünya oluşturmanız yeterli.</p></div></details>
+    <details class="kart"><summary>Bir hata buldum.</summary><div><p>Oyunda <kbd>F3</kbd> ile konumu, Ayarlar ya da Dünyalar ekranından tohumu görebilirsiniz. Hatayı bunlarla birlikte yazarsanız bulmamız çok kolaylaşır.</p></div></details>
+  </div>
+</div></section>
+
+<div class="cagri">
+  <h2>Tohumunuz hazır mı?</h2>
+  <p>Yükleme birkaç saniye sürer. Sesi açmayı unutmayın.</p>
+  <a class="dugme" href="oyna.html">▶ Oyunu Başlat</a>
 </div>
+</main>
 
-<!-- Envanter ve üretim -->
-<!-- 0.30.4: simgelerin üzerine gelindiğinde açılan bilgi baloncuğu -->
-<div id="balon" role="tooltip" hidden></div>
-<div id="envanterEkrani" class="kaplama" hidden>
-  <div class="pencere envPencere">
-    <section class="envSol">
-      <header><h2>Envanter</h2><input type="search" id="envAra" placeholder="Eşya ara" autocomplete="off"><button type="button" class="envIslem" id="envSirala" title="Çantadaki eşyaları birleştirir ve türüne göre sıralar">Sırala</button></header>
-      <!-- 0.30.0: karakter bölümü: zırh yuvaları, canlı önizleme ve durum -->
-      <div class="karakterSatir">
-        <div id="envZirh" class="izgara zirhIzgara"></div>
-        <div id="karakterOnizleme" class="karakterKutu" title="Sürükleyerek döndürünüz · çift tık: öne çevir"></div>
-        <div id="envKiyafet" class="izgara zirhIzgara kiyafetIzgara"></div>
-        <div id="karakterBilgi" class="karakterBilgi"></div>
-      </div>
-      <div class="envBolum"><span>Çanta</span><span id="cantaDoluluk"></span></div>
-      <div id="envIzgara" class="izgara"></div>
-      <div class="envBolum"><span>Hızlı erişim</span><span title="İmleç bir yuvanın üzerindeyken">1-9: çubukla değiştir · X: bir tane at · Shift + X: yığını at</span></div>
-      <div id="envCubuk" class="izgara cubukIzgara"></div>
-      <p class="ipucuMetin">Sol tık: al / bırak · Sağ tık: yarısını al / bir tane bırak · Çift tık: aynı eşyaları topla · Shift + tık: çubuk ile çanta arasında taşı, zırhı giy / çıkar · Pencere dışına tık: yere at</p>
-    </section>
-    <section class="envSag">
-      <!-- 0.30.2: yeni üst bölüm: istasyon simgeleri, arama çubuğu, sıralama düğmeleri, kategori şeridi -->
-      <header class="uretimBaslik"><div><h2>Üretim</h2><small id="uretimOzet"></small></div><div id="istasyonDurum" class="istasyonlar"></div></header>
-      <!-- 0.30.1: arama, sıralama, süzgeç, ayrıntı paneli -->
-      <div class="uretimUst">
-        <label class="aramaKutu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input id="tarifAra" type="search" placeholder="Tarif ya da malzeme ara" autocomplete="off"></label>
-        <div id="tarifSira" class="tSegment" role="group" aria-label="Sıralama"><button type="button" data-sira="oneri" class="on" title="Önce yapılabilenler">Öneri</button><button type="button" data-sira="ad" title="Ada göre">A–Z</button><button type="button" data-sira="adet" title="Yapılabilir miktara göre">Adet</button></div>
-        <label class="uretimSecim" title="Yalnızca malzemesi ve istasyonu hazır olan tarifler"><input type="checkbox" id="tarifYapilir"><i></i><span>Yapılabilenler</span></label>
-      </div>
-      <div id="tarifSekme" class="sekmeler"></div>
-      <div class="uretimGovde">
-        <div id="tarifListe"></div>
-        <aside id="tarifAyrinti" class="tarifAyrinti"></aside>
-      </div>
-    </section>
-    <!-- 0.30.4: sandık ekranı yeniden tasarlandı: başlık kartı, doluluk, düzenli ızgara, işlem çubuğu, içindekiler özeti -->
-    <section class="envSandik" hidden>
-      <header class="sandikBaslik"><div class="sandikSimge" id="sandikSimge"></div><div><h2>Sandık</h2><small id="sandikAlt"></small></div></header>
-      <div class="sandikDoluluk"><i><em id="sandikDolulukCubuk"></em></i><span id="sandikDolulukMetin"></span></div>
-      <p class="sandikKural" id="sandikKural" hidden></p>
-      <div class="sandikKutu"><div id="sandikIzgara" class="izgara"></div></div>
-      <div class="sandikIslem">
-        <button type="button" class="sIslem" data-sandik="al" data-balon="<b>Tümünü al</b><em>Sandıktaki her şeyi çantaya alır</em>"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Tümünü al</button>
-        <button type="button" class="sIslem" data-sandik="koy" data-balon="<b>Çantayı boşalt</b><em>Çantadaki eşyaları sandığa koyar (hızlı erişim çubuğu hariç)</em>"><svg viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg>Çantayı boşalt</button>
-        <button type="button" class="sIslem" data-sandik="benzer" data-balon="<b>Benzerlerini koy</b><em>Yalnızca sandıkta zaten bulunan türdeki eşyaları koyar</em>"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h10M4 17h6M17 10l3 3-3 3"/></svg>Benzerlerini koy</button>
-        <button type="button" class="sIslem" data-sandik="sirala" data-balon="<b>Sırala</b><em>Yığınları birleştirir ve türe göre dizer</em>"><svg viewBox="0 0 24 24"><path d="M7 4v16M4 17l3 3 3-3M17 20V4M14 7l3-3 3 3"/></svg>Sırala</button>
-      </div>
-      <div class="sandikOzet"><h4>İçindekiler <small>tıklanan eşyanın tamamı çantaya alınır</small></h4><div id="sandikOzet"></div></div>
-      <p class="ipucuMetin">Shift + tık: sandık ile çanta arasında taşı · Çift tık: aynı eşyaları topla · Yuvanın üzerindeyken 1-9: çubukla değiştir</p>
-    </section>
-    <section class="envOrs" hidden>
-      <header><h2>Örs</h2><span class="ipucuMetin">Eşyalar, malzemesiyle ya da aynı türden ikinci bir eşyayla onarılır</span></header>
-      <div id="orsIzgara" class="izgara"></div>
-      <div id="orsBilgi"></div>
-      <p class="ipucuMetin">Her malzeme dayanımın dörtte birini onarır ve 1 deneyim seviyesi tutar. İki aynı eşyanın birleştirilmesi 2 seviye tutar; büyüler birleşir (aynı seviyedeki iki büyü bir seviye yükselir).</p>
-    </section>
-    <section class="envBuyu" hidden>
-      <header><h2>Büyü Masası</h2><span class="ipucuMetin">Alet, silah ya da zırh deneyim seviyesi ve parıltı kristali karşılığında büyülenir</span></header>
-      <div id="buyuIzgara" class="izgara"></div>
-      <div id="buyuSecenek"></div>
-      <p class="ipucuMetin">Sol yuvaya büyülenecek eşya, sağ yuvaya parıltı kristali konur. Seçenekler her büyülemeden sonra yenilenir. Büyülü bir eşya yeniden büyülenemez; büyüler örste aynı türden eşyalarla birleştirilebilir.</p>
-    </section>
-    <button class="kapat" id="envKapat" aria-label="Kapat">✕</button>
-  </div>
-</div>
+<div id="buyuk" role="dialog" aria-label="Büyük görüntü"><div><img alt=""><p></p></div></div>
 
-<!-- Köylü: ticaret ve görev -->
-<div id="koyluEkrani" class="kaplama" hidden>
-  <div class="pencere koyluPencere">
-    <header class="kBaslik">
-      <div id="kAvatar" class="kAvatar"></div>
-      <div class="kKimlik"><h2 id="kAd"></h2><span id="kAlt" class="kAlt"></span><div id="kSeviye" class="kSeviye"></div></div>
-      <div class="kSag"><span id="kItibar" class="rozet"></span><div id="kKademe" class="kKademe"></div></div>
-    </header>
-    <p id="kSoz" class="koyluSoz"></p>
-    <div class="kUst"><div class="sekmeler" id="kSekme"><button type="button" data-s="takas">Ticaret</button><button type="button" data-s="gorev">Görev</button></div><button type="button" id="kKonakla" class="kKonakla" hidden data-balon="<b>Köyde konakla</b><em>Doğma noktası köye ayarlanır; gece ise sabaha kadar uyunur.</em>">Köyde konakla</button></div>
-    <div id="kIcerik"></div>
-    <div id="kSikke" class="kSikke"></div>
-    <button class="kapat" id="kKapat" aria-label="Kapat">✕</button>
-  </div>
-</div>
-
-<!-- Geliştirici konsolu -->
-<div id="konsol" hidden>
-  <div class="konsolPencere">
-    <header><b>Geliştirici Konsolu</b><span id="konsolBilgi"></span></header>
-    <div class="konsolArac" id="konsolArac">
-      <input type="search" id="kAra" placeholder="Kayıtlarda ara" autocomplete="off" spellcheck="false" aria-label="Kayıtlarda ara">
-      <select id="kSev" aria-label="En düşük düzey"><option value="ayrinti">Tüm düzeyler</option><option value="bilgi">Bilgi ve üstü</option><option value="uyari">Uyarı ve üstü</option><option value="kritik">Yalnızca kritik</option></select>
-      <details class="kTurler" id="kTurler"><summary id="kTurlerAd">Türler</summary><div class="kTurListe" id="kTurListe"></div></details>
-      <span class="kSayac" id="kSayac"></span>
-      <button type="button" id="kDuraklat" title="Yeni olaylar kaydedilir ama görünüm en alta kaymaz">Duraklat</button>
-      <button type="button" id="kTemizle">Temizle</button>
-      <button type="button" id="kDisa" title="Bütün olayları .log dosyası olarak indir">Dışa aktar</button>
-    </div>
-    <div id="konsolCikti"></div>
-    <label class="konsolSatir"><span>&gt;</span><input id="konsolGirdi" autocomplete="off" spellcheck="false" placeholder="Komut yazınız (yardim)" aria-label="Komut"></label>
-  </div>
-</div>
-
-<!-- Geliştirici modu penceresi -->
-<div id="gelistirici" class="kaplama" hidden>
-  <div class="pencere dvPencere" role="dialog" aria-label="Geliştirici Modu">
-    <button class="kapat" id="dvKapat" aria-label="Kapat">✕</button>
-    <header><h2>Geliştirici Modu</h2><small id="dvDunya"></small></header>
-    <nav class="dvSekmeler" id="dvSekmeler" aria-label="Geliştirici sekmeleri"></nav>
-    <div id="dvIcerik"></div>
-    <footer class="dvAlt"><div id="dvMesaj" class="dvMesaj"></div><span><kbd>F9</kbd> kapat · <kbd>F8</kbd> konsol</span></footer>
-  </div>
-</div>
-
-<!-- Büyük harita -->
-<div id="haritaEkrani" hidden>
-  <canvas id="haritaTuval"></canvas>
-  <header class="haritaUst">
-    <div><h2>Harita</h2><span id="haritaAlan"></span></div>
-    <div class="haritaDugmeler">
-      <button type="button" data-h="yakin" title="Yakınlaştır">+</button><button type="button" data-h="uzak" title="Uzaklaştır">−</button>
-      <button type="button" data-h="ortala">Konumum</button><button type="button" data-h="kapat" title="Kapat (M / Esc)">✕</button>
-    </div>
-  </header>
-  <footer class="haritaAlt"><div id="haritaBilgi"></div><div id="haritaLejant"></div></footer>
-  <div id="yerForm" hidden>
-    <b id="yerBaslik">Yeni işaret</b><small id="yerKonum"></small>
-    <input id="yerAd" maxlength="24" autocomplete="off" spellcheck="false" aria-label="İşaret adı">
-    <div id="yerRenkler"></div>
-    <div class="yerDugmeler"><button type="button" class="dugme kucuk ana" id="yerKaydet">Kaydet</button><button type="button" class="dugme kucuk tehlike" id="yerSil">Sil</button><button type="button" class="dugme kucuk" id="yerVazgec">Vazgeç</button></div>
-  </div>
-</div>
-
-<!-- Başarımlar (0.14.0) -->
-<div id="basarimEkrani" class="kaplama" hidden>
-  <div class="pencere orta">
-    <header><h2>Başarımlar</h2><span id="basarimSayi" class="rozet"></span></header>
-    <div id="basarimListe"></div>
-    <button class="kapat" id="bKapat" aria-label="Kapat">✕</button>
-  </div>
-</div>
-
-<!-- Tarif Kitabı (0.17.0) -->
-<div id="tarifKitabi" class="kaplama" hidden>
-  <div class="pencere genis tkPencere">
-    <header><h2>Tarif Kitabı</h2><span id="tkSayi" class="rozet"></span></header>
-    <div class="tkGovde">
-      <div class="tkSol">
-        <input type="search" id="tkAra" placeholder="Eşya ara…" autocomplete="off">
-        <div id="tkSekme" class="tkSekme"></div>
-        <div id="tkIzgara"></div>
-        <div id="tkIpucu"></div>
-      </div>
-      <div id="tkAyrinti"></div>
-    </div>
-    <button class="kapat" id="tkKapat" aria-label="Kapat">✕</button>
-  </div>
-</div>
-
-<!-- Görev günlüğü -->
-<div id="gorevEkrani" class="kaplama" hidden>
-  <div class="pencere orta">
-    <header><h2>Görevler</h2></header>
-    <div id="gorevListe"></div>
-    <button class="kapat" id="gKapat" aria-label="Kapat">✕</button>
-  </div>
-</div>
-
-<!-- Ana menü -->
-<div id="anaMenu" class="ekran menuArka">
-  <!-- 0.40.9: oyunun kendi motoruyla tam çözünürlükte çekilmiş manzara; yavaş kayma ve süzülen polen parçacıkları -->
-  <div class="menuGok" aria-hidden="true"><div class="menuResim"></div><div class="menuGolge"></div><div class="menuKor"><i style="--x:8%;--g:0s;--s:14s;--k:3px"></i><i style="--x:17%;--g:-6s;--s:18s;--k:2px"></i><i style="--x:26%;--g:-11s;--s:16s;--k:3px"></i><i style="--x:35%;--g:-3s;--s:20s;--k:2px"></i><i style="--x:44%;--g:-9s;--s:15s;--k:3px"></i><i style="--x:55%;--g:-1s;--s:19s;--k:2px"></i><i style="--x:63%;--g:-13s;--s:17s;--k:3px"></i><i style="--x:72%;--g:-5s;--s:21s;--k:2px"></i><i style="--x:81%;--g:-8s;--s:16s;--k:3px"></i><i style="--x:90%;--g:-2s;--s:18s;--k:2px"></i><i style="--x:12%;--g:-15s;--s:22s;--k:2px"></i><i style="--x:68%;--g:-17s;--s:20s;--k:3px"></i></div></div>
-  <div class="menuIc">
-    <h1 class="logo">HUNGER<span>MAN</span></h1>
-    <div class="menuDugmeler">
-      <button class="dugme ana" data-git="dunyalar">Tek Oyunculu</button>
-      <button class="dugme" data-git="cok">Çok Oyunculu</button>
-      <button class="dugme" data-git="ayarlar">Ayarlar</button>
-    </div>
-    <p class="surum"><span id="surum"></span> · <a href="../../../" class="siteDon">Siteye dön</a></p>
-  </div>
-</div>
-
-<!-- Dünya listesi -->
-<div id="dunyalarEkrani" class="ekran menuArka" hidden>
-  <!-- 0.29.2: geniş dünya listesi: araç çubuğu, arama, sıralama ve kartlar -->
-  <div class="pencere menuPencere">
-    <header class="menuBaslik">
-      <div><h2 id="dunyalarBaslik">Dünyalar</h2><span class="menuAlt" id="dunyaSayi"></span></div>
-      <div class="menuIslem">
-        <button class="dugme" id="yedekYukle">Yedekten Yükle</button><input type="file" id="yedekDosya" accept=".hmdunya,.json,.gz,application/json,application/gzip" hidden>
-        <button class="dugme ana" data-git="yeni">Yeni Dünya</button>
-      </div>
-    </header>
-    <div class="dunyaArac">
-      <input type="search" id="dunyaAra" placeholder="Dünya ara (ad ya da tohum)" autocomplete="off">
-      <label>Sırala<select id="dunyaSira"><option value="son">Son oynanan</option><option value="ad">Ada göre</option><option value="gun">Gün sayısı</option><option value="yeni">Oluşturma tarihi</option></select></label>
-    </div>
-    <div id="dunyaListe" class="dunyaIzgara"></div>
-    <div class="altDugmeler menuAltDugme"><button class="dugme" data-git="ana">Ana Menü</button></div>
-  </div>
-</div>
-
-<!-- Çok oyunculu -->
-<div id="cokEkrani" class="ekran menuArka" hidden>
-  <div class="pencere orta dar">
-    <header><h2>Çok Oyunculu</h2></header>
-    <label class="alan">Oyuncu adınız<input id="cokAd" maxlength="16" autocomplete="off" spellcheck="false"></label>
-    <section class="cokBolum">
-      <h3>Bir dünyaya katıl</h3>
-      <div class="cokSatir"><input id="cokKod" maxlength="6" placeholder="Katılım kodu" autocomplete="off" spellcheck="false" aria-label="Katılım kodu"><button class="dugme ana kucuk" id="cokKatil">Katıl</button></div>
-    </section>
-    <section class="cokBolum">
-      <h3>Sunucu ol</h3>
-      <p class="aciklama">Dünyalarınızdan biri açılır ve diğer oyuncuların katılması için 6 karakterlik bir kod verilir. Oyun sırasında duraklatma menüsündeki “Dünyayı Arkadaşlara Aç” düğmesi de aynı işi yapar.</p>
-      <button class="dugme" id="cokSunucu">Dünya Seç ve Aç</button>
-    </section>
-    <p id="cokDurum" class="cokDurum" hidden></p>
-    <p class="aciklama kucukNot">Bağlantı doğrudan oyuncular arasında kurulur; ayrı bir oyun sunucusu yoktur. İlk tanışma için PeerJS'in ücretsiz eşleştirme hizmeti kullanılır. Dünya, sunucu olan oyuncunun bilgisayarında kayıtlıdır; o oyuncu çıkınca dünya kapanır.</p>
-    <div class="altDugmeler"><button class="dugme" data-git="ana">Geri</button></div>
-  </div>
-</div>
-
-<!-- Bilgi (bağlantı kesildi vb.) -->
-<div id="bilgiEkrani" class="ekran menuArka" hidden>
-  <div class="pencere orta dar">
-    <header><h2 id="bilgiBaslik">Bilgi</h2></header>
-    <p id="bilgiMetin" class="bilgiMetin"></p>
-    <div class="altDugmeler"><button class="dugme ana" id="yenidenBaglan" hidden>Yeniden Bağlan</button><button class="dugme" id="bilgiTamam">Ana Menü</button></div>
-  </div>
-</div>
-
-<!-- Yeni dünya (0.29.2: iki sütunlu geniş düzen) -->
-<div id="yeniEkrani" class="ekran menuArka" hidden>
-  <div class="pencere menuPencere">
-    <header class="menuBaslik"><div><h2>Yeni Dünya</h2><span class="menuAlt">Her dünya tohum değerinden üretilir; aynı tohum aynı haritayı verir.</span></div></header>
-    <div class="yeniIzgara">
-      <div class="yeniSutun">
-        <section class="yeniKart">
-          <h3>Dünya</h3>
-          <label class="alan">Dünya adı<input id="yeniAd" maxlength="32" value="Yeni Dünya"></label>
-          <label class="alan">Tohum <small>Boş bırakılırsa rastgele seçilir</small>
-            <span class="tohumSatir"><input id="yeniTohum" maxlength="40" placeholder="Rastgele"><button type="button" class="dugme kucuk" id="tohumZar" title="Rastgele tohum">Rastgele</button></span></label>
-        </section>
-        <section class="yeniKart">
-          <h3>Zorluk</h3>
-          <div class="zorlukSec zorlukKart" id="yeniZorluk"></div>
-        </section>
-      </div>
-      <div class="yeniSutun">
-        <section class="yeniKart">
-          <h3>Kurallar</h3>
-          <!-- 0.29.1: vücut ısısı ve geliştirici konsolu dünya ayarıdır -->
-          <label class="secim"><input type="checkbox" id="yeniVucut" checked><span>Vücut ısısı<small>Soğuk ve sıcak etkileri: üşüme, bunalma, donma ve sıcak çarpması.</small></span></label>
-          <label class="secim"><input type="checkbox" id="yeniKonsol"><span>Geliştirici konsolu (F8)<small>Bu dünyada F8 ile geliştirici konsolu açılabilir.</small></span></label>
-          <label class="secim"><input type="checkbox" id="yeniKomut" disabled><span>Komutlara izin ver<small>Konsoldaki eşya verme, ışınlanma, zaman ve uçma gibi komutlar kullanılabilir. Konsol açıkken seçilebilir.</small></span></label>
-        </section>
-        <section class="yeniKart">
-          <h3>Denge</h3>
-          <div class="dengeIzgara">
-            <label class="alan">Kanlı Ay<select id="yeniKanli" data-denge="kanliAy"></select></label>
-            <label class="alan">Meteor<select id="yeniMeteor" data-denge="meteor"></select></label>
-            <label class="alan">Vücut ısısı değişimi<select id="yeniIsi" data-denge="isiHizi"></select></label>
-          </div>
-          <p class="aciklama">Dünya ayarları dünya oluşturulduktan sonra değiştirilemez.</p>
-        </section>
-      </div>
-    </div>
-    <div class="altDugmeler menuAltDugme">
-      <button class="dugme" data-git="dunyalar">Geri</button>
-      <button class="dugme ana" id="yeniOlustur">Dünyayı Oluştur</button>
-    </div>
-  </div>
-</div>
-
-<!-- Ayarlar -->
-<div id="ayarlarEkrani" class="ekran" hidden>
-  <div class="pencere orta ayarPencere">
-    <header><h2>Ayarlar</h2></header>
-    <!-- 0.29.0: ayarlar kategorilere ayrıldı -->
-    <nav class="ayarSekmeler" id="ayarSekmeler">
-      <button type="button" data-as="goruntu" class="on">Görüntü</button><button type="button" data-as="ses">Ses</button><button type="button" data-as="kontrol">Kontroller</button><button type="button" data-as="arayuz">Arayüz</button><button type="button" data-as="oynanis">Oynanış</button>
-    </nav>
-    <div class="ayarIcerik">
-      <section class="ayarBolum" data-as="goruntu">
-        <div class="onAyar" id="grafikOnAyar"><span>Grafik ön ayarı</span><button type="button" data-on="dusuk">Düşük</button><button type="button" data-on="orta">Orta</button><button type="button" data-on="yuksek">Yüksek</button><button type="button" data-on="ultra">Ultra</button></div>
-        <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
-        <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
-        <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
-        <label class="kaydir">Parlaklık <b id="aParlakD"></b><input type="range" id="aParlak" min="0.7" max="1.4" step="0.05"></label>
-        <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
-        <p class="ayarNot">Kare hızı düşükse görüş mesafesini ya da çözünürlüğü azaltınız. Çözünürlük "Otomatik" iken kare hızına göre kendiliğinden ayarlanır.</p>
-      </section>
-      <section class="ayarBolum" data-as="ses" hidden>
-        <label class="kaydir">Ses efektleri <b id="aSesD"></b><input type="range" id="aSes" min="0" max="1" step="0.05"></label>
-        <label class="kaydir">Müzik <b id="aMuzikD"></b><input type="range" id="aMuzik" min="0" max="1" step="0.05"></label>
-        <label class="secim"><input type="checkbox" id="aArkaSessiz"> Oyun penceresi arka plandayken sesi kapat</label>
-      </section>
-      <section class="ayarBolum" data-as="kontrol" hidden>
-        <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
-        <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
-        <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
-        <!-- 0.30.7: değiştirilebilir tuş atamaları -->
-        <div class="tusBaslik"><h4>Tuş atamaları</h4><button type="button" class="envIslem" id="tusSifirla">Varsayılan tuşlar</button></div>
-        <p class="ayarNot">Değiştirmek için eylemin tuşuna tıklayıp yeni tuşa basınız (Esc: vazgeç, sağ tık: varsayılana döndür). Başka bir eylemde kullanılan tuş seçilirse iki eylemin tuşları yer değiştirir.</p>
-        <div id="tusListe" class="tusListe"></div>
-        <dl class="ayarTuslar">
-          <dt>Sol tık</dt><dd>Kırma, saldırı · elde kablo varken kablo yerleştirme</dd>
-          <dt>Sağ tık</dt><dd>Kullanma, koyma · elde kablo varken son işlemi geri alma</dd>
-          <dt>1-9 / tekerlek</dt><dd>Hızlı erişim yuvası seçimi</dd>
-          <dt>Shift + tekerlek</dt><dd>Çekilen kablonun sarkması</dd>
-          <dt>Esc</dt><dd>Duraklatma, pencereleri kapatma</dd>
-        </dl>
-      </section>
-      <section class="ayarBolum" data-as="arayuz" hidden>
-        <label class="kaydir">Arayüz boyutu <b id="aOlcekD"></b><input type="range" id="aOlcek" min="0.85" max="1.25" step="0.05"></label>
-        <label class="secim"><input type="checkbox" id="aFps"> Kare hızını (FPS) göster</label>
-        <label class="secim"><input type="checkbox" id="aMini"> Mini haritayı göster</label>
-        <label class="secim"><input type="checkbox" id="aBakilan"> Bakılan nesnenin adını göster</label>
-        <label class="secim"><input type="checkbox" id="aOnizleme"> Yerleştirme önizlemesi (cihazlar ve yönlü bloklar; R tuşu yönü çevirir)</label>
-        <label class="secim"><input type="checkbox" id="aEnerji"> Elektrikli cihaz bilgi panelini göster</label>
-      </section>
-      <section class="ayarBolum" data-as="oynanis" hidden>
-        <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
-        <p class="ayarNot">Zorluk, Kanlı Ay, meteor sıklığı, vücut ısısı ve geliştirici konsolu her dünya için ayrıdır: dünya oluşturulurken seçilir ve sonradan değiştirilemez.</p>
-      </section>
-    </div>
-    <div class="altDugmeler"><button class="dugme" id="ayarSifirla">Varsayılanlara dön</button><button class="dugme ana" id="ayarTamam">Tamam</button></div>
-  </div>
-</div>
-
-
-<!-- Duraklatma -->
-
-<div id="duraklatEkrani" class="ekran yari" hidden>
-  <div class="pencere orta dar">
-    <header><h2>Oyun Duraklatıldı</h2></header>
-    <div id="agPanel" class="agPanel" hidden>
-      <div id="agKodSatir" class="agKod"><span>Katılım kodu</span><b id="agKod"></b><button class="dugme kucuk" id="agKopyala" type="button">Kopyala</button></div>
-      <div id="agOyuncular" class="agOyuncular"></div>
-      <p class="aciklama">Çok oyunculuda oyun duraklatılmaz; dünya sürmeye devam eder.</p>
-    </div>
-    <div class="menuDugmeler">
-      <button class="dugme ana" id="devamEt">Oyuna Dön</button>
-      <button class="dugme" id="agAc">Dünyayı Arkadaşlara Aç</button>
-      <button class="dugme" id="basarimAc">Başarımlar</button>
-      <button class="dugme" data-git="ayarlar">Ayarlar</button>
-      <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>
-    </div>
-  </div>
-</div>
-
-<!-- Ölüm -->
-<div id="olumEkrani" class="ekran olum" hidden>
-  <div class="olumIc">
-    <h2>Öldünüz</h2>
-    <p id="olumSebep"></p>
-    <p class="aciklama" id="olumMezar">Eşyalarınız öldüğünüz yere düştü.</p>
-    <p class="olumIstat" id="olumIstat"></p>
-    <div class="menuDugmeler"><button class="dugme ana" id="sonKayitDog" title="Doğma noktasında (son kullanılan yatak) doğulur">Son Kayıt Noktasında Doğ</button><button class="dugme ana" id="yenidenDog" title="Rastgele bir konumda doğulur">Yeniden Doğ</button><button class="dugme ana" id="izleyiciOl" hidden>İzleyici Olarak Dolaş</button><button class="dugme" id="olumCik">Ana Menü</button></div>
-  </div>
-</div>
-
-<!-- Yükleme -->
-<div id="yuklemeEkrani" class="ekran menuArka" hidden>
-  <div class="yukleIc">
-    <h2 id="yukleBaslik">Dünya oluşturuluyor</h2>
-    <div class="cubukDis"><div id="yukleCubuk"></div></div>
-    <p id="yukleIpucu" class="aciklama"></p>
-  </div>
-</div>
-
-<div id="tasima"></div>
-<div id="ipucu" hidden></div>
-<div id="hataKutusu" hidden></div>
-
-<script type="module" src="js/ana.js"></script>
+<footer><div class="kap">
+  <span>© <span data-yil></span> HungerMan · Sürüm <span data-surum></span></span>
+  <span><a href="rehber.html">Rehber</a> · <a href="guncellemeler.html">Güncellemeler</a> · <a href="../../../index.html">Blog</a></span>
+</div></footer>
+<script src="site/gecmis.js"></script>
+<script src="site/site.js"></script>
 </body>
 </html>

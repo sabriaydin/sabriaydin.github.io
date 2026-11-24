@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rehber · HungerMan</title>
+<meta name="description" content="HungerMan oyun rehberi: ilk gün, kontroller, açlık ve vücut ısısı, cevherler, biyomlar, canlılar, köyler, bosslar, tarım, elektrik ve çok oyunculu.">
+<meta name="theme-color" content="#0e1512">
+<script>if(!/\/$|\.html$/.test(location.pathname))location.replace(location.pathname+"/"+location.search+location.hash)</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site/stil.css">
+</head>
+<body>
+<nav><div class="kap">
+  <a class="marka" href="index.html"><i></i>HungerMan</a>
+  <button id="menuAc" type="button" aria-label="Menü" aria-expanded="false">☰</button>
+  <div class="baglar">
+    <a class="geri" href="../../../index.html">← Bloga Dön</a>
+    <a href="index.html#oyun">Oyun</a>
+    <a class="etkin" href="rehber.html">Rehber</a>
+    <a href="guncellemeler.html">Güncellemeler</a>
+    <a href="index.html#sss">SSS</a>
+    <a class="dugme" href="oyna.html">Oyna</a>
+  </div>
+</div></nav>
+
+<header class="sayfaBas"><div class="kap">
+  <h1>Rehber</h1>
+  <p>Oyunu ilk kez açanlar için baştan, biraz yol almış olanlar için de işe yarar bilgiler. Hepsini okumanız gerekmiyor, soldan aradığınız konuya atlayın.</p>
+</div></header>
+
+<div class="kap rehber">
+  <aside class="icindekiler">
+    <b>Konular</b>
+    <a href="#ilk-gun">İlk gün</a>
+    <a href="#kontroller">Kontroller</a>
+    <a href="#hayatta-kalma">Hayatta kalmak</a>
+    <a href="#madencilik">Madencilik ve aletler</a>
+    <a href="#dunya">Dünya ve biyomlar</a>
+    <a href="#canlilar">Canlılar</a>
+    <a href="#koyler">Köyler ve ticaret</a>
+    <a href="#bosslar">Özel yapılar ve bosslar</a>
+    <a href="#lanetli-ada">Lanetli Ada ve Yeraltı Diyarı</a>
+    <a href="#tarim">Tarım ve mutfak</a>
+    <a href="#elektrik">Elektrik</a>
+    <a href="#buyu">Büyü ve başarımlar</a>
+    <a href="#cok-oyunculu">Çok oyunculu</a>
+    <a href="#ayarlar">Ayarlar ve performans</a>
+    <a href="#konsol">Geliştirici konsolu</a>
+  </aside>
+
+  <article class="yazi">
+
+<h2 id="ilk-gun">İlk gün</h2>
+<p>Yeni bir dünyaya düştüğünüzde envanteriniz boş. İlk iş bir ağaç bulup sol tıkı basılı tutarak kütük toplamak. Beş altı kütük şimdilik yeter.</p>
+<p><kbd>Q</kbd> ile envanteri açın. Kütükten kalas, kalastan çubuk ve Üretim Masası yapılır. Masayı yere koyun; yanındayken daha fazla tarif açılır. Tahta kazma ile taş kırmaya başlayın, birkaç parke taşı toplayınca hemen taş kazmaya geçin.</p>
+<div class="not">Bir gün 20 dakika sürüyor ve bunun yaklaşık yarısı gece. Ekranın sağ altındaki saat şeridinde gece yaklaşınca bir uyarı çıkar.</div>
+<p>Gün batmadan önce yapmanız gerekenler:</p>
+<ul>
+  <li>Bir miktar yiyecek. Hayvan avlayıp eti kamp ateşinde pişirin. Çiğ et de olur ama pişmiş çok daha fazla doyurur.</li>
+  <li>Meşale. Kömür ya da odun kömürü ile çubuktan yapılır. Canavarlar aydınlık yerde doğmaz.</li>
+  <li>Dört duvarı ve kapısı olan bir yer. Toprak bile olur. Canavarlar kapalı kapının arkasından size vuramaz.</li>
+  <li>Mümkünse bir yatak. Yün için koyun bulmanız lazım. Yatakta uyuyunca gece geçer ve orası doğma noktanız olur.</li>
+</ul>
+<p>Yatak yoksa ölünce rastgele, güvenli bir yerde doğarsınız. Bu da bazen evinizden yüzlerce blok uzakta uyanmak demek. İlk fırsatta yatak yapın.</p>
+
+<h2 id="kontroller">Kontroller</h2>
+<p>Aşağıdakiler varsayılan tuşlar. Hepsini <b>Ayarlar &gt; Kontroller</b> bölümünden değiştirebilirsiniz. <kbd>Esc</kbd> ve <kbd>1</kbd>-<kbd>9</kbd> sabit.</p>
+<div class="tablo"><table>
+  <thead><tr><th>Tuş</th><th>Ne yapar</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td><td>Yürü</td></tr>
+    <tr><td><kbd>Boşluk</kbd></td><td>Zıpla, suda yukarı yüz</td></tr>
+    <tr><td><kbd>Sol Shift</kbd></td><td>Koş</td></tr>
+    <tr><td><kbd>C</kbd></td><td>Eğil; tekneden ya da binekten in; suda dal</td></tr>
+    <tr><td>Sol tık</td><td>Kaz, vur</td></tr>
+    <tr><td>Sağ tık</td><td>Blok koy, kullan, ye, yay ger</td></tr>
+    <tr><td><kbd>E</kbd></td><td>Kapı, sandık, köylü, istasyon, yatak gibi şeylerle etkileşim</td></tr>
+    <tr><td><kbd>G</kbd></td><td>Elindekini yere at</td></tr>
+    <tr><td><kbd>R</kbd></td><td>Yerleştirmeden önce bloğu döndür (yatak, merdiven, cihazlar)</td></tr>
+    <tr><td><kbd>1</kbd>-<kbd>9</kbd>, tekerlek</td><td>Hızlı erişim yuvası seç</td></tr>
+    <tr><td><kbd>Q</kbd></td><td>Envanter ve üretim</td></tr>
+    <tr><td><kbd>B</kbd></td><td>Tarif Kitabı</td></tr>
+    <tr><td><kbd>M</kbd></td><td>Büyük harita</td></tr>
+    <tr><td><kbd>J</kbd></td><td>Görev günlüğü</td></tr>
+    <tr><td><kbd>L</kbd></td><td>Başarımlar</td></tr>
+    <tr><td><kbd>T</kbd></td><td>Sohbet (çok oyunculu)</td></tr>
+    <tr><td><kbd>Tab</kbd></td><td>Oyuncu listesi ve katılım kodu (basılı tutun)</td></tr>
+    <tr><td><kbd>F1</kbd></td><td>Fotoğraf modu, göstergeleri gizler</td></tr>
+    <tr><td><kbd>F2</kbd></td><td>Ekran görüntüsü</td></tr>
+    <tr><td><kbd>F3</kbd></td><td>Konum, biyom, kare hızı gibi bilgiler</td></tr>
+    <tr><td><kbd>F8</kbd></td><td>Geliştirici konsolu (dünya ayarlarında açıksa)</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Duraklat, pencereyi kapat</td></tr>
+  </tbody>
+</table></div>
+<p>Envanterde Shift + tık eşyayı hızlıca sandığa ya da hızlı erişim çubuğuna taşır. Üretim penceresinde Üret düğmesine Shift ile basarsanız malzemeniz yettiği kadar üretir.</p>
+
+<h2 id="hayatta-kalma">Hayatta kalmak</h2>
+<h3>Açlık</h3>
+<p>Koşmak, zıplamak, kazmak, savaşmak açlığı daha hızlı düşürür. Açlık göstergesi doluyken can yavaş yavaş yenilenir. Tamamen boşalırsa can gitmeye başlar. Çürük et ve bazı çiğ yiyecekler mide bulandırabilir, mecbur kalmadıkça yemeyin.</p>
+<p>Köylerde ve mutfakta yapılan yemekler ayrıca kısa süreli etki verir. Mesela Maden Gücü kazmayı hızlandırır, Hafiflik düşme hasarını yarıya indirir. Uzun bir maden turuna çıkmadan önce bir tabak bir şey yemek fena fikir değil.</p>
+
+<h3>Vücut ısısı</h3>
+<p>Dünyayı oluştururken vücut ısısını açtıysanız sağ altta sıcaklığınız görünür. Normal aralık 36 ile 38 °C arası. Bunun altına inerseniz üşürsünüz, üstüne çıkarsanız bunalırsınız; ikisi de uzarsa can götürür.</p>
+<ul>
+  <li>Hissedilen sıcaklığı biyom, mevsim, saat, yükseklik ve yağış belirler. Islak giysiyle rüzgârda kalmak hiç iyi değil.</li>
+  <li>Çölde gündüz kavrulursunuz ama gece bir anda soğur.</li>
+  <li>Kamp ateşi, meşale, şömine, lav ve fener yakınında ısınırsınız. Buz ve buz feneri serinletir.</li>
+  <li>Kıyafetler ve zırhlar soğuğa karşı korur. Bazı hafif kıyafetler sıcakta serinletir.</li>
+</ul>
+<div class="not mavi">Kolay zorlukta soğuk ve sıcak can götürmez, sadece göstergede görünür.</div>
+
+<h3>Düşme</h3>
+<p>Üç bloğa kadar sorun yok. Sonrası hızla artıyor: 6 blok yaklaşık iki buçuk kalp, 10 blok yedi kalp götürür. 12 bloktan düşmek tam canlı bir oyuncuyu öldürür. 7 bloktan yüksekten düşünce bacağınız kırılabilir ve bir süre topallarsınız.</p>
+<p>Suya düşmek hasarsız. Yün, saman balyası, yatak ve minder hasarın çoğunu, yapraklar yarısını emer.</p>
+
+<h3>Ölünce ne olur</h3>
+<p>Eşyalarınız etrafa saçılmaz, öldüğünüz yere bir mezar taşı konur ve hepsi onun içinde durur. Geri dönüp alabilirsiniz. Lavda ya da suda öldüyseniz mezar en yakın güvenli yere konur.</p>
+<p>Ölüm ekranında iki seçenek var: son kullandığınız yatakta doğmak ya da rastgele bir yerde yeniden başlamak. Hardcore dünyalarda tek can var; ölünce dünya biter ve sadece izleyebilirsiniz.</p>
+
+<h3>Zorluklar</h3>
+<div class="tablo"><table>
+  <thead><tr><th>Zorluk</th><th>Farkı</th></tr></thead>
+  <tbody>
+    <tr><td>Kolay</td><td>Canavarlar az ve zayıf, açlık yavaş, ısı can götürmez</td></tr>
+    <tr><td>Normal</td><td>Oyunun düşünüldüğü hâli</td></tr>
+    <tr><td>Zor</td><td>Canavarlar kalabalık ve sert vurur, açlık hızlı, yaralanmak kolay</td></tr>
+    <tr><td>Hardcore</td><td>Zor ile aynı, ama tek can</td></tr>
+  </tbody>
+</table></div>
+<p>Zorluk, Kanlı Ay sıklığı, meteorlar ve vücut ısısı dünya oluşturulurken seçilir, sonradan değişmez.</p>
+
+<h2 id="madencilik">Madencilik ve aletler</h2>
+<p>Aletlerin sırası şöyle: tahta, taş, bakır, demir, elmas ve en sonda obsidyen. Bir cevheri kırmak için en az bir alt seviyedeki kazma gerekir. Taş kazma ile demir çıkar ama elmas çıkmaz.</p>
+<p>Cevherlerin bulunduğu yükseklikler aşağıda. Yüksekliğinizi <kbd>F3</kbd> ile görebilirsiniz; deniz seviyesi 48.</p>
+<div class="tablo"><table>
+  <thead><tr><th>Cevher</th><th>Yükseklik</th><th>Not</th></tr></thead>
+  <tbody>
+    <tr><td>Kömür</td><td>5-130</td><td>Her yerde var, dağlarda zirveye kadar çıkar</td></tr>
+    <tr><td>Bakır</td><td>8-90</td><td>Kayalık Tepeler'de yüzeye yakın bol</td></tr>
+    <tr><td>Demir</td><td>4-70</td><td>Dağlarda yükseklerde de bulunur</td></tr>
+    <tr><td>Altın</td><td>2-32</td><td>Kızıl Kayalıklar'da çok daha yukarıda da çıkar</td></tr>
+    <tr><td>Elmas</td><td>2-16</td><td>Az. Lavın hemen üstünde, dikkatli kazın</td></tr>
+  </tbody>
+</table></div>
+<p>Bazı bölgelerde mağara duvarlarında kalın damarlar görürsünüz. Demir genelde koyu bazaltla, bakır granitle birlikte uzanır. Böyle bir duvar bulduysanız bir süre orada kalmaya değer.</p>
+<div class="not">10. bloğun altında lav göllerine rastlarsınız. Lava düşen eşya yok olur. Elinizde su kovası olsun; su lavı taşa çevirir, üstünüz yanıyorsa söndürür.</div>
+<p>Kum, çakıl ve kızıl kum altı boşalınca düşer. Tavanı kumlu bir mağarada altını kazarken kafanıza düşebilir.</p>
+
+<h2 id="dunya">Dünya ve biyomlar</h2>
+<p>Her dünya bir tohumdan üretilir. Aynı tohumu giren herkes aynı kıtayı görür, bu yüzden güzel bir dünya bulduğunuzda tohumunu not edin. Kıta denizle çevrili ve çapı 8000 bloğa yakın. Dünyanın bir sınırı var, oraya kadar gitmeniz pek olası değil.</p>
+<p>Biyomlar iklime göre dizilir. Çöl ile karlı ova yan yana gelmez, arada her zaman ılıman bir kuşak vardır. Başlıcaları:</p>
+<ul>
+  <li><b>Ilıman:</b> Çayır, Çiçekli Çayır, Orman, Sık Orman, Huş Ormanı, Sonbahar Ormanı, Bataklık</li>
+  <li><b>Soğuk:</b> Tayga, Karlı Ova, Karlı Zirveler, Karlı Kumsal</li>
+  <li><b>Sıcak:</b> Çöl, Savan, Kızıl Kayalıklar, Mangrov</li>
+  <li><b>Engebeli:</b> Dağlar, Kayalık Tepeler, Yalıyar</li>
+  <li><b>Su:</b> Okyanus, Derin Okyanus, Nehir, Göl, Kumsal, Taşlı Kıyı, Mantar Adası</li>
+</ul>
+<p>Mevsimler de araziyi değiştirir. Yıl 28 gün; her mevsim 7 gün sürüyor. Kışın çöl ve savan dışında kar yağar, göller donar. Yazın gündüzler uzun, kışın kısa.</p>
+<p>Hava bölgeseldir. Yağmur bulutları rüzgârla sürüklenir; ıslanmak istemiyorsanız yağmurun dışına yürüyebilirsiniz. Bazı gecelerde gökyüzü kızarır, buna Kanlı Ay deniyor. O gece canavarlar çok daha kalabalık olur.</p>
+
+<h2 id="canlilar">Canlılar</h2>
+<h3>Zararsızlar</h3>
+<p>İnek, koyun, domuz, tavuk, tavşan, at, arı ve denizde hamsi, çipura, ahtapot. Kurtlar siz bulaşmadıkça zararsız ama birine vurursanız sürü hâlinde gelir.</p>
+<ul>
+  <li><b>Köpek:</b> Kurda kemik verin. Her denemede yaklaşık üçte bir şansla evcilleşir, size saldıranlara saldırır.</li>
+  <li><b>Kedi:</b> Çayır ve ormanlarda seyrek görülür. Balıkla evcilleşir.</li>
+  <li><b>At:</b> Binilebilir. Uzun yolculukta çok vakit kazandırır.</li>
+</ul>
+<p>Evcil hayvanınıza <kbd>E</kbd> ile bastığınızda oturur ya da kalkar.</p>
+<h3>Canavarlar</h3>
+<div class="tablo"><table>
+  <thead><tr><th>Canavar</th><th>Nerede</th><th>Bilmeniz gereken</th></tr></thead>
+  <tbody>
+    <tr><td>Zombi</td><td>Gece yüzeyde, her zaman karanlık mağarada</td><td>Gündüz güneşte yanar</td></tr>
+    <tr><td>İskelet</td><td>Gece ve mağaralar</td><td>Uzaktan ok atar, siper alın</td></tr>
+    <tr><td>Mağara Örümceği</td><td>Mağaralar</td><td>Duvara tırmanır, zehirler. Aydınlıkta saldırmaz</td></tr>
+    <tr><td>Mumya</td><td>Çöl ve savan</td><td>Güneşte yanmaz, vuruşu acıktırır</td></tr>
+    <tr><td>Boğulmuş Zombi</td><td>Gece derin suların dibi</td><td>Suda hızlı</td></tr>
+    <tr><td>Buz İskeleti</td><td>Karlı bölgeler</td><td>Okları yavaşlatır</td></tr>
+    <tr><td>Yarasa</td><td>Mağaralar</td><td>Daha çok rahatsız edici</td></tr>
+    <tr><td>Haydut</td><td>Haydut Kampı çevresi</td><td>Gruplar hâlinde gezer</td></tr>
+    <tr><td>Köpekbalığı</td><td>Açık deniz</td><td>Sudaki oyuncuya saldırır, teknedeyken güvendesiniz</td></tr>
+    <tr><td>Kor Ruhu, Kül Zombisi</td><td>Yeraltı Diyarı</td><td>Ateşe dayanıklı</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="koyler">Köyler ve ticaret</h2>
+<p>Kıtada dağınık hâlde onlarca köy var. Yakınınızdaki köyler mini haritada ev simgesiyle görünür. Her köyün kendine ait bir adı ve uzmanlığı vardır: tarım köyü, demirci köyü, ticaret kasabası, çoban obası, balıkçı limanı gibi. Uzmanlık, köyde hangi malların bol ve ucuz olduğunu belirler.</p>
+<h3>Takas</h3>
+<p>Köylüye <kbd>E</kbd> ile konuşun. Para birimi sikke. Her köylünün sınırlı takası var ve her sabah yenilenir. Çok aldığınız şey pahalanır, çok sattığınız şey için daha az sikke verilir; bu fark her sabah yarıya iner. Her köylünün bir de günün fırsatı oluyor, gözünüz olsun.</p>
+<p>Köylüler takas yaptıkça ustalaşır: Çırak, Kalfa, Usta, Üstat. Her seviyede daha değerli mallar açılır.</p>
+<h3>İtibar ve görevler</h3>
+<p>Ticaret ve görevlerle itibarınız artar, köylülere zarar verirseniz düşer. İtibar Güvenilmez'den Kahraman'a kadar gider. Yükseldikçe indirim alırsınız; çok düşerse köylüler sizinle konuşmaz.</p>
+<p>Görevler getirme, avlanma ve başka köye mektup götürme gibi işler. Aynı anda en fazla üç görev alabilirsiniz, hepsi <kbd>J</kbd> ile açılan günlükte. Bazıları birbirine bağlı zincir görevler.</p>
+<div class="not yesil">İtibarınız Dost seviyesine çıkınca köyde konaklayabilirsiniz. Doğma noktanız köye ayarlanır, gece ise doğrudan uyursunuz. Kahraman seviyesinde köylüler arada bir hediye de verir.</div>
+
+<h2 id="bosslar">Özel yapılar ve bosslar</h2>
+<p>Tapınak, kule ve kamplardan her dünyada yalnızca birer tane var, köylerden uzakta, düzce bir arazide kurulurlar. Boss siz yaklaşınca uyanır ve ekranın üstünde can çubuğu çıkar. Geri itmeye dirençlidirler, canları yarıya inince hızlanırlar. Yendiğiniz boss bir daha çıkmaz.</p>
+<div class="tablo"><table>
+  <thead><tr><th>Yapı</th><th>Boss</th><th>Can</th></tr></thead>
+  <tbody>
+    <tr><td>Çöl Tapınağı</td><td>Firavun</td><td>140</td></tr>
+    <tr><td>Buzul Kulesi</td><td>Buz Büyücüsü</td><td>110</td></tr>
+    <tr><td>Haydut Kampı</td><td>Haydut Reisi</td><td>150</td></tr>
+    <tr><td>Derin zindanlar</td><td>Taş Muhafız</td><td>180</td></tr>
+    <tr><td>Lanetli Ada</td><td>Kül Devi</td><td>260</td></tr>
+  </tbody>
+</table></div>
+<ul>
+  <li><b>Firavun</b> sert vurur, acıktırır ve yanına mumyalar çağırır. Yanınızda yiyecek olsun.</li>
+  <li><b>Buz Büyücüsü</b> üçlü buz okuyla yavaşlatır, yaklaşınca ışınlanıp kaçar. Yayla dövüşmek daha kolay.</li>
+  <li><b>Haydut Reisi</b> uzaktan üstünüze atılır, canı yarıya inince haydutlarını çağırır.</li>
+  <li><b>Taş Muhafız</b> 30. bloğun altındaki bazı zindanlarda bekler. Yere vurduğunda çevresine hasar verir, yakın dövüşte arada bir geri çekilin.</li>
+</ul>
+<p>Bosslardan efsanevi eşyalar düşer: Güneş Kılıcı, Buz Yayı, Reis Baltası, Muhafız Göğüslüğü. Orman Tapınağı'nda boss yok ama koridorları ok atıcı ve tuzak teliyle dolu. Yere bakarak yürüyün.</p>
+<p>Daha küçük yapılar da var: mağaralardaki zindanlar (canavar yuvası ve ganimet sandıkları), okyanus dibindeki batık gemiler, kıyı köylerinin limanları ve deniz fenerleri. Canavar yuvasının çevresine meşale koyarsanız canavar çıkarmayı bırakır.</p>
+
+<h2 id="lanetli-ada">Lanetli Ada ve Yeraltı Diyarı</h2>
+<p>Oyunun en zor bölümü burası, acele etmeyin. Önce iyi bir zırh, birkaç şifa iksiri ve bol yiyecek edinin.</p>
+<ol>
+  <li><b>Adayı bulun.</b> Lanetli Ada kıtadan çok uzakta, ıssız açık denizde. Bir yelkenli yapın ya da bir balıkçı köylüsünden alın. Obsidyen yarlarından ve kül rengi kıyısından tanırsınız.</li>
+  <li><b>Kül Devi'ni yenin.</b> Adanın bekçisi üç blok boyunda, 260 canlı, ateşe bağışık bir dev. Yere vurmadan önce etrafında bir halka belirir; hemen o halkadan çıkın. Magma yağdırır, kül fırtınasıyla sizi kendine çeker, canı yarıya inince yanına kül zombileri çağırır. Ateşle ona zarar veremezsiniz. Adadan ayrılamaz, işler kötüye giderse denize atlayın.</li>
+  <li><b>Anahtarları alın.</b> Kül Devi ölünce iki adet tek kullanımlık Büyülü Anahtar bırakır. Yenisi ancak yarım saat sonra doğar.</li>
+  <li><b>Geçidi açın.</b> Anahtarla geçide sağ tıklayın. Geçidin içinden geçince Yeraltı Diyarı'na inersiniz.</li>
+</ol>
+<p>Diyar sıcak, kızıl, lav dolu bir yer. Kor Ruhları ateş topu atar, Kül Zombileri lavın içinde bile yüzebilir. Hissedilen sıcaklık 40 °C civarında, vücut ısısı açıksa serinletici bir şey yanınıza alın. Dönüş için ikinci anahtarı saklayın.</p>
+
+<h2 id="tarim">Tarım ve mutfak</h2>
+<p>Önce çapa ile toprağı tarla toprağına çevirin; tohum başka bir şeye ekilmez. Uzun otları kırınca tohum düşer, çiftçi köylüler de tohum satar. Kışın açıktaki ekinler don yüzünden geriler, yakına bir ışık ya da ısı kaynağı koyarsanız korunur.</p>
+<ul>
+  <li>Buğday, havuç, patates, soğan, domates, biber, mısır, lahana, pamuk, çilek, karpuz, balkabağı, şeker kamışı.</li>
+  <li>Her ekinin sevdiği bir mevsim var. Çoğu kışın büyümez; soğan ve lahana kışın yavaş da olsa büyür. Eşyanın açıklamasında yazıyor.</li>
+  <li>Domates, biber ve çilek olgunlaşınca sağ tıkla toplanır, bitki kalır ve tekrar ürün verir.</li>
+  <li>Kemik tozu büyümeyi hızlandırır. Kompost Kutusu'na bitki artıklarını atarsanız gübre verir, o da aynı işi görür.</li>
+  <li>Elma, kiraz, portakal ve zeytin ağaçları kendiliğinden yetişir. Fidanını dikip kendi bahçenizi kurabilirsiniz.</li>
+</ul>
+<p>Mutfakta Değirmen Taşı ile un, kıyma ve pul biber öğütülür. Tandır fırın gibi çalışır. Pide, mantı, lahmacun, börek, sütlaç gibi yemekler hem çok doyurur hem de etki verir. Yemek yaptıkça aşçılık seviyeniz yükselir, etkiler uzar. Seviyenizi ve tarifleri Tarif Defteri'nden görebilirsiniz.</p>
+<p>Hayvancılık için iki aynı hayvanı uygun yemle besleyin, yavru olur. Beslediğiniz hayvanlar kaybolmaz. Kovayla inekten süt sağabilir, makasla koyun kırkabilirsiniz; yün birkaç dakikada yeniden uzar.</p>
+
+<h2 id="elektrik">Elektrik</h2>
+<p>Elektrik biraz uğraştırır ama bir kere kurunca bırakamazsınız.</p>
+<h3>Üretmek</h3>
+<ul>
+  <li><b>Güneş paneli:</b> Gündüz çalışır, üstü açık olmalı. Bulut ve yağmurda düşer.</li>
+  <li><b>Rüzgâr türbini:</b> Yükseğe kurulduğunda daha çok üretir.</li>
+  <li><b>Su türbini:</b> Yanındaki her su bloğu için üretir, gece gündüz çalışır. Kışın verimi yarıya düşer.</li>
+  <li><b>Jeneratör:</b> Kömür ya da odun yakar. Her yerde çalışır ama yakıt ister.</li>
+</ul>
+<h3>Bağlamak</h3>
+<p>Her cihazın mavi giriş ve turuncu çıkış soketi var. Güç kabloyla çıkıştan girişe, tek yönde akar. Elinizde kabloyla bir sokete tıklayıp diğerine tıklamanız yeterli. Dağıtıcı gücü üçe böler, birleştirici iki kaynağı tek hatta toplar. Artan enerji bataryalarda birikir; küçük, orta ve büyük olmak üzere üç boy batarya var.</p>
+<p>Elektrikle çalışanlar: lambalar, ısıtıcı, elektrikli ocak, otomatik taret, hareket algılayıcı ve sulama fıskiyesi. Şalterle devreyi kapatıp açabilirsiniz.</p>
+<div class="not">Taret ok harcar. Yanına bir ok sandığı koymayı unutmayın, yoksa bir gece sessizce susar.</div>
+
+<h2 id="buyu">Büyü ve başarımlar</h2>
+<p>Büyü Masası elmas, parıltı kristali ve kesme taştan yapılır. Aletlere, silahlara ve zırhlara deneyim seviyesi karşılığında büyü eklenir. Deneyimi canavar öldürerek, maden kazarak ve görev yaparak kazanırsınız. Büyülemek bir de parıltı kristali ister. Örste yıpranmış eşyaları onarabilir, aynı türden iki eşyayı birleştirebilirsiniz; eşit seviyeli iki büyü birleşince bir seviye yükselir.</p>
+<p>Başarımları <kbd>L</kbd> ile görebilirsiniz. Bazıları kolay, bazıları gerçekten uğraştırıyor. Kanlı Ay'ı sağ çıkarmak gibi.</p>
+<p>Eve Dönüş Tılsımı sizi son kullandığınız yatağa ışınlar. Uzak bir keşifte çantanız dolduğunda can kurtarır.</p>
+
+<h2 id="cok-oyunculu">Çok oyunculu</h2>
+<p>Dünyanın sahibi oyunu açar, duraklatma menüsünden <b>Dünyayı Arkadaşlara Aç</b> der. Ekranda 6 karakterlik bir kod çıkar. Diğerleri ana menüden <b>Çok Oyunculu</b> ekranına gidip adını ve kodu yazar. En fazla 8 kişi olabilirsiniz.</p>
+<ul>
+  <li>Bağlantı oyuncular arasında doğrudan kurulur, ayrı bir sunucu yok. Dünya, açan kişinin tarayıcısında kaydedilir.</li>
+  <li>Envanter, can, görevler ve köy itibarı herkesin kendine ait. Aynı adla tekrar girerseniz kaldığınız yerden devam edersiniz.</li>
+  <li>Gece, herkes yatağa yatınca geçer.</li>
+  <li>Sohbet <kbd>T</kbd>, oyuncu listesi <kbd>Tab</kbd>.</li>
+</ul>
+<div class="not mavi">Bazı okul ve iş ağları doğrudan bağlantıyı engelliyor. Bağlanamıyorsanız farklı bir ağdan, örneğin telefonun internetinden deneyin.</div>
+
+<h2 id="ayarlar">Ayarlar ve performans</h2>
+<p>Oyun ilk açılışta bilgisayarınıza göre bir grafik ayarı seçer. Takılma varsa sırayla şunları deneyin:</p>
+<ol>
+  <li>Ayarlar &gt; Görüntü bölümünde görüş mesafesini düşürün. En büyük fark burada.</li>
+  <li>Grafik ön ayarını bir kademe indirin.</li>
+  <li>Çözünürlüğü Otomatik'te bırakın; kare hızı düşünce kendiliğinden ayarlanır. Yine olmuyorsa elle indirin.</li>
+  <li>Tarayıcıda başka ağır sekmeler açıksa kapatın.</li>
+</ol>
+<p>Fare hassasiyeti, görüş açısı, ses düzeyleri, mini harita ve öğretici ipuçları da Ayarlar'da. Dünyalarınızı Dünyalar ekranındaki Yedekle düğmesiyle tek bir dosya olarak indirip başka bir bilgisayarda Yedekten Yükle ile açabilirsiniz.</p>
+
+<h2 id="konsol">Geliştirici konsolu</h2>
+<p>Yeni dünya oluştururken <b>Komutlara izin ver</b> seçeneğini işaretlediyseniz <kbd>F8</kbd> ile konsol açılır. İşaretlemediyseniz sadece bilgi komutları çalışır (konum, tohum, fps gibi).</p>
+<p>Birkaç işe yarar komut:</p>
+<div class="tablo"><table>
+  <thead><tr><th>Komut</th><th>Ne yapar</th></tr></thead>
+  <tbody>
+    <tr><td><code>yardim</code></td><td>Bütün komutları listeler</td></tr>
+    <tr><td><code>tohum</code></td><td>Dünyanın tohumunu yazar</td></tr>
+    <tr><td><code>isinla koy</code></td><td>En yakın köye ışınlar. <code>liman</code>, <code>zindan</code>, <code>batik</code>, <code>ada</code> da olur</td></tr>
+    <tr><td><code>isinla x y z</code></td><td>Koordinata ışınlar</td></tr>
+    <tr><td><code>zaman</code></td><td>Saati değiştirir</td></tr>
+    <tr><td><code>hava</code></td><td>Havayı değiştirir</td></tr>
+  </tbody>
+</table></div>
+<p>Komut yazmak istemeyenler için <kbd>F9</kbd> ile açılan bir pencere var; aynı işleri düğmelerle yapıyor. Konsolda <kbd>Tab</kbd> komutu tamamlar, ok tuşlarıyla eski komutlara dönersiniz.</p>
+
+<p style="margin-top:50px;color:var(--silik)">Eksik ya da yanlış bir şey gördüyseniz haber verin, düzeltelim. Güncel değişiklikler için <a href="guncellemeler.html">güncellemeler sayfasına</a> bakabilirsiniz.</p>
+  </article>
+</div>
+
+<footer><div class="kap">
+  <span>© <span data-yil></span> HungerMan · Sürüm <span data-surum></span></span>
+  <span><a href="index.html">Ana sayfa</a> · <a href="guncellemeler.html">Güncellemeler</a> · <a href="oyna.html">Oyna</a></span>
+</div></footer>
+<script src="site/gecmis.js"></script>
+<script src="site/site.js"></script>
+</body>
+</html>
