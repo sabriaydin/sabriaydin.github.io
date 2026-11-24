@@ -64,6 +64,8 @@ export class Oyuncu {
     for (let k = 0.05; k <= 0.75; k += 0.05) for (const [ax, az] of [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]]) {
       if (!this.carpisiyor(p.x + ax * k, p.y, p.z + az * k)) { p.x += ax * k; p.z += az * k; return true; }
     }
+    /* 0.42.0: yanlarda yer yoksa (üstüne kum düşmesi, blok içine ışınlanma) yukarıdaki ilk boş yere çıkılır */
+    for (let dy = 1; dy <= 6; dy++) if (!this.carpisiyor(p.x, Math.floor(p.y) + dy, p.z)) { p.y = Math.floor(p.y) + dy; this.hiz.y = 0; this.dusus = 0; return true; }
     return false;
   }
 
@@ -189,7 +191,8 @@ export class Oyuncu {
     /* Dünya sınırı */
     if (diyarMi(p.x)) { const S = DIYAR_SINIR - 1; p.x = Math.max(DIYAR_X - S, Math.min(DIYAR_X + S, p.x)); p.z = Math.max(-S, Math.min(S, p.z)); }
     else { const S = DUNYA_SINIRI - 1; p.x = Math.max(-S, Math.min(S, p.x)); p.z = Math.max(-S, Math.min(S, p.z)); }
-    if (p.y < -20) { p.y = 200; v.set(0, 0, 0); }
+    /* 0.42.0: dünyanın altına düşülürse aynı sütunun yüzeyine konulur (önceden y 200'e konuyor, düşüş hasarıyla ölünüyordu) */
+    if (p.y < -20) { p.y = d.ustKati(Math.floor(p.x), Math.floor(p.z)) + 1.05; v.set(0, 0, 0); this.dusus = 0; }
 
     /* Adım sesi ve yürüme fazı */
     const yatay = Math.hypot(v.x, v.z) * dt;

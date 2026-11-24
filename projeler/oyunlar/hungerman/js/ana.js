@@ -298,7 +298,7 @@ $('#dunyaListe').addEventListener('click', async e => {
   if (tk) { try { await navigator.clipboard.writeText(tk.dataset.tohum); tk.classList.add('kopyalandi'); setTimeout(() => tk.classList.remove('kopyalandi'), 1200); } catch (x) { /* pano kapalı */ } return; }
   const o = e.target.closest('[data-oyna]'), s = e.target.closest('[data-sil]');
   ses.baslat();
-  if (o) { ses.tik(); const v = await Kayit.yukle(o.dataset.oyna); if (v) { Kayit.kaydet({ ...v, id: v.id + '~yedek' }).catch(() => {}); const s = sunucuIstek; oyunBaslat(v); if (oyun) oyun.sunucuIstek = s; } }
+  if (o) { ses.tik(); dunyaAc(o.dataset.oyna); }
   /* 0.23.0: yedek indirme ve önceki oturuma dönme */
   const ind = e.target.closest('[data-indir]');
   if (ind) {
@@ -312,6 +312,26 @@ $('#dunyaListe').addEventListener('click', async e => {
     else { s.dataset.onay = '1'; s.textContent = 'Onayla'; setTimeout(() => { if (s.isConnected) { delete s.dataset.onay; s.textContent = 'Sil'; } }, 3000); }
   }
 });
+/* 0.42.0: dünya açma. Kayıt okunamaz ya da dünya kurulurken hata çıkarsa son başarılı açılıştaki kopyası (~yedek) denenir.
+   Yedek kopya artık açılıştan önce değil, dünya hatasız yüklendikten sonra yazılır (bozuk kayıt yedeğin üzerine yazılmaz). */
+function oyunuGuvenliBitir() { try { oyunBitir(); } catch (e) { oyun = null; $('#hud').hidden = true; } }
+async function dunyaAc(id) {
+  const ac = v => { const s = sunucuIstek; oyunBaslat(v); if (oyun) { oyun.sunucuIstek = s; oyun.acilisKaydi = v; } };
+  let v = null, hata = null;
+  try { v = await Kayit.yukle(id); if (!v || v.tohum == null) throw new Error('kayıt okunamadı'); ac(v); return; }
+  catch (e) { hata = e; oyunuGuvenliBitir(); }
+  let y = null;
+  try { y = await Kayit.yukle(id + '~yedek'); } catch (e) { y = null; }
+  if (y && y.tohum != null) {
+    try {
+      ac({ ...y, id });
+      if (oyun) oyun.yedektenAcildi = true;
+      return;
+    } catch (e) { oyunuGuvenliBitir(); }
+  }
+  ekran('dunyalar'); dunyaListesi();
+  hataGoster(`Dünya açılamadı (${hata && hata.message || 'bilinmeyen hata'}). Kullanılabilir bir yedek kopyası da mevcut değil.`);
+}
 $('#yeniOlustur').onclick = () => {
   ses.baslat(); ses.tik();
   const ad = $('#yeniAd').value.trim() || 'Yeni Dünya';
@@ -617,6 +637,7 @@ function oyunBaslat(v) {
     hayatBasi: Number.isFinite(v.hayatBasi) ? v.hayatBasi : (v.gun || 1) + (v.zaman ?? 0.02), isiSayac: 0, tilsim: 0, sarsinti: 0,
     zorluk: v.zorluk || 'normal', denge: dengeDuzelt(v.denge), hardcoreBitti: !!v.hardcoreBitti, ogretici: v.yeni ? 0 : Number.isFinite(v.ogretici) ? v.ogretici : -1 };
   const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
+  varliklar.hataBildir = (m, e) => { console.error('Canlı hatası', e); konsol.kayit('canli', 'Canlı hatası; canlı kaldırıldı', { seviye: 'kritik', alan: { hata: m } }); };
   oyun.varliklar = varliklar; oyun.gunIsigi = 1; oyun.uyku = 0; oyun.isaretSayac = 0;
   const yereBirak = (id, adet) => { const p = oyuncu.konum; dusenler.birak(id, adet, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1); };
   const tekneler = new Tekneler({ sahne, dunya, dusenler, ses, varliklar });
@@ -814,6 +835,9 @@ function yuklemeKontrol() {
     if (o.hayatta.olu) olum('');
     else { kilitle(); }
     if (!o.ilkBildirim) { o.ilkBildirim = true; o.hud.bildirim(`${o.ad} · ${(q => BIYOMLAR[q.ab ?? q.b])(o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {}))}`); }
+    /* 0.42.0: dünya hatasız açıldı; açılıştaki kaydı yedek kopya olarak saklanır */
+    if (o.acilisKaydi) { const k = o.acilisKaydi; o.acilisKaydi = null; if (!o.yedektenAcildi) Kayit.kaydet({ ...k, id: k.id + '~yedek' }).catch(() => {}); }
+    if (o.yedektenAcildi) { o.yedektenAcildi = false; o.hud.bildirim('Son kayıt okunamadığı için dünya bir önceki açılıştaki hâliyle açıldı.'); }
     if (o.sunucuIstek) { o.sunucuIstek = false; agAc(); }
   }
 }
@@ -964,7 +988,21 @@ $('#izleyiciOl').onclick = () => {
 };
 $('#olumCik').onclick = async () => { ses.tik(); oyun.olumAnim = 0; $('#olumPerde').classList.remove('acik'); oyun.hayatta.sifirla(); yatakDenetle(oyun); { const d = oyun.yatakNoktasi || oyun.dunya.uretici.rastgeleDogum(); oyun.oyuncu.konum.set(d.x, d.y, d.z); } await oyunKaydet(); oyunBitir(); ekran('ana'); };
 
-async function oyunKaydet() {
+/* 0.42.0: kayıtlar sıraya girer (aynı anda iki kayıt yazılmaz); kayıt verisi hazırlanırken çıkan hata bildirilir */
+let kayitZinciri = Promise.resolve(), kayitSirada = null, kayitHataBildirildi = false;
+/* 0.42.0: envanter penceresi açıkken imleçte taşınan eşya da kayda girer (sekme kapanırsa kaybolmaz) */
+function envanterKaydi(o) {
+  const e = o.envanter.disaAktar(), T = envEkrani.acik && envEkrani.envanter === o.envanter && envEkrani.tasinan;
+  if (T && T.adet > 0) e.tasinan = T.buyu ? [T.id, T.adet, T.dayanim ?? null, T.buyu] : [T.id, T.adet, T.dayanim ?? null];
+  return e;
+}
+function oyunKaydet() {
+  if (kayitSirada) return kayitSirada;   // sırada bekleyen kayıt zaten en güncel durumu yazacak
+  const k = kayitZinciri.then(() => { kayitSirada = null; return oyunKaydetIc(); }).catch(e => hataGoster('Kayıt: ' + (e && e.message || e)));
+  kayitSirada = kayitZinciri = k;
+  return k;
+}
+async function oyunKaydetIc() {
   const o = oyun;
   if (!o || !o.hazir && !o.hayatta.olu) return;
   /* Keşif haritası (istemcide de yerel olarak saklanır) */
@@ -972,17 +1010,26 @@ async function oyunKaydet() {
   /* Çok oyunculu istemci: dünya sunucuda; oyuncu bilgileri sunucuya kaydedilir */
   if (o.istemci) { if (o.ag) o.ag.kayitGonder(); return; }
   const p = o.oyuncu.konum;
-  const veri = {
+  let veri;
+  try { veri = {
     id: o.id, ad: o.ad, tohum: o.tohum, uretici: o.uretici, olusturma: o.olusturma, son: Date.now(), surum: SURUM,
     oyuncu: { x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
-    hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
+    hayatta: o.hayatta.disaAktar(), envanter: envanterKaydi(o), zaman: o.zaman, gun: o.gun, dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), kablolar: o.kablolar.disaAktar(), tekneler: o.tekneler.disaAktar(),
     yapiPlani: o.etkilesim && o.etkilesim.plan ? o.etkilesim.plan.plan : null,   // 0.35.0: Yapı Planı dünyayla da kaydedilir
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, konsol: !!o.konsol, vucutIsisi: o.vucutIsisi !== false, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
     hava: o.hava.disaAktar(), evciller: o.varliklar.evcilDisa(), basarimlar: o.basarimlar.disaAktar(), bosslar: o.yapiOlaylari.disaAktar(), gecit: o.gecit.disaAktar(), adaBekci: o.adaBekcisi ? o.adaBekcisi.disaAktar() : null
-  };
-  try { await Kayit.kaydet(veri); } catch (e) { o.hud.bildirim('Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.'); }
+  }; } catch (e) {
+    konsol.kayit('dunya', 'Kayıt verisi hazırlanamadı', { seviye: 'kritik', alan: { hata: e.message } });
+    if (!kayitHataBildirildi) { kayitHataBildirildi = true; hataGoster('Kayıt hazırlanamadı: ' + e.message); }
+    return;
+  }
+  try { await Kayit.kaydet(veri); kayitHataBildirildi = false; }
+  catch (e) {
+    const dolu = e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''));
+    o.hud.bildirim(dolu ? 'Kayıt yapılamadı: tarayıcı depolama alanı dolu. Eski dünyaları silmek ya da yedekleyip kaldırmak yer açar.' : 'Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.');
+  }
 }
 addEventListener('beforeunload', () => { if (oyun && oyun.hazir) oyunKaydet(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && oyun && oyun.hazir) oyunKaydet(); });
@@ -1032,9 +1079,16 @@ function otoCozunurluk(t) {
   oto.t0 = t; oto.kare = 0;
 }
 const gecici = new THREE.Vector3();
+/* 0.42.0: karede çıkan hata konsola ayrıntısıyla yazılır; aynı hata her karede tekrar bildirilmez */
+const kareHatalari = new Map();
 function dongu(t) {
   requestAnimationFrame(dongu);
-  adim(t);
+  try { adim(t); }
+  catch (e) {
+    const m = (e && e.message) || String(e), n = (kareHatalari.get(m) || 0) + 1;
+    kareHatalari.set(m, n);
+    if (n === 1) { console.error(e); hataGoster(m); try { konsol.kayit('dunya', 'Oyun döngüsünde hata', { seviye: 'kritik', alan: { hata: m, yer: String(e && e.stack || '').split('\n')[1]?.trim() || '' } }); } catch (x) { /* konsol hazır değil */ } }
+  }
 }
 function adim(t) {
   let dt = (t - onceki) / 1000; onceki = t;
@@ -1760,6 +1814,9 @@ function istemciBaslat(k, m, kod) {
     yerler: r.yerler, komutlar: !!m.komutlar, konsol: m.konsol !== 0, vucutIsisi: m.vucutIsisi !== 0, zorluk: m.zorluk, denge: m.denge, haritaKimlik: `ag:${m.tohum}:${ayar.ad.toLocaleLowerCase('tr')}` });
   if (!r.oyuncu) oyun.oyuncu.konum.set(m.dogum.x, m.dogum.y, m.dogum.z);
   const ist = new IstemciOyun({ kanal: k, id: m.id, kod, oyun, sahne, ses, ad: ayar.ad, arayuz: agArayuz() });
+  /* 0.42.0: açık sandık ve imleçteki eşya kayda girer */
+  ist.acikSandik = () => (envEkrani.acik && oyun && envEkrani.envanter === oyun.envanter ? envEkrani.sandik : null);
+  ist.envanterDisa = () => envanterKaydi(oyun);
   oyun.ag = ist;
   ist.ilkVeri(m);
   sohbetEkle(null, `${m.ad} dünyasına katılındı. Sohbet için T, oyuncu listesi için Tab tuşu kullanılır.`);

@@ -287,7 +287,12 @@ export class Varliklar {
       if (!this.dunya.yuklu(v.konum.x, v.konum.z) || this.donmus) continue;   // donmus: geliştirici modunda canlılar durur
       /* Binilen at: konumunu binen oyuncu belirler; yalnızca canlandırılır */
       if (v.binen) { this.canlandir(v, dt, 0, 0, 0, false, v.binenHiz || 0); continue; }
-      this.varlikGuncelle(v, dt, c);
+      /* 0.42.0: tek bir canlıda çıkan hata bütün karenin (ve oyunun) durmasına yol açmaz; canlı kaldırılır ve hata kaydedilir */
+      try { this.varlikGuncelle(v, dt, c); }
+      catch (e) {
+        if (this.hataBildir) this.hataBildir(`${v.turAd}: ${e.message}`, e);
+        this.modelSil(v); this.liste.splice(i, 1);
+      }
     }
     this.ayir();
     this.yuvaGuncelle(dt, C);
@@ -1193,6 +1198,10 @@ export class Varliklar {
     const adim = Math.max(1, Math.ceil(Math.max(Math.abs(h.x), Math.abs(h.y), Math.abs(h.z)) * dt / 0.35));
     const s = dt / adim;
     let yerde = false; v.engel = false;
+    /* 0.42.0: bloğun içinde kalan canlı (üstüne blok konması, kum düşmesi, kapalı alana doğma) yukarıdaki ilk boş yere çıkar */
+    if (!v.tur.su && this.carpisiyor(v, p.x, p.y + 0.02, p.z)) {
+      for (let k = 1; k <= 4; k++) if (!this.carpisiyor(v, p.x, Math.floor(p.y) + k, p.z)) { p.y = Math.floor(p.y) + k; h.y = 0; v.dusTepe = null; break; }
+    }
     for (let i = 0; i < adim; i++) {
       let ny = p.y + h.y * s;
       if (this.carpisiyor(v, p.x, ny, p.z)) { if (h.y < 0) { const u = this.carpisiyor(v, p.x, ny, p.z, 1); ny = u != null && u <= p.y + 1e-3 ? u : Math.floor(ny) + 1; yerde = true; } else ny = Math.floor(ny + v.tur.boy) - v.tur.boy - 1e-4; if (this.carpisiyor(v, p.x, ny, p.z)) ny = p.y; h.y = 0; }

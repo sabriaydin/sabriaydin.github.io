@@ -2,6 +2,16 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.42', b: 'Kararlılık', y: [
+  { s: '0.42.0', b: 'Hatalar ve kararlılık', m: [
+    'Bir dünyanın kaydı bozulursa oyun artık takılıp kalmıyor; dünya son sorunsuz açılıştaki hâliyle açılıyor.',
+    'Yedek kopya artık dünya düzgünce açıldıktan sonra alınıyor, bozuk kayıt yedeğin üstüne yazılmıyor.',
+    'Envanter açıkken elinizde tuttuğunuz eşya, sekme kapansa bile kaybolmuyor.',
+    'Bloğun içine sıkışan oyuncu ve canlılar yukarıdaki boş yere çıkıyor. Dünyanın altına düşen oyuncu yüzeye konuyor.',
+    'Tek bir canlıdaki hata artık bütün oyunu dondurmuyor.',
+    'Çok oyunculuda sandık açıkken bağlantı koparsa eşyalar çoğalmıyor ya da kaybolmuyor.'
+  ]}
+]},
 { g: '0.41', b: 'Yeni dünya', y: [
   { s: '0.41.12', b: 'Dünya oluşumunda hata avı ve akan su', m: [
     'Mağaralarda havada asılı duran su duvarları artık yok. Yeraltı gölleri parça parça dolduruluyordu, sınırlarda su katmanları kalıyordu.',

@@ -227,19 +227,20 @@ export class SunucuOyun {
         k.gonder({ t: 'sandik', k: s, y: sandikDizi(d) });
         break;
       }
+      case 'sg':    // 0.42.0: sandık açıkken içerik değişti (kilit sürer); bağlantı koparsa eşya kaybolmaz ya da çoğalmaz
       case 'sk': {  // sandık kapandı: yeni içerik
-        if (this.kilit.get(m.k) !== c.id) return;
-        this.kilit.delete(m.k);
+        if (typeof m.k !== 'string' || this.kilit.get(m.k) !== c.id) return;
+        if (m.t === 'sk') this.kilit.delete(m.k);
         const [x, y, z] = m.k.split(',').map(Number);
         const B0 = o.dunya.yuklu(x, z) ? BLOKLAR[o.dunya.blok(x, y, z)] : null, boy = kapBoyu(B0);   // 0.33.0: fırın ve kamp ateşi haznesi
         const yuvalar = sandikKur(m.y).slice(0, boy);
         while (yuvalar.length < boy) yuvalar.push(null);
-        if (B0 && !kapMi(B0)) { for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
+        if (B0 && !kapMi(B0)) { if (m.t === 'sk') for (const e of yuvalar) if (e) o.dusenler.birak(e.id, e.adet, x + 0.5, y + 0.5, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); return; }
         /* 0.29.0: cihaz haznesine uymayan eşyalar (ör. jeneratöre yakıt dışı) yere düşer */
         const kural = kapFiltresiId(o.dunya.blok(x, y, z)), eski = o.dunya.sandiklar.get(m.k) || [];
-        if (kural) for (let i = 0; i < yuvalar.length; i++) { const e = yuvalar[i]; if (e && !(kural.yuva ? kural.yuva(i, e.id) || (eski[i] && eski[i].id === e.id) : kural.izin(e.id)) && !eski.some(q => q && q.id === e.id)) { o.dusenler.birak(e.id, e.adet, x + 0.5, y + 1, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); yuvalar[i] = null; } }
+        if (kural) for (let i = 0; i < yuvalar.length; i++) { const e = yuvalar[i]; if (e && !(kural.yuva ? kural.yuva(i, e.id) || (eski[i] && eski[i].id === e.id) : kural.izin(e.id)) && !eski.some(q => q && q.id === e.id)) { if (m.t === 'sk') o.dusenler.birak(e.id, e.adet, x + 0.5, y + 1, z + 0.5, 0, 0, 0, e.dayanim, 0.5, e.buyu); yuvalar[i] = null; } }
         o.dunya.sandiklar.set(m.k, yuvalar);
-        mezarBosalt(o.dunya, m.k);   // 0.22.0: boşaltılan mezar kaybolur
+        if (m.t === 'sk') mezarBosalt(o.dunya, m.k);   // 0.22.0: boşaltılan mezar kaybolur
         break;
       }
       case 'mz': {  // 0.22.0: ölen istemcinin eşyaları mezar taşına

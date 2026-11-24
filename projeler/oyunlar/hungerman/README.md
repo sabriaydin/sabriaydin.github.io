@@ -119,6 +119,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 42.0 (0.42.0): Hatalar ve kararlılık (geliştirme planı 1. aşama)
+- **Kayıt güvenliği:** dünyanın yedek kopyası (`~yedek`) artık açılıştan önce değil, dünya hatasız yüklendikten sonra yazılır; bozuk bir kayıt yedeğin üzerine yazılmaz. Kayıt okunamaz ya da dünya kurulurken hata çıkarsa dünya son başarılı açılıştaki hâliyle açılır ve bildirim gösterilir; yedek de yoksa Dünyalar ekranına dönülür ve hata açıklanır (önceden yükleme ekranında kalınabiliyordu).
+- Kayıtlar sıraya girer; aynı anda iki kayıt yazılmaz. "Kaydet ve Çık" sürmekte olan kaydın ardından en güncel durumu yazar.
+- Kayıt verisi hazırlanırken çıkan hata artık sessizce yutulmaz: ekranda bildirilir ve konsola KRİTİK olarak yazılır. Depolama alanı dolduğunda ayrı bir uyarı verilir.
+- Envanter penceresi açıkken imleçte taşınan eşya kayda girer; sekme bu sırada kapanırsa eşya kaybolmaz.
+- **Oyun döngüsü:** karede çıkan hata konsola ayrıntısıyla (yeriyle) yazılır ve aynı hata her karede yeniden bildirilmez. Tek bir canlıda çıkan hata artık bütün karenin durmasına yol açmaz; o canlı kaldırılır ve hata kaydedilir.
+- **Sıkışma:** oyuncu bloğun içinde kalırsa (üstüne kum düşmesi, ışınlanma, kapalı alanda doğma) yanlarda yer yoksa yukarıdaki ilk boş yere çıkar. Canlılar için de aynı kural eklendi.
+- **Dünyanın altına düşme:** oyuncu aynı sütunun yüzeyine konur. Önceden 200 yüksekliğe konuyor ve düşüş hasarıyla ölüyordu.
+- Tekneden inerken birikmiş düşüş mesafesi sıfırlanır (inişte beklenmeyen düşme hasarı alınmaz).
+- **Çok oyunculu:** sandık açıkken içeriği değişince sunucuya hemen bildirilir ve oyuncu kaydı da gönderilir. Bağlantı sandık açıkken koparsa önceden sandıktan alınan eşyalar hem sandıkta hem çantada kalabiliyor (çoğalma) ya da sandığa konanlar kaybolabiliyordu. İmleçteki eşya istemci kaydına da girer.
+- **Denetim:** uzun oturum taraması (yürüyüş, pencereler, gece savaşı, düşen kum, köy, liman, zindan, batık, tapınak, kule, kamp, Lanetli Ada, fırtına, Kanlı Ay, meteor, Yeraltı Diyarı'na gidiş-dönüş, hızlandırılmış 6 gün, 2400 blokluk gezinti, ölüm, yeniden doğma, kaydet ve yeniden açma) iki ayrı tohumda yapıldı: sayfa hatası 0, bellek kullanımı oturum boyunca sabit (sızıntı yok), kayıt ve yeniden açmada blok değişiklikleri eksiksiz. Bozuk kayıt, imleçte eşya, dünyanın altına düşme ve bloğa gömülme senaryoları ayrıca sınandı.
+- Köy baskınları geliştirme planına göre 0.46 sürümünde ele alınacaktır; şimdilik kapalıdır.
+
 ## 41.12 (0.41.12): Dünya oluşumu hata taraması ve akan su canlandırması
 Tohum 4122432088 başta olmak üzere üç tohumda doğma noktası çevresindeki yaklaşık 1900 parça otomatik olarak tarandı; bulunan hatalar düzeltildi:
 - Havada asılı su duvarları (mağaralar): yeraltı gölleri ve nehirleri parça parça dolduruluyordu; parça sınırlarında havada duran su katmanları ve lava değen su yığınları oluşuyordu (tarama: 701 hücre). Mağaralara artık su doldurulmaz; yeraltı nehri kanalları kuru tünel olarak kalır (tarama: 0).

@@ -190,13 +190,13 @@ export class Tekneler {
     for (const [a, b] of yanlar) {
       const x = t.p.x + a * c + b * s, z = t.p.z - a * s + b * c;
       for (let y = Math.floor(t.p.y) - 1; y <= Math.floor(t.p.y) + 2; y++) {
-        if (KATI[this.dunya.blok(Math.floor(x), y - 1, Math.floor(z))] && !oyuncu.carpisiyor(x, y, z, 1.8)) { oyuncu.konum.set(x, y, z); oyuncu.hiz.set(0, 0, 0); return; }
+        if (KATI[this.dunya.blok(Math.floor(x), y - 1, Math.floor(z))] && !oyuncu.carpisiyor(x, y, z, 1.8)) { oyuncu.konum.set(x, y, z); oyuncu.hiz.set(0, 0, 0); oyuncu.dusus = 0; return; }
       }
       if (!su && !oyuncu.carpisiyor(x, t.p.y, z, 1.8)) su = [x, t.p.y, z];
     }
     if (su) oyuncu.konum.set(su[0], su[1], su[2]);
     else oyuncu.konum.set(t.p.x, t.p.y + 0.9, t.p.z);
-    oyuncu.hiz.set(0, 0, 0);
+    oyuncu.hiz.set(0, 0, 0); oyuncu.dusus = 0;
   }
 
   fizik(t, dt, ileri, donus) {

@@ -122,6 +122,8 @@ export class Envanter {
     this.kiyafet = [null, null, null, null];
     if (o && o.kiyafet) o.kiyafet.forEach((s, i) => { if (s && ESYALAR[s[0]] && ESYALAR[s[0]].kiyafet && i < 4) this.kiyafet[i] = this.yeni(s[0], s[1], s[2] ?? undefined, s[3]); });
     this.secili = (o && o.secili) || 0;
+    /* 0.42.0: kayıt anında imleçte taşınan eşya (envanter penceresi açıkken) çantaya geri konur */
+    if (o && Array.isArray(o.tasinan) && ESYALAR[o.tasinan[0]]) this.ekle(o.tasinan[0], o.tasinan[1], o.tasinan[2] ?? undefined, o.tasinan[3]);
     this.bildir();
   }
 }

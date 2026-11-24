@@ -189,7 +189,7 @@ export class IstemciOyun {
     const p = o.oyuncu.konum;
     this.gonder({ t: 'ky', v: {
       oyuncu: { x: r3(p.x), y: r3(p.y), z: r3(p.z), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
-      envanter: o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
+      envanter: this.envanterDisa ? this.envanterDisa() : o.envanter.disaAktar(), hayatta: o.hayatta.disaAktar(), dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
       gorevler: o.gorevler.disaAktar(), koyler: o.koyler.disaAktar(), yerler: o.yerler, basarimlar: o.basarimlar ? o.basarimlar.disaAktar() : undefined
     } });
   }
@@ -205,6 +205,15 @@ export class IstemciOyun {
     }
     this.kayitSayac -= dt;
     if (this.kayitSayac <= 0 && o.hazir) { this.kayitSayac = 15; this.kayitGonder(); }
+    /* 0.42.0: açık sandığın içeriği değişince sunucuya hemen bildirilir ve oyuncu kaydı da gönderilir
+       (bağlantı sandık açıkken koparsa sandık ve çanta birbirine uyumlu kalır) */
+    this.sandikSayac = (this.sandikSayac || 0) - dt;
+    const S = this.acikSandik && this.acikSandik();
+    if (S && S.k && this.sandikSayac <= 0) {
+      const dz = sandikDizi(S.yuvalar), m = JSON.stringify(dz);
+      if (this.sonSandik && this.sonSandik.k === S.k && this.sonSandik.m !== m) { this.gonder({ t: 'sg', k: S.k, y: dz }); this.kayitGonder(); this.sandikSayac = 0.4; }
+      this.sonSandik = { k: S.k, m };
+    } else if (!S) this.sonSandik = null;
     this.uzak.guncelle(dt, o.gunIsigi);
     if (performance.now() - this.kanal.sonAlim > ZAMAN_ASIMI) this.kanal.kapat();
   }
