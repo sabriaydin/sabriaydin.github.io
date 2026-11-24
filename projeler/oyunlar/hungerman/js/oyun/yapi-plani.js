@@ -7,6 +7,7 @@
    Plan tarayıcıda saklanır; bu sayede başka dünyalarda da kullanılabilir. */
 import { THREE } from '../grafik/sahne.js';
 import { BLOKLAR, ESYALAR, KATI, SIVI } from '../bloklar.js';
+import { PY } from '../sabitler.js';
 
 const SAKLA = 'hungerman_yapiPlani';
 const UST = 32;
@@ -111,7 +112,7 @@ export class YapiPlani {
     const d = this.e.dunya, gerek = new Map(), kurulacak = [];
     for (const c of this.hucreler(Y)) {
       const [x, y, z, id] = c;
-      if (y < 1 || y >= 127) continue;
+      if (y < 1 || y >= PY - 1) continue;
       const q = d.blok(x, y, z), qb = BLOKLAR[q];
       if (q !== 0 && !(qb && qb.degistirilebilir) && !(SIVI[q] && q !== 59)) continue;
       const es = planEsyasi(id);

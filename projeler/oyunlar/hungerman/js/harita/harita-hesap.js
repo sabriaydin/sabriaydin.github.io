@@ -1,21 +1,22 @@
 /* HungerMan - harita hesabı: bir parçanın üstten görünümü (sütun başına en üst blok ve yükseklik)
    Tarayıcı nesnesi kullanmaz; ana iş parçacığında ve keşif işçisinde ortak kullanılır. */
-import { PB, PY, dizin } from '../sabitler.js';
+import { PB, PY, dizin, HARITA_OLCEK } from '../sabitler.js';
 import { KATI, SIVI, LAV, BLOKLAR } from '../bloklar.js';
 
-/* Bir sütunun haritadaki karşılığı: [blok, yükseklik]; su için blok = taban bloğu, yükseklik = 128 + derinlik */
+/* Bir sütunun haritadaki karşılığı: [blok, yükseklik]; su için blok = taban bloğu, yükseklik = 128 + derinlik.
+   0.41.0: kara yüksekliği bir bayta sığsın diye HARITA_OLCEK'e bölünür (sürüm 2 dünyalarında 2, eski dünyalarda 1) */
 export function sutun(al) {
   for (let y = PY - 1; y > 0; y--) {
     const b = al(y);
     if (!b) continue;
-    if (LAV[b]) return [b, y];
+    if (LAV[b]) return [b, Math.min(127, Math.round(y / HARITA_OLCEK))];
     if (SIVI[b]) {
       let d = 0, yy = y;
       while (yy > 0 && SIVI[al(yy)] && !LAV[al(yy)]) { d++; yy--; }
       return [al(yy) || 7, 128 + Math.min(127, d)];
     }
     if (!KATI[b] && !(BLOKLAR[b] && BLOKLAR[b].ekin != null)) continue;   // ot, çiçek, meşale görünmez; ekinler görünür
-    return [b, y];
+    return [b, Math.min(127, Math.round(y / HARITA_OLCEK))];
   }
   return [0, 0];
 }

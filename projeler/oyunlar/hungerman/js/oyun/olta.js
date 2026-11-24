@@ -3,7 +3,7 @@
    tekrar sağ tıklanırsa av çekilir. Erken ya da geç çekilen oltadan bir şey çıkmaz. */
 import { THREE } from '../grafik/sahne.js';
 import { SIVI, LAV, KATI, ESYALAR, maksDayanim, buyuSeviye } from '../bloklar.js';
-import { DENIZ } from '../sabitler.js';
+import { DENIZ, PY } from '../sabitler.js';
 
 const MENZIL = 30;
 const NOKTA = 14;
@@ -124,7 +124,7 @@ export class Olta {
     } else if (s.durum === 'su' || s.durum === 'isirma') {
       /* Su yüzeyini bul ve yüz */
       let y = Math.floor(p.y);
-      while (y < 127 && su(p.x, y + 1, p.z)) y++;
+      while (y < PY - 1 && su(p.x, y + 1, p.z)) y++;
       while (y > 0 && !su(p.x, y, p.z)) y--;
       const yuzey = y + 0.875;
       const t = performance.now() / 1000;

@@ -5,7 +5,7 @@ import { BLOKLAR, ESYALAR } from '../bloklar.js';
 import { TARIFLER, GRUPLAR, istasyonlar } from './uretim.js';
 
 /* Yakıt: eşya -> yanma süresi (sn) */
-export const YAKIT = { 257: 40, 8: 15, 10: 15, 12: 15, 144: 15, 14: 4, 38: 4, 39: 4, 256: 1 };
+export const YAKIT = { 257: 40, 8: 15, 10: 15, 12: 15, 144: 15, 3005: 15, 14: 4, 38: 4, 39: 4, 256: 1 };
 export const OK_ESYALARI = new Set([287]);
 /* Girdi eşyası -> { n: harcanan, cikti, adet } */
 export const PISIRME = {};

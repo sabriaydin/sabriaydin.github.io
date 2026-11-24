@@ -2,7 +2,7 @@
    Oyuncunun görüş mesafesine giren her parça, üstten görünüm olarak (sütun başına en üstteki blok ve yükseklik) saklanır.
    Parçalar 16 x 16 parçalık bölgelerde toplanır; her bölge 256 x 256 piksellik bir tuvale (1 piksel = 1 blok) boyanır.
    Bölge tuvalleri hem büyük haritada hem mini haritada ölçeklenerek çizilir. */
-import { PB, DENIZ, diyarMi } from '../sabitler.js';
+import { PB, DENIZ, diyarMi, HARITA_OLCEK } from '../sabitler.js';
 import { LAV, YUZ_DOKU } from '../bloklar.js';
 import { doseme } from '../grafik/doku.js';
 import { sutun, parcaHesapla } from './harita-hesap.js';
@@ -79,13 +79,13 @@ export class Harita {
     const cx = Math.floor(x / PB), cz = Math.floor(z / PB), t = this.parcalar.get(cx + ',' + cz);
     if (!t) return null;
     const i = (z - cz * PB) * PB + (x - cx * PB), h = t[PB * PB + i];
-    return { id: t[i], h: h >= 128 ? DENIZ : h, su: h >= 128, derinlik: h >= 128 ? h - 128 : 0 };
+    return { id: t[i], h: h >= 128 ? DENIZ : h * HARITA_OLCEK, su: h >= 128, derinlik: h >= 128 ? h - 128 : 0 };
   }
   yukseklik(x, z) {
     const cx = Math.floor(x / PB), cz = Math.floor(z / PB), t = this.parcalar.get(cx + ',' + cz);
     if (!t) return null;
     const h = t[PB * PB + (z - cz * PB) * PB + (x - cx * PB)];
-    return h >= 128 ? DENIZ : h;
+    return h >= 128 ? DENIZ : h * HARITA_OLCEK;
   }
 
   /* ---------- Keşif ---------- */
@@ -159,7 +159,7 @@ export class Harita {
     this.boya(b, t, x, z, (z - cz * PB) * PB + (x - cx * PB));
   }
   boya(b, t, x, z, i) {
-    const id = t[i], hh = t[PB * PB + i];
+    const id = t[i], hh = t[PB * PB + i], hk = hh * HARITA_OLCEK;   // hk: gerçek kara yüksekliği
     if (!b.img) b.img = b.ctx.getImageData(0, 0, BOLGE_BLOK, BOLGE_BLOK);
     const o = ((z - b.rz * BOLGE_BLOK) * BOLGE_BLOK + (x - b.rx * BOLGE_BLOK)) * 4, d = b.img.data;
     b.kirli = true;
@@ -178,10 +178,10 @@ export class Harita {
       const c = ustRenk(id);
       let k = 1;
       if (!LAV[id]) {
-        const hn = this.yukseklik(x, z - 1) ?? hh, hw = this.yukseklik(x - 1, z) ?? hh;
-        const fark = (hh - hn) + (hh - hw) * 0.5;
+        const hn = this.yukseklik(x, z - 1) ?? hk, hw = this.yukseklik(x - 1, z) ?? hk;
+        const fark = (hk - hn) + (hk - hw) * 0.5;
         k = 1 + Math.max(-0.3, Math.min(0.28, fark * 0.075));
-        k *= 0.92 + Math.max(-0.16, Math.min(0.22, (hh - DENIZ) / 150));
+        k *= 0.92 + Math.max(-0.16, Math.min(0.22, (hk - DENIZ) / (HARITA_OLCEK > 1 ? 220 : 150)));
       }
       r = c[0] * k; g = c[1] * k; bl = c[2] * k;
     }

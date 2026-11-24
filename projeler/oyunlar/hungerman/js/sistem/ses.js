@@ -11,6 +11,8 @@ const ORNEK = { adim_cim: 5, adim_tas: 5, adim_odun: 5, adim_kar: 5, adim_kum: 5
   sayfa: 3, tencere: 3, balta: 1, kol: 2, kilic: 3, deri: 2, tik: 3, sec: 2, pencere_ac: 2, pencere_kapa: 2, onay: 2, hata: 1, basarim: 1, gorev: 1, seviye: 1, buyu: 1, olum: 1,
   /* 0.40.0 */
   sut: 1, kirp: 1, ahtapot_acima: 2, ahtapot_olum: 1, alet_kir: 3, at: 2, at_acima: 1, at_olum: 1, ates: 3, ates_topu: 1, balik: 4, buyucu: 2, buyucu_acima: 2, buyucu_olum: 1, buyucu_saldiri: 3, cakmak: 1, damla: 3, domuz: 1, domuz_acima: 1, dugme: 1, firavun: 1, firlat: 1, gecis: 1, gecit_ac: 1, gok: 4, haydut: 2, haydut_acima: 2, hayvan_ye: 1, ic: 1, inek: 1, inek_acima: 1, isinlanma: 2, iskelet: 2, iskelet_acima: 1, iskelet_olum: 1, kanli_ay: 1, kedi: 2, kedi_acima: 1, kedi_olum: 1, kopek: 3, kopekbaligi: 1, kopekbaligi_acima: 2, kopekbaligi_olum: 1, korruhu: 1, korruhu_acima: 1, korruhu_olum: 1, koylu: 7, koylu_acima: 2, koylu_evet: 2, koyun: 3, koyun_acima: 1, kuldev: 3, kuldev_acima: 1, kuldev_olum: 1, kuldev_saldiri: 2, kurt: 1, kurt_acima: 3, kurt_olum: 1, lav: 3, lav_ortam: 2, magara: 2, muhafiz: 2, muhafiz_acima: 3, muhafiz_olum: 1, mumya: 2, mumya_acima: 3, mumya_olum: 2, nota_bas: 1, nota_davul: 1, nota_flut: 1, nota_piyano: 1, nota_zil: 1, ok_isabet: 1, olta_cek: 1, olta_dus: 1, orumcek: 2, orumcek_acima: 3, orumcek_olum: 1, orumcek_saldiri: 2, patlama: 1, roket: 1, ruzgar: 2, sicrama: 1, su: 4, su_adim: 3, tavsan: 4, tavsan_acima: 3, tavsan_olum: 3, tavuk: 3, tavuk_acima: 1, tavuk_yumurta: 1, tilsim: 1, topla: 1, yagmur: 1, yarasa: 1, yarasa_acima: 3, yarasa_olum: 1, yay_at: 1, zombi: 1, zombi_acima: 1, zombi_olum: 1 };
+/* 0.41.0: biyom ortam sesleri (AmbientSounds ve Ambience Redo kaynaklı; ses/LISANS.md) */
+Object.assign(ORNEK, { kus: 3, karga: 1, baykus: 1, cekirge: 1, kurt_uluma: 1, cakal: 1, col_ruzgar: 1, marti: 1, selale: 1, dag_ruzgar: 2, dere: 2 });
 /* Blok ses türlerinin kayıt grupları */
 const ADIM = { cimen: 'adim_cim', toprak: 'adim_cim', bitki: 'adim_cim', tas: 'adim_tas', cam: 'adim_tas', odun: 'adim_odun', kar: 'adim_kar', kum: 'adim_kum', yun: 'adim_kum' };
 const KAZ = { tas: 'kaz_tas', odun: 'kaz_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', cam: 'kaz_cam' };
@@ -205,6 +207,11 @@ export class Ses {
   zirhGiy() { if (this.cal('kumas', 1)) return; this.patlama(1800, 0.15, 0.2, 'bandpass', 2); }
   takas() { this.cal('koylu_evet', 0.8); if (this.cal('para', 1)) return; this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }
   gorev() { if (this.cal('gorev', 1)) return; [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => this.ton(f, 0.16, 0.07, 'triangle', f), i * 90)); }
+  /* 0.41.0: biyom ortam sesleri. Uzun kayıtlar (rüzgâr, dere, şelale, çekirge) üst üste binmez; kısa çağrılar (kuş, baykuş) perde ve düzeyce değişir */
+  ortam(g, h = 1, uzun = false) {
+    if (uzun) return this.calTek(g, h);
+    return this.cal(g, h, 0.92 + Math.random() * 0.16);
+  }
   /* Mağara ortam sesleri */
   damla(h = 1) { if (this.cal('damla', h)) return; this.ton(1500 + Math.random() * 900, 0.18, 0.05 * h, 'sine', 900); }
   lav(h = 1) { if ((Math.random() < 0.5 ? this.calTek('lav_ortam', h) : this.cal('lav', h))) return; this.patlama(180 + Math.random() * 120, 0.25, 0.12 * h, 'lowpass', 2, 0.5); }

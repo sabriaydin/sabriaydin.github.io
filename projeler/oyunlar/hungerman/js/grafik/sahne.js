@@ -2,7 +2,7 @@
 import * as THREE from '../../lib/three.module.min.js';
 import { atlas, catlaklar, simge } from './doku.js';
 import { YUZ_DOKU, CIZIM, C_KUP, ESYALAR, ATLAS_N } from '../bloklar.js';
-import { PY } from '../sabitler.js';
+import { PY, BULUT_Y } from '../sabitler.js';
 import { uretec } from '../rastgele.js';
 
 export { THREE };
@@ -11,7 +11,9 @@ export const ISIK_SAYISI = 32;   // 0.15.2: aydınlatılmış büyük salonlar i
 /* 0.23.0: rüzgâr: bitkilerin üst köşeleri (ışık değeri -1'in altında) ve yapraklar (-1 ile 0 arası) salınır; su yüzeyi dalgalanır */
 const BLOK_VS = `
 attribute vec2 isik;
+attribute vec3 ton;
 uniform float zaman;
+uniform float sicak;
 uniform float ruzgar;
 uniform float yaprakSal;
 varying vec2 vUv;
@@ -19,7 +21,9 @@ varying float vAo;
 varying float vGok;
 varying vec3 vDunya;
 varying float vUzak;
+varying vec3 vTon;
 void main() {
+  vTon = 1.0 + ton * 0.5;   /* 0.41.0: biyom tonu (öznitelik yoksa 0: değişiklik yok) */
   float a = isik.x, sal = 0.0;
   if (a < -1.0) { sal = 1.0; a = -a - 1.0; } else if (a < 0.0) { sal = 0.3 * yaprakSal; a = -a; }   // 0.33.0: ağaç yaprakları yalnızca fırtınada salınır
   vUv = uv; vAo = a; vGok = isik.y;
@@ -35,6 +39,12 @@ void main() {
   #endif
   vDunya = d.xyz;
   vec4 mv = viewMatrix * d;
+  /* 0.41.0: sıcak hava dalgalanması (çöl ve kızıl kayalıklarda gündüz): uzaktaki yüzeyler hafifçe titrer */
+  if (sicak > 0.0) {
+    float uz = length(mv.xyz), k = sicak * smoothstep(22.0, 90.0, uz) * 0.0032 * uz;
+    mv.x += sin(zaman * 7.0 + d.x * 0.45 + d.y * 0.9) * k;
+    mv.y += cos(zaman * 5.3 + d.z * 0.4 + d.x * 0.2) * k * 0.6;
+  }
   vUzak = length(mv.xyz);
   gl_Position = projectionMatrix * mv;
 }`;
@@ -56,6 +66,7 @@ varying float vAo;
 varying float vGok;
 varying vec3 vDunya;
 varying float vUzak;
+varying vec3 vTon;
 void main() {
   vec2 uv = vUv;
   if (vAo > 1.5) { uv.x += sin(zaman * 0.7 + vDunya.z * 0.5) * 0.0012; uv.y += cos(zaman * 0.6 + vDunya.x * 0.5) * 0.0012; }
@@ -85,7 +96,7 @@ void main() {
     vec3 gokIsik = gokRenk * max(vGok * gun, magara);
     isik = max(gokIsik, min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc, vec3(1.08)));
   }
-  vec3 renk = t.rgb * ao * isik;
+  vec3 renk = t.rgb * vTon * ao * isik;
   /* Yağmur: açıktaki yüzeyler ıslak ve koyu görünür */
   renk *= mix(vec3(1.0), vec3(0.76, 0.8, 0.88), islak * clamp(vGok, 0.0, 1.0));
   float s = clamp((vUzak - sisBas) / (sisSon - sisBas), 0.0, 1.0);
@@ -138,7 +149,7 @@ export class Sahne {
     this.atlasDoku = doku;
     const ortak = () => ({
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
-      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 },
+      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 }, sicak: { value: 0 },
       isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 }
     });
     this.opakMalzeme = new THREE.ShaderMaterial({ uniforms: ortak(), vertexShader: BLOK_VS, fragmentShader: BLOK_FS });
@@ -263,7 +274,7 @@ export class Sahne {
     this.gunes.position.copy(gy).multiplyScalar(400); this.gunes.lookAt(konum);
     this.ay.position.copy(gy).multiplyScalar(-400); this.ay.lookAt(konum);
     /* Bulutlar oyuncuyu izler, doku kayar */
-    this.bulut.position.set(konum.x, PY + 4, konum.z);
+    this.bulut.position.set(konum.x, BULUT_Y, konum.z);   // 0.41.0: sürüm 2 dünyalarında 196, eski dünyalarda 132
     const bk = this.bulutMalzeme.map;
     bk.offset.set((konum.x + zamanSn * 1.2) / 768 % 1, -(konum.z) / 768 % 1);
     this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
@@ -278,8 +289,16 @@ export class Sahne {
     const lav = suda === 'lav';
     /* suda === 'maske': dalış maskesi su altında görüşü uzatır */
     const maske = suda === 'maske';
-    const sis = lav ? new THREE.Color(0.9, 0.32, 0.05) : suda ? new THREE.Color(0.08, 0.22, 0.44).multiplyScalar((maske ? 0.45 : 0.35) + gun * (maske ? 0.75 : 0.65)) : ufuk;
+    const sis = lav ? new THREE.Color(0.9, 0.32, 0.05) : suda ? new THREE.Color(0.08, 0.22, 0.44).multiplyScalar((maske ? 0.45 : 0.35) + gun * (maske ? 0.75 : 0.65)) : ufuk.clone();
     let sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : (gorus * 16 - 6) * (1 - 0.42 * hy - 0.12 * hf), sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * (0.62 - 0.3 * hy);
+    /* 0.41.0: uzak arazi açıkken sis, uzak arazinin sınırına çekilir */
+    if (this.uzakMesafe > 0 && !lav && !suda) { sisSon = Math.max(sisSon, this.uzakMesafe * (1 - 0.42 * hy - 0.12 * hf)); sisBas = Math.max(sisBas, sisSon * (0.5 - 0.3 * hy)); }
+    /* 0.41.0: biyom sisi (bataklık ve mangrovda; ortamSis 0..1): görüş kısalır, sis yeşilimsi griye döner */
+    const os = !lav && !suda ? (this.ortamSis || 0) : 0;
+    if (os > 0.001) {
+      sisSon = Math.max(28, sisSon * (1 - 0.6 * os)); sisBas = sisBas * (1 - 0.85 * os);
+      sis.lerp(new THREE.Color(0.58, 0.64, 0.58).multiplyScalar(0.25 + 0.75 * gun), os * 0.55);
+    }
     /* Geliştirici: sis kapatılabilir (sisKapali), en düşük ışık en yükseğe çıkarılabilir (tamAydinlik) */
     if (this.sisKapali) { sisBas = 9000; sisSon = 10000; }
     /* 0.18.0: Yeraltı Diyarı: gökyüzü yok; kızıl sis, sıcak ve loş ortam ışığı */
@@ -298,11 +317,12 @@ export class Sahne {
       /* Gece görüşü iksiri: en düşük ışık yükselir */
       u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.07;
       u.islak.value = m === this.opakMalzeme && !suda && !diyar ? hy : 0;
+      u.sicak.value = !suda && !diyar ? (this.sicakDalga || 0) : 0;
     }
     this.cizici.setClearColor(sis);
     this.gokGrubu.visible = !suda && !diyar; this.bulut.visible = !suda && !diyar;
     if (diyar) return 0.4;
-    this.kamera.far = Math.max(600, gorus * 16 + 40); this.kamera.updateProjectionMatrix();
+    this.kamera.far = Math.max(600, gorus * 16 + 40, (this.uzakMesafe || 0) + 120); this.kamera.updateProjectionMatrix();
     return gun;
   }
 

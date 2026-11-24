@@ -93,8 +93,8 @@ function koyKur0(u, rx, rz, yer) {
   let z = rz * KOY_BOLGE + KENAR + Math.floor(r() * (KOY_BOLGE - 2 * KENAR));
   if (yer) { x = yer.x; z = yer.z; }
   const o = u.kolon(x, z, {});
-  if (!UYGUN.has(o.b) || o.h < DENIZ + 2 || o.h > DENIZ + 30 || o.c < 0.07) return null;
-  for (const [dx, dz] of [[24, 0], [-24, 0], [0, 24], [0, -24]]) { const q = u.kolon(x + dx, z + dz, {}); if (q.h < DENIZ || Math.abs(q.h - o.h) > 14) return null; }
+  if (!UYGUN.has(o.b) || o.h < DENIZ + 2 || o.h > DENIZ + 30 || o.c < 0.07 || o.su > o.h) return null;
+  for (const [dx, dz] of [[24, 0], [-24, 0], [0, 24], [0, -24]]) { const q = u.kolon(x + dx, z + dz, {}); if (q.h < DENIZ || q.su > q.h || Math.abs(q.h - o.h) > 14) return null; }
   const stil = o.b === 7 ? 'col' : o.b === 6 || o.b === 13 ? 'tayga' : 'mese';
   r(); r();   // eski ad seçiminin rastgele sırası korunur (köy yerleşimi değişmez)
   const ad = koyAdi(u, rx, rz);
@@ -132,7 +132,7 @@ function koyKur0(u, rx, rz, yer) {
         const uz = 3 + (d - 1) / 2;
         const bx = x + ax * t + px * uz, bz = z + az * t + pz * uz;
         const bo = u.kolon(bx, bz, {});
-        if (bo.h < DENIZ + 1) continue;
+        if (bo.h < DENIZ + 1 || bo.su > bo.h) continue;
         let egim = 0;
         for (const [cx, cz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) egim = Math.max(egim, Math.abs(u.kolon(bx + cx * (w >> 1), bz + cz * (d >> 1), {}).h - bo.h));
         if (egim > 5) continue;

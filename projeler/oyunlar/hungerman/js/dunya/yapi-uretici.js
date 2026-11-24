@@ -60,7 +60,7 @@ function yapiAday(u, gx, gz) {
       const f = Math.floor(r() * 4);
       const o = u.kolon(x, z, {});
       const tur = turSec(o);
-      if (!tur || o.h < DENIZ + 1 || o.c < 0.05) continue;
+      if (!tur || o.h < DENIZ + 1 || o.su > o.h || o.c < 0.05) continue;
       const R = YARICAP[tur];
       if (o.h + (tur === 'kule' ? 46 : tur === 'tapinak' ? 30 : 15) >= PY - 1 || (tur === 'tapinak' && o.h < 24)) continue;
       /* Düzlük ve su denetimi */
@@ -68,7 +68,7 @@ function yapiAday(u, gx, gz) {
       for (const [a, b] of [[-R, -R], [R, -R], [-R, R], [R, R], [0, -R], [0, R], [-R, 0], [R, 0], [-R / 2, -R / 2], [R / 2, R / 2], [-R / 2, R / 2], [R / 2, -R / 2]]) {
         const q = u.kolon(x + a, z + b, {});
         mn = Math.min(mn, q.h); mx = Math.max(mx, q.h);
-        if (q.h < DENIZ) su = true;
+        if (q.h < DENIZ || q.su > q.h) su = true;   // 0.41.0: göl ve nehirler de su sayılır
       }
       if (su || mx - mn > (tur === 'kule' ? 9 : tur === 'tapinak' ? 10 : tur === 'kamp' ? 5 : 6)) continue;
       if (koyIcinde(u, x, z, R + 24)) continue;

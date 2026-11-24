@@ -26,6 +26,9 @@ const GOLGE_MALZ = (() => {
 const CICEK = new Set([26, 27, 44]);   // 0.21.0: arıların polen topladığı çiçekler
 const MAX_HAYVAN = 18, HAYVAN_UZAK = 120, ZOMBI_UZAK = 72;
 
+/* 0.41.0: alt biyomlara özgü hayvanlar (ana biyomun hayvanlarına eklenir) */
+const ALT_HAYVAN = { [BY.CICEKLI]: ['at', 'tavsan', 'koyun'], [BY.SONBAHAR]: ['domuz', 'tavsan', 'kurt'], [BY.SIK]: ['domuz', 'kurt'], [BY.KAYALIK]: ['koyun', 'tavsan'], [BY.KARLI_ZIRVE]: ['koyun'], [BY.YALIYAR]: ['koyun'] };
+
 export class Varliklar {
   constructor(o) {
     Object.assign(this, o); // sahne, dunya, dusenler, ses, uretici
@@ -164,9 +167,10 @@ export class Varliklar {
       const x = Math.floor(op.x + Math.cos(a) * r), z = Math.floor(op.z + Math.sin(a) * r);
       if (this.dunya.yuklu(x, z)) {
         const kol = this.uretici.kolon(x, z, {});
-        const adaylar = HAYVANLAR.filter(t => TURLER[t].biyom.includes(kol.b));
+        /* 0.41.0: alt biyomlara özgü hayvanlar (ALT_HAYVAN); mantar adasında yalnızca inekler */
+        const adaylar = kol.ab === BY.MANTAR ? ['inek'] : HAYVANLAR.filter(t => TURLER[t].biyom.includes(kol.b) || (ALT_HAYVAN[kol.ab] || []).includes(t));
         const zem = this.zeminBul(x, z);
-        if (adaylar.length && zem && (zem.b === 4 || zem.b === 45 || zem.b === 5 || zem.b === 3 || zem.b === 142)) {
+        if (adaylar.length && zem && (zem.b === 4 || zem.b === 45 || zem.b === 5 || zem.b === 3 || zem.b === 142 || zem.b === 3001)) {
           let tur = adaylar[Math.floor(Math.random() * adaylar.length)];
           if (tur === 'kedi' && Math.random() < 0.7) tur = adaylar[0];   // kediler seyrek
           const T = TURLER[tur];
@@ -212,15 +216,19 @@ export class Varliklar {
           if (y != null && y > this.uretici.kolon(x, z, {}).h - 5) y = null;
         }
         if (y == null) continue;
+        /* 0.41.0: mantar adalarında yüzeyde canavar doğmaz */
+        if (!this.gokAcik(x, y + 2, z) ? false : this.uretici.kolon(x, z, {}).ab === BY.MANTAR) continue;
         if ((x + 0.5 - op.x) ** 2 + (y - op.y) ** 2 + (z + 0.5 - op.z) ** 2 < 18 * 18) continue;
         if (this.mesaleYakin(x + 0.5, y, z + 0.5, kanli ? 6 : 10)) continue;
         const s = Math.random(), yeralti = !this.gokAcik(x, y + 2, z);
         let tur = yeralti ? (s < 0.42 ? 'zombi' : s < 0.72 ? 'iskelet' : 'orumcek') : (s < 0.6 ? 'zombi' : s < 0.85 ? 'iskelet' : 'orumcek');
         /* 0.14.0: çöl ve savanda mumya, karlı bölgelerde buz iskeleti */
         if (!yeralti) {
-          const b = this.uretici.kolon(x, z, {}).b;
+          const k = this.uretici.kolon(x, z, {}), b = k.b;
           if (tur === 'zombi' && (b === BY.COL || b === BY.SAVAN) && Math.random() < 0.85) tur = 'mumya';
-          else if (tur === 'iskelet' && KARLI.has(b) && Math.random() < 0.85) tur = 'buziskelet';
+          else if (tur === 'iskelet' && (KARLI.has(b) || k.ab === BY.KARLI_ZIRVE) && Math.random() < 0.85) tur = 'buziskelet';
+          /* 0.41.0: bataklık ve mangrovda zombilerin bir kısmı boğulmuş zombidir */
+          else if (tur === 'zombi' && b === BY.BATAKLIK && Math.random() < 0.45) tur = 'bogulmus';
         }
         /* Yarasa sürüsü: mağaralarda ve gece açıkta */
         if (Math.random() < (yeralti ? 0.2 : 0.06)) {

@@ -7,6 +7,7 @@ import { ezgiTuru } from './mekanik.js';
 import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ } from '../cihazlar.js';
 import { KABLO, portlar, portBilgi, PORT_AD, kabloUcu, mesafe, yolUzunlugu, kabloMaliyeti } from './kablolar.js';
 import { YapiPlani } from './yapi-plani.js';
+import { PY } from '../sabitler.js';
 
 const hexRgb = h => { h = (h || '#ffffff').replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16) / 255); };
 const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
@@ -742,7 +743,7 @@ export class Etkilesim {
         if ((mevcut && !BLOKLAR[mevcut].degistirilebilir) || (ust && !BLOKLAR[ust].degistirilebilir)) return false;
         if (!KATI[alt]) { this.arayuz.bildirim('Kapı katı bir zeminin üstüne konur.'); return true; }
         if (this.oyuncu.hucreyiKapliyor(x, y, z) || this.oyuncu.hucreyiKapliyor(x, y + 1, z)) return false;
-        if (y + 1 >= 127) return false;
+        if (y + 1 >= PY - 1) return false;
         d.blokKoy(x, y, z, 88 + f * 4); d.blokKoy(x, y + 1, z, 88 + f * 4 + 1);
         env.seciliAzalt(1); this.ses.koy('odun');
         return true;
@@ -752,7 +753,7 @@ export class Etkilesim {
       const suBitkisi = !!BLOKLAR[id].suIcinde;
       const bitki = (BITKI[id] && !suBitkisi) || BLOKLAR[id].mesale;
       if (mevcut !== 0 && !(mb.degistirilebilir) && !(SIVI[mevcut] && !BITKI[mevcut] && !bitki)) return false;
-      if (y < 1 || y >= 127) return false;
+      if (y < 1 || y >= PY - 1) return false;
       const alt = d.blok(x, y - 1, z);
       /* 0.31.0: avize tavana asılır */
       if (BLOKLAR[id].asili) { const ust = d.blok(x, y + 1, z); if (!(KATI[ust] && OPAK[ust])) { this.arayuz.bildirim(`${BLOKLAR[id].ad} katı bir tavana asılır.`); return true; } }
@@ -938,7 +939,7 @@ export class Etkilesim {
     const ic = new Set(hucreler.map(q => q[0] + ',' + q[1] + ',' + q[2]));
     let su = 0;
     for (const [hx, hy, hz, i] of hucreler) {
-      if (hy < 1 || hy >= 126 || !d.yuklu(hx, hz)) return sonuc(false, 'Cihaz bu yüksekliğe sığmaz.');
+      if (hy < 1 || hy >= PY - 2 || !d.yuklu(hx, hz)) return sonuc(false, 'Cihaz bu yüksekliğe sığmaz.');
       const q = d.blok(hx, hy, hz), qb = BLOKLAR[q];
       const bos = q === 0 || (qb && qb.degistirilebilir && !qb.cihaz) || (C.elektrik === 'su' && SIVI[q] && q !== 59);
       if (!bos) return sonuc(false, `${C.ad} için yer yok: ${C.w} × ${C.d} taban ve ${C.h} blok yükseklik gerekir.`);
@@ -955,7 +956,7 @@ export class Etkilesim {
     }
     if (C.elektrik === 'su' && !su) return sonuc(false, 'Su çarkının alt kısmı suya değmelidir (çarkı suyun içine ya da kıyısına kurunuz).');
     if (C.elektrik === 'ruzgar') for (const [px, py, pz] of pervaneHucreleri(yon, ax, y, az)) {
-      if (py >= 127 || KATI[d.blok(px, py, pz)]) return sonuc(false, 'Pervanenin döneceği alan boş olmalıdır (yaklaşık 7 blok çapında).');
+      if (py >= PY - 1 || KATI[d.blok(px, py, pz)]) return sonuc(false, 'Pervanenin döneceği alan boş olmalıdır (yaklaşık 7 blok çapında).');
     }
     return sonuc(true);
   }
@@ -1002,7 +1003,7 @@ export class Etkilesim {
     const sonuc = (gecerli, neden = '') => ({ coklu: D.tur, yon, x, y, z, parcalar, gecerli, neden });
     const boyut = D.n > 1 ? `${D.w} × ${D.d} taban ve ${D.h} blok yükseklik` : 'bir blok';
     for (const [hx, hy, hz, i] of hucreler) {
-      if (hy < 1 || hy >= 127 || !d.yuklu(hx, hz)) return sonuc(false, `${D.ad} buraya sığmaz.`);
+      if (hy < 1 || hy >= PY - 1 || !d.yuklu(hx, hz)) return sonuc(false, `${D.ad} buraya sığmaz.`);
       const q = d.blok(hx, hy, hz), qb = BLOKLAR[q];
       if (!(q === 0 || (qb && qb.degistirilebilir && !qb.cihaz))) return sonuc(false, `${D.ad} için ${boyut} boş yer gerekir.`);
       if (kati && this.oyuncu.hucreyiKapliyor(hx, hy, hz)) return sonuc(false, `${D.ad} kurulacak yerde durulmaktadır.`);
@@ -1047,7 +1048,7 @@ export class Etkilesim {
     const parcalar = [[YATAK + yon * 2, x, y, z], [YATAK + yon * 2 + 1, x + dx, y, z + dz]];
     const sonuc = (gecerli, neden = '') => ({ yatak: true, yon, x, y, z, parcalar, gecerli, neden });
     for (const [, px, py, pz] of parcalar) {
-      if (py < 1 || py >= 127 || !d.yuklu(px, pz)) return sonuc(false, 'Yatak buraya sığmaz.');
+      if (py < 1 || py >= PY - 1 || !d.yuklu(px, pz)) return sonuc(false, 'Yatak buraya sığmaz.');
       const q = d.blok(px, py, pz), qb = BLOKLAR[q];
       if (!(q === 0 || (qb && qb.degistirilebilir && !qb.cihaz))) return sonuc(false, 'Yatak için iki blok boş yer gerekir.');
       if (this.oyuncu.hucreyiKapliyor(px, py, pz)) return sonuc(false, 'Yatağın kurulacağı yerde durulmaktadır.');

@@ -3,7 +3,8 @@
    Kor taşından oyulmuş dev mağaralar, 31. katmana kadar lav denizi, tavandan sarkan ışıltaş kümeleri, kül kumu düzlükleri,
    magma kıyıları, kızıl mantarlar ve kor cevherleri bulunur. Yer yer lav denizinin üstünde köprüleriyle bir Kül Kalesi yükselir.
    Yoğunluk, iri bir ızgarada hesaplanıp ara değerlenir (hızlı ve yumuşak mağaralar). */
-import { PB, PY, DIYAR_X, DIYAR_SINIR, DIYAR_LAV, dizin } from '../sabitler.js';
+import { PB, PHACIM, DIYAR_X, DIYAR_SINIR, DIYAR_LAV, dizin } from '../sabitler.js';
+const PY = 128;   // 0.41.0: diyarın yüksekliği dünya yüksekliğinden bağımsız olarak 128'dir
 import { Gurultu, karistir, karma2, karma3, uretec } from '../rastgele.js';
 
 const KOR = 512, KUL = 513, ISIL = 514, KULT = 518, OYMA = 519, KORC = 520, MAGMA = 521, MANTAR = 522, LAV = 59, ANA = 1;
@@ -27,7 +28,7 @@ function yogunluk(G, x, y, z) {
 }
 
 export function diyarUret(u, cx, cz) {
-  const v = new Uint16Array(PB * PB * PY);
+  const v = new Uint16Array(PHACIM);
   const G = gurultular(u);
   const x0 = cx * PB, z0 = cz * PB;
   /* İri ızgara: 5 x 5 x 17 */

@@ -2,10 +2,10 @@
    ve yalnızca üstten görünümlerini (parça başına 512 bayt) ana iş parçacığına gönderir.
    Kıtadan uzak açık deniz parçaları için tam parça üretilmez: sütunların yüksekliği ve deniz tabanı bloğu doğrudan
    arazi işlevinden hesaplanır (aynı sonucu çok daha hızlı verir). Batık bulunan parçalar her zaman tam üretilir. */
-import { Uretici } from '../dunya/uretici.js';
+import { ureticiOlustur } from '../dunya/uretici.js';
 import { batiklarAlan } from '../dunya/batik-uretici.js';
 import { parcaHesapla } from './harita-hesap.js';
-import { PB, DENIZ, KITA_YARICAP } from '../sabitler.js';
+import { PB, DENIZ, KITA_YARICAP, dunyaSurumAyarla } from '../sabitler.js';
 
 let uretici = null;
 const o = {};
@@ -25,7 +25,7 @@ function acikDeniz(cx, cz) {
 }
 self.onmessage = e => {
   const m = e.data;
-  if (m.tur === 'baslat') { uretici = new Uretici(m.tohum); return; }
+  if (m.tur === 'baslat') { dunyaSurumAyarla(m.surum || 1); uretici = ureticiOlustur(m.tohum, m.surum || 1); return; }
   if (m.tur === 'is') {
     const n = m.l.length / 2, v = new Uint8Array(n * 512);
     for (let i = 0; i < n; i++) {

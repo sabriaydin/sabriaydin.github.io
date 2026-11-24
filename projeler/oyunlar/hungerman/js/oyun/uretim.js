@@ -5,7 +5,7 @@ import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLER
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
-  kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144] }
+  kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144, 3005] }
 };
 export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere', degirmen: 'Değirmen Taşı', taskesme: 'Taş Kesme Tezgâhı' };
 export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencere: 232, degirmen: MUTFAK.degirmen, taskesme: COKLU_ID.tasKesme };
@@ -27,6 +27,7 @@ t(14, 4, [[8, 1]], null, 'blok');
 t(38, 4, [[10, 1]], null, 'blok');
 t(39, 4, [[12, 1]], null, 'blok');
 t(14, 4, [[144, 1]], null, 'blok');
+t(14, 4, [[3005, 1]], null, 'blok');   // 0.41.0: mangrov kütüğü
 t(32, 1, [['kalas', 4]], null, 'blok');
 t(46, 4, [[256, 1], [257, 1]], null, 'blok');
 t(33, 1, [[15, 8]], 'masa', 'blok');

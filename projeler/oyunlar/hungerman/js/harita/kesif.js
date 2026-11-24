@@ -1,5 +1,6 @@
 /* HungerMan - toplu harita keşfi (geliştirici modu): verilen parçalar işçilerde üretilir ve haritaya işlenir.
    İşçilerden gelen sonuçlar kare başına kısa bir zaman bütçesiyle haritaya yazılır; oyun akıcı kalır. */
+import { URETICI_SURUM } from '../sabitler.js';
 const PAKET = 16, BUTCE_MS = 5, KUYRUK_SINIRI = 8;
 
 export class HaritaKesif {
@@ -13,7 +14,7 @@ export class HaritaKesif {
       const w = new Worker(new URL('./kesif-isci.js', import.meta.url), { type: 'module' });
       w.onmessage = e => { this.kuyruk.push(e.data); this.ver(w); };
       w.onerror = e => { this.hata = e.message || 'Keşif işçisi çalışmadı.'; };
-      w.postMessage({ tur: 'baslat', tohum });
+      w.postMessage({ tur: 'baslat', tohum, surum: URETICI_SURUM });
       this.isciler.push(w);
       this.ver(w);
     }

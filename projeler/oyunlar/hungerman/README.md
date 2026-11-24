@@ -117,6 +117,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.0 (0.41.0): Yeni dünya üreticisi, büyük dünya ve atmosfer
+Yeni dünyalar yeni üreticiyle (sürüm 2) kurulur; eski dünyalar eski üreticiyle açılmaya devam eder (dünya kaydında `uretici` alanı; kaydı olmayan dünyalar sürüm 1 sayılır, arazileri değişmez).
+- Büyük dünya: yükseklik 128'den 256'ya (eski dünyalarda arazi alttaki 128 blokta kalır), kıta yarıçapı 2600'den 4000'e (çap yaklaşık 8000 blok), dünya sınırı 3600'den 5400'e çıktı. Bulutlar 196 yüksekliğe taşındı; haritada yükseklik ölçeklenir.
+- Arazi biçimi: çok katlı sırt gürültüsüyle sivri zirveler ve keskin sırtlar (zirveler 200 yüksekliği aşar), basamaklı vadiler ve uçurumlar, dik kenarlı platolar, engebeli kayalık tepeler, sıcak ve kurak bölgelerde renk katmanlı basamaklı kızıl kayalıklar (mesa), savanda alçak platolar, daha uzun ve derin kanyonlar, doğal taş kemerler, dik yamaçların altında oyuklar ve çıkıntılar. Dik yamaçlarda kaya (taş, granit) görünür.
+- Su: dağlardan denize uzanan kıvrımlı nehirler; yüksek arazide su seviyesi basamaklarla iner ve basamaklarda şelale oluşur. Yüksek arazide sabit seviyeli göller (kıyılarında saz, yüzeyinde nilüfer; çok soğukta donar). Kıyılar üç türlüdür: dik yalıyarlar, çakıllı ve kayalık taşlı kıyılar, geniş kumsallar. Kıyı açıklarında takımadalar, açık denizde mantar adaları.
+- Biyomlar: çiçekli çayır, sık orman, sonbahar ormanı, kayalık tepeler, karlı zirveler, mangrov, mantar adası, kızıl kayalıklar, göl, taşlı kıyı ve yalıyar alt biyomları eklendi (iklim, hava ve canlılar ana biyoma göredir; konum satırında alt biyomun adı görünür). Çimen, yaprak ve suyun rengi iklime göre (kuru bölgelerde sarımsı, soğukta mavimsi, bataklıkta koyu, sıcak denizde turkuaz) biyom sınırlarında yumuşakça geçiş yaparak değişir.
+- Bitki örtüsü: 2 × 2 gövdeli dev meşe ve dev ladin, uzun ladin ve uzun huş, yuvarlak taçlı meşe, sonbahar ağaçları (kızıl, turuncu ve sarı yapraklar), mangrov ağaçları (sudan yükselen kökler), dev kırmızı ve kahverengi mantarlar, çalılar, devrik kütükler (üstünde mantar), yosunlu ve çıplak kayalar, çakıl ve toprak lekeleri, mantar kümeleri, orman açıklıkları, çayırlarda ağaç kümeleri; çiçekli çayırda öbek öbek papatya, lale, lavanta, gelincik ve karahindiba.
+- Yeni bloklar: kızıl kum, miselyum, üç renk sonbahar yaprağı, mangrov kütüğü, yaprağı ve kökü, kırmızı ve kahverengi mantar blokları, mantar sapı, kırmızı mantar, papatya, lale, lavanta, saz, devrik kütükler. Mangrov kütüğü kalasa çevrilir ve yakıttır.
+- Yeraltı: kıvrımlı tünellere ek olarak derinlerde geniş mağara salonları, yeraltı gölleri ve yeraltı nehirleri, yüzeye açılan mağara ağızları; granit, kireçtaşı ve bazalt kütleleri. Cevherler derinliğe ve biyoma göre dağılır (dağlarda yüksekte kömür ve demir, kayalık tepelerde bakır, kızıl kayalıklarda altın); bazı bölgelerde mağara duvarlarında görünen kalın demir (bazaltla) ve bakır (granitle) damarları bulunur.
+- Atmosfer: ormanda ve çayırda gündüz kuş cıvıltıları, gece çekirgeler ve baykuşlar, taygada ve dağlarda gece kurt ulumaları, çölde çöl rüzgârı ve gece çakallar, yükseklerde dağ rüzgârı, kıyıda martılar, nehir kıyısında dere ve şelale yakınında şelale sesi (gerçek kayıtlar; ses/LISANS.md). Bataklık ve mangrovda sis, gece bataklık, orman ve çayırlarda ateş böcekleri, çölde gündüz sıcak hava dalgalanması.
+- Biyoma özgü canlılar: mantar adalarında yalnızca inekler bulunur ve yüzeyde canavar doğmaz; çiçekli çayırda at ve tavşan, sonbahar ve sık ormanda domuz ve kurt, kayalık tepelerde koyun; bataklıkta zombilerin bir kısmı boğulmuş zombidir, karlı zirvelerde buz iskeletleri doğar.
+- Görüş ve başarım: Ayarlara "Uzak arazi" eklendi (Kapalı, 512, 768, 1024, 1536 blok; varsayılan 768, dokunmatik cihazlarda kapalı): yüklü parçaların ötesindeki arazi seyrek ızgaralı ve sade renkli olarak çizilir, sis bu mesafeye çekilir. Parça üretiminde mağara, taş ve damar gürültüleri 4 blokluk ızgarada örneklenip ara değerlenir; meshleme yalnızca parçanın dolu yüksekliğine kadar yapılır.
+
 ## 40.9 (0.40.9): Yeni ana menü arka planı (yüksek çözünürlük)
 - Ana menü arka planı yeniden çekildi: önceki görüntü, oyunun otomatik çözünürlük ayarı düşük çözünürlüğe indiği ve uzak parçalar yüklenmeden çekildiği için bulanık ve kısa görüşlüydü.
 - Yeni görüntü %100 çözünürlükte, iki kat büyüklükte (5120 × 2560) çekilip yumuşatılarak 3200 × 1600'e küçültüldü; 16 parçalık görüş mesafesindeki bütün parçalar yüklendikten sonra çekildi. Manzara: öğleden sonra ışığında ormanlık bir tepe, arkasında taş bir dağ, sağda deniz ve bloklu bulutlar.
@@ -943,6 +956,11 @@ js/rastgele.js        Tohumlu rastgele sayı ve gürültü fonksiyonları
 js/bloklar.js         Blok, eşya ve alet tanımları
 js/sekiller.js        Biçimli bloklar (merdiven, yarım blok, kapı, çit...): kutular, çarpışma, ışın isabeti
 js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
+js/dunya/uretici-v1.js Eski dünyaların (sürüm 1) dondurulmuş üreticisi
+js/dunya/biyom.js     Biyomlar, alt biyomlar ve iklim
+js/dunya/agac.js, agac2.js Ağaç kurucular (eski türler ve fidanlar; dev ağaçlar, mangrov, dev mantarlar, çalılar)
+js/dunya/uzak-isci.js, js/grafik/uzak-arazi.js Uzak arazi (görüş mesafesinin ötesi)
+js/oyun/ortam.js, js/grafik/atesbocegi.js Biyom atmosferi: ortam sesleri, sis, ateş böcekleri, sıcak dalgası
 js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları
 js/dunya/maden-uretici.js Terk edilmiş madenler

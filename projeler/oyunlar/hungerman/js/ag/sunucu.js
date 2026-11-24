@@ -102,7 +102,7 @@ export class SunucuOyun {
     this.istemciler.set(id, c);
     this.uzak.ekle(id, ad, renk);
     k.gonder({
-      t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, zaman: o.zaman, gun: o.gun, komutlar: !!o.komutlar, konsol: o.konsol ? 1 : 0, vucutIsisi: o.vucutIsisi !== false ? 1 : 0, zorluk: o.zorluk, denge: o.denge,
+      t: 'hg', id, surum: SURUM, ad: o.ad, tohum: o.tohum, uretici: o.uretici, zaman: o.zaman, gun: o.gun, komutlar: !!o.komutlar, konsol: o.konsol ? 1 : 0, vucutIsisi: o.vucutIsisi !== false ? 1 : 0, zorluk: o.zorluk, denge: o.denge,
       degisiklikler: o.dunya.degisiklikleriAl(), kablolar: o.kablolar ? o.kablolar.disaAktar() : [], kayit, dogum,
       dusenler: o.dusenler.liste.map(x => this.dusenVeri(x)),
       tekneler: o.tekneler.liste.map(t => this.tekneVeri(t)),

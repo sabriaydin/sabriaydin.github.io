@@ -83,7 +83,10 @@ export const DOKULAR = [
   'kor_yatak', 'izgara', 'kebap_sis', 'tabela_on', 'tas_kesme_yan', 'tas_kesme_ust',
   'mermer_tugla', 'mermer_sutun_yan', 'mermer_sutun_ust', 'granit', 'granit_cilali', 'bazalt_yan', 'bazalt_ust', 'bazalt_cilali', 'kayrak', 'kayrak_kiremit', 'kirectasi',
   'kerpic', 'eski_tugla', 'catlak_tugla', 'yosunlu_tugla', 'fayans', 'mozaik', 'iznik', 'kamis_yan', 'kamis_ust', 'hasir', 'saman_cati', 'demir_levha', 'bakir_levha',
-  'pasli_bakir', 'cam_tugla', 'altin_suslu', 'kasa_yan', 'kasa_ust'
+  'pasli_bakir', 'cam_tugla', 'altin_suslu', 'kasa_yan', 'kasa_ust',
+  /* 0.41.0: yeni dünya üreticisinin doğa blokları */
+  'kizil_kum', 'miselyum_ust', 'miselyum_yan', 'yaprak_kizil', 'yaprak_turuncu', 'yaprak_sari', 'mangrov_yan', 'mangrov_ust', 'mangrov_yaprak', 'mangrov_kok',
+  'mantar_kirmizi_blok', 'mantar_kahve_blok', 'mantar_sap', 'mantar_ic', 'kirmizi_mantar', 'papatya', 'lale', 'lavanta', 'saz'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -639,6 +642,38 @@ YAPI_MALZEME37.forEach(m => {
 export const DUVAR_MALZEME37 = [{ ad: 'Mermer Tuğla', taban: YAPI37.mermerTugla }, { ad: 'Eski Tuğla', taban: YAPI37.eskiTugla }, { ad: 'Granit', taban: YAPI37.granit }];
 DUVAR_MALZEME37.forEach(m => { m.duvar = ayir(1); blok(m.duvar, { ...yapiOrtak(B[m.taban]), ad: `${m.ad} Duvar`, sekil: 'duvar' }); });
 
+/* ---------- 0.41.0: yeni dünya üreticisinin (sürüm 2) doğa blokları ----------
+   Kimlikleri sabittir (3000'den başlar): sonradan eklenen eşya ve bloklar mevcut kimlikleri kaydırmaz. */
+export const DOGA41 = { kizilKum: 3000, miselyum: 3001, kizilYaprak: 3002, turuncuYaprak: 3003, sariYaprak: 3004, mangrovKutuk: 3005, mangrovYaprak: 3006, mangrovKok: 3007,
+  kirmiziMantarBlok: 3008, kahveMantarBlok: 3009, mantarSap: 3010, kirmiziMantar: 3011, papatya: 3012, lale: 3013, lavanta: 3014, saz: 3015, sazSu: 3016,
+  devrikMeseX: 3017, devrikMeseZ: 3018, devrikLadinX: 3019, devrikLadinZ: 3020, devrikHusX: 3021, devrikHusZ: 3022 };
+{
+  const D = DOGA41;
+  const yaprakDusur = r => { const o = []; if (r() < 1 / 16) o.push([40, 1]); if (r() < 1 / 30) o.push([256, 1]); return o; };
+  blok(D.kizilKum, { ad: 'Kızıl Kum', dok: 'kizil_kum', sertlik: 0.5, alet: 'kurek', ses: 'kum', harita: 163 });
+  blok(D.miselyum, { ad: 'Miselyum', dok: ['miselyum_ust', 'miselyum_yan', 'toprak'], sertlik: 0.6, alet: 'kurek', ses: 'cimen', dusur: () => [[3, 1]], harita: 119 });
+  blok(D.kizilYaprak, { ad: 'Kızıl Sonbahar Yaprağı', dok: 'yaprak_kizil', opak: false, kesik: true, sertlik: 0.2, alet: 'makas', ses: 'bitki', dusur: yaprakDusur, harita: 114 });
+  blok(D.turuncuYaprak, { ad: 'Turuncu Sonbahar Yaprağı', dok: 'yaprak_turuncu', opak: false, kesik: true, sertlik: 0.2, alet: 'makas', ses: 'bitki', dusur: yaprakDusur, harita: 115 });
+  blok(D.sariYaprak, { ad: 'Sarı Sonbahar Yaprağı', dok: 'yaprak_sari', opak: false, kesik: true, sertlik: 0.2, alet: 'makas', ses: 'bitki', dusur: r => { const o = []; if (r() < 1 / 16) o.push([42, 1]); if (r() < 1 / 30) o.push([256, 1]); return o; }, harita: 116 });
+  blok(D.mangrovKutuk, { ad: 'Mangrov Kütüğü', dok: ['mangrov_ust', 'mangrov_yan', 'mangrov_ust'], sertlik: 2, alet: 'balta', ses: 'odun', harita: 8 });
+  blok(D.mangrovYaprak, { ad: 'Mangrov Yaprağı', dok: 'mangrov_yaprak', opak: false, kesik: true, sertlik: 0.2, alet: 'makas', ses: 'bitki', dusur: r => (r() < 1 / 30 ? [[256, 1]] : []), harita: 9 });
+  blok(D.mangrovKok, { ad: 'Mangrov Kökü', dok: 'mangrov_kok', opak: false, kesik: true, sertlik: 0.7, alet: 'balta', ses: 'odun', harita: 8 });
+  blok(D.kirmiziMantarBlok, { ad: 'Kırmızı Mantar Bloğu', dok: 'mantar_kirmizi_blok', sertlik: 0.2, alet: 'balta', ses: 'bitki', dusur: r => (r() < 0.3 ? [[D.kirmiziMantar, 1]] : []), harita: 114 });
+  blok(D.kahveMantarBlok, { ad: 'Kahverengi Mantar Bloğu', dok: 'mantar_kahve_blok', sertlik: 0.2, alet: 'balta', ses: 'bitki', dusur: r => (r() < 0.3 ? [[36, 1]] : []), harita: 14 });
+  blok(D.mantarSap, { ad: 'Mantar Sapı', dok: ['mantar_ic', 'mantar_sap', 'mantar_ic'], sertlik: 0.2, alet: 'balta', ses: 'bitki', harita: 49 });
+  blok(D.kirmiziMantar, { ad: 'Kırmızı Mantar', dok: 'kirmizi_mantar', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
+  blok(D.papatya, { ad: 'Papatya', dok: 'papatya', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 49 });
+  blok(D.lale, { ad: 'Lale', dok: 'lale', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 114 });
+  blok(D.lavanta, { ad: 'Lavanta', dok: 'lavanta', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 119 });
+  blok(D.saz, { ad: 'Saz', dok: 'saz', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 4 });
+  blok(D.sazSu, { ad: 'Saz', dok: 'saz', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, suIcinde: true, sivi: true, gizli: true, dusur: () => [[D.saz, 1]], harita: 7 });
+  /* Devrik kütükler: yatay yatan ağaç gövdeleri (halkalı yüzler uçlardadır); kırılınca olağan kütük düşer */
+  for (const [x, z, ad, dk, kutuk] of [[D.devrikMeseX, D.devrikMeseZ, 'Meşe', 'mese', 8], [D.devrikLadinX, D.devrikLadinZ, 'Ladin', 'ladin', 10], [D.devrikHusX, D.devrikHusZ, 'Huş', 'hus', 12]]) {
+    blok(x, { ad: `Devrik ${ad} Kütüğü`, dok: [dk + '_yan', dk + '_yan', dk + '_yan'], devrik: [dk + '_ust', 0], sertlik: 2, alet: 'balta', ses: 'odun', gizli: true, dusur: () => [[kutuk, 1]], harita: kutuk });
+    blok(z, { ad: `Devrik ${ad} Kütüğü`, dok: [dk + '_yan', dk + '_yan', dk + '_yan'], devrik: [dk + '_ust', 2], sertlik: 2, alet: 'balta', ses: 'odun', gizli: true, dusur: () => [[kutuk, 1]], harita: kutuk });
+  }
+}
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 4096;   // 0.31.0: 1024'ten 2048'e; 0.37.0: 4096'ya
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
@@ -663,6 +698,8 @@ for (const b of B) {
   /* onYon: ön yüz dokusu verilen yöne (0 kuzey -z, 1 doğu +x, 2 güney +z, 3 batı -x) bakar; yoksa +z */
   const yuz = [y, y, u, a, b.onYon == null ? o : y, y];
   if (b.onYon != null) yuz[[5, 0, 4, 1][b.onYon]] = o;
+  /* 0.41.0: devrik kütüklerin uç yüzleri (x ekseni: +x/-x, z ekseni: +z/-z) halkalıdır */
+  if (b.devrik) { const h = T[b.devrik[0]]; if (b.devrik[1] === 0) { yuz[0] = h; yuz[1] = h; } else { yuz[4] = h; yuz[5] = h; } }
   YUZ_DOKU.set(yuz, b.id * 6);
 }
 

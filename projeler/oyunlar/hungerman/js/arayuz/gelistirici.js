@@ -265,7 +265,7 @@ export class GelistiriciPenceresi {
     const isaret = (o.yerler || []).map((y, i) => this.satir(esc(y.ad), `${y.x}, ${y.z} · ${Math.round(Math.hypot(y.x - P.x, y.z - P.z))} blok`, `<button type="button" class="dvIslem" data-is="isaretGit" data-y="${i}">Git</button>`)).join('');
     return this.bolum('Yerler',
         this.satir('Yere git', '', this.secim('dvYerSec', YERLER, 'koy') + this.islem('yerGit', 'Git')) +
-        this.satir('Biyoma git', 'En yakın örneği aranır', this.secim('dvBiyomSec', BIYOMLAR.map(b => [b, b]), BIYOMLAR[0]) + this.islem('biyomGit', 'Git')) +
+        this.satir('Biyoma git', 'En yakın örneği aranır', this.secim('dvBiyomSec', BIYOMLAR.slice(0, o.uretici >= 2 ? BIYOMLAR.length : 14).map(b => [b, b]), BIYOMLAR[0]) + this.islem('biyomGit', 'Git')) +
         this.satir('Dünya ile diyar arasında geç', 'Karşı taraftaki 8:1 oranlı konuma', this.islem('diyar', 'Geç'))) +
       this.bolum('Koordinat',
         this.satir('Koordinata git', 'Y boş bırakılırsa yüzeye', `<input type="number" id="dvX" class="dvGirdi dvSayi" placeholder="X" value="${Math.round(P.x)}"><input type="number" id="dvY" class="dvGirdi dvSayi" placeholder="Y"><input type="number" id="dvZ" class="dvGirdi dvSayi" placeholder="Z" value="${Math.round(P.z)}">` + this.islem('koordGit', 'Git')) +
@@ -473,7 +473,7 @@ export class GelistiriciPenceresi {
       ['Kare hızı', `${$('#fps').textContent || '-'} · ortalama ${ort.toFixed(1)} ms`],
       ['Çizim', `${inf.render.calls} çağrı · ${Math.round(inf.render.triangles / 1000)} bin üçgen · ${inf.memory.geometries} geometri`],
       ['Konum', `X ${P.x.toFixed(1)} · Y ${P.y.toFixed(1)} · Z ${P.z.toFixed(1)} · parça ${Math.floor(P.x / PB)}, ${Math.floor(P.z / PB)}`],
-      ['Biyom / zemin', `${BIYOMLAR[k.b]} · ${k.h}`],
+      ['Biyom / zemin', `${BIYOMLAR[k.ab ?? k.b]} · ${k.h}`],
       ['Zaman', `${o.gun}. gün · ${$('#saatDeger').textContent} · hız ${o.zamanHizi ?? 1}×`],
       ['Hava', `${HAVA_ADI[o.hava.durum] || o.hava.durum} · yoğunluk %${Math.round(o.hava.yogunluk * 100)}`],
       ['Canlılar', `${V.length} (düşman ${V.filter(v => v.tur.dusman).length}, evcil ${V.filter(v => v.evcil).length}, köylü ${V.filter(v => v.tur.koylu).length})`],

@@ -113,4 +113,22 @@ Kaynak listesi: `mods/ENTITIES/mobs_mc/LICENSE-media.md` ve ilgili modların REA
 | gok_0-3 | rbh thunder storm (freesound 2523) | RHumphries | CC BY 4.0 |
 | ruzgar_0-1 | Wind (freesound 139337) | felix.blume | CC0 |
 
+| dag_ruzgar_0-1 | Wind (freesound 139337) | felix.blume | CC0 |
+| dere_0-1 | Stream (freesound 7138) | mystiscool | CC BY |
+
+### Ambience Redo (https://github.com/minetest-mirrors/ambience, TenPlus1) üzerinden (0.41.0, biyom ortam sesleri)
+| Oyundaki dosya | Özgün dosya | Yazar | Lisans |
+|---|---|---|---|
+| kus_0 | bluejay | UncleSigmund (freesound 42382) | CC0 |
+| kus_1 | cardinal | PsychoBird (soundbible 1515) | CC BY 3.0 |
+| kus_2 | robin | reinsamba (freesound 32479) | CC BY |
+| karga_0 | craw | inchadney (freesound 52450) | CC BY |
+| baykus_0 | hornedowl | Mike Koenig (soundbible 1851) | CC BY 3.0 |
+| cekirge_0 | cricket | Mike Koenig (soundbible 365) | CC BY 3.0 |
+| kurt_uluma_0 | wolves | fws.gov (soundbible 277) | Kamu malı |
+| cakal_0 | coyote | rogerforeman (freesound 68068) | CC BY |
+| col_ruzgar_0 | desertwind | Proxima4 (freesound 104320) | CC0 |
+| marti_0 | seagull | hazure (freesound 23707) | CC BY 3.0 |
+| selale_0 | waterfall | volivieri (freesound 38390) | CC BY |
+
 Kaydı bulunmayan birkaç ince ses (arı vızıltısı, kalp atışı, soğukta titreme, kayan yıldız, geçit uğultusu) Web Audio ile üretilir. Kayıt yüklenemezse her sesin yerine aynı sesin sentez biçimi çalar.

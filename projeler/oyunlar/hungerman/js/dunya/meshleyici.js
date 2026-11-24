@@ -3,7 +3,9 @@
    Çıktı: katı bloklar ve su için ayrı geometri dizileri (konum, doku koordinatı, ışık).
    Görünmeyen yüzler çizilmez; köşe gölgelemesi (AO) ve gökyüzü ışığı köşe başına yumuşatılır. */
 import { PB, PY, DB, ddizin } from '../sabitler.js';
-import { ATLAS_N, OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST, SU_SEVIYE } from '../bloklar.js';
+/* 0.41.0: dolgulu hacmin yüksekliği (meshle çağrısında verilir; üstü boş havadır) */
+let PH = PY;
+import { ATLAS_N, OPAK, CIZIM, AYNI_GIZLE, SIVI, KESIK, YUZ_DOKU, C_KUP, C_CAPRAZ, C_SIVI, C_LAV, C_SEKIL, LAV, BLOKLAR, BLOK_UST, SU_SEVIYE, DOGA41 } from '../bloklar.js';
 import { sekilKutulari } from '../sekiller.js';
 
 const DX = 1, DZ = DB, DY = DB * DB;
@@ -39,10 +41,25 @@ for (const f of YUZLER) {
 const AO_D = [0.42, 0.62, 0.82, 1];
 
 class Tampon {
-  constructor() { this.p = []; this.u = []; this.l = []; this.i = []; this.n = 0; }
+  constructor() { this.p = []; this.u = []; this.l = []; this.i = []; this.t = []; this.n = 0; }
   bitir() {
-    return { p: new Float32Array(this.p), u: new Float32Array(this.u), l: new Float32Array(this.l), i: new Uint32Array(this.i) };
+    return { p: new Float32Array(this.p), u: new Float32Array(this.u), l: new Float32Array(this.l), i: new Uint32Array(this.i), t: new Int8Array(this.t) };
   }
+}
+
+/* 0.41.0: biyom tonu (köşe rengi). TON: işçinin verdiği sütun tablosu (DB x DB x 9: çimen, yaprak, su rgb) ya da null.
+   Köşenin tonu, köşeyi paylaşan dört sütunun ortalamasıdır (biyom sınırlarında yumuşak geçiş). Bayt: (ton - 1) * 254 */
+let TON = null;
+const TON_CIM = new Uint8Array(BLOK_UST), TON_YAPRAK = new Uint8Array(BLOK_UST);
+for (const id of [4, 143, 25, 43]) TON_CIM[id] = 1;
+for (const id of [9, 11, 13, 145, DOGA41.mangrovYaprak]) TON_YAPRAK[id] = 1;
+function tonEkle(T, tur, x, z, kx, kz) {
+  if (!TON || !tur) { T.t.push(0, 0, 0); return; }
+  const o = (tur - 1) * 3, cx = x + kx, cz = z + kz;
+  let r = 0, g = 0, b = 0;
+  for (let dz = -1; dz <= 0; dz++) for (let dx = -1; dx <= 0; dx++) { const j = ((cz + dz + 1) * DB + cx + dx + 1) * 9 + o; r += TON[j]; g += TON[j + 1]; b += TON[j + 2]; }
+  const q = v => Math.max(-127, Math.min(127, Math.round((v / 4 - 1) * 254)));
+  T.t.push(q(r), q(g), q(b));
 }
 
 function dokuUV(t, lu, lv, out) {
@@ -52,12 +69,13 @@ function dokuUV(t, lu, lv, out) {
   out.push(u0 + lu * (u1 - u0), vb + lv * (vt - vb));
 }
 
-export function meshle(P) {
+export function meshle(P, H = PY, ton = null) {
+  PH = H; TON = ton;
   /* Gökyüzü ışığı: her sütunda yukarıdan aşağı */
-  const gok = new Float32Array(DB * DB * PY);
+  const gok = new Float32Array(DB * DB * PH);
   for (let z = -1; z <= PB; z++) for (let x = -1; x <= PB; x++) {
     let s = 1;
-    for (let y = PY - 1; y >= 0; y--) {
+    for (let y = PH - 1; y >= 0; y--) {
       const i = ddizin(x, y, z), id = P[i];
       if (id) {
         if (OPAK[id]) s = 0;
@@ -73,7 +91,7 @@ export function meshle(P) {
   }
   const op = new Tampon(), su = new Tampon();
   let ustY = 0;
-  for (let y = PY - 1; y >= 0 && !ustY; y--) for (let z = 0; z < PB && !ustY; z++) for (let x = 0; x < PB; x++) if (P[ddizin(x, y, z)]) { ustY = y; break; }
+  for (let y = PH - 1; y >= 0 && !ustY; y--) for (let z = 0; z < PB && !ustY; z++) for (let x = 0; x < PB; x++) if (P[ddizin(x, y, z)]) { ustY = y; break; }
 
   for (let y = 0; y <= ustY; y++) for (let z = 0; z < PB; z++) for (let x = 0; x < PB; x++) {
     const i = ddizin(x, y, z), id = P[i];
@@ -94,7 +112,7 @@ function kup(P, gok, i, id, x, y, z, T) {
   for (let f = 0; f < 6; f++) {
     const Y = YUZLER[f];
     let ni = i + Y.komsu, n;
-    if (f === 2 && y === PY - 1) n = 0;
+    if (f === 2 && y === PH - 1) n = 0;
     else if (f === 3 && y === 0) continue;
     else n = P[ni];
     if (OPAK[n]) continue;
@@ -107,7 +125,7 @@ function kup(P, gok, i, id, x, y, z, T) {
       T.p.push(x + k[0], y + k[1], z + k[2]);
       dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
       let a = 3, g = 0, gs = 0;
-      if (n === 0 && f === 2 && y === PY - 1) { g = 1; gs = 1; }
+      if (n === 0 && f === 2 && y === PH - 1) { g = 1; gs = 1; }
       else {
         const o = Y.ao[c];
         const s1 = OPAK[P[ni + o[0]]], s2 = OPAK[P[ni + o[1]]], kk = OPAK[P[ni + o[2]]];
@@ -119,6 +137,7 @@ function kup(P, gok, i, id, x, y, z, T) {
       }
       ao[c] = a;
       T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : YAPRAK[id] ? -AO_D[a] * Y.g : AO_D[a] * Y.g, g / gs);
+      tonEkle(T, f === 2 && TON_CIM[id] ? 1 : TON_YAPRAK[id] ? 2 : 0, x, z, k[0], k[2]);
     }
     T.n += 4;
     if (ao[0] + ao[2] < ao[1] + ao[3]) T.i.push(tabanN + 1, tabanN + 2, tabanN + 3, tabanN + 1, tabanN + 3, tabanN);
@@ -144,7 +163,7 @@ function sekil(P, gok, i, id, x, y, z, T) {
       let g = gok[i];
       if (sinirda) {
         if (f === 3 && y === 0) continue;
-        const n = f === 2 && y === PY - 1 ? 0 : P[i + Y.komsu];
+        const n = f === 2 && y === PH - 1 ? 0 : P[i + Y.komsu];
         if (OPAK[n]) continue;
         if (n === id && AYNI_GIZLE[id]) continue;
         g = Math.max(g, gok[i + Y.komsu] || 0);
@@ -158,6 +177,7 @@ function sekil(P, gok, i, id, x, y, z, T) {
         const uv = UVF[f](px, py, pz);
         dokuUV(doku, uv[0], uv[1], T.u);
         T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : Y.g * (sinirda ? 1 : 0.92), g);
+        T.t.push(0, 0, 0);
       }
       T.n += 4;
       T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
@@ -190,6 +210,7 @@ function capraz(gok, i, id, x, y, z, T) {
         T.p.push(x + k[0], y + k[1], z + k[2]);
         dokuUV(doku, CAPRAZ_UV[c][0], CAPRAZ_UV[c][1], T.u);
         T.l.push(k[1] && SALLANIR[id] ? -1.92 : 0.92, g);
+        tonEkle(T, TON_CIM[id] ? 1 : 0, x, z, k[0] > 0.5 ? 1 : 0, k[2] > 0.5 ? 1 : 0);
       }
       T.n += 4;
       if (yon === 0) T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
@@ -201,7 +222,7 @@ function capraz(gok, i, id, x, y, z, T) {
 /* Su ve lav yüzeyleri; lav kendi ışığıyla parlar (ışık değeri 2 = gölgesiz) */
 function sivi(P, gok, i, x, y, z, T, lav = false) {
   const ayni = n => (lav ? LAV[n] === 1 : SIVI[n] === 1 && !LAV[n]);
-  const ustSivi = y < PY - 1 && ayni(P[i + DY]);
+  const ustSivi = y < PH - 1 && ayni(P[i + DY]);
   const h = ustSivi ? 1 : 0.875;
   /* 0.30.5: su yüzeyi köşe yükseklikleri: köşeyi paylaşan dört hücrenin su seviyesinin ortalaması (akan su eğimli görünür) */
   const kose = [];
@@ -209,7 +230,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
     let top = 0, n = 0, dolu = false;
     for (let dz = kz - 1; dz <= kz; dz++) for (let dx = kx - 1; dx <= kx; dx++) {
       const j = i + dx * DX + dz * DZ, id = P[j], L = SU_SEVIYE[id];
-      if (L) { if (y < PY - 1 && SU_SEVIYE[P[j + DY]]) dolu = true; top += L >= 8 ? 0.875 : L / 8 * 0.875; n++; }
+      if (L) { if (y < PH - 1 && SU_SEVIYE[P[j + DY]]) dolu = true; top += L >= 8 ? 0.875 : L / 8 * 0.875; n++; }
       else if (!OPAK[id] && CIZIM[id] !== C_KUP && !LAV[id]) n++;
     }
     kose[kz * 2 + kx] = dolu ? 1 : n ? Math.max(0.06, top / n) : h;
@@ -219,7 +240,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
     const Y = YUZLER[f];
     const ni = i + Y.komsu;
     if (f === 3 && y === 0) continue;
-    const n = (f === 2 && y === PY - 1) ? 0 : P[ni];
+    const n = (f === 2 && y === PH - 1) ? 0 : P[ni];
     if (ayni(n) || OPAK[n]) continue;
     if (f !== 2 && CIZIM[n] === C_KUP && !SIVI[n] && KESIK[n] === 0) continue;
     const doku = YUZ_DOKU[(lav ? 59 : 7) * 6 + f];
@@ -230,6 +251,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
       T.p.push(x + k[0], y + k[1] * yuk(k[0], k[2]), z + k[2]);
       dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
       if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g, g);
+      tonEkle(T, lav ? 0 : 3, x, z, k[0], k[2]);
     }
     T.n += 4;
     T.i.push(b, b + 1, b + 2, b, b + 2, b + 3);
@@ -241,6 +263,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
         T.p.push(x + k[0], y + k[1] * yuk(k[0], k[2]), z + k[2]);
         dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
         T.l.push(0.8, g);
+        tonEkle(T, 3, x, z, k[0], k[2]);
       }
       T.n += 4;
       T.i.push(b2, b2 + 1, b2 + 2, b2, b2 + 2, b2 + 3);

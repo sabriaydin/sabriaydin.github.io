@@ -2,8 +2,8 @@
    Parçaları oyuncunun çevresinde yükler / boşaltır, işçilere üretim ve meshleme işi dağıtır,
    blok okuma-yazma ve oyuncu değişikliklerini (kayıt ve ileride ağ eşitlemesi için) tutar. */
 import { THREE } from '../grafik/sahne.js';
-import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi } from '../sabitler.js';
-import { Uretici, agacKur, KARLI, karliZirve, BY } from './uretici.js';
+import { PB, PY, PHACIM, DB, DENIZ, dizin, ddizin, parcaAnahtar, DUNYA_SINIRI, DIYAR_X, DIYAR_SINIR, diyarMi, URETICI_SURUM } from '../sabitler.js';
+import { ureticiOlustur, agacKur, KARLI, karliZirve, BY } from './uretici.js';
 import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST, MEYVE_YAPRAK_ID, C_KUP } from '../bloklar.js';
 
 /* 0.18.0: mevsime göre ekin ve fidan büyüme hızı (ilkbahar, yaz, sonbahar, kış) */
@@ -15,13 +15,19 @@ import { uretec } from '../rastgele.js';
 const KAYNAK = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && (b.mesale || b.mekanik || b.elektrik || b.kovan || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
 
-const SINIR_ICIN = DUNYA_SINIRI;
+
+/* 0.41.0: parçadaki en yüksek dolu katman (yukarıdan aşağı ilk dolu katman) */
+function ustBul(v) {
+  const K = PB * PB;
+  for (let y = PY - 1; y > 0; y--) { const b = y * K; for (let j = 0; j < K; j++) if (v[b + j]) return y; }
+  return 0;
+}
 
 export class Dunya {
   constructor(tohum, sahne) {
     this.tohum = tohum >>> 0;
     this.sahne = sahne;
-    this.uretici = new Uretici(this.tohum);
+    this.uretici = ureticiOlustur(this.tohum, URETICI_SURUM);
     this.parcalar = new Map();
     this.degisiklikler = new Map();   // anahtar -> Map(dizin -> blok)
     this.mesaleler = new Map();       // "x,y,z" -> [x, y, z, güç]
@@ -54,7 +60,7 @@ export class Dunya {
       const isci = { w, mesgul: false, is: null };
       w.onmessage = e => this.isciMesaj(isci, e.data);
       w.onerror = e => console.error('İşçi hatası', e.message || e);
-      w.postMessage({ tur: 'baslat', tohum: this.tohum });
+      w.postMessage({ tur: 'baslat', tohum: this.tohum, surum: URETICI_SURUM });
       this.isciler.push(isci);
     }
     this.gorusAyarla(this.gorus);
@@ -88,7 +94,7 @@ export class Dunya {
   }
   yuklu(x, z) { const p = this.parca(Math.floor(x / PB), Math.floor(z / PB)); return !!(p && p.v); }
   /* 0.18.0: Yeraltı Diyarı'nın kendi sınırı vardır */
-  sinirDisi(x, z) { return diyarMi(x) ? Math.abs(x - DIYAR_X) > DIYAR_SINIR || Math.abs(z) > DIYAR_SINIR : Math.abs(x) > SINIR_ICIN || Math.abs(z) > SINIR_ICIN; }
+  sinirDisi(x, z) { return diyarMi(x) ? Math.abs(x - DIYAR_X) > DIYAR_SINIR || Math.abs(z) > DIYAR_SINIR : Math.abs(x) > DUNYA_SINIRI || Math.abs(z) > DUNYA_SINIRI; }
   kati(x, y, z) {
     if (this.sinirDisi(x, z)) return true;
     return KATI[this.blok(x, y, z)] === 1;
@@ -104,6 +110,7 @@ export class Dunya {
     const eski = p.v[i];
     if (eski === id) return false;
     p.v[i] = id;
+    if (id && y > (p.ust ?? 0)) p.ust = y;   // 0.41.0: parçadaki en yüksek dolu katman (meshleme yalnızca bu yüksekliğe kadar yapılır)
     if (this.kayit) this.kayit(eski, id, x, y, z, kaynak);   // 0.40.5: olay kaydı
     const k = parcaAnahtar(cx, cz);
     /* 0.18.0: mevsimlik kar ve buz kayda geçmez (parça yeniden yüklenince kendiliğinden kalkar) */
@@ -218,10 +225,13 @@ export class Dunya {
   }
 
   meshIste(isci, p) {
-    const P = new Uint16Array(DB * DB * PY);
+    /* 0.41.0: dolgulu hacim yalnızca dokuz parçanın en yüksek dolu katmanının iki üstüne kadar kurulur (256 yükseklikte boş hava taşınmaz) */
     const g = [];
-    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) g.push(this.parca(p.cx + dx, p.cz + dz).v);
-    for (let y = 0; y < PY; y++) for (let z = -1; z <= PB; z++) {
+    let ust = 0;
+    for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) { const q = this.parca(p.cx + dx, p.cz + dz); if (q.ust == null) q.ust = ustBul(q.v); ust = Math.max(ust, q.ust); g.push(q.v); }
+    const H = Math.min(PY, ust + 2);
+    const P = new Uint16Array(DB * DB * H);
+    for (let y = 0; y < H; y++) for (let z = -1; z <= PB; z++) {
       const kz = z < 0 ? 0 : z >= PB ? 2 : 1, lz = (z + PB) % PB;
       for (let x = -1; x <= PB; x++) {
         const kx = x < 0 ? 0 : x >= PB ? 2 : 1, lx = (x + PB) % PB;
@@ -230,7 +240,7 @@ export class Dunya {
     }
     p.meshleniyor = true; p.kirli = false; p.acil = false;
     isci.mesgul = true;
-    isci.w.postMessage({ tur: 'meshle', cx: p.cx, cz: p.cz, surum: p.surum, P }, [P.buffer]);
+    isci.w.postMessage({ tur: 'meshle', cx: p.cx, cz: p.cz, surum: p.surum, P, H }, [P.buffer]);
   }
 
   isciMesaj(isci, m) {
@@ -242,7 +252,7 @@ export class Dunya {
       if (p && !p.v) {
         const d = this.degisiklikler.get(p.k);
         if (d) for (const [i, id] of d) m.v[i] = id;
-        p.v = m.v; p.uretiliyor = false; p.kirli = true;
+        p.v = m.v; p.uretiliyor = false; p.kirli = true; p.ust = ustBul(p.v);
         this.kaynakTara(p);
         if (this.parcaYuklendi) this.parcaYuklendi(p);   // 0.30.5: akan su taraması
       }
@@ -262,7 +272,7 @@ export class Dunya {
       if (!KAYNAK[id] && !EKIN_SONRAKI[id]) continue;
       const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
       /* Lav gölleri: her 4 x 4 alanda yüzeydeki bir blok ışık kaynağı sayılır */
-      if (id === 59 && (lx % 4 !== 1 || lz % 4 !== 1 || (y < 127 && v[i + PB * PB] === 59))) continue;
+      if (id === 59 && (lx % 4 !== 1 || lz % 4 !== 1 || (y < PY - 1 && v[i + PB * PB] === 59))) continue;
       const x = p.cx * PB + lx, z = p.cz * PB + lz;
       const k = x + ',' + y + ',' + z;
       if (BLOKLAR[id].mekanik) this.mekanikler.set(k, [x, y, z]);
@@ -336,6 +346,7 @@ export class Dunya {
       g.setAttribute('position', new THREE.BufferAttribute(veri.p, 3));
       g.setAttribute('uv', new THREE.BufferAttribute(veri.u, 2));
       g.setAttribute('isik', new THREE.BufferAttribute(veri.l, 2));
+      if (veri.t) g.setAttribute('ton', new THREE.BufferAttribute(veri.t, 3, true));   // 0.41.0: biyom tonu (işaretli bayt, 0 = değişiklik yok)
       g.setIndex(new THREE.BufferAttribute(veri.i, 1));
       g.computeBoundingSphere();
       const m = new THREE.Mesh(g, malzeme);

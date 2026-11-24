@@ -1,5 +1,5 @@
 /* HungerMan - giriş noktası: menüler, oyun döngüsü, girdi, kayıt */
-import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl, zamanHizi } from './sabitler.js';
+import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl, zamanHizi, dunyaSurumAyarla } from './sabitler.js';
 import { Sahne, THREE } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
 import { BIYOMLAR, BY } from './dunya/uretici.js';
@@ -35,6 +35,8 @@ import { kaleAt } from './dunya/diyar-uretici.js';
 import { lanetliAda, ADA_AD } from './dunya/ada-uretici.js';
 import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
 import { hissedilenSicaklik } from './oyun/sicaklik.js';
+import { Ortam } from './oyun/ortam.js';
+import { UzakArazi } from './grafik/uzak-arazi.js';
 import { mezarKoy, mezarBosalt } from './oyun/mezar.js';
 import { Ogretici } from './arayuz/ogretici.js';
 import { Baskinlar } from './koy/baskin.js';
@@ -82,12 +84,16 @@ tuslariKur(ayar.tuslar);   // 0.30.7
 if (!ayar.ad) { ayar.ad = 'Oyuncu' + (100 + Math.floor(Math.random() * 900)); ayarlariKaydet(ayar); }
 if (ayar.miniHarita === undefined) ayar.miniHarita = true;
 const ses = new Ses(); ses.duzeyAyarla(ayar.ses);
+let ortamAtmosfer = null;   // 0.41.0: biyom atmosferi (sesler, sis, ateş böcekleri, sıcak dalgası)
 /* 0.19.0: müzik; tarayıcılar sesi ilk dokunuş ya da tıklamadan sonra açar */
 const muzik = new Muzik(); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
 addEventListener('pointerdown', () => { ses.baslat(); muzik.izinVer(); }, true);
 addEventListener('keydown', () => { ses.baslat(); muzik.izinVer(); }, true);
 let sahne;
 try { sahne = new Sahne(tuval); } catch (e) { hataGoster('WebGL başlatılamadı. Tarayıcınız veya ekran kartı sürücünüz WebGL desteklemiyor olabilir.'); throw e; }
+/* 0.41.0: uzak arazi (görüş mesafesinin ötesi; ayarlardan seçilir) */
+const uzakArazi = new UzakArazi(sahne);
+const UZAK_ARAZI = [['Kapalı', 0], ['512 blok', 512], ['768 blok', 768], ['1024 blok', 1024], ['1536 blok', 1536]];
 sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
 
 /* ---------- Ekran yönetimi ---------- */
@@ -185,6 +191,7 @@ function ayarFormu() {
     else { el.checked = !!ayar[anahtar]; el.onchange = () => { ayar[anahtar] = el.checked; ayarUygula(); }; }
   };
   bag('#aGorus', 'gorus', v => v + ' parça');
+  bag('#aUzak', 'uzakArazi', v => (UZAK_ARAZI[v] || UZAK_ARAZI[0])[0]);
   bag('#aFov', 'fov', v => v + '°');
   bag('#aHas', 'hassasiyet', v => v.toFixed(2).replace('.', ',') + '×');
   /* 0.29.1: geçerli değerlere uyan grafik ön ayarı işaretlenir */
@@ -315,7 +322,7 @@ $('#yeniOlustur').onclick = () => {
   const t = $('#yeniTohum').value.trim();
   const tohum = t ? metinTohum(t) : (Math.random() * 4294967296) >>> 0;
   const s = sunucuIstek;
-  oyunBaslat({ id: 'd' + Date.now().toString(36), ad, tohum, olusturma: Date.now(), yeni: true, komutlar: $('#yeniKonsol').checked && $('#yeniKomut').checked, konsol: $('#yeniKonsol').checked, vucutIsisi: $('#yeniVucut').checked, zorluk: $('#yeniZorluk').dataset.secili || 'normal', denge: dengeOku('yeni') });
+  oyunBaslat({ id: 'd' + Date.now().toString(36), ad, tohum, olusturma: Date.now(), yeni: true, uretici: 2, komutlar: $('#yeniKonsol').checked && $('#yeniKomut').checked, konsol: $('#yeniKonsol').checked, vucutIsisi: $('#yeniVucut').checked, zorluk: $('#yeniZorluk').dataset.secili || 'normal', denge: dengeOku('yeni') });
   if (oyun) oyun.sunucuIstek = s;
 };
 $('#yeniAd').addEventListener('keydown', e => { if (e.key === 'Enter') $('#yeniOlustur').click(); });
@@ -403,6 +410,7 @@ const dokun = new Dokunmatik({ tus, fare, kilitle: () => kilitle(), kosKilit: v 
   } });
 if (ayar.dokunmatik === undefined) ayar.dokunmatik = dokunmatikCihaz();
 /* Telefon ve tabletlerde ilk açılışta görüş mesafesi düşük başlar */
+if (ayar.uzakArazi === undefined) { ayar.uzakArazi = dokunmatikCihaz() ? 0 : 2; ayarlariKaydet(ayar); }   // 0.41.0
 if (ayar.mobilVarsayilan === undefined) { ayar.mobilVarsayilan = true; if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5); ayarlariKaydet(ayar); }
 dokun.ayarla(ayar.dokunmatik);
 function kilitBirak() {
@@ -583,8 +591,12 @@ function oyunBaslat(v) {
     'Canavar avlamak, cevher kazmak, balık tutmak ve ticaret deneyim kazandırır.', 'Büyü masasında aletler ve zırhlar deneyim seviyesi ve parıltı kristali karşılığında büyülenir.', 'Başarımlar L tuşuyla açılır.', 'Çöl tapınaklarının hazine odasında Firavun uyur.', 'Tapınaklarda tuzak tellerine dikkat ediniz; tel kırılınca tuzak etkisizleşir.', 'Yenilen bosslar efsanevi eşyalar düşürür.', 'Mumyaların vuruşu açlığı hızlandırır; buz iskeletlerinin okları yavaşlatır.', 'Kapılar, sandıklar ve istasyonlar E tuşu ya da sağ tıkla açılır; eğilerek yanlarına blok konur.', 'Tırmanma merdiveninde W ile bakılan yöne gidilir: yukarı bakılırken çıkılır, aşağı bakılırken inilir; C ile tutunulur.', 'Envanter ve üretim Q tuşuyla açılır; G tuşu eldekini atar.', 'Merdiven bir bloğun alt yüzüne konunca ters döner; tavan kenarları ve kemerler için kullanılır.', 'Eldeki boyayla yün, cam, pişmiş kil, beton, perde ve sancağa sağ tıklanınca blok o renge boyanır.', 'Yapı Planı ile bir yapının iki köşesi seçilip kopyalanır; R ile döndürülüp başka bir yere kurulur.', 'Şömine sağ tıkla yakılır; yanan şömine odayı aydınlatır ve ısıtır.', 'Köylüler takas yaptıkça Kalfa, Usta ve Üstat olur; her seviyede yeni takaslar açılır.', 'Çok alınan eşyalar pahalanır; köylülerin günün fırsatlarını kaçırmayınız.', 'Tanıdık itibarındaki köylerde hikâyeli zincir görevler verilir.', 'Görev kabul edildiği gün tamamlanırsa ödül %50 artar.', 'Dost olunan köylerde köylüyle konuşarak köyde konaklanabilir.', 'Fırına sağ tıklanınca kendi penceresi açılır; yakıt ve malzeme konunca kendiliğinden çalışır.', 'Kıyafetler zırhın altına giyilir; kalın giysiler soğuktan korur, çölde ise ince giysiler serinletir.', 'Hava bölgeseldir: ufukta yağmur perdesi görünen yere gidilirse yağmura girilir.', 'Olgun domates, biber ve çilek sağ tıkla toplanır; bitki yeniden ürün verir.', 'Tırpan olgun ekinleri geniş alanda biçer ve tohum varsa yeniden eker.', 'Meyve ağaçlarının meyveli yaprakları sağ tıkla toplanır.', 'Kompost kutusuna bitkisel atık konunca dolar ve gübre verir.', 'Değirmen Taşı buğdayı una, biberi pul bibere öğütür.', 'Yemek pişirdikçe aşçılık seviyesi yükselir; yemek etkileri uzar.', 'Lahmacun kazma hızını, Börek ve Kumpir alınan hasarı azaltan direnci verir.', 'Çilekli pasta yere konur; her sağ tıkta bir dilim yenir.', 'Mutfak Tezgâhı üretim masası, Tandır fırın yerine geçer.', 'Tarif Defteri sağ tıkla aşçılık seviyesini gösterir.', 'Kanepe, gardırop, piyano gibi büyük eşyalar kurulmadan önce yerleşim önizlemesi gösterilir; R tuşu döndürür.', 'Taş Kesme Tezgâhı mermer, granit, bazalt ve kayrak üretir.', 'Dürbün sağ tıkla uzağı yakınlaştırır.', 'Mangal kamp ateşi gibi pişirme istasyonudur.', 'Piyano ve gramofon sağ tıkla çalar.'];
   $('#yukleIpucu').textContent = ipuclari[Math.floor(Math.random() * ipuclari.length)];
 
+  /* 0.41.0: dünyanın üretici sürümü (kaydı olmayan eski dünyalar 1: eski arazi, 128 yükseklik, 2600 yarıçap) */
+  const ureticiSurum = v.uretici >= 2 ? 2 : 1;
+  dunyaSurumAyarla(ureticiSurum);
   const dunya = new Dunya(v.tohum, sahne);
   dunya.gorusAyarla(ayar.gorus);
+  uzakArazi.baslat(v.tohum, ureticiSurum);
   dunya.degisiklikleriYukle(v.degisiklikler);
   const oyuncu = new Oyuncu(dunya);
   const envanter = new Envanter();
@@ -602,7 +614,7 @@ function oyunBaslat(v) {
   else oyuncu.konum.set(dogum.x, dogum.y, dogum.z);
   envanter.iceAktar(v.envanter);
   hayatta.iceAktar(v.hayatta);
-  oyun = { id: v.id, ad: v.ad, tohum: v.tohum, olusturma: v.olusturma || Date.now(), dunya, oyuncu, envanter, hayatta, dusenler, hud,
+  oyun = { id: v.id, ad: v.ad, tohum: v.tohum, uretici: ureticiSurum, olusturma: v.olusturma || Date.now(), dunya, oyuncu, envanter, hayatta, dusenler, hud,
     zaman: v.zaman ?? 0.02, gun: v.gun || 1, dogum, olumNoktasi: v.olumNoktasi || null, ortamSayac: 4, sure: 0, kayitSayac: 0, tikSayac: 0, isikSayac: 0, isik: 1, hazir: false, yeniDogum: !v.oyuncu,
     istemci: !!v.istemci, ag: null, oyuncuKayitlari: v.oyuncuKayitlari || {}, yatakta: false, yatakNoktasi: v.yatakNoktasi && Array.isArray(v.yatakNoktasi.hucreler) ? v.yatakNoktasi : null,
     harita, haritaKimlik, yerler: Array.isArray(v.yerler) ? v.yerler : [], komutlar: !!v.komutlar, gelistirici: !!v.gelistirici,
@@ -806,7 +818,7 @@ function yuklemeKontrol() {
     ekran('oyun');
     if (o.hayatta.olu) olum('');
     else { kilitle(); }
-    if (!o.ilkBildirim) { o.ilkBildirim = true; o.hud.bildirim(`${o.ad} · ${BIYOMLAR[o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z)).b]}`); }
+    if (!o.ilkBildirim) { o.ilkBildirim = true; o.hud.bildirim(`${o.ad} · ${(q => BIYOMLAR[q.ab ?? q.b])(o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {}))}`); }
     if (o.sunucuIstek) { o.sunucuIstek = false; agAc(); }
   }
 }
@@ -966,7 +978,7 @@ async function oyunKaydet() {
   if (o.istemci) { if (o.ag) o.ag.kayitGonder(); return; }
   const p = o.oyuncu.konum;
   const veri = {
-    id: o.id, ad: o.ad, tohum: o.tohum, olusturma: o.olusturma, son: Date.now(), surum: SURUM,
+    id: o.id, ad: o.ad, tohum: o.tohum, uretici: o.uretici, olusturma: o.olusturma, son: Date.now(), surum: SURUM,
     oyuncu: { x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
     hayatta: o.hayatta.disaAktar(), envanter: o.envanter.disaAktar(), zaman: o.zaman, gun: o.gun, dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
     degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
@@ -1132,6 +1144,9 @@ function adim(t) {
     const ge = !o.hayatta.olu && !BN.biniyor && !o.tekneler.binilen ? o.gecit.guncelle(dt) : 0;
     $('#gecitEfekt').style.opacity = ge.toFixed(2);
     if (!o.hazir) return;
+    /* 0.41.0: biyom atmosferi */
+    if (!ortamAtmosfer) ortamAtmosfer = new Ortam(sahne);
+    ortamAtmosfer.guncelle(o, dt, ses, { gun: o.gunIsigi ?? 1, diyar, yagis: o.hava ? o.hava.yogunluk : 0, zamanSn: o.sure || 0 });
     /* Mağara ortam sesleri */
     o.ortamSayac -= dt;
     if (o.ortamSayac <= 0) {
@@ -1197,6 +1212,10 @@ function adim(t) {
   const H = o.hava, yagisTur = diyar ? 0 : H.yagisTuru(sahne.kamera.position);
   o.gok.guncelle(calisiyor ? dt : 0);
   H.guncelle(calisiyor ? dt : 0, sahne.kamera, gozSuda || diyar);
+  /* 0.41.0: uzak arazi */
+  const uzakM = !diyar && !gozSuda ? (UZAK_ARAZI[ayar.uzakArazi ?? 2] || UZAK_ARAZI[0])[1] : 0;
+  sahne.uzakMesafe = uzakM;
+  uzakArazi.guncelle(p, uzakM, o.dunya.gorus * 16, uzakM > 0);
   const gun = sahne.gokGuncelle(o.zaman, sahne.kamera.position, o.oyuncu.basLavda ? 'lav' : gozSuda ? (maskeli ? 'maske' : true) : false, o.dunya.gorus, o.sure,
     diyar ? { diyar: true, gece: o.hayatta.etki('gece') } : { y: H.yogunluk * (yagisTur === 0 ? 0.45 : 1), f: H.firtinaK, simsek: H.simsekParla, gece: o.hayatta.etki('gece') });
   o.gunIsigi = gun;
@@ -1368,11 +1387,11 @@ function adim(t) {
     if (kar > 0.3 && Math.random() < 0.02) ses.diyarUgultu();
     if (!diyar && adaD < 24) { o.konumMetni = `${ADA_AD} · Issız Deniz`; if (adaD < 12) o.basarimlar.ver('gecit'); }
     else if (diyar) o.konumMetni = `${kaleAt(o.dunya.uretici, Math.floor(p.x), Math.floor(p.y), Math.floor(p.z)) ? 'Kül Kalesi' : 'Yeraltı Diyarı'} · Y ${Math.floor(p.y)}`;
-    else if (o.tekneler.binilen) { const t = o.tekneler.binilen; o.konumMetni = `${t.T.ad} · ${Math.abs(t.hiz).toFixed(1)} blok/sn · ${BIYOMLAR[kol.b]}`; }
-    else if (o.oyuncu.basSuda) o.konumMetni = `Su altı · Derinlik ${Math.max(0, DENIZ + 1 - Math.floor(g.y))} · ${BIYOMLAR[kol.b]}`;
+    else if (o.tekneler.binilen) { const t = o.tekneler.binilen; o.konumMetni = `${t.T.ad} · ${Math.abs(t.hiz).toFixed(1)} blok/sn · ${BIYOMLAR[kol.ab ?? kol.b]}`; }
+    else if (o.oyuncu.basSuda) o.konumMetni = `Su altı · Derinlik ${Math.max(0, DENIZ + 1 - Math.floor(g.y))} · ${BIYOMLAR[kol.ab ?? kol.b]}`;
     else if (o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) > g.y + 2 && g.y < kol.h - 2) o.konumMetni = `Yeraltı · Derinlik ${Math.max(0, kol.h - Math.floor(p.y))} · Y ${Math.floor(p.y)}`;
-    else if (o.koyler.icindeki) { const U = UZMANLIK[o.koyler.icindeki.uzmanlik]; o.konumMetni = `${o.koyler.icindeki.ad} köyü${U ? ` (${U.kisa})` : ''} · ${BIYOMLAR[kol.b]}`; }
-    else o.konumMetni = BIYOMLAR[kol.b];
+    else if (o.koyler.icindeki) { const U = UZMANLIK[o.koyler.icindeki.uzmanlik]; o.konumMetni = `${o.koyler.icindeki.ad} köyü${U ? ` (${U.kisa})` : ''} · ${BIYOMLAR[kol.ab ?? kol.b]}`; }
+    else o.konumMetni = BIYOMLAR[kol.ab ?? kol.b];
     /* Pusulada yalnızca oyuncunun haritada eklediği işaretler gösterilir (diğerleri mini haritada ve büyük haritada) */
     o.isaretler = isaret.filter(m => m.sinif === 'yer');
     o.gorevler.guncelle(dt, p);   // 0.32.0: keşif ve teslimat süresi
@@ -1471,7 +1490,7 @@ function hataPaneli(o) {
 `HungerMan ${SURUM}   ${$('#fps').textContent || ''}
 XYZ: ${p.x.toFixed(2)} / ${p.y.toFixed(2)} / ${p.z.toFixed(2)}
 Parça: ${Math.floor(p.x / PB)}, ${Math.floor(p.z / PB)}   Yüklü parça: ${o.dunya.parcalar.size}
-Biyom: ${BIYOMLAR[k.b]}   Zemin: ${k.h}
+Biyom: ${BIYOMLAR[k.ab ?? k.b]}   Zemin: ${k.h}
 Yön: ${yon.toFixed(0)}°   Görüş: ${o.dunya.gorus}
 Tohum: ${o.tohum}   Hava: ${HAVA_ADI[o.hava.durum]} (${Math.round(o.hava.yogunluk * 100)}%, ${Math.round(o.hava.sure)} sn)   Deneyim: ${o.hayatta.seviye}. seviye
 Bakılan: ${h ? `${BLOKLAR[h.id].ad} (${h.x}, ${h.y}, ${h.z})` : '-'}
@@ -1740,7 +1759,7 @@ $('#cokKatil').onclick = async () => {
 function istemciBaslat(k, m, kod) {
   sonKod = kod; baglanDeneme = 0;
   const r = m.kayit || {};
-  oyunBaslat({ id: 'ag', ad: m.ad, tohum: m.tohum, zaman: m.zaman, gun: m.gun, degisiklikler: m.degisiklikler, kablolar: m.kablolar, dogum: r.dogum || m.dogum, yatakNoktasi: r.yatakNoktasi || null,
+  oyunBaslat({ id: 'ag', ad: m.ad, tohum: m.tohum, uretici: m.uretici || 1, zaman: m.zaman, gun: m.gun, degisiklikler: m.degisiklikler, kablolar: m.kablolar, dogum: r.dogum || m.dogum, yatakNoktasi: r.yatakNoktasi || null,
     oyuncu: r.oyuncu || null, envanter: r.envanter, hayatta: r.hayatta, gorevler: r.gorevler, koyler: r.koyler, basarimlar: r.basarimlar, olumNoktasi: r.olumNoktasi, hayatBasi: r.hayatBasi, istemci: true,
     yerler: r.yerler, komutlar: !!m.komutlar, konsol: m.konsol !== 0, vucutIsisi: m.vucutIsisi !== 0, zorluk: m.zorluk, denge: m.denge, haritaKimlik: `ag:${m.tohum}:${ayar.ad.toLocaleLowerCase('tr')}` });
   if (!r.oyuncu) oyun.oyuncu.konum.set(m.dogum.x, m.dogum.y, m.dogum.z);

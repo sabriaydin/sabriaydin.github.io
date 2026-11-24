@@ -5,21 +5,22 @@
    kor mangallı direklerle çevrili kül tuğlası tapınak avlusu ve kadim geçit; güneyde obsidyen iskele ve fener, kurumuş ağaçlar,
    yıkık duvarlar, kızıl mantarlar, örümcek ağları, iskelet yuvası ve geçidin arkasında bir hazine sandığı.
    Konum tohumdan belirlenir (her dünyada bir tane); dünya üretiminde (işçide) ve oyunda aynı işlevle bulunur. */
-import { PB, PY, DENIZ, dizin } from '../sabitler.js';
+import { PB, PY, DENIZ, dizin, KITA_YARICAP, DUNYA_SINIRI } from '../sabitler.js';
 import { karistir, uretec, karma3 } from '../rastgele.js';
 
 const R = 16;   // adanın en geniş yarıçapı
 export const ADA_AD = 'Lanetli Ada';
 const OBS = 515, KUL = 513, KOR = 512, TUGLA = 518, OYMA = 519, GECIT = 516, KUTUK = 10, AG = 148, YUVA = 58, SANDIK = 50, MAGMA = 521, ISIL = 514, MANTAR = 522, FENER = 159;
 
-/* Adanın konumu: kıtanın dışında, merkezden 2950-3300 blok uzakta; çevresi 250 blok boyunca kara içermeyen derin deniz */
+/* Adanın konumu: kıtanın dışında, merkezden (kıta yarıçapı + 350) ile (dünya sınırı - 300) arasında; çevresi 250 blok boyunca kara içermeyen derin deniz
+   (sürüm 1 dünyalarında 2950-3300 blok; 0.41.0'dan beri dünya boyutuna göre hesaplanır) */
 export function lanetliAda(u) {
   if (u.lanetliAdaB !== undefined) return u.lanetliAdaB;
   const r = uretec(karistir(u.tohum ^ 0x61646132));
-  const a0 = r() * Math.PI * 2, SINIR = 3300;
-  const derin = (x, z, s) => { if (Math.abs(x) > 3560 || Math.abs(z) > 3560) return true; const o = u.kolon(x, z, {}); return o.h < DENIZ - s; };
+  const a0 = r() * Math.PI * 2, SINIR = DUNYA_SINIRI - 300, D0 = KITA_YARICAP + 350;
+  const derin = (x, z, s) => { if (Math.abs(x) > DUNYA_SINIRI - 40 || Math.abs(z) > DUNYA_SINIRI - 40) return true; const o = u.kolon(x, z, {}); return o.h < DENIZ - s; };
   let A = null;
-  for (let d = 2950; d <= 3300 && !A; d += 50) {
+  for (let d = D0; d <= SINIR && !A; d += 50) {
     for (let k = 0; k < 36 && !A; k++) {
       const a = a0 + k * Math.PI * 2 / 36, x = Math.round(Math.cos(a) * d), z = Math.round(Math.sin(a) * d);
       if (Math.abs(x) > SINIR || Math.abs(z) > SINIR || !derin(x, z, 12)) continue;
@@ -28,7 +29,7 @@ export function lanetliAda(u) {
       if (acik) A = { x, z };
     }
   }
-  if (!A) { const x = Math.round(Math.cos(a0) * 3100), z = Math.round(Math.sin(a0) * 3100); A = { x: Math.max(-SINIR, Math.min(SINIR, x)), z: Math.max(-SINIR, Math.min(SINIR, z)) }; }
+  if (!A) { const x = Math.round(Math.cos(a0) * (KITA_YARICAP + 500)), z = Math.round(Math.sin(a0) * (KITA_YARICAP + 500)); A = { x: Math.max(-SINIR, Math.min(SINIR, x)), z: Math.max(-SINIR, Math.min(SINIR, z)) }; }
   const T = DENIZ + 6;   // avlu (ada tepesi) yüksekliği
   A.ust = T; A.r = R;
   A.gecit = { x: A.x - 1, y: T + 1, z: A.z - 2 };   // geçidin sol alt iç hücresi (x-y düzlemi)

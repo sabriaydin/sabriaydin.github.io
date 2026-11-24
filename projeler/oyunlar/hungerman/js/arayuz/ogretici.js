@@ -1,7 +1,7 @@
 /* HungerMan - öğretici (0.23.0): yeni dünyada ilk adımları sırayla gösterir. Her adım, koşulu sağlanınca kendiliğinden geçer.
    Ayarlardan kapatılabilir ya da paneldeki "Gizle" ile o dünya için bırakılabilir. */
 const $ = s => document.querySelector(s);
-const KAZMALAR = [300, 304, 308, 312, 316], KUTUKLER = [8, 10, 12, 144];
+const KAZMALAR = [300, 304, 308, 312, 316], KUTUKLER = [8, 10, 12, 144, 3005];
 const yakinda = (o, id, r = 6) => { const P = o.oyuncu.konum, d = o.dunya; for (let x = -r; x <= r; x++) for (let y = -2; y <= 3; y++) for (let z = -r; z <= r; z++) if (d.blok(Math.floor(P.x) + x, Math.floor(P.y) + y, Math.floor(P.z) + z) === id) return true; return false; };
 export const ADIMLAR = [
   { baslik: 'Hareket', metin: 'W A S D ile yürünür, fareyle bakılır. Boşluk zıplatır, Shift koşturur.', tamam: o => (o.ogrMesafe || 0) > 12 },

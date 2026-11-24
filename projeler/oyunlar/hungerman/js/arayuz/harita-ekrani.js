@@ -200,7 +200,7 @@ export class HaritaEkrani {
     const X = Math.floor(x), Z = Math.floor(z), p = this.o.oyuncu.konum;
     const k = this.o.harita.kolon(X, Z);
     const d = Math.round(Math.hypot(X + 0.5 - p.x, Z + 0.5 - p.z));
-    let yer = k ? (k.su ? `${BIYOMLAR[this.o.dunya.uretici.kolon(X, Z, {}).b]} · Su (derinlik ${k.derinlik})` : `${BIYOMLAR[this.o.dunya.uretici.kolon(X, Z, {}).b]} · Y ${k.h}`) : 'Keşfedilmemiş bölge';
+    let yer = k ? (k.su ? `${(q => BIYOMLAR[q.ab ?? q.b])(this.o.dunya.uretici.kolon(X, Z, {}))} · Su (derinlik ${k.derinlik})` : `${(q => BIYOMLAR[q.ab ?? q.b])(this.o.dunya.uretici.kolon(X, Z, {}))} · Y ${k.h}`) : 'Keşfedilmemiş bölge';
     const m = this.isaretBul(this.fare[0], this.fare[1]);
     if (m) yer = `${m.ad} · ${yer}`;
     el.textContent = `X ${X} · Z ${Z} · ${yer} · ${d} blok uzakta`;

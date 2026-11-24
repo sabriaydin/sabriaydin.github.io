@@ -1,20 +1,31 @@
 /* HungerMan - genel sabitler (ana iş parçacığı ve işçiler ortak kullanır) */
-export const SURUM = '0.40.9';
+export const SURUM = '0.41.0';
 
-/* Parça (chunk) boyutları: 16 x 16 taban, 128 yükseklik */
+/* Parça (chunk) boyutları: 16 x 16 taban, 256 yükseklik (0.41.0; önceden 128) */
 export const PB = 16;            // parça kenarı
-export const PY = 128;           // dünya yüksekliği
+export const PY = 256;           // dünya yüksekliği (sürüm 1 dünyalarında arazi yalnızca alttaki 128 blokta bulunur)
 export const PHACIM = PB * PB * PY;
 export const DENIZ = 48;         // deniz seviyesi
 
-/* Kıta ve dünya sınırı (blok) */
-export const KITA_YARICAP = 2600;
-export const DUNYA_SINIRI = 3600;
+/* Kıta ve dünya sınırı (blok). 0.41.0: dünyanın üretici sürümüne göre değişir (canlı bağlama: dunyaSurumAyarla ile ayarlanır;
+   ana iş parçacığı dünya açılırken, işçiler "baslat" iletisinde çağırır).
+   Sürüm 1 (eski dünyalar): kıta 2600, sınır 3600, diyar 470, bulut 132. Sürüm 2: kıta 4000, sınır 5400, diyar 690, bulut 196. */
+export let URETICI_SURUM = 2;
+export let KITA_YARICAP = 4000;
+export let DUNYA_SINIRI = 5400;
+export let DIYAR_SINIR = 690;         // diyarın merkeze uzaklık sınırı (blok)
+export let BULUT_Y = 196;             // bulut katmanının yüksekliği
+export let HARITA_OLCEK = 2;          // haritada kara yüksekliği bu sayıya bölünerek bir baytta saklanır
+export function dunyaSurumAyarla(s) {
+  URETICI_SURUM = s >= 2 ? 2 : 1;
+  const yeni = URETICI_SURUM === 2;
+  KITA_YARICAP = yeni ? 4000 : 2600; DUNYA_SINIRI = yeni ? 5400 : 3600; DIYAR_SINIR = yeni ? 690 : 470;
+  BULUT_Y = yeni ? 196 : 132; HARITA_OLCEK = yeni ? 2 : 1;
+}
 
 /* 0.18.0: Yeraltı Diyarı, dünyadan çok uzakta (x = DIYAR_X çevresinde) ayrı bir bölgedir.
    Diyardaki 1 blok, dünyadaki 8 bloğa karşılık gelir: dünya (x, z) <-> diyar (DIYAR_X + x / 8, z / 8). */
 export const DIYAR_X = 20000;
-export const DIYAR_SINIR = 470;       // diyarın merkeze uzaklık sınırı (blok)
 export const DIYAR_LAV = 31;          // lav denizinin yüzeyi
 export const diyarMi = x => x > 10000;
 /* Mevsimler: her biri 7 gün; yıl 28 gün */

@@ -224,14 +224,14 @@ export class Konsol {
   }
   /* Belirtilen biyomun en yakın noktası (halkalar hâlinde aranır) */
   biyomBul(o, b) {
-    const P = o.oyuncu.konum, u = o.dunya.uretici, kara = b !== BY.OKYANUS && b !== BY.DERIN && b !== BY.NEHIR;
+    const P = o.oyuncu.konum, u = o.dunya.uretici, kara = b !== BY.OKYANUS && b !== BY.DERIN && b !== BY.NEHIR && b !== BY.GOL && b !== BY.MANGROV;
     for (let r = 48; r < DUNYA_SINIRI * 1.3; r += 48) {
       const n = Math.max(8, Math.round(Math.PI * 2 * r / 48)), a0 = Math.random() * 6.28;
       for (let i = 0; i < n; i++) {
         const x = Math.floor(P.x + Math.cos(a0 + i / n * 6.283) * r), z = Math.floor(P.z + Math.sin(a0 + i / n * 6.283) * r);
         if (Math.abs(x) > DUNYA_SINIRI - 40 || Math.abs(z) > DUNYA_SINIRI - 40) continue;
         const k = u.kolon(x, z, {});
-        if (k.b === b && (!kara || k.h > DENIZ)) return { x, z };
+        if ((k.b === b || k.ab === b) && (!kara || (k.h > DENIZ && k.h >= k.su))) return { x, z };
       }
     }
     return null;
@@ -660,7 +660,7 @@ export class Konsol {
     });
     ekle('konum', 'Konum, parça, biyom ve yükseklik bilgisi', 'konum', o => {
       const P = o.oyuncu.konum, k = o.dunya.uretici.kolon(Math.floor(P.x), Math.floor(P.z), {});
-      this.yaz(`X ${P.x.toFixed(2)} · Y ${P.y.toFixed(2)} · Z ${P.z.toFixed(2)} · parça ${Math.floor(P.x / PB)},${Math.floor(P.z / PB)} · ${BIYOMLAR[k.b]} · zemin ${k.h} · yön ${Math.round(((-o.oyuncu.yaw * 180 / Math.PI) % 360 + 360) % 360)}°`, 'bilgi');
+      this.yaz(`X ${P.x.toFixed(2)} · Y ${P.y.toFixed(2)} · Z ${P.z.toFixed(2)} · parça ${Math.floor(P.x / PB)},${Math.floor(P.z / PB)} · ${BIYOMLAR[k.ab ?? k.b]} · zemin ${k.h} · yön ${Math.round(((-o.oyuncu.yaw * 180 / Math.PI) % 360 + 360) % 360)}°`, 'bilgi');
     });
     ekle('tohum', 'Dünya tohumunu yazar', 'tohum', o => this.yaz(`Tohum: ${o.tohum}`, 'bilgi'));
     ekle('gorus', 'Görüş mesafesini ayarlar (4-16 parça)', 'gorus <4-16>', (o, p) => { const n = Math.max(4, Math.min(16, Math.round(this.sayi(p[0], 8)))); this.arayuz.gorusAyarla(n); this.tamam(`Görüş ${n} parça.`); });
@@ -731,6 +731,6 @@ export class Konsol {
     if (!o) return;
     const P = o.oyuncu.konum, k = o.dunya.uretici.kolon(Math.floor(P.x), Math.floor(P.z), {});
     const bayrak = [o.hayatta.olumsuz ? 'ölümsüz' : '', o.oyuncu.ucus ? 'uçuyor' : '', o.oyuncu.hizCarpani !== 1 ? `hız ${o.oyuncu.hizCarpani}×` : '', (o.zamanHizi ?? 1) !== 1 ? `zaman ${o.zamanHizi}×` : '', this.kesif ? `keşif %${Math.floor(this.kesif.k.oran * 100)}` : ''].filter(Boolean).join(' · ');
-    $('#konsolBilgi').textContent = `${this.arayuz.fpsMetni()} · X ${P.x.toFixed(1)} Y ${P.y.toFixed(1)} Z ${P.z.toFixed(1)} · ${BIYOMLAR[k.b]} · canlı ${o.varliklar.liste.length} · parça ${o.dunya.parcalar.size}${o.ag ? (o.istemci ? ' · istemci' : ' · sunucu') : ''}${bayrak ? ' · ' + bayrak : ''}`;
+    $('#konsolBilgi').textContent = `${this.arayuz.fpsMetni()} · X ${P.x.toFixed(1)} Y ${P.y.toFixed(1)} Z ${P.z.toFixed(1)} · ${BIYOMLAR[k.ab ?? k.b]} · canlı ${o.varliklar.liste.length} · parça ${o.dunya.parcalar.size}${o.ag ? (o.istemci ? ' · istemci' : ' · sunucu') : ''}${bayrak ? ' · ' + bayrak : ''}`;
   }
 }

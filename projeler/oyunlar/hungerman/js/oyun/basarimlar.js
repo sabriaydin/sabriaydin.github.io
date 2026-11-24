@@ -114,7 +114,7 @@ export const ISTATISTIKLER = [
 ];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
-const ESYA_BASARIM = [['meyve', [378, 379, 380]], ['tirpan', [388, 389]], ['gubre', [390]], ['menemen', [382]], ['kumas', [391]], ['plan', [345]], ['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
+const ESYA_BASARIM = [['meyve', [378, 379, 380]], ['tirpan', [388, 389]], ['gubre', [390]], ['menemen', [382]], ['kumas', [391]], ['plan', [345]], ['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144, 3005]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
 
 export class Basarimlar {
   constructor() {
