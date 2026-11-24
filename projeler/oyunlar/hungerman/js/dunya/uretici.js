@@ -385,7 +385,7 @@ export class UreticiV2 {
     }
 
     const ymax = Math.min(PY - 2, ustY + 1);
-    this.magaralar(v, x0, z0, kolonlar, ymax);
+    this.magaralar(v, x0, z0, kolonlar, ymax, K);
     this.taslar(v, x0, z0, kolonlar, ymax);
     this.cevherler(v, cx, cz, kolonlar);
     this.magaraSusle(v, x0, z0, kolonlar);
@@ -405,7 +405,7 @@ export class UreticiV2 {
   }
 
   /* Mağaralar: kıvrımlı tüneller, derinlerde geniş salonlar, yeraltı gölleri ve nehirleri, lav gölleri, uçurum altı oyukları */
-  magaralar(v, x0, z0, kolonlar, ymax) {
+  magaralar(v, x0, z0, kolonlar, ymax, K) {
     const gA = this.gA, gB = this.gB, gO = this.gO, gBm = this.gBm;
     const tA = new Izgara((x, y, z) => gA.g3(x / 56, y / 38, z / 56), x0, z0, ymax);
     const tB = new Izgara((x, y, z) => gB.g3(x / 56 + 100, y / 38, z / 56), x0, z0, ymax);
@@ -418,7 +418,10 @@ export class UreticiV2 {
       const x = x0 + lx, z = z0 + lz;
       const kara = o.h >= o.su;
       const giris = kara && o.h >= DENIZ + 2 && this.girisMi(x, z);
-      const ust = !kara ? o.h - 6 : (giris ? o.h : o.h - 5);
+      /* 0.41.8: yanındaki sütunda su (deniz, göl, nehir) varsa mağara, yarık ve oyuklar o suyun tabanının altında kalır (su mağaraya boşalmaz) */
+      let tavan = PY;
+      for (const j of [-1, 1, -18, 18]) { const q = K[(lz + 1) * 18 + lx + 1 + j]; if (q.su > q.h) tavan = Math.min(tavan, q.h - 2); }
+      const ust = Math.min(tavan, !kara ? o.h - 6 : (giris ? o.h : o.h - 5));
       /* Yeraltı nehri: yatay bir kanal; tabanı su dolu */
       const yn = Math.abs(this.gYn.g2((x + this.gW.g2(x / 90, z / 90) * 30) / 380, (z + this.gW.g2(x / 90 + 7, z / 90) * 30) / 380));
       const ynY = 22 + Math.floor((this.gYn.g2(x / 700 + 11, z / 700) + 1) * 5);
@@ -443,11 +446,11 @@ export class UreticiV2 {
       }
       /* Yarıklar (kanyonlar) */
       const dip = this.yarik(x, z, o);
-      if (dip != null) for (let y = dip; y <= o.h; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
+      if (dip != null && tavan === PY) for (let y = dip; y <= o.h; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
       /* Uçurum altı oyukları ve çıkıntılar: dik yamaçlarda yüzeyin altında oyuklar (üst kabuk kalır) */
       const ab = o.ab ?? o.b;
       if (kara && o.eg >= 6 && o.h > DENIZ + 10 && (ab === BY.KAYALIK || ab === BY.KIZIL || ab === BY.YALIYAR || o.b === BY.DAG || o.tm > 0.5)) {
-        for (let y = Math.max(DENIZ + 2, o.h - 14); y <= o.h - 3; y++) {
+        for (let y = Math.max(DENIZ + 2, o.h - 14); y <= Math.min(o.h - 3, tavan); y++) {
           const n = this.gU.g3(x / 16, y / 9, z / 16);
           if (n > 0.42) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
         }
@@ -684,20 +687,24 @@ export class UreticiV2 {
 
   /* Kayalar: yarı gömülü, yosunlu ya da çıplak kaya öbekleri */
   kayalar(v, x0, z0) {
+    /* 0.41.7: kayalar yalnız taşlık arazide (kayalık tepeler, dağlar, taşlı kıyı, yalıyar, tayga) bulunur; işlenmiş parke taş yerine
+       doğal taş, granit ve (savanda) kum taşından yapılır. Yarı gömülü, yassı ve yuvarlaktır; soğuk ve nemli yerlerde üstü yer yer yosunludur. */
     const set = this.yazici(v, x0, z0), o = {};
-    const OLASILIK = { [BY.KAYALIK]: 0.45, [BY.DAG]: 0.16, [BY.TAYGA]: 0.14, [BY.ORMAN]: 0.06, [BY.SIK]: 0.08, [BY.SONBAHAR]: 0.06, [BY.HUS]: 0.05, [BY.CAYIR]: 0.04, [BY.TASLI_KIYI]: 0.22, [BY.YALIYAR]: 0.12, [BY.SAVAN]: 0.05, [BY.KARLI_OVA]: 0.06, [BY.KARLI_ZIRVE]: 0.1 };
+    const OLASILIK = { [BY.KAYALIK]: 0.32, [BY.DAG]: 0.1, [BY.TAYGA]: 0.06, [BY.TASLI_KIYI]: 0.14, [BY.YALIYAR]: 0.07, [BY.KARLI_ZIRVE]: 0.05, [BY.SAVAN]: 0.025 };
     this.hucreler(x0, z0, KAYA_HUCRE, 4, 0x6b6179, (x, z, s) => {
       this.kolon(x, z, o);
       const ab = o.ab ?? o.b, p = OLASILIK[ab] ?? OLASILIK[o.b];
       if (!p || s > p || o.h < o.su || o.h < DENIZ || this.girisMi(x, z) || koyIcinde(this, x, z, 6)) return;
-      const R = 1 + karma2(this.tohum ^ 0x6b62, x, z) * 1.8, Ry = R * 0.8;
-      const orman = ab === BY.ORMAN || ab === BY.SIK || ab === BY.SONBAHAR || o.b === BY.TAYGA || ab === BY.HUS;
-      const tas = o.b === BY.SAVAN ? 24 : ab === BY.KAYALIK && s < p * 0.4 ? GRANIT : 2;
+      const R = 1.5 + karma2(this.tohum ^ 0x6b62, x, z) * 1.5, Ry = R * 0.65;
+      const tas = o.b === BY.SAVAN ? 24 : (ab === BY.KAYALIK || o.b === BY.DAG) && karma2(this.tohum ^ 0x6b64, x, z) < 0.35 ? GRANIT : 2;
+      const yosun = o.b === BY.TAYGA || (ab === BY.KAYALIK && o.n > 0.15);
       const RI = Math.ceil(R);
-      for (let dy = -1; dy <= Math.ceil(Ry); dy++) for (let dz = -RI; dz <= RI; dz++) for (let dx = -RI; dx <= RI; dx++) {
-        if ((dx * dx + dz * dz) / (R * R) + (dy * dy) / (Ry * Ry) > 1) continue;
-        const k = karma3(this.tohum ^ 0x6b63, x + dx, dy, z + dz);
-        const id = orman ? (k < 0.4 ? 60 : k < 0.55 ? 149 : k < 0.8 ? 15 : 2) : (k < 0.25 ? 15 : k < 0.32 ? 60 : tas);
+      for (let dy = -2; dy <= Math.ceil(Ry); dy++) for (let dz = -RI; dz <= RI; dz++) for (let dx = -RI; dx <= RI; dx++) {
+        const q = (dx * dx + dz * dz) / (R * R) + (dy * dy) / (Ry * Ry);
+        if (q > 1) continue;
+        /* Üst yüzey: kabuk kenarındaki üst bloklar */
+        const ust = (dx * dx + dz * dz) / (R * R) + ((dy + 1) * (dy + 1)) / (Ry * Ry) > 1;
+        const id = yosun && ust && dy >= 0 && karma3(this.tohum ^ 0x6b63, x + dx, dy, z + dz) < 0.45 ? 149 : tas;
         set(x + dx, o.h + 1 + dy, z + dz, id, false);
       }
     });

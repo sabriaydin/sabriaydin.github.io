@@ -91,8 +91,9 @@ export function isikHesapla(Q, H) {
       const i = (y * IW + z) * IW + x, id = Q[i];
       if (id) {
         if (OPAK[id] || LAV[id]) { if (y + 1 < yAlt) yAlt = y + 1; if (y > yUst) yUst = y; break; }
-        if (SIVI[id]) s = Math.max(6, s - 1);
-        else if (KESIK[id] && !AYNI_GIZLE[id]) s = Math.max(10, s - 1);
+        /* 0.41.8: su ve yaprak altı eski aydınlıkta kalır (deniz tabanı ve sık orman zemini fazla kararmaz) */
+        if (SIVI[id]) s = Math.max(10, s - 1);
+        else if (KESIK[id] && !AYNI_GIZLE[id]) s = Math.max(12, s - 1);
       }
       L[i] = s;
       if (GOLGE[id]) { if (y < yAlt) yAlt = y; if (y > yUst) yUst = y; break; }

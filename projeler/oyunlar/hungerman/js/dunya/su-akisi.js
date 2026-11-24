@@ -5,7 +5,10 @@
    Yalnızca tek oyunculuda ve sunucuda çalışır; değişiklikler blokKoy ile kaydedilir ve istemcilere yayılır.
    Güncellemeler sıradan saniyede 4 adımda (Minecraft'taki gibi) ve adım başına sınırlı sayıda işlenir. */
 import { BLOKLAR, KATI, SIVI, LAV, BITKI, SU_SEVIYE, AKAN_SU, DUSEN_SU } from '../bloklar.js';
-import { PB, PY } from '../sabitler.js';
+import { PB, PY, DENIZ } from '../sabitler.js';
+/* 0.41.8: derin yeraltındaki (deniz seviyesinin 10 blok altı ve aşağısı) üretilmiş sular, parça yüklenince kendiliğinden akmaz; yanlarında
+   bir blok değişince akar (Minecraft'taki gibi). Önceden yeraltı gölleri ve nehirleri yeni dünyada binlerce blok değişikliği ve kayıt şişmesi yapıyordu. */
+const DERIN = DENIZ - 10;
 
 const ADIM = 0.25, BUTCE = 600;
 const YAN = [[1, 0], [-1, 0], [0, 1], [0, -1]];
@@ -62,7 +65,7 @@ export class SuAkisi {
     for (let i = 0; i < v.length; i++) {
       if (!SU_SEVIYE[v[i]]) continue;
       const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
-      if (y < 1) continue;
+      if (y < DERIN) continue;
       const x = x0 + lx, z = z0 + lz;
       let acik = gecilir(v[i - PB * PB]) || (akanMi(v[i]) && !SU_SEVIYE[v[i + PB * PB]]);
       if (!acik) for (const [a, c] of YAN) {
@@ -79,7 +82,7 @@ export class SuAkisi {
       const x = x0 + (ox === -1 || ox === PB ? ox : k), z = z0 + (oz === -1 || oz === PB ? oz : k);
       if (!d.yuklu(x, z)) continue;
       const lx = ox === -1 || ox === PB ? ix : k, lz = oz === -1 || oz === PB ? iz : k;
-      for (let y = 1; y < PY - 1; y++) {
+      for (let y = DERIN; y < PY - 1; y++) {
         const ic = v[(y * PB + lz) * PB + lx];
         if (!gecilir(ic) && !(akanMi(ic) && SU_SEVIYE[ic] < 7)) continue;
         if (SU_SEVIYE[d.blok(x, y, z)]) this.ekle(x, y, z);

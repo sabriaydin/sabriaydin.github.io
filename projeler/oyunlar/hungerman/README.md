@@ -117,6 +117,17 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.8 (0.41.8): Genel iyileştirmeler (su, ışık, başarım)
+- Su sızıntıları giderildi: yeni bir dünyada ilk dakikalarda göl, nehir ve deniz suyu yanındaki mağara ve oyuklara boşalıyor, yeraltı gölleri ve nehirleri mağaralara taşıyor, lavla karşılaşıp obsidyen ve parke taşa dönüşüyordu (ölçümde ilk 90 saniyede yaklaşık 13 000 blok değişikliği). Artık su olan bir sütunun yanında mağara, yarık ve oyuk suyun tabanının altında kalır; derin yeraltındaki üretilmiş sular yanlarında bir blok değişene kadar durgundur (Minecraft'taki gibi). Aynı ölçümde değişiklik sayısı yaklaşık 90'a indi (yalnızca şelalelerin dibindeki doğal akış). Su akışı kuyruğu yeni parçalar yüklenirken birikmez; kayıt dosyası gereksiz yere büyümez.
+- Akan su ve düşen bloklar, komşu parçayı yalnızca tam kenardaysa yeniden çizdirir (sık su değişikliklerinde gereksiz yeniden çizim ve takılma olmaz).
+- Işık: deniz ve göl tabanı ile sık orman zemini yeni ışık sisteminde fazla kararıyordu; su ve yaprak altı önceki aydınlığına döndürüldü.
+- Denetim: yeni dünya oluşturma, biyomlar arası ışınlanma, gece, yağmur, fırtına, zaman hızlandırma, kaydetme ve yeniden açma senaryolarında hata çıkmadı; yeni dünyanın üretici sürümü ve oyuncu değişiklikleri yeniden açılışta korunur.
+
+## 41.7 (0.41.7): Doğal kayalar
+- Çayır ve ormanlarda rastgele duran parke taşı ve yosunlu parke taşı yığınları kaldırıldı (parke taş işlenmiş bir yapı malzemesidir, doğada bulunmaz).
+- Kayalar artık yalnız taşlık arazide bulunur: kayalık tepeler, dağlar, taşlı kıyı, yalıyar ve (seyrek) tayga ile savan. Doğal taştan, yer yer granitten (savanda kum taşından) yapılır; daha iri, yassı ve yarı gömülüdür; taygada ve nemli kayalık tepelerde üstü yer yer yosunludur.
+- Yalnızca yeni yüklenen bölgelerde görünür.
+
 ## 41.6 (0.41.6): Özel çalı modeli
 - Çalılar artık yere konmuş ağaç yaprağı blokları değildir: kendine özgü biçimli yeni bir bitkidir. Üst üste binen yuvarlak yaprak kümelerinden oluşan alçak bir tümsek biçimindedir; dokusu ışık alan ve gölgede kalan yaprak kümeleri, ince dallar ve küçük boşluklar içerir. İçinden geçilir; makasla hızlı kırılır, kırılınca çubuk ve seyrek olarak meşe fidanı düşer.
 - Beş tür: Çalı (çayır ve ormanlar), Büyük Çalı (ormanda, daha yüksek ve dolgun), Ladin Çalısı (tayga ve dağlar), Savan Çalısı (savan ve çöl kenarları), Sonbahar Çalısı (sonbahar ormanı). Yer yer ikili öbekler hâlinde bulunur.

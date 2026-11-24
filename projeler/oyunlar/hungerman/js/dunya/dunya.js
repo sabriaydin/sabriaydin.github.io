@@ -131,10 +131,12 @@ export class Dunya {
     if (eski === 59 || id === 59) this.lavIsikGuncelle(x, y, z);
     this.kirlet(p, true);
     /* 0.41.3: ışık komşu parçaya 8 bloğa kadar uzandığından sınıra yakın değişiklikler komşuyu da yeniler */
-    if (lx < 4) this.kirletK(cx - 1, cz); if (lx > PB - 5) this.kirletK(cx + 1, cz);
-    if (lz < 4) this.kirletK(cx, cz - 1); if (lz > PB - 5) this.kirletK(cx, cz + 1);
-    if (lx < 4 && lz < 4) this.kirletK(cx - 1, cz - 1); if (lx > PB - 5 && lz < 4) this.kirletK(cx + 1, cz - 1);
-    if (lx < 4 && lz > PB - 5) this.kirletK(cx - 1, cz + 1); if (lx > PB - 5 && lz > PB - 5) this.kirletK(cx + 1, cz + 1);
+    /* 0.41.8: akan su ve düşen bloklar yalnız tam kenarda komşuyu yeniler (sık su değişiklikleri gereksiz yeniden çizim yapmaz) */
+    const K = kaynak === 'su' || kaynak === 'dusme' ? 1 : 4;
+    if (lx < K) this.kirletK(cx - 1, cz); if (lx > PB - 1 - K) this.kirletK(cx + 1, cz);
+    if (lz < K) this.kirletK(cx, cz - 1); if (lz > PB - 1 - K) this.kirletK(cx, cz + 1);
+    if (lx < K && lz < K) this.kirletK(cx - 1, cz - 1); if (lx > PB - 1 - K && lz < K) this.kirletK(cx + 1, cz - 1);
+    if (lx < K && lz > PB - 1 - K) this.kirletK(cx - 1, cz + 1); if (lx > PB - 1 - K && lz > PB - 1 - K) this.kirletK(cx + 1, cz + 1);
     for (const f of this.dinleyiciler) f(x, y, z, id, eski, kaynak);
     return true;
   }
