@@ -773,14 +773,16 @@ export class UreticiV2 {
       else if (alt === 4) {
         if (ab === BY.CICEKLI) {
           /* Çiçekli çayır: türler öbekler hâlinde (renkli lekeler) */
+          /* 0.41.5: çiçekler yalnız seyrek öbeklerde yoğunlaşır (öbek içinde en çok %10, dışında %1,5) */
           const ci = this.gCi.g2(x / 22, z / 22), tur = ci > 0.35 ? (o.te > 0.18 ? D.lavanta : D.lale) : ci > 0.05 ? 26 : ci > -0.25 ? D.papatya : ci > -0.5 ? 27 : 44;
-          id = r < 0.34 ? tur : r < 0.5 ? 25 : r < 0.53 ? D.papatya : 0;
+          const obek = yumusak(0.35, 0.7, this.gCi.g2(x / 45 + 50, z / 45 - 20)), pc = 0.015 + 0.085 * obek;
+          id = r < pc ? tur : r < pc + 0.2 ? 25 : 0;
         }
-        else if (o.b === BY.CAYIR) id = r < 0.18 ? 25 : r < 0.2 ? 26 : r < 0.22 ? 27 : r < 0.226 ? 44 : r < 0.229 ? D.papatya : r < 0.231 ? 28 : 0;
+        else if (o.b === BY.CAYIR) id = r < 0.18 ? 25 : r < 0.186 ? 26 : r < 0.192 ? 27 : r < 0.194 ? 44 : r < 0.196 ? D.papatya : r < 0.198 ? 28 : 0;
         else if (ab === BY.SIK) id = r < 0.14 ? 25 : r < 0.24 ? 43 : r < 0.25 ? 28 : 0;
         else if (ab === BY.SONBAHAR) id = r < 0.14 ? 25 : r < 0.18 ? 43 : r < 0.19 ? 28 : 0;
         else if (o.b === BY.ORMAN) id = r < 0.1 ? 25 : r < 0.13 ? 43 : r < 0.136 ? 36 : r < 0.142 ? 28 : r < 0.146 ? 26 : 0;
-        else if (o.b === BY.HUS) id = r < 0.12 ? 25 : r < 0.135 ? 27 : r < 0.145 ? 44 : r < 0.148 ? 28 : r < 0.152 ? D.papatya : 0;
+        else if (o.b === BY.HUS) id = r < 0.12 ? 25 : r < 0.125 ? 27 : r < 0.129 ? 44 : r < 0.132 ? 28 : r < 0.134 ? D.papatya : 0;
         else id = r < 0.05 ? 25 : 0;
       } else if (alt === 45) id = o.b === BY.KARLI_OVA ? (r < 0.015 ? 30 : 0) : r < 0.05 ? 43 : r < 0.055 ? 36 : r < 0.06 ? 28 : 0;
       else if (alt === 142) id = ab === BY.KIZIL ? (r < 0.04 ? 30 : 0) : r < 0.3 ? 25 : r < 0.33 ? 30 : r < 0.335 ? 27 : 0;
