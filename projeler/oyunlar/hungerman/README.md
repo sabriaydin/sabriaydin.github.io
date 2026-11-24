@@ -119,7 +119,8 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
 
 ## 41.5 (0.41.5): Daha seyrek çiçekler
 - Çiçekli çayırda yerin yaklaşık üçte biri çiçekti; artık çiçekler seyrek öbeklerde toplanır (öbek içinde en çok %10, öbek dışında %1,5; ortalama yaklaşık %2). Çayırda çiçek oranı %5'ten %1,5'e, huş ormanında %2'den %1'e indi.
-- Bu ayar yalnızca yeni yüklenen bölgelerde görünür; daha önce oluşmuş bölgelerdeki çiçekler yerinde kalır.
+- Çalılar küçük ağaç gibi görünüyordu (içinde kütük, iki-üç blok yüksekliğinde); artık kütüksüz, çoğu bir blok yüksekliğinde alçak yaprak öbekleridir ve daha seyrektir (çayırda üçte bire indi).
+- Bu ayar yalnızca yeni yüklenen bölgelerde görünür; daha önce oluşmuş bölgelerdeki çiçekler ve çalılar yerinde kalır.
 
 ## 41.4 (0.41.4): Düşen kum ve çakıl
 - Kum, çakıl ve kızıl kum Minecraft'taki gibi havada asılı kalmaz: altı boş bir yere konduğunda ya da altındaki blok kırıldığında yer çekimiyle düşen bir küp olarak aşağı iner ve ilk katı zeminin üstüne yerleşir. Üst üste duran bloklar sırasını koruyarak düşer.

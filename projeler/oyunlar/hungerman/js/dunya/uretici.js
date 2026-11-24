@@ -646,7 +646,7 @@ export class UreticiV2 {
       set(a[0] + dx, a[1] + 1, a[2] + dz, 569 + d * 6 + 2, true);
     }
     /* Çalılar */
-    const CALI = { [BY.ORMAN]: 0.16, [BY.SIK]: 0.3, [BY.SONBAHAR]: 0.14, [BY.HUS]: 0.1, [BY.TAYGA]: 0.12, [BY.CAYIR]: 0.05, [BY.CICEKLI]: 0.03, [BY.SAVAN]: 0.1, [BY.KAYALIK]: 0.12, [BY.DAG]: 0.04, [BY.BATAKLIK]: 0.12, [BY.YALIYAR]: 0.08 };
+    const CALI = { [BY.ORMAN]: 0.12, [BY.SIK]: 0.22, [BY.SONBAHAR]: 0.1, [BY.HUS]: 0.07, [BY.TAYGA]: 0.08, [BY.CAYIR]: 0.015, [BY.CICEKLI]: 0.01, [BY.SAVAN]: 0.06, [BY.KAYALIK]: 0.08, [BY.DAG]: 0.03, [BY.BATAKLIK]: 0.08, [BY.YALIYAR]: 0.05 };   // 0.41.5: daha seyrek
     const cali = [];
     this.hucreler(x0, z0, CALI_HUCRE, 3, 0x63616c, (x, z, s) => {
       this.kolon(x, z, o);

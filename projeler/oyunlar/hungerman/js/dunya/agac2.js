@@ -144,11 +144,10 @@ export function agacKur2(set, x, y, z, tur, r, kisim = 'hepsi', yaprakId = 0) {
       if (gov) for (let k = 0; k < boy; k++) set(x, y + k, z, D.mantarSap, false);
       return;
     }
-    /* Çalı: alçak, yuvarlak yaprak öbeği (içinde tek kütük) */
+    /* Çalı: yere yakın, alçak yaprak öbeği (0.41.5: kütüksüz; çoğu bir, bazıları iki blok yüksekliğinde) */
     case 'cali': {
-      const yaprak = yaprakId || 9, rx = 1.2 + r() * 0.9, ry = 1 + r() * 0.5;
-      if (yap) tac(set, x, y, z, rx, ry, yaprak, 107);
-      if (gov) set(x, y, z, yaprak === 11 ? 10 : yaprak === 145 ? 144 : 8, false);
+      const yaprak = yaprakId || 9, rx = 0.9 + r() * 0.8, iki = r() < 0.25;
+      if (yap) { tac(set, x, y, z, rx, 0.6, yaprak, 107); if (iki) set(x, y + 1, z, yaprak, true); }
       return;
     }
     default: agacKur(set, x, y, z, tur, r, kisim);
