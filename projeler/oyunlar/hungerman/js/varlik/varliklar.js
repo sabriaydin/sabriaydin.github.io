@@ -12,6 +12,7 @@ import { adaYakin } from '../dunya/ada-uretici.js';
 import { karma3 } from '../rastgele.js';
 import { PY, DENIZ, diyarMi } from '../sabitler.js';
 import { cakisma, hucreKutulari } from '../sekiller.js';
+import { YolBulucu } from './yol.js';
 
 let SIRA = 1;
 /* 0.23.0: canlıların altındaki yumuşak gölge (zemine yatırılmış, kenarı silinen koyu daire) */
@@ -24,6 +25,7 @@ const GOLGE_MALZ = (() => {
   return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, opacity: 0.4, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 })();
 const CICEK = new Set([26, 27, 44]);   // 0.21.0: arıların polen topladığı çiçekler
+const AV = new Set(['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'at']);   // 0.44.0: kurttan kaçan hayvanlar
 const MAX_HAYVAN = 18, HAYVAN_UZAK = 120, ZOMBI_UZAK = 72;
 
 /* 0.41.0: alt biyomlara özgü hayvanlar (ana biyomun hayvanlarına eklenir) */
@@ -43,6 +45,8 @@ export class Varliklar {
     this.ayna = false;        // çok oyunculu istemci: yapay zekâ çalışmaz, sunucu verisi gösterilir
     this.ag = null;           // ağ kancaları
     this.dinleyici = null;    // çok oyunculuda seslerin uzaklığa göre kısılması için yerel oyuncunun konumu
+    /* 0.44.0: yol bulma (karede sınırlı sayıda arama) */
+    this.yolBulucu = new YolBulucu(this.dunya); this.kare = 0; this.yolButce = 0;
     this.okSira = 0;
   }
   /* Ses düzeyi: çok oyunculuda dinleyiciye uzaklığa göre azalır (tek oyunculuda her zaman 1) */
@@ -78,6 +82,7 @@ export class Varliklar {
       hasarZaman: 0, saldiriBek: 0, ofkeli: false, olu: false, olumZaman: 0, faz: 0, sesZaman: 3 + Math.random() * 10,
       isik: 1, isikSayac: 0, yaniyor: false, yanmaSayac: 0, zipSayac: 0, sikisma: 0, renk
     };
+    if (tur.boss) v.ev = { x, y, z };   // 0.44.0: boss yuvası (uzaklaşınca döner)
     m.kok.position.copy(v.konum);
     if (m.kollar.length && !m.insan && !tur.uzak) for (const k of m.kollar) k.rotation.x = Math.PI / 2 * 0.92;
     this.grup.add(m.kok);
@@ -195,7 +200,9 @@ export class Varliklar {
     /* 0.22.0: Kanlı Ay: iki kat canavar, meşaleler daha az korur */
     const kanli = !!ctx.kanliAy;
     const zc = ctx.zorlukCanavar || 1;   // 0.23.0: zorluk
-    const sinir = Math.round((kanli ? Math.min(32, 2 * (5 + ctx.gunSayisi)) : Math.min(18, 5 + ctx.gunSayisi)) * zc);
+    /* 0.44.0: ilk geceler daha sakin (1. gece 4, 5. gece 10), 10. geceden sonra 18 */
+    const egri = Math.min(18, 2.5 + 1.5 * ctx.gunSayisi);
+    const sinir = Math.round((kanli ? Math.min(32, 2 * egri + 4) : egri) * zc);
     if (zombi < (gece ? sinir : Math.ceil(sinir / 2))) {
       for (let deneme = 0; deneme < 6; deneme++) {
         const a = Math.random() * Math.PI * 2, r = 20 + Math.random() * 26;
@@ -266,6 +273,7 @@ export class Varliklar {
     this.dogurSayac -= dt;
     if (this.dogurSayac <= 0) { this.dogurSayac = C[0] && C[0].kanliAy ? 0.6 : 1.2; if (!this.dogurmaKapali) for (const c of C) this.dogur(c); }
     this.kovanlariGuncelle(dt, C);
+    this.kare++; this.yolButce = 3; this.yolBulucu.temizle(this.kare);
     for (let i = this.liste.length - 1; i >= 0; i--) {
       const v = this.liste[i];
       /* Yapay zekâ en yakın canlı oyuncuya göre, kaybolma en yakın oyuncuya göre */
@@ -347,17 +355,31 @@ export class Varliklar {
         }
       }
     }
+    /* 0.44.0: av hayvanları yakındaki yabani kurttan kaçar */
+    if (AV.has(v.turAd) && !v.sahip) {
+      v.avSayac = (v.avSayac || 0) - dt;
+      if (v.avSayac <= 0) {
+        v.avSayac = 0.8 + Math.random() * 0.5;
+        for (const w of this.liste) if (w.turAd === 'kurt' && !w.olu && !w.sahip && w.konum.distanceToSquared(p) < 64) { v.kacZaman = 3; v.kacKaynak = { x: w.konum.x, z: w.konum.z }; v.kacYon = null; break; }
+      }
+    }
     const sadik = v.sahip && T.sadik ? this.sadikAI(v, dt) : null;
     if (sadik) { [yx, yz, hiz, kovaliyor] = sadik; v.hedef = null; v.kacZaman = 0; }
-    else if (saldirgan && !ctx.oyuncuOlu && yatay < (T.gorus || 20) && Math.abs(dy) < 10) {
+    else if (saldirgan && !ctx.oyuncuOlu && !(v.kacti && v.kacZaman > 0) && this.algila(v, ctx, dt, yatay, dy)) {
       kovaliyor = true;
       if (yatay > 0.01) { yx = dx / yatay; yz = dz / yatay; }
       hiz = yatay > 0.7 ? T.kosu : 0;
+      /* 0.44.0: görmüyorsa ya da arada engel/yükseklik farkı varsa yol bulunur; birkaç canavar oyuncuyu çevreler */
+      const yon = this.kovalamaYonu(v, ctx, yatay, dy, dt);
+      if (yon) { [yx, yz] = yon; if (yon[2]) hiz = T.kosu; }
       if (T.uzak) {
-        /* Okçu: uygun mesafede durur, görüş varsa ok atar */
-        const gor = this.gorusVar(p.x, p.y + 1.6, p.z, op.x, op.y + 1.4, op.z);
-        if (yatay < 6) { yx = -yx; yz = -yz; hiz = T.hiz * 1.4; }
-        else if (yatay < 13 && gor) hiz = 0;
+        /* Okçu: uygun mesafede durur, görüş varsa ok atar (0.44.0: nişan alırken yana adım atar) */
+        const gor = v.gorur;
+        if (yatay < 6) { yx = -dx / (yatay || 1); yz = -dz / (yatay || 1); hiz = T.hiz * 1.4; }
+        else if (yatay < 13 && gor) {
+          v.yanAdim = (v.yanAdim ?? (Math.random() < 0.5 ? 1 : -1)); if (Math.random() < dt * 0.4) v.yanAdim = -v.yanAdim;
+          yx = -dz / yatay * v.yanAdim; yz = dx / yatay * v.yanAdim; hiz = T.hiz * 0.7;
+        }
         if (gor && yatay < T.menzil && v.saldiriBek <= 0 && !v.yt) { v.saldiriBek = 1.6 + Math.random() * 1.2; this.mobOkAt(v, ctx); }
         v.nisan = gor && yatay < T.menzil;
         /* Germe: atıştan önceki 1,2 saniyede yay gerilir */
@@ -366,6 +388,8 @@ export class Varliklar {
         const temas = yatay < T.menzil + T.gen + 0.3 && op.y < p.y + T.boy && op.y + 1.8 > p.y;
         /* 0.30.5: yakın saldırı yalnızca arada engel yokken (kapalı kapı, çit, cam, duvar araya girer) */
         if (temas && v.saldiriBek <= 0 && !v.yt && this.yakinErisim(v, op)) { v.saldiriBek = 1.0; ctx.oyuncuyaVur(T.hasar, v); }
+        /* 0.44.0: canı çok azalan haydut, örümcek ve kurt bir süre kaçar */
+        if (T.kacar && !v.kacti && v.can < T.can * 0.25) { v.kacti = true; v.kacZaman = 3.5; v.kacKaynak = { x: op.x, z: op.z }; v.karar = 0; v.kacYon = null; }
         /* Örümcek atılır */
         if (T.agu && v.yerde && yatay > 1.6 && yatay < 4 && v.saldiriBek < 0.4 && Math.random() < dt * 3) { v.hiz.y = 5.8; v.hiz.x = yx * 7; v.hiz.z = yz * 7; }
       }
@@ -381,11 +405,19 @@ export class Varliklar {
       v.hedef = null; v.karar = 0.5;
     } else {
       if (v.karar <= 0) {
-        v.karar = 2 + Math.random() * 5;
-        if (Math.random() < 0.38) v.hedef = null;
+        /* 0.44.0: hayvanlar gece çoğunlukla dinlenir; dolaşırken sürüden fazla uzaklaşmaz */
+        const dinlen = !T.dusman && !T.koylu && ctx.gunIsigi < 0.3;
+        v.karar = (dinlen ? 7 : 2) + Math.random() * 5;
+        if (Math.random() < (dinlen ? 0.85 : 0.38)) v.hedef = null;
         else {
-          const a = Math.random() * Math.PI * 2, r = 3 + Math.random() * 8;
-          const hx = Math.floor(p.x + Math.cos(a) * r), hz = Math.floor(p.z + Math.sin(a) * r);
+          let mx = p.x, mz = p.z;
+          if (!T.dusman && T.grup) {
+            let sx = 0, sz = 0, n = 0;
+            for (const w of this.liste) if (w !== v && w.turAd === v.turAd && !w.olu && w.konum.distanceToSquared(p) < 196) { sx += w.konum.x; sz += w.konum.z; n++; }
+            if (n && Math.hypot(sx / n - p.x, sz / n - p.z) > 5) { mx = sx / n; mz = sz / n; }
+          }
+          const a = Math.random() * Math.PI * 2, r = 3 + Math.random() * (mx === p.x ? 8 : 3);
+          const hx = Math.floor(mx + Math.cos(a) * r), hz = Math.floor(mz + Math.sin(a) * r);
           const zem = this.dunya.yuklu(hx, hz) ? this.zeminBul(hx, hz) : null;
           v.hedef = zem && Math.abs(zem.y - p.y) <= 3 ? { x: hx + 0.5, z: hz + 0.5 } : null;
         }
@@ -394,6 +426,16 @@ export class Varliklar {
         const hx = v.hedef.x - p.x, hz = v.hedef.z - p.z, l = Math.hypot(hx, hz);
         if (l < 0.6) v.hedef = null; else { yx = hx / l; yz = hz / l; hiz = T.hiz; }
       }
+    }
+    /* 0.44.0: boss yuvasından 30 bloktan fazla uzaklaşmaz; kovalamıyorken yuvasına döner, bir süre dinlenince yavaşça iyileşir */
+    if (T.boss && v.ev && !v.bekci) {
+      const ex = v.ev.x - p.x, ez = v.ev.z - p.z, el = Math.hypot(ex, ez);
+      if (kovaliyor && el > 30) { kovaliyor = false; v.farkinda = 0; }
+      if (!kovaliyor) {
+        if (el > 2.5) { const y = this.yolIzle(v, v.ev, dt); if (y) [yx, yz] = y; else { yx = ex / el; yz = ez / el; } hiz = T.hiz * 1.3; v.hedef = null; }
+        v.dinlen = (v.dinlen || 0) + dt;
+        if (v.dinlen > 6 && v.can < T.can) v.can = Math.min(T.can, v.can + T.can * 0.03 * dt);
+      } else v.dinlen = 0;
     }
     /* Uçurumdan kaçın (kovalamıyorken) */
     if (hiz > 0 && !kovaliyor && v.yerde) {
@@ -1257,6 +1299,8 @@ export class Varliklar {
     if (o.oyuncu && v.sahip && v.sahip === (o.vuran ? o.vuran.ad : this.yerelAd)) return false;
     v.can -= n;
     v.hasarZaman = 0.45;
+    /* 0.44.0: vurulan canavar saldıranın farkına varır */
+    if (o.oyuncu || kaynak) { v.farkinda = 10; if (kaynak) v.sonGorulen = { x: kaynak.x, y: kaynak.y ?? v.konum.y, z: kaynak.z }; }
     /* 0.40.5: olay kaydı */
     const kaynakAd = o.oyuncu ? (o.vuran ? o.vuran.ad : 'oyuncu') : o.dusme ? 'düşme' : kaynak ? 'saldırı' : v.lavda ? 'lav' : v.yaniyor ? 'yanma' : 'çevre';
     if (this.kayit) this.kayit('savas', 'Canlı hasar aldı', { seviye: v.tur.boss ? 'bilgi' : 'ayrinti', alan: { hedef: v.tur.ad, miktar: Math.round(n), kaynak: kaynakAd, can: `${Math.max(0, Math.ceil(v.can))}/${v.tur.can}` } });
@@ -1328,6 +1372,74 @@ export class Varliklar {
       return true;
     };
     return yol(p.y + Math.min(h * 0.75, 1.4), op.y + 1.3) || yol(p.y + Math.min(h * 0.3, 0.6), op.y + 0.5);
+  }
+  /* 0.44.0: algı. Canavar oyuncuyu görüş menzilinde ve görüş hattı açıkken görür (eğilen oyuncuyu daha yakından), gürültüsünü
+     duyar (koşmak, kazmak, savaşmak duyulur; eğilerek yürümek neredeyse duyulmaz) ya da vurulunca fark eder. Fark ettikten sonra
+     oyuncuyu bir süre (8 saniye) izler; görmediği sürece son gördüğü yere gider. Kanlı Ay'da menzil artar. */
+  algila(v, ctx, dt, yatay, dy) {
+    const T = v.tur, p = v.konum, op = ctx.oyuncu.konum;
+    const kanli = ctx.kanliAy ? 1.4 : 1, gorusM = (T.gorus || 20) * kanli * (ctx.egiliyor ? 0.55 : 1);
+    v.farkinda = (v.farkinda || 0) - dt;
+    v.algiSayac = (v.algiSayac || 0) - dt;
+    if (v.algiSayac <= 0) {
+      v.algiSayac = 0.25 + Math.random() * 0.15;
+      v.gorur = false;
+      if (yatay < gorusM && Math.abs(dy) < 12) {
+        const gy = p.y + Math.min(T.boy * 0.85, 1.6);
+        v.gorur = this.gorusVar(p.x, gy, p.z, op.x, op.y + 1.5, op.z) || this.gorusVar(p.x, gy, p.z, op.x, op.y + 0.4, op.z);
+      }
+      const duyma = (ctx.gurultu ?? 7) * kanli;
+      const duyar = yatay < duyma && Math.abs(dy) < 6;
+      if (v.gorur || duyar) { v.farkinda = 8; v.sonGorulen = { x: op.x, y: op.y, z: op.z }; }
+    }
+    if (v.farkinda <= 0) { v.sonGorulen = null; v.kusatAci = null; return false; }
+    /* Görmediği oyuncunun son görüldüğü yere varıp kimseyi bulamayınca ilgisi daha çabuk söner */
+    if (!v.gorur && v.sonGorulen && Math.hypot(v.sonGorulen.x - p.x, v.sonGorulen.z - p.z) < 1.5) v.farkinda = Math.min(v.farkinda, 2.5);
+    return yatay < (T.gorus || 20) * 2 && Math.abs(dy) < 16;
+  }
+  /* 0.44.0: kovalama yönü: [yx, yz, koş] ya da null (düz yürünür). Görüş yoksa, yükseklik farkı varsa ya da önü kapalıysa yol bulunur.
+     Birden çok yakın dövüşçü canavar oyuncuyu farklı yönlerden çevreler. */
+  kovalamaYonu(v, ctx, yatay, dy, dt) {
+    const T = v.tur, p = v.konum, op = ctx.oyuncu.konum;
+    const hedef = v.gorur || !v.sonGorulen ? op : v.sonGorulen;
+    let tx = hedef.x, tz = hedef.z;
+    /* Çevreleme: yakın dövüşçü, görüyor, 3-10 blok uzakta ve yakında başka kovalayan varsa kendi açısına yönelir */
+    if (!T.uzak && !T.boss && v.gorur && yatay > 1.4 && yatay < 10) {
+      let es = 0; for (const w of this.liste) if (w !== v && !w.olu && w.farkinda > 0 && w.tur.dusman && !w.tur.uzak && w.konum.distanceToSquared(op) < 144) es++;
+      if (es >= 1) {
+        /* her canavar kendi yaklaşma yönüne göre farklı bir açıya kayar (0, ±70°, ±140°): oyuncu iki-üç yönden sarılır */
+        if (v.kusatAci == null) v.kusatAci = Math.atan2(p.z - tz, p.x - tx) + [0, 1.2, -1.2, 2.4, -2.4][v.id % 5];
+        const aci = v.kusatAci;
+        const r = Math.min(2.6, yatay - 0.8), ax = tx + Math.cos(aci) * r, az = tz + Math.sin(aci) * r;
+        if (!this.kati(ax, op.y + 0.5, az)) { tx = ax; tz = az; }
+      }
+    }
+    if (T.tirmanir || T.ucar) { const l = Math.hypot(tx - p.x, tz - p.z) || 1; return [(tx - p.x) / l, (tz - p.z) / l]; }
+    const direkt = v.gorur && Math.abs(dy) < 1.3 && !(v.sikisma > 0.4);
+    if (direkt && yatay < 14) { v.yol = null; const l = Math.hypot(tx - p.x, tz - p.z) || 1; return [(tx - p.x) / l, (tz - p.z) / l]; }
+    return this.yolIzle(v, hedef, dt);
+  }
+  /* 0.44.0: hedefe giden yolu izler: [yx, yz, true] ya da null. Yol, hedef 2,5 bloktan fazla kayınca ya da süre dolunca yenilenir */
+  yolIzle(v, hedef, dt) {
+    const T = v.tur, p = v.konum;
+    v.yolSayac = (v.yolSayac || 0) - dt;
+    const kay = v.yolHedef ? Math.hypot(v.yolHedef.x - hedef.x, v.yolHedef.z - hedef.z) + Math.abs(v.yolHedef.y - hedef.y) : 99;
+    if ((!v.yol || !v.yol.length || kay > 2.5 || v.yolSayac <= 0) && this.yolButce > 0) {
+      this.yolButce--;
+      v.yolSayac = 0.9 + Math.random() * 0.4;
+      v.yol = this.yolBulucu.bul(p.x, p.y, p.z, hedef.x, hedef.y, hedef.z, T.boy);
+      v.yolHedef = { x: hedef.x, y: hedef.y, z: hedef.z };
+    }
+    const Y = v.yol;
+    while (Y && Y.length) {
+      const [wx, wy, wz] = Y[0], ex = wx + 0.5 - p.x, ez = wz + 0.5 - p.z;
+      if (ex * ex + ez * ez < 0.2 && Math.abs(wy - p.y) < 1.2) { Y.shift(); continue; }
+      const l = Math.hypot(ex, ez) || 1;
+      /* bir basamak yukarıdaki noktaya yaklaşınca zıplanır */
+      if (wy > p.y + 0.5 && v.yerde && l < 1.3 && !this.carpisiyor(v, p.x, p.y + 1.1, p.z)) v.hiz.y = Math.max(v.hiz.y, 8.2);
+      return [ex / l, ez / l, true];
+    }
+    return null;
   }
   gorusVar(ax, ay, az, bx, by, bz) {
     const d = Math.hypot(bx - ax, by - ay, bz - az), n = Math.ceil(d / 0.5);

@@ -1,5 +1,5 @@
 /* HungerMan - genel sabitler (ana iş parçacığı ve işçiler ortak kullanır) */
-export const SURUM = '0.43.0';
+export const SURUM = '0.44.0';
 
 /* Parça (chunk) boyutları: 16 x 16 taban, 256 yükseklik (0.41.0; önceden 128) */
 export const PB = 16;            // parça kenarı

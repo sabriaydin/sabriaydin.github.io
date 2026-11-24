@@ -2,6 +2,17 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.44', b: 'Yapay zekâ', y: [
+  { s: '0.44.0', b: 'Daha akıllı canavarlar', m: [
+    'Canavarlar artık duvarın arkasındaki oyuncuyu sezmiyor. Sizi ya görüyor ya da duyuyor. Eğilerek yürürseniz yanından geçebilirsiniz, koşarsanız duyarlar.',
+    'Yol buluyorlar: duvarın etrafından dolanıyor, basamakları zıplayarak çıkıyorlar. Kapalı kapıdan geçemiyorlar.',
+    'Birkaç zombi birden gelirse sizi farklı yönlerden sarıyor. İskeletler nişan alırken yana kayıyor.',
+    'Canı azalan haydut, örümcek ve kurt kaçmaya başlıyor.',
+    'Hayvanlar sürüsünden ayrılmıyor, gece dinleniyor ve kurtlardan kaçıyor.',
+    'Bosslar sizi yuvalarından çok uzağa kovalamıyor; kaçarsanız geri dönüp iyileşiyorlar.',
+    'İlk geceler biraz daha sakin, canavarlar günler geçtikçe çoğalıyor.'
+  ]}
+]},
 { g: '0.43', b: 'Hareket', y: [
   { s: '0.43.0', b: 'Fizik ve hareket', m: [
     'Tuşu bırakınca karakter artık kayıp gitmiyor, net duruyor. Havada ise hızınız korunuyor.',

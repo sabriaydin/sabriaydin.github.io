@@ -119,6 +119,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 44.0 (0.44.0): Canlılar ve yapay zekâ (geliştirme planı 3. aşama)
+- **Yol bulma (`js/varlik/yol.js`):** canavarlar artık oyuncuya düz çizgide yürümez; görüş yoksa, arada yükseklik farkı ya da engel varsa A* ile yol bulur. Duvarların etrafından dolanır, bir blokluk basamakları zıplayarak çıkar, en çok üç blok aşağı iner, lavdan geçmez, suyu son çare olarak kullanır. Kapı, çit ve cam gibi biçimli bloklar çarpışma kutularıyla hesaba katılır (kapalı kapıdan geçilmez). Ulaşılamayan hedefte en çok yaklaşılan noktaya gidilir. Arama sınırlıdır (en çok 520 hücre, 30 blok yarıçap, karede en çok 3 arama).
+- **Algı:** canavarlar önceden duvarların arkasından da oyuncuyu "biliyordu". Artık oyuncuyu görüş menzilinde ve görüş hattı açıkken görür, gürültüsünü duyar ya da vurulunca fark eder; fark ettikten sonra 8 saniye izler, görmediği sürece son gördüğü yere gider ve orada kimseyi bulamazsa vazgeçer.
+  - Gürültü: dururken 4, yürürken 7, koşarken 12, kazarken ya da vururken 10 blok; eğilerek yürürken 2,5 blok (eğilen oyuncu kazarken 6). Eğilen oyuncu %45 daha yakından görülür.
+  - Kanlı Ay'da görme ve duyma menzili %40 artar.
+- **Çevreleme:** oyuncuyu birden çok yakın dövüşçü canavar kovalarken her biri kendi yaklaşma yönüne göre farklı bir açıya (0, ±70°, ±140°) kayar; oyuncu iki-üç yönden sarılır.
+- **Okçular** nişan alırken yana adım atar (sabit hedef olmazlar).
+- **Geri çekilme:** canı dörtte birin altına inen haydut, mağara örümceği ve öfkeli kurt bir kez 3,5 saniye kaçar.
+- **Hayvanlar:** sürüden fazla uzaklaşmaz (dolaşırken sürünün ortasına döner), gece çoğunlukla dinlenir; inek, koyun, domuz, tavuk, tavşan ve at yakındaki yabani kurttan kaçar.
+- **Bosslar** yuvalarından 30 bloktan fazla uzaklaşmaz; oyuncu kaçınca yuvalarına döner ve 6 saniye dinlendikten sonra yavaşça iyileşir (saniyede canının %3'ü). Kül Devi kendi ada kuralına bağlı kalır.
+- **Canavar sayısı:** ilk geceler daha sakin: yakındaki canavar sınırı 1. gece 4, 5. gece 10, 10. geceden sonra 18 (önceden 1. gece 6). Kanlı Ay ve zorluk çarpanları sürer.
+- **Sınama:** havada kurulan alanda duvarın arkasındaki oyuncuya dolanarak ulaşma, üç basamaklı kuleye çıkma, duvar arkasında eğilen oyuncuyu fark etmeme ve koşanı duyma, dört zombinin oyuncuyu farklı yönlerden (−177°, −122°, −64°, 121°) sarması, koyunun kurttan kaçması ve Firavun'un yuvasına dönmesi ölçüldü; uzun oturum taraması tekrarlandı.
+
 ## 43.0 (0.43.0): Fizik ve hareket (geliştirme planı 2. aşama)
 - **Hareket:** yerde hızlanma ve durma ayrıldı; tuş bırakılınca daha çabuk ve kararlı durulur (yürürken yaklaşık 0,2 blok). Havada tuşa basılmıyorsa hız korunur (önceden havada kendiliğinden yavaşlanıyordu).
 - **Koşarak zıplama:** bakılan yöne küçük bir hız eklenir; koşarak yaklaşık 4,5 blok atlanır.

@@ -1220,8 +1220,12 @@ function adim(t) {
     else { o.etkilesim.ilerleme = 0; sahne.secimGoster(o.etkilesim.isin(o.oyuncu.gozKonumu(), o.oyuncu.bakisYonu())); }
     const eldeki = o.envanter.seciliId();
     o.olta.guncelle(dt, !!ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'olta' && !o.hayatta.olu, o.isik);
+    /* 0.44.0: oyuncunun çıkardığı gürültü (canavarların duyma uzaklığı, blok): eğilerek yürümek sessiz, koşmak ve kazmak/vurmak gürültülü */
+    const OY = o.oyuncu, yuruyor = Math.hypot(OY.hiz.x, OY.hiz.z) > 0.6;
+    let gurultu = OY.egiliyor ? 2.5 : yuruyor ? (OY.kosuyor ? 12 : 7) : 4;
+    if (fare.sol && kilitli) gurultu = Math.max(gurultu, OY.egiliyor ? 6 : 10);
     varlikGuncelle(o, dt, {
-      oyuncu: o.oyuncu, ad: ayar.ad, oyuncuOlu: o.hayatta.olu || !!o.izleyici, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
+      oyuncu: o.oyuncu, ad: ayar.ad, gurultu, egiliyor: OY.egiliyor, oyuncuOlu: o.hayatta.olu || !!o.izleyici, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
       firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(), kanliAy: o.gok.kanliAyMi(o), zorlukCanavar: o.Z ? o.Z.canavar : 1,
       oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n + (v.kanli ? 1 : 0), v.turAd, v.tur.agu, k.x, k.z); },
       okTopla: () => { const k = o.envanter.ekle(287, 1); if (!k) ses.topla(); return !k; }
