@@ -1003,6 +1003,12 @@ E37('havaiFisek', { ad: 'Havai Fişek', simge: 'fisek', yigin: 16, ozellik: 'Sa�
 export const ESYA39 = {};
 ESYA39.anahtar = ayir(1);
 esya(ESYA39.anahtar, { ad: 'Büyülü Anahtar', simge: 'anahtar', yigin: 16, nadir: true, ozellik: 'Lanetli Ada’daki kadim geçide ya da diyardaki dönüş kapısına sağ tıklanınca iki geçidi 30 dakika açar · Tek kullanımlık' });
+/* 0.45.0: özel oklar (yay hızlı erişim çubuğundaysa ilk sıradaki özel ok atılır; yoksa sıradan ok) */
+export const ESYA45 = {};
+ESYA45.atesOk = ayir(1); ESYA45.zehirOk = ayir(1);
+esya(ESYA45.atesOk, { ad: 'Ateşli Ok', simge: 'ok', renk: '#ff7a2a', ozellik: 'Vurduğu canlıyı tutuşturur · Hızlı erişim çubuğundayken yayla önce bu ok atılır' });
+esya(ESYA45.zehirOk, { ad: 'Zehirli Ok', simge: 'ok', renk: '#6fcf3a', ozellik: 'Vurduğu canlıyı 6 saniye zehirler · Hızlı erişim çubuğundayken yayla önce bu ok atılır' });
+export const OKLAR = [287, ESYA45.atesOk, ESYA45.zehirOk];
 yemek(486, 'Ayran', { simge: 'iksir', renk: '#f4f4ee', yemek: 3, kap: 331 }, 'hiz', 30);
 yemek(487, 'Kek', { simge: 'kek', yemek: 12 }, 'tokluk', 120);
 yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });

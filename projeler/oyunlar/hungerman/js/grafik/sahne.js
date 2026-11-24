@@ -492,6 +492,9 @@ export class Sahne {
     let px = 0.42 + yx - g * 0.22 - y * 0.3, py = -0.38 - yy + nefes - g * -0.12 - d * 0.35 + y * 0.12 + ym, pz = -0.62 + g * 0.08 + y * 0.12;
     let rx = g >= 1 ? Math.sin(t * 25) * 0.01 : 0, ry = g * 0.5 + y * 0.6, rz = g * 0.4 - y * 0.3;
     if (this.elTur === 'alet') { px -= ke * 0.12; py += ke * 0.06 - s * 0.05; pz -= ke * 0.12; rx -= ke * 1.25; ry -= ke * 0.35; rz += ke * 0.5; }
+    /* 0.45.0: savunma duruşu: silah ekranın ortasında yatay tutulur */
+    this.elSav = (this.elSav || 0) + ((ek.savunma ? 1 : 0) - (this.elSav || 0)) * Math.min(1, dt * 14);
+    if (this.elTur === 'alet' && this.elSav > 0.002) { const e = this.elSav * this.elSav * (3 - 2 * this.elSav); px -= 0.24 * e; py += 0.12 * e; pz += 0.04 * e; rx += 0.25 * e; ry += 0.55 * e; rz += 1.2 * e; }
     else if (this.elTur === 'blok' || this.elTur === 'esya') { px -= ke * 0.06; py -= s * 0.06; pz -= ke * 0.16; rx -= ke * 0.55; ry -= ke * 0.2; }
     else { px -= ke * 0.05; py -= s * 0.05; pz -= ke * 0.2; rx -= ke * 0.7; }
     this.el.position.set(px, py, pz);

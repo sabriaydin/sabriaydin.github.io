@@ -62,6 +62,14 @@ export class Oyuncu {
     return bx + 1 > p.x - YARIM && bx < p.x + YARIM && bz + 1 > p.z - YARIM && bz < p.z + YARIM && by + 1 > p.y && by < p.y + this.boy;
   }
 
+  /* 0.45.0: yana ya da geriye atılma (yön tuşuna iki kez hızlıca basılınca). Kısa süre yakın dövüş saldırılarından kaçılır */
+  atil(yx, yz) {
+    if (!this.yerde || this.atilBekle > 0 || this.suda || this.ucus || this.egiliyor) return false;
+    const l = Math.hypot(yx, yz) || 1;
+    this.hiz.x = yx / l * 10.5; this.hiz.z = yz / l * 10.5; this.hiz.y = 3.4;
+    this.itme = 0.2; this.kacis = 0.3; this.atilBekle = 1.1;
+    return true;
+  }
   /* 0.43.0: geri itme: kaynaktan uzağa savrulma; güç vuruşun ağırlığına göre */
   geriIt(kx, kz, guc = 1) {
     const p = this.konum, dx = p.x - kx, dz = p.z - kz, l = Math.hypot(dx, dz) || 1;
@@ -100,7 +108,7 @@ export class Oyuncu {
     else this.egiliyor = egilIstek;
 
     const ileri = (g.ileri ? 1 : 0) - (g.geri ? 1 : 0), yan = (g.sag ? 1 : 0) - (g.sol ? 1 : 0);
-    this.kosuyor = g.kos && ileri > 0 && !this.egiliyor && g.kosabilir;
+    this.kosuyor = g.kos && ileri > 0 && !this.egiliyor && g.kosabilir && !this.savunma;
     let hizMax = this.egiliyor ? 1.35 : this.kosuyor ? 5.7 : 4.3;
     /* Palet: suda hızlandırır, karada biraz yavaşlatır */
     if (this.suda) hizMax = (this.kosuyor ? 3.2 : 2.3) * (g.palet ? 1.65 : 1);
@@ -110,6 +118,7 @@ export class Oyuncu {
     this.agda = !this.ucus && (BLOKLAR[vucut] && BLOKLAR[vucut].ag || BLOKLAR[d.blok(Math.floor(p.x), Math.floor(p.y + 1.3), Math.floor(p.z))]?.ag);
     if (this.agda) hizMax = 0.6;
     if (this.ucus) hizMax = (this.kosuyor || g.kos ? 16 : 9);
+    if (this.savunma && !this.ucus) hizMax *= 0.45;   // 0.45.0: savunurken yavaş yürünür
     hizMax *= this.hizCarpani;
     if (!this.ucus && !this.suda) hizMax *= this.etkiHiz;
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
@@ -132,6 +141,7 @@ export class Oyuncu {
     const ziplaBas = !!g.zipla && !this._ziplaOnce; this._ziplaOnce = !!g.zipla;
     this.ziplaTampon = ziplaBas ? 0.15 : Math.max(0, this.ziplaTampon - dt);
     this.itme = Math.max(0, this.itme - dt);
+    this.kacis = Math.max(0, (this.kacis || 0) - dt); this.atilBekle = Math.max(0, (this.atilBekle || 0) - dt);
     if (this.ucus) {
       /* Uçma: Boşluk yükselir, C alçalır; yer çekimi ve düşme hasarı yoktur */
       const hedefY = ((g.zipla ? 1 : 0) - (g.egil ? 1 : 0)) * 9 * this.hizCarpani;

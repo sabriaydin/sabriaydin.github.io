@@ -119,6 +119,29 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 45.0 (0.45.0): Savaş (geliştirme planı 4. aşama)
+- **Silah profilleri** (`SILAHLAR`, `js/oyun/etkilesim.js`): önceden bütün silahların vuruş arası 0,5 saniye ve erişimi 3,6 bloktu. Artık her silahın temposu, erişimi, itmesi ve özelliği ayrıdır:
+
+  | Silah | Vuruş arası | Erişim | İtme | Özelliği |
+  | --- | --- | --- | --- | --- |
+  | El | 0,4 sn | 3,2 | 0,8 | |
+  | Kılıç | 0,55 sn | 3,6 | 1 | Yerdeyken ve koşmuyorken yandaki düşmanlara %35 süpürme |
+  | Hançer | 0,38 sn | 3,0 | 0,6 | Fark etmemiş ya da arkası dönük canlıya 2 kat (boss hariç) |
+  | Mızrak | 0,85 sn | 4,7 | 1,3 | Uzun erişim |
+  | Savaş Çekici | 1,15 sn | 3,4 | 2,1 | Hedefin çevresine %50 hasar, sarsıntı |
+  | Balta | 0,8 sn | 3,4 | 1,3 | |
+  | Kazma / Kürek | 0,65 / 0,6 sn | 3,5 | 0,9 | |
+
+- **Denge (saniyedeki hasar, tek hedef):** demir kılıç 12,7, elmas kılıç 14,5, obsidyen kılıç 16,4, hançer 13,2 (sırttan 26,3), mızrak 9,4, savaş çekici 8,3 (+ alan), demir balta 7,5. Silahların vuruş hasarları değişmedi.
+- **Vuruş hissi:** isabette çok kısa zaman yavaşlaması (hafif silahta 0,03, çekiçte 0,08 saniye; kritik ve sırttan vuruşta uzun), kıvılcım; ağır ve kritik vuruş daha tok duyulur; çekiç kamerayı sarsar. Çok oyunculuda dünya yavaşlatılmaz.
+- **Saldırı hazırlığı:** yakın dövüşçü canavarlar vurmadan önce kısa bir hazırlık yapar (0,38 saniye, örümcek 0,22, boss 0,45; kollu canavarlarda kollar kalkar). Hazırlık bitince hedef hâlâ menzildeyse vurulur, yoksa savrulma boşa gider.
+- **Savunma:** elde kılıç, hançer, mızrak, çekiç ya da balta varken kullanılacak bir şeye bakmadan sağ tık basılı tutulur; silah ekranın ortasında yatay tutulur. Önden (±75°) gelen yakın ve ok saldırılarının hasarı %65 azalır, silah yıpranır; savunurken yavaş yürünür, koşulamaz ve saldırılamaz. Saldırıdan en çok 0,3 saniye önce başlayan savunma **savuşturma** olur: hasar alınmaz, saldıran 1,6 saniye sersemler ve geri itilir.
+- **Atılma:** geri, sol ya da sağ yön tuşuna 0,26 saniye içinde iki kez basılınca o yöne atılınır (yaklaşık 2,2 blok); atılmanın ilk 0,3 saniyesinde gelen saldırılar boşa gider. 1,1 saniyede bir yapılabilir, biraz acıktırır.
+- **Özel oklar:** Ateşli Ok (4 ok + 1 kömür, Üretim Masası) vurduğu canlıyı tutuşturur; Zehirli Ok (4 ok + 1 çürük et) 6 saniye boyunca saniyede 1 hasar verir (boss ve iskeletlere yarı hızda). Hızlı erişim çubuğundaki ilk özel ok yayla önce atılır; yoksa sıradan ok, o da yoksa çantadaki özel ok. Tam gerilmiş, ateşli ve zehirli oklar uçarken iz bırakır.
+- **Hasar sayıları:** Ayarlar > Arayüz > "Hasar sayılarını göster" (varsayılan kapalı): vurulan canlının üstünde yükselip kaybolan sayı; kritik ve sırttan vuruş sarı ve büyük.
+- Ayarlar > Kontroller'deki tuş listesine ve sitedeki rehbere savunma, atılma ve silahlar eklendi.
+- **Sınama:** silah profilleri ve hasarları, kılıç süpürmesi (yandakilere 2), hançerin sırttan vuruşu (5 → 10), çekicin alan hasarı (yandakilere 5), saldırı hazırlığı, savunmalı ve savunmasız alınan hasar (3 → 1), savuşturma (hasar 0, saldıran 1,6 sn sersem), atılma (2,2 blok, beklemede tekrar atılamaz), zehirli ve ateşli ok ile hasar sayıları ölçüldü; uzun oturum taraması tekrarlandı.
+
 ## 44.0 (0.44.0): Canlılar ve yapay zekâ (geliştirme planı 3. aşama)
 - **Yol bulma (`js/varlik/yol.js`):** canavarlar artık oyuncuya düz çizgide yürümez; görüş yoksa, arada yükseklik farkı ya da engel varsa A* ile yol bulur. Duvarların etrafından dolanır, bir blokluk basamakları zıplayarak çıkar, en çok üç blok aşağı iner, lavdan geçmez, suyu son çare olarak kullanır. Kapı, çit ve cam gibi biçimli bloklar çarpışma kutularıyla hesaba katılır (kapalı kapıdan geçilmez). Ulaşılamayan hedefte en çok yaklaşılan noktaya gidilir. Arama sınırlıdır (en çok 520 hücre, 30 blok yarıçap, karede en çok 3 arama).
 - **Algı:** canavarlar önceden duvarların arkasından da oyuncuyu "biliyordu". Artık oyuncuyu görüş menzilinde ve görüş hattı açıkken görür, gürültüsünü duyar ya da vurulunca fark eder; fark ettikten sonra 8 saniye izler, görmediği sürece son gördüğü yere gider ve orada kimseyi bulamazsa vazgeçer.

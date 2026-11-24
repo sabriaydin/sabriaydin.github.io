@@ -1,7 +1,7 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37 } from '../bloklar.js';
+import { ESYA45, aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
@@ -64,6 +64,8 @@ t(47, 1, [[49, 3], ['kalas', 3]], 'masa', 'blok');
 t(284, 1, [[267, 3]], null, 'malzeme');
 t(286, 1, [[256, 3], [284, 3]], 'masa', 'savas');
 t(287, 4, [[256, 1], [283, 1], [285, 1]], null, 'savas');
+t(ESYA45.atesOk, 4, [[287, 4], [257, 1]], 'masa', 'savas');   // 0.45.0
+t(ESYA45.zehirOk, 4, [[287, 4], [281, 1]], 'masa', 'savas');
 const ZIRH_ADET = [5, 8, 7, 4];
 ZIRH_MALZEME.slice(0, 4).forEach((m, mi) => ZIRH_ADET.forEach((a, pi) => t(400 + mi * 4 + pi, 1, [[m.mal, a]], 'masa', 'savas')));   // 0.33.0: yeni zırhların tarifleri dosyanın sonunda
 /* Pişirme: kamp ateşi veya fırın */

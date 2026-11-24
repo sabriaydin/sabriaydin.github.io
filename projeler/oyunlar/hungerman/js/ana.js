@@ -199,7 +199,7 @@ function ayarFormu() {
   bag('#aParlak', 'parlaklik', v => Math.round(v * 100) + '%');
   bag('#aOlcek', 'arayuzOlcek', v => Math.round(v * 100) + '%');
   bag('#aArkaSessiz', 'arkaSessiz', null, 'cb'); bag('#aEnerji', 'enerjiPanel', null, 'cb');
-  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
+  bag('#aTers', 'tersY', null, 'cb'); bag('#aSal', 'sallanma', null, 'cb'); bag('#aFps', 'fps', null, 'cb'); bag('#aMini', 'miniHarita', null, 'cb'); bag('#aDokun', 'dokunmatik', null, 'cb'); bag('#aBakilan', 'bakilanAd', null, 'cb'); bag('#aHasarSayi', 'hasarSayilari', null, 'cb'); bag('#aOgretici', 'ogretici', null, 'cb'); bag('#aOnizleme', 'onizleme', null, 'cb');
 }
 /* 0.30.7: tuş atamaları listesi; tıklanan eylem bir sonraki tuşu bekler */
 let tusBekleyen = null;
@@ -229,6 +229,7 @@ function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOn
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
 function ayarUygula() {
   ayarlariKaydet(ayar);
+  if (oyun && oyun.hud) { oyun.hud.hasarSayiAcik = !!ayar.hasarSayilari; if (!ayar.hasarSayilari) oyun.hud.temizleHasarSayilari(); }   // 0.45.0
   sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
   ses.duzeyAyarla(ayar.ses); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
   { const c = COZUNURLUK[ayar.cozunurluk | 0] || COZUNURLUK[0]; if (c[1]) sahne.olcekAyarla(c[1]); }
@@ -362,6 +363,8 @@ addEventListener('keydown', e => {
     if (e.repeat) { tus[e.code] = true; return; }
     tus[e.code] = true;
     if (e.code === T.zipla) ziplaBasildi = true;   // 0.43.0: iki kare arasında basılıp bırakılan zıplama kaybolmaz
+    /* 0.45.0: geri, sol ya da sağ tuşuna iki kez hızlıca basılınca o yöne atılınır */
+    if ([T.geri, T.sol, T.sag].includes(e.code)) { const t = performance.now(); if (t - (ciftTus[e.code] || 0) < 260) { atilIstek = e.code; ciftTus[e.code] = 0; } else ciftTus[e.code] = t; }
     if (e.code === T.ileri) { const t = performance.now(); if (t - sonW < 280) kosKilit = true; sonW = t; }
     /* 0.15.1: Q envanter ve üretim, E nesnelerle etkileşim, G eşya atma */
     if (e.code === T.etkiles && !e.repeat && (envEkrani.acik || koyluEkrani.acik)) { if (envEkrani.acik) envanterAcKapa(); else panelKapat(true); return; }
@@ -618,6 +621,7 @@ function oyunBaslat(v) {
   const hayatta = new Hayatta();
   const dusenler = new Dusenler(sahne, dunya);
   const hud = new Hud(envanter, hayatta);
+  hud.hasarSayiAcik = !!ayar.hasarSayilari;   // 0.45.0
   envEkrani.envanter = envanter; envEkrani.hud = hud; envEkrani.hayatta = hayatta;
   const dogum = v.dogum || dunya.uretici.dogumNoktasi();
   /* Keşif haritası: kayıtlı bölgeler arka planda yüklenir */
@@ -773,6 +777,8 @@ function oyunBaslat(v) {
       const d = dunya.sandiklar.get(k) || (ganimet ? koyler.sandikGanimeti(x, y, z) : []); dunya.sandiklar.delete(k); return d.filter(Boolean);
     }
   } });
+  oyun.etkilesim.arayuz.hasarSayisi = (x, y, z, n, k) => hud.hasarSayisi(x, y, z, n, k);   // 0.45.0
+  varliklar.hasarSayisi = (x, y, z, n, k) => hud.hasarSayisi(x, y, z, n, k);
   oyun.etkilesim.kablolar = oyun.kablolar;
   hayatta.zirhFn = () => envanter.zirhPuani();
   hayatta.buyuFn = k => envanter.zirhBuyu(k);
@@ -1052,6 +1058,7 @@ function oyunBitir() {
   if (tarifKitabi.acik) tarifKitabi.kapat();
   basarimEkrani.temizle();
   oyun.harita.temizle();
+  oyun.hud.temizleHasarSayilari();
   oyun.dusenler.temizle();
   if (oyun.cihazCizici) { oyun.cihazCizici.temizle(); sahne.sahne.remove(oyun.cihazCizici.grup); }
   oyun.varliklar.temizle();
@@ -1082,7 +1089,8 @@ function otoCozunurluk(t) {
   oto.t0 = t; oto.kare = 0;
 }
 const gecici = new THREE.Vector3();
-let ziplaBasildi = false;
+let ziplaBasildi = false, atilIstek = null;
+const ciftTus = {};
 /* 0.42.0: karede çıkan hata konsola ayrıntısıyla yazılır; aynı hata her karede tekrar bildirilmez */
 const kareHatalari = new Map();
 function dongu(t) {
@@ -1105,6 +1113,8 @@ function adim(t) {
   const o = oyun;
   if (!o) { menuKamera(dt); muzik.guncelle(dt, 'menu'); return; }
   if (!o.hazir) { yuklemeKontrol(); if (o.ag) o.ag.guncelle(dt); if (oyun) sahne.ciz(); return; }
+  /* 0.45.0: isabet anında çok kısa zaman yavaşlaması (vuruş hissi); çok oyunculuda dünya yavaşlatılmaz */
+  if (o.etkilesim && o.etkilesim.durak > 0) { o.etkilesim.durak -= dt; if (!o.ag) dt *= 0.15; }
   /* Çok oyunculuda dünya duraklatılmaz (menüdeyken de oyun sürer) */
   const calisiyor = aktifEkran === 'oyun' || (!!o.ag && aktifEkran !== 'yukleme');
   const p = o.oyuncu.konum;
@@ -1150,6 +1160,12 @@ function adim(t) {
       kos: basili(tus, 'kos') || kosKilit, egil: basili(tus, 'egil'), kosabilir: o.hayatta.aclik > 6 && !o.hayatta.etki('kirik')
     } : { kosabilir: false };
     ziplaBasildi = false;
+    if (atilIstek) {
+      const sy = Math.sin(o.oyuncu.yaw), cy = Math.cos(o.oyuncu.yaw);
+      const [ax, az] = atilIstek === T.geri ? [sy, cy] : atilIstek === T.sol ? [-cy, sy] : [cy, -sy];
+      atilIstek = null;
+      if (kilitli && !o.hayatta.olu && o.hayatta.aclik > 3 && !o.tekneler.binilen && !o.binek.biniyor && o.oyuncu.atil(ax, az)) { o.hayatta.yor(0.3); ses.savur(0.6); }
+    }
     const zirh = o.envanter.zirh;
     g.palet = !!(zirh[3] && zirh[3].id === 457);
     /* Tekne: binilirken oyuncu fiziği yerine tekne sürülür; C ile inilir */
@@ -1227,7 +1243,7 @@ function adim(t) {
     varlikGuncelle(o, dt, {
       oyuncu: o.oyuncu, ad: ayar.ad, gurultu, egiliyor: OY.egiliyor, oyuncuOlu: o.hayatta.olu || !!o.izleyici, oyuncuSuda: o.oyuncu.suda, gunIsigi: o.gunIsigi, gunSayisi: o.gun, isik: o.isik,
       firtina: o.hava.firtina && o.hava.yogunluk > 0.5, yagmur: o.hava.yogunluk > 0.3, eldeki: o.envanter.seciliId(), kanliAy: o.gok.kanliAyMi(o), zorlukCanavar: o.Z ? o.Z.canavar : 1,
-      oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n + (v.kanli ? 1 : 0), v.turAd, v.tur.agu, k.x, k.z); },
+      oyuncuyaVur: (n, v, kaynak) => { const k = kaynak || v.konum; yerelHasar(n + (v.kanli ? 1 : 0), v.turAd, v.tur.agu, k.x, k.z, v); },
       okTopla: () => { const k = o.envanter.ekle(287, 1); if (!k) ses.topla(); return !k; }
     }, o.ag && !o.istemci);
     const ekKonumlar = o.ag && !o.istemci ? o.ag.konumlar() : null;
@@ -1325,7 +1341,8 @@ function adim(t) {
   sahne.el.visible = !o.hayatta.olu && !o.fotoModu;
   sahne.elAyarla(seciliId, buyuluMu(o.envanter.seciliYuva()));
   if (o.etkilesim.yemeAnim > 0) o.etkilesim.yemeAnim = Math.max(0, o.etkilesim.yemeAnim - dt * 1.6);
-  sahne.elGuncelle(dt, o.etkilesim.vurus, o.oyuncu.adimFaz, o.isik, o.etkilesim.germe, { yeme: Math.min(1, (o.etkilesim.yemeAnim || 0) * 3), kos: o.oyuncu.kosuyor });
+  sahne.elGuncelle(dt, o.etkilesim.vurus, o.oyuncu.adimFaz, o.isik, o.etkilesim.germe, { yeme: Math.min(1, (o.etkilesim.yemeAnim || 0) * 3), kos: o.oyuncu.kosuyor, savunma: !!o.etkilesim.savunma });
+  o.hud.hasarSayiGuncelle(sahne.kamera, dt, sahne.tuval || tuval);
   const V = o.varliklar;
   /* Bosslar üstteki boss çubuğunda gösterilir */
   const hc = o.etkilesim.hedefCanli || (V.sonVurulanZaman > 0 && V.sonVurulan && !V.sonVurulan.olu ? V.sonVurulan : null);
@@ -1520,10 +1537,32 @@ function tilsimGuncelle(o, dt) {
   ekran('yukleme'); $('#yukleBaslik').textContent = 'Eve dönülüyor'; $('#yukleIpucu').textContent = '';
 }
 /* Canlı veya ok hasarı (çok oyunculu istemcide sunucudan gelir) */
-function yerelHasar(n, turAd, agu, kx, kz) {
+function yerelHasar(n, turAd, agu, kx, kz, saldiran) {
   const o = oyun;
   if (!o) return;
   if (n > 0 && o.Z) n = Math.max(1, Math.round(n * o.Z.hasar));   // 0.23.0: zorluk
+  /* 0.45.0: atılma anında gelen saldırı boşa gider; önden gelen saldırı savunmayla azalır ya da savuşturulur */
+  if (n > 0 && Number.isFinite(kx)) {
+    const OY = o.oyuncu;
+    if (OY.kacis > 0) { o.dusenler.renkliParcacik([0.9, 0.9, 0.9], OY.konum.x, OY.konum.y + 1, OY.konum.z, 4); return; }
+    if (o.etkilesim.savunma) {
+      const ax = kx - OY.konum.x, az = kz - OY.konum.z, bak = Math.atan2(-ax, -az) - OY.yaw, f = Math.abs(Math.atan2(Math.sin(bak), Math.cos(bak)));
+      if (f < 1.3) {
+        const tam = performance.now() - (o.etkilesim.savunmaBas || 0) < 300;
+        ses.savunma(tam);
+        const P = OY.konum, yx = -Math.sin(OY.yaw), yz = -Math.cos(OY.yaw);
+        o.dusenler.renkliParcacik(tam ? [1, 0.95, 0.6] : [0.85, 0.85, 0.85], P.x + yx * 0.7, P.y + 1.3, P.z + yz * 0.7, tam ? 10 : 5);
+        if (o.envanter.aletYipran(1)) { ses.aletKirildi(); o.hud.bildirim("Silahınız kırıldı."); }
+        if (tam) {
+          /* Savuşturma: hasar yok; saldıran sersemler ve geri itilir */
+          if (saldiran && saldiran.hiz && !saldiran.tur.boss && saldiran.konum.distanceToSquared(OY.konum) < 16) { saldiran.saldiriBek = Math.max(saldiran.saldiriBek || 0, 1.6); saldiran.hazirlik = 0; const l = Math.hypot(ax, az) || 1; saldiran.hiz.x = ax / l * 6; saldiran.hiz.z = az / l * 6; saldiran.hiz.y = 3.5; }
+          o.etkilesim.durak = 0.07; o.basarimlar && o.basarimlar.istatEkle && o.basarimlar.istatEkle('savusturma', 1);
+          return;
+        }
+        n = Math.max(1, Math.round(n * 0.35));
+      }
+    }
+  }
   o.hayatta.hasar(n, turAd, true);
   if (agu) o.hayatta.agu = 6;
   /* 0.14.0: mumya açlık, buz iskeleti yavaşlık etkisi verir */

@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37, ESYA39 } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37, ESYA39, ESYA45, OKLAR } from '../bloklar.js';
 import { COKLU, cokluHucreler, cokluCapaKonumu, cokluYerel } from '../coklu.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
@@ -13,6 +13,26 @@ const hexRgb = h => { h = (h || '#ffffff').replace('#', ''); return [0, 2, 4].ma
 const ZEMIN_MEK = { kol: 1, dugme: 1, plaka: 1, tel: 1, ters: 1, gecik: 1 };   // 0.17.0: altındaki blok kırılınca düşen mekanik bloklar
 
 const ERISIM = 5;
+/* 0.45.0: silah profilleri: b bekleme (sn), erim (blok), itme, supur (kılıç: yandakilere vurulan hasarın payı), alan (çekiç: hedefin
+   çevresine), sirt (hançer: arkadan ya da fark edilmeden vurunca hasar çarpanı), durak (isabette kısa zaman yavaşlaması, sn) */
+export const SILAHLAR = {
+  el: { ad: 'El', b: 0.4, erim: 3.2, itme: 0.8, durak: 0.02 },
+  kilic: { ad: 'Kılıç', b: 0.55, erim: 3.6, itme: 1, supur: 0.35, durak: 0.035 },
+  hancer: { ad: 'Hançer', b: 0.38, erim: 3.0, itme: 0.6, sirt: 2, durak: 0.025 },
+  mizrak: { ad: 'Mızrak', b: 0.85, erim: 4.7, itme: 1.3, durak: 0.045 },
+  cekic: { ad: 'Savaş Çekici', b: 1.15, erim: 3.4, itme: 2.1, alan: 0.5, durak: 0.08 },
+  balta: { ad: 'Balta', b: 0.8, erim: 3.4, itme: 1.3, durak: 0.06 },
+  kazma: { ad: 'Kazma', b: 0.65, erim: 3.5, itme: 0.9, durak: 0.03 },
+  kurek: { ad: 'Kürek', b: 0.6, erim: 3.5, itme: 0.9, durak: 0.03 }
+};
+export function silahProfili(id) {
+  const e = ESYALAR[id];
+  if (!e || e.tur !== 'alet' || !e.alet) return SILAHLAR.el;
+  if (id === ESYA37.hancer) return SILAHLAR.hancer;
+  if (id === ESYA37.mizrak) return SILAHLAR.mizrak;
+  if (id === ESYA37.cekic) return SILAHLAR.cekic;
+  return SILAHLAR[e.alet.tur] || SILAHLAR.el;
+}
 const TOPRAK = new Set([3, 4, 45, 137, 138]);   // fidan ve bitki dikilebilen zeminler
 const TARLA = new Set([137, 138]);   // 0.38.4: tohum yalnızca çapalanmış tarlaya ekilir
 /* 0.34.0: ekinin tohumu (evre 0 bloğunu eken eşya) */
@@ -148,7 +168,7 @@ export class Etkilesim {
     const goz = this.oyuncu.gozKonumu(), yon = this.oyuncu.bakisYonu();
     this.hedef = this.isin(goz, yon);
     /* Canlı, bloktan daha yakınsa hedef odur */
-    const vb = this.varliklar ? this.varliklar.isin(goz, yon, 3.6) : null;
+    const vb = this.varliklar ? this.varliklar.isin(goz, yon, silahProfili(this.envanter.seciliId()).erim) : null;
     this.hedefCanli = null;
     if (vb && (!this.hedef || vb.t < this.hedef.t)) { this.hedefCanli = vb.v; this.hedef = null; }
     /* Tekne: en yakın hedefse binme ve kırma */
@@ -217,7 +237,7 @@ export class Etkilesim {
     const yayMi = !!(ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'yay');
     if (yayMi) {
       if (g.sag) {
-        if (this.envanter.say(287) > 0) { if (this.germe === 0) this.ses.yayGer(); this.germe = Math.min(1, this.germe + dt); }
+        if (this.okVar()) { if (this.germe === 0) this.ses.yayGer(); this.germe = Math.min(1, this.germe + dt); }
         else if (this.okUyari <= 0) { this.okUyari = 2; this.arayuz.bildirim('Atılacak ok mevcut değil.'); }
       } else if (this.germe > 0) { if (this.germe > 0.15) this.okAt(goz, yon); this.germe = 0; }
     } else this.germe = 0;
@@ -226,7 +246,7 @@ export class Etkilesim {
     const h = this.hedef;
     if (g.sol && this.hedefCanli) {
       this.ilerleme = 0; this.kirilanAnahtar = '';
-      if (this.saldiriBekleme <= 0) { this.saldir(this.hedefCanli); this.saldiriBekleme = 0.5; this.vurus = 0.01; }
+      if (this.saldiriBekleme <= 0 && !this.savunma) { const S = silahProfili(this.envanter.seciliId()); this.saldir(this.hedefCanli, S); this.saldiriBekleme = S.b; this.saldiriSure = S.b; this.vurus = 0.01; }
     } else if (g.sol && h) {
       /* Kırma */
       const k = h.x + ',' + h.y + ',' + h.z + ',' + h.id;
@@ -248,16 +268,26 @@ export class Etkilesim {
     if (eldeOlta && !blokEtkin) {
       if (sagYeni && this.olta && this.olta.kullan()) this.vurus = 0.01;
     }
-    /* Kullanma / koyma */
+    /* 0.45.0: savunma: elde kılıç, hançer, mızrak, çekiç ya da balta varken sağ tık basılı tutulur (etkileşimli bloğa bakılmıyorsa).
+       Önden gelen yakın ve ok saldırılarının hasarı %65 azalır; saldırıdan hemen önce (0,3 sn içinde) başlayan savunma saldırıyı tamamen
+       savuşturur ve saldıranı sersemletir. Savunurken yavaş yürünür, koşulamaz ve saldırılamaz. */
+    else if (g.sag && !yayMi && this.savunma) { /* savunma sürüyor */ }
+    /* Kullanma / koyma (kullanılacak bir şey yoksa ve elde silah varsa savunmaya geçilir) */
     else if (g.sag && !yayMi && this.sagBekleme <= 0) {
       this.acildi = false;
       if (this.kullan(g)) { this.sagBekleme = this.acildi ? 0.45 : 0.22; this.vurus = 0.01; }
-      else this.sagBekleme = 0.05;
+      else { this.sagBekleme = 0.05; if (sagYeni && this.savunabilir(eldeki)) { this.savunma = true; this.savunmaBas = performance.now(); } }
     }
+    if (!g.sag || yayMi || !this.savunabilir(eldeki)) this.savunma = false;
+    this.oyuncu.savunma = this.savunma;
     this.sahne.secimGoster(this.hedef, this.ilerleme);
   }
+  savunabilir(id) {
+    const S = silahProfili(id);
+    return !(S === SILAHLAR.el || S === SILAHLAR.kazma || S === SILAHLAR.kurek);
+  }
 
-  saldir(v) {
+  saldir(v, S = silahProfili(this.envanter.seciliId())) {
     const a = this.aletBilgi();
     let hasar = a && a.tur !== 'yay' ? a.hasar : 1;
     const es = this.envanter.seciliYuva();
@@ -266,17 +296,45 @@ export class Etkilesim {
     if (this.hayatta.etki('guc')) hasar *= 1.5;
     const o = this.oyuncu;
     const kritik = !o.yerde && !o.suda && o.hiz.y < 0;
-    if (kritik) { hasar *= 1.5; this.dusenler.renkliParcacik([1, 0.9, 0.5], v.konum.x, v.konum.y + v.tur.boy * 0.7, v.konum.z, 8); }
+    if (kritik) { hasar *= 1.5; this.dusenler.renkliParcacik([1, 0.9, 0.5], v.konum.x, v.konum.y + v.tur.boy * 0.7, v.konum.z, 10); }
+    /* 0.45.0: hançerle arkadan ya da fark edilmeden vuruş */
+    let sirttan = false;
+    if (S.sirt && !v.tur.boss) {
+      const ax = o.konum.x - v.konum.x, az = o.konum.z - v.konum.z, bak = Math.atan2(-ax, -az) - v.yaw, f = Math.abs(Math.atan2(Math.sin(bak), Math.cos(bak)));
+      if (!(v.farkinda > 0) || f > 2.1) { sirttan = true; hasar *= S.sirt; this.dusenler.renkliParcacik([0.85, 0.15, 0.15], v.konum.x, v.konum.y + v.tur.boy * 0.6, v.konum.z, 12); }
+    }
     /* Savurma: geri itme seviye başına %60 artar; Yağma: ganimet artar */
-    const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma'));
+    const itme = (o.kosuyor ? 1.5 : 1) * (1 + 0.6 * buyuSeviye(es, 'savurma')) * S.itme;
     /* Güneş Kılıcı vurulan canlıyı tutuşturur */
     if (this.varliklar.hasarVer(v, hasar, o.konum, { itme, oyuncu: true, yagma: buyuSeviye(es, 'yagma') + (this.hayatta.etki('sans') ? 1 : 0), ates: !!(es && (es.id === 458 || (ESYALAR[es.id] && ESYALAR[es.id].yakar))) })) {
       this.ses.vurus();
+      if (kritik || sirttan || S.alan) this.ses.cal('vurus', 1.1, S.alan ? 0.6 : 0.8);   // 0.45.0: ağır ve kritik vuruş daha tok duyulur
       if (a && a.tur !== 'yay' && this.envanter.aletYipran(a.tur === 'kilic' ? 1 : 2)) { this.ses.aletKirildi(); this.arayuz.bildirim('Aletiniz kırıldı.'); }
       this.hayatta.yor(0.1);
+      /* 0.45.0: isabet hissi: kısa zaman yavaşlaması (ağır ve kritik vuruşta daha uzun), kıvılcım */
+      this.durak = Math.max(this.durak || 0, S.durak * (kritik || sirttan ? 1.8 : 1));
+      this.dusenler.renkliParcacik(kritik ? [1, 0.85, 0.4] : [0.95, 0.95, 0.9], v.konum.x, v.konum.y + v.tur.boy * 0.6, v.konum.z, kritik ? 6 : 3);
+      if (this.arayuz.hasarSayisi) this.arayuz.hasarSayisi(v.konum.x, v.konum.y + v.tur.boy + 0.2, v.konum.z, hasar, kritik || sirttan);
+      /* Kılıç süpürmesi (yerde, koşmuyorken) ve çekiç darbesi yakındaki diğer canlılara da vurur */
+      const pay = S.supur && o.yerde && !o.kosuyor ? S.supur : S.alan || 0;
+      if (pay) for (const w of this.varliklar.liste) {
+        if (w === v || w.olu || w.sahip || w.tur.koylu || (!w.tur.dusman && !w.ofkeli)) continue;
+        if (w.konum.distanceToSquared(v.konum) > (S.alan ? 2.6 : 1.9) ** 2 || w.konum.distanceToSquared(o.konum) > 16) continue;
+        this.varliklar.hasarVer(w, Math.max(1, Math.round(hasar * pay)), o.konum, { itme: itme * 0.7, oyuncu: true });
+      }
+      if (S.alan) { this.dusenler.renkliParcacik([0.55, 0.5, 0.45], v.konum.x, v.konum.y + 0.1, v.konum.z, 14); this.oyuncu.kamHiz -= 0.9; }
     }
   }
 
+  /* 0.45.0: atılacak ok: hızlı erişim çubuğundaki ilk özel ok, yoksa sıradan ok, o da yoksa çantadaki ilk özel ok */
+  okSec() {
+    const Y = this.envanter.yuvalar;
+    for (let i = 0; i < 9; i++) if (Y[i] && Y[i].id !== 287 && OKLAR.includes(Y[i].id)) return Y[i].id;
+    if (this.envanter.say(287) > 0) return 287;
+    for (const id of OKLAR) if (this.envanter.say(id) > 0) return id;
+    return 287;
+  }
+  okVar() { return OKLAR.some(id => this.envanter.say(id) > 0); }
   okAt(goz, yon) {
     const g = this.germe;
     const p = goz.clone().addScaledVector(yon, 0.5);
@@ -284,9 +342,13 @@ export class Etkilesim {
     /* Güç büyüsü: ok hasarı seviye başına %25 artar */
     const gb = 1 + 0.25 * buyuSeviye(this.envanter.seciliYuva(), 'guc');
     /* Buz Yayı: oklar vurduğu canlıyı yavaşlatır */
-    const ek = this.envanter.seciliId() === 459 ? { yavas: true } : null;
-    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), (2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0)) * gb, false, null, ek);
-    this.envanter.harca(287, 1);
+    const okId = this.okSec(), ek = {};
+    if (this.envanter.seciliId() === 459) ek.yavas = true;
+    if (okId === ESYA45.atesOk) ek.ates = true;
+    if (okId === ESYA45.zehirOk) ek.zehir = true;
+    if (tam) ek.iz = true;
+    this.varliklar.okAt(p, yon.clone().multiplyScalar(8 + 30 * g), (2 + g * 6 + (tam && Math.random() < 0.25 ? 2 : 0)) * gb, false, null, Object.keys(ek).length ? ek : null);
+    this.envanter.harca(okId, 1);
     if (this.envanter.aletYipran(1)) { this.ses.aletKirildi(); this.arayuz.bildirim('Yayınız kırıldı.'); }
     this.ses.yayAt();
     this.vurus = 0.01;

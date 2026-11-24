@@ -1248,3 +1248,8 @@ body.gostergesiz #ogretici { display: none; }
 .kTurListe label { justify-content: flex-start; }
 .kTurListe input[type=checkbox] { appearance: auto; -webkit-appearance: checkbox; position: static; width: 14px; height: 14px; min-width: 0; margin: 0; padding: 0; flex: none; border: 0; background: none; box-shadow: none; accent-color: #ffd34e; cursor: pointer; }
 .kTurListe input[type=checkbox]::before, .kTurListe input[type=checkbox]::after { content: none; display: none; }
+/* 0.45.0: hasar sayıları */
+#hasarSayilari { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+#hasarSayilari .hs { position: absolute; left: 0; top: 0; font: 700 15px/1 'Pixelify Sans', Rubik, sans-serif; color: #fff; text-shadow: 0 2px 0 #000, 0 0 4px #000; will-change: transform, opacity; }
+#hasarSayilari .hs.kritik { color: #ffd24a; font-size: 19px; }
+body.gostergesiz #hasarSayilari { display: none; }

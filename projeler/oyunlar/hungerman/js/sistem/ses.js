@@ -266,6 +266,8 @@ export class Ses {
   yayAt() { if (this.cal('yay_at', 1)) return; this.ton(180, 0.18, 0.18, 'triangle', 90); this.patlama(2000, 0.12, 0.15, 'highpass', 1); }
   okIsabet() { if (this.cal('ok_isabet', 1)) return; this.patlama(700, 0.12, 0.3, 'bandpass', 1.5); }
   okSaplandi() { if (this.cal('ok_isabet', 0.8, 0.8)) return; this.patlama(450, 0.1, 0.22, 'bandpass', 2); this.ton(160, 0.08, 0.1, 'triangle', 120); }
+  /* 0.45.0: savunmada darbe karşılama (metal) ve savuşturma */
+  savunma(tam) { if (this.cal('kaz_metal', tam ? 1 : 0.7, tam ? 1.25 : 0.9)) return; this.patlama(tam ? 2200 : 1400, 0.12, 0.2, 'bandpass', 3); }
   vurus() { if (this.cal('vurus', 1)) return; this.patlama(800, 0.08, 0.25, 'bandpass', 1); }
   zirhGiy() { if (this.cal('kumas', 1)) return; this.patlama(1800, 0.15, 0.2, 'bandpass', 2); }
   takas() { this.cal('koylu_evet', 0.8); if (this.cal('para', 1)) return; this.ton(1320, 0.08, 0.08, 'triangle', 1760); setTimeout(() => this.ton(1760, 0.1, 0.07, 'triangle', 2100), 70); }

@@ -38,6 +38,30 @@ const IMG = {
 };
 
 export class Hud {
+  /* 0.45.0: hasar sayıları (Ayarlar > Arayüz > Hasar sayılarını göster): vurulan canlının üstünde yükselip kaybolan sayı */
+  hasarSayisi(x, y, z, n, kritik) {
+    if (!this.hasarSayiAcik) return;
+    if (!this.hsKap) { this.hsKap = document.createElement('div'); this.hsKap.id = 'hasarSayilari'; document.body.appendChild(this.hsKap); this.hsListe = []; }
+    const e = document.createElement('span');
+    e.className = 'hs' + (kritik ? ' kritik' : '');
+    e.textContent = (Math.round(n * 2) / 2).toLocaleString('tr-TR');
+    this.hsKap.appendChild(e);
+    this.hsListe.push({ e, x: x + (Math.random() - 0.5) * 0.4, y, z: z + (Math.random() - 0.5) * 0.4, t: 0 });
+    if (this.hsListe.length > 24) this.hsListe.shift().e.remove();
+  }
+  hasarSayiGuncelle(kamera, dt, tuval) {
+    if (!this.hsListe || !this.hsListe.length) return;
+    const v = this._hsV || (this._hsV = new kamera.position.constructor()), w = tuval.clientWidth, h = tuval.clientHeight;
+    for (let i = this.hsListe.length - 1; i >= 0; i--) {
+      const q = this.hsListe[i]; q.t += dt;
+      if (q.t > 0.9) { q.e.remove(); this.hsListe.splice(i, 1); continue; }
+      v.set(q.x, q.y + q.t * 0.9, q.z).project(kamera);
+      if (v.z > 1) { q.e.style.opacity = 0; continue; }
+      q.e.style.transform = `translate(${((v.x + 1) / 2 * w).toFixed(1)}px, ${((1 - v.y) / 2 * h).toFixed(1)}px) translate(-50%, -50%)`;
+      q.e.style.opacity = String(Math.min(1, (0.9 - q.t) * 3));
+    }
+  }
+  temizleHasarSayilari() { if (this.hsListe) { for (const q of this.hsListe) q.e.remove(); this.hsListe.length = 0; } }
   constructor(envanter, hayatta) {
     this.env = envanter; this.hay = hayatta;
     this.son = {};
