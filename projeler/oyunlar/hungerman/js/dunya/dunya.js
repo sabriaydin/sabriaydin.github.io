@@ -10,6 +10,7 @@ import { BLOKLAR, KATI, OPAK, SIVI, BITKI, EKIN_SONRAKI, BLOK_UST, MEYVE_YAPRAK_
 const MEVSIM_BUYUME = [1.4, 1.15, 0.85, 0.25];
 const YAPRAK = new Set([9, 11, 13, 145, ...MEYVE_YAPRAK_ID]);   // 0.35.0: meyve ağaçları
 import { uretec } from '../rastgele.js';
+import { ISIK_PAY } from './meshleyici.js';
 
 /* Işık kaynağı sayılan bloklar (meşale niteliği taşıyanlar, örümcek yuvası ve lav) */
 const KAYNAK = new Uint8Array(BLOK_UST);
@@ -129,10 +130,11 @@ export class Dunya {
     if (BLOKLAR[id] && BLOKLAR[id].kovan) { if (!this.kovanlar.has(mk)) this.kovanlar.set(mk, { x, y, z, sayac: 2 }); } else this.kovanlar.delete(mk);
     if (eski === 59 || id === 59) this.lavIsikGuncelle(x, y, z);
     this.kirlet(p, true);
-    if (lx === 0) this.kirletK(cx - 1, cz); if (lx === PB - 1) this.kirletK(cx + 1, cz);
-    if (lz === 0) this.kirletK(cx, cz - 1); if (lz === PB - 1) this.kirletK(cx, cz + 1);
-    if (lx === 0 && lz === 0) this.kirletK(cx - 1, cz - 1); if (lx === PB - 1 && lz === 0) this.kirletK(cx + 1, cz - 1);
-    if (lx === 0 && lz === PB - 1) this.kirletK(cx - 1, cz + 1); if (lx === PB - 1 && lz === PB - 1) this.kirletK(cx + 1, cz + 1);
+    /* 0.41.3: ışık komşu parçaya 8 bloğa kadar uzandığından sınıra yakın değişiklikler komşuyu da yeniler */
+    if (lx < 4) this.kirletK(cx - 1, cz); if (lx > PB - 5) this.kirletK(cx + 1, cz);
+    if (lz < 4) this.kirletK(cx, cz - 1); if (lz > PB - 5) this.kirletK(cx, cz + 1);
+    if (lx < 4 && lz < 4) this.kirletK(cx - 1, cz - 1); if (lx > PB - 5 && lz < 4) this.kirletK(cx + 1, cz - 1);
+    if (lx < 4 && lz > PB - 5) this.kirletK(cx - 1, cz + 1); if (lx > PB - 5 && lz > PB - 5) this.kirletK(cx + 1, cz + 1);
     for (const f of this.dinleyiciler) f(x, y, z, id, eski, kaynak);
     return true;
   }
@@ -230,13 +232,12 @@ export class Dunya {
     let ust = 0;
     for (let dz = -1; dz <= 1; dz++) for (let dx = -1; dx <= 1; dx++) { const q = this.parca(p.cx + dx, p.cz + dz); if (q.ust == null) q.ust = ustBul(q.v); ust = Math.max(ust, q.ust); g.push(q.v); }
     const H = Math.min(PY, ust + 2);
-    const P = new Uint16Array(DB * DB * H);
-    for (let y = 0; y < H; y++) for (let z = -1; z <= PB; z++) {
-      const kz = z < 0 ? 0 : z >= PB ? 2 : 1, lz = (z + PB) % PB;
-      for (let x = -1; x <= PB; x++) {
-        const kx = x < 0 ? 0 : x >= PB ? 2 : 1, lx = (x + PB) % PB;
-        P[ddizin(x, y, z)] = g[kz * 3 + kx][dizin(lx, y, lz)];
-      }
+    /* 0.41.3: ışık hesabı için parçanın her yönde ISIK_PAY blok ötesini de içeren hacim (satır satır kopyalanır) */
+    const A = ISIK_PAY, W = PB + 2 * A, P = new Uint16Array(W * W * H);
+    for (let y = 0; y < H; y++) for (let z = -A; z < PB + A; z++) {
+      const kz = z < 0 ? 0 : z >= PB ? 2 : 1, lz = (z + PB) % PB, d = (y * W + z + A) * W;
+      const sat = (k, lx0, lx1, hedef) => { const b = dizin(0, y, lz); P.set(g[kz * 3 + k].subarray(b + lx0, b + lx1), hedef); };
+      sat(0, PB - A, PB, d); sat(1, 0, PB, d + A); sat(2, 0, A, d + A + PB);
     }
     p.meshleniyor = true; p.kirli = false; p.acil = false;
     isci.mesgul = true;

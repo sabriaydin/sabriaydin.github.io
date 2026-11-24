@@ -117,6 +117,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.3 (0.41.3): Yeni ışık sistemi, akan su ve nehir düzeltmeleri
+- Gökyüzü ışığı yeniden yazıldı (0-15 ışık düzeyi): gökyüzünü gören hücreler tam aydınlıktır; ışık her yöne (yanlara, aşağı ve yukarı) taşkın dolgusuyla yayılır ve her blokta bir düzey azalır. Tek blokluk oyuklar, mağara ağızları, çıkıntı ve ağaç altları artık zifiri karanlık değildir; içeri doğru yaklaşık 15 blokta kademeli olarak kararır. Su ve yapraklar ışığı azaltarak geçirir.
+- Işık, parçanın her yönde 8 blok ötesini de kapsayan hacimde hesaplanır: komşu parçadaki açıklıktan gelen ışık sayılır, parça sınırlarında aydınlık farkı oluşmaz. Sınıra 4 bloktan yakın blok değişiklikleri komşu parçanın ışığını da yeniler.
+- En karanlık yerlerin taban ışığı biraz yükseltildi (derin mağaralar yine karanlıktır, ancak tamamen siyah değildir).
+- Akan su: bir parça yüklendiğinde, komşu parçanın bu parçaya bakan kenarındaki sular da akışa alınır. Önceden parça sınırında suyun havada asılı kalması ve nehirlerin sınırda yarıda kesilmesi düzeltildi.
+- Nehir basamaklarında üretim sırasında şelale (düşen su sütunu) oluşturulur; üst basamağın suyu havada asılı bir duvar gibi kalmaz.
+- Nehirler kıyı şeridini de keserek denize ulaşır (kıyıdaki ince kara şeridinde yarıda kalmaz); kıyıya yakın bölgelerde nehirlerin takımada hesabı nedeniyle kesilmesi düzeltildi.
+
 ## 41.2 (0.41.2): Arazi, su ve biyom düzeltmeleri
 - Kızıl kayalıkların yüksek tepeleri yanlışlıkla "Dağlar" sayılıyor, renk katmanları ve kızıl kum görünmüyordu; düzeltildi. Dağ biyomu artık yalnız dağlık bölgede ya da çok yüksekte başlar (yüksek platolar ve tepeler kendi biyomunda kalır).
 - Çöldeki kum tepeleri ve kıyı şeridi basamaklanmaz (basamaklı kum tepeleri oluşmuyor). Çok yüksek zirveler yumuşakça sıkıştırılır; en üst sınırda düz kesik tepe oluşmaz.

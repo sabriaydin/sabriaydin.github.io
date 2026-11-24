@@ -69,43 +69,78 @@ function dokuUV(t, lu, lv, out) {
   out.push(u0 + lu * (u1 - u0), vb + lv * (vt - vb));
 }
 
-export function meshle(P, H = PY, ton = null) {
-  PH = H; TON = ton;
-  /* Gökyüzü ışığı: her sütunda yukarıdan aşağı */
-  const gok = new Float32Array(DB * DB * PH);
-  let yAlt = PH;   // 0.41.1: en alçak yüzeyin yüksekliği (yayılma bunun biraz altına kadar hesaplanır)
-  for (let z = -1; z <= PB; z++) for (let x = -1; x <= PB; x++) {
-    let s = 1;
-    for (let y = PH - 1; y >= 0; y--) {
-      if (s === 0) { if (y + 1 < yAlt) yAlt = y + 1; break; }   // altı karanlıktır (dizi zaten sıfır)
-      const i = ddizin(x, y, z), id = P[i];
+/* 0.41.3: gökyüzü ışığı (Minecraft benzeri ışık düzeyleri, 0-15)
+   - Gökyüzünü gören hücreler 15'tir; su ve yapraklar ışığı azaltarak geçirir.
+   - Işık her yöne (yanlara, aşağı, yukarı) taşkın dolgusuyla yayılır ve her blokta bir düzey azalır: mağara ağızları, oyuklar,
+     çıkıntı ve ağaç altları içeri doğru kademeli olarak kararır.
+   - Hesap, parçanın her yönde 8 blok ötesini de kapsayan hacimde yapılır: komşu parçadaki açıklıktan gelen ışık da sayılır,
+     parça sınırlarında aydınlık farkı oluşmaz.
+   Q: (16 + 2 * ISIK_PAY)^2 x H blok hacmi (y, z, x sırası). Düzeyin parlaklığa çevrimi ISIK_EGRI ile yapılır. */
+export const ISIK_PAY = 8;
+const IW = PB + 2 * ISIK_PAY, IWY = IW * IW;
+const ISIK_EGRI = new Float32Array(16);
+for (let l = 0; l < 16; l++) ISIK_EGRI[l] = l >= 15 ? 1 : l <= 0 ? 0 : Math.pow(0.8, 15 - l);
+let KUYRUK = new Int32Array(1 << 16);
+export function isikHesapla(Q, H) {
+  const L = new Uint8Array(IWY * H);
+  let yAlt = H, yUst = 0;
+  /* Sütunlar: yukarıdan aşağı */
+  for (let z = 0; z < IW; z++) for (let x = 0; x < IW; x++) {
+    let s = 15;
+    for (let y = H - 1; y >= 0; y--) {
+      const i = (y * IW + z) * IW + x, id = Q[i];
       if (id) {
-        if (OPAK[id]) s = 0;
-        else if (s > 0) {
-          if (LAV[id]) s = 0;
-          else if (SIVI[id]) s = Math.max(0.3, s * 0.9);
-          else if (KESIK[id] && !AYNI_GIZLE[id]) s = Math.max(0.5, s * 0.86);
-        }
+        if (OPAK[id] || LAV[id]) { if (y + 1 < yAlt) yAlt = y + 1; if (y > yUst) yUst = y; break; }
+        if (SIVI[id]) s = Math.max(6, s - 1);
+        else if (KESIK[id] && !AYNI_GIZLE[id]) s = Math.max(10, s - 1);
       }
-      gok[i] = s;
-      if (GOLGE[id]) s = 0;
+      L[i] = s;
+      if (GOLGE[id]) { if (y < yAlt) yAlt = y; if (y > yUst) yUst = y; break; }
     }
   }
-  /* 0.41.1: gökyüzü ışığı yanlara ve aşağıya da yayılır (her adımda azalarak): mağara ağızları, oyuklar ve çıkıntı altları zifiri karanlık görünmez */
-  const YAY = 0.8;
-  for (let tur = 0; tur < 6; tur++) {
-    let degisti = false;
-    for (let y = Math.max(0, yAlt - 12); y < PH; y++) for (let z = -1; z <= PB; z++) for (let x = -1; x <= PB; x++) {
-      const i = ddizin(x, y, z), id = P[i];
-      if (OPAK[id] || LAV[id] || gok[i] >= 0.8) continue;
-      let m = 0;
-      if (x > -1) m = Math.max(m, gok[i - DX]); if (x < PB) m = Math.max(m, gok[i + DX]);
-      if (z > -1) m = Math.max(m, gok[i - DZ]); if (z < PB) m = Math.max(m, gok[i + DZ]);
-      if (y < PH - 1) m = Math.max(m, gok[i + DY]); if (y > 0) m = Math.max(m, gok[i - DY]);
-      m *= YAY;
-      if (m > gok[i] + 0.01) { gok[i] = m; degisti = true; }
+  /* Taşkın dolgusu: komşusundan en az iki düzey aydınlık olan hücreler tohumdur */
+  const y0 = Math.max(0, yAlt - 16);
+  let bas = 0, son = 0;
+  /* Tohum taraması yalnızca en alçak ve en yüksek yüzey arasında (üstü tümüyle açık hava, düzeyi 15) */
+  const y1 = Math.min(H, yUst + 2);
+  for (let y = y0; y < y1; y++) for (let z = 0; z < IW; z++) for (let x = 0; x < IW; x++) {
+    const i = (y * IW + z) * IW + x, l = L[i];
+    if (l < 2) continue;
+    if ((x > 0 && L[i - 1] < l - 1 && !OPAK[Q[i - 1]]) || (x < IW - 1 && L[i + 1] < l - 1 && !OPAK[Q[i + 1]]) ||
+      (z > 0 && L[i - IW] < l - 1 && !OPAK[Q[i - IW]]) || (z < IW - 1 && L[i + IW] < l - 1 && !OPAK[Q[i + IW]]) ||
+      (y > y0 && L[i - IWY] < l - 1 && !OPAK[Q[i - IWY]]) || (y < H - 1 && L[i + IWY] < l - 1 && !OPAK[Q[i + IWY]])) {
+      if (son >= KUYRUK.length) { const k = new Int32Array(KUYRUK.length * 2); k.set(KUYRUK); KUYRUK = k; }
+      KUYRUK[son++] = i;
     }
-    if (!degisti) break;
+  }
+  const yay = (n, l) => {
+    const id = Q[n];
+    if (OPAK[id] || LAV[id]) return;
+    const nl = SIVI[id] ? l - 2 : l - 1;
+    if (nl > L[n]) {
+      L[n] = nl;
+      if (nl > 1) { if (son >= KUYRUK.length) { const k = new Int32Array(KUYRUK.length * 2); k.set(KUYRUK.subarray(0, son)); KUYRUK = k; } KUYRUK[son++] = n; }
+    }
+  };
+  while (bas < son) {
+    const i = KUYRUK[bas++], l = L[i];
+    if (l < 2) continue;
+    const x = i % IW, z = ((i / IW) | 0) % IW, y = (i / IWY) | 0;
+    if (x > 0) yay(i - 1, l); if (x < IW - 1) yay(i + 1, l);
+    if (z > 0) yay(i - IW, l); if (z < IW - 1) yay(i + IW, l);
+    if (y > 0) yay(i - IWY, l); if (y < H - 1) yay(i + IWY, l);
+  }
+  return L;
+}
+
+export function meshle(Q, H = PY, ton = null) {
+  PH = H; TON = ton;
+  /* Meshleme hacmi (1 blok kenarlı) ve gökyüzü ışığı */
+  const P = new Uint16Array(DB * DB * PH), gok = new Float32Array(DB * DB * PH);
+  const L = isikHesapla(Q, H), o = ISIK_PAY - 1;
+  for (let y = 0; y < PH; y++) for (let z = 0; z < DB; z++) {
+    const q = (y * IW + z + o) * IW + o, d = (y * DB + z) * DB;
+    for (let x = 0; x < DB; x++) { P[d + x] = Q[q + x]; gok[d + x] = ISIK_EGRI[L[q + x]]; }
   }
   const op = new Tampon(), su = new Tampon();
   let ustY = 0;

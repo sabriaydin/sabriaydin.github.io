@@ -313,7 +313,7 @@ export class Sahne {
       u.ruzgar.value += ((diyar ? 0 : 0.25 + hy * 0.5 + hf * 1.0) - u.ruzgar.value) * 0.01;
       u.yaprakSal.value += ((diyar ? 0 : Math.max(0, (hf - 0.2) / 0.8)) - u.yaprakSal.value) * 0.01;
       /* Gece görüşü iksiri: en düşük ışık yükselir */
-      u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.07;
+      u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.1;   // 0.41.3: en karanlık yerlerin taban ışığı 0,07'den 0,1'e
       u.islak.value = m === this.opakMalzeme && !suda && !diyar ? hy : 0;
       u.sicak.value = !suda && !diyar ? (this.sicakDalga || 0) : 0;
     }

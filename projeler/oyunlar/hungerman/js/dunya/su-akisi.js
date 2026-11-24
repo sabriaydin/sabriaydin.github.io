@@ -72,6 +72,19 @@ export class SuAkisi {
       }
       if (acik) this.ekle(x, y, z);
     }
+    /* 0.41.3: komşu parçaların bu parçaya bakan kenarındaki sular da sıraya alınır: önceden yüklenmiş komşudaki su, bu parça
+       yüklenince boşluğa akabilir (nehir ve şelaleler parça sınırında yarıda kalmaz) */
+    const kenar = [[-1, 0, 0, 0], [PB, 0, PB - 1, 0], [0, -1, 0, 0], [0, PB, 0, PB - 1]];
+    for (const [ox, oz, ix, iz] of kenar) for (let k = 0; k < PB; k++) {
+      const x = x0 + (ox === -1 || ox === PB ? ox : k), z = z0 + (oz === -1 || oz === PB ? oz : k);
+      if (!d.yuklu(x, z)) continue;
+      const lx = ox === -1 || ox === PB ? ix : k, lz = oz === -1 || oz === PB ? iz : k;
+      for (let y = 1; y < PY - 1; y++) {
+        const ic = v[(y * PB + lz) * PB + lx];
+        if (!gecilir(ic) && !(akanMi(ic) && SU_SEVIYE[ic] < 7)) continue;
+        if (SU_SEVIYE[d.blok(x, y, z)]) this.ekle(x, y, z);
+      }
+    }
   }
   guncelle(dt) {
     if (!this.sira.size) return;

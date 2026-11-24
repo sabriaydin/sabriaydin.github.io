@@ -27,7 +27,7 @@ import { zindanYaz } from './zindan-uretici.js';
 import { batikYaz } from './batik-uretici.js';
 import { adaYaz } from './ada-uretici.js';
 import { madenYaz } from './maden-uretici.js';
-import { MEYVE_YAPRAK_ID, DOGA41, YAPI37 } from '../bloklar.js';
+import { MEYVE_YAPRAK_ID, DOGA41, YAPI37, DUSEN_SU } from '../bloklar.js';
 
 export { BIYOMLAR, BY, KARLI, SICAK, karliZirve, iklimBiyomu, agacKur };
 /* Dünyanın üretici sürümüne göre üretici (1: eski dünyalar, 2: 0.41.0 ve sonrası) */
@@ -218,7 +218,8 @@ export class UreticiV2 {
       }
     }
     /* Nehirler: kıvrımlı çizgiler boyunca vadi oyulur; su seviyesi geniş ölçekli araziyi basamaklarla izler (basamaklarda şelale) */
-    if (c > 0.02 && !golde && o.ad < 0.05) {
+    /* 0.41.3: nehirler kıyı şeridini de keserek denize ulaşır (yarıda kalmaz); yalnız takımada adalarına oyulmaz */
+    if (c > -0.06 && !golde && c - o.ad > -0.02) {
       const rx = x + this.gNw.g2(x / 160, z / 160) * 40, rz = z + this.gNw.g2(x / 160 + 71, z / 160 - 33) * 40;
       const rv = Math.abs(this.gNe.f2(rx / 1050, rz / 1050, 3));
       const W = 0.0085 + 0.0035 * this.gNw.g2(x / 400 + 5, z / 400);
@@ -372,6 +373,11 @@ export class UreticiV2 {
       if (ust === 21 && (o.b === BY.DAG)) v[dizin(lx, h - 1, lz)] = 21;
       /* Su: deniz, göl ve nehir */
       for (let y = h + 1; y <= o.su; y++) v[dizin(lx, y, lz)] = 7;
+      /* 0.41.3: nehir basamaklarında şelale: üst basamaktaki komşu yatağın suyundan bu yatağın suyuna düşen su sütunu */
+      if (o.nh || o.gl) for (const j of [-1, 1, -18, 18]) {
+        const q = K[(lz + 1) * 18 + lx + 1 + j];
+        if ((q.nh || q.gl) && q.su > o.su) for (let y = o.su + 1; y <= q.su; y++) { const i = dizin(lx, y, lz); if (v[i] === 0) v[i] = DUSEN_SU; }
+      }
       /* Deniz buzu: yalnız soğuk kıyıların yakınında */
       if (h < DENIZ && o.su === DENIZ && o.te < -0.36 && o.c > -0.35) v[dizin(lx, DENIZ, lz)] = 22;
       /* Göl buzu: çok soğuk yüksek göller donar */
