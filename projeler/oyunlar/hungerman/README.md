@@ -117,6 +117,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.10 (0.41.10): Gerçekçi ses
+- Konumlu ses: canlı sesleri (normal, acıma, ölüm, saldırı), ok ve ateş topu sesleri, Ada Bekçisi'nin adımları, diğer oyuncuların blok kırma ve koyma sesleri ve mağaradaki lav sesi artık kaynağın konumuna göre çalar:
+  - Uzaklık: ses uzaklıkla yumuşakça azalır, menzil dışında hiç çalmaz; uzaktaki seslerin tizleri havada sönümlenir.
+  - Engel: oyuncunun başı ile kaynak arasındaki katı bloklar sayılır; her blok sesi yaklaşık yarıya indirir ve boğuklaştırır. 2-3 blok altındaki bir canlı boğuk duyulur, 10 blok toprağın altındaki bir canlı duyulmaz; duvarın arkasındaki ses boğuk gelir.
+  - Yön: ses kaynağın bulunduğu yöne göre sağ ve sol kulağa dağıtılır (stereo).
+- Su altında bütün sesler boğuklaşır; mağarada ve yeraltında sesler hafifçe yankılanır (Yeraltı Diyarı'nda daha az).
+- Ölçüm: 8 blok yandaki zombi açık ve sağdan, 3 blok alttaki boğuk ve kısık, 11 blok alttaki hiç duyulmaz.
+
 ## 41.9 (0.41.9): Su sesleri
 - Şelale kaydı kaldırıldı (`ses/efekt/selale_0.mp3` artık kullanılmaz, silinebilir); nehir ve şelale yakınında yalnızca hafif akarsu sesi çalar.
 - Akarsu sesi yaklaşık üçte bire, tekne sürerken duyulan dalga sesi yarıya indirildi; su sesleri duyulacak kadar, gürültü yapmayacak düzeydedir.

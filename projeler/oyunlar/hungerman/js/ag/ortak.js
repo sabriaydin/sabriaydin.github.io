@@ -31,10 +31,12 @@ export function durumDizisi(o) {
 export function blokEfekti(o, ses, x, y, z, id, eski) {
   const p = o.oyuncu.konum;
   if ((x + 0.5 - p.x) ** 2 + (y - p.y) ** 2 + (z + 0.5 - p.z) ** 2 > 18 * 18) return;
+  /* 0.41.10: konumlu (uzaklık, aradaki bloklar ve yön) */
+  const kon = f => (ses.konumlu ? ses.konumlu(x + 0.5, y + 0.5, z + 0.5, f, 18) : f());
   if ((id === 0 || (SIVI[id] && !BLOKLAR[id].suIcinde)) && eski && BLOKLAR[eski] && !SIVI[eski]) {
-    ses.kir(BLOKLAR[eski].ses);
+    kon(() => ses.kir(BLOKLAR[eski].ses));
     o.dusenler.parcacik(eski, x, y, z);
-  } else if (id && BLOKLAR[id] && !SIVI[id] && !(BLOKLAR[id].ekin > 0) && !(BLOKLAR[id].tarla && BLOKLAR[eski] && BLOKLAR[eski].tarla)) ses.koy(BLOKLAR[id].ses);
+  } else if (id && BLOKLAR[id] && !SIVI[id] && !(BLOKLAR[id].ekin > 0) && !(BLOKLAR[id].tarla && BLOKLAR[eski] && BLOKLAR[eski].tarla)) kon(() => ses.koy(BLOKLAR[id].ses));
 }
 
 /* Sandık yuvalarını ağ için diziye çevir / geri kur */

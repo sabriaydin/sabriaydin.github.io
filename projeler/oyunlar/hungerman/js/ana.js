@@ -3,7 +3,7 @@ import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl,
 import { Sahne, THREE } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
 import { BIYOMLAR, BY } from './dunya/uretici.js';
-import { BLOKLAR, ESYALAR, KATI, buyuluMu, ESYA37, dusmeHasari } from './bloklar.js';
+import { BLOKLAR, ESYALAR, KATI, OPAK, buyuluMu, ESYA37, dusmeHasari } from './bloklar.js';
 import { metinTohum } from './rastgele.js';
 import { Oyuncu } from './oyun/oyuncu.js';
 import { Envanter } from './oyun/envanter.js';
@@ -1142,6 +1142,9 @@ function adim(t) {
     if (!o.hazir) return;
     /* 0.41.0: biyom atmosferi */
     if (!ortamAtmosfer) ortamAtmosfer = new Ortam(sahne);
+    /* 0.41.10: ses dinleyicisi (baş konumu ve bakış yönü; aradaki opak bloklar sesi boğar), su altında boğukluk, mağarada yankı */
+    { const gz = o.oyuncu.gozKonumu(), D = o.dunya; ses.dinleyiciAyarla(gz.x, gz.y, gz.z, o.oyuncu.yaw, (x, y, z) => OPAK[D.blok(x, y, z)] === 1);
+      ses.ortamAyarla({ suAlti: !!o.oyuncu.basSuda, yanki: diyar ? 0.18 : ortamAtmosfer.yeralti ? 0.3 : 0 }); }
     ortamAtmosfer.guncelle(o, dt, ses, { gun: o.gunIsigi ?? 1, diyar, yagis: o.hava ? o.hava.yogunluk : 0, zamanSn: o.sure || 0 });
     /* Mağara ortam sesleri */
     o.ortamSayac -= dt;
@@ -1151,7 +1154,7 @@ function adim(t) {
       if (diyar) { ses.diyarUgultu(); if (Math.random() < 0.6) ses.lav(0.6 + Math.random() * 0.4); }
       else if (o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) > g.y + 2 && g.y < DENIZ + 6) {
         ses.damla(0.4 + Math.random() * 0.6);
-        for (const m of o.dunya.mesaleler.values()) if (m[3] === 11 && Math.hypot(m[0] - g.x, m[1] - g.y, m[2] - g.z) < 14) { ses.lav(0.8); break; }
+        for (const m of o.dunya.mesaleler.values()) if (m[3] === 11 && Math.hypot(m[0] - g.x, m[1] - g.y, m[2] - g.z) < 14) { ses.konumlu(m[0], m[1], m[2], () => ses.lav(1), 16); break; }   // 0.41.10: konumlu
       }
     }
     if (kilitli && !o.hayatta.olu && o.uyku <= 0) o.etkilesim.guncelle(dt, { sol: fare.sol, sag: fare.sag, egil: basili(tus, 'egil') });

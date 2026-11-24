@@ -52,7 +52,7 @@ const CANLI = {
 /* Müzik kutusu çalgıları (0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
 const CALGI = ['nota_piyano', 'nota_bas', 'nota_zil', 'nota_flut', 'nota_davul'];
 export class Ses {
-  constructor() { this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; this.ornekler = {}; }
+  constructor() { this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; this.ornekler = {}; this.dinleyici = null; this.engel = null; this._k = null; }
   baslat() {
     if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
     try {
@@ -60,7 +60,12 @@ export class Ses {
       this.ana = this.ctx.createGain(); this.ana.gain.value = this.duzey;
       /* 0.40.2: çok ses üst üste binince kırpılmayı önleyen sıkıştırıcı */
       const k = this.ctx.createDynamicsCompressor(); k.threshold.value = -10; k.knee.value = 8; k.ratio.value = 6; k.attack.value = 0.003; k.release.value = 0.2;
-      this.ana.connect(k); k.connect(this.ctx.destination);
+      /* 0.41.10: genel süzgeç (su altında sesler boğuklaşır) ve yankı (mağarada) */
+      this.suzgec = this.ctx.createBiquadFilter(); this.suzgec.type = 'lowpass'; this.suzgec.frequency.value = 20000; this.suzgec.Q.value = 0.5;
+      this.ana.connect(this.suzgec); this.suzgec.connect(k); k.connect(this.ctx.destination);
+      this.yankiGir = this.ctx.createGain(); this.yankiGir.gain.value = 0;
+      const yanki = this.ctx.createConvolver(); yanki.buffer = this.yankiTepkisi(2.2);
+      this.ana.connect(this.yankiGir); this.yankiGir.connect(yanki); yanki.connect(this.suzgec);
       const n = this.ctx.sampleRate;
       this.gurultu = this.ctx.createBuffer(1, n, n);
       const d = this.gurultu.getChannelData(0);
@@ -76,16 +81,72 @@ export class Ses {
         .then(buf => { if (buf) (this.ornekler[g] = this.ornekler[g] || []).push(buf); }).catch(() => {});
     }
   }
+  /* ---------- 0.41.10: konumlu ses ----------
+     Dinleyici (oyuncunun başı) her karede ayarlanır. konumlu(x, y, z, fn, menzil) içinde çalınan bütün sesler:
+     - uzaklıkla azalır (menzilin ötesinde hiç çalmaz) ve uzaktaysa havada sönümlenerek tizlerini yitirir,
+     - aradaki katı bloklar sayılarak boğuklaşır ve kısılır (her blok sesi yaklaşık yarıya indirir; 10 blok toprağın altındaki canlı duyulmaz),
+     - kaynağın yönüne göre sağ ve sol kulağa dağıtılır (stereo). */
+  dinleyiciAyarla(x, y, z, yaw, engel) { this.dinleyici = { x, y, z, yaw }; if (engel) this.engel = engel; }
+  /* Dinleyici ile kaynak arasındaki katı blok sayısı (yarım bloklık adımlarla; aynı blok bir kez sayılır) */
+  engelSay(x, y, z) {
+    const L = this.dinleyici, E = this.engel;
+    if (!L || !E) return 0;
+    const dx = x - L.x, dy = y - L.y, dz = z - L.z, d = Math.hypot(dx, dy, dz);
+    if (d < 1) return 0;
+    const n = Math.min(80, Math.ceil(d / 0.5));
+    let say = 0, son = '';
+    for (let i = 1; i < n; i++) {
+      const t = i / n, bx = Math.floor(L.x + dx * t), by = Math.floor(L.y + dy * t), bz = Math.floor(L.z + dz * t), k = bx + ',' + by + ',' + bz;
+      if (k === son) continue;
+      son = k;
+      if (E(bx, by, bz)) { say++; if (say >= 12) break; }
+    }
+    return say;
+  }
+  konumlu(x, y, z, fn, menzil = 32) {
+    const L = this.dinleyici;
+    if (!this.ctx || !L) { fn(); return; }
+    const dx = x - L.x, dy = y - L.y, dz = z - L.z, d = Math.hypot(dx, dy, dz);
+    if (d >= menzil) return;
+    const n = this.engelSay(x, y, z);
+    const kat = Math.pow(1 - d / menzil, 1.4) * Math.pow(0.5, n);
+    if (kat < 0.012) return;
+    const sag = Math.cos(L.yaw) * dx - Math.sin(L.yaw) * dz;
+    this._k = { kat, pan: d < 0.8 ? 0 : Math.max(-0.85, Math.min(0.85, sag / Math.max(1, Math.hypot(dx, dz)))), kesim: Math.max(280, 18000 / (1 + d / 14) * Math.pow(0.28, n)) };
+    try { fn(); } finally { this._k = null; }
+  }
+  /* Sesin bağlanacağı yer: konumlu çalarken süzgeç ve stereo yönlendirici, değilse ana çıkış */
+  cikis() {
+    const K = this._k;
+    if (!K) return this.ana;
+    const c = this.ctx, f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = K.kesim; f.Q.value = 0.5;
+    if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = K.pan; f.connect(p); p.connect(this.ana); } else f.connect(this.ana);
+    return f;
+  }
+  /* Ortam: su altında genel boğukluk, mağarada yankı (yumuşak geçişli) */
+  ortamAyarla({ suAlti = false, yanki = 0 } = {}) {
+    if (!this.ctx || !this.suzgec) return;
+    const t = this.ctx.currentTime;
+    this.suzgec.frequency.setTargetAtTime(suAlti ? 650 : 20000, t, 0.15);
+    this.yankiGir.gain.setTargetAtTime(Math.max(0, Math.min(0.6, yanki)), t, 0.5);
+  }
+  /* Yapay yankı tepkisi: iki kanallı, üstel sönen gürültü (mağara yankısı) */
+  yankiTepkisi(sure) {
+    const c = this.ctx, n = Math.floor(c.sampleRate * sure), b = c.createBuffer(2, n, c.sampleRate);
+    for (let k = 0; k < 2; k++) { const d = b.getChannelData(k); for (let i = 0; i < n; i++) { const t = i / n; d[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 3.2) * (i < c.sampleRate * 0.012 ? 0 : 1); } }
+    return b;
+  }
   /* Kayıttan çalar (rastgele değişke, hafif perde oynaması); kayıt yoksa false */
   /* 0.40.2: kayıtların düzeyi türüne göre dosyada dengelenmiştir (ses/LISANS.md); ses yalnızca uzaklık ve küçük ayar çarpanıdır */
   cal(g, ses = 1, hiz = 1) {
     const c = this.ctx, l = g && this.ornekler[g];
     if (!c || !l || !l.length) return false;
+    if (this._k) ses *= this._k.kat;
     if (ses <= 0.005) return true;
     const k = c.createBufferSource(); k.buffer = l[Math.floor(Math.random() * l.length)];
     k.playbackRate.value = hiz * (0.94 + Math.random() * 0.12);
     const s = c.createGain(); s.gain.value = Math.min(1.5, ses);
-    k.connect(s); s.connect(this.ana); k.start();
+    k.connect(s); s.connect(this.cikis()); k.start();
     return k;
   }
   /* Uzun ortam kayıtları (dalga, lav, mağara, rüzgâr): önceki bitmeden aynısı yeniden başlamaz, üst üste binmez */
@@ -119,16 +180,18 @@ export class Ses {
     const t = c.currentTime;
     const k = c.createBufferSource(); k.buffer = this.gurultu; k.playbackRate.value = 0.8 + Math.random() * 0.4;
     const f = c.createBiquadFilter(); f.type = tur; f.frequency.setValueAtTime(frekans, t); f.frequency.exponentialRampToValueAtTime(Math.max(40, frekans * kayma), t + sure); f.Q.value = q;
+    if (this._k) ses = Math.max(0.0002, ses * this._k.kat);
     const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(ses, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
-    k.connect(f); f.connect(g); g.connect(this.ana);
+    k.connect(f); f.connect(g); g.connect(this.cikis());
     k.start(t, Math.random() * 0.5); k.stop(t + sure + 0.05);
   }
   ton(frekans, sure, ses = 0.2, tur = 'sine', bitis = frekans) {
     const c = this.ctx; if (!c) return;
     const t = c.currentTime;
     const o = c.createOscillator(); o.type = tur; o.frequency.setValueAtTime(frekans, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, bitis), t + sure);
+    if (this._k) ses = Math.max(0.0002, ses * this._k.kat);
     const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(ses, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + sure);
-    o.connect(g); g.connect(this.ana); o.start(t); o.stop(t + sure + 0.05);
+    o.connect(g); g.connect(this.cikis()); o.start(t); o.stop(t + sure + 0.05);
   }
   malzeme(tur) {
     switch (tur) {
