@@ -117,6 +117,10 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.9 (0.41.9): Su sesleri
+- Şelale kaydı kaldırıldı (`ses/efekt/selale_0.mp3` artık kullanılmaz, silinebilir); nehir ve şelale yakınında yalnızca hafif akarsu sesi çalar.
+- Akarsu sesi yaklaşık üçte bire, tekne sürerken duyulan dalga sesi yarıya indirildi; su sesleri duyulacak kadar, gürültü yapmayacak düzeydedir.
+
 ## 41.8 (0.41.8): Genel iyileştirmeler (su, ışık, başarım)
 - Su sızıntıları giderildi: yeni bir dünyada ilk dakikalarda göl, nehir ve deniz suyu yanındaki mağara ve oyuklara boşalıyor, yeraltı gölleri ve nehirleri mağaralara taşıyor, lavla karşılaşıp obsidyen ve parke taşa dönüşüyordu (ölçümde ilk 90 saniyede yaklaşık 13 000 blok değişikliği). Artık su olan bir sütunun yanında mağara, yarık ve oyuk suyun tabanının altında kalır; derin yeraltındaki üretilmiş sular yanlarında bir blok değişene kadar durgundur (Minecraft'taki gibi). Aynı ölçümde değişiklik sayısı yaklaşık 90'a indi (yalnızca şelalelerin dibindeki doğal akış). Su akışı kuyruğu yeni parçalar yüklenirken birikmez; kayıt dosyası gereksiz yere büyümez.
 - Akan su ve düşen bloklar, komşu parçayı yalnızca tam kenardaysa yeniden çizdirir (sık su değişikliklerinde gereksiz yeniden çizim ve takılma olmaz).

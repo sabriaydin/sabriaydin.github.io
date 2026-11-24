@@ -129,6 +129,5 @@ Kaynak listesi: `mods/ENTITIES/mobs_mc/LICENSE-media.md` ve ilgili modların REA
 | cakal_0 | coyote | rogerforeman (freesound 68068) | CC BY |
 | col_ruzgar_0 | desertwind | Proxima4 (freesound 104320) | CC0 |
 | marti_0 | seagull | hazure (freesound 23707) | CC BY 3.0 |
-| selale_0 | waterfall | volivieri (freesound 38390) | CC BY |
 
 Kaydı bulunmayan birkaç ince ses (arı vızıltısı, kalp atışı, soğukta titreme, kayan yıldız, geçit uğultusu) Web Audio ile üretilir. Kayıt yüklenemezse her sesin yerine aynı sesin sentez biçimi çalar.

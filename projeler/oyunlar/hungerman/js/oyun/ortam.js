@@ -1,7 +1,7 @@
 /* HungerMan - 0.41.0: biyom atmosferi
    Ortam sesleri: ormanda ve çayırda gündüz kuş cıvıltıları, gece çekirgeler ve baykuşlar; taygada ve dağlarda gece kurt ulumaları,
    çölde ve kızıl kayalıklarda çöl rüzgârı ve gece çakallar; yükseklerde dağ rüzgârı; kıyıda martılar; nehir kıyısında dere,
-   şelale yakınında şelale uğultusu. Görsel: bataklık ve mangrovda sis, gece ateş böcekleri; çölde gündüz sıcak hava dalgalanması.
+   şelale yakınında hafif akarsu sesi. Görsel: bataklık ve mangrovda sis, gece ateş böcekleri; çölde gündüz sıcak hava dalgalanması.
    Ses düzeyleri biyomun ağırlığına (yakın sütunların payı) ve oyuncunun konumuna göre yumuşakça değişir. */
 import { BY } from '../dunya/biyom.js';
 import { DENIZ } from '../sabitler.js';
@@ -97,7 +97,8 @@ export class Ortam {
     const yuk = Math.max(0, Math.min(1, (P.y - (DENIZ + 60)) / 90));
     if (yuk > 0.05) ses.ortam('dag_ruzgar', 0.25 + 0.6 * yuk, true);
     if (a.col > 0.4 && !gece) ses.ortam('col_ruzgar', 0.35 * a.col, true);
-    if (this.selale > 0.05) ses.ortam('selale', 0.25 + 0.75 * this.selale, true);
-    else if ((a.nehir || 0) > 0.2) ses.ortam('dere', 0.2 + 0.4 * a.nehir, true);
+    /* 0.41.9: şelale için ayrı kayıt kullanılmaz; nehir ve şelale yakınında yalnızca hafif akarsu sesi duyulur */
+    const su = Math.max(this.selale, (a.nehir || 0) > 0.2 ? a.nehir : 0);
+    if (su > 0.05) ses.ortam('dere', 0.06 + 0.1 * su, true);
   }
 }
