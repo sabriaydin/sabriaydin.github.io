@@ -923,6 +923,21 @@ Object.assign(RESSAM, {
 }
 
 /* ---------- 0.41.0: yeni dünya üreticisinin doğa dokuları ---------- */
+function caliDoku(p, taban, koyu, acik, dal) {
+  const t = hex(taban), k = hex(koyu), a = hex(acik), d = hex(dal);
+  /* Koyu iç gölge üstüne yuvarlak yaprak kümeleri; kümelerin sol üstü ışık alır; kenarlarda küçük boşluklar */
+  for (let y = 0; y < D; y++) for (let x = 0; x < D; x++) p.set(x, y, karis(k, 0.8 + p.r() * 0.3));
+  for (let i = 0; i < 16; i++) {
+    const cx = p.r() * 16, cy = p.r() * 16, r = 1.6 + p.r() * 1.6;
+    for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) {
+      const dx = x - cx, dy = y - cy, q = (dx * dx + dy * dy) / (r * r);
+      if (q > 1) continue;
+      p.set((x + 16) % 16, (y + 16) % 16, karis(dx + dy < -r * 0.5 ? a : t, 0.88 + p.r() * 0.24));
+    }
+  }
+  for (let i = 0; i < 2; i++) { let x = 3 + Math.floor(p.r() * 10), y = 15; for (let n = 0; n < 4; n++) { p.set(x, y, karis(d, 0.9 + p.r() * 0.2)); y--; if (p.r() < 0.4) x += p.r() < 0.5 ? -1 : 1; } }
+  for (let i = 0; i < 18; i++) p.set(Math.floor(p.r() * 16), Math.floor(p.r() * 16), [0, 0, 0], 0);
+}
 function benekliCicek(p, sap, renk, orta, noktalar) {
   bitki(p, p => { const g = hex(sap); cizgi(p, 8, 15, 8, 8, g); p.set(7, 12, g); p.set(9, 11, g); p.set(6, 13, g);
     const c = hex(renk); for (const [x, y] of noktalar) p.set(x, y, karis(c, 0.85 + p.r() * 0.3)); if (orta) p.set(8, 6, hex(orta)); });
@@ -950,6 +965,11 @@ Object.assign(RESSAM, {
   papatya: p => benekliCicek(p, '#3f8a2d', '#f4f2ec', '#e8c22a', [[8, 4], [7, 5], [9, 5], [6, 6], [10, 6], [7, 7], [9, 7], [8, 8], [6, 5], [10, 5], [6, 7], [10, 7]]),
   lale: p => benekliCicek(p, '#3f8a2d', '#d8302a', null, [[7, 4], [9, 4], [7, 5], [8, 5], [9, 5], [7, 6], [8, 6], [9, 6], [8, 7], [6, 3], [10, 3], [8, 4]]),
   lavanta: p => bitki(p, p => { const g = hex('#5a8a46'), c = hex('#9a72d0'); for (const x0 of [4, 8, 11]) { const ust = 2 + Math.floor(p.r() * 4); cizgi(p, x0, 15, x0, ust + 4, g); for (let y = ust; y < ust + 5; y++) { p.set(x0, y, karis(c, 0.8 + p.r() * 0.35)); if (p.r() < 0.5) p.set(x0 + (p.r() < 0.5 ? -1 : 1), y, karis(c, 0.75 + p.r() * 0.3)); } } }),
+  /* 0.41.6: çalı dokuları: sık yaprak, gölgeli iç, yer yer dal ve küçük boşluklar */
+  cali_yesil: p => caliDoku(p, '#3f7a2a', '#2c5a1c', '#5c9a3c', '#5a3a20'),
+  cali_ladin: p => caliDoku(p, '#2f5a36', '#1f4226', '#46784c', '#4a3220'),
+  cali_savan: p => caliDoku(p, '#7a8a32', '#5a6824', '#9aa84a', '#6a4a2a'),
+  cali_sonbahar: p => caliDoku(p, '#b8621e', '#8a3e14', '#d8902e', '#5a3a20'),
   saz: p => bitki(p, p => { const g = hex('#6a9a3e'), k = hex('#5a3a22'); for (const x0 of [3, 7, 12]) { const ust = Math.floor(p.r() * 3); cizgi(p, x0, 15, x0 + (x0 > 8 ? 1 : 0), ust, g); }
     for (const [x0, y0] of [[7, 3], [3, 5]]) for (let y = y0; y < y0 + 4; y++) { p.set(x0, y, karis(k, 0.9 + p.r() * 0.2)); p.set(x0 + 1, y, karis(k, 0.8)); }
     for (const [x, y] of [[5, 9], [6, 8], [10, 7], [11, 6], [2, 10], [13, 9]]) p.set(x, y, karis(g, 1.1)); })

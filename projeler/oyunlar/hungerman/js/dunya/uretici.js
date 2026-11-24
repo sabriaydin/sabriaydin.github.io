@@ -647,18 +647,19 @@ export class UreticiV2 {
     }
     /* Çalılar */
     const CALI = { [BY.ORMAN]: 0.12, [BY.SIK]: 0.22, [BY.SONBAHAR]: 0.1, [BY.HUS]: 0.07, [BY.TAYGA]: 0.08, [BY.CAYIR]: 0.015, [BY.CICEKLI]: 0.01, [BY.SAVAN]: 0.06, [BY.KAYALIK]: 0.08, [BY.DAG]: 0.03, [BY.BATAKLIK]: 0.08, [BY.YALIYAR]: 0.05 };   // 0.41.5: daha seyrek
-    const cali = [];
     this.hucreler(x0, z0, CALI_HUCRE, 3, 0x63616c, (x, z, s) => {
       this.kolon(x, z, o);
       const ab = o.ab ?? o.b, p = CALI[ab] ?? CALI[o.b];
       if (!p || s > p || (o.b === BY.DAG && o.h > DENIZ + 80)) return;
       const ust = this.ustBlok(o, x, z);
       if ((ust !== 4 && ust !== 45 && ust !== 142 && ust !== 143) || !this.karaUygun(o, x, z)) return;
-      const yaprak = o.b === BY.TAYGA || o.b === BY.DAG ? 11 : o.b === BY.SAVAN ? 145 : ab === BY.SONBAHAR ? SONBAHAR_YAPRAK[Math.floor(karma2(this.tohum ^ 0x63, x, z) * 3)] : 9;
-      cali.push([x, o.h + 1, z, yaprak]);
+      /* 0.41.6: özel biçimli çalı blokları (biyoma göre tür; ormanda bir kısmı büyük çalı, yer yer ikili öbek) */
+      const s2 = karma2(this.tohum ^ 0x63, x, z);
+      const id = o.b === BY.TAYGA || o.b === BY.DAG || o.b === BY.KARLI_OVA ? D.ladinCali : o.b === BY.SAVAN || o.b === BY.COL ? D.savanCali : ab === BY.SONBAHAR ? D.sonbaharCali
+        : (ab === BY.ORMAN || ab === BY.SIK) && s2 < 0.3 ? D.buyukCali : D.cali;
+      set(x, o.h + 1, z, id, true);
+      if (s2 > 0.82) { const [dx, dz] = [[1, 0], [0, 1], [-1, 0], [0, -1]][Math.floor(s2 * 97) % 4]; const q = this.kolon(x + dx, z + dz, {}); if (q.h === o.h) set(x + dx, o.h + 1, z + dz, id === D.buyukCali ? D.cali : id, true); }
     });
-    for (const a of cali) agacKur2(set, a[0], a[1], a[2], 'cali', ur(a), 'yaprak', a[3]);
-    for (const a of cali) agacKur2(set, a[0], a[1], a[2], 'cali', ur(a), 'govde', a[3]);
   }
 
   /* Devrik kütükler: ormanlarda yere yatmış ağaç gövdeleri (üstünde yer yer mantar) */

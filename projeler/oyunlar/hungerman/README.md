@@ -117,6 +117,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.6 (0.41.6): Özel çalı modeli
+- Çalılar artık yere konmuş ağaç yaprağı blokları değildir: kendine özgü biçimli yeni bir bitkidir. Üst üste binen yuvarlak yaprak kümelerinden oluşan alçak bir tümsek biçimindedir; dokusu ışık alan ve gölgede kalan yaprak kümeleri, ince dallar ve küçük boşluklar içerir. İçinden geçilir; makasla hızlı kırılır, kırılınca çubuk ve seyrek olarak meşe fidanı düşer.
+- Beş tür: Çalı (çayır ve ormanlar), Büyük Çalı (ormanda, daha yüksek ve dolgun), Ladin Çalısı (tayga ve dağlar), Savan Çalısı (savan ve çöl kenarları), Sonbahar Çalısı (sonbahar ormanı). Yer yer ikili öbekler hâlinde bulunur.
+- Yalnızca yeni yüklenen bölgelerde görünür.
+
 ## 41.5 (0.41.5): Daha seyrek çiçekler
 - Çiçekli çayırda yerin yaklaşık üçte biri çiçekti; artık çiçekler seyrek öbeklerde toplanır (öbek içinde en çok %10, öbek dışında %1,5; ortalama yaklaşık %2). Çayırda çiçek oranı %5'ten %1,5'e, huş ormanında %2'den %1'e indi.
 - Çalılar küçük ağaç gibi görünüyordu (içinde kütük, iki-üç blok yüksekliğinde); artık kütüksüz, çoğu bir blok yüksekliğinde alçak yaprak öbekleridir ve daha seyrektir (çayırda üçte bire indi).

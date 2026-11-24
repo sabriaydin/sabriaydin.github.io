@@ -86,7 +86,9 @@ export const DOKULAR = [
   'pasli_bakir', 'cam_tugla', 'altin_suslu', 'kasa_yan', 'kasa_ust',
   /* 0.41.0: yeni dünya üreticisinin doğa blokları */
   'kizil_kum', 'miselyum_ust', 'miselyum_yan', 'yaprak_kizil', 'yaprak_turuncu', 'yaprak_sari', 'mangrov_yan', 'mangrov_ust', 'mangrov_yaprak', 'mangrov_kok',
-  'mantar_kirmizi_blok', 'mantar_kahve_blok', 'mantar_sap', 'mantar_ic', 'kirmizi_mantar', 'papatya', 'lale', 'lavanta', 'saz'
+  'mantar_kirmizi_blok', 'mantar_kahve_blok', 'mantar_sap', 'mantar_ic', 'kirmizi_mantar', 'papatya', 'lale', 'lavanta', 'saz',
+  /* 0.41.6: çalılar */
+  'cali_yesil', 'cali_ladin', 'cali_savan', 'cali_sonbahar'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -646,7 +648,8 @@ DUVAR_MALZEME37.forEach(m => { m.duvar = ayir(1); blok(m.duvar, { ...yapiOrtak(B
    Kimlikleri sabittir (3000'den başlar): sonradan eklenen eşya ve bloklar mevcut kimlikleri kaydırmaz. */
 export const DOGA41 = { kizilKum: 3000, miselyum: 3001, kizilYaprak: 3002, turuncuYaprak: 3003, sariYaprak: 3004, mangrovKutuk: 3005, mangrovYaprak: 3006, mangrovKok: 3007,
   kirmiziMantarBlok: 3008, kahveMantarBlok: 3009, mantarSap: 3010, kirmiziMantar: 3011, papatya: 3012, lale: 3013, lavanta: 3014, saz: 3015, sazSu: 3016,
-  devrikMeseX: 3017, devrikMeseZ: 3018, devrikLadinX: 3019, devrikLadinZ: 3020, devrikHusX: 3021, devrikHusZ: 3022 };
+  devrikMeseX: 3017, devrikMeseZ: 3018, devrikLadinX: 3019, devrikLadinZ: 3020, devrikHusX: 3021, devrikHusZ: 3022,
+  cali: 3023, ladinCali: 3024, savanCali: 3025, sonbaharCali: 3026, buyukCali: 3027 };
 {
   const D = DOGA41;
   const yaprakDusur = r => { const o = []; if (r() < 1 / 16) o.push([40, 1]); if (r() < 1 / 30) o.push([256, 1]); return o; };
@@ -667,6 +670,11 @@ export const DOGA41 = { kizilKum: 3000, miselyum: 3001, kizilYaprak: 3002, turun
   blok(D.lavanta, { ad: 'Lavanta', dok: 'lavanta', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 119 });
   blok(D.saz, { ad: 'Saz', dok: 'saz', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, harita: 4 });
   blok(D.sazSu, { ad: 'Saz', dok: 'saz', cizim: C_CAPRAZ, kati: false, opak: false, sertlik: 0, ses: 'bitki', bitki: true, suIcinde: true, sivi: true, gizli: true, dusur: () => [[D.saz, 1]], harita: 7 });
+  /* 0.41.6: çalılar: yere yakın, kendine özgü biçimli (üst üste binen yuvarlak yaprak kümeleri) bitkiler; içinden geçilir */
+  const caliDusur = r => { const o = []; if (r() < 0.25) o.push([256, 1]); if (r() < 0.06) o.push([40, 1]); return o; };
+  for (const [id, ad, dok, ek] of [[D.cali, 'Çalı', 'cali_yesil', {}], [D.ladinCali, 'Ladin Çalısı', 'cali_ladin', {}], [D.savanCali, 'Savan Çalısı', 'cali_savan', {}],
+    [D.sonbaharCali, 'Sonbahar Çalısı', 'cali_sonbahar', {}], [D.buyukCali, 'Büyük Çalı', 'cali_yesil', { buyuk: true }]])
+    blok(id, { ad, dok, cizim: C_SEKIL, sekil: 'cali', kati: false, opak: false, sertlik: 0.3, alet: 'makas', ses: 'bitki', bitki: true, dusur: caliDusur, harita: id === D.savanCali ? 142 : id === D.sonbaharCali ? 115 : 9, ...ek });
   /* Devrik kütükler: yatay yatan ağaç gövdeleri (halkalı yüzler uçlardadır); kırılınca olağan kütük düşer */
   for (const [x, z, ad, dk, kutuk] of [[D.devrikMeseX, D.devrikMeseZ, 'Meşe', 'mese', 8], [D.devrikLadinX, D.devrikLadinZ, 'Ladin', 'ladin', 10], [D.devrikHusX, D.devrikHusZ, 'Huş', 'hus', 12]]) {
     blok(x, { ad: `Devrik ${ad} Kütüğü`, dok: [dk + '_yan', dk + '_yan', dk + '_yan'], devrik: [dk + '_ust', 0], sertlik: 2, alet: 'balta', ses: 'odun', gizli: true, dusur: () => [[kutuk, 1]], harita: kutuk });

@@ -95,6 +95,10 @@ export function sekilKutulari(id, komsu, carp = false) {
     case 'fener': return [[5 * P, 0, 5 * P, 11 * P, 8 * P, 11 * P], [6 * P, 8 * P, 6 * P, 10 * P, 9 * P, 10 * P, T.demir_cubuk], [7 * P, 9 * P, 7.5 * P, 9 * P, 13 * P, 8.5 * P, T.demir_cubuk]];
     case 'tel': return carp ? [] : [[0, P, 7 * P, 1, 1.6 * P, 9 * P], [7 * P, P, 0, 9 * P, 1.6 * P, 1]];
     case 'nilufer': return carp ? [] : [[P, 0, P, 15 * P, 0.5 * P, 15 * P]];
+    /* 0.41.6: çalı: üst üste binen kümelerden yuvarlak tümsek (içinden geçilir) */
+    case 'cali': return carp ? [] : b.buyuk
+      ? [[0, 0, 2 * P, 1, 9 * P, 14 * P], [2 * P, 0, 0, 14 * P, 9 * P, 1], [P, 9 * P, P, 15 * P, 13 * P, 15 * P], [4 * P, 13 * P, 4 * P, 12 * P, 1, 12 * P]]
+      : [[P, 0, 3 * P, 15 * P, 6 * P, 13 * P], [3 * P, 0, P, 13 * P, 6 * P, 15 * P], [2 * P, 6 * P, 2 * P, 14 * P, 9 * P, 14 * P], [5 * P, 9 * P, 5 * P, 11 * P, 11 * P, 11 * P]];
     /* Sandık: gövde ve kapak (dokuda kapak çizgisi), önde demir kilit */
     case 'sandik': return carp ? [[P, 0, P, 15 * P, 14 * P, 15 * P]] : [[P, 0, P, 15 * P, 14 * P, 15 * P], [7 * P, 7 * P, 15 * P, 9 * P, 11 * P, 16 * P, T.demir_cubuk]];
     case 'cit': {
