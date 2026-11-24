@@ -73,9 +73,11 @@ export function meshle(P, H = PY, ton = null) {
   PH = H; TON = ton;
   /* Gökyüzü ışığı: her sütunda yukarıdan aşağı */
   const gok = new Float32Array(DB * DB * PH);
+  let yAlt = PH;   // 0.41.1: en alçak yüzeyin yüksekliği (yayılma bunun biraz altına kadar hesaplanır)
   for (let z = -1; z <= PB; z++) for (let x = -1; x <= PB; x++) {
     let s = 1;
     for (let y = PH - 1; y >= 0; y--) {
+      if (s === 0) { if (y + 1 < yAlt) yAlt = y + 1; break; }   // altı karanlıktır (dizi zaten sıfır)
       const i = ddizin(x, y, z), id = P[i];
       if (id) {
         if (OPAK[id]) s = 0;
@@ -88,6 +90,22 @@ export function meshle(P, H = PY, ton = null) {
       gok[i] = s;
       if (GOLGE[id]) s = 0;
     }
+  }
+  /* 0.41.1: gökyüzü ışığı yanlara ve aşağıya da yayılır (her adımda azalarak): mağara ağızları, oyuklar ve çıkıntı altları zifiri karanlık görünmez */
+  const YAY = 0.8;
+  for (let tur = 0; tur < 6; tur++) {
+    let degisti = false;
+    for (let y = Math.max(0, yAlt - 12); y < PH; y++) for (let z = -1; z <= PB; z++) for (let x = -1; x <= PB; x++) {
+      const i = ddizin(x, y, z), id = P[i];
+      if (OPAK[id] || LAV[id] || gok[i] >= 0.8) continue;
+      let m = 0;
+      if (x > -1) m = Math.max(m, gok[i - DX]); if (x < PB) m = Math.max(m, gok[i + DX]);
+      if (z > -1) m = Math.max(m, gok[i - DZ]); if (z < PB) m = Math.max(m, gok[i + DZ]);
+      if (y < PH - 1) m = Math.max(m, gok[i + DY]); if (y > 0) m = Math.max(m, gok[i - DY]);
+      m *= YAY;
+      if (m > gok[i] + 0.01) { gok[i] = m; degisti = true; }
+    }
+    if (!degisti) break;
   }
   const op = new Tampon(), su = new Tampon();
   let ustY = 0;

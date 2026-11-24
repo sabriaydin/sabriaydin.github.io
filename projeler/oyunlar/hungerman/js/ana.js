@@ -36,7 +36,6 @@ import { lanetliAda, ADA_AD } from './dunya/ada-uretici.js';
 import { GokOlaylari, kanliAyGunu } from './oyun/gok.js';
 import { hissedilenSicaklik } from './oyun/sicaklik.js';
 import { Ortam } from './oyun/ortam.js';
-import { UzakArazi } from './grafik/uzak-arazi.js';
 import { mezarKoy, mezarBosalt } from './oyun/mezar.js';
 import { Ogretici } from './arayuz/ogretici.js';
 import { Baskinlar } from './koy/baskin.js';
@@ -91,9 +90,6 @@ addEventListener('pointerdown', () => { ses.baslat(); muzik.izinVer(); }, true);
 addEventListener('keydown', () => { ses.baslat(); muzik.izinVer(); }, true);
 let sahne;
 try { sahne = new Sahne(tuval); } catch (e) { hataGoster('WebGL başlatılamadı. Tarayıcınız veya ekran kartı sürücünüz WebGL desteklemiyor olabilir.'); throw e; }
-/* 0.41.0: uzak arazi (görüş mesafesinin ötesi; ayarlardan seçilir) */
-const uzakArazi = new UzakArazi(sahne);
-const UZAK_ARAZI = [['Kapalı', 0], ['512 blok', 512], ['768 blok', 768], ['1024 blok', 1024], ['1536 blok', 1536]];
 sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
 
 /* ---------- Ekran yönetimi ---------- */
@@ -191,7 +187,6 @@ function ayarFormu() {
     else { el.checked = !!ayar[anahtar]; el.onchange = () => { ayar[anahtar] = el.checked; ayarUygula(); }; }
   };
   bag('#aGorus', 'gorus', v => v + ' parça');
-  bag('#aUzak', 'uzakArazi', v => (UZAK_ARAZI[v] || UZAK_ARAZI[0])[0]);
   bag('#aFov', 'fov', v => v + '°');
   bag('#aHas', 'hassasiyet', v => v.toFixed(2).replace('.', ',') + '×');
   /* 0.29.1: geçerli değerlere uyan grafik ön ayarı işaretlenir */
@@ -410,7 +405,6 @@ const dokun = new Dokunmatik({ tus, fare, kilitle: () => kilitle(), kosKilit: v 
   } });
 if (ayar.dokunmatik === undefined) ayar.dokunmatik = dokunmatikCihaz();
 /* Telefon ve tabletlerde ilk açılışta görüş mesafesi düşük başlar */
-if (ayar.uzakArazi === undefined) { ayar.uzakArazi = dokunmatikCihaz() ? 0 : 2; ayarlariKaydet(ayar); }   // 0.41.0
 if (ayar.mobilVarsayilan === undefined) { ayar.mobilVarsayilan = true; if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5); ayarlariKaydet(ayar); }
 dokun.ayarla(ayar.dokunmatik);
 function kilitBirak() {
@@ -596,7 +590,6 @@ function oyunBaslat(v) {
   dunyaSurumAyarla(ureticiSurum);
   const dunya = new Dunya(v.tohum, sahne);
   dunya.gorusAyarla(ayar.gorus);
-  uzakArazi.baslat(v.tohum, ureticiSurum);
   dunya.degisiklikleriYukle(v.degisiklikler);
   const oyuncu = new Oyuncu(dunya);
   const envanter = new Envanter();
@@ -1212,10 +1205,6 @@ function adim(t) {
   const H = o.hava, yagisTur = diyar ? 0 : H.yagisTuru(sahne.kamera.position);
   o.gok.guncelle(calisiyor ? dt : 0);
   H.guncelle(calisiyor ? dt : 0, sahne.kamera, gozSuda || diyar);
-  /* 0.41.0: uzak arazi */
-  const uzakM = !diyar && !gozSuda ? (UZAK_ARAZI[ayar.uzakArazi ?? 2] || UZAK_ARAZI[0])[1] : 0;
-  sahne.uzakMesafe = uzakM;
-  uzakArazi.guncelle(p, uzakM, o.dunya.gorus * 16, uzakM > 0);
   const gun = sahne.gokGuncelle(o.zaman, sahne.kamera.position, o.oyuncu.basLavda ? 'lav' : gozSuda ? (maskeli ? 'maske' : true) : false, o.dunya.gorus, o.sure,
     diyar ? { diyar: true, gece: o.hayatta.etki('gece') } : { y: H.yogunluk * (yagisTur === 0 ? 0.45 : 1), f: H.firtinaK, simsek: H.simsekParla, gece: o.hayatta.etki('gece') });
   o.gunIsigi = gun;

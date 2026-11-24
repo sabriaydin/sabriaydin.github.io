@@ -117,6 +117,10 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.1 (0.41.1): Mağara ağzı aydınlatması, uzak arazi kaldırıldı
+- Gökyüzü ışığı artık yalnızca yukarıdan aşağı değil, yanlara ve aşağıya da azalarak yayılır: mağara ağızları, uçurum altı oyukları ve çıkıntı altları zifiri karanlık görünmez; içeri doğru kademeli olarak kararır.
+- Uzak arazi (seyrek ızgaralı uzak görünüm) kaldırıldı: arazi yeniden görüş mesafesi kadar tam çizilir, ötesi sisle gizlenir. Ayarlardaki "Uzak arazi" seçeneği kaldırıldı; `js/grafik/uzak-arazi.js` ve `js/dunya/uzak-isci.js` artık kullanılmaz (silinebilir).
+
 ## 41.0 (0.41.0): Yeni dünya üreticisi, büyük dünya ve atmosfer
 Yeni dünyalar yeni üreticiyle (sürüm 2) kurulur; eski dünyalar eski üreticiyle açılmaya devam eder (dünya kaydında `uretici` alanı; kaydı olmayan dünyalar sürüm 1 sayılır, arazileri değişmez).
 - Büyük dünya: yükseklik 128'den 256'ya (eski dünyalarda arazi alttaki 128 blokta kalır), kıta yarıçapı 2600'den 4000'e (çap yaklaşık 8000 blok), dünya sınırı 3600'den 5400'e çıktı. Bulutlar 196 yüksekliğe taşındı; haritada yükseklik ölçeklenir.
@@ -128,7 +132,7 @@ Yeni dünyalar yeni üreticiyle (sürüm 2) kurulur; eski dünyalar eski üretic
 - Yeraltı: kıvrımlı tünellere ek olarak derinlerde geniş mağara salonları, yeraltı gölleri ve yeraltı nehirleri, yüzeye açılan mağara ağızları; granit, kireçtaşı ve bazalt kütleleri. Cevherler derinliğe ve biyoma göre dağılır (dağlarda yüksekte kömür ve demir, kayalık tepelerde bakır, kızıl kayalıklarda altın); bazı bölgelerde mağara duvarlarında görünen kalın demir (bazaltla) ve bakır (granitle) damarları bulunur.
 - Atmosfer: ormanda ve çayırda gündüz kuş cıvıltıları, gece çekirgeler ve baykuşlar, taygada ve dağlarda gece kurt ulumaları, çölde çöl rüzgârı ve gece çakallar, yükseklerde dağ rüzgârı, kıyıda martılar, nehir kıyısında dere ve şelale yakınında şelale sesi (gerçek kayıtlar; ses/LISANS.md). Bataklık ve mangrovda sis, gece bataklık, orman ve çayırlarda ateş böcekleri, çölde gündüz sıcak hava dalgalanması.
 - Biyoma özgü canlılar: mantar adalarında yalnızca inekler bulunur ve yüzeyde canavar doğmaz; çiçekli çayırda at ve tavşan, sonbahar ve sık ormanda domuz ve kurt, kayalık tepelerde koyun; bataklıkta zombilerin bir kısmı boğulmuş zombidir, karlı zirvelerde buz iskeletleri doğar.
-- Görüş ve başarım: Ayarlara "Uzak arazi" eklendi (Kapalı, 512, 768, 1024, 1536 blok; varsayılan 768, dokunmatik cihazlarda kapalı): yüklü parçaların ötesindeki arazi seyrek ızgaralı ve sade renkli olarak çizilir, sis bu mesafeye çekilir. Parça üretiminde mağara, taş ve damar gürültüleri 4 blokluk ızgarada örneklenip ara değerlenir; meshleme yalnızca parçanın dolu yüksekliğine kadar yapılır.
+- Başarım: Parça üretiminde mağara, taş ve damar gürültüleri 4 blokluk ızgarada örneklenip ara değerlenir; meshleme yalnızca parçanın dolu yüksekliğine kadar yapılır.
 
 ## 40.9 (0.40.9): Yeni ana menü arka planı (yüksek çözünürlük)
 - Ana menü arka planı yeniden çekildi: önceki görüntü, oyunun otomatik çözünürlük ayarı düşük çözünürlüğe indiği ve uzak parçalar yüklenmeden çekildiği için bulanık ve kısa görüşlüydü.
@@ -959,7 +963,6 @@ js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
 js/dunya/uretici-v1.js Eski dünyaların (sürüm 1) dondurulmuş üreticisi
 js/dunya/biyom.js     Biyomlar, alt biyomlar ve iklim
 js/dunya/agac.js, agac2.js Ağaç kurucular (eski türler ve fidanlar; dev ağaçlar, mangrov, dev mantarlar, çalılar)
-js/dunya/uzak-isci.js, js/grafik/uzak-arazi.js Uzak arazi (görüş mesafesinin ötesi)
 js/oyun/ortam.js, js/grafik/atesbocegi.js Biyom atmosferi: ortam sesleri, sis, ateş böcekleri, sıcak dalgası
 js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları

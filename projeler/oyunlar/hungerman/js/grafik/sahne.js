@@ -291,8 +291,6 @@ export class Sahne {
     const maske = suda === 'maske';
     const sis = lav ? new THREE.Color(0.9, 0.32, 0.05) : suda ? new THREE.Color(0.08, 0.22, 0.44).multiplyScalar((maske ? 0.45 : 0.35) + gun * (maske ? 0.75 : 0.65)) : ufuk.clone();
     let sisSon = lav ? 2.5 : maske ? 46 : suda ? 22 : (gorus * 16 - 6) * (1 - 0.42 * hy - 0.12 * hf), sisBas = lav ? 0 : maske ? 8 : suda ? 0 : sisSon * (0.62 - 0.3 * hy);
-    /* 0.41.0: uzak arazi açıkken sis, uzak arazinin sınırına çekilir */
-    if (this.uzakMesafe > 0 && !lav && !suda) { sisSon = Math.max(sisSon, this.uzakMesafe * (1 - 0.42 * hy - 0.12 * hf)); sisBas = Math.max(sisBas, sisSon * (0.5 - 0.3 * hy)); }
     /* 0.41.0: biyom sisi (bataklık ve mangrovda; ortamSis 0..1): görüş kısalır, sis yeşilimsi griye döner */
     const os = !lav && !suda ? (this.ortamSis || 0) : 0;
     if (os > 0.001) {
@@ -322,7 +320,7 @@ export class Sahne {
     this.cizici.setClearColor(sis);
     this.gokGrubu.visible = !suda && !diyar; this.bulut.visible = !suda && !diyar;
     if (diyar) return 0.4;
-    this.kamera.far = Math.max(600, gorus * 16 + 40, (this.uzakMesafe || 0) + 120); this.kamera.updateProjectionMatrix();
+    this.kamera.far = Math.max(600, gorus * 16 + 40); this.kamera.updateProjectionMatrix();
     return gun;
   }
 
