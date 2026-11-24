@@ -36,6 +36,8 @@ export function agacKur2(set, x, y, z, tur, r, kisim = 'hepsi', yaprakId = 0) {
       }
       if (gov) {
         for (let k = -1; k < boy; k++) for (const [ax, az] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(x + ax, y + k, z + az, 8, false);
+        /* 0.41.12: yamaçta 2 x 2 gövdenin alçak taraftaki köşeleri zemine kadar uzar (gövde havada kalmaz) */
+        for (const [ax, az] of [[0, 0], [1, 0], [0, 1], [1, 1]]) for (let yy = y - 2; yy >= y - 8; yy--) if (set(x + ax, yy, z + az, 8, 'kok') === false) break;
         /* Kök çıkıntıları */
         for (const [ax, az] of [[-1, 0], [2, 1], [1, -1], [0, 2]]) set(x + ax, y, z + az, 8, false);
         for (const [a, uz, h] of dl) for (let k = 1; k <= uz; k++) set(x + Math.round(Math.cos(a) * k), y + h + (k >> 1), z + Math.round(Math.sin(a) * k), 8, false);
@@ -57,7 +59,10 @@ export function agacKur2(set, x, y, z, tur, r, kisim = 'hepsi', yaprakId = 0) {
           }
         }
       }
-      if (gov) for (let k = -1; k < boy; k++) for (const [ax, az] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(x + ax, y + k, z + az, 10, false);
+      if (gov) {
+        for (let k = -1; k < boy; k++) for (const [ax, az] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(x + ax, y + k, z + az, 10, false);
+        for (const [ax, az] of [[0, 0], [1, 0], [0, 1], [1, 1]]) for (let yy = y - 2; yy >= y - 8; yy--) if (set(x + ax, yy, z + az, 10, 'kok') === false) break;
+      }
       return;
     }
     /* Uzun ladin ve uzun huş: olağan biçim, daha yüksek */

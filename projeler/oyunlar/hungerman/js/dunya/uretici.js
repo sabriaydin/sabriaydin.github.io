@@ -401,7 +401,27 @@ export class UreticiV2 {
     batikYaz(this, v, x0, z0);
     adaYaz(this, v, x0, z0);   // Lanetli Ada
     koyYaz(this, v, x0, z0);
+    this.kumDestek(v);
     return v;
+  }
+
+  /* 0.41.12: altı boş kalan kum, çakıl ve kızıl kum (mağara tavanı, kıyı yamacı) dengeli bir taşa döner: kum taşı, taş, turuncu pişmiş kil.
+     Böylece üretilen arazide düşmeyi bekleyen havada asılı kum kalmaz (Minecraft'taki kum taşı tabanı gibi) */
+  kumDestek(v) {
+    const K = PB * PB;
+    for (let y = 2; y < PY - 1; y++) for (let j = 0; j < K; j++) {
+      const i = y * K + j, b = v[i];
+      if ((b === 5 || b === 6 || b === D.kizilKum) && v[i - K] === 0) v[i] = b === 5 ? 24 : b === 6 ? 2 : 962;
+      /* Sonradan oyulan maden ve zindanların altını ya da üstünü boşalttığı dikit ve sarkıtlar kaldırılır */
+      else if ((b === 151 || b === 36 || b === 153 || b === 25) && v[i - K] === 0) v[i] = 0;
+      else if (b === 150 && v[i + K] === 0) v[i] = 0;
+    }
+    /* 0.41.12: mağaralarda dört yanı, altı ve üstü boş tek taş blokları (havada asılı kırıntılar) kaldırılır */
+    for (let y = 2; y < PY - 2; y++) for (let z = 1; z < PB - 1; z++) for (let x = 1; x < PB - 1; x++) {
+      const i = (y * PB + z) * PB + x, b = v[i];
+      if (!TAS.has(b) && b !== 16 && b !== 17 && b !== 18) continue;
+      if (!v[i - 1] && !v[i + 1] && !v[i - PB] && !v[i + PB] && !v[i - K] && !v[i + K]) v[i] = 0;
+    }
   }
 
   /* Mağaralar: kıvrımlı tüneller, derinlerde geniş salonlar, yeraltı gölleri ve nehirleri, lav gölleri, uçurum altı oyukları */
@@ -412,7 +432,7 @@ export class UreticiV2 {
     const tO = new Izgara((x, y, z) => gO.g3(x / 85, y / 45, z / 85), x0, z0, 72);
     const tS = new Izgara((x, y, z) => gBm.g3(x / 120, y / 52, z / 120) + 0.25 * gBm.g3(x / 34 + 50, y / 24, z / 34), x0, z0, 72);
     /* Yeraltı göllerinin bölgesi ve seviyesi; yeraltı nehirleri */
-    const golB = this.gYg.g2((x0 + 8) / 240, (z0 + 8) / 240) > 0.15, golL = 20 + Math.floor((this.gYg.g2((x0 + 8) / 600 + 30, (z0 + 8) / 600) + 1) * 6);
+    /* 0.41.12: mağaralara su doldurulmaz: parça parça doldurulan yeraltı gölleri ve nehirleri parça sınırlarında havada asılı su duvarları bırakıyordu (yeraltı nehri kanalları kuru tünel olarak kalır) */
     for (let lz = 0; lz < PB; lz++) for (let lx = 0; lx < PB; lx++) {
       const o = kolonlar[lz * PB + lx];
       const x = x0 + lx, z = z0 + lz;
@@ -426,35 +446,31 @@ export class UreticiV2 {
       const yn = Math.abs(this.gYn.g2((x + this.gW.g2(x / 90, z / 90) * 30) / 380, (z + this.gW.g2(x / 90 + 7, z / 90) * 30) / 380));
       const ynY = 22 + Math.floor((this.gYn.g2(x / 700 + 11, z / 700) + 1) * 5);
       const ynVar = yn < 0.016 && o.h > ynY + 12;
+      let enUst = -1;
       for (let y = 4; y <= ust; y++) {
         const i = dizin(lx, y, lz);
         const b = v[i];
         if (b === 0 || b === 1 || b === 7) continue;
         const a = tA.al(lx, y, lz), c = tB.al(lx, y, lz);
         let oy = a * a + c * c < 0.0045;
-        if (!oy && y < 72) {
+        /* 0.41.12: geniş boşluklar yüzeyin en az 8 blok altında kalır (yüzeyin hemen altında ince tavanlı büyük oyuklar ve havada asılı toprak tabakaları oluşmaz) */
+        if (!oy && y < 72 && y > 11 && y < o.h - 8) {   // 0.41.12: lav düzeyinde (y <= 10) geniş boşluk açılmaz; lav yalnız tünel diplerinde kalır
           oy = tO.al(lx, y, lz) > 0.6 - (40 - Math.min(40, y)) * 0.004;
           /* Geniş mağara salonları: derinlere doğru büyür, yüzeyin en az 14 blok altında kalır */
-          if (!oy && y > 6 && y < o.h - 14) oy = tS.al(lx, y, lz) > 0.62 - (64 - y) * 0.0035;
+          if (!oy && y > 13 && y < o.h - 14) oy = tS.al(lx, y, lz) > 0.62 - (64 - y) * 0.0035;   // 0.41.12: salonlar lav düzeyinin üstünde (lav denizleri oluşmaz)
         }
         if (!oy && ynVar && y >= ynY - 2 && y <= ynY + 3 - Math.floor(yn / 0.016 * 3)) oy = true;
         if (!oy) continue;
         /* Derinlerde boşluklar lavla, yeraltı göl bölgelerinde suyla dolar */
         if (y <= 10) v[i] = y === 10 && this.gO.g3(x / 7, 3.5, z / 7) > 0.32 ? 515 : 59;
-        else if ((golB && y <= golL && y < o.h - 10) || (ynVar && y <= ynY && Math.abs(y - ynY) <= 3)) v[i] = 7;
-        else v[i] = 0;
+        else { v[i] = 0; if (y > enUst) enUst = y; }
       }
+      /* 0.41.12: mağara ağzı: tünel yüzeye 4 bloktan fazla yaklaştıysa üstü tamamen açılır (1-3 blokluk ince tavan kalmaz) */
+      if (kara && enUst >= o.h - 4 && enUst < o.h) for (let y = enUst; y <= o.h; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
       /* Yarıklar (kanyonlar) */
       const dip = this.yarik(x, z, o);
       if (dip != null && tavan === PY) for (let y = dip; y <= o.h; y++) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
-      /* Uçurum altı oyukları ve çıkıntılar: dik yamaçlarda yüzeyin altında oyuklar (üst kabuk kalır) */
-      const ab = o.ab ?? o.b;
-      if (kara && o.eg >= 6 && o.h > DENIZ + 10 && (ab === BY.KAYALIK || ab === BY.KIZIL || ab === BY.YALIYAR || o.b === BY.DAG || o.tm > 0.5)) {
-        for (let y = Math.max(DENIZ + 2, o.h - 14); y <= Math.min(o.h - 3, tavan); y++) {
-          const n = this.gU.g3(x / 16, y / 9, z / 16);
-          if (n > 0.42) { const i = dizin(lx, y, lz); if (v[i] !== 1 && v[i] !== 7) v[i] = 0; }
-        }
-      }
+      /* 0.41.12: uçurum altı oyukları kaldırıldı (sütun sütun oyulduğu için yamaçlarda tek blokluk yarıklar ve havada ince toprak tabakaları oluşturuyordu) */
       /* Parıltı kristalleri: derin mağaraların tavan ve tabanında */
       for (let y = 6; y < Math.min(ust, 40); y++) {
         const i = dizin(lx, y, lz);
@@ -670,10 +686,13 @@ export class UreticiV2 {
     const set = this.yazici(v, x0, z0), o = {}, q = {};
     const OLASILIK = { [BY.ORMAN]: 0.08, [BY.SIK]: 0.14, [BY.SONBAHAR]: 0.1, [BY.HUS]: 0.07, [BY.TAYGA]: 0.08, [BY.BATAKLIK]: 0.06 };
     this.hucreler(x0, z0, KUTUK_HUCRE, 7, 0x6b7574, (x, z, s) => {
+      const yon = karma2(this.tohum ^ 0x6b75, x, z) < 0.5 ? 0 : 1, uz = 3 + Math.floor(karma2(this.tohum ^ 0x6b76, x, z) * 4);
+      /* 0.41.11: kütük kendi hücresinin dışına taşmaz (komşu hücrelerin kütükleri kesişip L/T biçimi oluşturmaz) */
+      const sx = Math.floor(x / KUTUK_HUCRE) * KUTUK_HUCRE, sz = Math.floor(z / KUTUK_HUCRE) * KUTUK_HUCRE, kenar = (v, s0, u) => Math.max(s0 + 1, Math.min(v, s0 + KUTUK_HUCRE - 1 - u));
+      if (yon) { z = kenar(z, sz, uz); x = kenar(x, sx, 1); } else { x = kenar(x, sx, uz); z = kenar(z, sz, 1); }
       this.kolon(x, z, o);
       const ab = o.ab ?? o.b, p = OLASILIK[ab] ?? OLASILIK[o.b];
       if (!p || s > p || !this.karaUygun(o, x, z)) return;
-      const yon = karma2(this.tohum ^ 0x6b75, x, z) < 0.5 ? 0 : 1, uz = 3 + Math.floor(karma2(this.tohum ^ 0x6b76, x, z) * 4);
       const tip = o.b === BY.TAYGA ? 1 : o.b === BY.HUS || ab === BY.SONBAHAR && s < p / 2 ? 2 : 0;
       const id = [[D.devrikMeseX, D.devrikMeseZ], [D.devrikLadinX, D.devrikLadinZ], [D.devrikHusX, D.devrikHusZ]][tip][yon];
       for (let k = 0; k < uz; k++) { this.kolon(x + (yon ? 0 : k), z + (yon ? k : 0), q); if (q.h !== o.h || q.h < q.su) return; }
@@ -755,7 +774,7 @@ export class UreticiV2 {
           if (r > 0.86 && v[dizin(lx, o.su + 1, lz)] === 0 && v[dizin(lx, o.su, lz)] === 7) v[dizin(lx, o.su + 1, lz)] = 146;
           continue;
         }
-        if (o.gl && derin >= 2) { if (r < 0.025 && v[dizin(lx, o.su + 1, lz)] === 0 && v[dizin(lx, o.su, lz)] === 7) v[dizin(lx, o.su + 1, lz)] = 146; else if (r < 0.2 && v[ui] === 7) v[ui] = 68; continue; }
+        if (o.gl && derin >= 2) { if (r < 0.012 && v[dizin(lx, o.su + 1, lz)] === 0 && v[dizin(lx, o.su, lz)] === 7) v[dizin(lx, o.su + 1, lz)] = 146; else if (r < 0.2 && v[ui] === 7) v[ui] = 68; continue; }
         /* Sıcak ve sığ sularda mercan resifleri */
         const resif = o.t > 0.1 && derin >= 3 && derin <= 16 && (o.b === BY.OKYANUS || o.b === BY.DERIN) && this.gZ.g2(x / 36 + 40, z / 36) > -0.05;
         if (resif) {

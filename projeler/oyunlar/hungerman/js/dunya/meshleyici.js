@@ -300,11 +300,13 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
     const doku = YUZ_DOKU[(lav ? 59 : 7) * 6 + f];
     const b = T.n;
     const g = f === 2 ? 1 : (gok[ni] || gok[i]);
+    /* 0.41.12: akan ve düşen suyun yan yüzleri akış canlandırması alır (gölgelendiricide doku aşağı kayar): ışık değerine +4 olarak işlenir */
+    const akis = !lav && f !== 2 && f !== 3 && (SU_SEVIYE[P[i]] < 8 || (BLOKLAR[P[i]] && BLOKLAR[P[i]].dusen)) ? 4 : 0;
     for (let c = 0; c < 4; c++) {
       const k = Y.k[c];
       T.p.push(x + k[0], y + k[1] * yuk(k[0], k[2]), z + k[2]);
       dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
-      if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g, g);
+      if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g + akis, g);
       tonEkle(T, lav ? 0 : 3, x, z, k[0], k[2]);
     }
     T.n += 4;

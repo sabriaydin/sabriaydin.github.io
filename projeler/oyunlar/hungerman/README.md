@@ -117,6 +117,23 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.12 (0.41.12): Dünya oluşumu hata taraması ve akan su canlandırması
+Tohum 4122432088 başta olmak üzere üç tohumda doğma noktası çevresindeki yaklaşık 1900 parça otomatik olarak tarandı; bulunan hatalar düzeltildi:
+- Havada asılı su duvarları (mağaralar): yeraltı gölleri ve nehirleri parça parça dolduruluyordu; parça sınırlarında havada duran su katmanları ve lava değen su yığınları oluşuyordu (tarama: 701 hücre). Mağaralara artık su doldurulmaz; yeraltı nehri kanalları kuru tünel olarak kalır (tarama: 0).
+- Yamaçlarda tek blokluk dikey yarıklar ve tarak görünümü, kum taşı ve taş çizgileri: uçurum altı oyukları sütun sütun oyulduğu için oluşuyordu. Bu oyma kaldırıldı.
+- Havada asılı ince toprak tabakaları: mağara girişlerinde geniş oyuklar yüzeyin hemen altına kadar çıkıyor, 1-3 blokluk tavan bırakıyordu (tarama: 109). Geniş boşluklar yüzeyin en az 8 blok altında kalır; yüzeye 4 bloktan fazla yaklaşan tünelin üstü tamamen açılır (tarama: 0).
+- Lav denizleri: geniş mağara salonları lav düzeyine (y 10) kadar iniyor, salonların tabanı baştan sona lavla doluyordu. Geniş boşluklar artık y 12'nin üstündedir; lav yalnız derin tünellerin dibinde kalır.
+- Havada asılı kum, çakıl ve kızıl kum (mağara tavanları, yamaçlar): altı boş olanlar kum taşına, taşa ve pişmiş kile döner (tarama: 127 → 0).
+- Yamaçtaki dev meşe ve dev ladinlerin 2 x 2 gövdesinin alçak taraftaki köşeleri havada kalıyordu; gövde zemine kadar uzar.
+- Mağaralarda dört yanı boş tek taş blokları ve maden ile zindan oyulduktan sonra altı boşalan dikitler, sarkıtlar ve mantarlar kaldırılır.
+- Göllerde nilüfer sıklığı yarıya indirildi.
+- Akan su canlandırması: akan ve düşen suyun yan yüzlerinde doku sürekli aşağı kayar; şelaleler ve nehir basamakları sabit bir su duvarı gibi değil, akan su olarak görünür.
+- Yalnızca yeni yüklenen bölgelerde geçerlidir (akan su canlandırması her yerde).
+
+## 41.11 (0.41.11): Devrik kütük düzeltmesi
+- Komşu hücrelere yerleşen iki devrik kütük birbirine değip ya da kesişip L veya T biçiminde birleşebiliyordu (kesişme hücresinde ötekinin halkalı ucu yandan görünüyordu). Her kütük artık kendi hücresinin içinde, kenarlardan bir blok içeride kalır; üç tohumda 10 800 parçalık denetimde kesişme yok.
+- Yalnızca yeni yüklenen bölgelerde geçerlidir.
+
 ## 41.10 (0.41.10): Gerçekçi ses
 - Konumlu ses: canlı sesleri (normal, acıma, ölüm, saldırı), ok ve ateş topu sesleri, Ada Bekçisi'nin adımları, diğer oyuncuların blok kırma ve koyma sesleri ve mağaradaki lav sesi artık kaynağın konumuna göre çalar:
   - Uzaklık: ses uzaklıkla yumuşakça azalır, menzil dışında hiç çalmaz; uzaktaki seslerin tizleri havada sönümlenir.

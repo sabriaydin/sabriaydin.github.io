@@ -22,10 +22,15 @@ varying float vGok;
 varying vec3 vDunya;
 varying float vUzak;
 varying vec3 vTon;
+varying float vAkis;
 void main() {
   vTon = 1.0 + ton * 0.5;   /* 0.41.0: biyom tonu (öznitelik yoksa 0: değişiklik yok) */
   float a = isik.x, sal = 0.0;
   if (a < -1.0) { sal = 1.0; a = -a - 1.0; } else if (a < 0.0) { sal = 0.3 * yaprakSal; a = -a; }   // 0.33.0: ağaç yaprakları yalnızca fırtınada salınır
+  vAkis = 0.0;
+  #ifdef SU
+    if (a > 3.0) { vAkis = 1.0; a -= 4.0; }   /* 0.41.12: akan ve düşen suyun yan yüzü */
+  #endif
   vUv = uv; vAo = a; vGok = isik.y;
   vec4 d = modelMatrix * vec4(position, 1.0);
   if (sal > 0.0) {
@@ -67,12 +72,20 @@ varying float vGok;
 varying vec3 vDunya;
 varying float vUzak;
 varying vec3 vTon;
+varying float vAkis;
 void main() {
   vec2 uv = vUv;
   if (vAo > 1.5) { uv.x += sin(zaman * 0.7 + vDunya.z * 0.5) * 0.0012; uv.y += cos(zaman * 0.6 + vDunya.x * 0.5) * 0.0012; }
   #ifdef SU
-    uv.x += sin(zaman * 1.3 + vDunya.z * 0.6) * 0.0015;
-    uv.y += cos(zaman * 1.1 + vDunya.x * 0.6) * 0.0015;
+    if (vAkis > 0.5) {
+      /* 0.41.12: akış canlandırması: doku kendi karesi içinde aşağı doğru kayar */
+      vec2 kare = floor(vUv * ${ATLAS_N}.0), yer = vUv * ${ATLAS_N}.0 - kare;
+      yer.y = fract(yer.y + zaman * 1.4);
+      uv = (kare + clamp(yer, 0.002, 0.998)) / ${ATLAS_N}.0;
+    } else {
+      uv.x += sin(zaman * 1.3 + vDunya.z * 0.6) * 0.0015;
+      uv.y += cos(zaman * 1.1 + vDunya.x * 0.6) * 0.0015;
+    }
   #endif
   vec4 t = texture2D(harita, uv);
   #ifndef SU
