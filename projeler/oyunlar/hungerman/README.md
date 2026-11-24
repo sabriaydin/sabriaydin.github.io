@@ -117,6 +117,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.4 (0.41.4): Düşen kum ve çakıl
+- Kum, çakıl ve kızıl kum Minecraft'taki gibi havada asılı kalmaz: altı boş bir yere konduğunda ya da altındaki blok kırıldığında yer çekimiyle düşen bir küp olarak aşağı iner ve ilk katı zeminin üstüne yerleşir. Üst üste duran bloklar sırasını koruyarak düşer.
+- Düşerken boşluktan, sudan ve lavdan, ot ve çiçek gibi bitkilerden geçer (yerine yerleştiği bitki silinir); meşale gibi katı olmayan bloklara tutunur.
+- Dünya üretimindeki kum ve çakıl, bir değişiklikle tetiklenene kadar yerinde kalır (Minecraft'taki gibi). Tek oyunculuda ve sunucuda çalışır; değişiklikler kayda geçer ve diğer oyunculara iletilir.
+
 ## 41.3 (0.41.3): Yeni ışık sistemi, akan su ve nehir düzeltmeleri
 - Gökyüzü ışığı yeniden yazıldı (0-15 ışık düzeyi): gökyüzünü gören hücreler tam aydınlıktır; ışık her yöne (yanlara, aşağı ve yukarı) taşkın dolgusuyla yayılır ve her blokta bir düzey azalır. Tek blokluk oyuklar, mağara ağızları, çıkıntı ve ağaç altları artık zifiri karanlık değildir; içeri doğru yaklaşık 15 blokta kademeli olarak kararır. Su ve yapraklar ışığı azaltarak geçirir.
 - Işık, parçanın her yönde 8 blok ötesini de kapsayan hacimde hesaplanır: komşu parçadaki açıklıktan gelen ışık sayılır, parça sınırlarında aydınlık farkı oluşmaz. Sınıra 4 bloktan yakın blok değişiklikleri komşu parçanın ışığını da yeniler.
@@ -981,6 +986,7 @@ js/dunya/uretici.js   Dünya üretimi (kıta, biyom, ağaç, cevher, mağara)
 js/dunya/uretici-v1.js Eski dünyaların (sürüm 1) dondurulmuş üreticisi
 js/dunya/biyom.js     Biyomlar, alt biyomlar ve iklim
 js/dunya/agac.js, agac2.js Ağaç kurucular (eski türler ve fidanlar; dev ağaçlar, mangrov, dev mantarlar, çalılar)
+js/oyun/kum-dusmesi.js Düşen kum ve çakıl
 js/oyun/ortam.js, js/grafik/atesbocegi.js Biyom atmosferi: ortam sesleri, sis, ateş böcekleri, sıcak dalgası
 js/dunya/koy-uretici.js Köy yerleşimi ve yapıları
 js/dunya/zindan-uretici.js Zindan odaları

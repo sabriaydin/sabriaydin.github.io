@@ -9,6 +9,7 @@ import { Oyuncu } from './oyun/oyuncu.js';
 import { Envanter } from './oyun/envanter.js';
 import { Hayatta, OLUM_SEBEBI } from './oyun/hayatta.js';
 import { Dusenler } from './oyun/dusenler.js';
+import { KumDusmesi } from './oyun/kum-dusmesi.js';
 import { Etkilesim } from './oyun/etkilesim.js';
 import { Olta } from './oyun/olta.js';
 import { Tekneler } from './oyun/tekneler.js';
@@ -685,6 +686,7 @@ function oyunBaslat(v) {
   /* 0.30.5: akan su (tek oyunculu ve sunucu) */
   if (v.yapiPlani && Array.isArray(v.yapiPlani.b)) oyun.etkilesim.plan.plan = v.yapiPlani;   // 0.35.0
   oyun.suAkisi = v.istemci ? null : new SuAkisi(dunya);
+  oyun.kumDusmesi = v.istemci ? null : new KumDusmesi(dunya, sahne);   // 0.41.4: kum ve çakıl düşer
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar,
     canlilar: () => { const l = []; if (!oyun.hayatta.olu) l.push([oyun.oyuncu.konum.x, oyun.oyuncu.konum.y + 1, oyun.oyuncu.konum.z, 'o']); if (oyun.ag && oyun.ag.konumlar) for (const q of oyun.ag.konumlar()) l.push([q.x, q.y + 1, q.z, 'o']);
       for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }),
@@ -1006,6 +1008,7 @@ function oyunBitir() {
   oyun.tekneler.temizle(); oyun.fenerler.temizle(); oyun.olta.kaldir();
   oyun.hava.temizle(); ses.yagmurAyarla(0);
   konsol.kesifBitir(); gelPencere.oyunBitti();
+  if (oyun.kumDusmesi) oyun.kumDusmesi.kapat();
   sahne.sahne.remove(oyun.dusenler.grup); sahne.sahne.remove(oyun.dusenler.noktalar); sahne.sahne.remove(oyun.tekneler.grup, oyun.olta.mesh, oyun.olta.cizgi);
   oyun.dunya.yoket();
   sahne.secimGoster(null);
@@ -1174,6 +1177,7 @@ function adim(t) {
     if (o.firinlar) o.firinlar.guncelle(dt);   // 0.33.0: fırın ve kamp ateşi
     if (o.baskinlar) o.baskinlar.guncelle(dt, o);   // 0.35.0: köy baskınları
     if (o.suAkisi) o.suAkisi.guncelle(dt);   // 0.30.5
+    if (o.kumDusmesi) o.kumDusmesi.guncelle(dt, o.gunIsigi ?? 1);
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
     if (o.tikSayac > 0.5 && !o.istemci) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); o.dunya.mevsimTik(p.x, p.z); if (ekKonumlar) for (const q of ekKonumlar) { o.dunya.rastgeleTik(q.x, q.z); o.dunya.mevsimTik(q.x, q.z); } o.dunya.ekinTik(); }
