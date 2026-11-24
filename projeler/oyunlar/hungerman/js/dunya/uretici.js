@@ -44,6 +44,8 @@ const NEHIR_ADIM = 6, GOL_HUCRE = 360, MANTAR_HUCRE = 1200, KEMER_HUCRE = 260;
 /* Ağaç ve süs ızgaraları (hücre boyu, tohum) */
 const HUCRE = 5, CALI_HUCRE = 4, KUTUK_HUCRE = 9, KAYA_HUCRE = 11;
 const lerp = (a, b, t) => a + (b - a) * t;
+/* 0.41.2: karla kaplı zirve (yüzey kar; alt biyom 'Karlı Zirveler') */
+const karliV2 = (h, te) => (h > DENIZ + 70 && te < SICAK.SOGUK) || (h > DENIZ + 100 && te < 0.1);
 const yuzeyMi = ab => ab !== BY.OKYANUS && ab !== BY.DERIN;
 
 /* 4 blokluk ızgarada örneklenen ve üç doğrusal ara değerlenen 3B gürültü (parça başına) */
@@ -127,6 +129,8 @@ export class UreticiV2 {
         r /= top;
         h += dagK * (Math.pow(r, 1.5) * 165 + r * 18);
       }
+      /* 0.41.2: çok yüksek zirveler yumuşakça sıkıştırılır (en üst sınırda düz tepe oluşmaz) */
+      if (h > DENIZ + 150) h = DENIZ + 150 + (h - DENIZ - 150) * 0.55;
       /* Kayalık tepeler: dağ dışındaki yüksekçe, engebeli ve taşlık arazi */
       kayalik = yumusak(0.28, 0.44, this.gRk.g2(x / 760, z / 760)) * yumusak(0.1, 0.2, c) * (1 - Math.min(1, dagK * 2.5));
       if (kayalik > 0) h += kayalik * (10 + (1 - Math.abs(this.gRk2.f2(x / 70, z / 70, 3))) * 22);
@@ -145,7 +149,9 @@ export class UreticiV2 {
       const sav = yumusak(SICAK.ILIK, SICAK.ILIK + 0.05, t) * yumusak(-0.05, -0.15, nem) * (1 - kizil) * (1 - Math.min(1, dagK * 3)) * yumusak(0.08, 0.16, c);
       if (sav > 0) { const ms2 = this.gMs.f2(x / 180 + 40, z / 180, 3); h += yumusak(0.22, 0.27, ms2) * sav * 15; }
       /* Basamaklı vadiler ve uçurumlar: belli bölgelerde yükseklik basamaklanır */
-      tm = Math.max(yumusak(0.2, 0.45, this.gTr.g2(x / 800, z / 800)) * yumusak(0.1, 0.25, c), kizil * 0.95, plato > 0.03 && plato < 0.97 ? 0.8 : 0);
+      /* 0.41.2: kum tepeleri (çöl) ve kıyı şeridi basamaklanmaz */
+      const colluk = yumusak(SICAK.SICAK - 0.03, SICAK.SICAK + 0.03, t) * yumusak(0.04, -0.06, nem) * (1 - kizil);
+      tm = Math.max(yumusak(0.2, 0.45, this.gTr.g2(x / 800, z / 800)) * yumusak(0.1, 0.25, c) * (1 - colluk), kizil * 0.95, plato > 0.03 && plato < 0.97 ? 0.8 * (1 - colluk) : 0);
       if (tm > 0 && h > DENIZ + 6) {
         const A = kizil > 0.5 ? 4 : 6, q = h / A, f = q - Math.floor(q);
         h = lerp(h, (Math.floor(q) + yumusak(0.55, 0.85, f)) * A, tm);
@@ -200,7 +206,7 @@ export class UreticiV2 {
   /* Bir sütunun yüksekliği, ana biyomu (b), alt biyomu (ab), su seviyesi (su) ve iklimi */
   kolon(x, z, o = this.ky) {
     this.arazi(x, z, o);
-    let h = o.h, su = DENIZ, golde = false, nehir = false;
+    let h = o.h, su = DENIZ, golde = false, nehir = false, kiyi = false, golL = 0, nehirL = -1;
     const c = o.c;
     /* Göller */
     if (c > 0.08) {
@@ -208,11 +214,11 @@ export class UreticiV2 {
       if (G) {
         const d = Math.hypot(x - G.x, z - G.z) / (G.R * (1 + 0.22 * this.gD.g2(x / 70, z / 70) + 0.06 * this.gD.g2(x / 19, z / 19)));
         if (d < 1) { h = Math.min(h, G.L - 1 - Math.floor(G.derin * (1 - d * d))); su = G.L; golde = true; }
-        else if (d < 1.25 && h > G.L + 1) h = G.L + 1 + (h - G.L - 1) * yumusak(1, 1.25, d);
+        else if (d < 1.25) { if (h > G.L + 1) h = G.L + 1 + (h - G.L - 1) * yumusak(1, 1.25, d); golL = G.L; if (h <= G.L + 2) kiyi = true; }
       }
     }
     /* Nehirler: kıvrımlı çizgiler boyunca vadi oyulur; su seviyesi geniş ölçekli araziyi basamaklarla izler (basamaklarda şelale) */
-    if (c > 0.02 && !golde) {
+    if (c > 0.02 && !golde && o.ad < 0.05) {
       const rx = x + this.gNw.g2(x / 160, z / 160) * 40, rz = z + this.gNw.g2(x / 160 + 71, z / 160 - 33) * 40;
       const rv = Math.abs(this.gNe.f2(rx / 1050, rz / 1050, 3));
       const W = 0.0085 + 0.0035 * this.gNw.g2(x / 400 + 5, z / 400);
@@ -222,6 +228,10 @@ export class UreticiV2 {
         let L = DENIZ;
         if (hb > DENIZ + 10) L = DENIZ + Math.floor((hb - DENIZ - 4) / NEHIR_ADIM) * NEHIR_ADIM;
         if (o.kz > 0.5) L = DENIZ;
+        /* 0.41.2: göl kıyısında nehir göl seviyesine bağlanır; arazinin belirgin biçimde alçaldığı yerde seviye yerel araziye iner (yükseltilmiş set oluşmaz) */
+        if (golL) L = golL;
+        else if (L > DENIZ && h < L - 4) L = Math.max(DENIZ, DENIZ + Math.floor((h + 3 - DENIZ) / NEHIR_ADIM) * NEHIR_ADIM);
+        if (rv < W * 1.6) nehirL = L;
         if (rv < W) { h = Math.min(h, L - 1 - Math.floor((1 - rv / W) * 2.5)); su = L; nehir = true; }
         else {
           const vadi = yumusak(W * 0.9, ust, rv), hedef = L + 1;
@@ -232,13 +242,16 @@ export class UreticiV2 {
     }
     h = Math.floor(h);
     if (h < 3) h = 3; if (h > PY - 8) h = PY - 8;
+    if (nehirL >= 0 && !nehir && h <= nehirL + 2) kiyi = true;
     /* Yükseklikle soğuma */
     const te = o.t - Math.max(0, h - (DENIZ + 30)) * 0.0045;
     let b, ab;
+    /* 0.41.2: biyom sınırları küçük bir gürültüyle girintili çıkıntılı olur (düz çizgi hâlinde değişmez) */
+    const tj = te + this.gZ.g2(x / 11, z / 11) * 0.014, nj = o.n + this.gZ.g2(x / 11 + 31, z / 11) * 0.014;
     if (h < su && (h < DENIZ || golde || nehir)) {
       if (c < 0 && o.ma <= 0) b = h < DENIZ - 16 ? BY.DERIN : BY.OKYANUS;
       else if (golde) { b = BY.NEHIR; ab = BY.GOL; }
-      else if (o.bt > 0.5) { b = BY.BATAKLIK; if (te > SICAK.ILIK - 0.02) ab = BY.MANGROV; }
+      else if (o.bt > 0.5) { b = BY.BATAKLIK; if (te > SICAK.ILIK - 0.02 && c < 0.22) ab = BY.MANGROV; }
       else b = c < 0 ? BY.OKYANUS : BY.NEHIR;
     }
     else if (o.ma > 0.05) { b = BY.ORMAN; ab = BY.MANTAR; }
@@ -247,36 +260,42 @@ export class UreticiV2 {
       b = te < SICAK.SOGUK + 0.08 ? BY.KARLI_KUMSAL : BY.KUMSAL;
       if (b === BY.KUMSAL && o.kt > 0.06) ab = BY.TASLI_KIYI;
     }
-    else if (h > DENIZ + 55) { b = BY.DAG; if (karliZirve({ h: h - 40, te })) ab = BY.KARLI_ZIRVE; }
-    else if (o.bt > 0.5) { b = BY.BATAKLIK; if (te > SICAK.ILIK - 0.02) ab = BY.MANGROV; }
-    else if (o.kz > 0.4) { b = BY.COL; ab = BY.KIZIL; }
+    /* 0.41.2: kızıl kayalıkların yüksek tepeleri dağ sayılmaz; dağ biyomu dağlık bölgede ya da çok yüksekte başlar (platolar dağ sayılmaz) */
+    else if (o.kz > 0.4 && o.d < 0.3) { b = BY.COL; ab = BY.KIZIL; }
+    else if (h > DENIZ + 85 || (h > DENIZ + 55 && o.d > 0.15)) { b = BY.DAG; if (karliV2(h, te)) ab = BY.KARLI_ZIRVE; }
+    else if (o.bt > 0.5) { b = BY.BATAKLIK; if (te > SICAK.ILIK - 0.02 && c < 0.22) ab = BY.MANGROV; }
     else {
-      b = iklimBiyomu(te, o.n);
-      const s = this.gAlt.g2(x / 650, z / 650);
+      b = iklimBiyomu(tj, nj);
+      const s = this.gAlt.g2(x / 650, z / 650) + this.gZ.g2(x / 13 + 7, z / 13) * 0.03;
       if (o.ky > 0.5) ab = BY.KAYALIK;
       else if (o.yl > 0.5 && c < 0.06) ab = BY.YALIYAR;
       else if (b === BY.CAYIR && s > 0.28) ab = BY.CICEKLI;
       else if (b === BY.ORMAN && s > 0.22) ab = BY.SIK;
       else if ((b === BY.ORMAN || b === BY.HUS) && te < 0.12 && s < -0.28) ab = BY.SONBAHAR;
     }
-    o.h = h; o.b = b; o.ab = ab; o.te = te; o.su = su; o.gl = golde; o.nh = nehir;
+    o.h = h; o.b = b; o.ab = ab; o.te = te; o.su = su; o.gl = golde; o.nh = nehir; o.ky2 = kiyi && h >= su && h > DENIZ - 1;
     return o;
   }
 
   /* Mağara girişi bölgesi (yüzeye açılan tüneller); ağaçlar bu bölgeye konmaz */
   girisMi(x, z) { return this.gG.g2(x / 90, z / 90) > 0.6; }
 
+  /* 0.41.2: ana biyomun düz zemini (alt biyomların zemini ana biyoma uyar: çölde kum, savanda kuru çimen, soğukta karlı çimen) */
+  zemin(o) { return o.b === BY.COL ? 5 : o.b === BY.SAVAN ? 142 : o.b === BY.TAYGA || o.b === BY.KARLI_OVA ? 45 : 4; }
   /* Yüzey bloğu */
   ustBlok(o, x, z) {
+    /* 0.41.2: göl ve nehir kıyısı: kum ya da (soğukta ve dağlarda) çakıl */
+    if (o.ky2 && (o.ab ?? o.b) !== BY.MANGROV && o.b !== BY.BATAKLIK) return o.te < SICAK.SOGUK || o.b === BY.DAG ? 6 : this.gZ.g2(x / 7, z / 7) > 0.45 ? 6 : 5;
     switch (o.ab ?? o.b) {
       case BY.MANTAR: return D.miselyum;
-      case BY.KIZIL: return o.h > DENIZ + 16 && this.gD.g2(x / 14, z / 14) > -0.1 ? 142 : D.kizilKum;
+      case BY.KIZIL: return o.h > DENIZ + 16 && this.gD.g2(x / 9, z / 9) > 0.3 ? 142 : D.kizilKum;   // 0.41.2: tepelerde kızıl kum, seyrek kuru çimen öbekleri
       case BY.TASLI_KIYI: { const n = this.gZ.g2(x / 9, z / 9); return n > 0.25 ? 6 : n < -0.35 ? 2 : 5; }
       case BY.KARLI_ZIRVE: return 21;
-      case BY.KAYALIK: { const n = this.gYm.g2(x / 16, z / 16); return n > 0.3 ? 2 : n < -0.55 ? 6 : 4; }
+      case BY.KAYALIK: { const n = this.gYm.g2(x / 16, z / 16); return n > 0.3 ? 2 : n < -0.55 ? 6 : this.zemin(o); }
       case BY.GOL: { const n = this.gZ.g2(x / 24, z / 24); return n > 0.35 ? 23 : n < -0.3 ? 6 : 3; }
       case BY.MANGROV: return o.h < o.su ? 3 : 143;
-      case BY.CICEKLI: case BY.SIK: case BY.SONBAHAR: case BY.YALIYAR: return o.b === BY.TAYGA || o.b === BY.KARLI_OVA ? 45 : o.b === BY.SAVAN ? 142 : 4;
+      case BY.CICEKLI: case BY.SIK: case BY.SONBAHAR: return 4;
+      case BY.YALIYAR: return this.zemin(o);
     }
     switch (o.b) {
       case BY.TAYGA: case BY.KARLI_OVA: return 45;
@@ -285,7 +304,8 @@ export class UreticiV2 {
       case BY.COL: case BY.KUMSAL: return 5;
       case BY.KARLI_KUMSAL: return 21;
       case BY.DAG: {
-        if (o.te < SICAK.SOGUK) return o.h > DENIZ + 70 ? 21 : 45;
+        if (karliV2(o.h, o.te)) return 21;
+        if (o.te < SICAK.SOGUK) return 45;
         if (o.te > 0.3) return o.h > DENIZ + 80 || this.gD.g2(x / 30, z / 30) > 0 ? 24 : 142;
         return this.gD.g2(x / 30, z / 30) > 0.1 && o.h < DENIZ + 75 ? (o.te > 0.2 ? 142 : 4) : 2;
       }

@@ -117,6 +117,16 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 41.2 (0.41.2): Arazi, su ve biyom düzeltmeleri
+- Kızıl kayalıkların yüksek tepeleri yanlışlıkla "Dağlar" sayılıyor, renk katmanları ve kızıl kum görünmüyordu; düzeltildi. Dağ biyomu artık yalnız dağlık bölgede ya da çok yüksekte başlar (yüksek platolar ve tepeler kendi biyomunda kalır).
+- Çöldeki kum tepeleri ve kıyı şeridi basamaklanmaz (basamaklı kum tepeleri oluşmuyor). Çok yüksek zirveler yumuşakça sıkıştırılır; en üst sınırda düz kesik tepe oluşmaz.
+- Karlı zirveler ile karla kaplı dağ yüzeyi aynı kurala bağlandı (karlı yüzeyde biyom adı da "Karlı Zirveler").
+- Kayalık tepeler ve yalıyarların zemini ana biyoma uyar: çölde kum, savanda kuru çimen, soğukta karlı çimen (önceden her yerde yeşil çimendi). Kızıl kayalık tepelerinde kızıl kum ağırlıklı, seyrek kuru çimen öbekleri.
+- Nehirler: arazinin belirgin biçimde alçaldığı yerlerde su seviyesi yerel araziye iner (yükseltilmiş nehir setleri oluşmaz); göl kıyısına gelen nehir göl seviyesine bağlanır; takımadaların küçük adalarına nehir oyulmaz.
+- Göl ve nehir kıyılarında kum (soğukta ve dağlarda çakıl) şeridi oluşur.
+- Mangrovlar yalnız kıyıya yakın sıcak bataklıklarda bulunur.
+- Biyom ve alt biyom sınırları küçük bir gürültüyle girintili çıkıntılı geçiş yapar (düz çizgi hâlinde değişmez).
+
 ## 41.1 (0.41.1): Mağara ağzı aydınlatması, uzak arazi kaldırıldı
 - Gökyüzü ışığı artık yalnızca yukarıdan aşağı değil, yanlara ve aşağıya da azalarak yayılır: mağara ağızları, uçurum altı oyukları ve çıkıntı altları zifiri karanlık görünmez; içeri doğru kademeli olarak kararır.
 - Uzak arazi (seyrek ızgaralı uzak görünüm) kaldırıldı: arazi yeniden görüş mesafesi kadar tam çizilir, ötesi sisle gizlenir. Ayarlardaki "Uzak arazi" seçeneği kaldırıldı; `js/grafik/uzak-arazi.js` ve `js/dunya/uzak-isci.js` artık kullanılmaz (silinebilir).
