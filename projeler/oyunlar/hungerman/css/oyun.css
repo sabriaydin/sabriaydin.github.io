@@ -50,17 +50,17 @@ h1, h2, h3 { font-family: var(--baslik); font-weight: 700; margin: 0; letter-spa
 .kaplama .kapat:hover { background: #5a4f42; }
 
 /* ---------- Ana menü arka planı (0.40.8) ----------
-   Oyunun kendi motoruyla çekilmiş gün batımı manzarası (gorsel/menu-arka.webp). Ana menüde resim yavaşça kayar ve yakınlaşır,
-   üstte okunurluk için koyulaşma, altta kor parçacıkları yükselir. Diğer menü ekranlarında aynı resim sabit ve koyulaştırılmış durur. */
-.menuArka { background: linear-gradient(rgba(14, 10, 18, .58), rgba(14, 10, 18, .58)), #2a1e2e url(../gorsel/menu-arka.webp) center 60% / cover no-repeat; overflow: hidden; }
-#anaMenu { background: #2a1e2e; }
+   Oyunun kendi motoruyla tam çözünürlükte çekilmiş manzara (gorsel/menu-arka.webp, 3200 × 1600; ormanlık tepe, dağ ve deniz).
+   Ana menüde resim yavaşça kayar ve yakınlaşır, okunurluk için ortası hafifçe koyulaşır, havada polen parçacıkları süzülür. Diğer menü ekranlarında aynı resim sabit ve koyulaştırılmış durur. */
+.menuArka { background: linear-gradient(rgba(12, 16, 22, .55), rgba(12, 16, 22, .55)), #3a5a8a url(../gorsel/menu-arka.webp) center 45% / cover no-repeat; overflow: hidden; }
+#anaMenu { background: #3a5a8a; }
 .menuGok { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.menuResim { position: absolute; inset: -4%; background: url(../gorsel/menu-arka.webp) center 60% / cover no-repeat; animation: menuKay 60s ease-in-out infinite alternate; will-change: transform; }
+.menuResim { position: absolute; inset: -4%; background: url(../gorsel/menu-arka.webp) center 45% / cover no-repeat; animation: menuKay 60s ease-in-out infinite alternate; will-change: transform; }
 @keyframes menuKay { from { transform: scale(1.04) translate3d(-1.5%, 0, 0); } to { transform: scale(1.1) translate3d(1.5%, -1%, 0); } }
 .menuGolge { position: absolute; inset: 0; background:
-  radial-gradient(ellipse 60% 45% at 50% 42%, rgba(10, 8, 14, .38), transparent 70%),
-  linear-gradient(rgba(14, 10, 22, .45), transparent 30%, transparent 62%, rgba(10, 8, 12, .6)); }
-.menuKor i { position: absolute; bottom: -10px; left: var(--x); width: var(--k); height: var(--k); background: #ffcf6e; box-shadow: 0 0 6px 1px rgba(255, 180, 80, .8); opacity: 0; animation: korYuksel var(--s) linear var(--g) infinite; }
+  radial-gradient(ellipse 55% 42% at 50% 45%, rgba(8, 14, 24, .42), transparent 72%),
+  linear-gradient(rgba(10, 20, 40, .28), transparent 28%, transparent 70%, rgba(6, 12, 8, .45)); }
+.menuKor i { position: absolute; bottom: -10px; left: var(--x); width: var(--k); height: var(--k); background: #fff8dc; box-shadow: 0 0 5px 1px rgba(255, 250, 220, .7); opacity: 0; animation: korYuksel var(--s) linear var(--g) infinite; }
 @keyframes korYuksel { 0% { transform: translate3d(0, 0, 0); opacity: 0; } 10% { opacity: .9; } 50% { transform: translate3d(28px, -45vh, 0); } 80% { opacity: .6; } 100% { transform: translate3d(-12px, -90vh, 0); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .menuResim, .menuKor i { animation: none; } .menuKor { display: none; } }
 .menuIc { position: relative; z-index: 1; width: min(760px, calc(100vw - 32px)); text-align: center; }

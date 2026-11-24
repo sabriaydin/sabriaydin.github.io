@@ -117,6 +117,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 40.9 (0.40.9): Yeni ana menü arka planı (yüksek çözünürlük)
+- Ana menü arka planı yeniden çekildi: önceki görüntü, oyunun otomatik çözünürlük ayarı düşük çözünürlüğe indiği ve uzak parçalar yüklenmeden çekildiği için bulanık ve kısa görüşlüydü.
+- Yeni görüntü %100 çözünürlükte, iki kat büyüklükte (5120 × 2560) çekilip yumuşatılarak 3200 × 1600'e küçültüldü; 16 parçalık görüş mesafesindeki bütün parçalar yüklendikten sonra çekildi. Manzara: öğleden sonra ışığında ormanlık bir tepe, arkasında taş bir dağ, sağda deniz ve bloklu bulutlar.
+- Kor parçacıkları gündüz manzarasına uygun, havada süzülen polen parçacıklarıyla değiştirildi; koyulaşma da yeni manzaraya göre hafifletildi.
+
 ## 40.8 (0.40.8): Yeni ana menü arka planı
 - Ana menüdeki "Açık dünya hayatta kalma" yazısı kaldırıldı.
 - Ana menünün arka planı yenilendi: CSS bulut ve tepeler yerine oyunun kendi motoruyla çekilmiş gün batımı manzarası (`gorsel/menu-arka.webp`; tepeden denize ve kumsala bakış). Resim yavaşça kayar ve yakınlaşır; okunurluk için üstte ve ortada hafif koyulaşma vardır, alttan kor parçacıkları yükselir. Hareketi azaltma tercihi açık cihazlarda animasyonlar kapanır.
