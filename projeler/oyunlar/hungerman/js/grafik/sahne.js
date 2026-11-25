@@ -228,11 +228,11 @@ export class Sahne {
   }
 
   /* 0.19.0: çizim çözünürlüğü ölçeği (0,5 - 1) */
-  olcekAyarla(k) {
+  olcekAyarla(k, zorla = false) {
     k = Math.max(0.5, Math.min(1, k));
-    if (Math.abs(k - this.olcek) < 0.01) return;
+    if (Math.abs(k - this.olcek) < 0.01 && !zorla) return;
     this.olcek = k;
-    this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5) * k);
+    this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.dusukGuc ? 1 : 1.5) * k);   // 0.50.0: düşük güç kipinde piksel oranı en çok 1
     this.boyut();
   }
   boyut() {
@@ -450,10 +450,11 @@ export class Sahne {
     for (const m of this.malzemeler) { const u = m.uniforms; if (menzil > 0) { u.elFener.value.set(p.x, p.y, p.z, menzil); u.elFenerYon.value.copy(yon); } else u.elFener.value.w = 0; }
   }
   isiklariAyarla(liste) {
+    const ust = this.dusukGuc ? 12 : ISIK_SAYISI;   // 0.50.0: düşük güç kipinde en yakın 12 ışık (gölgelendiricideki döngü kısalır)
     for (const m of this.malzemeler) {
       const a = m.uniforms.isiklar.value;
-      for (let i = 0; i < ISIK_SAYISI; i++) { const L = liste[i]; if (L) a[i].set(L[0], L[1], L[2], L[3]); else a[i].set(0, 0, 0, 0); }
-      m.uniforms.isikAdet.value = Math.min(liste.length, ISIK_SAYISI);
+      for (let i = 0; i < ISIK_SAYISI; i++) { const L = i < ust ? liste[i] : null; if (L) a[i].set(L[0], L[1], L[2], L[3]); else a[i].set(0, 0, 0, 0); }
+      m.uniforms.isikAdet.value = Math.min(liste.length, ust);
     }
   }
 

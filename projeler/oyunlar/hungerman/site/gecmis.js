@@ -2,6 +2,16 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.50', b: 'Performans', y: [
+  { s: '0.50.0', b: 'Performans, kayıt ve çok oyunculu', m: [
+    'Yer üstündeyken uzaktaki mağaralar artık çizilmiyor; ekran kartının yükü yaklaşık yarıya indi.',
+    'Pusula, yağmur ve harita gibi her karede yapılan işler azaltıldı; uzaktaki canlılar daha seyrek hesaplanıyor ve sis sınırının ötesinde çizilmiyor.',
+    'Atla, tekneyle ya da uçarak hızlı giderken gittiğiniz yöndeki arazi önce yükleniyor.',
+    'Her dünyanın son üç kopyası saklanıyor; kayıt dosyaları da daha küçük.',
+    'Çok oyunculuda diğer oyuncular ve canlılar daha akıcı hareket ediyor; bağlantı koparsa oyun birkaç kez kendiliğinden yeniden bağlanmayı deniyor.',
+    'Grafik ayarlarında telefonlar için ayrı bir ön ayar var.'
+  ]}
+]},
 { g: '0.49', b: 'Arayüz', y: [
   { s: '0.49.0', b: 'Arayüz ve ilk deneyim', m: [
     'Öğretici yenilendi: ilk gün sığınak ve yatak adımlarını da gösteriyor, istenen adım geçilebiliyor.',

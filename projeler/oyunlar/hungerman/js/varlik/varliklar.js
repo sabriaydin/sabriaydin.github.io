@@ -71,6 +71,14 @@ export class Varliklar {
     this.liste = []; this.oklar = [];
     this.sahne.sahne.remove(this.grup);
   }
+  /* 0.50.0: sis sınırı (görüş mesafesinin biraz içi) ve uzak canlının gizlenmesi (katman 1: kamera çizmez; görünürlük bayrağına dokunulmaz) */
+  gizleR2() { const R = (this.dunya.gorus || 8) * 16 - 4; return R * R; }
+  uzakGizle(v, gizli) {
+    if (!!v.uzakGizli === gizli) return;
+    v.uzakGizli = gizli;
+    v.m.kok.traverse(n => { if (n.isMesh || n.isLine || n.isPoints) n.layers.set(gizli ? 1 : 0); });
+    if (v.golge) v.golge.layers.set(gizli ? 1 : 0);
+  }
   modelSil(v) { if (v.golge) this.grup.remove(v.golge); this.grup.remove(v.m.kok); v.m.kok.traverse(n => { if (n.geometry) n.geometry.dispose(); }); v.m.malzeme.dispose(); }
 
   ekle(turAd, x, y, z, ek) {
@@ -298,8 +306,12 @@ export class Varliklar {
       if (!this.dunya.yuklu(v.konum.x, v.konum.z) || this.donmus) continue;   // donmus: geliştirici modunda canlılar durur
       /* Binilen at: konumunu binen oyuncu belirler; yalnızca canlandırılır */
       if (v.binen) { this.canlandir(v, dt, 0, 0, 0, false, v.binenHiz || 0); continue; }
+      /* 0.50.0: uzak canlılar: sis sınırının ötesindekiler çizilmez; 40 bloktan uzaktakilerin yapay zekâsı iki karede bir (biriken süreyle) işlenir */
+      this.uzakGizle(v, d2 > this.gizleR2());
+      let vdt = dt;
+      if (d2 > (this.dusukGuc ? 784 : 1600) && !v.tur.boss && !v.olu) { if ((this.kare + (v.id | 0)) & 1) { v.atlaDt = (v.atlaDt || 0) + dt; continue; } vdt = Math.min(0.12, dt + (v.atlaDt || 0)); v.atlaDt = 0; }
       /* 0.42.0: tek bir canlıda çıkan hata bütün karenin (ve oyunun) durmasına yol açmaz; canlı kaldırılır ve hata kaydedilir */
-      try { this.varlikGuncelle(v, dt, c); }
+      try { this.varlikGuncelle(v, vdt, c); }
       catch (e) {
         if (this.hataBildir) this.hataBildir(`${v.turAd}: ${e.message}`, e);
         this.modelSil(v); this.liste.splice(i, 1);
@@ -1785,6 +1797,7 @@ export class Varliklar {
         if (v.tur.koylu && koyluCoz) koyluCoz(v, meta);
         this.harita.set(id, v);
       }
+      { const n = performance.now(); if (v.tAl) { const ara = Math.max(0.03, Math.min(0.6, (n - v.tAl) / 1000)); if (!v.ongoru) v.ongoru = new THREE.Vector3(); v.ongoru.set((a[1] - v.hedefP.x) / ara, (a[2] - v.hedefP.y) / ara, (a[3] - v.hedefP.z) / ara); if (v.ongoru.lengthSq() > 400) v.ongoru.set(0, 0, 0); } v.tAl = n; }   // 0.50.0: hız tahmini
       v.hedefP.set(a[1], a[2], a[3]); v.hedefYaw = a[4];
       const b = a[5], once = v.agBayrak;
       v.agBayrak = b; v.can = a[6];
@@ -1817,13 +1830,15 @@ export class Varliklar {
       /* İstemcinin bindiği at yerelde sürülür */
       if (v.yerelBinek) { v.agBayrak = (v.agBayrak || 0) & ~32768; this.canlandir(v, dt, 0, 0, 0, false, v.binenHiz || 0); continue; }
       const ox = p.x, oy = p.y, oz = p.z, h = v.hedefP;
-      if (p.distanceToSquared(h) > 100) p.copy(h); else p.lerp(h, Math.min(1, dt * 10));
+      if (p.distanceToSquared(h) > 100) p.copy(h);
+      else { const g = Math.min(0.15, (performance.now() - (v.tAl || 0)) / 1000), O = v.ongoru, k = Math.min(1, dt * 10); p.x += (h.x + (O ? O.x * g : 0) - p.x) * k; p.y += (h.y + (O && O.y > 0 ? O.y * g : 0) - p.y) * k; p.z += (h.z + (O ? O.z * g : 0) - p.z) * k; }   // 0.50.0
       const id = 1 / Math.max(dt, 1e-3);
       v.hiz.set((p.x - ox) * id, (p.y - oy) * id, (p.z - oz) * id);
       v.aynaHiz += (Math.hypot(v.hiz.x, v.hiz.z) - v.aynaHiz) * Math.min(1, dt * 8);
       const b = v.agBayrak;
       v.yaniyor = !!(b & 4); v.nisan = !!(b & 8); v.hasarZaman = b & 2 ? 0.2 : 0; v.kacZaman = b & 32 ? 1 : 0; v.yerde = !(b & 32);
       m.kok.visible = !(b & 16);
+      this.uzakGizle(v, (p.x - op.x) ** 2 + (p.z - op.z) ** 2 > this.gizleR2());   // 0.50.0
       if (T.uzak) v.ger = v.nisan ? Math.min(1, (v.ger || 0) + dt / 1.4) : 0;
       if (T.su) {
         const bl = this.dunya.blok(Math.floor(p.x), Math.floor(p.y + T.boy * 0.5), Math.floor(p.z));

@@ -22,17 +22,30 @@ function islem(mod, f) {
   }));
 }
 
+/* 0.50.0: her dünyanın son üç yedek kopyası: ~yedek (en yeni), ~yedek2, ~yedek3 */
+export const YEDEK_EKLERI = ['~yedek', '~yedek2', '~yedek3'];
+const YEDEK_RE = /~yedek[23]?$/;
 export const Kayit = {
   /* 0.23.0: "~yedek" ile biten kayıtlar, dünyanın bir önceki oturumdaki kopyasıdır; listede ayrı gösterilmez */
   listele: () => islem('readonly', s => s.getAll()).then(l => { l = l || []; const yedek = new Set(l.filter(d => String(d.id).endsWith('~yedek')).map(d => String(d.id).slice(0, -6)));
-    return l.filter(d => !String(d.id).endsWith('~yedek')).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar, konsol: d.konsol, vucutIsisi: d.vucutIsisi, zorluk: d.zorluk || 'normal', bitti: !!d.hardcoreBitti, yedek: yedek.has(d.id) })).sort((a, b) => b.son - a.son); }),
+    return l.filter(d => !YEDEK_RE.test(String(d.id))).map(d => ({ id: d.id, ad: d.ad, tohum: d.tohum, olusturma: d.olusturma, son: d.son, gun: d.gun || 1, komutlar: !!d.komutlar, konsol: d.konsol, vucutIsisi: d.vucutIsisi, zorluk: d.zorluk || 'normal', bitti: !!d.hardcoreBitti, yedek: yedek.has(d.id) })).sort((a, b) => b.son - a.son); }),
   yukle: id => islem('readonly', s => s.get(id)),
   kaydet: veri => islem('readwrite', s => s.put(veri)),
-  sil: id => islem('readwrite', s => { s.delete(id + '~yedek'); return s.delete(id); })
+  sil: id => islem('readwrite', s => { for (const e of YEDEK_EKLERI) s.delete(id + e); return s.delete(id); }),
+  /* 0.50.0: yeni yedek kopya: eski kopyalar bir kaydırılır (en eskisi silinir) */
+  yedekEkle: async veri => {
+    const id = veri.id;
+    const [y1, y2] = await Promise.all([Kayit.yukle(id + '~yedek').catch(() => null), Kayit.yukle(id + '~yedek2').catch(() => null)]);
+    return islem('readwrite', s => {
+      if (y2) s.put({ ...y2, id: id + '~yedek3' });
+      if (y1) s.put({ ...y1, id: id + '~yedek2' });
+      return s.put({ ...veri, id: id + '~yedek' });
+    });
+  }
 };
 
 const AYAR_ANAHTAR = 'hungerman_ayarlar';
-export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true, onizleme: true, parlaklik: 1, arayuzOlcek: 1, arkaSessiz: false, enerjiPanel: true, bakilanAd: true, ogretici: true, miniHarita: true, yolculukIzle: true, sesEfekt: 1, sesCanli: 1, sesOrtam: 1, sesArayuz: 1, mono: false, altyazi: false, gerilim: true, ipuclari: true, sadeGosterge: true, yaziBoyutu: 1, renkKor: '', efektAzalt: false, dokunBoyut: 1 };
+export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true, onizleme: true, parlaklik: 1, arayuzOlcek: 1, arkaSessiz: false, enerjiPanel: true, bakilanAd: true, ogretici: true, miniHarita: true, yolculukIzle: true, sesEfekt: 1, sesCanli: 1, sesOrtam: 1, sesArayuz: 1, mono: false, altyazi: false, gerilim: true, ipuclari: true, sadeGosterge: true, yaziBoyutu: 1, renkKor: '', efektAzalt: false, dokunBoyut: 1, dusukGuc: false };
 /* 0.22.0: sayısal ayarlar geçerli aralığa çekilir (bozuk ya da elle değiştirilmiş kayıtta dünya yüklenemiyordu) */
 const AYAR_ARALIK = { gorus: [4, 16], fov: [60, 100], hassasiyet: [0.2, 2.5], ses: [0, 1], muzik: [0, 1], cozunurluk: [0, 4], parlaklik: [0.7, 1.4], arayuzOlcek: [0.85, 1.25], sesEfekt: [0, 1], sesCanli: [0, 1], sesOrtam: [0, 1], sesArayuz: [0, 1], yaziBoyutu: [0.9, 1.4], dokunBoyut: [0.8, 1.4], dokunHassas: [0.2, 2.5], kumandaHassas: [0.3, 2.5] };
 function ayarDuzelt(a) {

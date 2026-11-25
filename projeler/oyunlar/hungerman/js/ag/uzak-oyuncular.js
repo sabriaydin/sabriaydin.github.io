@@ -76,6 +76,10 @@ export class UzakOyuncular {
   durum(id, a) {
     const o = this.harita.get(id);
     if (!o) return;
+    /* 0.50.0: iki paket arasındaki hız tahmini (yumuşak izleme: hedef, son paketten bu yana geçen süre kadar ileri kaydırılır) */
+    const n = performance.now();
+    if (o.tAl && !o.ilk) { const ara = Math.max(0.03, Math.min(0.5, (n - o.tAl) / 1000)); if (!o.ongoru) o.ongoru = new THREE.Vector3(); o.ongoru.set((a[0] - o.hedef.x) / ara, (a[1] - o.hedef.y) / ara, (a[2] - o.hedef.z) / ara); if (o.ongoru.lengthSq() > 900) o.ongoru.set(0, 0, 0); }
+    o.tAl = n;
     o.hedef.set(a[0], a[1], a[2]); o.hedefYaw = a[3]; o.pitch = a[4];
     if (o.ilk) { o.p.copy(o.hedef); o.yaw = o.hedefYaw; o.ilk = false; }
     if (a[5] !== o.elId) {
@@ -99,7 +103,8 @@ export class UzakOyuncular {
       if (!m.kok.visible) continue;
       if (o.oluZaman > 0) { m.kok.rotation.set(0, o.yaw, -Math.min(1, o.oluZaman * 2.2) * Math.PI / 2); o.et.material.opacity = 1; continue; }
       const ox = o.p.x, oz = o.p.z;
-      if (o.p.distanceToSquared(o.hedef) > 64) o.p.copy(o.hedef); else o.p.lerp(o.hedef, Math.min(1, dt * 12));
+      if (o.p.distanceToSquared(o.hedef) > 64) o.p.copy(o.hedef);
+      else { const g = Math.min(0.12, (performance.now() - (o.tAl || 0)) / 1000), H = o.ongoru; const hx = o.hedef.x + (H ? H.x * g : 0), hy = o.hedef.y + (H ? H.y * g : 0), hz = o.hedef.z + (H ? H.z * g : 0), k = Math.min(1, dt * 14); o.p.x += (hx - o.p.x) * k; o.p.y += (hy - o.p.y) * k; o.p.z += (hz - o.p.z) * k; }
       let f = o.hedefYaw - o.yaw; f = Math.atan2(Math.sin(f), Math.cos(f)); o.yaw += f * Math.min(1, dt * 12);
       const yh = Math.hypot(o.p.x - ox, o.p.z - oz) / Math.max(dt, 1e-3);
       o.hiz += (yh - o.hiz) * Math.min(1, dt * 8);

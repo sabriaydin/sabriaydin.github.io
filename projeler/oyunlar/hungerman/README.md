@@ -119,6 +119,26 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 50.0 (0.50.0): Performans, kayıt ve çok oyunculu (geliştirme planı 9. aşama)
+- **Ölçüm** (`js/sistem/olcum.js`): konsolda `olcum ac`, `olcum rapor`, `olcum kapat`. Açıkken oyunun 36 işi sarılır ve kare başına ortalama / en uzun süreleri tutulur; rapor: kare içi iş süresi (ortalama, %95, en uzun), çizim çağrısı, üçgen, geometri, doku, JS belleği ve en pahalı 10 iş. Kapalıyken yük getirmez.
+- **Ölçüm sonuçları** (yazılımla çizen sınama tarayıcısı, aynı tohum, koşarak uçuş; mutlak değerler gerçek ekran kartından yüksektir, oranlar karşılaştırma içindir):
+  - Görüş 4 (Düşük): kare içi iş 25,7 → 15,1 ms; bellek 74-80 MB; çizilen üçgen 336 bin → 253 bin.
+  - Görüş 8 (Yüksek): kare içi iş 35,2 → 23,9 ms; bellek 185-190 MB; çizilen üçgen 966 bin → 771 bin.
+  - Ölçümle bulunan en pahalı işler: çizim, yağış dokusunun her karede 700 sütun okuması, her karede yeniden çizilen pusula, harita keşfinde tek karede 14 parça hesabı, uzak canlıların yapay zekâsı.
+- **Çizim:**
+  - Yeraltı geometrisi: her parçanın, en alçak yüzeyinin 3 blok altında kalan yüzleri ayrı bir geometriye yazılır. Oyuncu yer üstündeyken (başının üstünde gökyüzü varken) bulunduğu ve komşu parçalar dışındaki parçaların yeraltı geometrisi çizilmez; yeraltında, binada ya da ağaç altında hepsi çizilir. Sınamada yeraltı geometrisi toplamın yaklaşık yarısıydı; yüzeyde çizilen üçgen 224 binden 98 bine indi.
+  - Uzak canlılar: sis sınırının ötesindekiler çizilmez (önceden siste karartı gibi görünüyorlardı); 40 bloktan uzaktakilerin yapay zekâsı iki karede bir işlenir.
+  - Pusula yalnızca bakış yönü ya da işaretler değişince yeniden çizilir. Yağış çatı dokusu yağış yokken saniyede birkaç sütun okur; kaba yağış dokusu altı kareye bölünür. Harita keşfi kare başına en çok 4 parça hesaplar.
+- **Yükleme:** hızlı giderken (saniyede 6,5 bloktan hızlı: at, tekne, uçuş) gidilen yöndeki parçalar önce üretilir (uzaklık yöne göre 0,55-1,45 ile tartılır). Yeni dünyanın açılışı sınamada 2,1 saniye.
+- **Kayıt:**
+  - Her dünyanın son üç yedek kopyası tutulur (~yedek, ~yedek2, ~yedek3): dünya hatasız açıldığında ve oynarken her 15 dakikada bir yeni kopya eklenir, en eskisi silinir. Kayıt okunamazsa kopyalar en yeniden en eskiye denenir; uyarı bildirimi gösterilir.
+  - Blok değişiklikleri kayıtta tek bir 32 bitlik sayıya paketlenir (dizin × 4096 + blok); sınamada değişiklik verisi 4,5 KB'den 1,8 KB'ye indi. Eski kayıtlar açılır; çok oyunculu aktarım değişmedi.
+- **Çok oyunculu:**
+  - Diğer oyuncuların ve canlıların konumu, son iki paketten hesaplanan hızla kısa bir süre ileri tahmin edilerek yumuşak izlenir (paketler arasında takılma azalır).
+  - Kendiliğinden yeniden bağlanma: bağlantı koparsa 5 saniye sonra yeniden bağlanılır; deneme bağlantı aşamasında başarısız olursa 6 ve 9 saniye sonra yeniden denenir (en çok 3 deneme).
+  - 8 oyunculu yük sınaması (sunucu ve 7 istemci aynı makinede): yedisi de katıldı, her istemci 7 uzak oyuncuyu gördü; sunucuda ağ işi kare başına 4,8 ms. Koparılan istemci kendiliğinden yeniden bağlandı.
+- **Telefon ön ayarı:** Ayarlar > Görüntü > Grafik ön ayarı > Telefon: görüş 4 parça, %50 çözünürlük ve düşük güç kipi (piksel oranı en çok 1, en yakın 12 ışık, en çok 160 parçacık, uzak canlılar 28 bloktan sonra seyrek işlenir). Dokunmatik cihazlarda ilk açılışta kendiliğinden seçilir.
+
 ## 49.0 (0.49.0): Arayüz ve ilk deneyim (geliştirme planı 8. aşama)
 - **Öğretici:** ilk günün adımları yeniden düzenlendi: Hareket, Odun, Üretim Masası, İlk alet, Işık, **Sığınak** (yeni: çatısı ve en az üç yanında duvarı olan bir yerde durmak), **Yatak** (yeni: yakında yatak ya da yatakta uyumak), Yemek, İlk gece, ardından Fırın, Kıyafet, Tarla, Köyler (toplam 13 adım).
   - Metinler atanmış tuşları gösterir (önceden envanter için yanlışlıkla "E" yazıyordu); dokunmatik kontrollerde dokunmatik anlatım çıkar.

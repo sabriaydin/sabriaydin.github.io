@@ -154,6 +154,10 @@ export class Hud {
     if (isaretler) this.pListe = isaretler;
     const cv = this.pTuval, r = Math.min(2, devicePixelRatio || 1);
     const W = cv.clientWidth || 440, H = cv.clientHeight || 30;
+    /* 0.50.0: pusula yalnızca bakış yönü (çeyrek derece), işaret listesi ya da boyutu değişince yeniden çizilir (önceden her kare çiziliyordu) */
+    const anahtar = Math.round(a * 4) + '|' + W + '|' + H + '|' + r;
+    if (anahtar === this.son.pusula && this.pListe === this.son.pListe) return;
+    this.son.pusula = anahtar; this.son.pListe = this.pListe;
     if (cv.width !== Math.round(W * r) || cv.height !== Math.round(H * r)) { cv.width = Math.round(W * r); cv.height = Math.round(H * r); }
     const ctx = this.pCtx, PX = 3, M = W / 2;
     ctx.setTransform(r, 0, 0, r, 0, 0);

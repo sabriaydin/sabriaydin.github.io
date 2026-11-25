@@ -32,6 +32,7 @@ import { Firinlar } from './oyun/firinlar.js';
 import { T, EYLEMLER, VARSAYILAN_TUS, tuslariKur, tusKaydi, tusAta, basili, tusAdi, SABIT } from './sistem/tuslar.js';
 import { SuAkisi } from './dunya/su-akisi.js';
 import { Kumanda } from './sistem/kumanda.js';
+import { olcum } from './sistem/olcum.js';
 import { Kablolar, kabloMaliyeti, KABLO } from './oyun/kablolar.js';
 import { Gecit } from './oyun/gecit.js';
 import { kaleAt } from './dunya/diyar-uretici.js';
@@ -48,7 +49,7 @@ import { Hud } from './arayuz/hud.js';
 import { EnvanterEkrani } from './arayuz/envanter-ekrani.js';
 import { Ses } from './sistem/ses.js';
 import { Muzik } from './sistem/muzik.js';
-import { Kayit, ayarlariYukle, ayarlariKaydet, VARSAYILAN_AYAR, yedekDosyasi, yedekOku } from './sistem/kayit.js';
+import { Kayit, ayarlariYukle, ayarlariKaydet, VARSAYILAN_AYAR, yedekDosyasi, yedekOku, YEDEK_EKLERI } from './sistem/kayit.js';
 import { SunucuOyun } from './ag/sunucu.js';
 import { IstemciOyun } from './ag/istemci.js';
 import { katil, kodDuzelt } from './ag/baglanti.js';
@@ -204,7 +205,8 @@ function izleyiciYap(o) {
 
 /* ---------- Ayarlar ---------- */
 /* 0.23.0: grafik ön ayarları: görüş mesafesi, çizim çözünürlüğü ve kafa sallanması birlikte ayarlanır */
-const GRAFIK_ON = { dusuk: { gorus: 4, cozunurluk: 1 }, orta: { gorus: 6, cozunurluk: 3 }, yuksek: { gorus: 8, cozunurluk: 0 }, ultra: { gorus: 12, cozunurluk: 4 } };
+/* 0.50.0: telefon: düşük güç kipi (piksel oranı 1, en çok 12 ışık, daha az parçacık, uzak canlılar daha seyrek işlenir) */
+const GRAFIK_ON = { telefon: { gorus: 4, cozunurluk: 1, dusukGuc: true }, dusuk: { gorus: 4, cozunurluk: 1, dusukGuc: false }, orta: { gorus: 6, cozunurluk: 3, dusukGuc: false }, yuksek: { gorus: 8, cozunurluk: 0, dusukGuc: false }, ultra: { gorus: 12, cozunurluk: 4, dusukGuc: false } };
 document.addEventListener('click', e => {
   const b = e.target.closest('#grafikOnAyar button[data-on]'); if (!b) return;
   Object.assign(ayar, GRAFIK_ON[b.dataset.on]); ses.tik(); ayarUygula(); ayarFormu();
@@ -264,11 +266,12 @@ addEventListener('keydown', e => {
   if (diger) { const el = $('#tusListe').querySelector(`[data-tus="${diger}"]`); if (el) el.classList.add('yerDegisti'); }
 }, true);
 addEventListener('mousedown', e => { if (tusBekleyen && !e.target.closest('[data-tus]')) { tusBekleyen = null; tusListesiCiz(); } }, true);
-function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOnAyar button')) { const g = GRAFIK_ON[x.dataset.on]; x.classList.toggle('on', g.gorus === ayar.gorus && g.cozunurluk === (ayar.cozunurluk | 0)); } }
+function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOnAyar button')) { const g = GRAFIK_ON[x.dataset.on]; x.classList.toggle('on', g.gorus === ayar.gorus && g.cozunurluk === (ayar.cozunurluk | 0) && g.dusukGuc === !!ayar.dusukGuc); } }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
 function ayarUygula() {
   ayarlariKaydet(ayar);
+  if (oyun && oyun.dusenler) { oyun.dusenler.PMAX = ayar.dusukGuc ? 160 : 400; oyun.varliklar.dusukGuc = !!ayar.dusukGuc; }   // 0.50.0
   if (oyun && oyun.hud) { oyun.hud.hasarSayiAcik = !!ayar.hasarSayilari; if (!ayar.hasarSayilari) oyun.hud.temizleHasarSayilari(); }   // 0.45.0
   sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
   ses.duzeyAyarla(ayar.ses); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
@@ -291,6 +294,8 @@ function gorunumAyarla() {
   document.documentElement.style.fontSize = yo !== 1 ? (15 * yo).toFixed(2) + 'px' : '';
   document.body.style.fontSize = (ayar.yaziBoyutu ?? 1) !== 1 ? (15 * ayar.yaziBoyutu).toFixed(2) + 'px' : '';
   dokun.boyutAyarla(ayar.dokunBoyut ?? 1);
+  /* 0.50.0: düşük güç kipi */
+  if (sahne.dusukGuc !== !!ayar.dusukGuc) { sahne.dusukGuc = !!ayar.dusukGuc; sahne.olcekAyarla(sahne.olcek, true); }
   sahne.efektAzalt = !!ayar.efektAzalt;
 }
 function arkaSesAyarla() {
@@ -370,9 +375,11 @@ async function dunyaAc(id) {
   let v = null, hata = null;
   try { v = await Kayit.yukle(id); if (!v || v.tohum == null) throw new Error('kayıt okunamadı'); ac(v); return; }
   catch (e) { hata = e; oyunuGuvenliBitir(); }
-  let y = null;
-  try { y = await Kayit.yukle(id + '~yedek'); } catch (e) { y = null; }
-  if (y && y.tohum != null) {
+  /* 0.50.0: son üç yedek kopya sırayla denenir (en yeniden en eskiye) */
+  for (const ek of YEDEK_EKLERI) {
+    let y = null;
+    try { y = await Kayit.yukle(id + ek); } catch (e) { y = null; }
+    if (!y || y.tohum == null) continue;
     try {
       ac({ ...y, id });
       if (oyun) oyun.yedektenAcildi = true;
@@ -499,7 +506,7 @@ kumanda.koptu = () => { if (oyun && oyun.hud) oyun.hud.bildirim('Oyun kumandası
 addEventListener('mousemove', e => { if (kumanda.aktif && e.isTrusted && !kilitli && (Math.abs(e.movementX) + Math.abs(e.movementY) > 3)) kumanda.birak(); }, true);
 if (ayar.dokunmatik === undefined) ayar.dokunmatik = dokunmatikCihaz();
 /* Telefon ve tabletlerde ilk açılışta görüş mesafesi düşük başlar */
-if (ayar.mobilVarsayilan === undefined) { ayar.mobilVarsayilan = true; if (dokunmatikCihaz()) ayar.gorus = Math.min(ayar.gorus, 5); ayarlariKaydet(ayar); }
+if (ayar.mobilVarsayilan === undefined) { ayar.mobilVarsayilan = true; if (dokunmatikCihaz()) Object.assign(ayar, GRAFIK_ON.telefon); ayarlariKaydet(ayar); }   // 0.50.0: telefonda ilk açılışta telefon ön ayarı
 dokun.ayarla(ayar.dokunmatik);
 function kilitBirak() {
   if (kumanda.aktif && !document.pointerLockElement && !dokun.aktif) { kilitli = false; fare.sol = fare.sag = false; if (oyun && aktifEkran === 'oyun' && !bilerekBirak && !panelAcik() && !oyun.hayatta.olu) duraklat(); bilerekBirak = false; tiklaGuncelle(); return; }
@@ -575,6 +582,11 @@ const konsol = new Konsol({ ses, oyun: () => oyun, kapatIste: () => panelKapat(t
   fps: () => { ayar.fps = !ayar.fps; ayarlariKaydet(ayar); $('#fps').hidden = !ayar.fps; return ayar.fps; },
   fpsMetni: () => $('#fps').textContent || '-',
   hataPaneli: () => { $('#hata').hidden = !$('#hata').hidden; },
+  /* 0.50.0: performans ölçümü */
+  olcumAc: () => { if (!oyun) return false; olcum.ac(olcumListesi(oyun)); return true; },
+  olcumKapat: () => olcum.kapat(),
+  olcumRapor: () => olcum.metin(sahne.cizici),
+  olcumVeri: () => olcum.rapor(sahne.cizici),
   kaydet: () => oyunKaydet(),
   gorusAyarla: n => { ayar.gorus = n; ayarlariKaydet(ayar); if (oyun) oyun.dunya.gorusAyarla(n); },
   haritaAc: () => { panelKapat(false); if (oyun) panelAc(haritaEkrani, oyun); },
@@ -716,6 +728,7 @@ function oyunBaslat(v) {
     hayatBasi: Number.isFinite(v.hayatBasi) ? v.hayatBasi : (v.gun || 1) + (v.zaman ?? 0.02), isiSayac: 0, tilsim: 0, sarsinti: 0,
     zorluk: v.zorluk || 'normal', denge: dengeDuzelt(v.denge), hardcoreBitti: !!v.hardcoreBitti, ogretici: v.yeni ? 0 : Number.isFinite(v.ogretici) ? ogrSurumCevir(v.ogretici, v.ogrSurum | 0) : -1 };
   const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
+  if (ayar.dusukGuc) { dusenler.PMAX = 160; varliklar.dusukGuc = true; }   // 0.50.0
   varliklar.hataBildir = (m, e) => { console.error('Canlı hatası', e); konsol.kayit('canli', 'Canlı hatası; canlı kaldırıldı', { seviye: 'kritik', alan: { hata: m } }); };
   oyun.varliklar = varliklar; oyun.gunIsigi = 1; oyun.uyku = 0; oyun.isaretSayac = 0;
   const yereBirak = (id, adet) => { const p = oyuncu.konum; dusenler.birak(id, adet, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1); };
@@ -942,8 +955,8 @@ function yuklemeKontrol() {
     else { kilitle(); }
     if (!o.ilkBildirim) { o.ilkBildirim = true; o.hud.bildirim(`${o.ad} · ${(q => BIYOMLAR[q.ab ?? q.b])(o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {}))}`); }
     /* 0.42.0: dünya hatasız açıldı; açılıştaki kaydı yedek kopya olarak saklanır */
-    if (o.acilisKaydi) { const k = o.acilisKaydi; o.acilisKaydi = null; if (!o.yedektenAcildi) Kayit.kaydet({ ...k, id: k.id + '~yedek' }).catch(() => {}); }
-    if (o.yedektenAcildi) { o.yedektenAcildi = false; o.hud.bildirim('Son kayıt okunamadığı için dünya bir önceki açılıştaki hâliyle açıldı.'); }
+    if (o.acilisKaydi) { const k = o.acilisKaydi; o.acilisKaydi = null; if (!o.yedektenAcildi) Kayit.yedekEkle(k).catch(() => {}); }   // 0.50.0: son 3 kopya
+    if (o.yedektenAcildi) { o.yedektenAcildi = false; o.hud.bildirim('Son kayıt okunamadığı için dünya en son sağlam yedek kopyasından açıldı.', null, 'uyari'); }
     if (o.sunucuIstek) { o.sunucuIstek = false; agAc(); }
   }
 }
@@ -1121,7 +1134,7 @@ async function oyunKaydetIc() {
     id: o.id, ad: o.ad, tohum: o.tohum, uretici: o.uretici, olusturma: o.olusturma, son: Date.now(), surum: SURUM,
     oyuncu: { x: +p.x.toFixed(3), y: +p.y.toFixed(3), z: +p.z.toFixed(3), yaw: o.oyuncu.yaw, pitch: o.oyuncu.pitch },
     hayatta: o.hayatta.disaAktar(), envanter: envanterKaydi(o), zaman: o.zaman, gun: o.gun, dogum: o.dogum, yatakNoktasi: o.yatakNoktasi, olumNoktasi: o.olumNoktasi, hayatBasi: o.hayatBasi,
-    degisiklikler: o.dunya.degisiklikleriAl(), dusenler: o.dusenler.disaAktar(),
+    degisiklikler: o.dunya.degisiklikleriAl(true), dusenler: o.dusenler.disaAktar(),
     koyler: o.koyler.disaAktar(), gorevler: o.gorevler.disaAktar(), sandiklar: o.dunya.sandiklariAl(), enerji: o.dunya.enerjiAl(), kablolar: o.kablolar.disaAktar(), tekneler: o.tekneler.disaAktar(),
     yapiPlani: o.etkilesim && o.etkilesim.plan ? o.etkilesim.plan.plan : null,   // 0.35.0: Yapı Planı dünyayla da kaydedilir
     oyuncuKayitlari: o.oyuncuKayitlari, yerler: o.yerler, komutlar: !!o.komutlar, konsol: !!o.konsol, ogrSurum: 2, vucutIsisi: o.vucutIsisi !== false, zorluk: o.zorluk, denge: o.denge, hardcoreBitti: !!o.hardcoreBitti, ogretici: o.ogretici, gelistirici: !!o.gelistirici, uretimSurumu: URETIM_SURUMU,
@@ -1131,7 +1144,13 @@ async function oyunKaydetIc() {
     if (!kayitHataBildirildi) { kayitHataBildirildi = true; hataGoster('Kayıt hazırlanamadı: ' + e.message); }
     return;
   }
-  try { await Kayit.kaydet(veri); kayitHataBildirildi = false; }
+  try {
+    await Kayit.kaydet(veri); kayitHataBildirildi = false;
+    /* 0.50.0: oynarken her 15 dakikada bir kaydın kopyası da yedeklere eklenir (son 3 kopya tutulur) */
+    const n = performance.now();
+    if (!o.sonYedek) o.sonYedek = n;
+    else if (n - o.sonYedek > 15 * 60 * 1000) { o.sonYedek = n; Kayit.yedekEkle(veri).catch(() => {}); }
+  }
   catch (e) {
     const dolu = e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''));
     o.hud.bildirim(dolu ? 'Kayıt yapılamadı: tarayıcı depolama alanı dolu. Eski dünyaları silmek ya da yedekleyip kaldırmak yer açar.' : 'Kayıt yapılamadı: tarayıcı depolaması kapalı olabilir.');
@@ -1213,7 +1232,7 @@ const ciftTus = {};
 const kareHatalari = new Map();
 function dongu(t) {
   requestAnimationFrame(dongu);
-  try { adim(t); }
+  try { const t0 = olcum.acik ? performance.now() : 0; adim(t); if (olcum.acik) olcum.kareBitti(performance.now() - t0); }
   catch (e) {
     const m = (e && e.message) || String(e), n = (kareHatalari.get(m) || 0) + 1;
     kareHatalari.set(m, n);
@@ -1246,6 +1265,8 @@ function adim(t) {
     if (mevsimDokulari(mev)) { sahne.atlasDoku.needsUpdate = true; sahne.elBlokMalzeme.map.needsUpdate = true; o.dusenler.blokMalz.map.needsUpdate = true; if (o.cihazCizici) o.cihazCizici.map.needsUpdate = true; }
     if (!ilk) o.hud.bildirim(`${MEVSIMLER[mev]} başladı.${mev === 3 ? ' Ekinler yavaş büyür, sular donar.' : mev === 0 ? ' Ekinler hızlı büyür, çiçekler açar.' : ''}`);
   }
+  /* 0.50.0: hızlı giderken gidilen yöndeki parçalar önce yüklenir */
+  { const op = o.oncekiKonum || (o.oncekiKonum = p.clone()), id = dt > 0 ? 1 / dt : 0; o.dunya.hizAyarla((p.x - op.x) * id, (p.z - op.z) * id); op.copy(p); }
   o.dunya.guncelle(p.x, p.z);
   o.harita.guncelle(dt);
   if (calisiyor) {
@@ -1404,6 +1425,8 @@ function adim(t) {
   }
   /* 0.22.0: meteor çarpması sarsıntısı */
   if (o.sarsinti > 0) { const s = o.sarsinti * (ayar.efektAzalt ? 0 : ayar.sallanma ? 0.35 : 0.12); sahne.kamera.position.x += (Math.random() - 0.5) * s; sahne.kamera.position.y += (Math.random() - 0.5) * s; sahne.kamera.position.z += (Math.random() - 0.5) * s; o.sarsinti = Math.max(0, o.sarsinti - dt * 0.8); }
+  /* 0.50.0: yer üstündeyken uzak parçaların yeraltı geometrisi (mağara duvarları) çizilmez */
+  { const g = sahne.kamera.position; o.dunya.yeraltiAyarla(!diyar && o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) < g.y - 0.2 && !o.izleyici, g.x, g.z); }
   const kosFov = o.oyuncu.kosuyor ? 8 : 0;
   /* 0.37.0: dürbün elde ve açıkken görüş daralır */
   if (o.etkilesim.durbun && o.envanter.seciliId() !== ESYA37.durbun) o.etkilesim.durbun = false;
@@ -1762,6 +1785,18 @@ function yerelHasar(n, turAd, agu, kx, kz, saldiran) {
     o.oyuncu.geriIt(kx, kz, guc);
   }
 }
+/* 0.50.0: ölçülen işler (çalışmayan ya da bulunmayan işler atlanır) */
+function olcumListesi(o) {
+  const l = [[o.dunya, 'guncelle', 'Dünya parçaları (yükleme, meshleme)'], [o.varliklar, 'guncelle', 'Canlılar (yapay zekâ, hareket)'], [o.varliklar, 'aynaGuncelle', 'Canlılar (istemci)'],
+    [o.dusenler, 'guncelle', 'Düşen eşyalar ve parçacıklar'], [o.etkilesim, 'guncelle', 'Etkileşim (bakılan blok, kazma)'], [o.harita, 'guncelle', 'Harita keşfi'], [sahne, 'ciz', 'Çizim (ekran kartına gönderme)'],
+    [sahne, 'gokGuncelle', 'Gökyüzü ve sis'], [miniHarita, 'ciz', 'Mini harita'], [o.hud, 'pusula', 'Pusula'], [o.hud, 'saat', 'Saat göstergesi'], [o.hud, 'durumCiz', 'Can ve açlık göstergesi'],
+    [o.koyler, 'guncelle', 'Köyler'], [o.mekanik, 'guncelle', 'Mekanik'], [o.elektrik, 'guncelle', 'Elektrik'], [o.firinlar, 'guncelle', 'Fırınlar'], [o.suAkisi, 'guncelle', 'Su akışı'],
+    [o.kumDusmesi, 'guncelle', 'Kum düşmesi'], [o.hava, 'guncelle', 'Hava (yağış)'], [o.cihazCizici, 'guncelle', 'Cihaz modelleri'], [o.cihazCizici, 'kablolariCiz', 'Kablolar'], [o.taretler, 'guncelle', 'Taretler'],
+    [o.ag, 'guncelle', 'Ağ (çok oyunculu)'], [o.oyuncu, 'guncelle', 'Oyuncu fiziği'], [o.dunya, 'rastgeleTik', 'Rastgele tikler (ekin, çimen)'], [muzik, 'guncelle', 'Müzik'], [o.yapiOlaylari, 'guncelle', 'Yapı olayları'],
+    [o.tekneler, 'guncelle', 'Tekneler'], [o.olta, 'guncelle', 'Olta'], [o.fenerler, 'guncelle', 'Deniz fenerleri'], [o.gok, 'guncelle', 'Gök olayları'], [o.hayatta, 'guncelle', 'Hayatta kalma'],
+    [ortamAtmosfer, 'guncelle', 'Ortam sesleri'], [o.hud, 'hasarSayiGuncelle', 'Hasar sayıları'], [sahne, 'isiklariAyarla', 'Işık listesi'], [o.binek, 'guncelle', 'Binek']];
+  return l.filter(([n]) => !!n);
+}
 function hataPaneli(o) {
   const p = o.oyuncu.konum, k = o.dunya.uretici.kolon(Math.floor(p.x), Math.floor(p.z), {});
   let yon = (-o.oyuncu.yaw * 180 / Math.PI) % 360; if (yon < 0) yon += 360;
@@ -1999,7 +2034,15 @@ function arkaPlanAyarla() {
 document.addEventListener('visibilitychange', arkaPlanAyarla);
 
 /* Çok Oyunculu ekranı */
-function cokDurum(m) { const el = $('#cokDurum'); el.textContent = m; el.hidden = !m; }
+function cokDurum(m) {
+  const el = $('#cokDurum'); el.textContent = m; el.hidden = !m;
+  /* 0.50.0: kendiliğinden yeniden bağlanma denemesi bağlantı aşamasında başarısız olursa sonraki deneme kurulur (en çok 3 deneme, aralık giderek uzar) */
+  if (m && sonKod && baglanDeneme > 0 && baglanDeneme < 3 && aktifEkran === 'cok') {
+    const bek = 3000 + baglanDeneme * 3000;
+    el.textContent = `${m} ${Math.round(bek / 1000)} saniye içinde yeniden denenecek (deneme ${baglanDeneme + 1}/3).`;
+    clearTimeout(baglanZaman); baglanZaman = setTimeout(() => { if (aktifEkran === 'cok' && !oyun) $('#yenidenBaglan').click(); }, bek);
+  }
+}
 function adAl() {
   const ad = $('#cokAd').value.replace(/\s+/g, ' ').trim().slice(0, 16);
   if (ad) { ayar.ad = ad; ayarlariKaydet(ayar); }

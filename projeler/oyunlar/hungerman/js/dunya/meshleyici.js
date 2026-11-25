@@ -149,13 +149,23 @@ export function meshle(Q, H = PY, ton = null) {
     const q = (y * IW + z + o) * IW + o, d = (y * DB + z) * DB;
     for (let x = 0; x < DB; x++) { P[d + x] = Q[q + x]; gok[d + x] = ISIK_EGRI[L[q + x]]; }
   }
-  const op = new Tampon(), su = new Tampon();
+  const opUst = new Tampon(), su = new Tampon(), alt = new Tampon();
   let ustY = 0;
   for (let y = PH - 1; y >= 0 && !ustY; y--) for (let z = 0; z < PB && !ustY; z++) for (let x = 0; x < PB; x++) if (P[ddizin(x, y, z)]) { ustY = y; break; }
+  /* 0.50.0: yeraltı sınırı: parçanın (ve kenar komşularının) en alçak opak yüzeyinin 3 blok altı. Bu yüksekliğin altındaki yüzler
+     ayrı bir geometriye (alt) yazılır; oyuncu yer üstündeyken bu geometri çizilmez (mağara duvarları yüzeyden görünmez). */
+  let sinir = PH;
+  for (let z = -1; z <= PB; z++) for (let x = -1; x <= PB; x++) {
+    let t = 0;
+    for (let y = Math.min(ustY + 1, PH - 1); y > 0; y--) if (OPAK[P[ddizin(x, y, z)]]) { t = y; break; }
+    if (t < sinir) sinir = t;
+  }
+  sinir -= 3;
 
   for (let y = 0; y <= ustY; y++) for (let z = 0; z < PB; z++) for (let x = 0; x < PB; x++) {
     const i = ddizin(x, y, z), id = P[i];
     if (!id) continue;
+    const op = y < sinir ? alt : opUst;
     const ciz = CIZIM[id];
     if (ciz === C_KUP) kup(P, gok, i, id, x, y, z, op);
     else if (ciz === C_CAPRAZ) {
@@ -165,7 +175,7 @@ export function meshle(Q, H = PY, ton = null) {
     else if (ciz === C_LAV) sivi(P, gok, i, x, y, z, op, true);
     else if (ciz === C_SEKIL) { if (!GORUNMEZ[id]) sekil(P, gok, i, id, x, y, z, op); }   // 0.25.0: cihaz hücreleri ayrıca çizilir
   }
-  return { opak: op.bitir(), su: su.bitir() };
+  return { opak: opUst.bitir(), su: su.bitir(), alt: alt.bitir(), sinir };
 }
 
 function kup(P, gok, i, id, x, y, z, T) {

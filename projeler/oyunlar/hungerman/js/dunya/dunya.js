@@ -172,7 +172,7 @@ export class Dunya {
       const dx = p.cx - pcx, dz = p.cz - pcz;
       if (dx * dx + dz * dz > (R + 3) * (R + 3)) {
         /* Başka bir oyuncunun yakınındaysa veri kalır, yalnızca çizim kaldırılır */
-        if (this.ekMerkezler.length && this.ekYakin(p.cx, p.cz, this.EK_R + 2)) { if (p.mesh || p.suMesh) { this.meshSil(p); p.kirli = true; } continue; }
+        if (this.ekMerkezler.length && this.ekYakin(p.cx, p.cz, this.EK_R + 2)) { if (p.mesh || p.suMesh || p.altMesh) { this.meshSil(p); p.kirli = true; } continue; }
         this.meshSil(p); this.parcalar.delete(p.k);
         if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); this.mekanikler.delete(k); this.elektrikler.delete(k); this.kovanlar.delete(k); }
       }
@@ -180,6 +180,21 @@ export class Dunya {
     this.isDagit();
   }
 
+  /* 0.50.0: hızlı giderken (at, tekne, uçuş) gidilen yöndeki parçalar önce üretilir: uzaklık, yöne göre 0,55 ile 1,45 arasında tartılır */
+  hizAyarla(vx, vz) {
+    const h = Math.hypot(vx, vz);
+    this.yonK = h > 6.5 ? (((Math.round(Math.atan2(vz, vx) / (Math.PI / 4)) % 8) + 8) % 8) : null;
+  }
+  ofsetSirasi() {
+    const y = this.yonK; if (y == null) return this.ofsetler;
+    const O = this._yonOfset || (this._yonOfset = {}), a = y * Math.PI / 4, ux = Math.cos(a), uz = Math.sin(a);
+    let l = O[y];
+    if (!l || l.kaynak !== this.ofsetler) {
+      const puan = q => { const u = Math.sqrt(q[2]) || 0; return u ? u * (1 - 0.45 * (q[0] * ux + q[1] * uz) / u) : 0; };
+      l = this.ofsetler.slice().sort((A, B) => puan(A) - puan(B)); l.kaynak = this.ofsetler; O[y] = l;
+    }
+    return l;
+  }
   ekYakin(cx, cz, r) {
     for (const [x, z] of this.ekMerkezler) if ((cx - x) ** 2 + (cz - z) ** 2 <= r * r) return true;
     return false;
@@ -195,7 +210,7 @@ export class Dunya {
       if (!bos.length) return;
       if (p.acil && p.v && !p.meshleniyor && (p.cx - pcx) ** 2 + (p.cz - pcz) ** 2 <= (R + 3) * (R + 3) && this.komsularHazir(p)) { this.meshIste(bos.pop(), p); }
     }
-    for (const [ox, oz, d] of this.ofsetler) {
+    for (const [ox, oz, d] of this.ofsetSirasi()) {
       if (!bos.length) return;
       const cx = pcx + ox, cz = pcz + oz;
       const k = parcaAnahtar(cx, cz);
@@ -361,9 +376,20 @@ export class Dunya {
     };
     p.mesh = yap(r.opak, this.sahne.opakMalzeme, 0);
     p.suMesh = yap(r.su, this.sahne.suMalzeme, 1);
+    p.altMesh = r.alt ? yap(r.alt, this.sahne.opakMalzeme, 0) : null;   // 0.50.0: yeraltı geometrisi
+    if (p.altMesh) p.altMesh.visible = !this.yerustu || (Math.abs(p.cx - this.ycx) <= 1 && Math.abs(p.cz - this.ycz) <= 1);
+  }
+  /* 0.50.0: oyuncu yer üstündeyken (başının üstünde gökyüzü varken) uzak parçaların yeraltı geometrisi çizilmez;
+     oyuncunun bulunduğu ve komşu parçalarda (mağara ağzı, kuyu) hep çizilir */
+  yeraltiAyarla(yerustu, px, pz) {
+    if (this.yeraltiHepsi) yerustu = false;   // geliştirici: karşılaştırma için hepsi çizilir
+    const cx = Math.floor(px / PB), cz = Math.floor(pz / PB);
+    if (yerustu === this.yerustu && cx === this.ycx && cz === this.ycz) return;
+    this.yerustu = yerustu; this.ycx = cx; this.ycz = cz;
+    for (const p of this.parcalar.values()) if (p.altMesh) p.altMesh.visible = !yerustu || (Math.abs(p.cx - cx) <= 1 && Math.abs(p.cz - cz) <= 1);
   }
   meshSil(p) {
-    for (const k of ['mesh', 'suMesh']) if (p[k]) { this.sahne.dunyaGrubu.remove(p[k]); p[k].geometry.dispose(); p[k] = null; }
+    for (const k of ['mesh', 'suMesh', 'altMesh']) if (p[k]) { this.sahne.dunyaGrubu.remove(p[k]); p[k].geometry.dispose(); p[k] = null; }
   }
 
   /* Oyuncunun çevresindeki parçalar hazır mı (yükleme ekranı için 0..1) */
@@ -373,7 +399,7 @@ export class Dunya {
     for (let dz = -yaricap; dz <= yaricap; dz++) for (let dx = -yaricap; dx <= yaricap; dx++) {
       t++;
       const p = this.parca(pcx + dx, pcz + dz);
-      if (p && p.v && (p.mesh || p.suMesh || (!p.kirli && !p.meshleniyor))) h++;
+      if (p && p.v && (p.mesh || p.suMesh || p.altMesh || (!p.kirli && !p.meshleniyor))) h++;
     }
     return h / t;
   }
@@ -439,9 +465,14 @@ export class Dunya {
   sandiklariAl() { return [...this.sandiklar].map(([k, y]) => [k, y.map(s => (s ? (s.buyu ? [s.id, s.adet, s.dayanim ?? null, s.buyu] : [s.id, s.adet, s.dayanim ?? null]) : null))]); }
   sandiklariYukle(l) { this.sandiklar.clear(); for (const [k, y] of l || []) this.sandiklar.set(k, y.map(s => (s ? { id: s[0], adet: s[1], ...(s[2] != null ? { dayanim: s[2] } : {}), ...(s[3] && typeof s[3] === 'object' ? { buyu: { ...s[3] } } : {}) } : null))); }
 
-  degisiklikleriAl() {
+  /* sikistir: 0.50.0: dünya kaydında her değişiklik tek bir 32 bitlik sayıya (dizin × 4096 + blok) paketlenir (kayıt boyutu yaklaşık yarıya iner);
+     çok oyunculu aktarımda düz dizi kullanılır */
+  degisiklikleriAl(sikistir = false) {
     const o = [];
-    for (const [k, d] of this.degisiklikler) { const a = []; for (const [i, id] of d) a.push(i, id); o.push([k, a]); }
+    for (const [k, d] of this.degisiklikler) {
+      if (sikistir) { const a = new Uint32Array(d.size); let j = 0; for (const [i, id] of d) a[j++] = i * 4096 + id; o.push([k, a]); }
+      else { const a = []; for (const [i, id] of d) a.push(i, id); o.push([k, a]); }
+    }
     return o;
   }
   degisiklikleriYukle(liste) {
@@ -449,8 +480,9 @@ export class Dunya {
     for (const [k, a] of liste || []) {
       const d = new Map();
       const [cx, cz] = k.split(',').map(Number);
-      for (let j = 0; j < a.length; j += 2) {
-        d.set(a[j], a[j + 1]);
+      const paket = a instanceof Uint32Array;   // 0.50.0: sıkıştırılmış kayıt
+      for (let j = 0; j < a.length; j += paket ? 1 : 2) {
+        if (paket) d.set(Math.floor(a[j] / 4096), a[j] % 4096); else d.set(a[j], a[j + 1]);
 
       }
       this.degisiklikler.set(k, d);

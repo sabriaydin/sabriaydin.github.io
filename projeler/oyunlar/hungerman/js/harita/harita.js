@@ -11,8 +11,8 @@ export { parcaHesapla };
 
 export const BOLGE = 16;
 export const BOLGE_BLOK = BOLGE * PB;
-const TARAMA = 0.35;      // yeni parçaların haritaya işlenme aralığı (sn)
-const TARAMA_ADET = 14;   // bir taramada işlenen en çok parça
+const TARAMA = 0.1;       // yeni parçaların haritaya işlenme aralığı (sn)
+const TARAMA_ADET = 4;    // bir taramada işlenen en çok parça
 
 /* Bloğun üst yüz dokusunun ortalama rengi (0..255) */
 const RENK = new Map();
@@ -104,9 +104,9 @@ export class Harita {
       if (diyarMi(cx * PB)) continue;   // 0.18.0: Yeraltı Diyarı haritaya işlenmez
       this.taze.add(k);
       const yeni = parcaHesapla(p.v), eski = this.parcalar.get(k);
-      if (eski && eski.every((v, i) => v === yeni[i])) continue;
-      this.ekle(cx, cz, yeni);
-      if (++n >= TARAMA_ADET) break;
+      n++;   // 0.50.0: değişmeyen parçaların hesabı da bütçeye sayılır (yüklemede ani takılmalar)
+      if (!(eski && eski.every((v, i) => v === yeni[i]))) this.ekle(cx, cz, yeni);
+      if (n >= TARAMA_ADET) break;
     }
   }
   sinirGenislet(cx, cz) {

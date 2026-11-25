@@ -25,7 +25,7 @@ self.onmessage = e => {
     if (m.tur === 'meshle') {
       const r = meshle(m.P, m.H, tonTablosu(m.cx, m.cz));
       const tr = [];
-      for (const k of ['opak', 'su']) for (const a of ['p', 'u', 'l', 'i', 't']) tr.push(r[k][a].buffer);
+      for (const k of ['opak', 'su', 'alt']) for (const a of ['p', 'u', 'l', 'i', 't']) tr.push(r[k][a].buffer);
       self.postMessage({ tur: 'meshle', no: m.no, cx: m.cx, cz: m.cz, surum: m.surum, r }, tr);
     }
   } catch (err) {

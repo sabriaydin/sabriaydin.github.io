@@ -197,10 +197,11 @@ export class Hava {
   }
   turAl(x, z) { return this.hucre(Math.floor(x / KH), Math.floor(z / KH))[0]; }
   /* Kaba doku: kamera çevresindeki 48 x 48 hücre (toroidal dizin) */
-  kabaGuncelle(c) {
-    const V = this.kabaV, bx = Math.floor(c.x / KH) - KN / 2, bz = Math.floor(c.z / KH) - KN / 2;
-    if (this.kisOnce !== !!this.kis) { this.kisOnce = !!this.kis; this.turOnbellek.clear(); }
-    for (let j = 0; j < KN; j++) for (let i = 0; i < KN; i++) {
+  /* 0.50.0: kaba doku altı karede, sekizer satır güncellenir (önceden yarım saniyede bir tek karede 2304 hücre: ani takılma) */
+  kabaGuncelle(c, j0 = 0, j1 = KN) {
+    if (j0 === 0) { this.kabaB = [Math.floor(c.x / KH) - KN / 2, Math.floor(c.z / KH) - KN / 2]; if (this.kisOnce !== !!this.kis) { this.kisOnce = !!this.kis; this.turOnbellek.clear(); } }
+    const V = this.kabaV, [bx, bz] = this.kabaB || [Math.floor(c.x / KH) - KN / 2, Math.floor(c.z / KH) - KN / 2];
+    for (let j = j0; j < j1; j++) for (let i = 0; i < KN; i++) {
       const cx = bx + i, cz = bz + j, [tur, h] = this.hucre(cx, cz);
       const y = tur ? this.alan(cx * KH + 4, cz * KH + 4)[0] : 0;
       const o = ((((cz % KN) + KN) % KN) * KN + (((cx % KN) + KN) % KN)) * 4;
@@ -255,8 +256,10 @@ export class Hava {
       if (this.simsekOmur <= 0) this.simsekCizgi.visible = false;
     }
     this.kabaSayac -= dt;
-    if (this.kabaSayac <= 0) { this.kabaSayac = 0.5; this.kabaGuncelle(c); }
-    this.inceGuncelle(c, 700);
+    if (this.kabaSatir == null || this.kabaSatir >= KN) { if (this.kabaSayac <= 0) { this.kabaSayac = 0.5; this.kabaSatir = 0; } }
+    if (this.kabaSatir < KN) { const j = this.kabaSatir; this.kabaSatir = Math.min(KN, j + 8); this.kabaGuncelle(c, j, this.kabaSatir); }
+    /* 0.50.0: yağış yokken çatı dokusu yavaş yenilenir (önceden her karede 700 sütun okunuyordu) */
+    this.inceGuncelle(c, this.yogunluk > 0.01 || this.hedefY > 0.01 ? 500 : 30);
     const k = 2.4 * (1 + this.firtinaK * 2), zs = this.t % 3600;
     for (const K of this.katmanlar) {
       K.visible = !suda;

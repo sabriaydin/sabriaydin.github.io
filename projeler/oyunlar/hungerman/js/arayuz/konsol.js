@@ -695,6 +695,13 @@ export class Konsol {
     ekle('kaydet', 'Oyunu hemen kaydeder', 'kaydet', () => { this.arayuz.kaydet(); this.tamam('Kaydedildi.'); });
     ekle('fps', 'Kare hızı göstergesini açar / kapatır', 'fps', () => { this.tamam(`FPS göstergesi ${this.arayuz.fps() ? 'açık' : 'kapalı'}.`); });
     ekle('hata', 'Teknik bilgi panelini (F3) açar / kapatır', 'hata', () => { this.arayuz.hataPaneli(); });
+    /* 0.50.0: performans ölçümü */
+    ekle('olcum', 'Performans ölçümü: olcum ac | olcum rapor | olcum kapat', 'olcum ac|rapor|kapat', (o, a) => {
+      const k = (a[0] || 'rapor').toLocaleLowerCase('tr');
+      if (k === 'ac') { this.arayuz.olcumAc(); this.tamam('Ölçüm açıldı. Birkaç saniye oynadıktan sonra "olcum rapor" yazınız.'); }
+      else if (k === 'kapat') { this.arayuz.olcumKapat(); this.tamam('Ölçüm kapatıldı.'); }
+      else this.yaz(this.arayuz.olcumRapor(), 'bilgi');
+    }, { tamamla: () => ['ac', 'rapor', 'kapat'] });
     ekle('ag', 'Çok oyunculu durumunu gösterir', 'ag', o => {
       if (!o.ag) { this.yaz('Tek oyunculu. Dünya, duraklatma menüsünden arkadaşlara açılabilir.', 'bilgi'); return; }
       const l = o.ag.oyuncuListesi().map(a => a[1] + (a[3] ? ' (sunucu)' : '')).join(', ');
