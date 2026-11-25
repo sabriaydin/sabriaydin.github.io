@@ -23,12 +23,14 @@ varying vec3 vDunya;
 varying float vUzak;
 varying vec3 vTon;
 varying float vAkis;
+varying float vKopuk;
 void main() {
   vTon = 1.0 + ton * 0.5;   /* 0.41.0: biyom tonu (öznitelik yoksa 0: değişiklik yok) */
   float a = isik.x, sal = 0.0;
   if (a < -1.0) { sal = 1.0; a = -a - 1.0; } else if (a < 0.0) { sal = 0.3 * yaprakSal; a = -a; }   // 0.33.0: ağaç yaprakları yalnızca fırtınada salınır
-  vAkis = 0.0;
+  vAkis = 0.0; vKopuk = 0.0;
   #ifdef SU
+    if (a > 7.0) { vKopuk = 1.0; a -= 8.0; }   /* 0.48.0: kıyıya değen su yüzeyi köşesi (köpük) */
     if (a > 3.0) { vAkis = 1.0; a -= 4.0; }   /* 0.41.12: akan ve düşen suyun yan yüzü */
   #endif
   vUv = uv; vAo = a; vGok = isik.y;
@@ -66,6 +68,11 @@ uniform float magara;
 uniform float islak;
 uniform vec4 isiklar[${ISIK_SAYISI}];
 uniform float isikAdet;
+uniform vec4 elFener;
+uniform vec3 elFenerYon;
+uniform vec3 gokUst;
+uniform vec3 gokUfuk;
+uniform vec3 gunesYon;
 varying vec2 vUv;
 varying float vAo;
 varying float vGok;
@@ -73,6 +80,8 @@ varying vec3 vDunya;
 varying float vUzak;
 varying vec3 vTon;
 varying float vAkis;
+varying float vKopuk;
+float h21(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 void main() {
   vec2 uv = vUv;
   if (vAo > 1.5) { uv.x += sin(zaman * 0.7 + vDunya.z * 0.5) * 0.0012; uv.y += cos(zaman * 0.6 + vDunya.x * 0.5) * 0.0012; }
@@ -91,36 +100,74 @@ void main() {
   #ifndef SU
     if (t.a < 0.5) discard;
   #endif
-  float m = 0.0, mc = 0.0;
+  float m = 0.0, mc = 0.0, ml = 0.0;
   for (int i = 0; i < ${ISIK_SAYISI}; i++) {
     if (float(i) >= isikAdet) break;
     vec4 L = isiklar[i];
     if (L.w == 0.0) continue;
+    float r = abs(L.w), lavI = 0.0;
+    if (r > 500.0) { r -= 1000.0; lavI = 1.0; }   /* 0.48.0: 1000 üstü güç: lav ve magma (turuncu ışık) */
     float d = distance(vDunya, L.xyz);
-    float k = clamp(1.0 - d / (abs(L.w) * 0.9), 0.0, 1.0);
+    float k = clamp(1.0 - d / (r * 0.9), 0.0, 1.0);
     /* 0.15.1: birden çok ışık kaynağı toplanır; 0.15.4: eksi güç soğuk (buz) ışığıdır */
-    if (L.w > 0.0) m += k * k; else mc += k * k;
+    if (lavI > 0.5) ml += k * k; else if (L.w > 0.0) m += k * k; else mc += k * k;
   }
-  m = min(m, 1.0); mc = min(mc, 1.0);
+  /* 0.48.0: el feneri: bakış yönünde dar bir ışık konisi ve elin çevresinde zayıf bir hale */
+  if (elFener.w > 0.0) {
+    vec3 q = vDunya - elFener.xyz; float d = length(q), c = dot(q / max(d, 0.001), elFenerYon);
+    float k = smoothstep(0.84, 0.965, c) * pow(clamp(1.0 - d / elFener.w, 0.0, 1.0), 1.3) * 1.25 + clamp(1.0 - d / 4.0, 0.0, 1.0) * 0.35;
+    m += k;
+  }
+  m = min(m, 1.0); mc = min(mc, 1.0); ml = min(ml, 1.0);
   float ao = vAo;
   vec3 isik;
   if (ao > 1.5) { ao = ao - 1.0; isik = vec3(1.0); }   /* lav: kendi ışığıyla parlar */
   else {
     vec3 gokIsik = gokRenk * max(vGok * gun, magara);
-    isik = max(gokIsik, min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc, vec3(1.08)));
+    isik = max(gokIsik, min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc + vec3(1.0, 0.58, 0.28) * ml * 1.1, vec3(1.1)));
   }
   vec3 renk = t.rgb * vTon * ao * isik;
   /* Yağmur: açıktaki yüzeyler ıslak ve koyu görünür */
   renk *= mix(vec3(1.0), vec3(0.76, 0.8, 0.88), islak * clamp(vGok, 0.0, 1.0));
+  float a = alfa;
+  #ifdef SU
+    /* 0.48.0: su yüzeyi gökyüzünü yansıtır (yatık bakışta daha çok), güneş ya da ay dalgalarda parıldar; kıyıda köpük oluşur */
+    vec3 N = normalize(cross(dFdx(vDunya), dFdy(vDunya)));
+    vec3 V = normalize(cameraPosition - vDunya);
+    if (dot(N, V) < 0.0) N = -N;
+    if (abs(N.y) > 0.5 && V.y > 0.0) {
+      float ac = clamp(vGok, 0.0, 1.0);
+      vec3 Nd = normalize(N + vec3(sin(zaman * 1.7 + vDunya.x * 2.1 + vDunya.z * 1.3), 0.0, cos(zaman * 1.3 + vDunya.z * 2.4 - vDunya.x * 0.9)) * 0.06);
+      vec3 R = reflect(-V, Nd);
+      vec3 gk = mix(gokUfuk, gokUst, pow(clamp(R.y, 0.0, 1.0), 0.55));
+      float fr = 0.08 + 0.92 * pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 4.0);
+      renk = mix(renk, gk, clamp(fr * 0.85, 0.0, 0.8) * ac);
+      vec3 gy = gunesYon.y > -0.05 ? gunesYon : -gunesYon;
+      float sp = pow(max(dot(R, gy), 0.0), gunesYon.y > -0.05 ? 140.0 : 220.0) * ac * clamp(gy.y * 4.0, 0.0, 1.0);
+      renk += (gunesYon.y > -0.05 ? vec3(1.0, 0.92, 0.75) * 1.6 : vec3(0.55, 0.62, 0.8) * 0.7) * sp * (1.0 - islak * 0.8);
+      a = mix(alfa, 0.93, clamp(fr, 0.0, 1.0));
+      if (vKopuk > 0.02) {
+        vec2 hc = floor(vDunya.xz * 16.0);
+        float n = h21(hc), dalga = 0.5 + 0.5 * sin(zaman * 1.6 + n * 6.2832 + (vDunya.x + vDunya.z) * 0.8);
+        if (n < vKopuk * (0.55 + 0.45 * dalga) - 0.12) { renk = mix(renk, vec3(0.92, 0.96, 1.0) * max(isik.r, isik.b), 0.75); a = max(a, 0.9); }
+      }
+    }
+  #endif
+  /* 0.48.0: sis: yumuşak başlayan geçiş ve uzak dağlarda hafif hava perspektifi (pus) */
   float s = clamp((vUzak - sisBas) / (sisSon - sisBas), 0.0, 1.0);
+  s = s * s * (3.0 - 2.0 * s);
+  s = max(s, pow(clamp(vUzak / sisSon, 0.0, 1.0), 2.4) * 0.32);
   renk = mix(renk, sisRenk, s);
-  gl_FragColor = vec4(renk, alfa);
+  gl_FragColor = vec4(renk, a);
 }`;
 
 const GOK_VS = `varying vec3 vY; void main(){ vY = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
-const GOK_FS = `uniform vec3 ust; uniform vec3 ufuk; uniform vec3 gunesYon; uniform vec3 gunesHale; varying vec3 vY;
+/* 0.48.0: gün doğumu ve batımında güneşin bulunduğu ufuk turuncu-pembe, karşı ufuk morumsu renk alır */
+const GOK_FS = `uniform vec3 ust; uniform vec3 ufuk; uniform vec3 gunesYon; uniform vec3 gunesHale; uniform float alaca; uniform vec3 alacaRenk; uniform vec3 alacaKarsi; varying vec3 vY;
 void main(){ float h = clamp(vY.y, -1.0, 1.0); vec3 c = mix(ufuk, ust, pow(clamp(h, 0.0, 1.0), 0.55)); if (h < 0.0) c = mix(ufuk, ufuk * 0.6, clamp(-h * 3.0, 0.0, 1.0));
-float g = max(dot(vY, gunesYon), 0.0); c += gunesHale * pow(g, 12.0) * 0.6; gl_FragColor = vec4(c, 1.0); }`;
+if (alaca > 0.001) { vec2 a = normalize(vY.xz + 1e-4), b = normalize(gunesYon.xz + 1e-4); float yon = dot(a, b) * 0.5 + 0.5, bant = 1.0 - smoothstep(-0.05, 0.42, h);
+  c = mix(c, alacaRenk, alaca * bant * pow(yon, 1.6) * 0.9); c = mix(c, alacaKarsi, alaca * bant * pow(1.0 - yon, 2.0) * 0.45); }
+float g = max(dot(vY, gunesYon), 0.0); c += gunesHale * (pow(g, 12.0) * 0.6 + pow(g, 3.0) * 0.18 * alaca); gl_FragColor = vec4(c, 1.0); }`;
 
 /* 0.22.0: kuzey ışıkları: silindir perdede dalgalanan yeşil-mor ışık şeritleri (toplamalı karışım) */
 const AURORA_VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
@@ -163,7 +210,9 @@ export class Sahne {
     const ortak = () => ({
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
       sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 }, sicak: { value: 0 },
-      isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 }
+      isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 },
+      elFener: { value: new THREE.Vector4(0, 0, 0, 0) }, elFenerYon: { value: new THREE.Vector3(0, 0, -1) },
+      gokUst: { value: new THREE.Color(0.4, 0.6, 1) }, gokUfuk: { value: new THREE.Color(0.7, 0.8, 1) }, gunesYon: { value: new THREE.Vector3(0, 1, 0) }
     });
     this.opakMalzeme = new THREE.ShaderMaterial({ uniforms: ortak(), vertexShader: BLOK_VS, fragmentShader: BLOK_FS });
     const su = ortak(); su.alfa.value = 0.74;
@@ -197,7 +246,8 @@ export class Sahne {
   gokyuzuKur() {
     const g = new THREE.Group();
     this.gokMalzeme = new THREE.ShaderMaterial({
-      uniforms: { ust: { value: new THREE.Color() }, ufuk: { value: new THREE.Color() }, gunesYon: { value: new THREE.Vector3(0, 1, 0) }, gunesHale: { value: new THREE.Color(0, 0, 0) } },
+      uniforms: { ust: { value: new THREE.Color() }, ufuk: { value: new THREE.Color() }, gunesYon: { value: new THREE.Vector3(0, 1, 0) }, gunesHale: { value: new THREE.Color(0, 0, 0) },
+        alaca: { value: 0 }, alacaRenk: { value: new THREE.Color(0xff8a4c) }, alacaKarsi: { value: new THREE.Color(0x6a5a9a) } },
       vertexShader: GOK_VS, fragmentShader: GOK_FS, side: THREE.BackSide, depthWrite: false, fog: false
     });
     const kure = new THREE.Mesh(new THREE.SphereGeometry(500, 24, 16), this.gokMalzeme);
@@ -237,12 +287,15 @@ export class Sahne {
     /* Bulutlar */
     const cv = document.createElement('canvas'); cv.width = cv.height = 64;
     const ctx = cv.getContext('2d'); const rr = uretec(7);
+    /* 0.48.0: bulut dokusu yoğunluk alanıdır (saydamlık kanalında): eşik hava durumuna göre değişir; açık havada seyrek, yağmurda kapalı gök */
     const hucre = new Float32Array(64 * 64);
-    for (let i = 0; i < 70; i++) { const cx = rr() * 64, cy = rr() * 64, rad = 2 + rr() * 5; for (let y = -8; y <= 8; y++) for (let x = -8; x <= 8; x++) if (x * x + y * y * 1.6 < rad * rad) hucre[((Math.floor(cy + y) + 64) % 64) * 64 + ((Math.floor(cx + x) + 64) % 64)] = 1; }
-    ctx.fillStyle = '#fff';
-    for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) if (hucre[y * 64 + x]) ctx.fillRect(x, y, 1, 1);
+    for (let i = 0; i < 110; i++) { const cx = rr() * 64, cy = rr() * 64, rad = 2 + rr() * 6, w = 0.5 + rr() * 0.6; for (let y = -10; y <= 10; y++) for (let x = -10; x <= 10; x++) { const q = (x * x + y * y * 1.6) / (rad * rad); if (q < 1) hucre[((Math.floor(cy + y) + 64) % 64) * 64 + ((Math.floor(cx + x) + 64) % 64)] += (1 - q) * w; } }
+    const im = ctx.createImageData(64, 64);
+    for (let i = 0; i < 64 * 64; i++) { im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = 255; im.data[i * 4 + 3] = Math.round(Math.min(1, hucre[i] * 0.8) * 255); }
+    ctx.putImageData(im, 0, 0);
     const bd = new THREE.CanvasTexture(cv); bd.magFilter = THREE.NearestFilter; bd.minFilter = THREE.NearestFilter; bd.wrapS = bd.wrapT = THREE.RepeatWrapping; bd.repeat.set(4, 4);
-    this.bulutMalzeme = new THREE.MeshBasicMaterial({ map: bd, transparent: true, opacity: 0.82, depthWrite: false, side: THREE.DoubleSide, alphaTest: 0.3, fog: false });
+    this.bulutMalzeme = new THREE.MeshBasicMaterial({ map: bd, transparent: true, opacity: 0.82, depthWrite: false, side: THREE.DoubleSide, alphaTest: 0.42, fog: false });
+    this.bulutKay = 0; this.bulutEsik = 0.42;
     this.bulut = new THREE.Mesh(new THREE.PlaneGeometry(3072, 3072), this.bulutMalzeme);
     this.bulut.rotation.x = -Math.PI / 2; this.bulut.renderOrder = -5;
     this.sahne.add(this.bulut);
@@ -280,6 +333,10 @@ export class Sahne {
     const gy = new THREE.Vector3(Math.cos(a), yuks, 0.25).normalize();
     gm.gunesYon.value.copy(gy);
     gm.gunesHale.value.setRGB(1, 0.6, 0.3).multiplyScalar(alacakaranlik + 0.15 * k);
+    gm.alaca.value = alacakaranlik * (1 - hy * 0.85) * (1 - kn);
+    /* 0.48.0: alçalan güneş kızarır; blok ve su gölgelendiricisi gökyüzü renklerini (yansıma) ve güneş yönünü alır */
+    this.gunes.material.color.setHex(0xfff3b8).lerp(new THREE.Color(0xff7a3a), Math.max(0, 1 - Math.abs(yuks) * 3.2) * 0.85);
+    for (const m of this.malzemeler) { const u = m.uniforms; u.gokUst.value.copy(ust); u.gokUfuk.value.copy(ufuk); u.gunesYon.value.copy(gy); }
     this.yildizMalzeme.opacity = THREE.MathUtils.clamp(-yuks * 3, 0, 1) * 0.9 * (1 - hy);
     this.gunes.material.opacity = 1 - hy * 0.92; this.ay.material.opacity = 1 - hy * 0.92; this.gunes.children[0].material.opacity = 0.18 * (1 - hy);
     this.gokGrubu.position.copy(konum);
@@ -289,15 +346,20 @@ export class Sahne {
     /* Bulutlar oyuncuyu izler, doku kayar */
     this.bulut.position.set(konum.x, BULUT_Y, konum.z);   // 0.41.0: sürüm 2 dünyalarında 196, eski dünyalarda 132
     const bk = this.bulutMalzeme.map;
-    bk.offset.set((konum.x + zamanSn * 1.2) / 768 % 1, -(konum.z) / 768 % 1);
-    this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.75, 0.6), alacakaranlik * 0.4 * (1 - hy));
+    /* 0.48.0: bulutlar rüzgârla (fırtınada hızlı) kayar; yağış yaklaştıkça gök kapanır */
+    { const ad = Math.max(0, Math.min(0.5, zamanSn - (this.bulutSon ?? zamanSn))); this.bulutSon = zamanSn; this.bulutKay += ad * (1.2 + hy * 2.5 + hf * 7); }
+    bk.offset.set((konum.x + this.bulutKay) / 768 % 1, -(konum.z) / 768 % 1);
+    const esik = 0.5 - 0.36 * hy - 0.08 * hf;
+    this.bulutEsik += (esik - this.bulutEsik) * 0.02;
+    this.bulutMalzeme.alphaTest = this.bulutEsik;
+    this.bulutMalzeme.color.setScalar(0.1 + gun * 0.9).lerp(new THREE.Color(1, 0.66, 0.58), alacakaranlik * 0.6 * (1 - hy));
     /* 0.22.0: geceleri bulutlar gökyüzünün tonunu alır (gri lekeler oluşmaz; Kanlı Ay'da kızarır) */
     this.bulutMalzeme.color.lerp(ufuk.clone().multiplyScalar(1.5).convertSRGBToLinear(), (1 - k) * 0.9);
     /* Yağışta bulutlar gökyüzünün biraz koyu tonunu alır (gece kapkara lekeler oluşmaz) */
     if (hy > 0) this.bulutMalzeme.color.lerp(ust.clone().multiplyScalar(0.62).convertSRGBToLinear(), hy * 0.95);
     this.bulutMalzeme.opacity = 0.82 + 0.16 * hy;
     /* Blok aydınlatması */
-    const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.82, 0.68), alacakaranlik * 0.5);
+    const gokRenk = new THREE.Color(1, 1, 1).lerp(new THREE.Color(0.62, 0.7, 1), 1 - k).lerp(new THREE.Color(1, 0.76, 0.6), alacakaranlik * 0.6 * (1 - hy));   // 0.48.0: sıcak alacakaranlık ışığı
     if (kn > 0.001) gokRenk.lerp(new THREE.Color(1, 0.45, 0.4), kn * 0.75);
     const lav = suda === 'lav';
     /* suda === 'maske': dalış maskesi su altında görüşü uzatır */
@@ -383,6 +445,10 @@ export class Sahne {
     }
   }
 
+  /* 0.48.0: el feneri (konum, menzil, bakış yönü); menzil 0 kapalı */
+  elFeneriAyarla(p, menzil, yon) {
+    for (const m of this.malzemeler) { const u = m.uniforms; if (menzil > 0) { u.elFener.value.set(p.x, p.y, p.z, menzil); u.elFenerYon.value.copy(yon); } else u.elFener.value.w = 0; }
+  }
   isiklariAyarla(liste) {
     for (const m of this.malzemeler) {
       const a = m.uniforms.isiklar.value;

@@ -119,6 +119,33 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 48.0 (0.48.0): Görsel ve his (geliştirme planı 7. aşama)
+- **Canlı animasyonları:**
+  - Yürürken gövde hafifçe seker; koşarken adımlar açılır, gövde öne eğilir ve ayak altından toz kalkar.
+  - Saldırı hazırlığında canlı siner; vuruş anında kollar hızla iner ve gövde öne atılır. Kolsuz canlılar (kurt, örümcek) vuruşta öne doğru dalar.
+  - Hasar alan canlı geriye savrulur; kırmızı renk birden kaybolmak yerine yavaşça söner.
+  - Ölüm: canlı yana devrilir, yere çarpıp hafifçe seker, toprağa gömülerek solar ve dumana dönüşür (0,9 yerine 1,45 saniye).
+  - Oyuncu uzaktayken canlılar ara sıra etrafa bakınır; duran hayvanlar zaman zaman başını yere eğer.
+- **Parçacıklar:** parçacık çizimi yenilendi; her parçacığın kendi boyutu ve saydamlığı var, sönerken solar.
+  - Blok kırılınca daha iri parçalar saçılır, yere çarpıp seker ve küçülerek kaybolur; kırılan bloktan toz kalkar.
+  - Koşma tozu yumuşak, büyüyerek dağılan bir bulut; sert inişte ayak altından toz halkası.
+  - Suya düşünce damlalar sıçrar ve yüzeyde köpük halkası yayılır.
+  - Kıvılcımlar titreşerek parlar, duman büyüyerek dağılır.
+- **Işık:**
+  - Işık kaynakları yumuşak geçişle yanar ve söner: yeni konan meşale yavaşça parlar, kırılan söner; yaklaşırken ışık listesi değişince ani parlama ya da kararma olmaz.
+  - Lav ve magma ışığı turuncu ve yavaşça dalgalanır.
+  - Elde tutulan her ışıklı blok (fener, buz feneri, parıltı kristali, ışıklı mantar, lamba, ışıltaş vb.) çevresini aydınlatır; önceden yalnızca meşale aydınlatıyordu.
+  - Yeni eşya **El Feneri** (Üretim Masası: 2 bakır külçe, 1 cam, 1 parıltı kristali): elde tutulunca bakılan yönü 24 blok uzağa kadar dar bir ışık konisiyle aydınlatır.
+  - Gün doğumu ve batımında güneşin bulunduğu ufuk turuncu-pembe, karşı ufuk morumsu renk alır; alçalan güneş kızarır, bulutlar pembeleşir, ortam ışığı ısınır.
+- **Su ve gökyüzü:**
+  - Su yüzeyi gökyüzünü yansıtır (yatık bakışta daha çok ve daha az saydam); güneş ve ay dalgalarda parıldar. Mağara suyu gökyüzünü yansıtmaz.
+  - Kıyıya değen su yüzeyinde dalgalanan köpük oluşur.
+  - Bulutlar hava durumuna göre değişir: açık havada seyrek, yağmur yaklaştıkça gök kapanır; fırtınada bulutlar hızlı akar.
+- **Dokular:** taş, toprak, çimen, kum, çakıl, kar, kil ve kum taşı bloklarında blok başına hafif renk farkı; üst yüzlerde doku dört yönden birine döndürülür. Geniş düzlüklerde doku tekrarı belirgin olmaz.
+- **Uzak görüş:** sis yumuşak başlayarak koyulaşır; uzaktaki dağlarda hafif pus (hava perspektifi) oluşur, görüş sınırındaki geçiş daha az fark edilir.
+- Elde meşale ya da ışık varken buz ışığı yakındaysa el ve yerdeki eşyaların her zaman tam aydınlık görünmesi giderildi.
+- **Sınama:** irkilme, ölüm (devrilme, solma, kaldırılma), vuruş hareketi, toz / sıçrama / kırılma parçacıkları, meşalenin yumuşak yanması ve sönmesi, lav ışığı, elde fener ışığı, El Feneri ve tarifi, yağmurda bulut eşiği denendi; kumsal (öğle ve gün batımı), çayır ve dağ görüntüleri incelendi; uzun oturum taraması tekrarlandı.
+
 ## 47.0 (0.47.0): Ses ve müzik (geliştirme planı 6. aşama)
 - **Gerilim katmanı:** oyuncuyu fark eden canavarlar yaklaştıkça alttan alçak bir uğultu yükselir; yoğunluk arttıkça (yakında birkaç canavar) hızlanan bir davul eklenir (0,85 → 0,5 saniye). Katman hızlı yükselir, tehlike geçince yavaşça söner; çalan müzik parçası en çok %55 kısılır. Boss savaşında kendi parçası çaldığı için zayıflar. Müzik düzeyine bağlıdır; Ayarlar > Ses'ten kapatılabilir.
 - **Uyarı sesleri:**

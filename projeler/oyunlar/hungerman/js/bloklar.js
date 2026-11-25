@@ -1009,6 +1009,10 @@ ESYA45.atesOk = ayir(1); ESYA45.zehirOk = ayir(1);
 esya(ESYA45.atesOk, { ad: 'Ateşli Ok', simge: 'ok', renk: '#ff7a2a', ozellik: 'Vurduğu canlıyı tutuşturur · Hızlı erişim çubuğundayken yayla önce bu ok atılır' });
 esya(ESYA45.zehirOk, { ad: 'Zehirli Ok', simge: 'ok', renk: '#6fcf3a', ozellik: 'Vurduğu canlıyı 6 saniye zehirler · Hızlı erişim çubuğundayken yayla önce bu ok atılır' });
 export const OKLAR = [287, ESYA45.atesOk, ESYA45.zehirOk];
+/* 0.48.0: El Feneri: elde tutulunca bakılan yönü dar bir ışık konisiyle uzağa kadar aydınlatır */
+export const ESYA48 = {};
+ESYA48.elFeneri = ayir(1);
+esya(ESYA48.elFeneri, { ad: 'El Feneri', simge: 'elFeneri', yigin: 1, ozellik: 'Elde tutulunca baktığınız yönü 24 blok uzağa kadar aydınlatır' });
 yemek(486, 'Ayran', { simge: 'iksir', renk: '#f4f4ee', yemek: 3, kap: 331 }, 'hiz', 30);
 yemek(487, 'Kek', { simge: 'kek', yemek: 12 }, 'tokluk', 120);
 yemek(488, 'Balkabağı Turtası', { simge: 'turta', yemek: 8 });

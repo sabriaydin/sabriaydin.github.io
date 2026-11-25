@@ -1,9 +1,9 @@
 /* HungerMan - giriş noktası: menüler, oyun döngüsü, girdi, kayıt */
 import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl, zamanHizi, dunyaSurumAyarla } from './sabitler.js';
-import { Sahne, THREE } from './grafik/sahne.js';
+import { Sahne, THREE, ISIK_SAYISI } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
 import { BIYOMLAR, BY } from './dunya/uretici.js';
-import { BLOKLAR, ESYALAR, KATI, OPAK, SIVI, buyuluMu, ESYA37, dusmeHasari } from './bloklar.js';
+import { BLOKLAR, ESYALAR, KATI, OPAK, SIVI, LAV, buyuluMu, ESYA37, ESYA48, dusmeHasari } from './bloklar.js';
 import { metinTohum } from './rastgele.js';
 import { Oyuncu } from './oyun/oyuncu.js';
 import { Envanter } from './oyun/envanter.js';
@@ -857,8 +857,10 @@ function oyunBaslat(v) {
   oyuncu.olaylar.adim = id => ses.adim(BLOKLAR[id] ? BLOKLAR[id].ses : 'tas');
   oyuncu.olaylar.ziplad = () => { hayatta.yor(oyuncu.kosuyor ? 0.2 : 0.05); };
   /* 0.43.0: yüksekten inişte zemine göre iniş sesi */
-  oyuncu.olaylar.indi = (h, id) => { const t = BLOKLAR[id] ? BLOKLAR[id].ses : 'tas'; ses.adim(t); if (h > 11) setTimeout(() => ses.adim(t), 70); };
-  oyuncu.olaylar.suyaGirdi = h => ses.sicrama(Math.min(1.5, h / 8));
+  /* 0.48.0: sert inişte ayak altından toz, suya düşünce sıçrama */
+  oyuncu.olaylar.indi = (h, id) => { const t = BLOKLAR[id] ? BLOKLAR[id].ses : 'tas'; ses.adim(t); if (h > 11) setTimeout(() => ses.adim(t), 70);
+    if (oyun && oyun.dusenler && id && KATI[id]) { const P = oyuncu.konum; oyun.dusenler.toz(blokRengi(id), P.x, P.y, P.z, h > 11 ? 12 : 6, h > 11 ? 1.6 : 1.1); } };
+  oyuncu.olaylar.suyaGirdi = h => { ses.sicrama(Math.min(1.5, h / 8)); if (oyun && oyun.dusenler) { const P = oyuncu.konum; let y = Math.floor(P.y); while (y < Math.floor(P.y) + 4 && SIVI[oyun.dunya.blok(Math.floor(P.x), y + 1, Math.floor(P.z))]) y++; oyun.dusenler.sicrama(P.x, y + 0.92, P.z, Math.min(1.5, h / 9)); } };
   hayatta.olaylar.hasar = (n, sebep) => { ses.hasar(); hud.hasarParla(); basarimlar.istatEkle('hasar', n / 2); konsol.kayit('oyuncu', 'Oyuncu hasar aldı', { seviye: 'uyari', alan: { miktar: n, sebep: sebepAdi(sebep), can: `${Math.max(0, Math.ceil(hayatta.can))}/20` } }); };
   hayatta.olaylar.olum = sebep => olum(sebep);
   /* Deneyim sesleri (sık gelen küçük kazançlar seyreltilir) */
@@ -1262,7 +1264,7 @@ function adim(t) {
     /* 0.23.0: koşarken ayak tozu */
     if (o.oyuncu.kosuyor && o.oyuncu.yerde && !o.oyuncu.suda && mesafe > 0 && Math.random() < dt * 9) {
       const zid = o.dunya.blok(Math.floor(p.x), Math.floor(p.y - 0.2), Math.floor(p.z));
-      if (zid && KATI[zid]) o.dusenler.renkliParcacik(blokRengi(zid), p.x - Math.sin(o.oyuncu.yaw) * -0.3, p.y + 0.05, p.z - Math.cos(o.oyuncu.yaw) * -0.3, 2);
+      if (zid && KATI[zid]) o.dusenler.toz(blokRengi(zid), p.x - Math.sin(o.oyuncu.yaw) * -0.3, p.y, p.z - Math.cos(o.oyuncu.yaw) * -0.3, 1, 0.7);   // 0.48.0: yumuşak toz
     }
     o.hayatta.guncelle(dt, o.oyuncu.basSuda, { lavda: o.oyuncu.lavda, suda: o.oyuncu.suda && !o.oyuncu.lavda, maske: !!(zirh[0] && zirh[0].id === 456), solunum: o.envanter.zirhBuyu('solunum'), atesYakin: o.atesYakin });
     /* 0.22.0: vücut ısısı (hissedilen sıcaklık yarım saniyede bir hesaplanır), tılsım, istatistikler */
@@ -1396,16 +1398,41 @@ function adim(t) {
   const goz = o.oyuncu.gozKonumu(gecici);
   const liste = [];
   const titre = 13.5 + Math.sin(o.sure * 9) * 0.35 + Math.sin(o.sure * 23) * 0.2;
-  if (seciliId === 46) liste.push([goz.x, goz.y - 0.3, goz.z, 11]);
-  for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, 31)) liste.push([m[0], m[1], m[2], (m[3] || 14) * (m[5] ? 1 : titre / 13.5) * (m[4] ? -1 : 1)]);   // 0.39.0: magma ve ışıltaş titremez   // eksi: soğuk (buz) ışık
+  /* 0.48.0: elde tutulan her ışıklı blok (meşale, fener, kristal, ışıklı mantar, lamba...) çevresini aydınlatır; buz ışığı soğuktur */
+  const eb = !o.hayatta.olu ? BLOKLAR[seciliId] : null;
+  if (seciliId === 46 && !o.hayatta.olu) liste.push([goz.x, goz.y - 0.3, goz.z, 11]);
+  else if (eb && eb.mesale && eb.isik && ESYALAR[seciliId]) liste.push([goz.x, goz.y - 0.3, goz.z, Math.min(12, eb.isik * 0.8) * (eb.soguk ? -1 : 1)]);
+  /* 0.48.0: ışıklar yumuşak geçişle yanar ve söner (yaklaştıkça liste değişince ani parlama ya da kararma olmaz); lav ve magma ışığı turuncudur
+     ve yavaşça dalgalanır (gölgelendiricide 1000 üstü güç) */
+  { const S = o.isikSolma || (o.isikSolma = new Map()), gor = new Set(), ilk = !o.isikIlk;
+    for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, ISIK_SAYISI - 4)) {
+      const k = m[0] * 73856093 ^ m[1] * 19349663 ^ m[2] * 83492791; gor.add(k);
+      let q = S.get(k);
+      if (!q || q.m !== m) { const id = o.dunya.blok(Math.floor(m[0]), Math.floor(m[1] - 0.6), Math.floor(m[2])); q = { f: q ? q.f : ilk ? 1 : 0, m, lav: !!(LAV[id] || (BLOKLAR[id] && BLOKLAR[id].magma)) }; S.set(k, q); }
+      q.f = Math.min(1, q.f + dt * 4); q.var = true;
+    }
+    for (const [k, q] of S) if (!gor.has(k)) { q.f -= dt * 3; if (q.f <= 0) S.delete(k); }
+    o.isikIlk = true;
+    for (const q of S.values()) {
+      if (liste.length >= ISIK_SAYISI) break;
+      const m = q.m, f = q.f * (2 - q.f);
+      if (q.lav) liste.push([m[0], m[1], m[2], 1000 + (m[3] || 11) * f * (1 + 0.07 * Math.sin(o.sure * 1.4 + m[0] * 0.7 + m[2] * 0.3))]);
+      else liste.push([m[0], m[1], m[2], (m[3] || 14) * f * (m[5] ? 1 : titre / 13.5) * (m[4] ? -1 : 1)]);   // 0.39.0: magma ve ışıltaş titremez   // eksi: soğuk (buz) ışık
+    } }
   sahne.isiklariAyarla(liste);
+  /* 0.48.0: el feneri */
+  const feneri = seciliId === ESYA48.elFeneri && !o.hayatta.olu && !o.fotoModu;
+  if (feneri) { const y = o.oyuncu.bakisYonu(); sahne.elFeneriAyarla({ x: goz.x - y.z * 0.25, y: goz.y - 0.25, z: goz.z + y.x * 0.25 }, 24, y); }
+  else if (o.feneriAcik) sahne.elFeneriAyarla(null, 0);
+  o.feneriAcik = feneri;
   /* El ve düşen eşyaların ışığı */
   o.isikSayac -= dt;
   if (o.isikSayac <= 0) {
     o.isikSayac = 0.25;
     const acik = o.dunya.ustKati(Math.floor(goz.x), Math.floor(goz.z)) < goz.y;
     let l = acik && !diyar ? gun : diyar ? 0.42 : 0.12;
-    for (const L of liste) { const d = Math.hypot(L[0] - goz.x, L[1] - goz.y, L[2] - goz.z); l = Math.max(l, Math.min(1, (1 - d / (L[3] * 0.9)) * 1.1)); }
+    for (const L of liste) { const d = Math.hypot(L[0] - goz.x, L[1] - goz.y, L[2] - goz.z), g = Math.abs(L[3]) > 500 ? Math.abs(L[3]) - 1000 : Math.abs(L[3]); if (g > 0) l = Math.max(l, Math.min(1, (1 - d / (g * 0.9)) * 1.1)); }
+    if (o.feneriAcik) l = Math.max(l, 0.6);
     o.isikHedef = Math.max(sahne.tamAydinlik ? 1 : o.hayatta.etki('gece') ? 0.75 : 0.1, l);
     /* Yağmur sesi: çatı altında boğuk, karda ve çölde yok */
     o.havaAcik = H.acikta(goz);

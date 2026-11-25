@@ -2,6 +2,15 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.48', b: 'Görsel', y: [
+  { s: '0.48.0', b: 'Görsel ve his', m: [
+    'Canlılar daha canlı: koşarken öne eğiliyor, vururken atılıyor, darbe alınca geriye savruluyor. Ölen canlı yana devrilip solarak kayboluyor.',
+    'Kırılan bloktan iri parçalar ve toz, koşarken ayak altından toz, suya düşünce sıçrama.',
+    'Işıklar yavaşça yanıp sönüyor; lav turuncu parlıyor. Elinizdeki fener, kristal ya da ışıklı mantar da çevreyi aydınlatıyor. Yeni bir El Feneri de var.',
+    'Su gökyüzünü yansıtıyor, kıyıda köpük oluşuyor. Gün doğumu ve batımı çok daha renkli; bulutlar havaya göre seyrekleşip sıklaşıyor.',
+    'Zemindeki doku tekrarı azaldı, uzaktaki dağlar hafif pusla kayboluyor.'
+  ]}
+]},
 { g: '0.47', b: 'Ses', y: [
   { s: '0.47.0', b: 'Ses ve müzik', m: [
     'Canavarlar sizi fark edince alttan bir uğultu yükseliyor; kalabalıklaştıkça davul hızlanıyor. Tehlike geçince sessizce sönüyor.',

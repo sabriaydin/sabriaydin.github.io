@@ -4,6 +4,13 @@ import { simge, blokRengi } from '../grafik/doku.js';
 import { KATI, LAV, SIVI, ESYALAR, CIZIM, C_KUP, YUZ_DOKU, ATLAS_N } from '../bloklar.js';
 import { akisVektoru } from '../dunya/su-akisi.js';
 
+/* 0.48.0: parçacık gölgelendiricisi: her parçacığın kendi boyutu (dünya biriminde) ve saydamlığı vardır.
+   Eksi saydamlık yumuşak kenarlı (toz, duman, su damlası buharı) parçacık demektir. */
+const PARCA_VS = `attribute vec3 renk; attribute float boy; attribute float alfa; uniform float ekranY; varying vec3 vR; varying float vA;
+void main(){ vR = renk; vA = alfa; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = clamp(boy * projectionMatrix[1][1] * ekranY * 0.5 / max(0.05, -mv.z), 1.0, 96.0); gl_Position = projectionMatrix * mv; }`;
+const PARCA_FS = `varying vec3 vR; varying float vA;
+void main(){ float a = abs(vA); if (vA < 0.0) { vec2 q = gl_PointCoord - 0.5; float d = dot(q, q) * 4.0; a *= clamp(1.0 - d, 0.0, 1.0); } if (a < 0.02) discard; gl_FragColor = vec4(vR, a); }`;
+
 /* 0.23.0: yere düşen eşyalar düz resim (sprite) yerine üç boyutlu çizilir: küp bloklar küçük küp, diğerleri simgesinden kalınlaştırılmış model.
    Eski sürümde doku sRGB işaretlenmediği için renkler soluk görünüyordu; köşe renkleri doğrusal uzaya çevrilerek giderildi. */
 const GEO = new Map();
@@ -39,10 +46,13 @@ export class Dusenler {
     this.pk = [];
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.PMAX * 3), 3));
-    g.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.PMAX * 3), 3));
+    g.setAttribute('renk', new THREE.BufferAttribute(new Float32Array(this.PMAX * 3), 3));
+    g.setAttribute('boy', new THREE.BufferAttribute(new Float32Array(this.PMAX), 1));
+    g.setAttribute('alfa', new THREE.BufferAttribute(new Float32Array(this.PMAX), 1));
     g.setDrawRange(0, 0);
-    this.noktalar = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.09, vertexColors: true, sizeAttenuation: true }));
-    this.noktalar.frustumCulled = false;
+    this.parcaMalz = new THREE.ShaderMaterial({ uniforms: { ekranY: { value: 600 } }, vertexShader: PARCA_VS, fragmentShader: PARCA_FS, transparent: true, depthWrite: false });
+    this.noktalar = new THREE.Points(g, this.parcaMalz);
+    this.noktalar.frustumCulled = false; this.noktalar.renderOrder = 2;
     sahne.sahne.add(this.noktalar);
   }
 
@@ -76,15 +86,39 @@ export class Dusenler {
   atesParcacik(x, y, z, duman) {
     if (this.pk.length >= this.PMAX) return;
     const r = Math.random;
-    if (duman) this.pk.push({ p: [x + (r() - 0.5) * 0.3, y, z + (r() - 0.5) * 0.3], v: [(r() - 0.5) * 0.25, 0.8 + r() * 0.5, (r() - 0.5) * 0.25], c: [0.32, 0.31, 0.3], o: 1.6 + r() * 1.2, yukselen: true });
-    else this.pk.push({ p: [x + (r() - 0.5) * 0.25, y, z + (r() - 0.5) * 0.25], v: [(r() - 0.5) * 0.6, 1.4 + r() * 1.6, (r() - 0.5) * 0.6], c: [1, 0.55 + r() * 0.35, 0.12], o: 0.5 + r() * 0.6, yukselen: true, parlak: true });
+    if (duman) this.pk.push(this.yeni({ p: [x + (r() - 0.5) * 0.3, y, z + (r() - 0.5) * 0.3], v: [(r() - 0.5) * 0.25, 0.8 + r() * 0.5, (r() - 0.5) * 0.25], c: [0.32, 0.31, 0.3], o: 1.6 + r() * 1.2, yukselen: true, b: 0.12, buyu: 0.35, yumusak: true, a: 0.75 }));
+    else this.pk.push(this.yeni({ p: [x + (r() - 0.5) * 0.25, y, z + (r() - 0.5) * 0.25], v: [(r() - 0.5) * 0.6, 1.4 + r() * 1.6, (r() - 0.5) * 0.6], c: [1, 0.55 + r() * 0.35, 0.12], o: 0.5 + r() * 0.6, yukselen: true, parlak: true, b: 0.05 + r() * 0.03, titre: true }));
   }
-  parcacik(id, x, y, z, adet = 14) { this.renkliParcacik(blokRengi(id), x, y, z, adet, true); }
+  parcacik(id, x, y, z, adet = 14) { const c = blokRengi(id); this.renkliParcacik(c, x, y, z, adet, true); if (adet >= 10) this.toz(c, x + 0.5, y + 0.2, z + 0.5, 4, 1.2); }   // 0.48.0: kırılan bloktan toz
   renkliParcacik(c, x, y, z, adet = 10, blokIci = false) {
     for (let i = 0; i < adet && this.pk.length < this.PMAX; i++) {
       const k = 0.75 + Math.random() * 0.45;
       const o = blokIci ? [Math.random() * 0.8 + 0.1, Math.random() * 0.8 + 0.1, Math.random() * 0.8 + 0.1] : [0, 0, 0];
-      this.pk.push({ p: [x + o[0], y + o[1], z + o[2]], v: blokIci ? [(Math.random() - 0.5) * 4, Math.random() * 4, (Math.random() - 0.5) * 4] : [(Math.random() - 0.5) * 1.5, 1 + Math.random() * 2, (Math.random() - 0.5) * 1.5], c: [c[0] * k, c[1] * k, c[2] * k], o: 0.6 + Math.random() * 0.5, yukselen: !blokIci });
+      /* 0.48.0: blok parçaları daha iri, yere çarpınca seker ve sonlarına doğru küçülür */
+      this.pk.push(this.yeni({ p: [x + o[0], y + o[1], z + o[2]], v: blokIci ? [(Math.random() - 0.5) * 4, Math.random() * 4, (Math.random() - 0.5) * 4] : [(Math.random() - 0.5) * 1.5, 1 + Math.random() * 2, (Math.random() - 0.5) * 1.5], c: [c[0] * k, c[1] * k, c[2] * k], o: blokIci ? 0.7 + Math.random() * 0.6 : 0.6 + Math.random() * 0.5, yukselen: !blokIci, b: blokIci ? 0.08 + Math.random() * 0.07 : 0.075, sek: blokIci, kucul: blokIci }));
+    }
+  }
+  /* Parçacık kaydını varsayılanlarla tamamlar: b boyut, a saydamlık, buyu saniyede büyüme, kucul ömrün sonunda küçülme */
+  yeni(q) { q.oT = q.o; if (q.b == null) q.b = 0.075; if (q.a == null) q.a = 1; return q; }
+  /* 0.48.0: toz bulutu (koşma, sert iniş, kazma): yumuşak, büyüyerek dağılan, yere yakın kalan parçacıklar */
+  toz(c, x, y, z, adet = 3, yay = 1) {
+    const r = Math.random;
+    for (let i = 0; i < adet && this.pk.length < this.PMAX; i++) {
+      const a = r() * Math.PI * 2, h = (0.4 + r() * 0.8) * yay, k = 0.85 + r() * 0.25;
+      this.pk.push(this.yeni({ p: [x + Math.cos(a) * 0.15 * yay, y + 0.05, z + Math.sin(a) * 0.15 * yay], v: [Math.cos(a) * h, 0.25 + r() * 0.35, Math.sin(a) * h], c: [Math.min(1, c[0] * k + 0.08), Math.min(1, c[1] * k + 0.08), Math.min(1, c[2] * k + 0.08)],
+        o: 0.55 + r() * 0.45, yukselen: true, b: 0.16 + r() * 0.1, buyu: 0.45, yumusak: true, a: 0.55, surtun: 2.6 }));
+    }
+  }
+  /* 0.48.0: suya düşme sıçraması: yukarı fırlayan damlalar ve yüzeyde yayılan köpük halkası; guc 0..1.5 */
+  sicrama(x, y, z, guc = 1) {
+    const r = Math.random, n = Math.round(10 + 16 * guc);
+    for (let i = 0; i < n && this.pk.length < this.PMAX; i++) {
+      const a = r() * Math.PI * 2, h = (0.6 + r() * 1.8) * (0.6 + guc * 0.5), w = 0.75 + r() * 0.25;
+      this.pk.push(this.yeni({ p: [x + Math.cos(a) * 0.25, y, z + Math.sin(a) * 0.25], v: [Math.cos(a) * h, 2.5 + r() * 3.5 * guc, Math.sin(a) * h], c: [0.62 * w, 0.8 * w, 1 * w], o: 0.55 + r() * 0.35, b: 0.05 + r() * 0.04, a: 0.85, suSon: true }));
+    }
+    for (let i = 0; i < 14 && this.pk.length < this.PMAX; i++) {
+      const a = i / 14 * Math.PI * 2, h = 1.1 + guc * 0.8;
+      this.pk.push(this.yeni({ p: [x + Math.cos(a) * 0.3, y + 0.02, z + Math.sin(a) * 0.3], v: [Math.cos(a) * h, 0, Math.sin(a) * h], c: [0.9, 0.95, 1], o: 0.7 + r() * 0.3, yukselen: true, yuzer: true, b: 0.14, buyu: 0.2, yumusak: true, a: 0.6, surtun: 2.2 }));
     }
   }
 
@@ -142,18 +176,33 @@ export class Dusenler {
       }
     }
     /* Parçacıklar */
-    const pos = this.noktalar.geometry.attributes.position, col = this.noktalar.geometry.attributes.color;
+    const G = this.noktalar.geometry.attributes, pos = G.position, col = G.renk, boy = G.boy, alf = G.alfa;
+    this.parcaMalz.uniforms.ekranY.value = this.sahne.cizici.domElement.height || 600;
     let n = 0;
     for (let i = this.pk.length - 1; i >= 0; i--) {
       const q = this.pk[i];
       q.o -= dt;
       if (q.o <= 0) { this.pk.splice(i, 1); continue; }
-      q.v[1] -= (q.yukselen ? 2 : 18) * dt;
+      if (!q.yuzer) q.v[1] -= (q.yukselen ? 2 : 18) * dt;
+      if (q.surtun) { const s = Math.max(0, 1 - q.surtun * dt); q.v[0] *= s; q.v[2] *= s; if (q.yukselen) q.v[1] *= s; }
+      if (q.buyu) q.b += q.buyu * dt;
       q.p[0] += q.v[0] * dt; q.p[1] += q.v[1] * dt; q.p[2] += q.v[2] * dt;
-      if (KATI[this.dunya.blok(Math.floor(q.p[0]), Math.floor(q.p[1]), Math.floor(q.p[2]))]) { q.p[1] = Math.floor(q.p[1]) + 1.01; q.v[0] *= 0.5; q.v[1] = 0; q.v[2] *= 0.5; }
+      const ic = this.dunya.blok(Math.floor(q.p[0]), Math.floor(q.p[1]), Math.floor(q.p[2]));
+      if (KATI[ic]) {
+        q.p[1] = Math.floor(q.p[1]) + 1.01;
+        if (q.sek && q.v[1] < -2) { q.v[1] *= -0.35; q.v[0] *= 0.6; q.v[2] *= 0.6; } else { q.v[0] *= 0.5; q.v[1] = 0; q.v[2] *= 0.5; }
+      }
+      else if (q.suSon && q.v[1] < 0 && SIVI[ic] && !LAV[ic]) { this.pk.splice(i, 1); continue; }   // damla suya karışır
     }
-    for (const q of this.pk) { const l = q.parlak ? 1 : isik; pos.setXYZ(n, q.p[0], q.p[1], q.p[2]); col.setXYZ(n, q.c[0] * l, q.c[1] * l, q.c[2] * l); n++; }
-    pos.needsUpdate = true; col.needsUpdate = true;
+    for (const q of this.pk) {
+      const l = q.parlak ? (q.titre ? 0.85 + Math.random() * 0.3 : 1) : isik, f = q.o / (q.oT || 1);
+      pos.setXYZ(n, q.p[0], q.p[1], q.p[2]); col.setXYZ(n, Math.min(1, q.c[0] * l), Math.min(1, q.c[1] * l), Math.min(1, q.c[2] * l));
+      boy.setX(n, q.kucul ? q.b * Math.min(1, 0.35 + f * 1.6) : q.b);
+      const a = q.a * Math.min(1, f * 3);
+      alf.setX(n, q.yumusak ? -a : a);
+      n++;
+    }
+    pos.needsUpdate = true; col.needsUpdate = true; boy.needsUpdate = true; alf.needsUpdate = true;
     this.noktalar.geometry.setDrawRange(0, n);
   }
   disaAktar() { return this.liste.map(d => { const a = [d.id, d.adet, d.dayanim ?? null, +d.p.x.toFixed(2), +d.p.y.toFixed(2), +d.p.z.toFixed(2)]; if (d.buyu) a.push(d.buyu); return a; }); }

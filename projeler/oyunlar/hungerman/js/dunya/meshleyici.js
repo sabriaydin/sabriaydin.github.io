@@ -62,6 +62,12 @@ function tonEkle(T, tur, x, z, kx, kz) {
   T.t.push(q(r), q(g), q(b));
 }
 
+/* 0.48.0: doğal zemin bloklarında doku tekrarını kırmak için blok başına hafif parlaklık farkı (ton kanalına eklenir)
+   ve üst yüzde dokunun dört yönden birine döndürülmesi */
+const CESIT = new Uint8Array(BLOK_UST), DONER = new Uint8Array(BLOK_UST);
+for (const id of [1, 2, 3, 4, 5, 6, 15, 21, 23, 24]) CESIT[id] = 1;
+for (const id of [1, 2, 3, 4, 5, 6, 21, 23]) DONER[id] = 1;
+function karisim(x, y, z) { let h = (x * 374761393 + y * 668265263 + z * 2147483647) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return (h ^ (h >>> 16)) >>> 0; }
 function dokuUV(t, lu, lv, out) {
   const tx = t % ATLAS_N, ty = (t / ATLAS_N) | 0;
   const u0 = tx / ATLAS_N + EPS, u1 = (tx + 1) / ATLAS_N - EPS;
@@ -174,10 +180,12 @@ function kup(P, gok, i, id, x, y, z, T) {
     const doku = YUZ_DOKU[id * 6 + f];
     const tabanN = T.n;
     const ao = [0, 0, 0, 0];
+    const hs = CESIT[id] ? karisim(x, y, z) : 0, don = f === 2 && DONER[id] ? hs & 3 : 0, fark = CESIT[id] ? ((hs >>> 4) % 19) - 9 : 0;
     for (let c = 0; c < 4; c++) {
       const k = Y.k[c];
       T.p.push(x + k[0], y + k[1], z + k[2]);
-      dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
+      const uvc = Y.uv[(c + don) & 3];
+      dokuUV(doku, uvc[0], uvc[1], T.u);
       let a = 3, g = 0, gs = 0;
       if (n === 0 && f === 2 && y === PH - 1) { g = 1; gs = 1; }
       else {
@@ -192,6 +200,7 @@ function kup(P, gok, i, id, x, y, z, T) {
       ao[c] = a;
       T.l.push(PARLAK[id] ? 1.6 + 0.35 * Y.g : YAPRAK[id] ? -AO_D[a] * Y.g : AO_D[a] * Y.g, g / gs);
       tonEkle(T, f === 2 && TON_CIM[id] ? 1 : TON_YAPRAK[id] ? 2 : 0, x, z, k[0], k[2]);
+      if (fark) { const j = T.t.length - 3; for (let q = 0; q < 3; q++) T.t[j + q] = Math.max(-127, Math.min(127, T.t[j + q] + fark)); }
     }
     T.n += 4;
     if (ao[0] + ao[2] < ao[1] + ao[3]) T.i.push(tabanN + 1, tabanN + 2, tabanN + 3, tabanN + 1, tabanN + 3, tabanN);
@@ -290,6 +299,11 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
     kose[kz * 2 + kx] = dolu ? 1 : n ? Math.max(0.06, top / n) : h;
   }
   const yuk = (kx, kz) => (kose.length ? kose[kz * 2 + kx] : h);
+  /* 0.48.0: kıyı köpüğü: köşeyi paylaşan sütunlardan biri aynı yükseklikte kara ise köşe işaretlenir (ışık değerine +8) */
+  const kopuk = [0, 0, 0, 0];
+  if (!lav && !ustSivi) for (let kz = 0; kz <= 1; kz++) for (let kx = 0; kx <= 1; kx++) {
+    for (let dz = kz - 1; dz <= kz; dz++) for (let dx = kx - 1; dx <= kx; dx++) { const id = P[i + dx * DX + dz * DZ]; if (id && !SIVI[id] && (OPAK[id] || CIZIM[id] === C_KUP)) kopuk[kz * 2 + kx] = 8; }
+  }
   for (let f = 0; f < 6; f++) {
     const Y = YUZLER[f];
     const ni = i + Y.komsu;
@@ -306,7 +320,7 @@ function sivi(P, gok, i, x, y, z, T, lav = false) {
       const k = Y.k[c];
       T.p.push(x + k[0], y + k[1] * yuk(k[0], k[2]), z + k[2]);
       dokuUV(doku, Y.uv[c][0], Y.uv[c][1], T.u);
-      if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g + akis, g);
+      if (lav) T.l.push(1.6 + 0.4 * Y.g, 1); else T.l.push(Y.g + akis + (f === 2 ? kopuk[k[2] * 2 + k[0]] : 0), g);
       tonEkle(T, lav ? 0 : 3, x, z, k[0], k[2]);
     }
     T.n += 4;
