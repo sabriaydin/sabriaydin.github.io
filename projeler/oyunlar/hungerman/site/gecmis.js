@@ -2,6 +2,14 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.47', b: 'Ses', y: [
+  { s: '0.47.0', b: 'Ses ve müzik', m: [
+    'Canavarlar sizi fark edince alttan bir uğultu yükseliyor; kalabalıklaştıkça davul hızlanıyor. Tehlike geçince sessizce sönüyor.',
+    'Canavar sizi fark ettiği an sesini çıkarıyor, iskelet yayını gerince kiriş geriliyor. Canınız azalınca kalbinizin attığını duyuyorsunuz.',
+    'Metal ve buz bloklarının kendi sesleri var; çatının altında yağmur, çatı neyden yapıldıysa ona göre duyuluyor.',
+    'Ayarlarda canlı, ortam, arayüz ve dövüş seslerini ayrı ayrı ayarlayabilirsiniz. Mono ses ve ses altyazıları da eklendi.'
+  ]}
+]},
 { g: '0.46', b: 'Yolculuk', y: [
   { s: '0.46.0', b: 'Yolculuk ve gece olayları', m: [
     'Görev günlüğünde (J) yeni bir Yolculuk sekmesi var. İlk günden Yeraltı Diyarı\'na kadar sekiz bölüm; her bölüm bitince ödül veriyor.',

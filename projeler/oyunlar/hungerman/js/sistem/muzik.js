@@ -21,7 +21,7 @@ export class Muzik {
   izinVer() { this.izin = true; }
 
   /* Her karede: dt ve geçerli durum (menu, gunduz, gece, magara, col, diyar, boss) */
-  guncelle(dt, durum) {
+  guncelle(dt, durum, gerilim = 0) {
     /* Susturulan parçalar yavaşça kısılır */
     for (let i = this.solanlar.length - 1; i >= 0; i--) {
       const [a, h] = this.solanlar[i];
@@ -40,7 +40,10 @@ export class Muzik {
     }
     if (this.el) {
       /* Açılış: yavaşça yükselir */
-      if (this.el.volume < this.duzey) this.el.volume = Math.min(this.duzey, this.el.volume + dt * this.duzey / 3);
+      /* 0.47.0: gerilim katmanı yükselince parça %55'e kadar kısılır */
+      const hedef = this.duzey * (1 - 0.55 * Math.min(1, gerilim));
+      if (this.el.volume < hedef) this.el.volume = Math.min(hedef, this.el.volume + dt * this.duzey / 3);
+      else if (this.el.volume > hedef + 0.005) this.el.volume = Math.max(hedef, this.el.volume - dt * this.duzey);
       if (this.el.ended) { this.el = null; this.parca = null; this.bekleme = ACIL[durum] ? 1 : 60 + Math.random() * 120; }
       return;
     }

@@ -1275,3 +1275,7 @@ body.gostergesiz #hasarSayilari { display: none; }
 .yolKart .odul { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .yolKart .odul span { color: var(--soluk); font-size: .85rem; }
 #gorevIzleyici .yolIz { display: block; font: 600 .68rem var(--govde); letter-spacing: .5px; color: #f3d27a; text-transform: uppercase; }
+/* 0.47.0: ses altyazıları */
+#altyazilar { position: fixed; right: 16px; bottom: 150px; z-index: 6; display: grid; gap: 3px; justify-items: end; pointer-events: none; }
+#altyazilar div { padding: 2px 8px; background: rgba(0, 0, 0, .62); border-radius: 3px; font: 600 .8rem var(--govde); color: #f0e8d8; }
+body.gostergesiz #altyazilar { display: none; }

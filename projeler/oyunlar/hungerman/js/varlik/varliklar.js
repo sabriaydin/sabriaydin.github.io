@@ -388,6 +388,8 @@ export class Varliklar {
           yx = -dz / yatay * v.yanAdim; yz = dx / yatay * v.yanAdim; hiz = T.hiz * 0.7;
         }
         if (gor && yatay < T.menzil && v.saldiriBek <= 0 && !v.yt) { v.saldiriBek = 1.6 + Math.random() * 1.2; this.mobOkAt(v, ctx); }
+        /* 0.47.0: okçu yayını germeye başlayınca kirişin gerilme sesi duyulur */
+        if (gor && yatay < T.menzil && !v.nisan && this.ses.yayGer) this.sesCal(p, 20, () => this.ses.yayGer());
         v.nisan = gor && yatay < T.menzil;
         /* Germe: atıştan önceki 1,2 saniyede yay gerilir */
         v.ger = v.nisan ? Math.max(0, Math.min(1, 1 - v.saldiriBek / 1.2)) : 0;
@@ -539,7 +541,7 @@ export class Varliklar {
     if (v.sesZaman <= 0) {
       v.sesZaman = (T.dusman ? 4 : 8) + Math.random() * 10;
       const d = this.dinleyici ? this.dinleyici.distanceTo(p) : Math.hypot(dx, dy, dz);
-      if (d < 24) this.sesCal(p, 24, () => this.ses.canli(T.ses, 'normal', 1));
+      if (d < 24) { const sim = performance.now(); if (sim - (this.sonDogalSes || 0) > 700) { this.sonDogalSes = sim; this.sesCal(p, 24, () => this.ses.canli(T.ses, 'normal', 1)); } else v.sesZaman = 0.5 + Math.random() * 1.5; }
     }
 
     this.canlandir(v, dt, dx, dy, dz, kovaliyor);
@@ -1250,7 +1252,8 @@ export class Varliklar {
       v.isikHedef = Math.max(0.08, li);
     }
     v.isik += ((v.isikHedef || 1) - v.isik) * Math.min(1, dt * 5);
-    if (v.sesZaman <= 0) { v.sesZaman = 3 + Math.random() * 6; this.sesCal(p, 20, () => this.ses.canli(T.ses, 'normal', 1)); }
+    /* 0.47.0: kendiliğinden çıkan canlı sesleri seyreltilir: aynı anda çok hayvan varken art arda ses çıkmaz (en çok 0,7 saniyede bir) */
+    if (v.sesZaman <= 0) { v.sesZaman = 3 + Math.random() * 6; const sim = performance.now(); if (sim - (this.sonDogalSes || 0) > 700) { this.sonDogalSes = sim; this.sesCal(p, 20, () => this.ses.canli(T.ses, 'normal', 1)); } else v.sesZaman = 0.5 + Math.random() * 1.5; }
     this.canlandir(v, dt, dx, dy - 1.3, dz, kovaliyor);
   }
 
@@ -1411,7 +1414,11 @@ export class Varliklar {
       }
       const duyma = (ctx.gurultu ?? 7) * kanli;
       const duyar = yatay < duyma && Math.abs(dy) < 6;
-      if (v.gorur || duyar) { v.farkinda = 8; v.sonGorulen = { x: op.x, y: op.y, z: op.z }; }
+      if (v.gorur || duyar) {
+        /* 0.47.0: fark etme anında canavar sesini çıkarır (oyuncu yaklaşan tehlikeyi duyar) */
+        if (!(v.farkinda > 0) && yatay < 18 && performance.now() - (v.sonFarkSes || 0) > 12000) { v.sonFarkSes = performance.now(); v.sesZaman = 4 + Math.random() * 4; this.sesCal(p, 26, () => this.ses.canli(T.ses, 'normal', 1)); }
+        v.farkinda = 8; v.sonGorulen = { x: op.x, y: op.y, z: op.z };
+      }
     }
     if (v.farkinda <= 0) { v.sonGorulen = null; v.kusatAci = null; return false; }
     /* Görmediği oyuncunun son görüldüğü yere varıp kimseyi bulamayınca ilgisi daha çabuk söner */
@@ -1802,7 +1809,7 @@ export class Varliklar {
       if (v.yaniyor && Math.random() < dt * 8) this.dusenler.renkliParcacik([0.25, 0.25, 0.25], p.x - 0.3 + Math.random() * 0.6, p.y + T.boy * Math.random(), p.z - 0.3 + Math.random() * 0.6, 1);
       const dx = op.x - p.x, dy = op.y - p.y, dz = op.z - p.z;
       v.sesZaman -= dt;
-      if (v.sesZaman <= 0) { v.sesZaman = (T.dusman ? 4 : 8) + Math.random() * 10; const d = Math.hypot(dx, dy, dz); if (d < 24) this.sesCal(p, 24, () => this.ses.canli(T.ses, 'normal', 1)); }
+      if (v.sesZaman <= 0) { v.sesZaman = (T.dusman ? 4 : 8) + Math.random() * 10; const d = Math.hypot(dx, dy, dz); const sim = performance.now(); if (d < 24 && sim - (this.sonDogalSes || 0) > 700) { this.sonDogalSes = sim; this.sesCal(p, 24, () => this.ses.canli(T.ses, 'normal', 1)); } }
       this.canlandir(v, dt, dx, dy, dz, T.dusman && Math.hypot(dx, dz) < 14, v.aynaHiz);
     }
     this.okGuncelle(dt, [ctx]);

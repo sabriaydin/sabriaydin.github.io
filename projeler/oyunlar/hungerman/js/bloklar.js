@@ -1093,3 +1093,8 @@ for (const e of Object.values(E)) if (e && e.isi && e.isi.y) e.isi = { ...e.isi,
 export const ESYALAR = E;
 export const maksDayanim = e => (e ? (e.alet ? e.alet.dayanim : e.zirh ? e.zirh.dayanim : e.kiyafet ? e.kiyafet.dayanim : null) : null);
 export const esyaBilgi = id => E[id] || null;
+/* 0.47.0: malzeme sesleri: metal eşyalar ve cihazlar 'metal', buz blokları 'buz' sesini kullanır */
+for (const b of B) if (b) {
+  if (b.ses === 'tas' && ([139, 159, 165, 182, 1411, 1923, 1993].includes(b.id) || b.cihaz || b.elektrik || b.sekil === 'cihaz')) b.ses = 'metal';
+  else if (b.ses === 'cam' && /Buz/.test(b.ad || '')) b.ses = 'buz';
+}

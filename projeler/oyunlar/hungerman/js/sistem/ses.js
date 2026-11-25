@@ -14,10 +14,13 @@ const ORNEK = { adim_cim: 5, adim_tas: 5, adim_odun: 5, adim_kar: 5, adim_kum: 5
 /* 0.41.0: biyom ortam sesleri (AmbientSounds ve Ambience Redo kaynaklı; ses/LISANS.md) */
 Object.assign(ORNEK, { kus: 3, karga: 1, baykus: 1, cekirge: 1, kurt_uluma: 1, cakal: 1, col_ruzgar: 1, marti: 1, dag_ruzgar: 2, dere: 2 });
 /* Blok ses türlerinin kayıt grupları */
-const ADIM = { cimen: 'adim_cim', toprak: 'adim_cim', bitki: 'adim_cim', tas: 'adim_tas', cam: 'adim_tas', odun: 'adim_odun', kar: 'adim_kar', kum: 'adim_kum', yun: 'adim_kum' };
-const KAZ = { tas: 'kaz_tas', odun: 'kaz_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', cam: 'kaz_cam' };
-const KIR = { tas: 'kaz_tas', odun: 'kir_odun', toprak: 'kir_toprak', cimen: 'kir_toprak', kum: 'kir_toprak', kar: 'kir_toprak', yun: 'kir_toprak', cam: 'kir_cam' };
-const KOY = { tas: 'koy_tas', odun: 'koy_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: 'kaz_toprak', bitki: 'kaz_toprak', cam: 'koy_tas' };
+/* 0.47.0: metal, buz ve bitki (yaprak) türleri eklendi; her kayıt grubu için perde [grup, perde] */
+const ADIM = { cimen: 'adim_cim', toprak: 'adim_cim', bitki: ['adim_cim', 1.15], tas: 'adim_tas', cam: ['adim_tas', 1.15], metal: ['adim_tas', 1.3], buz: ['adim_kar', 1.25], odun: 'adim_odun', kar: 'adim_kar', kum: 'adim_kum', yun: ['kumas', 1] };
+const KAZ = { tas: 'kaz_tas', odun: 'kaz_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: ['kumas', 1], cam: 'kaz_cam', metal: 'kaz_metal', buz: ['kaz_cam', 0.85], bitki: ['kumas', 1.25] };
+const KIR = { tas: 'kaz_tas', odun: 'kir_odun', toprak: 'kir_toprak', cimen: 'kir_toprak', kum: 'kir_toprak', kar: 'kir_toprak', yun: ['kumas', 0.9], cam: 'kir_cam', metal: 'kir_metal', buz: ['kir_cam', 0.85], bitki: ['kumas', 1.1] };
+const KOY = { tas: 'koy_tas', odun: 'koy_odun', toprak: 'kaz_toprak', cimen: 'kaz_toprak', kum: 'kaz_toprak', kar: 'kaz_toprak', yun: ['kumas', 0.95], bitki: ['kumas', 1.2], cam: 'koy_tas', metal: 'koy_metal', buz: ['koy_tas', 1.2] };
+/* grup adı ya da [grup, perde] */
+const G_ = g => (Array.isArray(g) ? g : [g, 1]);
 /* 0.40.0: canlı sesleri. Her tür için [grup, hız, düzey]; 'acima' (canı yanınca), 'olum' ve 'saldiri' yoksa en yakın grup kullanılır */
 const CANLI = {
   inek: { normal: ['inek'], acima: ['inek_acima'], olum: ['inek_acima', 0.85] },
@@ -52,7 +55,59 @@ const CANLI = {
 /* Müzik kutusu çalgıları (0 piyano, 1 bas, 2 zil, 3 flüt, 4 davul) */
 const CALGI = ['nota_piyano', 'nota_bas', 'nota_zil', 'nota_flut', 'nota_davul'];
 export class Ses {
-  constructor() { this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; this.ornekler = {}; this.dinleyici = null; this.engel = null; this._k = null; }
+  constructor() {
+    this.ctx = null; this.ana = null; this.duzey = 0.8; this.gurultu = null; this.ornekler = {}; this.dinleyici = null; this.engel = null; this._k = null;
+    /* 0.47.0: ses kanalları (Ayarlar > Ses): her sesin bir türü vardır; türün düzeyi ayrı ayarlanır */
+    this.kanal = null; this.kanalDuzey = { efekt: 1, canli: 1, ortam: 1, arayuz: 1 }; this._kat = null; this.mono = false;
+    const sar = (tur, adlar) => { for (const ad of adlar) { const f = this[ad]; if (typeof f !== 'function') continue; this[ad] = (...a) => { const o = this._kat; this._kat = tur; try { return f.apply(this, a); } finally { this._kat = o; } }; } };
+    sar('canli', ['canli', 'agirAdim']);
+    /* 0.47.0: altyazı: konumlu çalan canlı sesleri, gök gürültüsü ve patlamalar yazıyla da bildirilir */
+    this.altyazi = null;   // (metin, yön -1..1) => void
+    const canli = this.canli;
+    this.canli = (tur, tip = 'normal', hacim = 1) => { if (this.altyazi && hacim > 0.02 && (!this._k || this._k.kat > 0.05)) this.altyazi({ tur, tip }, this._k ? this._k.pan : 0); return canli.call(this, tur, tip, hacim); };
+    const gok = this.gokGurultusu;
+    this.gokGurultusu = (h = 1, yakin = false) => { if (this.altyazi && h > 0.05) this.altyazi({ ozel: 'Gök gürlüyor' }, 0); return gok.call(this, h, yakin); };
+    sar('ortam', ['ortam', 'damla', 'lav', 'dalga', 'ruzgar', 'gecitUgultu', 'diyarUgultu', 'gokGurultusu', 'meteorUguldu', 'kayanYildiz']);
+    sar('arayuz', ['tik', 'ac', 'kapa', 'kitap', 'sayfa', 'basarim', 'gorev', 'seviye', 'xp', 'hataSes', 'takas', 'kalp']);
+  }
+  /* 0.47.0: gerilim katmanı: canavarlar oyuncuyu fark edince alttan gelen alçak bir uğultu ve yoğunluk arttıkça hızlanan davul.
+     g 0..1 (müzik düzeyiyle çarpılmış olarak verilir); her karede çağrılır */
+  gerilimAyarla(g, dt) {
+    const c = this.ctx; if (!c) return;
+    if (!this.gerilim) {
+      if (g <= 0.01) return;
+      const cik = c.createGain(); cik.gain.value = 0; cik.connect(this.ana);
+      const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 260; f.Q.value = 2; f.connect(cik);
+      const o1 = c.createOscillator(), o2 = c.createOscillator(); o1.type = o2.type = 'sawtooth'; o1.frequency.value = 55; o2.frequency.value = 55.7;
+      const og = c.createGain(); og.gain.value = 0.05; o1.connect(og); o2.connect(og); og.connect(f); o1.start(); o2.start();
+      this.gerilim = { cik, f, o1, o2, t: 0 };
+    }
+    const G = this.gerilim, t = c.currentTime;
+    G.cik.gain.setTargetAtTime(Math.min(1, g) * 0.9, t, 0.6);
+    G.f.frequency.setTargetAtTime(220 + 260 * g, t, 0.5);
+    /* Davul: yoğunluk 0,4'ün üstündeyken; aralık 0,85 → 0,5 saniye */
+    G.t -= dt;
+    if (g > 0.4 && G.t <= 0) {
+      G.t = 0.85 - 0.35 * Math.min(1, (g - 0.4) / 0.6);
+      const o = c.createOscillator(), gg = c.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.18);
+      gg.gain.setValueAtTime(0.0001, t); gg.gain.exponentialRampToValueAtTime(0.35 * g, t + 0.01); gg.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o.connect(gg); gg.connect(G.cik); o.start(t); o.stop(t + 0.3);
+    }
+    if (g <= 0.005 && G.cik.gain.value < 0.003) { G.o1.stop(); G.o2.stop(); G.cik.disconnect(); this.gerilim = null; }
+  }
+  /* 0.47.0: uyarı tonu (açlık, soğuk/sıcak, yanma başlangıcı): kısa, yumuşak iki nota */
+  uyari(tur = 'aclik') {
+    const o = this._kat; this._kat = 'arayuz';
+    try {
+      const [a, b] = tur === 'isi' ? [520, 390] : tur === 'ates' ? [700, 520] : [440, 330];
+      this.ton(a, 0.16, 0.06, 'triangle', a); setTimeout(() => { const k = this._kat; this._kat = 'arayuz'; this.ton(b, 0.22, 0.06, 'triangle', b); this._kat = k; }, 150);
+    } finally { this._kat = o; }
+  }
+  /* Kanal düzeyi: tur 'efekt' | 'canli' | 'ortam' | 'arayuz' (0..1) */
+  kanalAyarla(tur, v) { this.kanalDuzey[tur] = Math.max(0, Math.min(1, v)); if (this.kanal && this.kanal[tur]) this.kanal[tur].gain.value = this.kanalDuzey[tur]; }
+  /* Tek kanallı (mono) çıkış: stereo yönlendirme kapanır */
+  monoAyarla(v) { this.mono = !!v; if (this.ctx) { this.ctx.destination.channelCount = v ? 1 : 2; } }
+  hedef() { return this.kanal ? this.kanal[this._kat || 'efekt'] : this.ana; }
   baslat() {
     if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
     try {
@@ -70,6 +125,9 @@ export class Ses {
       this.gurultu = this.ctx.createBuffer(1, n, n);
       const d = this.gurultu.getChannelData(0);
       for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      this.kanal = {};
+      for (const t of Object.keys(this.kanalDuzey)) { const g = this.ctx.createGain(); g.gain.value = this.kanalDuzey[t]; g.connect(this.ana); this.kanal[t] = g; }
+      if (this.mono) this.monoAyarla(true);
       this.ornekleriYukle();
     } catch (e) { this.ctx = null; }
   }
@@ -117,10 +175,10 @@ export class Ses {
   }
   /* Sesin bağlanacağı yer: konumlu çalarken süzgeç ve stereo yönlendirici, değilse ana çıkış */
   cikis() {
-    const K = this._k;
-    if (!K) return this.ana;
+    const K = this._k, H = this.hedef();
+    if (!K) return H;
     const c = this.ctx, f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = K.kesim; f.Q.value = 0.5;
-    if (c.createStereoPanner) { const p = c.createStereoPanner(); p.pan.value = K.pan; f.connect(p); p.connect(this.ana); } else f.connect(this.ana);
+    if (c.createStereoPanner && !this.mono) { const p = c.createStereoPanner(); p.pan.value = K.pan; f.connect(p); p.connect(H); } else f.connect(H);
     return f;
   }
   /* Ortam: su altında genel boğukluk, mağarada yankı (yumuşak geçişli) */
@@ -162,7 +220,7 @@ export class Ses {
     const c = this.ctx, l = g && this.ornekler[g];
     if (!c || !l || !l.length) return false;
     const k = c.createBufferSource(); k.buffer = l[0]; k.playbackRate.value = hiz;
-    const s = c.createGain(); s.gain.value = ses; k.connect(s); s.connect(this.ana); k.start();
+    const s = c.createGain(); s.gain.value = ses; k.connect(s); s.connect(this.hedef()); k.start();
     return true;
   }
   /* Ağır adım (Kül Devi): kaya darbesi alçak perdede */
@@ -202,20 +260,22 @@ export class Ses {
       case 'kar': return [3000, 0.09, 0.5];
       case 'bitki': return [3600, 0.06, 0.7];
       case 'cam': return [4200, 0.12, 4];
+      case 'buz': return [3600, 0.1, 3];
+      case 'metal': return [2400, 0.12, 6];
       case 'yun': return [1600, 0.08, 0.5];
       default: return [900, 0.09, 1];
     }
   }
-  kaz(tur) { if (this.cal(KAZ[tur], 0.8)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f, s, 0.32, 'bandpass', q); if (tur === 'odun') this.ton(180, 0.06, 0.12, 'triangle', 120); }
+  kaz(tur) { const [g0, h0] = G_(KAZ[tur]); if (this.cal(g0, 0.8, h0)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f, s, 0.32, 'bandpass', q); if (tur === 'odun') this.ton(180, 0.06, 0.12, 'triangle', 120); }
   kir(tur) {
-    if (this.cal(KIR[tur], 1, tur === 'tas' ? 0.8 : 1)) return;
+    { const [g0, h0] = G_(KIR[tur]); if (this.cal(g0, 1, tur === 'tas' ? 0.8 : h0)) return; }
     const [f, s, q] = this.malzeme(tur);
     this.patlama(f, s * 2.4, 0.55, 'bandpass', q, 0.6);
     if (tur === 'cam') { this.ton(2400, 0.15, 0.08, 'triangle', 3200); this.ton(3100, 0.2, 0.06, 'triangle', 1800); }
     if (tur === 'tas') this.patlama(300, 0.12, 0.3, 'lowpass', 1);
   }
-  koy(tur) { if (this.cal(KOY[tur], 0.9)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f * 0.8, s * 1.4, 0.45, 'bandpass', q, 0.7); }
-  adim(tur) { if (this.cal(ADIM[tur], 1)) return; const [f, , q] = this.malzeme(tur); this.patlama(f * 0.7, 0.07, 0.14, 'bandpass', q); }
+  koy(tur) { const [g0, h0] = G_(KOY[tur]); if (this.cal(g0, 0.9, h0)) return; const [f, s, q] = this.malzeme(tur); this.patlama(f * 0.8, s * 1.4, 0.45, 'bandpass', q, 0.7); }
+  adim(tur) { const [g0, h0] = G_(ADIM[tur]); if (this.cal(g0, 1, h0)) return; const [f, , q] = this.malzeme(tur); this.patlama(f * 0.7, 0.07, 0.14, 'bandpass', q); }
   topla() { if (this.cal('topla', 1, 1.1)) return; this.ton(780 + Math.random() * 120, 0.08, 0.1, 'sine', 1300); }
   ye() { if (this.cal('hayvan_ye', 1, 1.15)) return; for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(1800, 0.06, 0.25, 'bandpass', 1.4), i * 110); }
   hasar() { if (this.cal('hasar', 1)) return; this.ton(220, 0.18, 0.25, 'sawtooth', 110); this.patlama(500, 0.12, 0.3, 'lowpass', 1); }
@@ -346,13 +406,15 @@ export class Ses {
       const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = kayit ? 16000 : 2400; f.Q.value = 0.4;
       const b = c.createBiquadFilter(); b.type = 'highpass'; b.frequency.value = kayit ? 40 : 300;
       const g = c.createGain(); g.gain.value = 0;
-      k.connect(b); b.connect(f); f.connect(g); g.connect(this.ana); k.start();
+      k.connect(b); b.connect(f); f.connect(g); g.connect(this.kanal ? this.kanal.ortam : this.ana); k.start();
       this.yagmur = { k, f, g };
     }
     const Y = this.yagmur, t = c.currentTime;
     const kayitli = Y.k.buffer !== this.gurultu;
     Y.g.gain.setTargetAtTime(Math.max(0, hacim) * (kayitli ? 0.9 : 0.16), t, 0.4);
-    Y.f.frequency.setTargetAtTime(boguk ? 700 : kayitli ? 16000 : 2400, t, 0.3);
+    /* 0.47.0: çatı altında boğukluk çatının malzemesine göre: metal ve cam çınlar, ahşap ve yaprak orta, taş en boğuk */
+    const cati = { metal: 2600, cam: 2200, buz: 2000, odun: 1100, bitki: 1400, yun: 600, tas: 650 }[boguk] || 700;
+    Y.f.frequency.setTargetAtTime(boguk ? cati : kayitli ? 16000 : 2400, t, 0.3);
     if (hacim <= 0.01 && Y.g.gain.value < 0.002) { try { Y.k.stop(); } catch (e) { /* durmuş */ } this.yagmur = null; }
   }
   gokGurultusu(h = 1, yakin = false) {
@@ -363,7 +425,7 @@ export class Ses {
       k.buffer = l[Math.floor(Math.random() * l.length)]; k.playbackRate.value = 0.9 + Math.random() * 0.2;
       const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = yakin ? 18000 : 700 + h * 2500;
       const g = c.createGain(); g.gain.value = Math.min(1, h);
-      k.connect(f); f.connect(g); g.connect(this.ana); k.start();
+      k.connect(f); f.connect(g); g.connect(this.hedef()); k.start();
       return;
     }
     if (yakin) { this.patlama(3800, 0.25, 0.45 * h, 'highpass', 0.7, 0.5); this.patlama(900, 0.5, 0.4 * h, 'lowpass', 0.8, 0.4); }

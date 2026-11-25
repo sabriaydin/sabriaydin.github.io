@@ -96,6 +96,8 @@ export class Ortam {
     /* Uzun döngüler: dağ rüzgârı (yükseklikle artar), çöl rüzgârı, dere ve şelale */
     const yuk = Math.max(0, Math.min(1, (P.y - (DENIZ + 60)) / 90));
     if (yuk > 0.05) ses.ortam('dag_ruzgar', 0.25 + 0.6 * yuk, true);
+    /* 0.47.0: fırtınada alçakta da rüzgâr uğuldar */
+    else if (yagis > 0.6) ses.ortam('dag_ruzgar', 0.15 + 0.3 * (yagis - 0.6) / 0.4, true);
     if (a.col > 0.4 && !gece) ses.ortam('col_ruzgar', 0.35 * a.col, true);
     /* 0.41.9: şelale için ayrı kayıt kullanılmaz; nehir ve şelale yakınında yalnızca hafif akarsu sesi duyulur */
     const su = Math.max(this.selale, (a.nehir || 0) > 0.2 ? a.nehir : 0);

@@ -3,7 +3,7 @@ import { SURUM, GUN_SURESI, PB, DENIZ, diyarMi, MEVSIMLER, MEVSIM_GUN, mevsimAl,
 import { Sahne, THREE } from './grafik/sahne.js';
 import { Dunya } from './dunya/dunya.js';
 import { BIYOMLAR, BY } from './dunya/uretici.js';
-import { BLOKLAR, ESYALAR, KATI, OPAK, buyuluMu, ESYA37, dusmeHasari } from './bloklar.js';
+import { BLOKLAR, ESYALAR, KATI, OPAK, SIVI, buyuluMu, ESYA37, dusmeHasari } from './bloklar.js';
 import { metinTohum } from './rastgele.js';
 import { Oyuncu } from './oyun/oyuncu.js';
 import { Envanter } from './oyun/envanter.js';
@@ -85,6 +85,32 @@ tuslariKur(ayar.tuslar);   // 0.30.7
 if (!ayar.ad) { ayar.ad = 'Oyuncu' + (100 + Math.floor(Math.random() * 900)); ayarlariKaydet(ayar); }
 if (ayar.miniHarita === undefined) ayar.miniHarita = true;
 const ses = new Ses(); ses.duzeyAyarla(ayar.ses);
+/* 0.47.0: ses kanalları, mono ve altyazı */
+function sesKanallari() {
+  ses.kanalAyarla('efekt', ayar.sesEfekt ?? 1); ses.kanalAyarla('canli', ayar.sesCanli ?? 1); ses.kanalAyarla('ortam', ayar.sesOrtam ?? 1); ses.kanalAyarla('arayuz', ayar.sesArayuz ?? 1);
+  ses.monoAyarla(!!ayar.mono);
+  ses.altyazi = ayar.altyazi ? altyaziGoster : null;
+  if (!ayar.altyazi) { const k = document.getElementById('altyazilar'); if (k) k.innerHTML = ''; }
+}
+sesKanallari();
+/* Altyazı: "◀ Zombi inliyor" (yön sola/sağa ok ile); aynı satır yinelenirse süresi uzar; en çok 5 satır, 3 saniye */
+const SES_AD = {}; for (const T of Object.values(TURLER)) if (T.ses && !SES_AD[T.ses]) SES_AD[T.ses] = T.ad;
+Object.assign(SES_AD, { buyucu: 'Buz Büyücüsü', reis: 'Haydut Reisi', balik: 'Balık', ari: 'Arı' });
+const SES_FIIL = { zombi: 'inliyor', bogulmus: 'inliyor', kulzombi: 'inliyor', mumya: 'inliyor', iskelet: 'takırdıyor', buziskelet: 'takırdıyor', orumcek: 'tıslıyor', kurt: 'hırlıyor', kopek: 'havlıyor', kedi: 'miyavlıyor',
+  inek: 'böğürüyor', koyun: 'meliyor', domuz: 'homurdanıyor', tavuk: 'gıdaklıyor', tavsan: 'kıpırdıyor', at: 'kişniyor', koylu: 'konuşuyor', yarasa: 'kanat çırpıyor', haydut: 'bağırıyor', ari: 'vızıldıyor', korruhu: 'çatırdıyor', balik: 'çırpınıyor' };
+function altyaziGoster(k, pan) {
+  let kap = document.getElementById('altyazilar');
+  if (!kap) { kap = document.createElement('div'); kap.id = 'altyazilar'; document.body.appendChild(kap); }
+  let m;
+  if (k.ozel) m = k.ozel;
+  else { const ad = SES_AD[k.tur] || 'Bir canlı'; m = k.tip === 'olum' ? `${ad} öldü` : k.tip === 'acima' ? `${ad} yaralandı` : k.tip === 'saldiri' ? `${ad} saldırıyor` : `${ad} ${SES_FIIL[k.tur] || 'ses çıkarıyor'}`; }
+  const yon = pan < -0.3 ? '◀ ' : pan > 0.3 ? '' : '', sag = pan > 0.3 ? ' ▶' : '';
+  const metin = yon + m + sag, simdi = performance.now();
+  let e = [...kap.children].find(x => x.dataset.m === m);
+  if (!e) { e = document.createElement('div'); e.dataset.m = m; kap.appendChild(e); while (kap.children.length > 5) kap.firstChild.remove(); }
+  e.textContent = metin; e.dataset.t = simdi;
+  clearTimeout(e._z); e._z = setTimeout(() => e.remove(), 3000);
+}
 let ortamAtmosfer = null;   // 0.41.0: biyom atmosferi (sesler, sis, ateş böcekleri, sıcak dalgası)
 /* 0.19.0: müzik; tarayıcılar sesi ilk dokunuş ya da tıklamadan sonra açar */
 const muzik = new Muzik(); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
@@ -196,6 +222,8 @@ function ayarFormu() {
   tusListesiCiz();
   bag('#aSes', 'ses', v => Math.round(v * 100) + '%');
   bag('#aMuzik', 'muzik', v => Math.round(v * 100) + '%');
+  for (const [id, k] of [['#aSesEfekt', 'sesEfekt'], ['#aSesCanli', 'sesCanli'], ['#aSesOrtam', 'sesOrtam'], ['#aSesArayuz', 'sesArayuz']]) bag(id, k, v => Math.round(v * 100) + '%');   // 0.47.0
+  bag('#aGerilim', 'gerilim', null, 'cb'); bag('#aAltyazi', 'altyazi', null, 'cb'); bag('#aMono', 'mono', null, 'cb');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
   bag('#aParlak', 'parlaklik', v => Math.round(v * 100) + '%');
   bag('#aOlcek', 'arayuzOlcek', v => Math.round(v * 100) + '%');
@@ -233,6 +261,7 @@ function ayarUygula() {
   if (oyun && oyun.hud) { oyun.hud.hasarSayiAcik = !!ayar.hasarSayilari; if (!ayar.hasarSayilari) oyun.hud.temizleHasarSayilari(); }   // 0.45.0
   sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
   ses.duzeyAyarla(ayar.ses); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
+  sesKanallari();
   { const c = COZUNURLUK[ayar.cozunurluk | 0] || COZUNURLUK[0]; if (c[1]) sahne.olcekAyarla(c[1]); }
   if (oyun && oyun.dunya.gorus !== ayar.gorus) oyun.dunya.gorusAyarla(ayar.gorus);
   $('#fps').hidden = !ayar.fps;
@@ -1345,8 +1374,23 @@ function adim(t) {
   o.gunIsigi = gun;
   o.fenerler.guncelle(dt, o.yakinKoyler, gun);
   /* 0.19.0: duruma göre müzik */
+  /* 0.47.0: gerilim: oyuncuyu fark eden canavarlar yakınlaştıkça alttan bir uğultu ve davul yükselir; çalan müzik biraz kısılır */
+  { let hg = 0;
+    if (!o.hayatta.olu) for (const w of o.varliklar.liste) if (!w.olu && w.tur.dusman && !w.tur.boss && (w.farkinda > 0 || (o.istemci && w.kovaliyor))) { const d = w.konum.distanceTo(p); if (d < 22) hg += d < 8 ? 0.4 : 0.22; }
+    if (o.bossVar) hg *= 0.3;
+    hg = Math.min(1, hg);
+    o.gerilim = (o.gerilim || 0) + (hg - (o.gerilim || 0)) * Math.min(1, dt * (hg > (o.gerilim || 0) ? 1.5 : 0.22));
+    ses.gerilimAyarla(o.gerilim * (ayar.muzik ?? 0.5) * (ayar.gerilim === false ? 0 : 1), dt); }
   muzik.guncelle(dt, o.bossVar || (o.gok.kanli > 0.5 && !diyar) ? 'boss' : diyar ? 'diyar' : p.y < DENIZ - 6 && o.dunya.ustKati(Math.floor(p.x), Math.floor(p.z)) > p.y + 6 ? 'magara'
-    : gun < 0.35 ? 'gece' : (o.biyom === BY.COL || o.biyom === BY.SAVAN) ? 'col' : 'gunduz');
+    : gun < 0.35 ? 'gece' : (o.biyom === BY.COL || o.biyom === BY.SAVAN) ? 'col' : 'gunduz', o.gerilim || 0);
+  /* 0.47.0: uyarı sesleri: can azken kalp atışı, açlık 6'nın altına inince, vücut ısısı tehlikeye girince, tutuşunca */
+  { const H = o.hayatta;
+    if (!H.olu && !H.olumsuz && H.can <= 6 && !H.etki('kanama')) { o.kalpSayac2 = (o.kalpSayac2 || 0) - dt; if (o.kalpSayac2 <= 0) { o.kalpSayac2 = H.can <= 3 ? 0.7 : 1.05; ses.kalpAtisi(H.can <= 3 ? 0.8 : 0.5); } }
+    const ac = H.aclik <= 6, isi = (H.isiDurum || 0) !== 0 && H.isiAcik !== false, ates = H.yanma > 0;
+    if (ac && !o.uyAclik) { ses.uyari('aclik'); o.hud.bildirim('Karnınız acıktı. Açlık bitince can azalmaya başlar.'); }
+    if (isi && !o.uyIsi) ses.uyari('isi');
+    if (ates && !o.uyAtes) ses.uyari('ates');
+    o.uyAclik = ac; o.uyIsi = isi; o.uyAtes = ates; }
   /* Meşale ışıkları */
   const seciliId = o.envanter.seciliId();
   const goz = o.oyuncu.gozKonumu(gecici);
@@ -1365,7 +1409,9 @@ function adim(t) {
     o.isikHedef = Math.max(sahne.tamAydinlik ? 1 : o.hayatta.etki('gece') ? 0.75 : 0.1, l);
     /* Yağmur sesi: çatı altında boğuk, karda ve çölde yok */
     o.havaAcik = H.acikta(goz);
-    ses.yagmurAyarla(calisiyor && !gozSuda && !diyar && yagisTur === 1 ? H.yogunluk * (o.havaAcik ? 1 : 0.45) : 0, !o.havaAcik);
+    let cati = false;
+    if (!o.havaAcik) { cati = 'tas'; for (let k = 1; k < 24; k++) { const id = o.dunya.blok(Math.floor(goz.x), Math.floor(goz.y) + k, Math.floor(goz.z)); if (id && BLOKLAR[id] && !SIVI[id] && (KATI[id] || BLOKLAR[id].ses === 'bitki')) { cati = BLOKLAR[id].ses || 'tas'; break; } } }   // 0.47.0: çatının malzemesi
+    ses.yagmurAyarla(calisiyor && !gozSuda && !diyar && yagisTur === 1 ? H.yogunluk * (o.havaAcik ? 1 : 0.45) : 0, cati);
   }
   o.isik += ((o.isikHedef || 1) - o.isik) * Math.min(1, dt * 4);
   /* 0.23.0: hareketli ateş, meşale ve lav dokuları; yakındaki ateşlerden kıvılcım ve duman */

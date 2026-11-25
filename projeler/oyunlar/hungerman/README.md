@@ -119,6 +119,20 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 47.0 (0.47.0): Ses ve müzik (geliştirme planı 6. aşama)
+- **Gerilim katmanı:** oyuncuyu fark eden canavarlar yaklaştıkça alttan alçak bir uğultu yükselir; yoğunluk arttıkça (yakında birkaç canavar) hızlanan bir davul eklenir (0,85 → 0,5 saniye). Katman hızlı yükselir, tehlike geçince yavaşça söner; çalan müzik parçası en çok %55 kısılır. Boss savaşında kendi parçası çaldığı için zayıflar. Müzik düzeyine bağlıdır; Ayarlar > Ses'ten kapatılabilir.
+- **Uyarı sesleri:**
+  - Canavar oyuncuyu fark ettiği anda sesini çıkarır (aynı canavar 12 saniyede bir).
+  - Okçu iskelet yayını germeye başlayınca kirişin gerilme sesi duyulur.
+  - Can 3 kalbin altındayken kalp atışı (1,5 kalbin altında hızlanır).
+  - Açlık 6'nın altına inince, vücut ısısı tehlikeye girince ve tutuşulunca kısa bir uyarı tonu; açlıkta ayrıca bildirim.
+- **Malzeme sesleri:** metal (Örs, Fener, Altın Blok, Demir Parmaklık, Buzdolabı, Metal Varil, Demir Levha, elektrikli cihazlar) ve buz blokları kendi adım, kazma, kırma ve koyma seslerini kullanır; yaprak ve yün kazılırken ve kırılırken hışırdar (önceden sentez sesine düşüyordu).
+- **Ortam:** çatı altında yağmur sesi çatının malzemesine göre değişir (metal ve cam çınlar, ahşap ve yaprak orta, taş en boğuk); fırtınada alçakta da rüzgâr uğuldar.
+- **Ses kanalları:** Ayarlar > Ses: "Ana ses düzeyi"nin altında ayrı kaydırıcılar: Eylem ve dövüş sesleri, Canlı sesleri, Ortam sesleri (yağmur, rüzgâr, kuşlar), Arayüz sesleri. Ayrıca "Tek kanallı ses (mono)" ve "Ses altyazıları".
+- **Altyazılar:** yakında duyulan canlı sesleri, gök gürültüsü yazıyla gösterilir ("◀ Zombi inliyor", "Koyun meliyor ▶"); yön soldan ya da sağdan geldiğini gösterir, aynı satır yinelenince süresi uzar, en çok 5 satır.
+- **Seyreltme:** kendiliğinden çıkan canlı sesleri en çok 0,7 saniyede birdir; çok hayvanın bulunduğu yerde art arda ses birikmez.
+- **Sınama:** ses kanalları, malzeme sesleri, üç zombi fark ettiğinde gerilim katmanının açılması, altyazı, kanal ayarının uygulanıp kaydedilmesi, düşük canda kalp atışı ve açlık uyarısı denendi; uzun oturum taraması tekrarlandı.
+
 ## 46.0 (0.46.0): Oynanış döngüsü ve ilerleme (geliştirme planı 5. aşama)
 - **Yolculuk** (`js/oyun/yolculuk.js`): oyunun başından Yeraltı Diyarı'na uzanan, sırayla açılan 8 bölüm: İlk Gün, İlk Gece, İnsanlar, Demir Çağı, Derinlikler, Efsaneler, Lanetli Ada, Ateşin Eşiği. Her bölümün 3-4 adımı başarımlara bağlıdır (bir adım, listedeki başarımlardan biri kazanılınca tamamlanır). Bölüm bitince ödülü verilir (deneyim ve eşya; çanta doluysa yere bırakılır) ve sonraki bölüm açılır.
   - Ödüller: İlk Gün 8 meşale, 3 ekmek; İlk Gece 3 bandaj, 4 pişmiş domuz eti; İnsanlar 12 sikke, 4 ekmek; Demir Çağı altın elma, şifa iksiri; Derinlikler 2 elmas, 3 parıltı kristali; Efsaneler 2 altın elma, Eve Dönüş Tılsımı; Lanetli Ada 2 şifa iksiri, 2 altın elma; Ateşin Eşiği 5 elmas, 3 altın elma (ve 8 ile 80 arasında deneyim).
