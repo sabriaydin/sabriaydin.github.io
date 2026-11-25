@@ -122,7 +122,7 @@ const muzik = new Muzik(); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
 addEventListener('pointerdown', () => { ses.baslat(); muzik.izinVer(); }, true);
 addEventListener('keydown', () => { ses.baslat(); muzik.izinVer(); }, true);
 let sahne;
-try { sahne = new Sahne(tuval); } catch (e) { hataGoster('WebGL başlatılamadı. Tarayıcınız veya ekran kartı sürücünüz WebGL desteklemiyor olabilir.'); throw e; }
+try { sahne = new Sahne(tuval, { msaa: !!ayar.msaa }); } catch (e) { hataGoster('WebGL başlatılamadı. Tarayıcınız veya ekran kartı sürücünüz WebGL desteklemiyor olabilir.'); throw e; }
 sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
 
 /* ---------- Ekran yönetimi ---------- */
@@ -209,7 +209,8 @@ function izleyiciYap(o) {
 /* ---------- Ayarlar ---------- */
 /* 0.23.0: grafik ön ayarları: görüş mesafesi, çizim çözünürlüğü ve kafa sallanması birlikte ayarlanır */
 /* 0.50.0: telefon: düşük güç kipi (piksel oranı 1, en çok 12 ışık, daha az parçacık, uzak canlılar daha seyrek işlenir) */
-const GRAFIK_ON = { telefon: { gorus: 4, cozunurluk: 1, dusukGuc: true }, dusuk: { gorus: 4, cozunurluk: 1, dusukGuc: false }, orta: { gorus: 6, cozunurluk: 3, dusukGuc: false }, yuksek: { gorus: 8, cozunurluk: 0, dusukGuc: false }, ultra: { gorus: 12, cozunurluk: 4, dusukGuc: false } };
+/* 0.51.1: ön ayarlar piksel yoğunluğu, parçacık ve ışık kalitesini de belirler */
+const GRAFIK_ON = { telefon: { gorus: 4, cozunurluk: 1, dusukGuc: true, pikselSinir: 1, parcacik: 1, isikKalite: 0 }, dusuk: { gorus: 4, cozunurluk: 1, dusukGuc: false, pikselSinir: 1, parcacik: 1, isikKalite: 0 }, orta: { gorus: 6, cozunurluk: 3, dusukGuc: false, pikselSinir: 1.5, parcacik: 2, isikKalite: 1 }, yuksek: { gorus: 8, cozunurluk: 0, dusukGuc: false, pikselSinir: 1.5, parcacik: 2, isikKalite: 1 }, ultra: { gorus: 12, cozunurluk: 4, dusukGuc: false, pikselSinir: 2, parcacik: 2, isikKalite: 1 } };
 document.addEventListener('click', e => {
   const b = e.target.closest('#grafikOnAyar button[data-on]'); if (!b) return;
   Object.assign(ayar, GRAFIK_ON[b.dataset.on]); ses.tik(); ayarUygula(); ayarFormu();
@@ -233,6 +234,17 @@ function ayarFormu() {
   bag('#aGerilim', 'gerilim', null, 'cb'); bag('#aAltyazi', 'altyazi', null, 'cb'); bag('#aMono', 'mono', null, 'cb');
   bag('#aCoz', 'cozunurluk', v => COZUNURLUK[v][0]);
   bag('#aParlak', 'parlaklik', v => Math.round(v * 100) + '%');
+  /* 0.51.1: Görüntü sekmesinin yeni ayarları */
+  bag('#aKontrast', 'kontrast', v => Math.round(v * 100) + '%'); bag('#aDoygun', 'doygunluk', v => Math.round(v * 100) + '%');
+  for (const [id, k] of [['#aKareSinir', 'kareSinir'], ['#aPikselSinir', 'pikselSinir'], ['#aOtoHedef', 'otoHedef'], ['#aParcacik', 'parcacik'], ['#aIsikKalite', 'isikKalite']]) {
+    const el = $(id); el.value = String(+ayar[k]); if (el.value !== String(+ayar[k])) el.value = String(VARSAYILAN_AYAR[k]);
+    el.onchange = () => { ayar[k] = +el.value; ayarUygula(); onAyarIsaretle(); ekranBilgisi(); };
+  }
+  for (const [id, k] of [['#aDusukGuc', 'dusukGuc'], ['#aBulut', 'bulut'], ['#aBitkiSal', 'bitkiSal'], ['#aSisAz', 'sisAz'], ['#aKosFov', 'kosFov'], ['#aHamFare', 'hamFare']]) {
+    const el = $(id); el.checked = !!ayar[k]; el.onchange = () => { ayar[k] = el.checked; ayarUygula(); onAyarIsaretle(); };
+  }
+  { const el = $('#aMsaa'); el.checked = !!ayar.msaa; el.onchange = () => { ayar.msaa = el.checked; ayarUygula(); msaaNotu(); }; msaaNotu(); }
+  kareSiniriSecenekleri(); ekranBilgisi();
   bag('#aOlcek', 'arayuzOlcek', v => Math.round(v * 100) + '%');
   bag('#aArkaSessiz', 'arkaSessiz', null, 'cb'); bag('#aEnerji', 'enerjiPanel', null, 'cb');
   /* 0.49.0: erişilebilirlik, dokunmatik, kumanda, sade gösterge ve ipuçları */
@@ -269,16 +281,36 @@ addEventListener('keydown', e => {
   if (diger) { const el = $('#tusListe').querySelector(`[data-tus="${diger}"]`); if (el) el.classList.add('yerDegisti'); }
 }, true);
 addEventListener('mousedown', e => { if (tusBekleyen && !e.target.closest('[data-tus]')) { tusBekleyen = null; tusListesiCiz(); } }, true);
-function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOnAyar button')) { const g = GRAFIK_ON[x.dataset.on]; x.classList.toggle('on', g.gorus === ayar.gorus && g.cozunurluk === (ayar.cozunurluk | 0) && g.dusukGuc === !!ayar.dusukGuc); } }
+function onAyarIsaretle() { for (const x of document.querySelectorAll('#grafikOnAyar button')) { const g = GRAFIK_ON[x.dataset.on]; x.classList.toggle('on', Object.entries(g).every(([k, v]) => typeof v === 'boolean' ? v === !!ayar[k] : v === +ayar[k])); } }
 /* 0.19.0: çözünürlük: otomatik ya da sabit ölçek */
 const COZUNURLUK = [['Otomatik', 0], ['%50', 0.5], ['%67', 0.67], ['%85', 0.85], ['%100', 1]];
+/* 0.51.1: Görüntü sekmesi yardımcıları */
+function parcacikSiniri() { const n = [0, 160, 400][ayar.parcacik ?? 2] ?? 400; return ayar.dusukGuc ? Math.min(n, 160) : n; }
+const KARE_SINIRLARI = [30, 45, 60, 75, 90, 100, 120, 144, 165, 180, 240];
+function kareSiniriSecenekleri() {
+  const el = $('#aKareSinir'); if (!el) return;
+  const hz = yenileme.hz, deger = +ayar.kareSinir || 0;
+  const l = KARE_SINIRLARI.filter(n => !hz || n < hz - 1);
+  if (deger && !l.includes(deger)) l.push(deger);
+  el.innerHTML = `<option value="0">Ekranla eşit${hz ? ` (${hz} Hz)` : ''}</option>` + l.sort((a, b) => a - b).map(n => `<option value="${n}">${n} FPS${hz && n >= hz - 1 ? ' (ekranın üstünde, etkisiz)' : ''}</option>`).join('');
+  el.value = String(deger);
+}
+function ekranBilgisi() {
+  const el = $('#aEkranBilgi'); if (!el) return;
+  const c = sahne.cizici.domElement, hz = yenileme.hz;
+  el.innerHTML = `<span><b>${hz ? hz + ' Hz' : 'ölçülüyor…'}</b>ekran</span><span><b>${sonFps || '-'}</b>FPS</span><span><b>${c.width}×${c.height}</b>çizim</span><span><b>%${Math.round(sahne.olcek * 100)}</b>ölçek</span>`;
+}
+function msaaNotu() { const n = $('#aMsaaNot'); if (n) n.hidden = !!ayar.msaa === sahne.msaa; }
 function ayarUygula() {
   ayarlariKaydet(ayar);
-  if (oyun && oyun.dusenler) { oyun.dusenler.PMAX = ayar.dusukGuc ? 160 : 400; oyun.varliklar.dusukGuc = !!ayar.dusukGuc; }   // 0.50.0
+  if (oyun && oyun.dusenler) { oyun.dusenler.PMAX = parcacikSiniri(); oyun.varliklar.dusukGuc = !!ayar.dusukGuc; }   // 0.50.0; 0.51.1: parçacık ayarı
   if (oyun && oyun.hud) { oyun.hud.hasarSayiAcik = !!ayar.hasarSayilari; if (!ayar.hasarSayilari) oyun.hud.temizleHasarSayilari(); }   // 0.45.0
   sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
   ses.duzeyAyarla(ayar.ses); muzik.duzeyAyarla(ayar.muzik ?? 0.5);
   sesKanallari();
+  /* 0.51.1: görüntü ayarları sahneye */
+  { const ps = +ayar.pikselSinir || 1.5, deg = sahne.pikselSinir !== ps; sahne.pikselSinir = ps; sahne.isikUst = (ayar.isikKalite ?? 1) ? 32 : 12; sahne.bulutKapali = ayar.bulut === false; sahne.sisAz = !!ayar.sisAz; sahne.bitkiSabit = ayar.bitkiSal === false;
+    if (deg) sahne.olcekAyarla(sahne.olcek, true); }
   { const c = COZUNURLUK[ayar.cozunurluk | 0] || COZUNURLUK[0]; if (c[1]) sahne.olcekAyarla(c[1]); }
   if (oyun && oyun.dunya.gorus !== ayar.gorus) oyun.dunya.gorusAyarla(ayar.gorus);
   $('#fps').hidden = !ayar.fps;
@@ -290,7 +322,7 @@ function ayarUygula() {
 function gorunumAyarla() {
   /* 0.49.0: renk körlüğü süzgeci oyun görüntüsüne ve göstergelere; yazı boyutu arayüz boyutuyla çarpılır */
   const rk = ayar.renkKor ? `url(#rk-${ayar.renkKor})` : '';
-  $('#oyun').style.filter = [(ayar.parlaklik ?? 1) !== 1 ? `brightness(${ayar.parlaklik})` : '', rk].filter(Boolean).join(' ');
+  $('#oyun').style.filter = [(ayar.parlaklik ?? 1) !== 1 ? `brightness(${ayar.parlaklik})` : '', (ayar.kontrast ?? 1) !== 1 ? `contrast(${ayar.kontrast})` : '', (ayar.doygunluk ?? 1) !== 1 ? `saturate(${ayar.doygunluk})` : '', rk].filter(Boolean).join(' ');   // 0.51.1: kontrast ve doygunluk
   for (const s of ['#hud', '#haritaEkrani']) $(s).style.filter = rk;
   for (const el of document.querySelectorAll('.kaplama .pencere')) el.style.filter = rk;
   const yo = (ayar.arayuzOlcek ?? 1) * (ayar.yaziBoyutu ?? 1);
@@ -525,7 +557,9 @@ function kilitle() {
     try { if (!document.fullscreenElement && document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {})).catch(() => {}); } catch (e) { /* desteklenmiyor */ }
     return;
   }
-  try { const p = tuval.requestPointerLock(); if (p && p.catch) p.catch(() => tiklaGuncelle()); } catch (e) { /* tarayıcı reddetti */ }
+  /* 0.51.1: ham fare girdisi (işletim sisteminin fare hızlandırması atlanır); desteklenmezse normal kilide dönülür */
+  try { const p = ayar.hamFare ? tuval.requestPointerLock({ unadjustedMovement: true }) : tuval.requestPointerLock();
+    if (p && p.catch) p.catch(() => { if (ayar.hamFare) { try { const q = tuval.requestPointerLock(); if (q && q.catch) q.catch(() => tiklaGuncelle()); } catch (x) { tiklaGuncelle(); } } else tiklaGuncelle(); }); } catch (e) { /* tarayıcı reddetti */ }
 }
 document.addEventListener('pointerlockchange', () => {
   kilitli = document.pointerLockElement === tuval;
@@ -753,7 +787,7 @@ function oyunBaslat(v) {
     hayatBasi: Number.isFinite(v.hayatBasi) ? v.hayatBasi : (v.gun || 1) + (v.zaman ?? 0.02), isiSayac: 0, tilsim: 0, sarsinti: 0,
     zorluk: v.zorluk || 'normal', denge: dengeDuzelt(v.denge), hardcoreBitti: !!v.hardcoreBitti, ogretici: v.yeni ? 0 : Number.isFinite(v.ogretici) ? ogrSurumCevir(v.ogretici, v.ogrSurum | 0) : -1 };
   const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
-  if (ayar.dusukGuc) { dusenler.PMAX = 160; varliklar.dusukGuc = true; }   // 0.50.0
+  dusenler.PMAX = parcacikSiniri(); if (ayar.dusukGuc) varliklar.dusukGuc = true;   // 0.50.0; 0.51.1: parçacık ayarı
   oyun.gezgin = new GezginTuccar({ varliklar, dunya, hud, ses });   // 0.51.0
   varliklar.hataBildir = (m, e) => { console.error('Canlı hatası', e); konsol.kayit('canli', 'Canlı hatası; canlı kaldırıldı', { seviye: 'kritik', alan: { hata: m } }); };
   oyun.varliklar = varliklar; oyun.gunIsigi = 1; oyun.uyku = 0; oyun.isaretSayac = 0;
@@ -1218,7 +1252,7 @@ function oyunBitir() {
 }
 
 /* ---------- Döngü ---------- */
-let onceki = performance.now(), fpsSayac = 0, fpsZaman = 0;
+let onceki = performance.now(), fpsSayac = 0, fpsZaman = 0, sonFps = 0;
 /* 0.19.0: otomatik çözünürlük: oyun sırasında kare hızı 2 saniye boyunca 45'in altında kalırsa çizim çözünürlüğü düşer, 57'nin üstüne çıkınca yükselir */
 const oto = { t0: 0, kare: 0 };
 function otoCozunurluk(t) {
@@ -1227,8 +1261,10 @@ function otoCozunurluk(t) {
   const s = (t - oto.t0) / 1000;
   if (s < 2) return;
   const fps = oto.kare / s;
-  if (fps < 45) sahne.olcekAyarla(sahne.olcek - 0.1);
-  else if (fps > 57) sahne.olcekAyarla(sahne.olcek + 0.05);
+  /* 0.51.1: hedef kare hızı ayardan (ekranın ve kare hızı sınırının üstünde olamaz) */
+  const hedef = Math.min(+ayar.otoHedef || 60, +ayar.kareSinir || 999, yenileme.hz || 999);
+  if (fps < hedef * 0.75) sahne.olcekAyarla(sahne.olcek - 0.1);
+  else if (fps > hedef * 0.95) sahne.olcekAyarla(sahne.olcek + 0.05);
   oto.t0 = t; oto.kare = 0;
 }
 const gecici = new THREE.Vector3();
@@ -1257,8 +1293,31 @@ function geceOlayi(o) {
 const ciftTus = {};
 /* 0.42.0: karede çıkan hata konsola ayrıntısıyla yazılır; aynı hata her karede tekrar bildirilmez */
 const kareHatalari = new Map();
+/* 0.51.1: ekran yenileme hızı algılama ve kare hızı sınırı.
+   Tarayıcı kareleri ekranın yenileme hızında çizer (dikey eşitleme); sınır seçilirse fazla kareler atlanır. */
+const yenileme = { son: 0, araliklar: [], hz: 0, hedef: 0 };
+function yenilemeOlc(t) {
+  const d = t - yenileme.son; yenileme.son = t;
+  if (d > 1 && d < 100) { yenileme.araliklar.push(d); if (yenileme.araliklar.length > 120) yenileme.araliklar.shift(); }
+  if (yenileme.araliklar.length >= 60 && (yenileme.araliklar.length % 30 === 0)) {
+    const l = [...yenileme.araliklar].sort((a, b) => a - b), a = l[Math.floor(l.length * 0.2)], hz = 1000 / a;
+    const ortak = [48, 50, 60, 72, 75, 90, 100, 120, 144, 165, 170, 180, 200, 240, 280, 300, 360], en = ortak.reduce((b, x) => Math.abs(x - hz) < Math.abs(b - hz) ? x : b, ortak[0]);
+    const yeni = Math.abs(en - hz) / hz < 0.04 ? en : Math.round(hz);
+    if (yeni !== yenileme.hz) { yenileme.hz = yeni; kareSiniriSecenekleri(); }
+  }
+}
+function kareAtla(t) {
+  const sinir = +ayar.kareSinir || 0;
+  if (!sinir || (yenileme.hz && sinir >= yenileme.hz - 1)) { yenileme.hedef = 0; return false; }
+  const aralik = 1000 / sinir;
+  if (yenileme.hedef && t + 1.5 < yenileme.hedef) return true;
+  yenileme.hedef = (yenileme.hedef || t) + aralik; if (yenileme.hedef < t) yenileme.hedef = t + aralik;
+  return false;
+}
 function dongu(t) {
   requestAnimationFrame(dongu);
+  yenilemeOlc(t);
+  if (kareAtla(t)) return;
   try { const t0 = olcum.acik ? performance.now() : 0; adim(t); if (olcum.acik) olcum.kareBitti(performance.now() - t0); }
   catch (e) {
     const m = (e && e.message) || String(e), n = (kareHatalari.get(m) || 0) + 1;
@@ -1274,7 +1333,7 @@ function adim(t) {
   dokun.guncelle();
   try { kumanda.guncelle(dt); } catch (e) { /* kumanda okunamadı */ }
   otoCozunurluk(t);
-  if (fpsZaman >= 0.5) { $('#fps').textContent = Math.round(fpsSayac / fpsZaman) + ' FPS'; fpsSayac = 0; fpsZaman = 0; }
+  if (fpsZaman >= 0.5) { sonFps = Math.round(fpsSayac / fpsZaman); $('#fps').textContent = sonFps + ' FPS'; fpsSayac = 0; fpsZaman = 0; if (aktifEkran === 'ayarlar') ekranBilgisi(); }
   const o = oyun;
   if (!o) { menuKamera(dt); muzik.guncelle(dt, 'menu'); return; }
   if (!o.hazir) { yuklemeKontrol(); if (o.ag) o.ag.guncelle(dt); if (oyun) sahne.ciz(); return; }
@@ -1455,7 +1514,7 @@ function adim(t) {
   if (o.sarsinti > 0) { const s = o.sarsinti * (ayar.efektAzalt ? 0 : ayar.sallanma ? 0.35 : 0.12); sahne.kamera.position.x += (Math.random() - 0.5) * s; sahne.kamera.position.y += (Math.random() - 0.5) * s; sahne.kamera.position.z += (Math.random() - 0.5) * s; o.sarsinti = Math.max(0, o.sarsinti - dt * 0.8); }
   /* 0.50.0: yer üstündeyken uzak parçaların yeraltı geometrisi (mağara duvarları) çizilmez */
   { const g = sahne.kamera.position; o.dunya.yeraltiAyarla(!diyar && o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) < g.y - 0.2 && !o.izleyici, g.x, g.z); }
-  const kosFov = o.oyuncu.kosuyor ? 8 : 0;
+  const kosFov = o.oyuncu.kosuyor && ayar.kosFov !== false ? 8 : 0;   // 0.51.1: ayardan kapatılabilir
   /* 0.37.0: dürbün elde ve açıkken görüş daralır */
   if (o.etkilesim.durbun && o.envanter.seciliId() !== ESYA37.durbun) o.etkilesim.durbun = false;
   const hedefFov = o.etkilesim.durbun ? ayar.fov * 0.28 : ayar.fov + kosFov - o.etkilesim.germe * 12;

@@ -383,12 +383,33 @@
     <div class="ayarIcerik">
       <section class="ayarBolum" data-as="goruntu">
         <div class="onAyar" id="grafikOnAyar"><span>Grafik ön ayarı</span><button type="button" data-on="telefon" title="Düşük güçlü telefon ve tabletler için">Telefon</button><button type="button" data-on="dusuk">Düşük</button><button type="button" data-on="orta">Orta</button><button type="button" data-on="yuksek">Yüksek</button><button type="button" data-on="ultra">Ultra</button></div>
-        <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
-        <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
+        <!-- 0.51.1: Görüntü sekmesi bölümlere ayrıldı; yenileme hızı, kalite, dünya ve renk ayarları eklendi -->
+        <div class="ekranBilgi" id="aEkranBilgi"></div>
+        <h4 class="ayarAlt">Kare hızı ve akıcılık</h4>
+        <label class="alan">Ekran yenileme hızı (kare hızı sınırı)<select id="aKareSinir"></select><small>"Ekranla eşit" seçiliyken oyun ekranınızın yenileme hızında çizilir. Daha düşük bir sınır, ısınmayı ve pil tüketimini azaltır.</small></label>
+        <label class="secim"><input type="checkbox" id="aHamFare"> Ham fare girdisi (işletim sisteminin fare hızlandırması atlanır; bakış daha tutarlı olur)</label>
+        <label class="secim"><input type="checkbox" id="aDusukGuc"> Düşük güç kipi (piksel yoğunluğu, ışık ve parçacık sayısı sınırlanır; uzak canlılar daha seyrek işlenir)</label>
+        <h4 class="ayarAlt">Çözünürlük ve keskinlik</h4>
         <label class="kaydir">Çözünürlük <b id="aCozD"></b><input type="range" id="aCoz" min="0" max="4" step="1"></label>
-        <label class="kaydir">Parlaklık <b id="aParlakD"></b><input type="range" id="aParlak" min="0.7" max="1.4" step="0.05"></label>
+        <label class="alan">Otomatik çözünürlük hedefi<select id="aOtoHedef"><option value="30">30 FPS</option><option value="45">45 FPS</option><option value="60">60 FPS</option><option value="90">90 FPS</option><option value="120">120 FPS</option><option value="144">144 FPS</option><option value="165">165 FPS</option><option value="240">240 FPS</option></select><small>Çözünürlük "Otomatik" iken kare hızı bu değerin altına düşerse çizim çözünürlüğü azaltılır.</small></label>
+        <label class="alan">Piksel yoğunluğu üst sınırı<select id="aPikselSinir"><option value="1">Standart (1×)</option><option value="1.5">Yüksek (1,5×)</option><option value="2">Çok yüksek (2×)</option><option value="3">Ekranın tamamı</option></select><small>Yüksek çözünürlüklü (2K, 4K, Retina) ekranlarda görüntüyü keskinleştirir; ekran kartını daha çok yorar.</small></label>
+        <label class="secim"><input type="checkbox" id="aMsaa"> Kenar yumuşatma (MSAA)</label>
+        <p class="ayarNot uyari" id="aMsaaNot" hidden>Kenar yumuşatma oyun yeniden yüklendiğinde uygulanır.</p>
+        <h4 class="ayarAlt">Dünya</h4>
+        <label class="kaydir">Görüş mesafesi <b id="aGorusD"></b><input type="range" id="aGorus" min="4" max="16" step="1"></label>
+        <label class="alan">Işık kalitesi<select id="aIsikKalite"><option value="0">Düşük (en yakın 12 ışık kaynağı)</option><option value="1">Yüksek (en yakın 32 ışık kaynağı)</option></select></label>
+        <label class="alan">Parçacıklar<select id="aParcacik"><option value="0">Kapalı</option><option value="1">Az</option><option value="2">Normal</option></select><small>Kırılan blok kırıntıları, toz, su sıçraması, kıvılcım ve duman.</small></label>
+        <label class="secim"><input type="checkbox" id="aBulut"> Bulutlar</label>
+        <label class="secim"><input type="checkbox" id="aSisAz"> Hafif sis (uzak yerler daha net görünür)</label>
+        <label class="secim"><input type="checkbox" id="aBitkiSal"> Otlar, çiçekler ve yapraklar rüzgârda salınır</label>
+        <h4 class="ayarAlt">Kamera ve renk</h4>
+        <label class="kaydir">Görüş açısı <b id="aFovD"></b><input type="range" id="aFov" min="60" max="100" step="1"></label>
+        <label class="secim"><input type="checkbox" id="aKosFov"> Koşarken görüş açısı genişler</label>
         <label class="secim"><input type="checkbox" id="aSal"> Yürürken kamera sallanması</label>
-        <p class="ayarNot">Kare hızı düşükse görüş mesafesini ya da çözünürlüğü azaltınız. Çözünürlük "Otomatik" iken kare hızına göre kendiliğinden ayarlanır.</p>
+        <label class="kaydir">Parlaklık <b id="aParlakD"></b><input type="range" id="aParlak" min="0.7" max="1.4" step="0.05"></label>
+        <label class="kaydir">Kontrast <b id="aKontrastD"></b><input type="range" id="aKontrast" min="0.8" max="1.3" step="0.05"></label>
+        <label class="kaydir">Renk doygunluğu <b id="aDoygunD"></b><input type="range" id="aDoygun" min="0.5" max="1.5" step="0.05"></label>
+        <p class="ayarNot">Kare hızı düşükse önce görüş mesafesini, sonra piksel yoğunluğunu ve çözünürlüğü azaltınız. Kare hızı yüksek göründüğü hâlde görüntü akıcı değilse, tarayıcı penceresinin ana ekranda olduğundan ve ekranın yenileme hızının işletim sistemi ayarlarında doğru seçildiğinden emin olunuz.</p>
       </section>
       <section class="ayarBolum" data-as="ses" hidden>
         <label class="kaydir">Ana ses düzeyi <b id="aSesD"></b><input type="range" id="aSes" min="0" max="1" step="0.05"></label>

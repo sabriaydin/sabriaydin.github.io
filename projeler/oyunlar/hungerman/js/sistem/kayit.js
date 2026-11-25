@@ -45,9 +45,11 @@ export const Kayit = {
 };
 
 const AYAR_ANAHTAR = 'hungerman_ayarlar';
-export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true, onizleme: true, parlaklik: 1, arayuzOlcek: 1, arkaSessiz: false, enerjiPanel: true, bakilanAd: true, ogretici: true, miniHarita: true, yolculukIzle: true, sesEfekt: 1, sesCanli: 1, sesOrtam: 1, sesArayuz: 1, mono: false, altyazi: false, gerilim: true, ipuclari: true, sadeGosterge: true, yaziBoyutu: 1, renkKor: '', efektAzalt: false, dokunBoyut: 1, dusukGuc: false };
+export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true, onizleme: true, parlaklik: 1, arayuzOlcek: 1, arkaSessiz: false, enerjiPanel: true, bakilanAd: true, ogretici: true, miniHarita: true, yolculukIzle: true, sesEfekt: 1, sesCanli: 1, sesOrtam: 1, sesArayuz: 1, mono: false, altyazi: false, gerilim: true, ipuclari: true, sadeGosterge: true, yaziBoyutu: 1, renkKor: '', efektAzalt: false, dokunBoyut: 1, dusukGuc: false,
+  /* 0.51.1: görüntü ayarları */
+  kareSinir: 0, hamFare: false, pikselSinir: 1.5, otoHedef: 60, msaa: false, sisAz: false, bulut: true, bitkiSal: true, parcacik: 2, isikKalite: 1, kosFov: true, kontrast: 1, doygunluk: 1 };
 /* 0.22.0: sayısal ayarlar geçerli aralığa çekilir (bozuk ya da elle değiştirilmiş kayıtta dünya yüklenemiyordu) */
-const AYAR_ARALIK = { gorus: [4, 16], fov: [60, 100], hassasiyet: [0.2, 2.5], ses: [0, 1], muzik: [0, 1], cozunurluk: [0, 4], parlaklik: [0.7, 1.4], arayuzOlcek: [0.85, 1.25], sesEfekt: [0, 1], sesCanli: [0, 1], sesOrtam: [0, 1], sesArayuz: [0, 1], yaziBoyutu: [0.9, 1.4], dokunBoyut: [0.8, 1.4], dokunHassas: [0.2, 2.5], kumandaHassas: [0.3, 2.5] };
+const AYAR_ARALIK = { gorus: [4, 16], fov: [60, 100], hassasiyet: [0.2, 2.5], ses: [0, 1], muzik: [0, 1], cozunurluk: [0, 4], parlaklik: [0.7, 1.4], arayuzOlcek: [0.85, 1.25], sesEfekt: [0, 1], sesCanli: [0, 1], sesOrtam: [0, 1], sesArayuz: [0, 1], yaziBoyutu: [0.9, 1.4], dokunBoyut: [0.8, 1.4], dokunHassas: [0.2, 2.5], kumandaHassas: [0.3, 2.5], kareSinir: [0, 360], pikselSinir: [1, 3], otoHedef: [30, 240], parcacik: [0, 2], isikKalite: [0, 1], kontrast: [0.8, 1.3], doygunluk: [0.5, 1.5] };
 function ayarDuzelt(a) {
   for (const [k, [en, eb]] of Object.entries(AYAR_ARALIK)) { const v = Number(a[k]); a[k] = Number.isFinite(v) ? Math.min(eb, Math.max(en, v)) : VARSAYILAN_AYAR[k]; }
   a.gorus = Math.round(a.gorus);

@@ -3,6 +3,12 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.51', b: 'Yayın öncesi', y: [
+  { s: '0.51.1', b: 'Görüntü ayarları', m: [
+    'Ayarlar\'daki Görüntü sekmesi yenilendi: ekranınızın yenileme hızı ve anlık kare hızı sekmenin başında görünüyor.',
+    'Kare hızı sınırı seçilebiliyor; varsayılan olarak oyun ekranınızın yenileme hızında (144 Hz, 165 Hz...) çiziliyor.',
+    'Yeni seçenekler: ham fare girdisi, piksel yoğunluğu, kenar yumuşatma, ışık kalitesi, parçacıklar, bulutlar, hafif sis, bitki salınımı, kontrast ve renk doygunluğu.',
+    'Geliştirici modunda gezgin tüccarı çağırıp denemek mümkün.'
+  ]},
   { s: '0.51.0', b: 'Yayına hazırlık', m: [
     'Oyun dört zorlukta da ilk günden Yeraltı Diyarı\'na kadar baştan sona denendi.',
     'Gezgin tüccar geldi: bazı sabahlar yakınınızda konaklıyor, fidan, tohum ve tılsım satıyor; elmas ve inciyi iyi fiyata alıyor.',

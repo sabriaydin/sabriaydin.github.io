@@ -1321,3 +1321,11 @@ body.kumanda.oyunda-kilitli #kumandaImlec { display: none; }
 .raporAyrinti { margin: 10px 0; }
 .raporAyrinti summary { cursor: pointer; color: var(--soluk); font-size: .88rem; }
 .raporAyrinti pre { max-height: 180px; overflow: auto; white-space: pre-wrap; font-size: .74rem; background: rgba(0, 0, 0, .3); padding: 8px; border-radius: 6px; user-select: text; }
+
+/* 0.51.1: Görüntü ayarları: bölüm başlıkları ve canlı ekran bilgisi */
+.ayarAlt { margin: 18px 0 10px; padding-bottom: 5px; border-bottom: 1px solid rgba(255, 255, 255, .12); font: 700 .78rem var(--govde); letter-spacing: .08em; text-transform: uppercase; color: var(--vurgu2); }
+.ekranBilgi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 4px 0 2px; }
+.ekranBilgi span { display: grid; gap: 1px; padding: 7px 8px; border-radius: 6px; background: rgba(0, 0, 0, .3); border: 1px solid rgba(255, 255, 255, .1); font-size: .72rem; color: rgba(255, 255, 255, .55); text-align: center; }
+.ekranBilgi b { font: 700 .95rem var(--baslik); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ayarNot.uyari { color: #f2b33d; margin: -6px 0 10px; }
+@media (max-width: 520px) { .ekranBilgi { grid-template-columns: repeat(2, 1fr); } }

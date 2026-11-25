@@ -119,6 +119,18 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 51.1 (0.51.1): Görüntü ayarları ve gezgin tüccar testi
+
+- Ayarlar > Görüntü sekmesi bölümlere ayrıldı (Kare hızı ve akıcılık, Çözünürlük ve keskinlik, Dünya, Kamera ve renk); sekmenin başında ekranın algılanan yenileme hızı, anlık kare hızı, çizim çözünürlüğü ve ölçek görünür
+- Ekran yenileme hızı (kare hızı sınırı): "Ekranla eşit" (algılanan Hz ile) ya da 30-240 FPS; tarayıcı ekranın hızında çizer, seçilen sınırın üstündeki kareler atlanır. Yenileme hızı kare aralıklarından ölçülür ve en yakın yaygın değere (60, 75, 120, 144, 165, 240...) yuvarlanır
+- Ham fare girdisi (işletim sisteminin fare hızlandırması atlanır; desteklemeyen tarayıcıda normal kilide dönülür)
+- Düşük güç kipi artık ayrı bir seçenek olarak da açılıp kapatılabilir
+- Otomatik çözünürlük hedefi (30-240 FPS; önceden 60'a sabitti), piksel yoğunluğu üst sınırı (1×, 1,5×, 2×, ekranın tamamı; önceden 1,5× sabitti), kenar yumuşatma (MSAA; oyun yeniden yüklenince uygulanır)
+- Işık kalitesi (en yakın 12 ya da 32 ışık), parçacıklar (kapalı, az, normal), bulutlar, hafif sis (sis görüş sınırına yakın başlar, pus azalır), bitkilerin rüzgârda salınması
+- Koşarken görüş açısı genişlemesi kapatılabilir; kontrast ve renk doygunluğu ayarları
+- Grafik ön ayarları piksel yoğunluğunu, ışık kalitesini ve parçacıkları da belirler
+- Geliştirici Modu > Köy ve Görev > Gezgin tüccar: tüccar gerçek hâliyle (takas listesi, bir günlük süre, küsme) getirilebilir, takasları yenilenebilir, durumu gösterilebilir ve gönderilebilir; konsolda `gezgin getir | yenile | durum | gonder`
+
 ## 51.0 (0.51.0): Yayın öncesi (geliştirme planı 10. aşama)
 - **Baştan sona oyun sınaması:** her zorlukta (Kolay, Normal, Zor, Hardcore) yeni bir dünyada Yolculuk'un 8 bölümü sırayla tamamlandı. Üretim penceresinden üretim (kalas, masa, çubuk, kazma, taş kazma, demir külçe, tam demir zırh), zırh giyme, zombi öldürme, köye varma, ticaret, 12. seviyenin altına inme, dört boss (Firavun, Buz Büyücüsü, Haydut Reisi, Taş Muhafız), Kanlı Ay gecesi, Lanetli Ada, Yeraltı Diyarı, Kor Ruhu ve Kül Kalesi oyunun kendi sistemleriyle yapıldı; uzun süren ya da elle yapılması gereken birkaç adım (pişirme, uyku, köy görevi, zindan ve tapınak sandığı, büyüleme, tekne) başarımla işaretlendi. Bosslar sınamada tek vuruşla yenildi (dövüş dengesi ayrıca denenmedi). Dört zorlukta da bütün bölümler bitti, ödüller verildi, hata çıkmadı; Hardcore'da ölüm dünyayı bitirdi.
 - **Ulaşılabilirlik taraması:** 2.097 eşya ve 549 tarifin ham maddelerden (blok ve canlı ganimetleri, olta, sağma, kırkma, köylü satışları) üretilebilirliği tarandı; dünyada doğal olarak bulunan bloklar ve görev eşyaları dışında ulaşılamayan eşya yoktur.

@@ -16,6 +16,7 @@ uniform float zaman;
 uniform float sicak;
 uniform float ruzgar;
 uniform float yaprakSal;
+uniform float salinim;
 varying vec2 vUv;
 varying float vAo;
 varying float vGok;
@@ -35,6 +36,7 @@ void main() {
   #endif
   vUv = uv; vAo = a; vGok = isik.y;
   vec4 d = modelMatrix * vec4(position, 1.0);
+  sal *= salinim;   /* 0.51.1: Görüntü ayarı: bitkiler rüzgârda salınmasın */
   if (sal > 0.0) {
     float t = zaman * (1.3 + ruzgar * 1.2), g = (0.55 + ruzgar) * sal;
     d.x += (sin(t + d.x * 0.7 + d.z * 0.35) * 0.06 + sin(t * 2.3 + d.z) * 0.015) * g;
@@ -62,6 +64,7 @@ uniform vec3 gokRenk;
 uniform vec3 sisRenk;
 uniform float sisBas;
 uniform float sisSon;
+uniform float pus;
 uniform float alfa;
 uniform float zaman;
 uniform float magara;
@@ -156,7 +159,7 @@ void main() {
   /* 0.48.0: sis: yumuşak başlayan geçiş ve uzak dağlarda hafif hava perspektifi (pus) */
   float s = clamp((vUzak - sisBas) / (sisSon - sisBas), 0.0, 1.0);
   s = s * s * (3.0 - 2.0 * s);
-  s = max(s, pow(clamp(vUzak / sisSon, 0.0, 1.0), 2.4) * 0.32);
+  s = max(s, pow(clamp(vUzak / sisSon, 0.0, 1.0), 2.4) * pus);   /* 0.51.1: hafif sis ayarında pus azalır */
   renk = mix(renk, sisRenk, s);
   gl_FragColor = vec4(renk, a);
 }`;
@@ -195,9 +198,13 @@ function isikDokusu() {
 }
 
 export class Sahne {
-  constructor(tuval) {
-    this.cizici = new THREE.WebGLRenderer({ canvas: tuval, antialias: false, powerPreference: 'high-performance' });
+  constructor(tuval, sec = {}) {
+    /* 0.51.1: kenar yumuşatma (MSAA) çizici oluşturulurken seçilir; değişiklik sayfa yeniden yüklenince uygulanır */
+    this.cizici = new THREE.WebGLRenderer({ canvas: tuval, antialias: !!sec.msaa, powerPreference: 'high-performance' });
+    this.msaa = !!sec.msaa;
     this.olcek = 1;   // 0.19.0: çözünürlük ölçeği (performans)
+    /* 0.51.1: Görüntü ayarları: piksel yoğunluğu üst sınırı, dinamik ışık üst sınırı, bulutlar, hafif sis, bitki salınımı */
+    this.pikselSinir = 1.5; this.isikUst = ISIK_SAYISI; this.bulutKapali = false; this.sisAz = false; this.bitkiSabit = false;
     this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     this.cizici.info.autoReset = false;
     this.sahne = new THREE.Scene();
@@ -209,7 +216,7 @@ export class Sahne {
     this.atlasDoku = doku;
     const ortak = () => ({
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
-      sisBas: { value: 80 }, sisSon: { value: 120 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 }, sicak: { value: 0 },
+      sisBas: { value: 80 }, sisSon: { value: 120 }, pus: { value: 0.32 }, salinim: { value: 1 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 }, sicak: { value: 0 },
       isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 },
       elFener: { value: new THREE.Vector4(0, 0, 0, 0) }, elFenerYon: { value: new THREE.Vector3(0, 0, -1) },
       gokUst: { value: new THREE.Color(0.4, 0.6, 1) }, gokUfuk: { value: new THREE.Color(0.7, 0.8, 1) }, gunesYon: { value: new THREE.Vector3(0, 1, 0) }
@@ -232,7 +239,7 @@ export class Sahne {
     k = Math.max(0.5, Math.min(1, k));
     if (Math.abs(k - this.olcek) < 0.01 && !zorla) return;
     this.olcek = k;
-    this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.dusukGuc ? 1 : 1.5) * k);   // 0.50.0: düşük güç kipinde piksel oranı en çok 1
+    this.cizici.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.dusukGuc ? 1 : this.pikselSinir) * k);   // 0.50.0: düşük güç kipinde piksel oranı en çok 1; 0.51.1: üst sınır ayardan
     this.boyut();
   }
   boyut() {
@@ -373,6 +380,8 @@ export class Sahne {
       sis.lerp(new THREE.Color(0.58, 0.64, 0.58).multiplyScalar(0.25 + 0.75 * gun), os * 0.55);
     }
     /* Geliştirici: sis kapatılabilir (sisKapali), en düşük ışık en yükseğe çıkarılabilir (tamAydinlik) */
+    /* 0.51.1: hafif sis: sis yalnızca görüş sınırına yakın başlar (uzak yerler daha net) */
+    if (this.sisAz && !lav && !suda) sisBas = Math.max(sisBas, sisSon * (0.86 - 0.2 * os));
     if (this.sisKapali) { sisBas = 9000; sisSon = 10000; }
     /* 0.18.0: Yeraltı Diyarı: gökyüzü yok; kızıl sis, sıcak ve loş ortam ışığı */
     const diyar = !!hava.diyar && !lav && !suda;
@@ -387,13 +396,14 @@ export class Sahne {
       u.gun.value = diyar ? 0 : gun; u.gokRenk.value.copy(gokRenk); u.sisRenk.value.copy(sis); u.sisBas.value = sisBas; u.sisSon.value = sisSon; u.zaman.value = zamanSn;
       u.ruzgar.value += ((diyar ? 0 : 0.25 + hy * 0.5 + hf * 1.0) - u.ruzgar.value) * 0.01;
       u.yaprakSal.value += ((diyar ? 0 : Math.max(0, (hf - 0.2) / 0.8)) - u.yaprakSal.value) * 0.01;
+      u.salinim.value = this.bitkiSabit ? 0 : 1; u.pus.value = this.sisAz && !suda ? 0.12 : 0.32;   // 0.51.1
       /* Gece görüşü iksiri: en düşük ışık yükselir */
       u.magara.value = this.tamAydinlik ? 1 : hava.gece ? 0.72 : diyar ? 0.36 : 0.1;   // 0.41.3: en karanlık yerlerin taban ışığı 0,07'den 0,1'e
       u.islak.value = m === this.opakMalzeme && !suda && !diyar ? hy : 0;
       u.sicak.value = !suda && !diyar ? (this.sicakDalga || 0) : 0;
     }
     this.cizici.setClearColor(sis);
-    this.gokGrubu.visible = !suda && !diyar; this.bulut.visible = !suda && !diyar;
+    this.gokGrubu.visible = !suda && !diyar; this.bulut.visible = !suda && !diyar && !this.bulutKapali;   // 0.51.1: bulutlar kapatılabilir
     if (diyar) return 0.4;
     this.kamera.far = Math.max(600, gorus * 16 + 40); this.kamera.updateProjectionMatrix();
     return gun;
@@ -450,7 +460,7 @@ export class Sahne {
     for (const m of this.malzemeler) { const u = m.uniforms; if (menzil > 0) { u.elFener.value.set(p.x, p.y, p.z, menzil); u.elFenerYon.value.copy(yon); } else u.elFener.value.w = 0; }
   }
   isiklariAyarla(liste) {
-    const ust = this.dusukGuc ? 12 : ISIK_SAYISI;   // 0.50.0: düşük güç kipinde en yakın 12 ışık (gölgelendiricideki döngü kısalır)
+    const ust = Math.min(this.dusukGuc ? 12 : ISIK_SAYISI, this.isikUst);   // 0.51.1: ışık kalitesi ayarı   // 0.50.0: düşük güç kipinde en yakın 12 ışık (gölgelendiricideki döngü kısalır)
     for (const m of this.malzemeler) {
       const a = m.uniforms.isiklar.value;
       for (let i = 0; i < ISIK_SAYISI; i++) { const L = i < ust ? liste[i] : null; if (L) a[i].set(L[0], L[1], L[2], L[3]); else a[i].set(0, 0, 0, 0); }
