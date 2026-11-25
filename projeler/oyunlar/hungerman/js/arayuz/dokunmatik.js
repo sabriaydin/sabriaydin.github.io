@@ -28,7 +28,7 @@ export class Dokunmatik {
     this.aktif = !!acik;
     document.body.classList.toggle('dokunmatik', this.aktif);
     this.kok.hidden = !this.aktif;
-    $('#tikla b').textContent = this.aktif ? 'Devam etmek için dokununuz' : 'Devam etmek için tıklayın';
+    $('#tikla b').textContent = this.aktif ? 'Devam etmek için dokununuz' : 'Devam etmek için tıklayınız';
     if (this.aktif && !this.kurulu) this.kur();
     if (!this.aktif) this.sifirla();
   }

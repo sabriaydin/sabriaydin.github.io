@@ -244,14 +244,17 @@ export const MODELLER = {
     const kanatlar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.18, 0.54, 0], [[0.04, 0.24, 0.32, '#e6e3db', s * 0.02, -0.11, 0]]));
     return { kok, malzeme, govde, kafa, bacaklar, kanatlar, kollar: [], kuyruk: null };
   },
-  koylu: (meslek = 'ciftci') => {
-    const M = MESLEKLER[meslek] || MESLEKLER.ciftci;
+  /* 0.51.0: gezgin tüccar: mor kaftan, sarı geniş şapka, sırt heybesi */
+  gezgin: () => MODELLER.koylu('gezgin', 0, { gomlek: '#5a2a6e', pantolon: '#2e2a3a', sapka: '#c8a040', uzun: true, heybe: '#8a5a2e' }),
+  koylu: (meslek = 'ciftci', renk, ozel) => {
+    const M = ozel || MESLEKLER[meslek] || MESLEKLER.ciftci;
     const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
     const kok = new THREE.Group();
     const ten = '#d6a47c', sac = ['#3a2a1e', '#5a3a22', '#2a2420', '#7a5a3a'][meslek.length % 4];
     const govdeKutular = [[0.5, 0.75, 0.26, M.gomlek], [0.52, 0.08, 0.28, '#3a2a1e', 0, -0.33, 0]];
     if (M.onluk) govdeKutular.push([0.42, 0.62, 0.02, M.onluk, 0, -0.06, -0.14]);
     if (M.uzun) govdeKutular.push([0.54, 0.5, 0.3, M.gomlek, 0, -0.55, 0]);
+    if (M.heybe) govdeKutular.push([0.4, 0.46, 0.2, M.heybe, 0, 0.02, 0.23], [0.42, 0.06, 0.22, '#5a3a1e', 0, 0.2, 0.23]);   // 0.51.0: gezgin tüccarın sırt heybesi
     const govde = parca(kok, malzeme, [0, 1.12, 0], govdeKutular);
     const kafaK = [[0.48, 0.48, 0.48, ten, 0, 0.24, 0], [0.5, 0.14, 0.5, sac, 0, 0.44, 0.0], [0.5, 0.3, 0.08, sac, 0, 0.28, 0.22],
       [0.08, 0.06, 0.02, '#1e1e24', -0.11, 0.28, -0.245], [0.08, 0.06, 0.02, '#1e1e24', 0.11, 0.28, -0.245], [0.08, 0.1, 0.06, '#c48e66', 0, 0.2, -0.26], [0.16, 0.03, 0.02, '#8a4a3a', 0, 0.1, -0.245]];

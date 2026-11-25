@@ -1373,6 +1373,7 @@ export class Varliklar {
     if (o.oyuncu && v.sahip && v.sahip === (o.vuran ? o.vuran.ad : this.yerelAd)) return false;
     v.can -= n;
     v.hasarZaman = 0.45; v.irkil = 0.32;
+    if (v.tur.gezgin && o.oyuncu) v.kuskun = true;   // 0.51.0: saldırılan gezgin tüccar gider
     /* 0.44.0: vurulan canavar saldıranın farkına varır */
     if (o.oyuncu || kaynak) { v.farkinda = 10; if (kaynak) v.sonGorulen = { x: kaynak.x, y: kaynak.y ?? v.konum.y, z: kaynak.z }; }
     /* 0.40.5: olay kaydı */

@@ -110,6 +110,7 @@ export class Etkilesim {
       return true;
     }
     if (this.hedefCanli && this.hedefCanli.tur.koylu) { this.arayuz.koyluAc(this.hedefCanli); return true; }
+    if (this.hedefCanli && this.hedefCanli.tur.gezgin && this.arayuz.gezginAc) { this.arayuz.gezginAc(this.hedefCanli); return true; }   // 0.51.0
     const h = this.hedef;
     if (!h) return false;
     const b = BLOKLAR[h.id];
@@ -227,9 +228,9 @@ export class Etkilesim {
       return;
     }
     /* Köylü ile konuşma */
-    if (g.sag && this.hedefCanli && this.hedefCanli.tur.koylu && this.sagBekleme <= 0) {
+    if (g.sag && this.hedefCanli && (this.hedefCanli.tur.koylu || this.hedefCanli.tur.gezgin) && this.sagBekleme <= 0) {
       this.sagBekleme = 0.4; this.germe = 0;
-      this.arayuz.koyluAc(this.hedefCanli);
+      if (this.hedefCanli.tur.gezgin) { if (this.arayuz.gezginAc) this.arayuz.gezginAc(this.hedefCanli); } else this.arayuz.koyluAc(this.hedefCanli);
       this.sahne.secimGoster(null, 0);
       return;
     }

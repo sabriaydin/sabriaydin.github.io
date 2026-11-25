@@ -20,6 +20,8 @@ import { Koyler } from './koy/koyler.js';
 import { Gorevler, yonAci } from './koy/gorevler.js';
 import { koylerAlan, UZMANLIK } from './dunya/koy-uretici.js';
 import { KoyluEkrani, GorevEkrani } from './arayuz/koylu-ekrani.js';
+import { GezginTuccar } from './koy/gezgin.js';
+import { GezginEkrani } from './arayuz/gezgin-ekrani.js';
 import { Yolculuk } from './oyun/yolculuk.js';
 import { ISTASYON_BLOK, ISTASYON_ADI, ELOCAK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
@@ -127,6 +129,7 @@ sahne.kamera.fov = ayar.fov; sahne.kamera.updateProjectionMatrix();
 const EKRANLAR = { ana: '#anaMenu', dunyalar: '#dunyalarEkrani', yeni: '#yeniEkrani', ayarlar: '#ayarlarEkrani', duraklat: '#duraklatEkrani', olum: '#olumEkrani', yukleme: '#yuklemeEkrani', cok: '#cokEkrani', bilgi: '#bilgiEkrani' };
 let aktifEkran = 'ana', oncekiEkran = 'ana';
 function ekran(ad) {
+  if (ad !== 'duraklat') { const r = document.getElementById('raporEkrani'); if (r) r.hidden = true; }   // 0.51.0
   if (ad === 'ayarlar') oncekiEkran = aktifEkran;
   for (const [k, s] of Object.entries(EKRANLAR)) $(s).hidden = k !== ad;
   if (ad === 'ayarlar') { const el = $(EKRANLAR[ad]); el.classList.toggle('menuArka', !oyun); el.classList.toggle('yari', !!oyun); }
@@ -533,8 +536,8 @@ document.addEventListener('pointerlockchange', () => {
   bilerekBirak = false;
   tiklaGuncelle();
 });
-function tiklaGuncelle() { $('#tikla').hidden = !(oyun && aktifEkran === 'oyun' && !kilitli && !panelAcik() && !sohbetAcik && !(oyun.olumAnim > 0)); if (!dokun.aktif) $('#tikla b').textContent = kumanda.aktif ? 'Devam etmek için A tuşuna basınız' : 'Devam etmek için tıklayın'; }
-function panelAcik() { return envEkrani.acik || koyluEkrani.acik || gorevEkrani.acik || haritaEkrani.acik || konsol.acik || gelPencere.acik || basarimEkrani.acik || tarifKitabi.acik; }
+function tiklaGuncelle() { $('#tikla').hidden = !(oyun && aktifEkran === 'oyun' && !kilitli && !panelAcik() && !sohbetAcik && !(oyun.olumAnim > 0)); if (!dokun.aktif) $('#tikla b').textContent = kumanda.aktif ? 'Devam etmek için A tuşuna basınız' : 'Devam etmek için tıklayınız'; }
+function panelAcik() { return envEkrani.acik || koyluEkrani.acik || gezginEkrani.acik || gorevEkrani.acik || haritaEkrani.acik || konsol.acik || gelPencere.acik || basarimEkrani.acik || tarifKitabi.acik; }
 function seciliAyarla(n) { oyun.envanter.secili = n; oyun.hud.cubukCiz(); oyun.hud.esyaAdiGoster(); ses.tik(); }
 
 /* ---------- Envanter ekranı ---------- */
@@ -565,6 +568,9 @@ function envanterAcKapa(istasyon, sandik) {
 envEkrani.firinDurum = k => (oyun && oyun.firinlar ? oyun.firinlar.durum.get(k) : null);   // 0.33.0
 const koyluEkrani = new KoyluEkrani({ ses, kapatIste: () => panelKapat(true) });
 const gorevEkrani = new GorevEkrani({ ses, kapatIste: () => panelKapat(true) });
+/* 0.51.0: Gezgin Tüccar penceresi */
+const gezginEkrani = new GezginEkrani({ ses, kapatIste: () => panelKapat(true), tuccar: { get teklifler() { return oyun && oyun.gezgin ? oyun.gezgin.teklifler : []; } },
+  envanter: () => oyun.envanter, birak: (id, n) => { const p = oyun.oyuncu.konum; oyun.dusenler.birak(id, n, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1.5); } });
 /* Başarımlar: L tuşu ya da duraklatma menüsü */
 const basarimEkrani = new BasarimEkrani({ ses, kapatIste: () => { if (basarimEkrani.menudenAcildi) { basarimEkrani.menudenAcildi = false; basarimEkrani.kapat(); ses.kapa(); ekran('duraklat'); } else panelKapat(true); } });
 /* 0.17.0: Tarif Kitabı (B); takip edilen tarif ayarlarda saklanır */
@@ -628,6 +634,7 @@ function panelAc(panel, ...a) {
 }
 function panelKapat(kilitlensin) {
   if (koyluEkrani.acik) koyluEkrani.kapat();
+  if (gezginEkrani.acik) gezginEkrani.kapat();
   if (gorevEkrani.acik) gorevEkrani.kapat();
   if (haritaEkrani.acik) haritaEkrani.kapat();
   const sessiz = konsol.acik;   // 0.30.5: konsol sessiz kapanır
@@ -674,6 +681,24 @@ $('#agKopyala').onclick = () => {
   if (navigator.clipboard) navigator.clipboard.writeText(k).then(ok, () => {}); 
 };
 $('#devamEt').onclick = () => { ses.tik(); ekran('oyun'); kilitle(); };
+/* 0.51.0: sorun bildirme raporu (yerelde hazırlanır; kopyalanır ya da indirilir) */
+function raporMetni() {
+  const o = oyun, gl = sahne.cizici.getContext(), d = gl && gl.getExtension('WEBGL_debug_renderer_info');
+  const kart = d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : (gl ? gl.getParameter(gl.RENDERER) : '-');
+  const son = konsol.kayitlar.filter(k => k.sev === 'uyari' || k.sev === 'kritik').slice(-15).map(k => `  [${k.gercek}] ${k.sev}: ${k.m}${k.alan ? ' (' + k.alan + ')' : ''}${k.n > 1 ? ' ×' + k.n : ''}`).join('\n') || '  (yok)';
+  const P = o ? o.oyuncu.konum : null;
+  return [`HungerMan sorun raporu · ${new Date().toLocaleString('tr-TR')}`, '', 'Açıklama:', ($('#raporMetin').value.trim() || '(yazılmadı)'), '',
+    `Sürüm: ${SURUM}`, `Tarayıcı: ${navigator.userAgent}`, `Ekran kartı: ${kart}`, `Ekran: ${innerWidth}×${innerHeight} (piksel oranı ${devicePixelRatio || 1})`,
+    `Ayarlar: görüş ${ayar.gorus}, çözünürlük ${COZUNURLUK[ayar.cozunurluk | 0][0]}, düşük güç ${ayar.dusukGuc ? 'açık' : 'kapalı'}, dokunmatik ${dokun.aktif ? 'açık' : 'kapalı'}, kumanda ${kumanda.aktif ? 'açık' : 'kapalı'}, ${$('#fps').textContent || 'FPS -'}`,
+    o ? `Dünya: tohum ${o.tohum}, ${o.gun}. gün, zorluk ${o.zorluk}, ${o.ag ? (o.istemci ? 'çok oyunculu (istemci)' : 'çok oyunculu (sunucu)') : 'tek oyunculu'}, konum ${P.x.toFixed(1)} ${P.y.toFixed(1)} ${P.z.toFixed(1)}` : 'Dünya: açık değil',
+    `Son ekran hatası: ${$('#hataKutusu').textContent || '-'}`, 'Son uyarılar:', son].join('\n');
+}
+$('#raporAc').onclick = () => { ses.tik(); $('#raporBilgi').textContent = raporMetni().split('\n').slice(5).join('\n'); $('#raporEkrani').hidden = false; setTimeout(() => $('#raporMetin').focus(), 30); };
+$('#raporKapat').onclick = () => { ses.tik(); $('#raporEkrani').hidden = true; };
+$('#raporKopyala').onclick = () => { ses.tik(); const m = raporMetni(), b = $('#raporKopyala'); const ok = () => { b.textContent = 'Kopyalandı'; setTimeout(() => (b.textContent = 'Kopyala'), 1500); };
+  if (navigator.clipboard) navigator.clipboard.writeText(m).then(ok, () => { $('#raporBilgi').textContent = m; $('.raporAyrinti').open = true; }); };
+$('#raporIndir').onclick = () => { ses.tik(); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([raporMetni()], { type: 'text/plain;charset=utf-8' })); a.download = `hungerman-sorun-${SURUM}-${Date.now().toString(36)}.txt`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+$('#raporMetin').addEventListener('keydown', e => e.stopPropagation());
 $('#basarimAc').onclick = () => { if (!oyun) return; ses.tik(); ekran('oyun'); basarimEkrani.menudenAcildi = true; basarimEkrani.ac(); ses.ac(); tiklaGuncelle(); };
 $('#kaydetCik').onclick = async () => { ses.tik(); await oyunKaydet(); oyunBitir(); ekran('ana'); };
 
@@ -729,6 +754,7 @@ function oyunBaslat(v) {
     zorluk: v.zorluk || 'normal', denge: dengeDuzelt(v.denge), hardcoreBitti: !!v.hardcoreBitti, ogretici: v.yeni ? 0 : Number.isFinite(v.ogretici) ? ogrSurumCevir(v.ogretici, v.ogrSurum | 0) : -1 };
   const varliklar = new Varliklar({ sahne, dunya, dusenler, ses, uretici: dunya.uretici });
   if (ayar.dusukGuc) { dusenler.PMAX = 160; varliklar.dusukGuc = true; }   // 0.50.0
+  oyun.gezgin = new GezginTuccar({ varliklar, dunya, hud, ses });   // 0.51.0
   varliklar.hataBildir = (m, e) => { console.error('Canlı hatası', e); konsol.kayit('canli', 'Canlı hatası; canlı kaldırıldı', { seviye: 'kritik', alan: { hata: m } }); };
   oyun.varliklar = varliklar; oyun.gunIsigi = 1; oyun.uyku = 0; oyun.isaretSayac = 0;
   const yereBirak = (id, adet) => { const p = oyuncu.konum; dusenler.birak(id, adet, p.x, p.y + 1, p.z, 0.001, 2, 0.001, undefined, 1); };
@@ -861,6 +887,7 @@ function oyunBaslat(v) {
     tilsim: () => tilsimBaslat(),
     zaman: () => ({ zaman: oyun.zaman, gun: oyun.gun, mevsim: `${MEVSIMLER[oyun.mevsim]} ${((oyun.gun - 1) % MEVSIM_GUN) + 1}/${MEVSIM_GUN}` }),   // 0.37.0: cep saati
     koyluAc: w => panelAc(koyluEkrani, w),
+    gezginAc: () => panelAc(gezginEkrani),
     sandikAc: (x, y, z) => {
       const k = x + ',' + y + ',' + z;
       /* Çok oyunculu: istemcide içerik sunucudan istenir, sunucuda sandık aynı anda tek oyuncuya açılır */
@@ -912,7 +939,7 @@ function oyunBaslat(v) {
     }
   };
   oyuncu.olaylar.adim = id => ses.adim(BLOKLAR[id] ? BLOKLAR[id].ses : 'tas');
-  oyuncu.olaylar.ziplad = () => { hayatta.yor(oyuncu.kosuyor ? 0.2 : 0.05); };
+  oyuncu.olaylar.ziplad = () => { hayatta.yor(oyuncu.kosuyor ? 0.15 : 0.05); };
   /* 0.43.0: yüksekten inişte zemine göre iniş sesi */
   /* 0.48.0: sert inişte ayak altından toz, suya düşünce sıçrama */
   oyuncu.olaylar.indi = (h, id) => { const t = BLOKLAR[id] ? BLOKLAR[id].ses : 'tas'; ses.adim(t); if (h > 11) setTimeout(() => ses.adim(t), 70);
@@ -1326,7 +1353,7 @@ function adim(t) {
       o.oyuncu.etkiHiz = (o.hayatta.etki('hiz') ? 1.3 : 1) * (o.hayatta.etki('yavas') ? 0.6 : 1) * (zem && zem.yavaslatir && o.oyuncu.yerde ? 0.55 : 1)
         * (o.hayatta.etki('kirik') ? (o.hayatta.atel ? 0.8 : 0.55) : 1) * (o.hayatta.isiDurum === -2 ? 0.85 : 1);   // 0.22.0: kırık bacak ve donma yavaşlatır
       mesafe = o.oyuncu.guncelle(dt, o.inisBekle > 0 ? { ...g, egil: false } : g) || 0; }
-    o.hayatta.yor(mesafe * (o.oyuncu.kosuyor ? 0.1 : 0.01));
+    o.hayatta.yor(mesafe * (o.oyuncu.kosuyor ? 0.07 : 0.01));   // 0.51.0: koşu açlığı 0,1'den 0,07'ye (doygunluk sistemi olmadığı için koşarken açlık çok hızlı bitiyordu)
     /* 0.23.0: koşarken ayak tozu */
     if (o.oyuncu.kosuyor && o.oyuncu.yerde && !o.oyuncu.suda && mesafe > 0 && Math.random() < dt * 9) {
       const zid = o.dunya.blok(Math.floor(p.x), Math.floor(p.y - 0.2), Math.floor(p.z));
@@ -1407,6 +1434,7 @@ function adim(t) {
     if (o.baskinlar) o.baskinlar.guncelle(dt, o);   // 0.35.0: köy baskınları
     if (o.suAkisi) o.suAkisi.guncelle(dt);   // 0.30.5
     if (o.kumDusmesi) o.kumDusmesi.guncelle(dt, o.gunIsigi ?? 1);
+    if (o.gezgin) o.gezgin.guncelle(dt, o);   // 0.51.0
     o.tikSayac += dt;
     /* Rastgele tikler ve ekinler sunucuda işlenir; istemciye blok değişikliği olarak gelir */
     if (o.tikSayac > 0.5 && !o.istemci) { o.tikSayac = 0; o.dunya.rastgeleTik(p.x, p.z); o.dunya.mevsimTik(p.x, p.z); if (ekKonumlar) for (const q of ekKonumlar) { o.dunya.rastgeleTik(q.x, q.z); o.dunya.mevsimTik(q.x, q.z); } o.dunya.ekinTik(); }
@@ -2100,5 +2128,5 @@ $('#bilgiTamam').onclick = () => { ses.tik(); clearTimeout(baglanZaman); ekran('
 requestAnimationFrame(dongu);
 ekran('ana');
 /* Konsoldan inceleme için (oyun mantığını değiştirmez) */
-window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, koyluEkrani, gorevEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi, ses, muzik, dokun, kumanda, ipuclari, ayarFormu, ayarUygula };
+window.HungerMan = { get oyun() { return oyun; }, get ekran() { return aktifEkran; }, get kilitli() { return kilitli; }, sahne, ayar, tus, fare, kilitAyarla: v => { kilitli = v; tiklaGuncelle(); }, agAc, sohbetEkle, envEkrani, koyluEkrani, gorevEkrani, duraklat, haritaEkrani, miniHarita, konsol, gelPencere, basarimEkrani, tarifKitabi, ses, muzik, dokun, kumanda, ipuclari, ayarFormu, ayarUygula, gezginEkrani };
 export { ESYALAR };

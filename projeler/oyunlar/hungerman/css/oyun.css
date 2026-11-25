@@ -1305,3 +1305,19 @@ body.gostergesiz #altyazilar { display: none; }
 #kumandaImlec { position: fixed; left: 0; top: 0; width: 22px; height: 22px; margin: -3px 0 0 -3px; z-index: 9999; pointer-events: none;
   background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cpath d='M3 2l15 9-6.5 1.6L15 20l-3 1.4-3.4-7.3L3 18z' fill='%23fff' stroke='%23000' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E"); filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
 body.kumanda.oyunda-kilitli #kumandaImlec { display: none; }
+
+/* 0.51.0: Gezgin Tüccar */
+.gzListe { display: grid; gap: 6px; margin: 10px 0; max-height: 56vh; overflow: auto; }
+.gzTeklif { display: grid; grid-template-columns: auto auto 1fr auto auto; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 6px; background: rgba(255, 255, 255, .04); border: 1px solid var(--cizgi); }
+.gzTeklif.bitti { opacity: .45; }
+.gzVer, .gzAl { display: flex; align-items: center; gap: 6px; }
+.gzAl span { color: var(--yazi); font-size: .88rem; }
+.gzOk { color: var(--soluk); font-style: normal; }
+.gzTeklif small { color: var(--soluk); }
+
+/* 0.51.0: sorun bildirme */
+.raporEkran { z-index: 30; }
+#raporMetin { width: 100%; resize: vertical; margin-top: 6px; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--cizgi); background: rgba(0, 0, 0, .3); color: var(--yazi); font: 400 .92rem/1.45 var(--govde); user-select: text; }
+.raporAyrinti { margin: 10px 0; }
+.raporAyrinti summary { cursor: pointer; color: var(--soluk); font-size: .88rem; }
+.raporAyrinti pre { max-height: 180px; overflow: auto; white-space: pre-wrap; font-size: .74rem; background: rgba(0, 0, 0, .3); padding: 8px; border-radius: 6px; user-select: text; }

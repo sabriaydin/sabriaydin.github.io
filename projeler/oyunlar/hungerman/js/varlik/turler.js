@@ -64,6 +64,8 @@ export const TURLER = {
   /* 0.21.0: Arı: kovanından çıkar, çiçeklerden polen toplayıp kovanı bala doyurur; kızdırılırsa sokar ve zehirler */
   ari: { ad: 'Arı', model: 'ari', gen: 0.2, boy: 0.45, can: 6, hiz: 2.0, kosu: 4.4, ucar: true, ari: true, notr: true, hasar: 2, agu: true, menzil: 0.7, gorus: 18,
     dusur: () => [], ses: 'ari', xp: 1 },
+  /* 0.51.0: Gezgin Tüccar (doğal olarak doğmaz; koy/gezgin.js sabahları getirir) */
+  gezgin: { ad: 'Gezgin Tüccar', model: 'gezgin', gen: 0.3, boy: 1.9, can: 20, hiz: 0.6, kosu: 3.0, gezgin: true, dusur: () => [], ses: 'koylu' },
   koylu: { ad: 'Köylü', model: 'koylu', gen: 0.3, boy: 1.9, can: 20, hiz: 1.0, kosu: 3.2, koylu: true, dusur: () => [], ses: 'koylu' }
 };
 export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt', 'at', 'kedi'];

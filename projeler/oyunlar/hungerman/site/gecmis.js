@@ -2,6 +2,15 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.51', b: 'Yayın öncesi', y: [
+  { s: '0.51.0', b: 'Yayına hazırlık', m: [
+    'Oyun dört zorlukta da ilk günden Yeraltı Diyarı\'na kadar baştan sona denendi.',
+    'Gezgin tüccar geldi: bazı sabahlar yakınınızda konaklıyor, fidan, tohum ve tılsım satıyor; elmas ve inciyi iyi fiyata alıyor.',
+    'Koşarken açlık daha yavaş bitiyor.',
+    'Oyunda bir sorunla karşılaşırsanız duraklatma menüsündeki Sorun Bildir hazır bir rapor çıkarıyor.',
+    'Sitede bilinen sorunlar listesi, yeni ekran görüntüleri ve kısa bir tanıtım videosu var.'
+  ]}
+]},
 { g: '0.50', b: 'Performans', y: [
   { s: '0.50.0', b: 'Performans, kayıt ve çok oyunculu', m: [
     'Yer üstündeyken uzaktaki mağaralar artık çizilmiyor; ekran kartının yükü yaklaşık yarıya indi.',

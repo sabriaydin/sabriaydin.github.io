@@ -23,12 +23,12 @@ export const BOLUMLER = [
     ['Bir köy görevini tamamla', ['gorev'], 'Görevler sikke, deneyim ve itibar kazandırır.']
   ], odul: { xp: 15, esya: [[288, 12], [293, 4]] } },
   { ad: 'Demir Çağı', aciklama: 'Derine inmeye hazırlanın.', adimlar: [
-    ['Demir külçe elde et', ['demir'], 'Ham demiri fırında eritiniz. Demir 70. seviyenin altında bulunur.'],
+    ['Demir külçe elde et', ['demir', 'zirh'], 'Ham demiri fırında eritiniz. Demir 70. seviyenin altında bulunur.'],
     ['Tam takım demir zırh giy', ['zirh'], 'Kask, göğüslük, pantolon ve bot.'],
     ['12. seviyenin altına in', ['derin'], 'F3 ile yüksekliğinizi görebilirsiniz. Lava dikkat ediniz.']
   ], odul: { xp: 20, esya: [[290, 1], [289, 1]] } },
   { ad: 'Derinlikler', aciklama: 'Elmaslar ve unutulmuş yapılar.', adimlar: [
-    ['Elmas bul', ['elmas'], 'Elmas 16. seviyenin altındadır.'],
+    ['Elmas bul', ['elmas', 'elmasZirh'], 'Elmas 16. seviyenin altındadır.'],
     ['Bir zindan, batık ya da maden keşfet', ['zindan', 'batik', 'maden'], 'Köylülerin söylentileri yerlerini işaret eder.'],
     ['Bir eşyayı büyüle', ['buyu'], 'Büyü Masası: 2 elmas, 2 parıltı kristali, 4 kesme taş.']
   ], odul: { xp: 30, esya: [[264, 2], [61, 3]] } },
