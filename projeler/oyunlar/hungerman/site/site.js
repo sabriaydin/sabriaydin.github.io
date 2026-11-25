@@ -18,9 +18,9 @@
   /* Galeri: tıklanınca büyük görünüm */
   const b = $('#buyuk');
   if (b) {
-    $$('.galeri figure').forEach(f => f.addEventListener('click', () => {
+    $$('.galeri figure, .sahne figure, .rFoto').forEach(f => f.addEventListener('click', () => {
       b.querySelector('img').src = f.querySelector('img').src;
-      b.querySelector('p').textContent = f.querySelector('figcaption')?.textContent || '';
+      b.querySelector('p').textContent = f.querySelector('figcaption')?.textContent || f.querySelector('img').alt || '';
       b.classList.add('acik');
     }));
     b.addEventListener('click', () => b.classList.remove('acik'));
