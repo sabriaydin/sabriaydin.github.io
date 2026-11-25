@@ -2,6 +2,16 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.49', b: 'Arayüz', y: [
+  { s: '0.49.0', b: 'Arayüz ve ilk deneyim', m: [
+    'Öğretici yenilendi: ilk gün sığınak ve yatak adımlarını da gösteriyor, istenen adım geçilebiliyor.',
+    'Su, lav, mağara, gece ve ilk canavar gibi şeylerle ilk karşılaştığınızda kısa bir ipucu çıkıyor.',
+    'Envanterde sürükle-bırak var. Eksik malzemenin nereden bulunacağı tarifin altında yazıyor.',
+    'Can ve açlık doluyken göstergeler soluklaşıyor; önemli uyarılar kırmızı çerçeveyle geliyor.',
+    'Oyun kumandası desteği geldi. Telefonda kol artık parmağınızın değdiği yerde açılıyor.',
+    'Ayarlarda yeni Erişilebilirlik bölümü: yazı boyutu, renk körlüğü düzeltmesi, sarsıntı ve parlamaları azaltma.'
+  ]}
+]},
 { g: '0.48', b: 'Görsel', y: [
   { s: '0.48.0', b: 'Görsel ve his', m: [
     'Canlılar daha canlı: koşarken öne eğiliyor, vururken atılıyor, darbe alınca geriye savruluyor. Ölen canlı yana devrilip solarak kayboluyor.',

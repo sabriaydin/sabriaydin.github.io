@@ -409,7 +409,7 @@ export class Sahne {
     l.boy = 30 + Math.random() * 45; l.hiz = 160 + Math.random() * 120; l.omur = 0.55 + Math.random() * 0.5; l.yas = 0; l.visible = true;
   }
   /* Ekran parlaması (meteor çarpması) */
-  parlama(k) { const el = document.getElementById('gokParla'); if (!el) return; el.style.transition = 'none'; el.style.opacity = String(Math.min(0.9, k)); void el.offsetWidth; el.style.transition = 'opacity 1.6s ease-out'; el.style.opacity = '0'; }
+  parlama(k) { const el = document.getElementById('gokParla'); if (!el) return; if (this.efektAzalt) k *= 0.25; el.style.transition = 'none'; el.style.opacity = String(Math.min(0.9, k)); void el.offsetWidth; el.style.transition = 'opacity 1.6s ease-out'; el.style.opacity = '0'; }
   /* Her kare: s = { kanli, aurora, meteorlar, sure } */
   gokOlaylari(dt, s) {
     this.kanliK = s.kanli;

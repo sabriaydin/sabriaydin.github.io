@@ -104,6 +104,7 @@ export class Hud {
     const zp = this.env.zirhPuani ? this.env.zirhPuani() : 0, zehir = h.zehir > 0;
     const anahtar = h.can + '|' + h.aclik + '|' + h.oksijen + '|' + suda + '|' + zp + '|' + zehir + '|' + (h.agu > 0);
     if (anahtar === this.son.durum) return;
+    this.sonDegisim = performance.now();   // 0.49.0: sade gösterge
     if (this.son.can != null && h.can < this.son.can) { const c = $('#canlar'); c.classList.remove('titre'); void c.offsetWidth; c.classList.add('titre'); }
     this.son.durum = anahtar; this.son.can = h.can;
     const sira = (deger, dolu, yarim, bos) => { let s = ''; for (let i = 0; i < 10; i++) { const v = deger - i * 2; s += `<img src="${v >= 2 ? dolu : v === 1 ? yarim : bos}" alt="">`; } return s; };
@@ -118,15 +119,24 @@ export class Hud {
     else o.hidden = true;
   }
 
-  bildirim(metin, id) {
+  /* 0.49.0: tur: 'uyari' (kırmızı çerçeve, uyarı işareti, daha uzun kalır) */
+  bildirim(metin, id, tur) {
     const b = document.createElement('div');
-    b.className = 'bildirim' + (id ? ' esya' : '');
+    b.className = 'bildirim' + (id ? ' esya' : '') + (tur === 'uyari' ? ' uyari' : '');
     b.innerHTML = (id ? `<img src="${simge(id).url}" alt="">` : '') + `<span></span>`;
     b.querySelector('span').textContent = metin;
     const kap = $('#bildirimler');
     kap.appendChild(b);
     while (kap.children.length > 4) kap.firstChild.remove();
-    setTimeout(() => b.remove(), 3300);
+    setTimeout(() => b.remove(), tur === 'uyari' ? 5300 : 3300);
+  }
+  /* 0.49.0: sade gösterge: can ve açlık doluyken, değişmedikçe ve tehlike yokken durum satırı ve deneyim çubuğu soluklaşır */
+  sadeGuncelle(acik, tehlike) {
+    const n = performance.now(), h = this.hay;
+    const sakin = acik && !tehlike && h.can >= 20 && h.aclik >= 18 && !(h.zehir > 0) && n - (this.sonDegisim || 0) > 6000;
+    if (sakin !== this.son.sakin) { this.son.sakin = sakin; $('#durumlar').classList.toggle('sakin', sakin); }
+    const xs = acik && n - (this.sonXp || 0) > 6000;
+    if (xs !== this.son.xpSakin) { this.son.xpSakin = xs; $('#xpCubuk').classList.toggle('sakin', xs); }
   }
 
   /* Pusula tuvalde çizilir: üst şeritte yönler ve dereceler, alt şeritte işaretler, en altta çentikler */
@@ -263,6 +273,7 @@ export class Hud {
   xpCiz(h) {
     const L = h.seviye, o = h.ilerleme, a = L + '|' + o.toFixed(3);
     if (a === this.son.xp) return;
+    if (this.son.xp != null) this.sonXp = performance.now();
     this.son.xp = a;
     $('#xpDolu').style.width = (o * 100).toFixed(1) + '%';
     $('#xpSeviye').textContent = L > 0 ? String(L) : '';

@@ -32,12 +32,13 @@ export const Kayit = {
 };
 
 const AYAR_ANAHTAR = 'hungerman_ayarlar';
-export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true, onizleme: true, parlaklik: 1, arayuzOlcek: 1, arkaSessiz: false, enerjiPanel: true, bakilanAd: true, ogretici: true, miniHarita: true, yolculukIzle: true, sesEfekt: 1, sesCanli: 1, sesOrtam: 1, sesArayuz: 1, mono: false, altyazi: false, gerilim: true };
+export const VARSAYILAN_AYAR = { gorus: 8, fov: 75, hassasiyet: 1, ses: 0.8, muzik: 0.5, cozunurluk: 0, tersY: false, fps: false, sallanma: true, vucutIsisi: true, onizleme: true, parlaklik: 1, arayuzOlcek: 1, arkaSessiz: false, enerjiPanel: true, bakilanAd: true, ogretici: true, miniHarita: true, yolculukIzle: true, sesEfekt: 1, sesCanli: 1, sesOrtam: 1, sesArayuz: 1, mono: false, altyazi: false, gerilim: true, ipuclari: true, sadeGosterge: true, yaziBoyutu: 1, renkKor: '', efektAzalt: false, dokunBoyut: 1 };
 /* 0.22.0: sayısal ayarlar geçerli aralığa çekilir (bozuk ya da elle değiştirilmiş kayıtta dünya yüklenemiyordu) */
-const AYAR_ARALIK = { gorus: [4, 16], fov: [60, 100], hassasiyet: [0.2, 2.5], ses: [0, 1], muzik: [0, 1], cozunurluk: [0, 4], parlaklik: [0.7, 1.4], arayuzOlcek: [0.85, 1.25], sesEfekt: [0, 1], sesCanli: [0, 1], sesOrtam: [0, 1], sesArayuz: [0, 1] };
+const AYAR_ARALIK = { gorus: [4, 16], fov: [60, 100], hassasiyet: [0.2, 2.5], ses: [0, 1], muzik: [0, 1], cozunurluk: [0, 4], parlaklik: [0.7, 1.4], arayuzOlcek: [0.85, 1.25], sesEfekt: [0, 1], sesCanli: [0, 1], sesOrtam: [0, 1], sesArayuz: [0, 1], yaziBoyutu: [0.9, 1.4], dokunBoyut: [0.8, 1.4], dokunHassas: [0.2, 2.5], kumandaHassas: [0.3, 2.5] };
 function ayarDuzelt(a) {
   for (const [k, [en, eb]] of Object.entries(AYAR_ARALIK)) { const v = Number(a[k]); a[k] = Number.isFinite(v) ? Math.min(eb, Math.max(en, v)) : VARSAYILAN_AYAR[k]; }
   a.gorus = Math.round(a.gorus);
+  if (!['', 'protan', 'deutan', 'tritan'].includes(a.renkKor)) a.renkKor = '';   // 0.49.0
   return a;
 }
 export function ayarlariYukle() {

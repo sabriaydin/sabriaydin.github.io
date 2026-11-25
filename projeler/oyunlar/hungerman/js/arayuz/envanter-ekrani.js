@@ -1,4 +1,4 @@
-/* HungerMan - envanter ve üretim ekranı: sürükle-bırak yerine tıkla-al / tıkla-bırak, tarif arama ve kategori */
+/* HungerMan - envanter ve üretim ekranı: tıkla-al / tıkla-bırak (0.49.0: ayrıca sürükle-bırak), tarif arama ve kategori */
 import { simge } from '../grafik/doku.js';
 import { BLOKLAR, ESYALAR, ZIRH_PARCALARI, KIYAFET_PARCALARI, maksDayanim, onarimMalzemesi, ETKILER, BUYULER, buyuMetinleri, buyuluMu, uygunBuyuler, romaRakam } from '../bloklar.js';
 import { uretec } from '../rastgele.js';
@@ -7,6 +7,8 @@ import { KarakterOnizleme } from './karakter-onizleme.js';
 /* Büyü masası: seçeneklerin seviye bedeli ve parıltı kristali gereksinimi */
 const BUYU_BEDEL = [2, 5, 9];
 const KRISTAL = 61;
+import { TURLER } from '../varlik/turler.js';
+import { MESLEKLER } from '../koy/meslekler.js';
 import { TARIFLER, KATEGORILER, ISTASYON_ADI, ISTASYON_BLOK, girdiAdi, girdiSay, kacKez, uret, GRUPLAR, istasyonVar, istasyonMetni, istasyonlar, girdiListesi } from '../oyun/uretim.js';
 
 /* 0.33.0: kıyafet ve zırh ısı değerleri metni */
@@ -14,6 +16,34 @@ export const isiMetni = i => [i.y ? `Soğuktan koruma +${String(i.y).replace('.'
 const $ = s => document.querySelector(s);
 /* 0.30.3: içerik değişmediyse öğeleri yeniden kurmaz (tıklama sırasında öğenin yerinden sökülmesini ve titremeyi önler) */
 const yaz = (el, html) => { if (el && el._html !== html) { el._html = html; el.innerHTML = html; } };
+/* 0.49.0: eksik malzemenin nereden bulunacağı: kırılınca düşüren bloklar, düşüren canlılar, satan köylüler (ilk istekte hesaplanır) */
+let KAYNAK = null;
+function kaynaklariKur() {
+  KAYNAK = new Map();
+  const ekle = (id, tur, ad) => { if (!KAYNAK.has(id)) KAYNAK.set(id, { blok: new Set(), canli: new Set(), koy: new Set() }); KAYNAK.get(id)[tur].add(ad); };
+  const ornek = [0.02, 0.2, 0.45, 0.7, 0.98];
+  for (const b of BLOKLAR) {
+    if (!b || !b.ad || b.gizli || b.id === 0) continue;
+    if (typeof b.dusur === 'function') { for (const q of ornek) { let l = []; try { l = b.dusur(() => q) || []; } catch (e) { l = []; } for (const [id, n] of l) if (n > 0 && id !== b.id) ekle(id, 'blok', b.ad); } }
+  }
+  for (const T of Object.values(TURLER)) {
+    if (typeof T.dusur !== 'function' || T.boss) continue;
+    for (const q of ornek) { let l = []; try { l = T.dusur(() => q) || []; } catch (e) { l = []; } for (const [id, n] of l) if (n > 0) ekle(id, 'canli', T.ad); }
+  }
+  for (const M of Object.values(MESLEKLER)) {
+    const tk = [...(M.sabit || []), ...(M.havuz || []), ...((M.seviye || []).flat())];
+    for (const t of tk) if (t && t.al && t.ver && t.ver.some(([v]) => v === 288)) ekle(t.al[0], 'koy', M.ad);
+  }
+}
+export function kaynakMetni(id) {
+  if (!KAYNAK) kaynaklariKur();
+  const K = KAYNAK.get(id), p = [], kis = s => [...s].slice(0, 3).join(', ');
+  if (K && K.blok.size) p.push(`${kis(K.blok)} kırılınca düşer`);
+  if (K && K.canli.size) p.push(`${kis(K.canli)} avlanınca düşer`);
+  if (!p.length && !(K && K.koy.size) && BLOKLAR[id] && BLOKLAR[id].ad && !BLOKLAR[id].gizli && !BLOKLAR[id].sivi && BLOKLAR[id].sertlik >= 0 && !TARIFLER.some(t => t.cikti === id)) p.push('dünyada bulunur, kazılarak toplanır');
+  if (K && K.koy.size) p.push(`${kis(K.koy)} köylüler satar`);
+  return p.length ? 'Nereden: ' + p.join(' · ') : '';
+}
 
 export class EnvanterEkrani {
   constructor(o) {
@@ -58,7 +88,16 @@ export class EnvanterEkrani {
     $('#tarifAra').addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Escape' || e.key === 'Enter') e.target.blur(); });
     $('#envKapat').addEventListener('click', () => this.kapatIste && this.kapatIste());
     this.kok.addEventListener('contextmenu', e => e.preventDefault());
+    /* 0.49.0: sürükle-bırak: yuvadan eşya alınıp düğme basılıyken başka bir yuvaya bırakılırsa oraya konur (tıkla-al / tıkla-bırak da sürer) */
+    this.kok.addEventListener('mousedown', e => { this.oncekiTasinan = !!this.tasinan; }, true);
     this.kok.addEventListener('mousedown', e => this.fare(e));
+    this.kok.addEventListener('mousedown', e => { const el = e.target.closest && e.target.closest('.izgara .yuva'); this.surukle = !this.oncekiTasinan && this.tasinan && el ? { el, x: e.clientX, y: e.clientY } : null; });
+    addEventListener('mouseup', e => {
+      const S = this.surukle; this.surukle = null;
+      if (!S || !this.acik || !this.tasinan || Math.hypot(e.clientX - S.x, e.clientY - S.y) < 8) return;
+      const h = document.elementFromPoint(e.clientX, e.clientY), el = h && h.closest('.izgara .yuva');
+      if (el) this.fare({ target: el, button: 0, shiftKey: false, clientX: e.clientX, clientY: e.clientY, preventDefault() {} });
+    });
     this.kok.addEventListener('mousemove', e => this.hareket(e));
     /* 0.20.0: dokunmatik: yuvaya kısa dokunuş sol tıklama, basılı tutma (0,4 sn) sağ tıklamadır (yığın bölme, tek tek bırakma) */
     const sahte = (el, t, button) => ({ target: el, button, shiftKey: false, clientX: t.clientX, clientY: t.clientY, preventDefault() {} });
@@ -69,14 +108,26 @@ export class EnvanterEkrani {
       const t = e.changedTouches[0];
       this.hareket(sahte(el, t, 0));
       if (this.dokunus) clearTimeout(this.dokunus.zaman);
-      const d = this.dokunus = { el, uzun: false };
+      const d = this.dokunus = { el, uzun: false, x: t.clientX, y: t.clientY, surukle: false };
       d.zaman = setTimeout(() => { d.uzun = true; this.fare(sahte(el, t, 2)); if (navigator.vibrate) navigator.vibrate(15); }, 400);
+    }, { passive: false });
+    /* 0.49.0: parmakla sürükleme: yuvadaki eşya parmağı izler, bırakılan yuvaya konur */
+    this.kok.addEventListener('touchmove', e => {
+      const d = this.dokunus; if (!d || d.uzun) return;
+      const t = e.changedTouches[0];
+      if (!d.surukle && Math.hypot(t.clientX - d.x, t.clientY - d.y) > 12) { clearTimeout(d.zaman); d.surukle = true; if (!this.tasinan) this.fare(sahte(d.el, t, 0)); d.alinan = !!this.tasinan; }
+      if (d.surukle) { e.preventDefault(); const q = $('#tasima'); q.style.left = t.clientX + 'px'; q.style.top = t.clientY + 'px'; }
     }, { passive: false });
     const bitir = e => {
       const d = this.dokunus;
       if (!d) return;
       clearTimeout(d.zaman); this.dokunus = null;
       const t = e.changedTouches[0];
+      if (d.surukle) {
+        const h = document.elementFromPoint(t.clientX, t.clientY), el = h && h.closest('.izgara .yuva');
+        if (this.tasinan && d.alinan) this.fare(sahte(el || d.el, t, 0));
+        return;
+      }
       if (!d.uzun && e.type === 'touchend') this.fare(sahte(d.el, t, 0));
       this.hareket(sahte(d.el, t, 0));
     };
@@ -398,7 +449,8 @@ export class EnvanterEkrani {
     const girdiler = girdiListesi(t).map(([g, k]) => {
       const v = girdiSay(env, g), gerek = k * m, id = GRUPLAR[g] ? GRUPLAR[g].idler[0] : g;
       const kaynak = !GRUPLAR[g] && v < gerek ? TARIFLER.findIndex(x => x.cikti === g) : -1;
-      return `<li class="${v >= gerek ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt=""><span>${girdiAdi(g)}</span><b>${v} / ${gerek}</b>${kaynak >= 0 ? `<button type="button" class="tLink" data-tgit="${kaynak}" title="Bu malzemenin tarifine git">tarif ›</button>` : ''}</li>`;
+      const nereden = v < gerek && kaynak < 0 ? kaynakMetni(id) : '';
+      return `<li class="${v >= gerek ? 'ok' : 'eksik'}"><img src="${simge(id).url}" alt=""><span>${girdiAdi(g)}</span><b>${v} / ${gerek}</b>${kaynak >= 0 ? `<button type="button" class="tLink" data-tgit="${kaynak}" title="Bu malzemenin tarifine git">tarif ›</button>` : ''}${nereden ? `<small class="tKaynak">${nereden}</small>` : ''}</li>`;
     }).join('');
     if (sadeceMiktar && kap.querySelector('#tarifMiktar')) {
       kap.querySelector('.tGirdi').innerHTML = girdiler;

@@ -2,7 +2,9 @@
    Sol altta sanal kol (yürüme; sonuna kadar itince koşu), ekranın geri kalanında parmakla sürükleyerek bakış.
    Ekrana kısa dokunma: kullan / koy (sağ tık); parmağı basılı tutma: kır / saldır (sol tık).
    Sağ altta Zıpla, Eğil, Kır, Kullan; üstte Çanta, Etkileşim, At, Harita, Kitap ve Duraklat düğmeleri. Alt çubuktaki yuvalara dokunarak eşya seçilir.
-   Dokunuşlar, klavye ve fare durumlarına (tus, fare) çevrilir; oyunun geri kalanı aynı kodla çalışır. */
+   Dokunuşlar, klavye ve fare durumlarına (tus, fare) çevrilir; oyunun geri kalanı aynı kodla çalışır.
+   0.49.0: kayan kol: ekranın sol alt bölümünde nereye dokunulursa kol orada belirir (kol alanına yetişmek gerekmez);
+   düğme boyutu ayarlanabilir; koşu için kolun ileri itilme eşiği yumuşatıldı. */
 import { T } from '../sistem/tuslar.js';
 const $ = s => document.querySelector(s);
 const ESIK = 0.32;             // kolun yön sayılması için en az itme oranı
@@ -34,6 +36,7 @@ export class Dokunmatik {
     const t = this.tus;
     for (const k of ['ileri', 'geri', 'sol', 'sag', 'zipla', 'egil']) t[T[k]] = false;
     this.fare.sol = this.fare.sag = false;
+    if (this.kol && this.kol.kayan) this.kolYerine();
     this.kol = null; this.bakis.clear(); this.kosKilit(false);
     this.topuz.style.transform = '';
     for (const b of this.kok.querySelectorAll('.basili')) b.classList.remove('basili');
@@ -56,7 +59,18 @@ export class Dokunmatik {
       if (!this.aktif) return;
       e.preventDefault();
       if (!this.oyunda()) { this.kilitle(); return; }
-      for (const d of e.changedTouches) this.bakis.set(d.identifier, { x: d.clientX, y: d.clientY, ox: d.clientX, oy: d.clientY, t: performance.now(), kaydi: false, kiriyor: false });
+      for (const d of e.changedTouches) {
+        /* 0.49.0: kayan kol: sol alt bölgeye ilk dokunuş kolu orada açar */
+        if (!this.kol && this.kayanKol !== false && d.clientX < innerWidth * 0.38 && d.clientY > innerHeight * 0.42) {
+          this.kolAlan.classList.add('kayan');
+          const r = this.kolAlan.getBoundingClientRect(), R = r.width / 2;
+          this.kolAlan.style.left = (d.clientX - R) + 'px'; this.kolAlan.style.top = (d.clientY - R) + 'px'; this.kolAlan.style.bottom = 'auto';
+          this.kol = { id: d.identifier, x: d.clientX, y: d.clientY, r: R, kayan: true };
+          this.kolGuncelle(d);
+          continue;
+        }
+        this.bakis.set(d.identifier, { x: d.clientX, y: d.clientY, ox: d.clientX, oy: d.clientY, t: performance.now(), kaydi: false, kiriyor: false });
+      }
     }, ops);
     addEventListener('touchmove', e => {
       if (!this.aktif) return;
@@ -74,7 +88,7 @@ export class Dokunmatik {
     const bitir = e => {
       if (!this.aktif) return;
       for (const d of e.changedTouches) {
-        if (this.kol && d.identifier === this.kol.id) { this.kol = null; this.topuz.style.transform = ''; const t = this.tus; t[T.ileri] = t[T.geri] = t[T.sol] = t[T.sag] = false; this.kosKilit(false); continue; }
+        if (this.kol && d.identifier === this.kol.id) { if (this.kol.kayan) this.kolYerine(); this.kol = null; this.topuz.style.transform = ''; const t = this.tus; t[T.ileri] = t[T.geri] = t[T.sol] = t[T.sag] = false; this.kosKilit(false); continue; }
         const b = this.bakis.get(d.identifier);
         if (!b) continue;
         this.bakis.delete(d.identifier);
@@ -115,6 +129,9 @@ export class Dokunmatik {
       this.eylem('yuva', [...y.parentNode.children].indexOf(y));
     }, ops);
   }
+  kolYerine() { const s = this.kolAlan.style; s.left = s.top = s.bottom = ''; this.kolAlan.classList.remove('kayan'); }
+  /* 0.49.0: düğme boyutu (0,8 - 1,4) */
+  boyutAyarla(k) { this.kok.style.setProperty('--dk', String(Math.max(0.8, Math.min(1.4, k || 1)))); }
   /* Sanal kolun yönü klavye tuşlarına çevrilir; sonuna kadar ileri itilirse koşulur */
   kolGuncelle(d) {
     const k = this.kol;
@@ -124,7 +141,7 @@ export class Dokunmatik {
     this.topuz.style.transform = `translate(${(dx * k.r * 0.6).toFixed(1)}px, ${(dy * k.r * 0.6).toFixed(1)}px)`;
     const t = this.tus;
     t[T.ileri] = dy < -ESIK; t[T.geri] = dy > ESIK; t[T.sol] = dx < -ESIK; t[T.sag] = dx > ESIK;
-    this.kosKilit(dy < -0.9 && Math.abs(dx) < 0.45);
+    this.kosKilit(dy < -0.82 && Math.abs(dx) < 0.5);
   }
   /* Basılı tutma süresi dolan dokunuş kırmaya başlar */
   guncelle() {

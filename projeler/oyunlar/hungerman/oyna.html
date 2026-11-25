@@ -49,7 +49,8 @@
   <div id="bakilanAd" hidden></div>
   <div id="enerjiBilgi" hidden></div>
   <div id="kabloIpucu" hidden></div>
-  <div id="ogretici" hidden><b></b><p></p><button type="button">Gizle</button></div>
+  <div id="ogretici" hidden><b></b><p></p><i class="ogrIlerleme"><s></s></i><div class="ogrDugme"><button type="button" data-ogr="atla">Bu adımı geç</button><button type="button" data-ogr="kapat">Öğreticiyi kapat</button></div></div>
+  <div id="ipucuKart" hidden title="Kapatmak için tıklayınız"><b></b><p></p></div>
   <div id="hedefBilgi" hidden><b id="hedefAd"></b><div class="hedefCubuk"><s id="hedefIz"></s><i id="hedefCan"></i></div></div>
   <div id="uyku"></div>
   <div id="nisan"></div>
@@ -366,7 +367,7 @@
     <header><h2>Ayarlar</h2></header>
     <!-- 0.29.0: ayarlar kategorilere ayrıldı -->
     <nav class="ayarSekmeler" id="ayarSekmeler">
-      <button type="button" data-as="goruntu" class="on">Görüntü</button><button type="button" data-as="ses">Ses</button><button type="button" data-as="kontrol">Kontroller</button><button type="button" data-as="arayuz">Arayüz</button><button type="button" data-as="oynanis">Oynanış</button>
+      <button type="button" data-as="goruntu" class="on">Görüntü</button><button type="button" data-as="ses">Ses</button><button type="button" data-as="kontrol">Kontroller</button><button type="button" data-as="arayuz">Arayüz</button><button type="button" data-as="oynanis">Oynanış</button><button type="button" data-as="erisim">Erişilebilirlik</button>
     </nav>
     <div class="ayarIcerik">
       <section class="ayarBolum" data-as="goruntu">
@@ -394,6 +395,10 @@
         <label class="kaydir">Fare hassasiyeti <b id="aHasD"></b><input type="range" id="aHas" min="0.2" max="2.5" step="0.05"></label>
         <label class="secim"><input type="checkbox" id="aTers"> Fare Y eksenini ters çevir</label>
         <label class="secim"><input type="checkbox" id="aDokun"> Dokunmatik kontroller</label>
+        <label class="kaydir">Dokunmatik bakış hassasiyeti <b id="aDkHasD"></b><input type="range" id="aDkHas" min="0.2" max="2.5" step="0.05"></label>
+        <label class="kaydir">Dokunmatik düğme boyutu <b id="aDkBoyD"></b><input type="range" id="aDkBoy" min="0.8" max="1.4" step="0.05"></label>
+        <label class="kaydir">Oyun kumandası bakış hızı <b id="aKmHasD"></b><input type="range" id="aKmHas" min="0.3" max="2.5" step="0.05"></label>
+        <p class="ayarNot">Oyun kumandası takılıysa bir tuşuna basmak yeterlidir. Sol çubuk yürür, sağ çubuk bakar; A zıpla, B eğil, X etkileşim, Y envanter, RT kır, LT kullan, LB / RB eşya seçer, Başlat duraklatır, Geri haritayı açar. Yön tuşları: yukarı görevler, aşağı eşya at, sol Tarif Kitabı, sağ yön çevir. Menülerde sol çubuk imleci sürer, A tıklar, B geri döner.</p>
         <!-- 0.30.7: değiştirilebilir tuş atamaları -->
         <div class="tusBaslik"><h4>Tuş atamaları</h4><button type="button" class="envIslem" id="tusSifirla">Varsayılan tuşlar</button></div>
         <p class="ayarNot">Değiştirmek için eylemin tuşuna tıklayıp yeni tuşa basınız (Esc: vazgeç, sağ tık: varsayılana döndür). Başka bir eylemde kullanılan tuş seçilirse iki eylemin tuşları yer değiştirir.</p>
@@ -417,10 +422,21 @@
         <label class="secim"><input type="checkbox" id="aYolculuk"> Yolculuk adımını görev izleyicide göster</label>
         <label class="secim"><input type="checkbox" id="aOnizleme"> Yerleştirme önizlemesi (cihazlar ve yönlü bloklar; R tuşu yönü çevirir)</label>
         <label class="secim"><input type="checkbox" id="aEnerji"> Elektrikli cihaz bilgi panelini göster</label>
+        <label class="secim"><input type="checkbox" id="aSade"> Sade gösterge (can ve açlık doluyken, değişmedikçe göstergeler soluklaşır)</label>
       </section>
       <section class="ayarBolum" data-as="oynanis" hidden>
-        <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici ipuçları (yeni dünyalarda)</label>
+        <label class="secim"><input type="checkbox" id="aOgretici"> Öğretici (yeni dünyalarda ilk günün adımları)</label>
+        <label class="secim"><input type="checkbox" id="aIpucu"> Bağlamsal ipuçları (su, lav, mağara, gece gibi şeylerle ilk karşılaşmada kısa bilgi)</label>
+        <div class="ayarSatir"><button type="button" class="envIslem" id="ipucuSifirla">İpuçlarını yeniden göster</button></div>
         <p class="ayarNot">Zorluk, Kanlı Ay, meteor sıklığı, vücut ısısı ve geliştirici konsolu her dünya için ayrıdır: dünya oluşturulurken seçilir ve sonradan değiştirilemez.</p>
+      </section>
+      <section class="ayarBolum" data-as="erisim" hidden>
+        <label class="kaydir">Yazı boyutu <b id="aYaziD"></b><input type="range" id="aYazi" min="0.9" max="1.4" step="0.05"></label>
+        <label class="alan">Renk körlüğü düzeltmesi<select id="aRenkKor"><option value="">Kapalı</option><option value="protan">Kırmızıyı ayırt etmekte güçlük (protanopi)</option><option value="deutan">Yeşili ayırt etmekte güçlük (döteranopi)</option><option value="tritan">Maviyi ayırt etmekte güçlük (tritanopi)</option></select></label>
+        <label class="secim"><input type="checkbox" id="aSal2"> Yürürken kamera sallanması</label>
+        <label class="secim"><input type="checkbox" id="aEfektAzalt"> Ekran sarsıntısını ve parlamaları azalt (şimşek, meteor, hasar parlaması, iniş ve vuruş sarsıntısı)</label>
+        <label class="secim"><input type="checkbox" id="aAltyazi2"> Ses altyazıları</label>
+        <p class="ayarNot">Renk düzeltmesi oyun görüntüsüne ve göstergelere uygulanır; renkleri, ayırt edilmesi güç tonlardan ayırt edilebilir tonlara kaydırır.</p>
       </section>
     </div>
     <div class="altDugmeler"><button class="dugme" id="ayarSifirla">Varsayılanlara dön</button><button class="dugme ana" id="ayarTamam">Tamam</button></div>
@@ -445,6 +461,7 @@
       <button class="dugme" data-git="ayarlar">Ayarlar</button>
       <button class="dugme" id="kaydetCik">Kaydet ve Ana Menüye Dön</button>
     </div>
+    <div id="durOgretici" class="durOgretici" hidden><span>Öğretici</span><button type="button" class="dugme kucuk" data-ogr="atla">Bu adımı geç</button><button type="button" class="dugme kucuk" data-ogr="kapat">Öğreticiyi kapat</button></div>
   </div>
 </div>
 
@@ -469,6 +486,13 @@
 </div>
 
 <div id="tasima"></div>
+<div id="kumandaImlec" hidden></div>
+<!-- 0.49.0: renk körlüğü düzeltme süzgeçleri (daltonlaştırma) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="rk-protan" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1.000 0.000 0.000 0 0 0.383 0.582 0.035 0 0 0.478 -0.551 1.073 0 0 0 0 0 1 0"/></filter>
+  <filter id="rk-deutan" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="1.349 -0.505 0.156 0 0 0.000 1.000 0.000 0 0 -0.147 0.149 0.998 0 0 0 0 0 1 0"/></filter>
+  <filter id="rk-tritan" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.793 -0.326 0.533 0 0 0.060 0.668 0.272 0 0 0.000 0.000 1.000 0 0 0 0 0 1 0"/></filter>
+</svg>
 <div id="ipucu" hidden></div>
 <div id="hataKutusu" hidden></div>
 

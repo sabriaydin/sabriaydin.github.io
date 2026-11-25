@@ -119,6 +119,23 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 49.0 (0.49.0): Arayüz ve ilk deneyim (geliştirme planı 8. aşama)
+- **Öğretici:** ilk günün adımları yeniden düzenlendi: Hareket, Odun, Üretim Masası, İlk alet, Işık, **Sığınak** (yeni: çatısı ve en az üç yanında duvarı olan bir yerde durmak), **Yatak** (yeni: yakında yatak ya da yatakta uyumak), Yemek, İlk gece, ardından Fırın, Kıyafet, Tarla, Köyler (toplam 13 adım).
+  - Metinler atanmış tuşları gösterir (önceden envanter için yanlışlıkla "E" yazıyordu); dokunmatik kontrollerde dokunmatik anlatım çıkar.
+  - Panelde ilerleme çubuğu, "Bu adımı geç" ve "Öğreticiyi kapat" düğmeleri; fare oyunda kilitli olduğu için aynı düğmeler duraklatma menüsünde de bulunur.
+  - Eski dünyaların öğretici adımı yeni sıraya çevrilir.
+- **Bağlamsal ipuçları** (`js/arayuz/ipuclari.js`): su, lav, köylü, mağara, gece, sizi fark eden canavar, açlık, vücut ısısı ve düşük can ile ilk karşılaşmada sol altta kısa bir bilgi kartı (11 saniye, tıklanınca kapanır). Her ipucu bir kez gösterilir; görülenler tarayıcıda saklanır. Ayarlar > Oynanış'tan kapatılabilir; "İpuçlarını yeniden göster" ile sıfırlanır.
+- **Envanter ve üretim:**
+  - Sürükle-bırak: eşya düğme basılıyken başka bir yuvaya sürüklenip bırakılabilir (tıkla-al / tıkla-bırak da sürer); dokunmatikte parmakla sürüklenir.
+  - Eksik malzemenin altında nereden bulunacağı yazar (kırılınca düşüren bloklar, düşüren canlılar, satan köylüler); üretilebilen malzemelerde önceden olduğu gibi tarif bağlantısı vardır.
+- **Gösterge:**
+  - Sade gösterge (varsayılan açık): can ve açlık doluyken, değişmedikçe ve tehlike yokken can, açlık ve zırh satırı ile deneyim çubuğu soluklaşır; bir şey değişince ya da canavar yaklaşınca belirginleşir.
+  - Uyarı bildirimleri kırmızı çerçeveli, uyarı işaretli ve daha uzun süreli: açlık, üşüme / donma / bunalma / sıcak çarpması, can 3 kalbin altına inince.
+- **Dokunmatik:** kayan kol (ekranın sol alt bölümünde nereye dokunulursa kol orada açılır), ayrı dokunmatik bakış hassasiyeti, düğme boyutu (%80-140), koşu eşiği yumuşatıldı.
+- **Oyun kumandası** (`js/sistem/kumanda.js`, Gamepad API): bir tuşa basınca kumanda kipi açılır. Sol çubuk yürüme (sonuna kadar ya da L3: koşu), sağ çubuk bakış, A zıpla, B eğil, X etkileşim, Y envanter, RT kır, LT kullan, LB / RB eşya, Başlat duraklat, Geri harita, yön tuşları görevler / eşya at / Tarif Kitabı / yön çevir. Menülerde ve pencerelerde ekran imleci (sol çubuk ya da yön tuşları sürer, A sol tık, X sağ tık, B kapat / geri, sağ çubuk kaydırır). Fare kullanılınca kumanda kipi kapanır. Ayarlar > Kontroller: kumanda bakış hızı.
+- **Erişilebilirlik** (Ayarlar'da yeni sekme): yazı boyutu (%90-140), renk körlüğü düzeltmesi (protanopi, döteranopi, tritanopi; oyun görüntüsüne, göstergelere ve pencerelere uygulanır), kamera sallanması, ekran sarsıntısını ve parlamaları azaltma (şimşek ve meteor parlaması dörtte bir, hasar parlaması ve meteor sarsıntısı kapalı, iniş ve vuruş sarsıntısı azaltılmış), ses altyazıları.
+- **Sınama:** öğretici (tuş adları, adım geçme, eski kayıt çevirisi), sığınak denetimi, su ipucu ve kaydı, sade gösterge ve açlık uyarısı, malzeme kaynağı metni ve tarif ayrıntısı, gerçek fareyle sürükle-bırak, sahte kumandayla kilitleme / yürüme / bakış / envanter açıp kapama / duraklatma ve devam, renk körlüğü süzgeci, yazı boyutu, kayan dokunmatik kol denendi; uzun oturum taraması tekrarlandı.
+
 ## 48.0 (0.48.0): Görsel ve his (geliştirme planı 7. aşama)
 - **Canlı animasyonları:**
   - Yürürken gövde hafifçe seker; koşarken adımlar açılır, gövde öne eğilir ve ayak altından toz kalkar.

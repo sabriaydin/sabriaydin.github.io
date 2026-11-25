@@ -257,10 +257,10 @@ export class Oyuncu {
     return yatay;
   }
 
-  kameraAyarla(kamera, sallanma) {
+  kameraAyarla(kamera, sallanma, azalt = false) {
     this.gozKonumu(kamera.position);
     if (sallanma && this.yerde) kamera.position.y += Math.abs(Math.sin(this.adimFaz)) * 0.045;
-    kamera.position.y += this.kamDus * (sallanma ? 1 : 0.4);
+    kamera.position.y += this.kamDus * (azalt ? 0.15 : sallanma ? 1 : 0.4);   // 0.49.0: sarsıntı azaltma
     kamera.rotation.set(this.pitch, this.yaw, 0);
   }
 }
