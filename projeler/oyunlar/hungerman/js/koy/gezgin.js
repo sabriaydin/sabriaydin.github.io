@@ -56,6 +56,26 @@ export class GezginTuccar {
       return;
     }
   }
+  /* 0.51.1: geliştirici araçları için: tüccarı zaman ve şans koşulu olmadan, gerçek hâliyle (takas listesi, süre, küsme) getirir */
+  getir(o) {
+    if (this.v) return this.v;
+    const P = o.oyuncu.konum;
+    for (let d = 0; d < 40; d++) {
+      const a = Math.random() * Math.PI * 2, r = (d < 20 ? 4 : 2) + Math.random() * 4, x = Math.floor(P.x + Math.cos(a) * r), z = Math.floor(P.z + Math.sin(a) * r);
+      if (!this.dunya.yuklu(x, z)) continue;
+      const y = this.dunya.ustKati(x, z) + 1;
+      if (Math.abs(y - P.y) > 6 || !this.dunya.kati(x, y - 1, z) || this.dunya.kati(x, y, z) || this.dunya.kati(x, y + 1, z)) continue;
+      this.sonGun = o.gun;
+      return this.dogur(x + 0.5, y, z + 0.5);
+    }
+    return null;
+  }
+  /* 0.51.1: takas listesini ve stokları yeniden seçer */
+  yenile() { if (!this.v) return false; const l = havuz(), sec = [];
+    while (sec.length < 7 && l.length) sec.push(l.splice(Math.floor(Math.random() * l.length), 1)[0]);
+    this.teklifler = sec.sort((a, b) => (a.ver[0][0] === S) - (b.ver[0][0] === S)).map(t => ({ ...t, kalan: t.stok })); return true; }
+  /* 0.51.1: tüccarı hemen gönderir */
+  gonder() { if (!this.v) return false; if (this.varliklar.liste.includes(this.v)) this.varliklar.kaldir(this.v); this.v = null; return true; }
   dogur(x, y, z) {
     const v = this.varliklar.ekle('gezgin', x, y, z);
     v.gezginSure = GUN_SURESI; v.evcil = false;

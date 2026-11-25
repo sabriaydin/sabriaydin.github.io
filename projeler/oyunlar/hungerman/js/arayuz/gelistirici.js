@@ -152,6 +152,7 @@ export class GelistiriciPenceresi {
       yerGit: () => k(`isinla ${d('dvYerSec')}`), koordGit: () => this.koordGit(), yonGit: o => this.yonGit(o), biyomGit: () => k(`isinla biyom ${d('dvBiyomSec')}`),
       isaretGit: (o, b) => { const y = o.yerler[+b.dataset.y]; if (y) k(`isinla ${y.x} ${y.z}`); },
       diyar: () => k('diyar'), kesfet: () => k(`kesfet ${d('dvKesifSec')}`), kesifDur: () => k('kesfet dur'), haritaAc: () => this.arayuz.haritaAc(),
+      gezginGetir: () => k('gezgin getir'), gezginYenile: () => k('gezgin yenile'), gezginGonder: () => k('gezgin gonder'), gezginDurum: () => k('gezgin durum'),
       itibar: () => k(`itibar ${d('dvItibar')}`), takas: () => k('koy takas'), dirilt: () => k('koy dirilt'),
       gorevTamam: () => k('gorev tamamla'), gorevBirak: () => k('gorev birak'),
       basarimGoster: () => { k('basarim liste'); this.arayuz.konsolAc(); }, basarimHepsi: () => k('basarim hepsi'), basarimSifir: () => k('basarim sifirla'),
@@ -282,6 +283,11 @@ export class GelistiriciPenceresi {
         this.satir('İtibar', 'Kesin değer (-100 ile 100 arası)', `<input type="number" id="dvItibar" class="dvGirdi dvSayi" min="-100" max="100" value="40">` + this.islem('itibar')) +
         this.satir('Takasları yenile', '', this.islem('takas', 'Yenile')) +
         this.satir('Ölen köylüleri geri getir', '', this.islem('dirilt', 'Getir'))) +
+      this.bolum('Gezgin tüccar',
+        this.satir('Tüccarı getir', 'Takas listesi, bir günlük süre ve küsme dahil gerçek hâliyle yanınıza gelir', this.islem('gezginGetir', 'Getir')) +
+        this.satir('Takasları yenile', 'Yeni 7 takas seçilir, stoklar dolar', this.islem('gezginYenile', 'Yenile')) +
+        this.satir('Durum', 'Uzaklık, kalan süre ve stok', this.islem('gezginDurum', 'Göster')) +
+        this.satir('Tüccarı gönder', '', this.islem('gezginGonder', 'Gönder')), 'Yalnızca tek oyunculu dünyalarda çalışır.') +
       this.bolum('Görevler',
         this.satir('Etkin görevleri tamamla', 'Gereken eşya ve sayılar tamamlanır', this.islem('gorevTamam', 'Tamamla')) +
         this.satir('Görevleri bırak', '', this.islem('gorevBirak', 'Bırak'))) +

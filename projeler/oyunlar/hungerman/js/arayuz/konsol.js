@@ -425,6 +425,26 @@ export class Konsol {
     ekle('kanliay', 'Kanlı Ay gecesini başlatır (gün, Kanlı Ay gününe ve gün batımına ayarlanır)', 'kanliay', o => {
       o.gun = Math.max(7, Math.ceil(o.gun / 7) * 7); o.zaman = 0.505; this.tamam(`${o.gun}. gün: Kanlı Ay yükseldi.`);
     }, { hile: true, dunya: true });
+    /* 0.51.1: gezgin tüccar testi */
+    ekle('gezgin', 'Gezgin tüccarı gerçek hâliyle getirir, takaslarını yeniler, gönderir ya da durumunu gösterir (yalnızca tek oyunculu)', 'gezgin [getir | yenile | gonder | durum]', (o, p) => {
+      const G = o.gezgin, a = kucuk(p[0] || 'getir');
+      if (!G) { this.hata('Gezgin tüccar sistemi mevcut değil.'); return; }
+      if (a === 'durum') {
+        if (!G.v) { this.tamam(`Gezgin tüccar yok.${G.sonGun ? ` Son gelme denemesi: ${G.sonGun}. gün.` : ''}`); return; }
+        const P = o.oyuncu.konum, v = G.v;
+        this.tamam(`Gezgin tüccar ${Math.round(Math.hypot(v.konum.x - P.x, v.konum.z - P.z))} blok uzakta · ${Math.ceil(v.gezginSure / 60)} dk kaldı · ${G.teklifler.length} takas (${G.teklifler.filter(t => t.kalan > 0).length} tanesinde stok var)`); return;
+      }
+      if (o.ag || o.istemci) { this.hata('Gezgin tüccar yalnızca tek oyunculu dünyalarda gelir.'); return; }
+      if (o.diyar) { this.hata('Gezgin tüccar Yeraltı Diyarı\'nda gelmez.'); return; }
+      if (a === 'getir') {
+        if (G.v) { this.hata('Gezgin tüccar zaten burada. Yeniden getirmek için önce: gezgin gonder'); return; }
+        const v = G.getir(o);
+        if (v) { G.hud.bildirim('Yakınlarda bir gezgin tüccar konakladı. Yarın sabah yola çıkacak.'); this.tamam(`Gezgin tüccar geldi: ${G.teklifler.length} takas.`); }
+        else this.hata('Yakında uygun bir yer bulunamadı. Düz ve açık bir yerde yeniden deneyiniz.');
+      } else if (a === 'yenile') { if (G.yenile()) this.tamam(`Takaslar yenilendi: ${G.teklifler.length} takas.`); else this.hata('Gezgin tüccar yok. Önce: gezgin getir'); }
+      else if (a === 'gonder') { if (G.gonder()) this.tamam('Gezgin tüccar gönderildi.'); else this.hata('Gezgin tüccar yok.'); }
+      else this.hata('Kullanım: gezgin [getir | yenile | gonder | durum]');
+    }, { hile: true, dunya: true, tamamla: () => ['getir', 'yenile', 'gonder', 'durum'] });
     ekle('meteor', 'Yakına bir meteor düşürür (dünya sahibinde)', 'meteor', o => {
       if (o.istemci) { this.hata('Meteoru dünyayı açan oyuncu düşürür.'); return; }
       if (o.gok.meteorDusur(o, true)) this.tamam('Meteor düşüyor.'); else this.hata('Uygun bir düşüş yeri bulunamadı.');
