@@ -9,9 +9,9 @@
 export const CIHAZ = {
   gunes: { port: [1, 0.45, 0.82], ad: 'Güneş Paneli', esya: 497, taban: 626, w: 2, d: 1, h: 1, elektrik: 'gunes', uretim: 10, sertlik: 1.5, alet: 'kazma', ses: 'cam',
     carp: [[0.05, 0, 0.05, 1.95, 0.95, 0.95]], aciklama: 'Gündüzleri en çok 10 E/sn üretir; üstü açık olmalıdır' },
-  ruzgar: { port: [1, 0.32, 1.45], ad: 'Rüzgâr Türbini', esya: 498, taban: 634, w: 2, d: 2, h: 8, elektrik: 'ruzgar', uretim: 30, sertlik: 2.5, alet: 'kazma', ses: 'tas',
+  ruzgar: { port: [1, 0.32, 1.45], ad: 'Rüzgâr Türbini', esya: 498, taban: 634, w: 2, d: 2, h: 8, elektrik: 'ruzgar', uretim: 60, sertlik: 2.5, alet: 'kazma', ses: 'tas',
     carp: [[0.15, 0, 0.15, 1.85, 0.3, 1.85], [0.62, 0.3, 0.62, 1.38, 7.2, 1.38], [0.6, 7.2, 0.25, 1.4, 7.85, 1.95]],
-    aciklama: 'Rüzgâr hızına göre en çok 30 E/sn üretir: 2,5 m/sn\'de dönmeye başlar, 11 m/sn\'de tam güce ulaşır, 28 m/sn\'yi aşan sert fırtınada (çoğunlukla yüksek tepelerde) kendini korumak için durur. Yüksek, açık ve engelsiz yerlerde (tepe, kıyı) rüzgâr güçlüdür; yağışta ve fırtınada artar. Pervanenin döndüğü alan boş olmalıdır' },
+    aciklama: 'Rüzgâr hızına göre en çok 60 E/sn üretir: 2,5 m/sn\'de dönmeye başlar, 18 m/sn\'de tam güce ulaşır. Rüzgâr yükseldikçe (zeminden ve deniz seviyesinden) güçlenir; bulutlu havada biraz, yağmurda belirgin, fırtınada çok artar. Su kıyısı ve açık arazi ormandan iyidir; engeller, yakındaki türbinlerin izi, sert fırtına ve buzlanma verimi düşürür. Pervanenin döndüğü alan boş olmalıdır' },
   su: { port: [1.5, 1.98, 0.88], ad: 'Su Çarkı', esya: 499, taban: 762, w: 3, d: 1, h: 3, elektrik: 'su', uretim: 16, sertlik: 2, alet: 'balta', ses: 'odun',
     carp: [[0.05, 0, 0.25, 2.95, 2.95, 0.75], [1.35, 0, 0.02, 1.65, 1.7, 0.2], [1.35, 0, 0.8, 1.65, 1.7, 0.98]],
     aciklama: 'Çarkın alt sırasına değen her su bloğu için 1,5 E/sn üretir (en çok 16); kışın yarı yarıya' },

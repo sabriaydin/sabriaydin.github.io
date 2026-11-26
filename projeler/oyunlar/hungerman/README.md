@@ -119,6 +119,17 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.5 (0.53.5): Rüzgâr türbini ayrıntıları
+
+- Tam güç 60 E/sn'ye çıktı; türbin 2,5 m/sn'de döner, 18 m/sn'de tam güce ulaşır, arada güç hızın karesiyle artar. Böylece her yükseklikte ve her havada üretim farklıdır.
+- Yükseklik: rüzgâr zeminden yükseldikçe (rüzgâr kesme yasası) ve deniz seviyesinden yükseldikçe (en çok %40) artar. Örnek (açık hava): düz arazide yaklaşık 15, 10 blok yukarıda 23, 20 blok yukarıda 31, 35 blok yukarıda 45 E/sn.
+- Hava: bulut cephesinde rüzgâr biraz, yağmurda 2, fırtınada 8 m/sn kadar artar. Yağmurda üretim belirgin yükselir; fırtınada alçakta tam güce yakın çalışır, yüksekte ani sağanakta güvenlik duruşu yapar ya da fırtına freniyle durur (ortalama 28 m/sn).
+- Türbülans: çevredeki engeller (rüzgârın geldiği yöndekiler iki kat) ve fırtına esintisi verimi düşürür.
+- İz etkisi: rüzgârın geldiği yönde 16 blok içindeki her türbin rüzgârı zayıflatır (her biri %12, en çok %40); türbinler aralıklı ya da yan yana kurulmalıdır.
+- Hava yoğunluğu: kışın soğuk ve yoğun hava %7 daha çok, yazın %4 daha az güç verir.
+- Buzlanma: kar yağarken kanatlar buzlanır, verim %30 düşer.
+- Bilgi paneli: rüzgâr hızı ve adı (Esinti, Orta rüzgâr, Sert rüzgâr, Fırtına…), gök durumu, göbeğin zeminden ve deniz seviyesinden yüksekliği, türbülans ve kapasite yüzdesi.
+
 ## 53.4 (0.53.4): Daha güçlü rüzgâr türbini
 
 - Yerdeki rüzgâr 3-11 m/sn arasında değişir (önceden 2-9). Türbin 2,5 m/sn'de dönmeye başlar, 11 m/sn'de tam güce (30 E/sn) ulaşır.

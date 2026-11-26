@@ -146,8 +146,8 @@ export class Hava {
      Dönen: { ort: ortalama, hiz: esintili anlık hız, yon: esme yönü (radyan, x ekseninden) } */
   ruzgar(x, z) {
     const [y, f] = this.alan(x, z), t = this.t, s = this.tohum || 1;
-    const ort = 3 + 8 * gurultu(x / 900 + t / 700, z / 900 - t / 900, s ^ 0x2b1) + y * 3 + f * 9;   // 0.53.4: 3-11 m/sn; yağışta +3, fırtınada +12
-    const e = gurultu(x / 40 + t * 0.35, z / 40 - t * 0.2, s ^ 0x71) - 0.5, hiz = Math.max(0, ort * (1 + e * (0.3 + f * 0.4)));
+    const ort = 3 + 8 * gurultu(x / 900 + t / 700, z / 900 - t / 900, s ^ 0x2b1) + y * 2 + f * 6;   // 0.53.5: 3-11 m/sn; yağışta +2, fırtınada +8
+    const e = gurultu(x / 40 + t * 0.35, z / 40 - t * 0.2, s ^ 0x71) - 0.5, hiz = Math.max(0, ort * (1 + e * (0.3 + f * 0.25)));
     return { ort, hiz, yon: Math.atan2(RUZGAR[1], RUZGAR[0]) + (gurultu(t / 400, 3.1, s ^ 0x13) - 0.5) * 0.8 };
   }
   /* Elle hava ayarı (konsol, uyku, geliştirici): her yerde geçerli; süre dolunca bölgesel havaya dönülür */

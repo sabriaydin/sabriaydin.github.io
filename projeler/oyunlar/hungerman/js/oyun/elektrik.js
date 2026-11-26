@@ -92,14 +92,22 @@ export function cihazUretim(d, b, x, y, z, O) {
   return { u: 0, neden: '' };
 }
 
-/* ---------- 0.53.3: Rüzgâr Türbini ----------
-   Rüzgâr hızı (m/sn) hava durumundan gelir (yerde 3-11; yağışta +3, fırtınada +12; esintili). Göbek yüksekliğindeki hız, zeminden yüksekliğe göre
-   rüzgâr kesme yasasıyla artar (v = v · (h / 4)^α; α: su üstü 0,11, açık arazi 0,18, orman 0,28); yüksek tepelerde rüzgâr biraz daha güçlüdür.
-   Çevredeki yüksek engeller (ağaç, bina) türbülans yaratır ve verimi düşürür. Güç eğrisi: 2,5 m/sn'de başlar, 11 m/sn'de tam güçtür (küp yasası);
-   ortalama rüzgâr 28 m/sn'yi aşarsa türbin kendini korumak için durur (fırtına freni). */
-export const TURBIN = { baslangic: 2.5, anma: 11, durma: 28 };   // 0.53.4: daha erken başlar, daha erken tam güce ulaşır
+/* ---------- 0.53.3 / 0.53.5: Rüzgâr Türbini ----------
+   Rüzgâr hızı (m/sn) hava durumundan gelir: yerde 3-11; bulut cephesinde biraz, yağmurda 2, fırtınada 8 m/sn kadar artar ve fırtına esintisi sertleşir.
+   Göbek yüksekliğindeki hız, zeminden yükseklikle rüzgâr kesme yasasına göre artar (v = v · (h / 4)^α; α: su üstü 0,11, açık arazi 0,18, orman 0,28)
+   ve deniz seviyesinden yükseldikçe (tepe ve dağlarda) güçlenir. Ayrıntılar:
+   - Güç eğrisi: 2,5 m/sn'de başlar, 18 m/sn'de tam güç (60 E/sn); arada hızın karesiyle artar. Ortalama göbek rüzgârı 28 m/sn'yi aşarsa fırtına freni,
+     anlık sağanak 31 m/sn'yi aşarsa kısa güvenlik duruşu.
+   - Türbülans: çevredeki engeller ve fırtına esintisi verimi düşürür.
+   - İz etkisi: rüzgârın geldiği yönde 16 blok içindeki başka türbinler rüzgârı zayıflatır (her biri %12, en çok %40).
+   - Hava yoğunluğu: soğuk havada (kış) yoğun hava daha çok güç verir, yazın biraz daha az.
+   - Buzlanma: kar yağarken kanatlar buzlanır, verim %30 düşer. */
+export const TURBIN = { baslangic: 2.5, anma: 18, durma: 28, sagnak: 31, iz: 16 };
+const BOFOR = [[1.5, 'Durgun'], [3.3, 'Esinti'], [5.5, 'Hafif rüzgâr'], [8, 'Orta rüzgâr'], [10.8, 'Serin rüzgâr'], [13.9, 'Kuvvetli rüzgâr'], [17.2, 'Sert rüzgâr'], [20.8, 'Fırtına'], [24.5, 'Kuvvetli fırtına'], [99, 'Şiddetli fırtına']];
+export const ruzgarAdi = v => BOFOR.find(q => v < q[0])[1];
+const YOGUNLUK = [1, 0.96, 1.02, 1.07];   // ilkbahar, yaz, sonbahar, kış
 function ruzgarUretim(d, b, x, y, z, O) {
-  const H = O.hava, [ox, oz] = dondurXZ(0.5, 0.5, b.yon), cx = x + 0.5 + ox, cz = z + 0.5 + oz, gob = y + PERVANE.y;
+  const H = O.hava, T = TURBIN, [ox, oz] = dondurXZ(0.5, 0.5, b.yon), cx = x + 0.5 + ox, cz = z + 0.5 + oz, gob = y + PERVANE.y;
   /* çevre zemini ve arazi pürüzü (8 nokta, 7 blok uzakta) */
   let zemin = 0, su = 0, orman = 0;
   for (let i = 0; i < 8; i++) {
@@ -108,17 +116,37 @@ function ruzgarUretim(d, b, x, y, z, O) {
   }
   zemin /= 8;
   const alfa = su >= 4 ? 0.11 : orman >= 3 ? 0.28 : 0.18, h = Math.max(2, gob - zemin);
-  const kat = Math.pow(h / 4, alfa) * (1 + Math.min(0.5, Math.max(0, (gob - DENIZ - 10) / 130)));   // 0.53.4: oyun ölçeğinde kesme (4 blok taban), tepelerde %50'ye kadar
-  /* türbülans: göbek yüksekliğinde 4-9 blok çevredeki katı engeller */
+  const rakim = Math.max(0, gob - DENIZ - 8);
+  const kat = Math.pow(h / 4, alfa) * (1 + Math.min(0.4, rakim / 150));
+  const R = H.ruzgar(cx, cz), gk = H.gok(cx, cz);
+  /* engeller: göbek yüksekliğinde 4-9 blok çevrede; rüzgârın geldiği yöndekiler iki kat etkilidir */
+  const ry = R.yon + Math.PI;   // rüzgârın geldiği yön
   let engel = 0;
-  for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; for (const r of [4, 6.5, 9]) if (KATI[d.blok(Math.floor(cx + Math.cos(a) * r), Math.floor(gob), Math.floor(cz + Math.sin(a) * r))]) { engel++; break; } }
-  const verim = 1 - Math.min(0.6, engel * 0.05);
-  const R = H.ruzgar(cx, cz), v = R.hiz * kat * verim, ort = R.ort * kat * verim, g = H.gok(cx, cz).ad, T = TURBIN;
-  const ek = { ruzgar: v, gok: g, yukseklik: Math.round(h) };
+  for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, w = Math.cos(a - ry) > 0.4 ? 2 : 1; for (const r of [4, 6.5, 9]) if (KATI[d.blok(Math.floor(cx + Math.cos(a) * r), Math.floor(gob), Math.floor(cz + Math.sin(a) * r))]) { engel += w; break; } }
+  /* iz etkisi: rüzgârın geldiği yöndeki türbinler */
+  let iz = 0;
+  for (const [, [ax, ay, az]] of d.elektrikler) {
+    if ((ax === x && ay === y && az === z) || Math.abs(ax - x) > T.iz || Math.abs(az - z) > T.iz) continue;
+    const q = BLOKLAR[d.blok(ax, ay, az)];
+    if (!q || q.cihaz !== 'ruzgar' || q.parca || Math.abs(ay - y) > 10) continue;
+    const dx = ax - x, dz = az - z, u = Math.hypot(dx, dz);
+    if (u > 0 && u <= T.iz && (dx * Math.cos(ry) + dz * Math.sin(ry)) / u > 0.5) iz++;
+  }
+  const izK = 1 - Math.min(0.4, iz * 0.12);
+  /* bulut cephesi rüzgârı biraz artırır */
+  const cephe = 1 + 0.12 * gk.bulut * (1 - gk.yagis);
+  const v = R.hiz * kat * cephe * izK * (1 - Math.min(0.5, engel * 0.03)), ort = R.ort * kat * cephe * izK * (1 - Math.min(0.5, engel * 0.03));
+  const turb = Math.min(0.9, 0.08 + engel * 0.025 + gk.firtina * 0.25 + gk.yagis * 0.05);   // türbülans yoğunluğu
+  const kar = gk.yagis > 0.5 && H.turAl && H.turAl(cx, cz) === 2;
+  const ek = { ruzgar: v, gok: gk.ad, yukseklik: Math.round(h), rakim: Math.round(gob - DENIZ), turb, iz, kar, bofor: ruzgarAdi(v) };
   if (ort > T.durma) return { u: 0, neden: 'fırtına freni', ...ek };
+  if (v > T.sagnak) return { u: 0, neden: 'sağanak: güvenlik duruşu', ...ek };
   if (v < T.baslangic) return { u: 0, neden: 'rüzgâr zayıf', ...ek };
-  const p = Math.min(1, (v ** 3 - T.baslangic ** 3) / (T.anma ** 3 - T.baslangic ** 3));
-  return { u: b.uretim * p, neden: engel >= 4 ? 'çevredeki engeller rüzgârı kesiyor' : '', ...ek };
+  let p = Math.min(1, (v * v - T.baslangic ** 2) / (T.anma ** 2 - T.baslangic ** 2));
+  p *= (1 - turb * 0.35) * YOGUNLUK[O.mevsim || 0] * (kar ? 0.7 : 1);
+  const u = Math.min(b.uretim, b.uretim * p);
+  const neden = kar ? 'kanatlarda buzlanma' : iz ? `${iz} türbinin izinde` : engel >= 6 ? 'çevredeki engeller rüzgârı kesiyor' : '';
+  return { u, neden, ...ek };
 }
 /* ---------- 0.53.3: Güneş Takip Sistemi ----------
    Doğrudan güneş ışınımı güneşin yüksekliğine bağlıdır (atmosferden geçiş: hava kütlesi); panel güneşe döndüğü için açı kaybı yoktur.
@@ -625,6 +653,7 @@ export class Elektrik {
     if (n.b.elektrik === 'buhar') { v.yk = Math.round(n.yakit || 0); v.bs = Math.round((n.basinc || 0) * 100); }
     if (n.b.elektrik === 'paratoner') v.d = Math.round(n.depo || 0);
     if (n.ek && n.ek.ruzgar != null) { v.rz = r1(n.ek.ruzgar); v.gk = n.ek.gok; if (n.ek.yukseklik != null) v.yk2 = n.ek.yukseklik; if (n.ek.isinim != null) v.is = n.ek.isinim; }   // 0.53.3
+    if (n.ek && n.ek.bofor) { v.bf = n.ek.bofor; v.rk = n.ek.rakim; v.tb = Math.round(n.ek.turb * 100); }   // 0.53.5
     if (MANTIK53.has(n.b.elektrik) || n.b.elektrik === 'sigorta') { v.a = r1(n.pg[0] || 0); v.b = r1(n.pg[1] || 0); }
     if (DONUSUM[n.b.cihaz] && n.pisen) { v.ps = n.pisen; v.pi = Math.round((n.ilerleme || 0) * 100); }
     if (n.b.cihaz === 'matkap') v.dr = n.derin || 0;
@@ -673,7 +702,10 @@ export function enerjiMetni(b, v) {
   } else if (b.uretim) {
     l.push(`Üretim <b>${s(v.u)}</b> / ${b.uretim} E/sn` + (v.ne ? ` (${v.ne})` : ''));
     /* 0.53.3: rüzgâr ve güneş verileri */
-    if (b.elektrik === 'ruzgar' && v.rz != null) l.push(`Rüzgâr <b>${s(v.rz)}</b> m/sn (göbek, zeminden ${v.yk2} m) · ${v.gk}`);
+    if (b.elektrik === 'ruzgar' && v.rz != null) {
+      l.push(`Rüzgâr <b>${s(v.rz)}</b> m/sn · ${v.bf} · ${v.gk}`);
+      l.push(`Göbek: zeminden ${v.yk2} m, deniz seviyesinden ${v.rk} m · türbülans %${v.tb} · kapasite <b>%${Math.round(v.u / b.uretim * 100)}</b>`);
+    }
     if (b.elektrik === 'takip' && v.is != null) l.push(`Güneş ışınımı <b>${v.is}</b> W/m² · ${v.gk} · rüzgâr ${s(v.rz)} m/sn`);
     l.push(v.cb ? `Çıkıştan verilen <b>${s(v.c)}</b> E/sn (talep ${s(v.t || 0)})` : 'Çıkışa kablo bağlı değil.');
     durum = !v.cb ? 'bagsiz' : v.u <= 0 ? 'kapali' : v.c + 0.05 < v.u ? 'fazla' : 'calisiyor';

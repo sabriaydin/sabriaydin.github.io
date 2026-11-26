@@ -3,6 +3,11 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.5', b: 'Rüzgâr türbini ayrıntıları', m: [
+    'Rüzgâr türbini en çok 60 E/sn üretiyor; üretim her yükseklikte ve her havada farklı: yükseğe kurulan türbin daha güçlü, yağmurda üretim artıyor, fırtınada alçaktaki türbin tam güce yaklaşırken yüksektekiler kendini korumak için durabiliyor.',
+    'Yeni ayrıntılar: türbülans, art arda kurulan türbinlerin birbirinin rüzgârını kesmesi (iz etkisi), kışın yoğun havada fazla, yazın az üretim ve kar yağışında kanat buzlanması.',
+    'Bilgi panelinde rüzgârın adı (esinti, sert rüzgâr, fırtına…), göbek yüksekliği, türbülans ve kapasite yüzdesi görünüyor.'
+  ]},
   { s: '0.53.4', b: 'Daha güçlü türbin', m: [
     'Rüzgâr türbini güçlendirildi: daha düşük rüzgârda dönmeye başlıyor ve daha erken tam güce ulaşıyor. Açık havada ortalama 10-20 E/sn, tepelerde ve kıyıda daha fazla, yağmurda ve fırtınada tam güç üretiyor; yalnızca yüksek tepelerdeki sert fırtınada kendini korumak için duruyor.'
   ]},
