@@ -11,7 +11,7 @@
    Hesap tek oyunculuda ve sunucuda yapılır; tüketici durumları blok değişikliği, batarya doluluğu 'bo' iletisiyle dağıtılır. */
 import { BLOKLAR, ESYALAR, SIVI, LAV, KATI, EKIN_SONRAKI, SU_SEVIYE, BLOK53 } from '../bloklar.js';
 import { DENIZ, diyarMi } from '../sabitler.js';
-import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ, hucreYerel } from '../cihazlar.js';
+import { CIHAZ, cihazHucreleri, kokKonumu, pervaneHucreleri, dondurXZ, hucreYerel, PERVANE } from '../cihazlar.js';
 import { portlar } from './kablolar.js';
 
 const ADIM = 0.5;
@@ -52,6 +52,7 @@ export function cihazUretim(d, b, x, y, z, O) {
     let acik = 0, n = 0;
     for (const [hx, hy, hz, i] of cihazHucreleri(Cd, b.yon, x, y, z)) { if (hucreYerel(Cd, i)[1] !== Cd.h - 1) continue; n++; if (d.ustKati(hx, hz) <= hy) acik++; }
     if (!acik) return { u: 0, neden: 'üstü kapalı' };
+    if (O.hava && O.hava.gok && O.zaman != null) return takipUretim(d, b, x, y, z, O, acik / n);   // 0.53.3: güneş yüksekliği, bulut, yağış, kar, rüzgâr koruması
     const gun = Math.min(1, Math.max(0, ((O.gunIsigi ?? 1) - 0.14) / 0.86));
     if (gun <= 0) return { u: 0, neden: 'gece' };
     return { u: b.uretim * (acik / n) * Math.pow(gun, 0.6) * (1 - 0.65 * Math.min(1, O.yogunluk || 0)), neden: acik < n ? 'kısmen gölgede' : '' };
@@ -68,6 +69,7 @@ export function cihazUretim(d, b, x, y, z, O) {
     for (const [hx, hy, hz] of pervaneHucreleri(b.yon, x, y, z)) { const q = d.blok(hx, hy, hz); if (KATI[q] && !(BLOKLAR[q] && BLOKLAR[q].cihaz)) return { u: 0, neden: 'pervane engelli' }; }
     const tepe = y + Cd.h - 1;
     if (d.ustKati(x, z) > tepe) return { u: 0, neden: 'üstü kapalı' };
+    if (O.hava && O.hava.ruzgar) return ruzgarUretim(d, b, x, y, z, O);   // 0.53.3: rüzgâr hızı, yükseklik, arazi ve hava durumu
     const yuk = Math.min(1, Math.max(0.25, (tepe - DENIZ) / 40));
     const esinti = 0.75 + 0.25 * Math.sin(O.sure * 0.13 + x * 0.7 + z * 0.3);
     return { u: Math.min(b.uretim, b.uretim * 0.7 * yuk * esinti * (1 + 0.6 * Math.min(1, O.yogunluk || 0)) * (O.firtina ? 1.4 : 1)), neden: '' };
@@ -88,6 +90,56 @@ export function cihazUretim(d, b, x, y, z, O) {
     return { u: Math.min(b.uretim, n * 1.5) * (O.mevsim === 3 ? 0.5 : 1), neden: O.mevsim === 3 ? 'kış: yarı güç' : '' };
   }
   return { u: 0, neden: '' };
+}
+
+/* ---------- 0.53.3: Rüzgâr Türbini ----------
+   Rüzgâr hızı (m/sn) hava durumundan gelir (yerde 2-9; yağışta +3, fırtınada +12; esintili). Göbek yüksekliğindeki hız, zeminden yüksekliğe göre
+   rüzgâr kesme yasasıyla artar (v = v10 · (h / 10)^α; α: su üstü 0,11, açık arazi 0,18, orman 0,28); yüksek tepelerde rüzgâr biraz daha güçlüdür.
+   Çevredeki yüksek engeller (ağaç, bina) türbülans yaratır ve verimi düşürür. Güç eğrisi: 3 m/sn'de başlar, 12 m/sn'de tam güçtür (küp yasası);
+   ortalama rüzgâr 25 m/sn'yi aşarsa türbin kendini korumak için durur (fırtına freni). */
+export const TURBIN = { baslangic: 3, anma: 12, durma: 25 };
+function ruzgarUretim(d, b, x, y, z, O) {
+  const H = O.hava, [ox, oz] = dondurXZ(0.5, 0.5, b.yon), cx = x + 0.5 + ox, cz = z + 0.5 + oz, gob = y + PERVANE.y;
+  /* çevre zemini ve arazi pürüzü (8 nokta, 7 blok uzakta) */
+  let zemin = 0, su = 0, orman = 0;
+  for (let i = 0; i < 8; i++) {
+    const a = i * Math.PI / 4, px = Math.floor(cx + Math.cos(a) * 7), pz = Math.floor(cz + Math.sin(a) * 7), u = d.ustKati(px, pz), q = BLOKLAR[d.blok(px, u, pz)];
+    zemin += u; if (SIVI[d.blok(px, u + 1, pz)] || SIVI[d.blok(px, u, pz)]) su++; else if (q && /Yaprağı|Yaprak/.test(q.ad || '')) orman++;
+  }
+  zemin /= 8;
+  const alfa = su >= 4 ? 0.11 : orman >= 3 ? 0.28 : 0.18, h = Math.max(2, gob - zemin);
+  const kat = Math.pow(h / 10, alfa) * (1 + Math.min(0.35, Math.max(0, (gob - DENIZ - 15) / 150)));
+  /* türbülans: göbek yüksekliğinde 4-9 blok çevredeki katı engeller */
+  let engel = 0;
+  for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; for (const r of [4, 6.5, 9]) if (KATI[d.blok(Math.floor(cx + Math.cos(a) * r), Math.floor(gob), Math.floor(cz + Math.sin(a) * r))]) { engel++; break; } }
+  const verim = 1 - Math.min(0.6, engel * 0.05);
+  const R = H.ruzgar(cx, cz), v = R.hiz * kat * verim, ort = R.ort * kat * verim, g = H.gok(cx, cz).ad, T = TURBIN;
+  const ek = { ruzgar: v, gok: g, yukseklik: Math.round(h) };
+  if (ort > T.durma) return { u: 0, neden: 'fırtına freni', ...ek };
+  if (v < T.baslangic) return { u: 0, neden: 'rüzgâr zayıf', ...ek };
+  const p = Math.min(1, (v ** 3 - T.baslangic ** 3) / (T.anma ** 3 - T.baslangic ** 3));
+  return { u: b.uretim * p, neden: engel >= 4 ? 'çevredeki engeller rüzgârı kesiyor' : '', ...ek };
+}
+/* ---------- 0.53.3: Güneş Takip Sistemi ----------
+   Doğrudan güneş ışınımı güneşin yüksekliğine bağlıdır (atmosferden geçiş: hava kütlesi); panel güneşe döndüğü için açı kaybı yoktur.
+   Bulutlar ışığı azaltır (az bulutlu %90, parçalı %65, çok bulutlu %35 dolayı; geçen bulut gölgeleri anlık düşüş yapar), yağmurda %20, fırtınada %8'e iner;
+   bulutlu havada saçılan (yaygın) ışık biraz destek olur. Kar yağarken panel karla örtülür. Rüzgâr 16 m/sn'yi aşınca panel kendini korumak için
+   yatay konuma geçer (yalnız tepeden gelen ışığı alır). Kışın güneş daha zayıftır. */
+export const TAKIP = { firtinaRuzgari: 16, mevsim: [1, 1.04, 0.9, 0.78] };
+function takipUretim(d, b, x, y, z, O, acikOran) {
+  const H = O.hava, cx = x + 1, cz = z + 1, a = O.zaman * Math.PI * 2, L = Math.hypot(Math.cos(a), Math.sin(a), 0.25), sinE = Math.sin(a) / L;
+  const gk = H.gok(cx, cz), R = H.ruzgar(cx, cz), ek = { gok: gk.ad, ruzgar: R.ort, isinim: 0 };
+  if (sinE <= 0.02) return { u: 0, neden: 'gece', ...ek };
+  const am = Math.min(38, 1 / sinE), dni = 1353 * Math.pow(0.7, Math.pow(am, 0.678));
+  let gecir = (1 - 0.72 * Math.pow(gk.bulut, 1.6)) * (1 - 0.6 * gk.golge);
+  if (gk.yagis > 0.5) gecir = Math.min(gecir, 0.2);
+  if (gk.firtina > 0.5) gecir = Math.min(gecir, 0.08);
+  const kar = gk.yagis > 0.5 && H.turAl && H.turAl(cx, cz) === 2, yatay = R.ort > TAKIP.firtinaRuzgari;
+  const yaygin = (40 + 110 * gk.bulut) * Math.sqrt(sinE) * (gk.firtina > 0.5 ? 0.5 : 1);
+  const isinim = kar ? 15 : dni * gecir * (yatay ? sinE : 1) + yaygin;
+  ek.isinim = Math.round(isinim); ek.yatay = yatay;
+  const u = b.uretim * acikOran * Math.min(1, isinim / 1000) * TAKIP.mevsim[O.mevsim || 0];
+  return { u, neden: kar ? 'panel karla örtülü' : yatay ? 'rüzgâr koruması: panel yatay' : acikOran < 1 ? 'kısmen gölgede' : '', ...ek };
 }
 
 export class Elektrik {
@@ -196,7 +248,7 @@ export class Elektrik {
       if (b.elektrik === 'jenerator') P = this.jenerator(n, dt);
       else if (b.elektrik === 'buhar') P = this.buhar(n, dt);   // 0.53.0
       else if (b.elektrik === 'paratoner') { const e = d.enerji.get(n.k) || 0, cik = n.cik.reduce((t, c) => t + c.talep, 0); P = Math.min(PARATONER.cikis, cik, e / dt); }
-      else if (b.uretim) { const r = cihazUretim(d, b, n.x, n.y, n.z, O); n.uretim = r.u; n.neden = r.neden; P = r.u; }
+      else if (b.uretim) { const r = cihazUretim(d, b, n.x, n.y, n.z, O); n.uretim = r.u; n.neden = r.neden; n.ek = r; P = r.u; }
       else if (b.elektrik === 'batarya') { const e = d.enerji.get(n.k) || 0, cik = n.cik.reduce((t, c) => t + c.talep, 0); P = Math.min(BATARYA_HIZ[b.cihaz], cik, e / dt); }
       else if (b.elektrik === 'algilayici') { n.calisiyor = n.gelen >= b.tuketim * 0.95; P = n.calisiyor && b.acik ? Math.max(0, n.gelen - b.tuketim) : 0; }
       else if (MANTIK53.has(b.elektrik)) {   // 0.53.0: mantık parçaları (önceki adımdaki duruma göre geçirir)
@@ -572,6 +624,7 @@ export class Elektrik {
     /* 0.53.0 */
     if (n.b.elektrik === 'buhar') { v.yk = Math.round(n.yakit || 0); v.bs = Math.round((n.basinc || 0) * 100); }
     if (n.b.elektrik === 'paratoner') v.d = Math.round(n.depo || 0);
+    if (n.ek && n.ek.ruzgar != null) { v.rz = r1(n.ek.ruzgar); v.gk = n.ek.gok; if (n.ek.yukseklik != null) v.yk2 = n.ek.yukseklik; if (n.ek.isinim != null) v.is = n.ek.isinim; }   // 0.53.3
     if (MANTIK53.has(n.b.elektrik) || n.b.elektrik === 'sigorta') { v.a = r1(n.pg[0] || 0); v.b = r1(n.pg[1] || 0); }
     if (DONUSUM[n.b.cihaz] && n.pisen) { v.ps = n.pisen; v.pi = Math.round((n.ilerleme || 0) * 100); }
     if (n.b.cihaz === 'matkap') v.dr = n.derin || 0;
@@ -619,6 +672,9 @@ export function enerjiMetni(b, v) {
     durum = !v.gb ? 'bagsiz' : !v.on ? 'eksik' : v.al ? 'calisiyor' : 'beklemede';
   } else if (b.uretim) {
     l.push(`Üretim <b>${s(v.u)}</b> / ${b.uretim} E/sn` + (v.ne ? ` (${v.ne})` : ''));
+    /* 0.53.3: rüzgâr ve güneş verileri */
+    if (b.elektrik === 'ruzgar' && v.rz != null) l.push(`Rüzgâr <b>${s(v.rz)}</b> m/sn (göbek, zeminden ${v.yk2} m) · ${v.gk}`);
+    if (b.elektrik === 'takip' && v.is != null) l.push(`Güneş ışınımı <b>${v.is}</b> W/m² · ${v.gk} · rüzgâr ${s(v.rz)} m/sn`);
     l.push(v.cb ? `Çıkıştan verilen <b>${s(v.c)}</b> E/sn (talep ${s(v.t || 0)})` : 'Çıkışa kablo bağlı değil.');
     durum = !v.cb ? 'bagsiz' : v.u <= 0 ? 'kapali' : v.c + 0.05 < v.u ? 'fazla' : 'calisiyor';
   } else if (b.elektrik === 'batarya') {

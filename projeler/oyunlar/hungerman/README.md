@@ -119,6 +119,14 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.3 (0.53.3): Rüzgâr ve güneş
+
+- Hava durumuna gök durumu eklendi: Açık, Az bulutlu, Parçalı bulutlu, Çok bulutlu, Yağmurlu, Fırtınalı. Bulutluluk yağış alanlarıyla birlikte değişir; parçalı bulutlu havada geçen bulutların gölgesi anlık düşüş yapar.
+- Rüzgâr hızı (m/sn): yerde 2-9 m/sn arasında yavaşça değişir, yağışta 3, fırtınada 12 m/sn kadar artar; esintiyle dalgalanır.
+- Rüzgâr Türbini: göbek yüksekliğindeki rüzgâr, zeminden yüksekliğe göre artar (su üstünde ve açık arazide daha çok, ormanda daha az); yüksek tepelerde rüzgâr daha güçlüdür, çevredeki engeller verimi düşürür. Güç eğrisi: 3 m/sn'de başlar, 12 m/sn'de tam güç (30 E/sn), ortalama rüzgâr 25 m/sn'yi aşarsa fırtına freniyle durur.
+- Güneş Takip Sistemi: üretim güneşin yüksekliğine (sabah ve akşam zayıf, öğlen güçlü) ve gök durumuna bağlıdır; bulutlu havada saçılan ışık biraz destek olur, yağmurda ve fırtınada çok azalır, kar yağarken panel örtülür, kışın güneş zayıftır. Rüzgâr 16 m/sn'yi aşınca panel kendini korumak için yatay konuma geçer.
+- Bilgi panelinde türbin için göbek rüzgâr hızı, zeminden yükseklik ve gök durumu; takip sistemi için güneş ışınımı (W/m²), gök durumu ve rüzgâr gösterilir.
+
 ## 53.2 (0.53.2): Kepenk, Kol ve Düğme
 
 - Güvenlik Kepengi: gücü varken sağ tıkla kapı gibi açılıp kapanır. Güç geldiği anda kendiliğinden açılır, güç kesilince iner; gücü yokken açılmaz. Altında biri varken inmez.

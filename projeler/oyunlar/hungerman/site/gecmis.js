@@ -3,6 +3,11 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.3', b: 'Rüzgâr ve güneş', m: [
+    'Rüzgâr türbini artık gerçek rüzgâra göre çalışıyor: yükseklik, arazi, engeller ve hava durumu üretimi belirliyor; sert fırtınada kendini korumak için duruyor.',
+    'Güneş takip sistemi güneşin yüksekliğine ve göğe göre üretiyor: açık, az bulutlu, parçalı bulutlu, çok bulutlu, yağmurlu ve fırtınalı hava farklı sonuç veriyor; kar paneli örtüyor, sert rüzgârda panel yatıyor.',
+    'Cihaz bilgi panelinde rüzgâr hızı, güneş ışınımı ve gök durumu görünüyor.'
+  ]},
   { s: '0.53.2', b: 'Kepenk, Kol ve Düğme', m: [
     'Güvenlik kepengi, enerjisi varken kapı gibi sağ tıkla açılıp kapanıyor; güç gelince kendiliğinden açılıp güç kesilince iniyor.',
     'Kol ve Düğme artık elektrik kablolarıyla da kullanılabiliyor: kol açıkken gücü geçiriyor, düğme basılınca 3 saniye geçiriyor.'

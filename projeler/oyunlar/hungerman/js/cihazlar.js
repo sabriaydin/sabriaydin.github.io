@@ -11,7 +11,7 @@ export const CIHAZ = {
     carp: [[0.05, 0, 0.05, 1.95, 0.95, 0.95]], aciklama: 'Gündüzleri en çok 10 E/sn üretir; üstü açık olmalıdır' },
   ruzgar: { port: [1, 0.32, 1.45], ad: 'Rüzgâr Türbini', esya: 498, taban: 634, w: 2, d: 2, h: 8, elektrik: 'ruzgar', uretim: 30, sertlik: 2.5, alet: 'kazma', ses: 'tas',
     carp: [[0.15, 0, 0.15, 1.85, 0.3, 1.85], [0.62, 0.3, 0.62, 1.38, 7.2, 1.38], [0.6, 7.2, 0.25, 1.4, 7.85, 1.95]],
-    aciklama: 'En çok 30 E/sn üretir; yükseklik, rüzgâr ve fırtına artırır. Pervanenin döndüğü alan boş olmalıdır' },
+    aciklama: 'Rüzgâr hızına göre en çok 30 E/sn üretir: 3 m/sn\'de dönmeye başlar, 12 m/sn\'de tam güce ulaşır, 25 m/sn\'yi aşan fırtınada kendini korumak için durur. Yüksek, açık ve engelsiz yerlerde (tepe, kıyı) rüzgâr güçlüdür; yağışta ve fırtınada artar. Pervanenin döndüğü alan boş olmalıdır' },
   su: { port: [1.5, 1.98, 0.88], ad: 'Su Çarkı', esya: 499, taban: 762, w: 3, d: 1, h: 3, elektrik: 'su', uretim: 16, sertlik: 2, alet: 'balta', ses: 'odun',
     carp: [[0.05, 0, 0.25, 2.95, 2.95, 0.75], [1.35, 0, 0.02, 1.65, 1.7, 0.2], [1.35, 0, 0.8, 1.65, 1.7, 0.98]],
     aciklama: 'Çarkın alt sırasına değen her su bloğu için 1,5 E/sn üretir (en çok 16); kışın yarı yarıya' },
@@ -41,7 +41,7 @@ yeni53('jeotermal', { ...M53, ad: 'Jeotermal Jeneratör', esya: 3029, w: 2, d: 2
   aciklama: 'Lavın ısısıyla yakıtsız ve kesintisiz enerji üretir: tabanın altına ya da yanına (3 blok içinde) değen her lav bloğu için 15 E/sn, en çok 45. Yeraltı Diyarı\'nda da çalışır' });
 yeni53('takip', { ...M53, ad: 'Güneş Takip Sistemi', esya: 3030, w: 2, d: 2, h: 3, elektrik: 'takip', uretim: 28, sertlik: 2, ses: 'cam',
   carp: [[0.35, 0, 0.35, 1.65, 0.22, 1.65], [0.86, 0.22, 0.86, 1.14, 2.3, 1.14]],
-  aciklama: 'Paneli gün boyunca güneşe döner; gündüz en çok 28 E/sn üretir. Paneli gölgede kalmamalıdır' });
+  aciklama: 'Paneli gün boyunca güneşe döner; en çok 28 E/sn üretir. Üretim güneşin yüksekliğine ve hava durumuna bağlıdır: açık havada tam, bulutlu havada daha az, yağmur ve fırtınada çok az; kar panelini örter. Sert rüzgârda kendini korumak için yatay konuma geçer. Paneli gölgede kalmamalıdır' });
 yeni53('paratoner', { ...M53, ad: 'Paratoner', esya: 3031, w: 1, d: 1, h: 6, elektrik: 'paratoner', kapasite: 8000, sertlik: 3,
   carp: [[0.1, 0, 0.12, 0.9, 0.72, 0.88], [0.36, 0.72, 0.36, 0.64, 5.95, 0.64]],
   aciklama: 'Fırtınada 48 blok içindeki yıldırımları kendine çeker; her yıldırım 5.000 E depolar (en çok 8.000 E), en çok 150 E/sn verir' });

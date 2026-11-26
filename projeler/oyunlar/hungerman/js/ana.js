@@ -876,7 +876,7 @@ function oyunBaslat(v) {
   oyun.kumDusmesi = v.istemci ? null : new KumDusmesi(dunya, sahne);   // 0.41.4: kum ve çakıl düşer
   if (!v.istemci) oyun.elektrik = new Elektrik({ dunya, kablolar: oyun.kablolar,
     canlilar: () => { const l = []; if (!oyun.hayatta.olu) l.push([oyun.oyuncu.konum.x, oyun.oyuncu.konum.y + 1, oyun.oyuncu.konum.z, 'o']); if (oyun.ag && oyun.ag.konumlar) for (const q of oyun.ag.konumlar()) l.push([q.x, q.y + 1, q.z, 'o']);
-      for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure }),
+      for (const w of varliklar.liste) if (!w.olu) l.push([w.konum.x, w.konum.y + 0.8, w.konum.z, w.tur.dusman || w.ofkeli ? 'c' : 'h']); return l; }, kabloKoptu: (w, p) => dusenler.birak(KABLO.esya, kabloMaliyeti(w.uz), p[0], p[1], p[2]), ortam: () => ({ gunIsigi: oyun.gunIsigi, yogunluk: oyun.hava ? oyun.hava.yogunluk : 0, firtina: !!(oyun.hava && oyun.hava.firtina), mevsim: oyun.mevsim || 0, sure: oyun.sure, zaman: oyun.zaman, hava: oyun.hava }),
     /* 0.29.0: ocak haznesi: başka oyuncuda açıkken pişirme bekler; açık hazne ekranı yenilenir */
     sandikKilitli: k => { const s = oyun.ag && oyun.ag.kilit && oyun.ag.kilit.get(k); return s != null && s !== 'yerel'; },
     sandikDegisti: k => { if (envEkrani.acik && envEkrani.sandik && envEkrani.sandik.k === k) envEkrani.ciz(); } });
@@ -1666,7 +1666,7 @@ function adim(t) {
   else o.hud.bakilan(null);
   /* 0.25.0: cihaz modelleri ve yerleştirme önizlemesi */
   if (o.cihazCizici) {
-    o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure, zaman: o.zaman, gun: o.gun, oyuncu: o.oyuncu.konum },
+    o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure, zaman: o.zaman, gun: o.gun, oyuncu: o.oyuncu.konum, hava: o.hava },
       k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k)));
     const etkin = kilitli && !gelPencere.acik && !o.hayatta.olu && !o.fotoModu && !o.izleyici;
     /* 0.28.0: taretler; çalışan jeneratörlerden duman, fıskiyelerden su */

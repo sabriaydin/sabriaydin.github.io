@@ -124,6 +124,32 @@ export class Hava {
     const v = a * 0.66 + b * 0.34 + (this.kis ? 0.03 : 0);
     return [smooth(0.57, 0.64, v), smooth(0.69, 0.75, v)];
   }
+  /* ---------- 0.53.3: gök durumu ve rüzgâr (enerji üretimi için) ----------
+     Bulutluluk, yağış alanlarıyla aynı gürültüden gelir: yağış alanının çevresi önce az, sonra çok bulutlu olur.
+     gok(x, z): { bulut 0-1, yagis 0-1, firtina 0-1, ad, golge }; golge: geçen bulutların o anki gölgesi (0 açık, 1 tam gölge). */
+  gok(x, z) {
+    const [y, f] = this.alan(x, z);
+    let bulut;
+    if (this.zorla) bulut = this.zorla.d === 'acik' ? 0.05 : this.zorla.d === 'yagmur' ? 0.9 : 1;
+    else {
+      const t = this.t, s = this.tohum, ax = (x - t * RUZGAR[0]) / 620, az = (z - t * RUZGAR[1]) / 620;
+      const v = (gurultu(ax, az, s) * 0.68 + gurultu(ax * 2.3 + 17, az * 2.3 - 9, s ^ 0x55) * 0.32) * 0.66 + gurultu(x / 1700 + t / 2600, z / 1700 - t / 3300, s ^ 0x9e37) * 0.34 + (this.kis ? 0.03 : 0);
+      bulut = Math.max(y * 0.9, smooth(0.3, 0.57, v));
+    }
+    /* geçen bulutların gölgesi: bulutlarla aynı rüzgârla kayan ince gürültü */
+    const g = gurultu((x - this.t * 3.2) / 55, (z - this.t * 1.3) / 55, (this.tohum || 1) ^ 0x6b3);
+    const esik = 1 - bulut * 0.8, golge = bulut < 0.08 ? 0 : smooth(esik - 0.04, esik + 0.04, g) * (1 - smooth(0.75, 0.95, bulut));   // kapalı gökte gölge tek düzedir (geçirgenlikte)
+    const ad = f > 0.5 ? 'Fırtınalı' : y > 0.5 ? 'Yağmurlu' : bulut > 0.72 ? 'Çok bulutlu' : bulut > 0.4 ? 'Parçalı bulutlu' : bulut > 0.15 ? 'Az bulutlu' : 'Açık';
+    return { bulut, yagis: y, firtina: f, ad, golge };
+  }
+  /* Yerdeki (10 m) rüzgâr hızı (m/sn): yavaş değişen temel rüzgâr (2-9), yağış ve fırtına cephesinde artar; esinti kısa süreli dalgalanmadır.
+     Dönen: { ort: ortalama, hiz: esintili anlık hız, yon: esme yönü (radyan, x ekseninden) } */
+  ruzgar(x, z) {
+    const [y, f] = this.alan(x, z), t = this.t, s = this.tohum || 1;
+    const ort = 2 + 7 * gurultu(x / 900 + t / 700, z / 900 - t / 900, s ^ 0x2b1) + y * 3 + f * 12;
+    const e = gurultu(x / 40 + t * 0.35, z / 40 - t * 0.2, s ^ 0x71) - 0.5, hiz = Math.max(0, ort * (1 + e * (0.3 + f * 0.4)));
+    return { ort, hiz, yon: Math.atan2(RUZGAR[1], RUZGAR[0]) + (gurultu(t / 400, 3.1, s ^ 0x13) - 0.5) * 0.8 };
+  }
   /* Elle hava ayarı (konsol, uyku, geliştirici): her yerde geçerli; süre dolunca bölgesel havaya dönülür */
   ayarla(durum, sure) {
     if (!HAVA.includes(durum)) return false;

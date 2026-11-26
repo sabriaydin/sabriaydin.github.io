@@ -475,7 +475,7 @@ export class CihazCizici {
     if (!C || C.taban < 3100) return;
     let on = false, yaniyor = false, aktif = 0;
     if (b.cihaz === 'buhar') { const r = v || 0; yaniyor = r >= 2; o.basinc = Math.min(1, r >= 2 ? r - 2 : r); aktif = o.basinc; on = aktif > 0.01; }
-    else if (b.cihaz === 'jeotermal' || b.cihaz === 'takip') { const r = cihazUretim(this.dunya, b, x, y, z, O); aktif = r.u / b.uretim; on = r.u > 0; }
+    else if (b.cihaz === 'jeotermal' || b.cihaz === 'takip') { const r = cihazUretim(this.dunya, b, x, y, z, O); aktif = r.u / b.uretim; on = r.u > 0; o.yatay = !!r.yatay; }
     else if (b.cihaz === 'konteyner' || b.cihaz === 'paratoner') { aktif = (v || 0) > 0.005 ? 0.4 : 0; on = aktif > 0; }
     else if (b.cihaz === 'matkap') { const r = Math.round(v || 0); o.derin = Math.floor(r / 2); on = r % 2 === 1; aktif = on ? 1 : 0; }
     else if (b.cihaz === 'olcer') { o.deger = v || 0; on = true; }
@@ -503,7 +503,7 @@ export class CihazCizici {
       /* Güneş takip: panel normali güneşe döner; gece yatay konuma iner */
       if (o.tur === 'takip' && o.kafa) {
         let yaw = o.takYaw ?? 0, pit = 0;
-        if (gy && gy.y > 0.03) { yaw = Math.atan2(gy.x, gy.z) + o.yon * Math.PI / 2; pit = Math.min(1.2, Math.atan2(Math.hypot(gy.x, gy.z), gy.y)); }
+        if (gy && gy.y > 0.03 && !o.yatay) { yaw = Math.atan2(gy.x, gy.z) + o.yon * Math.PI / 2; pit = Math.min(1.2, Math.atan2(Math.hypot(gy.x, gy.z), gy.y)); }   // 0.53.3: fırtınada yatay
         let fy = ((yaw - (o.takYaw ?? yaw)) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI;
         o.takYaw = (o.takYaw ?? yaw) + fy * Math.min(1, dt * 0.8); o.takPit = (o.takPit ?? 0) + (pit - (o.takPit ?? 0)) * Math.min(1, dt * 0.8);
         o.kafa.rotation.y = o.takYaw; o.namlu.rotation.x = o.takPit;
