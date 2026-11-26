@@ -88,7 +88,17 @@ export const DOKULAR = [
   'kizil_kum', 'miselyum_ust', 'miselyum_yan', 'yaprak_kizil', 'yaprak_turuncu', 'yaprak_sari', 'mangrov_yan', 'mangrov_ust', 'mangrov_yaprak', 'mangrov_kok',
   'mantar_kirmizi_blok', 'mantar_kahve_blok', 'mantar_sap', 'mantar_ic', 'kirmizi_mantar', 'papatya', 'lale', 'lavanta', 'saz',
   /* 0.41.6: çalılar */
-  'cali_yesil', 'cali_ladin', 'cali_savan', 'cali_sonbahar'
+  'cali_yesil', 'cali_ladin', 'cali_savan', 'cali_sonbahar',
+  /* 0.52.0: Bereket güncellemesi */
+  'kuvars', 'kuvars_cilali', 'kuvars_tugla', 'kuvars_sutun_ust', 'kuvars_sutun_yan', 'traverten', 'traverten_tugla', 'andezit', 'andezit_cilali',
+  'kizil_kumtasi_ust', 'kizil_kumtasi_yan', 'kizil_kumtasi_oyma', 'kumtasi_tugla', 'deniz_tasi', 'deniz_tasi_tugla', 'koyu_deniz_tasi', 'deniz_feneri_tasi',
+  'obsidyen_tugla', 'isiltas_tugla', 'kirmizi_tugla', 'sari_tugla', 'siyah_tugla', 'tas_karo', 'terrazzo', 'arnavut', 'tugla_yol',
+  'balik_sirti', 'koyu_lambri', 'kutuk_kaplama', 'kiremit_cati', 'mavi_kiremit', 'bakir_blok', 'kesme_bakir', 'yipranmis_bakir', 'yesil_bakir',
+  'demir_blok', 'elmas_blok', 'komur_blok', 'kemik_ust', 'kemik_yan', 'bal_blok', 'akvaryum_ust', 'akvaryum', 'buzlu_cam', 'cerceveli_cam',
+  ...['0', 'k', 't', 's', 'y', 'm', 'mo', 'si'].flatMap(e => ['siva_' + e, 'boyali_kalas_' + e, 'led_kapali_' + e, 'led_' + e]),
+  'kagit_fener', 'tas_fener', 'demir_fener', 'proj_yan', 'proj_on', 'proj_on_a', 'vant_ust', 'vant_yan', 'vant_yan_a',
+  ...['blender', 'kahve', 'tost', 'mikrodalga', 'dondurma', 'izgara', 'radyo'].flatMap(k => [k + '_yan', k + '_on', k + '_on_a']),
+  ...['celtik', 'patlican', 'aycicegi', 'cay', 'kahve', 'kakao'].flatMap(k => [0, 1, 2, 3].map(e => k + e))
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -682,6 +692,132 @@ export const DOGA41 = { kizilKum: 3000, miselyum: 3001, kizilYaprak: 3002, turun
   }
 }
 
+/* ---------- 0.52.0: Bereket güncellemesi: yapı blokları, elektrikli cihazlar ve yeni ekinler ----------
+   Kimlikler 2200'den başlayan ayrı aralıktan sırayla ayrılır (ayir52). Eski sıra (ayir) 2073'ten devam eder; 2073-2199 boştur.
+   Sıra değişmez: kayıtlarla uyum için yeni bloklar ve eşyalar yalnızca bu bölümlerin sonuna eklenir. */
+let ID52 = 2200;
+const ayir52 = n => { const s = ID52; ID52 += n; return s; };
+export const YAPI52 = {}, ESYA52 = {}, CIHAZ52 = {};
+const Y52 = (k, ad, dok, o = {}) => { const id = ayir52(1); YAPI52[k] = id; blok(id, { ad, dok, sertlik: 1.8, alet: 'kazma', seviye: 1, ses: 'tas', harita: 2, ...o }); return id; };
+const AHSAP52 = { alet: 'balta', seviye: 0, ses: 'odun', sertlik: 2, harita: 14 };
+/* Taşlar, tuğlalar ve zeminler (Taş Kesme Tezgâhı) */
+Y52('kuvars', 'Kuvars Bloğu', 'kuvars', { harita: 49, sertlik: 1.6 }); Y52('kuvarsCilali', 'Cilalı Kuvars', 'kuvars_cilali', { harita: 49 });
+Y52('kuvarsTugla', 'Kuvars Tuğla', 'kuvars_tugla', { harita: 49 }); Y52('kuvarsSutun', 'Kuvars Sütun', ['kuvars_sutun_ust', 'kuvars_sutun_yan', 'kuvars_sutun_ust'], { harita: 49 });
+Y52('traverten', 'Traverten', 'traverten', { harita: 116 }); Y52('travertenTugla', 'Traverten Tuğla', 'traverten_tugla', { harita: 116 });
+Y52('andezit', 'Andezit', 'andezit'); Y52('andezitCilali', 'Cilalı Andezit', 'andezit_cilali');
+Y52('kizilKumtasi', 'Kızıl Kumtaşı', ['kizil_kumtasi_ust', 'kizil_kumtasi_yan', 'kizil_kumtasi_ust'], { harita: 163, sertlik: 0.8 });
+Y52('kizilKumtasiOyma', 'Oymalı Kızıl Kumtaşı', ['kizil_kumtasi_ust', 'kizil_kumtasi_oyma', 'kizil_kumtasi_ust'], { harita: 163, sertlik: 0.8 });
+Y52('kizilKumtasiDuz', 'Düz Kızıl Kumtaşı', 'kizil_kumtasi_ust', { harita: 163, sertlik: 0.8 });
+Y52('kumtasiTugla', 'Kumtaşı Tuğla', 'kumtasi_tugla', { harita: 24, sertlik: 0.8 });
+Y52('denizTasi', 'Deniz Taşı', 'deniz_tasi', { harita: 118 }); Y52('denizTasiTugla', 'Deniz Taşı Tuğla', 'deniz_tasi_tugla', { harita: 118 });
+Y52('koyuDenizTasi', 'Koyu Deniz Taşı', 'koyu_deniz_tasi', { harita: 118 });
+Y52('denizFeneriTasi', 'Deniz Feneri Taşı', 'deniz_feneri_tasi', { mesale: true, isik: 15, soguk: true, sertlik: 0.6, alet: null, seviye: 0, ses: 'cam', harita: 49 });
+Y52('obsidyenTugla', 'Obsidyen Tuğla', 'obsidyen_tugla', { sertlik: 8, seviye: 4, harita: 120 });
+Y52('isiltasTugla', 'Işıltaş Tuğla', 'isiltas_tugla', { mesale: true, isik: 13, sertlik: 1.2, harita: 116 });
+Y52('kirmiziTugla', 'Kırmızı Tuğla', 'kirmizi_tugla', { harita: 114 }); Y52('sariTugla', 'Sarı Tuğla', 'sari_tugla', { harita: 116 }); Y52('siyahTugla', 'Siyah Tuğla', 'siyah_tugla', { harita: 120 });
+Y52('tasKaro', 'Taş Karo', 'tas_karo'); Y52('terrazzo', 'Terrazzo Zemin', 'terrazzo', { harita: 49, sertlik: 1.4 });
+Y52('arnavut', 'Arnavut Kaldırımı', 'arnavut', { sertlik: 2 }); Y52('tuglaYol', 'Tuğla Yol', 'tugla_yol', { harita: 114 });
+/* Ahşap ve çatı */
+Y52('balikSirti', 'Balıksırtı Parke', 'balik_sirti', AHSAP52); Y52('koyuLambri', 'Koyu Ahşap Lambri', 'koyu_lambri', AHSAP52);
+Y52('kutukKaplama', 'Kütük Kaplama', 'kutuk_kaplama', { ...AHSAP52, harita: 8 });
+Y52('kiremitCati', 'Kiremit Çatı', 'kiremit_cati', { harita: 114, sertlik: 1.5 }); Y52('maviKiremit', 'Mavi Kiremit Çatı', 'mavi_kiremit', { harita: 118, sertlik: 1.5 });
+/* Metal ve maden blokları (dokuz külçe ya da parça bir blok) */
+Y52('bakirBlok', 'Bakır Blok', 'bakir_blok', { sertlik: 3, harita: 163 }); Y52('kesmeBakir', 'Kesme Bakır', 'kesme_bakir', { sertlik: 3, harita: 163 });
+Y52('yipranmisBakir', 'Yıpranmış Bakır', 'yipranmis_bakir', { sertlik: 3, harita: 117 }); Y52('yesilBakir', 'Yeşillenmiş Bakır', 'yesil_bakir', { sertlik: 3, harita: 117 });
+Y52('demirBlok', 'Demir Blok', 'demir_blok', { sertlik: 4, seviye: 2, harita: 49 }); Y52('elmasBlok', 'Elmas Blok', 'elmas_blok', { sertlik: 5, seviye: 3, harita: 118 });
+Y52('komurBlok', 'Kömür Bloğu', 'komur_blok', { sertlik: 3, harita: 120 });
+Y52('kemikBlok', 'Kemik Bloğu', ['kemik_ust', 'kemik_yan', 'kemik_ust'], { sertlik: 1.6, harita: 49 });
+Y52('balBlok', 'Bal Bloğu', 'bal_blok', { sertlik: 0.5, alet: null, seviye: 0, ses: 'yun', harita: 116 });
+/* Cam ve dekor */
+Y52('akvaryum', 'Akvaryum', ['akvaryum_ust', 'akvaryum', 'kalas_koyu'], { sertlik: 0.5, alet: null, seviye: 0, ses: 'cam', harita: 118 });
+Y52('buzluCam', 'Buzlu Cam', 'buzlu_cam', { opak: false, kesik: true, ayniGizle: true, sertlik: 0.3, alet: null, seviye: 0, ses: 'cam', harita: 34 });
+Y52('cerceveliCam', 'Ahşap Çerçeveli Cam', 'cerceveli_cam', { opak: false, kesik: true, ayniGizle: true, sertlik: 0.4, alet: null, seviye: 0, ses: 'cam', harita: 34 });
+/* Boyanabilir aileler: sıva ve boyalı kalas (8 renk; eldeki boyayla sağ tıklanınca renk değişir) */
+YAPI52.siva = ayir52(8); YAPI52.boyaliKalas = ayir52(8);
+RENK8.forEach((r, c) => {
+  blok(YAPI52.siva + c, { ad: `${r.ad} Sıva`, dok: 'siva_' + r.ek, sertlik: 1, alet: 'kazma', seviye: 0, ses: 'tas', harita: c ? 113 + c : 49 });
+  blok(YAPI52.boyaliKalas + c, { ad: `${r.ad} Boyalı Kalas`, dok: 'boyali_kalas_' + r.ek, ...AHSAP52, harita: c ? 113 + c : 49 });
+});
+boyaAile(Array.from({ length: 8 }, (_, c) => YAPI52.siva + c)); boyaAile(Array.from({ length: 8 }, (_, c) => YAPI52.boyaliKalas + c));
+/* Fenerler (masa, raf ve çitin üstüne de konur) */
+for (const [k, ad, dok, o] of [['kagitFener', 'Kâğıt Fener', 'kagit_fener', { alet: null, sertlik: 0.3, ses: 'yun' }], ['tasFener', 'Taş Fener', 'tas_fener', { alet: 'kazma', sertlik: 1.5 }],
+  ['demirFener', 'Demir Fener', 'demir_fener', { alet: 'kazma', sertlik: 1 }]])
+  Y52(k, ad, dok, { cizim: C_SEKIL, kati: false, opak: false, sekil: 'fener', mesale: true, isik: 15, lamba: true, seviye: 0, ...o });
+/* Merdiven, yarım blok ve duvar çeşitleri */
+export const YAPI_MALZEME52 = [{ ad: 'Kuvars', taban: YAPI52.kuvars }, { ad: 'Traverten Tuğla', taban: YAPI52.travertenTugla }, { ad: 'Andezit', taban: YAPI52.andezitCilali },
+  { ad: 'Kızıl Kumtaşı', taban: YAPI52.kizilKumtasiDuz }, { ad: 'Deniz Taşı', taban: YAPI52.denizTasiTugla }, { ad: 'Kırmızı Tuğla', taban: YAPI52.kirmiziTugla },
+  { ad: 'Kiremit', taban: YAPI52.kiremitCati }, { ad: 'Obsidyen Tuğla', taban: YAPI52.obsidyenTugla }, { ad: 'Balıksırtı', taban: YAPI52.balikSirti }];
+YAPI_MALZEME52.forEach(m => {
+  const t = B[m.taban], o = yapiOrtak({ ...t, dok: t.dok }), mt = ayir52(8), yt = ayir52(2);
+  m.merdiven = mt; m.yarim = yt;
+  for (let f = 0; f < 4; f++) blok(mt + f, { ...o, ad: `${m.ad} Merdiven`, sekil: 'merdiven', yon: f, taban: mt, ters: mt + 4, gizli: f > 0, dusur: () => [[mt, 1]] });
+  for (let f = 0; f < 4; f++) blok(mt + 4 + f, { ...o, ad: `${m.ad} Merdiven`, sekil: 'merdiven', yon: f, ust: 1, taban: mt, ters: mt + 4, gizli: true, dusur: () => [[mt, 1]] });
+  for (let u = 0; u < 2; u++) blok(yt + u, { ...o, ad: `${m.ad} Yarım Blok`, sekil: 'yarim', ust: u, taban: yt, cift: m.taban, gizli: u > 0, dusur: () => [[yt, 1]] });
+});
+export const DUVAR_MALZEME52 = [{ ad: 'Kuvars Tuğla', taban: YAPI52.kuvarsTugla }, { ad: 'Traverten', taban: YAPI52.travertenTugla }, { ad: 'Kızıl Kumtaşı', taban: YAPI52.kizilKumtasi },
+  { ad: 'Deniz Taşı', taban: YAPI52.denizTasiTugla }, { ad: 'Kırmızı Tuğla', taban: YAPI52.kirmiziTugla }, { ad: 'Obsidyen Tuğla', taban: YAPI52.obsidyenTugla }, { ad: 'Arnavut Kaldırımı', taban: YAPI52.arnavut }];
+DUVAR_MALZEME52.forEach(m => { m.duvar = ayir52(1); blok(m.duvar, { ...yapiOrtak(B[m.taban]), ad: `${m.ad} Duvar`, sekil: 'duvar' }); });
+
+/* Elektrikli cihazlar. Tüketiciler (tuketim, taban + 1 çalışan hâli) elektrik ağının genel kuralıyla açılır ve söner.
+   LED panel: 8 renk, ışık verir. Projektör: güçlü ışık. Vantilatör: çevresini serinletir. Mutfak cihazları çalışırken bir pişirme istasyonudur;
+   Radyo çalışırken sağ tıkla müzik çalar. Yönlü cihazların ön yüzü oyuncuya bakar (yon: 0-3, taban + yon * 2 + açık). */
+CIHAZ52.led = ayir52(16);
+RENK8.forEach((r, c) => {
+  const id = CIHAZ52.led + c * 2, soguk = [0, 5, 6].includes(c);
+  blok(id, { ad: `${r.ad} LED Panel`, dok: 'led_kapali_' + r.ek, sertlik: 0.8, alet: null, seviye: 0, ses: 'cam', elektrik: 'ledpanel', tuketim: 0.3, acik: 0, taban: id, dusur: () => [[id, 1]], harita: 2 });
+  blok(id + 1, { ad: `${r.ad} LED Panel`, dok: 'led_' + r.ek, sertlik: 0.8, alet: null, seviye: 0, ses: 'cam', elektrik: 'ledpanel', tuketim: 0.3, acik: 1, taban: id, gizli: true,
+    mesale: true, isik: 15, lamba: true, ...(soguk ? { soguk: true } : {}), dusur: () => [[id, 1]], harita: c ? 113 + c : 49 });
+});
+const yonlu52 = (k, ad, ek, acikEk, dokuF) => {
+  const taban = ayir52(8); CIHAZ52[k] = taban;
+  for (let v = 0; v < 4; v++) for (let a = 0; a < 2; a++) blok(taban + v * 2 + a, { ad, ...ek, dok: dokuF(a), onYon: (v + 2) % 4, yon: v, cihaz52: taban, taban: taban + v * 2, acik: a,
+    gizli: v + a > 0, dusur: () => [[taban, 1]], ...(a ? acikEk : {}) });
+};
+yonlu52('projektor', 'Projektör', { sertlik: 1.5, alet: 'kazma', ses: 'tas', elektrik: 'projektor', tuketim: 1.5, harita: 2 }, { mesale: true, isik: 22, lamba: true },
+  a => ({ ust: 'proj_yan', yan: 'proj_yan', alt: 'proj_yan', on: a ? 'proj_on_a' : 'proj_on' }));
+CIHAZ52.vantilator = ayir52(2);
+for (let a = 0; a < 2; a++) blok(CIHAZ52.vantilator + a, { ad: 'Vantilatör', dok: ['vant_ust', a ? 'vant_yan_a' : 'vant_yan', 'vant_ust'], sertlik: 1.5, alet: 'kazma', ses: 'tas', elektrik: 'vantilator', tuketim: 1,
+  acik: a, taban: CIHAZ52.vantilator, gizli: a > 0, dusur: () => [[CIHAZ52.vantilator, 1]], harita: 2, ...(a ? { mesale: true, isik: 1, isi: [-9, 6] } : {}) });
+/* Mutfak cihazlarının kutuları (piksel, 0-16; yön 0'da ön yüz +z) */
+export const CIHAZ52_KUTU = {
+  blender: [[4, 0, 4, 12, 4, 12], [5, 4, 5, 11, 13, 11], [5, 13, 5, 11, 14, 11]],
+  kahve: [[3, 0, 3, 13, 12, 12], [4, 0, 12, 12, 1, 15]],
+  tost: [[2, 0, 3, 14, 6, 13]],
+  mikrodalga: [[1, 0, 3, 15, 9, 14]],
+  dondurma: [[2, 0, 3, 14, 13, 13]],
+  izgara: [[1, 0, 2, 15, 4, 14], [1, 4, 2, 15, 6, 4]],
+  radyo: [[2, 0, 4, 14, 9, 12], [11, 9, 6, 12, 15, 7]]
+};
+const MUTFAK52 = [['blender', 'Blender', 'blender', {}], ['kahve', 'Kahve Makinesi', 'kahve', {}], ['tost', 'Tost Makinesi', 'tost', { isi: [3, 2] }], ['mikrodalga', 'Mikrodalga', 'mikrodalga', { mesale: true, isik: 5 }],
+  ['dondurma', 'Dondurma Makinesi', 'dondurma', {}], ['izgara', 'Elektrikli Izgara', 'izgara', { mesale: true, isik: 6, isi: [6, 3] }], ['radyo', 'Radyo', null, { muzik: true }]];
+for (const [k, ad, ist, ek] of MUTFAK52)
+  yonlu52(k, ad, { cizim: C_SEKIL, opak: false, sekil: 'cihaz52', model: k, sertlik: 1, alet: null, ses: 'tas', elektrik: 'mutfak52', tuketim: k === 'radyo' ? 0.5 : 2, harita: 2 },
+    { ...(ist ? { istasyon: ist } : {}), ...ek }, a => ({ ust: k + '_yan', yan: k + '_yan', alt: k + '_yan', on: k + (a ? '_on_a' : '_on') }));
+
+/* Yeni ekinler (4 evre; olgun bitkiden ürün ve tohum düşer, tekrar: olgun bitkiye sağ tıklanınca ürün toplanır) */
+for (const k of ['pirinc', 'patlican', 'patlicanTohumu', 'aycicegi', 'cayYapragi', 'cayFidesi', 'kahve', 'kakao']) ESYA52[k] = ayir52(1);
+export const EKIN52 = [
+  { k: 'celtik', ad: 'Çeltik', urun: ESYA52.pirinc, tohum: ESYA52.pirinc, adet: [2, 4], mevsim: [0.8, 1.3, 0.7, 0] },
+  { k: 'patlican', ad: 'Patlıcan', urun: ESYA52.patlican, tohum: ESYA52.patlicanTohumu, adet: [1, 3], tekrar: true, mevsim: [0.7, 1.4, 0.6, 0] },
+  { k: 'aycicegi', ad: 'Ayçiçeği', urun: ESYA52.aycicegi, tohum: ESYA52.aycicegi, adet: [3, 6], mevsim: [0.8, 1.5, 0.5, 0] },
+  { k: 'cay', ad: 'Çay', urun: ESYA52.cayYapragi, tohum: ESYA52.cayFidesi, adet: [2, 4], tekrar: true, mevsim: [1.2, 1, 0.8, 0.2] },
+  { k: 'kahve', ad: 'Kahve', urun: ESYA52.kahve, tohum: ESYA52.kahve, adet: [2, 4], tekrar: true, mevsim: [0.9, 1.2, 0.8, 0] },
+  { k: 'kakao', ad: 'Kakao', urun: ESYA52.kakao, tohum: ESYA52.kakao, adet: [1, 3], tekrar: true, mevsim: [0.9, 1.3, 0.8, 0] }
+];
+EKIN52.forEach(E => {
+  const b = E.taban = ayir52(4);
+  for (let e = 0; e < 4; e++) blok(b + e, { ...T0, ad: e === 3 ? `Olgun ${E.ad}` : `${E.ad} Fidesi`, dok: E.k + e, ekin: e, sonraki: e < 3 ? b + e + 1 : 0, gizli: true, mevsim: E.mevsim, tarimTur: E.k,
+    ...(E.tekrar && e === 3 ? { tekrar: b + 2, urun: E.urun, urunAdet: E.adet } : {}), harita: 4,
+    dusur: r => (e === 3 ? [[E.urun, E.adet[0] + Math.floor(r() * (E.adet[1] - E.adet[0] + 1))], ...(E.tohum !== E.urun ? [[E.tohum, 1 + Math.floor(r() * 2)]] : [])] : [[E.tohum, 1]]) });
+  TARIM[E.k] = E;
+});
+/* Yabani tohumlar: saz çeltik, ot ve çalılar patlıcan, ayçiçeği ve çay, savan çalısı kahve, mangrov yaprağı kakao verebilir */
+{
+  const ek = (id, l) => { const b = B[id]; if (!b) return; const eski = b.dusur; b.dusur = r => { const o = eski ? [...eski(r)] : []; for (const [e, s] of l) if (r() < s) o.push([e, 1]); return o; }; };
+  ek(DOGA41.saz, [[ESYA52.pirinc, 0.18]]); ek(DOGA41.cali, [[ESYA52.cayFidesi, 0.05], [ESYA52.patlicanTohumu, 0.05]]); ek(DOGA41.buyukCali, [[ESYA52.cayFidesi, 0.08]]);
+  ek(DOGA41.savanCali, [[ESYA52.kahve, 0.08], [ESYA52.aycicegi, 0.06]]); ek(DOGA41.mangrovYaprak, [[ESYA52.kakao, 0.04]]); ek(25, [[ESYA52.aycicegi, 0.015], [ESYA52.patlicanTohumu, 0.012]]);
+}
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 4096;   // 0.31.0: 1024'ten 2048'e; 0.37.0: 4096'ya
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
@@ -1036,6 +1172,100 @@ for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakı
   [622, '4 E/sn harcar · Sağ tık: pişirme haznesi; çalışırken içine konan çiğ yiyecek ve fırın malzemelerini pişirir. Yakınındayken fırın ve kamp ateşi yerine geçer, kömür gerektirmez'], [624, '3 E/sn harcar · Çevresini ısıtır']]) E[id].ozellik = oz;
 for (const id of [269, 463, 464, 465, 466, 470]) { E[id].sicak = 150; E[id].ozellik = (E[id].ozellik ? E[id].ozellik + ' · ' : '') + 'Isınma (150 saniye)'; }
 E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
+
+/* ---------- 0.52.0: Bereket güncellemesi: ekin ürünleri, hayvan ürünleri, mutfak malzemeleri ve yemekler (kimlikler ayir52 sırasıyla) ---------- */
+{
+  const E52 = (k, o) => { const id = ESYA52[k] ?? (ESYA52[k] = ayir52(1)); esya(id, o); return id; };
+  const T52 = TARIM;
+  /* Ekin ürünleri ve tohumlar */
+  E52('pirinc', { ad: 'Pirinç', simge: 'tohum', renk: '#f2eee0', ekin: T52.celtik.taban, ozellik: 'Tarlaya ekilir · Pilav, sushi ve yayla çorbasında kullanılır' });
+  E52('patlican', { ad: 'Patlıcan', simge: 'patlican', tur: 'yiyecek', yemek: 2 });
+  E52('patlicanTohumu', { ad: 'Patlıcan Tohumu', simge: 'tohum', renk: '#e8dca0', ekin: T52.patlican.taban });
+  E52('aycicegi', { ad: 'Ayçiçeği Çekirdeği', simge: 'tohum', renk: '#3a3632', ekin: T52.aycicegi.taban, ozellik: 'Tarlaya ekilir · Kavrulur ya da yağı çıkarılır' });
+  E52('cayYapragi', { ad: 'Çay Yaprağı', simge: 'yaprak52', renk: '#3f8a2e' });
+  E52('cayFidesi', { ad: 'Çay Fidesi', simge: 'fide', renk: '#2f7a2a', ekin: T52.cay.taban });
+  E52('kahve', { ad: 'Kahve Çekirdeği', simge: 'tohum', renk: '#5a3418', ekin: T52.kahve.taban, ozellik: 'Tarlaya ekilir · Değirmende öğütülür' });
+  E52('kakao', { ad: 'Kakao Çekirdeği', simge: 'kakao', ekin: T52.kakao.taban, ozellik: 'Tarlaya ekilir · Değirmende kakao tozu olur' });
+  /* Hayvan ürünleri */
+  const et = (k, ad, simge, renk, yemek, pismis) => E52(k, { ad, simge, renk, tur: 'yiyecek', yemek, ...(pismis ? { pismis: true } : {}) });
+  et('keciEti', 'Çiğ Keçi Eti', 'et', '#c8504a', 2); et('keciEtiPismis', 'Pişmiş Keçi Eti', 'et', '#8a4a2a', 6, true);
+  et('ordekEti', 'Çiğ Ördek Eti', 'but', '#e8b0a0', 2); et('ordekPismis', 'Kızarmış Ördek', 'but', '#b8703a', 7, true);
+  et('hindiEti', 'Çiğ Hindi Eti', 'but', '#eab8a8', 3); et('hindiPismis', 'Kızarmış Hindi', 'but', '#c07a3a', 8, true);
+  et('geyikEti', 'Çiğ Geyik Eti', 'et', '#a83a34', 3); et('geyikPismis', 'Geyik Bifteği', 'et', '#6a3418', 9, true);
+  et('yabanEti', 'Çiğ Yaban Domuzu Eti', 'et', '#d0706a', 3); et('yabanPismis', 'Pişmiş Yaban Domuzu Eti', 'et', '#9a5a2a', 9, true);
+  et('levrek', 'Çiğ Levrek', 'balik', '#8a9aa0', 2); et('levrekPismis', 'Levrek Izgara', 'balik', '#b8885a', 7, true);
+  et('palamut', 'Çiğ Palamut', 'balik', '#3a5a8a', 2); et('palamutPismis', 'Palamut Izgara', 'balik', '#8a6a4a', 7, true);
+  E52('boynuz', { ad: 'Geyik Boynuzu', simge: 'boynuz', ozellik: 'Geyiklerden düşer · Avize ve süs yapımında kullanılır' });
+  E52('tilkiKurku', { ad: 'Tilki Kürkü', simge: 'kurk', renk: '#d8742a' });
+  E52('ayiPostu', { ad: 'Ayı Postu', simge: 'kurk', renk: '#5a3a22' });
+  E52('deveYunu', { ad: 'Deve Yünü', simge: 'yumak', renk: '#c8a070' });
+  E52('keciSutu', { ad: 'Keçi Sütü Kovası', simge: 'kova', ic: '#f8f6ea', yigin: 1, tur: 'yiyecek', yenir: true, yemek: 2, temizle: true, kap: 477, ozellik: 'Keçiden kovayla sağılır · İçilince olumsuz etkileri giderir' });
+  /* Mutfak malzemeleri */
+  E52('aycicekYagi', { ad: 'Ayçiçek Yağı', simge: 'iksir', renk: '#f2d04a', kap: 331 });
+  E52('kakaoTozu', { ad: 'Kakao Tozu', simge: 'cuval', renk: '#5a3418' });
+  E52('kahveTozu', { ad: 'Kahve Tozu', simge: 'cuval', renk: '#3a2416' });
+  E52('krema', { ad: 'Krema', simge: 'kavanoz', renk: '#faf6ea' });
+  E52('mayonez', { ad: 'Mayonez', simge: 'kavanoz', renk: '#f6eec0' });
+  E52('ketcap', { ad: 'Ketçap', simge: 'kavanoz', renk: '#c8281e' });
+  E52('sucuk', { ad: 'Sucuk', simge: 'sucuk', tur: 'yiyecek', yemek: 3 });
+  E52('keciPeyniri', { ad: 'Keçi Peyniri', simge: 'tereyag', renk: '#f8f4ea', tur: 'yiyecek', yemek: 3 });
+  /* Yemekler ve içecekler (etkiler aşçılık seviyesiyle uzar) */
+  const Y = (k, ad, simge, renk, yemek, etkiler, ek) => { ESYA52[k] = ayir52(1); Y36y(ESYA52[k], ad, simge, renk, yemek, etkiler, ek); };
+  Y('cikolata', 'Çikolata', 'cikolata', '#5a3418', 3, [['odak', 45]]);
+  Y('pilav', 'Pirinç Pilavı', 'corba2', '#f4f0e2', 8, [['tokluk', 150]], { kase: true });
+  Y('karniyarik', 'Karnıyarık', 'tabak', '#5a2a4a', 11, [['guc', 120]]);
+  Y('imamBayildi', 'İmam Bayıldı', 'tabak', '#7a3a5a', 9, [['yenilenme', 30]]);
+  Y('patlicanKebabi', 'Patlıcan Kebabı', 'kebap', '#5a2a4a', 10, [['guc', 150]]);
+  Y('menemen', 'Menemen', 'tabak', '#e8742a', 7, [['odak', 90]]);
+  Y('sucukluYumurta', 'Sucuklu Yumurta', 'tabak', '#c84a2a', 8, [['guc', 60], ['tokluk', 60]]);
+  Y('pizza', 'Pizza', 'pizza', '#d8402a', 12, [['tokluk', 120], ['sans', 60]]);
+  Y('hamburger', 'Hamburger', 'hamburger', '#8a4a22', 12, [['guc', 90], ['tokluk', 60]]);
+  Y('sandvic', 'Peynirli Sandviç', 'sandvic', '#f2d870', 7, [['hiz', 60]]);
+  Y('tost', 'Kaşarlı Sucuklu Tost', 'sandvic', '#c8502a', 9, [['odak', 90]]);
+  Y('patatesKizartmasi', 'Patates Kızartması', 'patatesK', '#f2c84a', 6, [['hiz', 45]]);
+  Y('misirCorbasi', 'Mısır Çorbası', 'corba2', '#f2d050', 7, [['yenilenme', 15]], { kase: true, sicak: 200 });
+  Y('domatesCorbasi', 'Domates Çorbası', 'corba2', '#d8402a', 7, [['yenilenme', 15]], { kase: true, sicak: 200 });
+  Y('ezogelin', 'Ezogelin Çorbası', 'corba2', '#c8602a', 8, [['direnc', 90]], { kase: true, sicak: 240 });
+  Y('yaylaCorbasi', 'Yayla Çorbası', 'corba2', '#f2eee0', 7, [['yenilenme', 20]], { kase: true, sicak: 200 });
+  Y('cobanSalatasi', 'Çoban Salatası', 'salata', '#d8402a', 5, [['yenilenme', 10]], { kase: true, serin: 120, pismis: false });
+  Y('meyveSalatasi', 'Meyve Salatası', 'salata', '#e8283a', 6, [['hiz', 45]], { kase: true, serin: 150, pismis: false });
+  Y('sezarSalata', 'Sezar Salata', 'salata', '#8ac05a', 9, [['direnc', 90]], { kase: true, pismis: false });
+  Y('sushi', 'Sushi', 'sushi', '#f2f0e8', 8, [['nefes', 180]], { pismis: false });
+  Y('hindiDolmasi', 'Hindi Dolması', 'tabak', '#b8703a', 14, [['tokluk', 180], ['guc', 60]]);
+  Y('portakalliOrdek', 'Portakallı Ördek', 'tabak', '#e8842a', 13, [['yenilenme', 40], ['sans', 90]]);
+  Y('geyikYahnisi', 'Geyik Yahnisi', 'corba2', '#6a3418', 13, [['guc', 150], ['direnc', 90]], { kase: true, sicak: 300 });
+  Y('yabanKizartmasi', 'Yaban Domuzu Kızartması', 'et', '#8a4a22', 11, [['guc', 120]]);
+  Y('gozleme', 'Peynirli Gözleme', 'pide', '#f2e6b0', 8, [['tokluk', 90]]);
+  Y('keciGozleme', 'Keçi Peynirli Gözleme', 'pide', '#f8f4ea', 9, [['odak', 90]]);
+  Y('cay', 'Demli Çay', 'fincan', '#a8401a', 1, [['hiz', 60]], { kap: 331, sicak: 240 });
+  Y('turkKahvesi', 'Türk Kahvesi', 'fincan', '#3a2416', 1, [['hiz', 90], ['odak', 60]], { kap: 331 });
+  Y('filtreKahve', 'Filtre Kahve', 'icecek', '#3a2416', 1, [['hiz', 150]], { kap: 331, sicak: 120 });
+  Y('latte', 'Sütlü Kahve', 'icecek', '#b8885a', 3, [['hiz', 90], ['yenilenme', 20]], { kap: 331 });
+  Y('sicakCikolata', 'Sıcak Çikolata', 'icecek', '#6a3a1e', 4, [['yenilenme', 30]], { kap: 331, sicak: 300 });
+  Y('milkshake', 'Çilekli Milkshake', 'icecek', '#f0a0b8', 4, [['hiz', 60]], { kap: 331, serin: 200 });
+  Y('smoothie', 'Meyve Smoothie', 'icecek', '#c8283a', 3, [['yenilenme', 30]], { kap: 331, serin: 240 });
+  Y('elmaSuyu', 'Elma Suyu', 'icecek', '#e8c050', 2, [['hiz', 30]], { kap: 331, serin: 150, pismis: false });
+  Y('cikolataliDondurma', 'Çikolatalı Dondurma', 'kulah', '#6a3a1e', 4, [['odak', 60]], { serin: 300, pismis: false });
+  Y('cilekliDondurma', 'Çilekli Dondurma', 'kulah', '#f0a0b8', 4, [['hiz', 60]], { serin: 300, pismis: false });
+  Y('brownie', 'Brownie', 'tatli', '#4a2a16', 7, [['odak', 90]]);
+  Y('cikolataliKek', 'Çikolatalı Kek', 'kek2', '#5a3418', 10, [['tokluk', 90], ['odak', 60]]);
+  Y('waffle', 'Waffle', 'waffle', '#d8a050', 7, [['hiz', 60]]);
+  Y('pankek', 'Pankek', 'pankek', '#e8b860', 6, [['yenilenme', 20]]);
+  Y('krep', 'Çikolatalı Krep', 'pide', '#6a3a1e', 8, [['hiz', 60], ['odak', 30]]);
+  Y('cheesecake', 'Cheesecake', 'kek2', '#f6eed8', 9, [['sans', 90]]);
+  Y('tiramisu', 'Tiramisu', 'kek2', '#8a5a3a', 9, [['hiz', 90], ['odak', 90]]);
+  Y('kunefe', 'Künefe', 'tabak', '#e8902a', 10, [['guc', 60], ['sans', 60]]);
+  Y('revani', 'Revani', 'tatli', '#f2c060', 7, [['hiz', 45]]);
+  Y('irmikHelvasi', 'İrmik Helvası', 'corba2', '#e8c070', 7, [['direnc', 60]], { kase: true });
+  Y('asure', 'Aşure', 'corba2', '#8a4a2a', 9, [['yenilenme', 40], ['sans', 60]], { kase: true });
+  Y('kavrulmusCekirdek', 'Kavrulmuş Çekirdek', 'tohum', '#4a4440', 2, [['odak', 30]]);
+  Y('izgaraKofte', 'Izgara Köfte', 'kofte', '#6a3418', 10, [['guc', 90]]);
+  Y('izgaraSebze', 'Izgara Sebze', 'tabak', '#7a8a3a', 6, [['yenilenme', 20]]);
+  Y('tavukSis', 'Tavuk Şiş', 'kebap', '#d8902a', 9, [['guc', 60], ['direnc', 60]]);
+  Y('sosisli', 'Sucuklu Sandviç', 'sosisli', '#c84a2a', 9, [['hiz', 45], ['tokluk', 45]]);
+  Y('misirEkmegi', 'Mısır Ekmeği', 'pide', '#f2c43c', 6, [['tokluk', 60]]);
+  Y('kakaoluPuding', 'Kakaolu Puding', 'corba2', '#6a3a1e', 6, [['yenilenme', 30]], { kase: true });
+}
 
 /* Örste onarım malzemesi */
 /* 0.40.4: gerçekçi düşme hasarı (yarım kalp cinsinden; oyuncu canı 20). 3 bloğa kadar hasar yoktur, sonra yükseklikle hızla artar:

@@ -1,14 +1,17 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { ESYA45, ESYA48, aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37 } from '../bloklar.js';
+import { ESYA45, ESYA48, aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37, YAPI52, ESYA52, CIHAZ52, YAPI_MALZEME52, DUVAR_MALZEME52 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
   kutuk: { ad: 'Herhangi bir kütük', idler: [8, 10, 12, 144, 3005] }
 };
-export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere', degirmen: 'Değirmen Taşı', taskesme: 'Taş Kesme Tezgâhı' };
-export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencere: 232, degirmen: MUTFAK.degirmen, taskesme: COKLU_ID.tasKesme };
+export const ISTASYON_ADI = { masa: 'Üretim Masası', firin: 'Fırın', ates: 'Kamp Ateşi', simya: 'Simya Masası', tencere: 'Tencere', degirmen: 'Değirmen Taşı', taskesme: 'Taş Kesme Tezgâhı',
+  /* 0.52.0: elektrikli mutfak cihazları (çalışırken) */
+  blender: 'Blender', kahve: 'Kahve Makinesi', tost: 'Tost Makinesi', mikrodalga: 'Mikrodalga', dondurma: 'Dondurma Makinesi', izgara: 'Elektrikli Izgara' };
+export const ISTASYON_BLOK = { masa: 32, firin: 33, ates: 48, simya: 140, tencere: 232, degirmen: MUTFAK.degirmen, taskesme: COKLU_ID.tasKesme,
+  blender: CIHAZ52.blender, kahve: CIHAZ52.kahve, tost: CIHAZ52.tost, mikrodalga: CIHAZ52.mikrodalga, dondurma: CIHAZ52.dondurma, izgara: CIHAZ52.izgara };
 /* Tarifin istasyon koşulu: yok, tek istasyon ya da istasyonlardan biri */
 export const istasyonlar = t => (!t.istasyon ? [] : Array.isArray(t.istasyon) ? t.istasyon : [t.istasyon]);
 export const istasyonVar = (t, mevcut) => { const l = istasyonlar(t); return !l.length || l.some(k => mevcut.has(k)); };
@@ -477,6 +480,147 @@ t(C.camasirSepeti, 1, [[568, 6], [391, 1]], 'masa', 'mobilya');
 t(C.odunYigini, 1, [['kutuk', 6]], null, 'mobilya');
 t(C.tabela, 1, [['kalas', 3], [256, 1]], null, 'mobilya');
 t(C.gazLambasi, 1, [[259, 2], [34, 1], [1190, 1]], 'masa', 'mobilya');
+
+/* ---------- 0.52.0: Bereket güncellemesi (sona eklenir) ---------- */
+{
+  const Y5 = YAPI52, E5 = ESYA52, C5 = CIHAZ52;
+  /* Taş Kesme Tezgâhında yeni taşlar */
+  t(Y5.kuvars, 2, [[2, 2], [34, 1]], 'taskesme', 'yapi');
+  t(Y5.kuvarsCilali, 1, [[Y5.kuvars, 1]], 'taskesme', 'yapi');
+  t(Y5.kuvarsTugla, 4, [[Y5.kuvars, 4]], 'taskesme', 'yapi');
+  t(Y5.kuvarsSutun, 2, [[Y5.kuvars, 2]], 'taskesme', 'yapi');
+  t(Y5.traverten, 4, [[2, 3], [5, 1]], 'taskesme', 'yapi');
+  t(Y5.travertenTugla, 4, [[Y5.traverten, 4]], 'taskesme', 'yapi');
+  t(Y5.andezit, 4, [[2, 3], [15, 1]], 'taskesme', 'yapi');
+  t(Y5.andezitCilali, 1, [[Y5.andezit, 1]], 'taskesme', 'yapi');
+  t(Y5.kizilKumtasi, 1, [[3000, 4]], 'masa', 'yapi');
+  t(Y5.kizilKumtasiDuz, 1, [[Y5.kizilKumtasi, 1]], 'taskesme', 'yapi');
+  t(Y5.kizilKumtasiOyma, 1, [[Y5.kizilKumtasi, 1]], 'taskesme', 'yapi');
+  t(Y5.kumtasiTugla, 4, [[24, 4]], 'taskesme', 'yapi');
+  t(Y5.denizTasi, 2, [[2, 2], [324, 1], [325, 1]], 'taskesme', 'yapi');
+  t(Y5.denizTasiTugla, 4, [[Y5.denizTasi, 4]], 'taskesme', 'yapi');
+  t(Y5.koyuDenizTasi, 2, [[Y5.denizTasi, 2], [327, 1]], 'taskesme', 'yapi');
+  t(Y5.denizFeneriTasi, 1, [[Y5.denizTasi, 2], [61, 2]], 'masa', 'yapi');
+  t(Y5.obsidyenTugla, 4, [[515, 4]], 'taskesme', 'yapi');
+  t(Y5.isiltasTugla, 4, [[514, 4]], 'taskesme', 'yapi');
+  t(Y5.kirmiziTugla, 1, [[ESYA37.tugla, 4]], 'masa', 'yapi');
+  t(Y5.sariTugla, 4, [[Y5.kirmiziTugla, 4], [323, 1]], 'masa', 'yapi');
+  t(Y5.siyahTugla, 4, [[Y5.kirmiziTugla, 4], [327, 1]], 'masa', 'yapi');
+  t(Y5.tasKaro, 4, [[2, 4]], 'taskesme', 'yapi');
+  t(Y5.terrazzo, 4, [[YAPI_ID.beton, 2], [15, 2], [Y5.kuvars, 1]], 'taskesme', 'yapi');
+  t(Y5.arnavut, 4, [[15, 4], [6, 1]], 'taskesme', 'yapi');
+  t(Y5.tuglaYol, 4, [[ESYA37.tugla, 4], [5, 1]], 'masa', 'yapi');
+  t(Y5.balikSirti, 4, [['kalas', 4]], 'masa', 'yapi');
+  t(Y5.koyuLambri, 4, [['kalas', 3], [327, 1]], 'masa', 'yapi');
+  t(Y5.kutukKaplama, 4, [['kutuk', 2]], 'masa', 'yapi');
+  t(Y5.kiremitCati, 4, [[ESYA37.tugla, 3], [23, 1]], 'firin', 'yapi');
+  t(Y5.maviKiremit, 4, [[Y5.kiremitCati, 4], [325, 1]], 'masa', 'yapi');
+  /* Maden blokları (geri de çözülür) */
+  for (const [blk, mal] of [[Y5.bakirBlok, 259], [Y5.demirBlok, 261], [Y5.elmasBlok, 264], [Y5.komurBlok, 257], [Y5.kemikBlok, 295]]) { t(blk, 1, [[mal, 9]], null, 'blok'); t(mal, 9, [[blk, 1]], null, 'malzeme'); }
+  t(Y5.kesmeBakir, 4, [[Y5.bakirBlok, 4]], 'taskesme', 'yapi');
+  t(Y5.yipranmisBakir, 1, [[Y5.bakirBlok, 1], [478, 1]], null, 'yapi');
+  t(Y5.yesilBakir, 1, [[Y5.yipranmisBakir, 1], [478, 1]], null, 'yapi');
+  t(Y5.balBlok, 1, [[482, 4]], null, 'blok'); t(482, 4, [[Y5.balBlok, 1], [331, 4]], null, 'malzeme');
+  t(Y5.akvaryum, 1, [[34, 6], ['kalas', 2], [297, 2], [478, 1]], 'masa', 'mobilya');
+  t(Y5.buzluCam, 4, [[34, 4], [5, 1]], 'firin', 'blok');
+  t(Y5.cerceveliCam, 4, [[34, 4], ['kalas', 2]], 'masa', 'blok');
+  RENK8.forEach((r, c) => {
+    t(Y5.siva + c, 8, [[5, 4], [23, 2], ...(c ? [[YUN_RENKLERI[c - 1].boya, 1]] : [[296, 1]])], 'masa', 'yapi');
+    t(Y5.boyaliKalas + c, 8, [['kalas', 8], ...(c ? [[YUN_RENKLERI[c - 1].boya, 1]] : [[296, 1]])], 'masa', 'yapi');
+  });
+  t(Y5.kagitFener, 2, [[ESYA37.kagit, 3], [256, 1], [46, 1]], 'masa', 'mobilya');
+  t(Y5.tasFener, 1, [[15, 4], [46, 1]], 'masa', 'mobilya');
+  t(Y5.demirFener, 1, [[261, 3], [34, 1], [46, 1]], 'masa', 'mobilya');
+  YAPI_MALZEME52.forEach(m => { t(m.merdiven, 4, [[m.taban, 6]], 'masa', 'yapi'); t(m.yarim, 6, [[m.taban, 3]], 'masa', 'yapi'); });
+  DUVAR_MALZEME52.forEach(m => t(m.duvar, 6, [[m.taban, 6]], 'masa', 'yapi'));
+  /* Elektrikli cihazlar */
+  RENK8.forEach((r, c) => t(C5.led + c * 2, 2, [[34, 2], [495, 1], [259, 1], ...(c ? [[YUN_RENKLERI[c - 1].boya, 1]] : [[61, 1]])], 'masa', 'elektrik'));
+  t(C5.projektor, 1, [[261, 4], [34, 2], [61, 2], [495, 1]], 'masa', 'elektrik');
+  t(C5.vantilator, 1, [[261, 4], [496, 2], [495, 1]], 'masa', 'elektrik');
+  t(C5.blender, 1, [[261, 2], [34, 2], [496, 1], [495, 1]], 'masa', 'elektrik');
+  t(C5.kahve, 1, [[261, 3], [34, 1], [496, 1], [495, 1]], 'masa', 'elektrik');
+  t(C5.tost, 1, [[261, 3], [496, 2], [495, 1]], 'masa', 'elektrik');
+  t(C5.mikrodalga, 1, [[261, 4], [34, 2], [496, 2], [495, 2]], 'masa', 'elektrik');
+  t(C5.dondurma, 1, [[261, 4], [22, 4], [496, 1], [495, 1]], 'masa', 'elektrik');
+  t(C5.izgara, 1, [[261, 5], [496, 2], [495, 1]], 'masa', 'elektrik');
+  t(C5.radyo, 1, [['kalas', 3], [259, 2], [495, 2], [120, 1]], 'masa', 'elektrik');
+  /* Hayvan ürünleri */
+  for (const [cig, pismis] of [[E5.keciEti, E5.keciEtiPismis], [E5.ordekEti, E5.ordekPismis], [E5.hindiEti, E5.hindiPismis], [E5.geyikEti, E5.geyikPismis], [E5.yabanEti, E5.yabanPismis], [E5.levrek, E5.levrekPismis], [E5.palamut, E5.palamutPismis]])
+    t(pismis, 1, [[cig, 1]], ['ates', 'firin', 'izgara'], 'yiyecek');
+  t(282, 3, [[E5.ayiPostu, 1]], null, 'malzeme');
+  t(49, 2, [[E5.deveYunu, 3]], null, 'malzeme');
+  t(350, 1, [[E5.tilkiKurku, 2], [282, 1]], 'masa', 'giyim');
+  t(Y.avize, 1, [[E5.boynuz, 2], [Y.mum, 4], [284, 1]], 'masa', 'mobilya');
+  /* Mutfak malzemeleri */
+  t(E5.aycicekYagi, 1, [[E5.aycicegi, 6], [331, 1]], 'degirmen', 'malzeme');
+  t(E5.kakaoTozu, 2, [[E5.kakao, 3]], 'degirmen', 'malzeme');
+  t(E5.kahveTozu, 2, [[E5.kahve, 3]], 'degirmen', 'malzeme');
+  t(E5.krema, 2, [[479, 1], [331, 2]], null, 'malzeme');
+  t(E5.mayonez, 2, [[480, 1], [E5.aycicekYagi, 1], [331, 1]], null, 'malzeme');
+  t(E5.ketcap, 2, [[363, 3], [476, 1], [397, 1], [331, 1]], 'tencere', 'malzeme');
+  t(E5.sucuk, 2, [[435, 2], [434, 1], [397, 1]], 'masa', 'malzeme');
+  t(E5.keciPeyniri, 2, [[E5.keciSutu, 1], [397, 1]], null, 'yiyecek');
+  t(E5.cikolata, 2, [[E5.kakaoTozu, 2], [476, 1], [479, 1]], 'masa', 'yiyecek');
+  /* Yemekler */
+  t(E5.pilav, 1, [[E5.pirinc, 2], [398, 1], [397, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.karniyarik, 1, [[E5.patlican, 2], [435, 1], [363, 1], [365, 1]], 'firin', 'yiyecek');
+  t(E5.imamBayildi, 1, [[E5.patlican, 2], [369, 1], [363, 1], [381, 1]], 'tencere', 'yiyecek');
+  t(E5.patlicanKebabi, 1, [[E5.patlican, 1], [435, 2], [256, 1]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.menemen, 1, [[480, 2], [363, 1], [365, 1]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.sucukluYumurta, 1, [[E5.sucuk, 1], [480, 2]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.pizza, 1, [[432, 1], [433, 1], [484, 1], [E5.sucuk, 1]], 'firin', 'yiyecek');
+  t(E5.hamburger, 1, [[293, 1], [435, 1], [370, 1], [363, 1], [E5.ketcap, 1]], ['izgara', 'ates'], 'yiyecek');
+  t(E5.sandvic, 2, [[293, 1], [484, 1], [363, 1]], 'masa', 'yiyecek');
+  t(E5.tost, 1, [[293, 1], [484, 1], [E5.sucuk, 1]], 'tost', 'yiyecek');
+  t(E5.patatesKizartmasi, 2, [[329, 2], [E5.aycicekYagi, 1], [397, 1]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.misirCorbasi, 1, [[367, 2], [479, 1], [398, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.domatesCorbasi, 1, [[363, 3], [396, 1], [398, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.ezogelin, 1, [[436, 1], [433, 1], [369, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.yaylaCorbasi, 1, [[485, 1], [E5.pirinc, 1], [396, 1]], 'tencere', 'yiyecek');
+  t(E5.cobanSalatasi, 1, [[363, 1], [365, 1], [369, 1], [381, 1], [270, 1]], 'masa', 'yiyecek');
+  t(E5.meyveSalatasi, 1, [[266, 1], [374, 2], [378, 2], [270, 1]], 'masa', 'yiyecek');
+  t(E5.sezarSalata, 1, [[276, 1], [370, 1], [484, 1], [E5.mayonez, 1], [270, 1]], 'masa', 'yiyecek');
+  t(E5.sushi, 2, [[E5.pirinc, 2], [297, 1], [9, 1]], 'masa', 'yiyecek');
+  t(E5.hindiDolmasi, 1, [[E5.hindiEti, 1], [E5.pirinc, 2], [369, 1]], 'firin', 'yiyecek');
+  t(E5.portakalliOrdek, 1, [[E5.ordekEti, 1], [379, 2], [482, 1]], 'firin', 'yiyecek');
+  t(E5.geyikYahnisi, 1, [[E5.geyikEti, 1], [329, 1], [328, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.yabanKizartmasi, 1, [[E5.yabanEti, 1], [397, 1], [369, 1]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.gozleme, 2, [[432, 1], [484, 1]], ['ates', 'tost'], 'yiyecek');
+  t(E5.keciGozleme, 2, [[432, 1], [E5.keciPeyniri, 1]], ['ates', 'tost'], 'yiyecek');
+  t(E5.cay, 2, [[E5.cayYapragi, 2], [478, 1], [331, 2]], ['tencere', 'kahve'], 'yiyecek');
+  t(E5.turkKahvesi, 1, [[E5.kahveTozu, 1], [476, 1], [331, 1]], ['ates', 'kahve'], 'yiyecek');
+  t(E5.filtreKahve, 2, [[E5.kahveTozu, 2], [478, 1], [331, 2]], 'kahve', 'yiyecek');
+  t(E5.latte, 1, [[E5.kahveTozu, 1], [479, 1], [331, 1]], 'kahve', 'yiyecek');
+  t(E5.sicakCikolata, 2, [[E5.kakaoTozu, 1], [479, 1], [476, 1], [331, 2]], ['tencere', 'kahve'], 'yiyecek');
+  t(E5.milkshake, 2, [[479, 1], [374, 2], [476, 1], [331, 2]], 'blender', 'yiyecek');
+  t(E5.smoothie, 2, [[378, 2], [376, 2], [331, 2]], 'blender', 'yiyecek');
+  t(E5.elmaSuyu, 1, [[266, 3], [331, 1]], 'blender', 'yiyecek');
+  t(E5.cikolataliDondurma, 2, [[479, 1], [E5.kakaoTozu, 1], [476, 1]], 'dondurma', 'yiyecek');
+  t(E5.cilekliDondurma, 2, [[479, 1], [374, 2], [476, 1]], 'dondurma', 'yiyecek');
+  t(E5.brownie, 2, [[E5.cikolata, 1], [396, 1], [480, 1], [398, 1]], 'firin', 'yiyecek');
+  t(E5.cikolataliKek, 1, [[396, 2], [E5.kakaoTozu, 1], [480, 2], [476, 1]], 'firin', 'yiyecek');
+  t(E5.waffle, 2, [[396, 1], [480, 1], [479, 1], [476, 1]], 'tost', 'yiyecek');
+  t(E5.pankek, 2, [[396, 1], [480, 1], [479, 1]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.krep, 2, [[396, 1], [480, 1], [479, 1], [E5.cikolata, 1]], ['ates', 'izgara'], 'yiyecek');
+  t(E5.cheesecake, 1, [[484, 2], [476, 1], [E5.krema, 1], [506, 1]], 'firin', 'yiyecek');
+  t(E5.tiramisu, 1, [[E5.kahveTozu, 1], [E5.krema, 1], [506, 2], [E5.kakaoTozu, 1]], 'masa', 'yiyecek');
+  t(E5.kunefe, 1, [[432, 1], [484, 1], [476, 2], [398, 1]], 'firin', 'yiyecek');
+  t(E5.revani, 2, [[396, 1], [480, 1], [476, 2], [379, 1]], 'firin', 'yiyecek');
+  t(E5.irmikHelvasi, 1, [[396, 2], [476, 1], [398, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.asure, 1, [[436, 1], [476, 1], [266, 1], [378, 1], [270, 1]], 'tencere', 'yiyecek');
+  t(E5.kavrulmusCekirdek, 2, [[E5.aycicegi, 4], [397, 1]], ['ates', 'firin', 'mikrodalga'], 'yiyecek');
+  t(E5.izgaraKofte, 2, [[435, 2], [369, 1]], 'izgara', 'yiyecek');
+  t(E5.izgaraSebze, 1, [[E5.patlican, 1], [365, 1], [363, 1]], 'izgara', 'yiyecek');
+  t(E5.tavukSis, 1, [[275, 2], [433, 1], [256, 1]], ['izgara', 'ates'], 'yiyecek');
+  t(E5.sosisli, 1, [[293, 1], [E5.sucuk, 1], [E5.ketcap, 1]], 'masa', 'yiyecek');
+  t(E5.misirEkmegi, 2, [[367, 3], [480, 1]], 'firin', 'yiyecek');
+  t(E5.kakaoluPuding, 1, [[479, 1], [E5.kakaoTozu, 1], [476, 1], [396, 1], [270, 1]], 'tencere', 'yiyecek');
+  /* Mikrodalga: kömürsüz, hızlı ısıtma (mevcut yemeklerin seçenek tarifleri) */
+  t(330, 1, [[329, 1]], 'mikrodalga', 'yiyecek');
+  t(384, 1, [[367, 1]], 'mikrodalga', 'yiyecek');
+  t(491, 1, [[480, 1]], 'mikrodalga', 'yiyecek');
+  t(449, 1, [[479, 1], [476, 1], [396, 1], [270, 1]], 'mikrodalga', 'yiyecek');
+}
 
 export const TARIFLER = R;
 

@@ -1,6 +1,6 @@
 /* HungerMan - canlı türleri: özellikler, yaşadıkları biyomlar, düşürdükleri eşyalar */
 import { BY } from '../dunya/uretici.js';
-import { ESYA39 } from '../bloklar.js';
+import { ESYA39, ESYA52 } from '../bloklar.js';
 
 const ar = (r, a, b) => a + Math.floor(r() * (b - a + 1));
 
@@ -66,10 +66,29 @@ export const TURLER = {
     dusur: () => [], ses: 'ari', xp: 1 },
   /* 0.51.0: Gezgin Tüccar (doğal olarak doğmaz; koy/gezgin.js sabahları getirir) */
   gezgin: { ad: 'Gezgin Tüccar', model: 'gezgin', gen: 0.3, boy: 1.9, can: 20, hiz: 0.6, kosu: 3.0, gezgin: true, dusur: () => [], ses: 'koylu' },
+  /* 0.52.0: Bereket güncellemesi: yeni hayvanlar ve balıklar */
+  keci: { ad: 'Keçi', model: 'keci', gen: 0.4, boy: 1.2, can: 8, hiz: 1.3, kosu: 3.8, biyom: [BY.DAG, BY.SAVAN], grup: [2, 3],
+    dusur: r => [[ESYA52.keciEti, ar(r, 1, 2)], ...(r() < 0.4 ? [[282, 1]] : [])], ses: 'keci', yem: [291, 370, 328], xp: 2 },
+  ordek: { ad: 'Ördek', model: 'ordek', gen: 0.22, boy: 0.62, can: 4, hiz: 1.0, kosu: 3.0, biyom: [BY.NEHIR, BY.BATAKLIK, BY.KUMSAL], grup: [2, 4],
+    dusur: r => [[ESYA52.ordekEti, 1], [283, ar(r, 0, 2)]], ses: 'ordek', yavasDus: true, yem: [292, 368, ESYA52.pirinc], xp: 1 },
+  hindi: { ad: 'Hindi', model: 'hindi', gen: 0.3, boy: 0.95, can: 6, hiz: 1.1, kosu: 3.2, biyom: [BY.ORMAN, BY.CAYIR], grup: [2, 3],
+    dusur: r => [[ESYA52.hindiEti, ar(r, 1, 2)], [283, ar(r, 1, 2)]], ses: 'hindi', yem: [292, 368, 364], xp: 2 },
+  geyik: { ad: 'Geyik', model: 'geyik', gen: 0.42, boy: 1.7, can: 12, hiz: 1.4, kosu: 5.4, biyom: [BY.ORMAN, BY.HUS, BY.TAYGA], grup: [1, 3],
+    dusur: r => [[ESYA52.geyikEti, ar(r, 1, 3)], ...(r() < 0.35 ? [[ESYA52.boynuz, 1]] : []), ...(r() < 0.4 ? [[282, 1]] : [])], ses: 'geyik', yem: [291, 266, 370], xp: 3 },
+  yaban: { ad: 'Yaban Domuzu', kacar: true, model: 'yaban', gen: 0.42, boy: 0.95, can: 14, hiz: 1.3, kosu: 4.4, biyom: [BY.ORMAN], grup: [1, 3], notr: true, hasar: 3, menzil: 1.1, gorus: 16,
+    dusur: r => [[ESYA52.yabanEti, ar(r, 1, 3)], ...(r() < 0.4 ? [[282, 1]] : [])], ses: 'yaban', yem: [329, 328, 266], xp: 3 },
+  tilki: { ad: 'Tilki', model: 'tilki', gen: 0.24, boy: 0.62, can: 8, hiz: 1.5, kosu: 5.4, biyom: [BY.TAYGA], grup: [1, 2],
+    dusur: r => (r() < 0.6 ? [[ESYA52.tilkiKurku, 1]] : []), ses: 'tilki', yem: [275, 279, 374, 378], xp: 2 },
+  ayi: { ad: 'Boz Ayı', kacar: true, model: 'ayi', gen: 0.62, boy: 1.5, can: 34, hiz: 1.1, kosu: 4.4, biyom: [BY.TAYGA], grup: [1, 1], notr: true, hasar: 6, menzil: 1.4, gorus: 18,
+    dusur: r => [[ESYA52.ayiPostu, 1], ...(r() < 0.5 ? [[483, ar(r, 1, 2)]] : [])], ses: 'ayi', xp: 6 },
+  deve: { ad: 'Deve', model: 'deve', gen: 0.5, boy: 2.2, can: 20, hiz: 1.1, kosu: 3.6, biyom: [BY.COL, BY.SAVAN], grup: [1, 3],
+    dusur: r => [[ESYA52.deveYunu, ar(r, 1, 3)], ...(r() < 0.4 ? [[282, 1]] : [])], ses: 'deve', yem: [291, 568, 266], xp: 2 },
+  levrek: { ad: 'Levrek', model: 'levrek', gen: 0.18, boy: 0.4, can: 4, hiz: 1.6, kosu: 4.4, su: true, grup: [1, 3], dusur: r => [[ESYA52.levrek, 1]], ses: 'balik', xp: 1 },
+  palamut: { ad: 'Palamut', model: 'palamut', gen: 0.16, boy: 0.35, can: 3, hiz: 2.0, kosu: 5.0, su: true, grup: [3, 6], dusur: r => [[ESYA52.palamut, 1]], ses: 'balik', xp: 1 },
   koylu: { ad: 'Köylü', model: 'koylu', gen: 0.3, boy: 1.9, can: 20, hiz: 1.0, kosu: 3.2, koylu: true, dusur: () => [], ses: 'koylu' }
 };
-export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt', 'at', 'kedi'];
-export const DENIZ_CANLILARI = ['hamsi', 'cipura', 'ahtapot', 'kopekbaligi'];
+export const HAYVANLAR = ['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'kurt', 'at', 'kedi', 'keci', 'ordek', 'hindi', 'geyik', 'yaban', 'tilki', 'ayi', 'deve'];   // 0.52.0: yeni hayvanlar
+export const DENIZ_CANLILARI = ['hamsi', 'cipura', 'ahtapot', 'kopekbaligi', 'levrek', 'palamut'];
 export const OLUM_KAYNAK = { zombi: 'zombi', kurt: 'kurt' };
 /* Dünyada doğan düşman canavarlar (görev, başarım ve sayım için) */
 export const CANAVARLAR = ['zombi', 'iskelet', 'orumcek', 'mumya', 'bogulmus', 'buziskelet', 'yarasa', 'kopekbaligi', 'haydut', 'firavun', 'buzbuyucu', 'reis', 'muhafiz', 'korruhu', 'kulzombi'];

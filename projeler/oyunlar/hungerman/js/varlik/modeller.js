@@ -78,6 +78,19 @@ function dortAyak(o) {
   return { kok, malzeme, govde, kafa, bacaklar, kuyruk, kollar: [], kanatlar: [] };
 }
 
+/* 0.52.0: iki ayaklı kanatlı kalıbı (ördek, hindi): tavuk modelinin ölçülendirilmiş hâli */
+function kanatli(o) {
+  const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
+  const kok = new THREE.Group();
+  const [gw, gh, gd, gr] = o.govde, gy = o.govdeY, b = o.boyun || 0;
+  const govde = parca(kok, malzeme, [0, gy + gh / 2, 0], [[gw, gh, gd, gr], ...(o.ek || [])]);
+  const kafa = parca(kok, malzeme, [0, gy + gh + b, -gd / 2 + 0.02], [[gw * 0.6, 0.24 + b, 0.2, o.kafaRenk, 0, 0.04, -0.06], [gw * 0.3, 0.06, 0.12, o.gaga, 0, 0.04, -0.2],
+    ...(o.sakal ? [[0.06, 0.12, 0.04, o.sakal, 0, -0.04, -0.17]] : []), [0.04, 0.04, 0.02, '#111', -gw * 0.24, 0.12, -0.165], [0.04, 0.04, 0.02, '#111', gw * 0.24, 0.12, -0.165]]);
+  const bacaklar = [-gw * 0.22, gw * 0.22].map(x => parca(kok, malzeme, [x, gy, 0.02], [[0.05, gy, 0.05, o.ayak, 0, -gy / 2, 0], [0.14, 0.02, 0.14, o.ayak, 0, -gy + 0.01, -0.03]]));
+  const kanatlar = [-1, 1].map(s => parca(kok, malzeme, [s * (gw / 2 + 0.02), gy + gh * 0.75, 0], [[0.04, gh * 0.75, gd * 0.75, o.kanat, s * 0.02, -gh * 0.34, 0]]));
+  return { kok, malzeme, govde, kafa, bacaklar, kanatlar, kollar: [], kuyruk: null };
+}
+
 /* Balık kalıbı: s ölçek, renk sırt, karin alt renk */
 function balik(s, renk, karin, ek = []) {
   const malzeme = new THREE.MeshBasicMaterial({ vertexColors: true, map: gurultu() });
@@ -244,6 +257,61 @@ export const MODELLER = {
     const kanatlar = [-1, 1].map(s => parca(kok, malzeme, [s * 0.18, 0.54, 0], [[0.04, 0.24, 0.32, '#e6e3db', s * 0.02, -0.11, 0]]));
     return { kok, malzeme, govde, kafa, bacaklar, kanatlar, kollar: [], kuyruk: null };
   },
+  /* 0.52.0: Bereket güncellemesi hayvanları */
+  keci: () => dortAyak({
+    govde: [0.5, 0.5, 0.86], govdeY: 0.78, renk: '#e8e2d6', bacak: [0.14, 0.52], bacakRenk: '#d8d0c0', toynak: '#3a2e24',
+    govdeEk: [[0.52, 0.12, 0.6, '#d8d0c0', 0, 0.24, 0.05]],
+    kafa: [0.32, 0.34, 0.4], kafaY: 1.1, kafaIleri: -0.02,
+    kafaEk: [[0.06, 0.22, 0.06, '#8a7a5a', -0.1, 0.26, -0.1], [0.06, 0.22, 0.06, '#8a7a5a', 0.1, 0.26, -0.1], [0.1, 0.16, 0.06, '#d8d0c0', 0, -0.2, -0.34],
+      [0.06, 0.06, 0.02, '#111', -0.12, 0.04, -0.41], [0.06, 0.06, 0.02, '#111', 0.12, 0.04, -0.41], [0.12, 0.06, 0.12, '#d8d0c0', -0.2, 0.06, -0.12], [0.12, 0.06, 0.12, '#d8d0c0', 0.2, 0.06, -0.12]],
+    kuyruk: [0.08, 0.16, 0.08]
+  }),
+  geyik: () => dortAyak({
+    govde: [0.56, 0.62, 1.2], govdeY: 1.12, renk: '#9a6a3a', bacak: [0.14, 0.86], bacakRenk: '#8a5e34', toynak: '#2a2018', bacakIc: 0.04,
+    govdeEk: [[0.4, 0.3, 0.06, '#e8dcc8', 0, -0.05, 0.6], [0.04, 0.2, 0.5, '#b8885a', 0.29, 0.1, 0]],
+    kafa: [0.3, 0.36, 0.44], kafaY: 1.62, kafaIleri: -0.12, kafaRenk: '#9a6a3a',
+    kafaEk: [[0.22, 0.5, 0.24, '#9a6a3a', 0, -0.32, 0.12], [0.16, 0.14, 0.16, '#6a4a2a', 0, -0.06, -0.46], [0.06, 0.06, 0.02, '#111', -0.14, 0.06, -0.3], [0.06, 0.06, 0.02, '#111', 0.14, 0.06, -0.3],
+      [0.05, 0.36, 0.05, '#d8c8a0', -0.12, 0.36, -0.12], [0.05, 0.36, 0.05, '#d8c8a0', 0.12, 0.36, -0.12], [0.24, 0.05, 0.05, '#d8c8a0', -0.2, 0.46, -0.12], [0.24, 0.05, 0.05, '#d8c8a0', 0.2, 0.46, -0.12],
+      [0.05, 0.16, 0.05, '#d8c8a0', -0.26, 0.56, -0.14], [0.05, 0.16, 0.05, '#d8c8a0', 0.26, 0.56, -0.14], [0.1, 0.14, 0.04, '#8a5e34', -0.2, 0.18, -0.06], [0.1, 0.14, 0.04, '#8a5e34', 0.2, 0.18, -0.06]],
+    kuyruk: [0.1, 0.14, 0.08], kuyrukRenk: '#e8dcc8'
+  }),
+  yaban: () => dortAyak({
+    govde: [0.62, 0.62, 1.05], govdeY: 0.7, renk: '#5a4232', bacak: [0.2, 0.38], bacakRenk: '#4a3628',
+    govdeEk: [[0.12, 0.16, 0.9, '#3a2a1e', 0, 0.36, 0]],
+    kafa: [0.48, 0.48, 0.46], kafaY: 0.78, kafaIleri: 0.0, kafaRenk: '#5a4232',
+    kafaEk: [[0.26, 0.2, 0.08, '#6a4a3a', 0, -0.1, -0.5], [0.04, 0.1, 0.04, '#f2ead8', -0.14, -0.06, -0.52], [0.04, 0.1, 0.04, '#f2ead8', 0.14, -0.06, -0.52],
+      [0.06, 0.06, 0.02, '#111', -0.15, 0.08, -0.47], [0.06, 0.06, 0.02, '#111', 0.15, 0.08, -0.47], [0.1, 0.12, 0.06, '#4a3628', -0.18, 0.28, -0.08], [0.1, 0.12, 0.06, '#4a3628', 0.18, 0.28, -0.08]],
+    kuyruk: [0.05, 0.16, 0.05]
+  }),
+  tilki: () => dortAyak({
+    govde: [0.3, 0.3, 0.66], govdeY: 0.46, renk: '#d8742a', bacak: [0.1, 0.3], bacakRenk: '#3a2a22',
+    govdeEk: [[0.26, 0.08, 0.5, '#f2ece0', 0, -0.12, 0]],
+    kafa: [0.32, 0.28, 0.28], kafaY: 0.58, kafaIleri: -0.04,
+    kafaEk: [[0.14, 0.12, 0.16, '#f2ece0', 0, -0.06, -0.34], [0.04, 0.04, 0.02, '#111', 0, -0.02, -0.425], [0.08, 0.12, 0.05, '#d8742a', -0.1, 0.2, -0.06], [0.08, 0.12, 0.05, '#d8742a', 0.1, 0.2, -0.06],
+      [0.05, 0.05, 0.02, '#111', -0.09, 0.05, -0.285], [0.05, 0.05, 0.02, '#111', 0.09, 0.05, -0.285]],
+    kuyruk: [0.14, 0.14, 0.5], kuyrukRenk: '#e8843a'
+  }),
+  ayi: () => dortAyak({
+    govde: [0.9, 0.86, 1.4], govdeY: 0.98, renk: '#5a3a22', bacak: [0.3, 0.56], bacakRenk: '#4a2e1a',
+    govdeEk: [[0.92, 0.3, 0.6, '#6a4428', 0, 0.36, -0.3]],
+    kafa: [0.58, 0.54, 0.52], kafaY: 1.18, kafaIleri: 0.0, kafaRenk: '#5a3a22',
+    kafaEk: [[0.3, 0.22, 0.18, '#8a6a4a', 0, -0.12, -0.6], [0.12, 0.08, 0.02, '#111', 0, -0.06, -0.695], [0.07, 0.07, 0.02, '#111', -0.16, 0.08, -0.53], [0.07, 0.07, 0.02, '#111', 0.16, 0.08, -0.53],
+      [0.14, 0.14, 0.08, '#4a2e1a', -0.24, 0.3, -0.18], [0.14, 0.14, 0.08, '#4a2e1a', 0.24, 0.3, -0.18]],
+    kuyruk: [0.12, 0.12, 0.1]
+  }),
+  deve: () => dortAyak({
+    govde: [0.7, 0.74, 1.5], govdeY: 1.5, renk: '#c8a070', bacak: [0.18, 1.16], bacakRenk: '#b8905e', bacakIc: 0.06, bacakUcIc: 0.08,
+    govdeEk: [[0.5, 0.42, 0.5, '#c8a070', 0, 0.5, 0.08], [0.6, 0.12, 0.4, '#b8905e', 0, 0.7, 0.08]],
+    kafa: [0.26, 0.86, 0.3], kafaY: 1.72, kafaIleri: -0.1, kafaRenk: '#c8a070',
+    kafaEk: [[0.3, 0.28, 0.56, '#c8a070', 0, 0.5, -0.38], [0.22, 0.14, 0.2, '#b8905e', 0, 0.42, -0.7], [0.05, 0.06, 0.02, '#111', -0.155, 0.56, -0.46], [0.05, 0.06, 0.02, '#111', 0.155, 0.56, -0.46],
+      [0.06, 0.1, 0.05, '#b8905e', -0.1, 0.68, -0.18], [0.06, 0.1, 0.05, '#b8905e', 0.1, 0.68, -0.18]],
+    kuyruk: [0.08, 0.5, 0.08], kuyrukRenk: '#9a7a4a'
+  }),
+  ordek: () => kanatli({ govde: [0.3, 0.24, 0.42, '#f2f0ea'], govdeY: 0.3, kafaRenk: '#2f7a3a', gaga: '#e8a020', kanat: '#d8d4c8', ayak: '#e8a020', boyun: 0.1, ek: [[0.31, 0.04, 0.12, '#f2f0ea', 0, 0.1, -0.26]] }),
+  hindi: () => kanatli({ govde: [0.44, 0.42, 0.5, '#4a3628'], govdeY: 0.5, kafaRenk: '#c8d0e0', gaga: '#d8a040', kanat: '#3a2a1e', ayak: '#c8803a', boyun: 0.2, sakal: '#c82a2a',
+    ek: [[0.6, 0.5, 0.06, '#6a4a32', 0, 0.22, 0.28], [0.5, 0.06, 0.06, '#e8d8b0', 0, 0.46, 0.3], [0.04, 0.4, 0.06, '#c8a060', 0, 0.22, 0.31]] }),
+  levrek: () => balik(0.9, '#5a7a6a', '#d8e0dc', [[0.04 * 0.9, 0.06, 0.4, '#3a5a4a', 0, 0.24, 0]]),
+  palamut: () => balik(0.8, '#2f4a7a', '#d8e4ea', [[0.23, 0.02, 0.5, '#1a2a4a', 0, 0.12, 0]]),
   /* 0.51.0: gezgin tüccar: mor kaftan, sarı geniş şapka, sırt heybesi */
   gezgin: () => MODELLER.koylu('gezgin', 0, { gomlek: '#5a2a6e', pantolon: '#2e2a3a', sapka: '#c8a040', uzun: true, heybe: '#8a5a2e' }),
   koylu: (meslek = 'ciftci', renk, ozel) => {

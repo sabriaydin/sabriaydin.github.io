@@ -16,6 +16,7 @@ import { Tekneler } from './oyun/tekneler.js';
 import { FenerIsiklari } from './grafik/fener.js';
 import { Varliklar } from './varlik/varliklar.js';
 import { TURLER } from './varlik/turler.js';
+import { MODELLER } from './varlik/modeller.js';
 import { Koyler } from './koy/koyler.js';
 import { Gorevler, yonAci } from './koy/gorevler.js';
 import { koylerAlan, UZMANLIK } from './dunya/koy-uretici.js';
@@ -1010,6 +1011,7 @@ function yuklemeKontrol() {
     while (o.oyuncu.carpisiyor(p.x, p.y, p.z) && g++ < 200) p.y += 1;
     if (o.yeniDogum) { o.dogum = { x: p.x, y: p.y, z: p.z }; o.yeniDogum = false; }
     o.hazir = true;
+    onDerle();   // 0.51.2: gölgelendiriciler önceden derlenir (ilk kez görülen canlı ya da eşyada takılma olmaz)
     $('#hud').hidden = false;
     ekran('oyun');
     if (o.hayatta.olu) olum('');
@@ -1251,6 +1253,28 @@ function oyunBitir() {
   if (document.pointerLockElement || (dokun.aktif && kilitli)) { bilerekBirak = true; kilitBirak(); }
 }
 
+/* 0.51.2: gölgelendirici ön derlemesi. Three.js bir malzeme türünü ilk kez çizerken gölgelendiricisini derler; bu, oyunda ilk kez
+   görülen canlıda, eşyada ya da parçacıkta 50-300 ms'lik takılmaya yol açıyordu. Dünya açılınca sahnedeki ve oyunda kullanılan başlıca
+   malzeme türlerinin gölgelendiricileri (tarayıcı destekliyorsa arka planda) derlenir. Malzemeler bırakılmaz; derlenen programlar önbellekte kalır. */
+let onDerlendi = false;
+const ON_DERLEME_MALZEME = [];
+function onDerle() {
+  if (onDerlendi) return; onDerlendi = true;
+  try {
+    const g = new THREE.Group(), geo = new THREE.BoxGeometry(0.01, 0.01, 0.01), h = sahne.atlasDoku;
+    const varyant = [{ map: h }, { map: h, transparent: true }, { map: h, alphaTest: 0.5 }, { map: h, alphaTest: 0.5, transparent: true, depthWrite: false }, { map: h, side: THREE.DoubleSide, alphaTest: 0.5 },
+      { vertexColors: true }, { vertexColors: true, transparent: true }, { vertexColors: true, map: h }, { vertexColors: true, map: h, transparent: true }, { color: 0xffffff }, { color: 0xffffff, transparent: true }, { color: 0xffffff, side: THREE.DoubleSide }];
+    if (!ON_DERLEME_MALZEME.length) for (const v of varyant) ON_DERLEME_MALZEME.push(new THREE.MeshBasicMaterial(v));
+    for (const m of ON_DERLEME_MALZEME) { const n = new THREE.Mesh(geo, m); n.layers.set(31); g.add(n); }
+    for (const t of ['zombi', 'iskelet', 'koylu']) { try { const T = TURLER[t]; if (!T) continue; const md = MODELLER[T.model](null, 0); md.kok.traverse(n => n.layers.set(31)); g.add(md.kok); } catch (e) { /* model yok */ } }
+    sahne.sahne.add(g);
+    const bitir = () => { sahne.sahne.remove(g); g.traverse(n => { if (n.geometry && n.geometry !== geo) n.geometry.dispose(); }); };
+    const c = sahne.cizici;
+    if (c.compileAsync) c.compileAsync(sahne.sahne, sahne.kamera).then(bitir, bitir); else { c.compile(sahne.sahne, sahne.kamera); bitir(); }
+    if (sahne.elSahne && sahne.elKamera) c.compile(sahne.elSahne, sahne.elKamera);
+  } catch (e) { console.warn('Ön derleme yapılamadı', e); }
+}
+
 /* ---------- Döngü ---------- */
 let onceki = performance.now(), fpsSayac = 0, fpsZaman = 0, sonFps = 0;
 /* 0.19.0: otomatik çözünürlük: oyun sırasında kare hızı 2 saniye boyunca 45'in altında kalırsa çizim çözünürlüğü düşer, 57'nin üstüne çıkınca yükselir */
@@ -1263,8 +1287,10 @@ function otoCozunurluk(t) {
   const fps = oto.kare / s;
   /* 0.51.1: hedef kare hızı ayardan (ekranın ve kare hızı sınırının üstünde olamaz) */
   const hedef = Math.min(+ayar.otoHedef || 60, +ayar.kareSinir || 999, yenileme.hz || 999);
-  if (fps < hedef * 0.75) sahne.olcekAyarla(sahne.olcek - 0.1);
-  else if (fps > hedef * 0.95) sahne.olcekAyarla(sahne.olcek + 0.05);
+  /* 0.51.2: tek bir takılmada çözünürlük oynamaz: düşürmek için art arda iki, yükseltmek için üç ölçüm gerekir (her değişiklik tuvali yeniden boyutlandırır) */
+  if (fps < hedef * 0.75) { oto.dus = (oto.dus || 0) + 1; oto.cik = 0; if (oto.dus >= 2) { oto.dus = 0; sahne.olcekAyarla(sahne.olcek - 0.1); } }
+  else if (fps > hedef * 0.95) { oto.cik = (oto.cik || 0) + 1; oto.dus = 0; if (oto.cik >= 3 && sahne.olcek < 1) { oto.cik = 0; sahne.olcekAyarla(sahne.olcek + 0.05); } }
+  else { oto.dus = 0; oto.cik = 0; }
   oto.t0 = t; oto.kare = 0;
 }
 const gecici = new THREE.Vector3();
@@ -1295,12 +1321,14 @@ const ciftTus = {};
 const kareHatalari = new Map();
 /* 0.51.1: ekran yenileme hızı algılama ve kare hızı sınırı.
    Tarayıcı kareleri ekranın yenileme hızında çizer (dikey eşitleme); sınır seçilirse fazla kareler atlanır. */
-const yenileme = { son: 0, araliklar: [], hz: 0, hedef: 0 };
+const yenileme = { son: 0, araliklar: new Float64Array(120), n: 0, hz: 0, hedef: 0 };
 function yenilemeOlc(t) {
   const d = t - yenileme.son; yenileme.son = t;
-  if (d > 1 && d < 100) { yenileme.araliklar.push(d); if (yenileme.araliklar.length > 120) yenileme.araliklar.shift(); }
-  if (yenileme.araliklar.length >= 60 && (yenileme.araliklar.length % 30 === 0)) {
-    const l = [...yenileme.araliklar].sort((a, b) => a - b), a = l[Math.floor(l.length * 0.2)], hz = 1000 / a;
+  if (!(d > 1 && d < 100)) return;
+  /* 0.51.2: halka arabellek; 120 karede bir değerlendirilir (her karede dizi kopyalanıp sıralanmaz) */
+  yenileme.araliklar[yenileme.n % 120] = d; yenileme.n++;
+  if (yenileme.n >= 60 && yenileme.n % 120 === 60) {
+    const l = yenileme.araliklar.slice(0, Math.min(120, yenileme.n)).sort(), a = l[Math.floor(l.length * 0.2)], hz = 1000 / a;
     const ortak = [48, 50, 60, 72, 75, 90, 100, 120, 144, 165, 170, 180, 200, 240, 280, 300, 360], en = ortak.reduce((b, x) => Math.abs(x - hz) < Math.abs(b - hz) ? x : b, ortak[0]);
     const yeni = Math.abs(en - hz) / hz < 0.04 ? en : Math.round(hz);
     if (yeni !== yenileme.hz) { yenileme.hz = yeni; kareSiniriSecenekleri(); }
@@ -1336,6 +1364,7 @@ function adim(t) {
   if (fpsZaman >= 0.5) { sonFps = Math.round(fpsSayac / fpsZaman); $('#fps').textContent = sonFps + ' FPS'; fpsSayac = 0; fpsZaman = 0; if (aktifEkran === 'ayarlar') ekranBilgisi(); }
   const o = oyun;
   if (!o) { menuKamera(dt); muzik.guncelle(dt, 'menu'); return; }
+  o.dunya.butceli = !!o.hazir;   // 0.51.2: oyun sırasında işçi sonuçları kare bütçesiyle işlenir
   if (!o.hazir) { yuklemeKontrol(); if (o.ag) o.ag.guncelle(dt); if (oyun) sahne.ciz(); return; }
   /* 0.45.0: isabet anında çok kısa zaman yavaşlaması (vuruş hissi); çok oyunculuda dünya yavaşlatılmaz */
   if (o.etkilesim && o.etkilesim.durak > 0) { o.etkilesim.durak -= dt; if (!o.ag) dt *= 0.15; }
@@ -1462,7 +1491,7 @@ function adim(t) {
       if (diyar) { ses.diyarUgultu(); if (Math.random() < 0.6) ses.lav(0.6 + Math.random() * 0.4); }
       else if (o.dunya.ustKati(Math.floor(g.x), Math.floor(g.z)) > g.y + 2 && g.y < DENIZ + 6) {
         ses.damla(0.4 + Math.random() * 0.6);
-        for (const m of o.dunya.mesaleler.values()) if (m[3] === 11 && Math.hypot(m[0] - g.x, m[1] - g.y, m[2] - g.z) < 14) { ses.konumlu(m[0], m[1], m[2], () => ses.lav(1), 16); break; }   // 0.41.10: konumlu
+        o.dunya.isikTara(g.x, g.z, 14, m => { if (m[3] === 11 && Math.hypot(m[0] - g.x, m[1] - g.y, m[2] - g.z) < 14) { ses.konumlu(m[0], m[1], m[2], () => ses.lav(1), 16); return true; } });   // 0.51.2: ızgaradan   // 0.41.10: konumlu
       }
     }
     if (kilitli && !o.hayatta.olu && o.uyku <= 0) o.etkilesim.guncelle(dt, { sol: fare.sol, sag: fare.sag, egil: basili(tus, 'egil') });

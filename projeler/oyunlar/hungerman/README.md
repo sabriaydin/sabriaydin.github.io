@@ -119,6 +119,31 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 52.0 (0.52.0): Bereket güncellemesi (213 yeni eşya ve blok)
+
+Kimlikler 2200'den başlayan ayrı bir aralıktan ayrılır (bloklar.js, ayir52); eski aralık 2073'ten devam eder. Eski kayıtlar etkilenmez.
+
+- **Yeni hayvanlar (8):** Keçi (dağ, savan, kayalık; kovayla sağılır: Keçi Sütü Kovası), Ördek (bataklık, kumsal, göl, mangrov; yumurtlar), Hindi (orman, çayır), Geyik (orman, huş, tayga; boynuz düşürebilir), Yaban Domuzu (orman, sık orman; nötr, kızdırılınca saldırır), Tilki (tayga, sonbahar ormanı; kürk), Boz Ayı (tayga, sık orman; nötr ve güçlü; post ve bal peteği), Deve (çöl, savan; deve yünü). Her birinin modeli, sesi, yemi (çoğaltma) ve ganimeti vardır; otçullar kurtlardan kaçar.
+- **Yeni balıklar (2):** Levrek ve Palamut denizde ve göllerde yüzer.
+- **Yeni ekinler (6):** Çeltik (pirinç), Patlıcan, Ayçiçeği, Çay, Kahve, Kakao. Tohumlar yabanda bulunur: saz pirinç, çalılar çay fidesi ve patlıcan tohumu, savan çalısı kahve çekirdeği ve ayçiçeği, mangrov yaprağı kakao, uzun ot nadiren ayçiçeği ve patlıcan tohumu verir. Gezgin tüccar da satar.
+- **Yeni malzemeler:** Ayçiçek Yağı, Kakao Tozu, Kahve Tozu (değirmende), Krema, Mayonez, Ketçap, Sucuk, Keçi Peyniri, Çikolata; hayvan ürünleri (7 çiğ ve 7 pişmiş et/balık, Geyik Boynuzu, Tilki Kürkü, Ayı Postu, Deve Yünü).
+- **Yeni yemekler ve içecekler (53):** pilav, karnıyarık, imam bayıldı, patlıcan kebabı, menemen, sucuklu yumurta, pizza, hamburger, sandviç, tost, patates kızartması, dört çorba, üç salata, sushi, hindi dolması, portakallı ördek, geyik yahnisi, gözlemeler, çay, Türk kahvesi, filtre kahve, sütlü kahve, sıcak çikolata, milkshake, smoothie, elma suyu, iki dondurma, brownie, çikolatalı kek, waffle, pankek, krep, cheesecake, tiramisu, künefe, revani, irmik helvası, aşure, ızgara köfte, ızgara sebze, tavuk şiş, mısır ekmeği, kakaolu puding ve daha fazlası. Her biri bir ya da iki etki verir (aşçılık seviyesiyle uzar); çorbalar ve sıcak içecekler ısıtır, dondurma ve soğuk içecekler serinletir.
+- **Elektrikli cihazlar (17):** 8 renkte LED Panel (çalışırken ışık verir; beyaz, mavi ve mor soğuk ışıktır), Projektör (22 blok menzilli güçlü ışık, yönlü), Vantilatör (çevresini 9 °C'ye kadar serinletir), Blender, Kahve Makinesi, Tost Makinesi, Mikrodalga, Dondurma Makinesi, Elektrikli Izgara (çalışırken yeni pişirme istasyonlarıdır; üretim penceresinde görünür) ve Radyo (çalışırken sağ tıkla müzik çalar). Hepsi kabloyla bağlanır; yönlü cihazların önü oyuncuya bakar.
+- **Yapı blokları (86):** Kuvars (blok, cilalı, tuğla, sütun), Traverten, Andezit, Kızıl Kumtaşı (düz, oymalı), Kumtaşı Tuğla, Deniz Taşı (tuğla, koyu, ışıklı Deniz Feneri Taşı), Obsidyen Tuğla, ışık veren Işıltaş Tuğla, kırmızı / sarı / siyah tuğla, Taş Karo, Terrazzo, Arnavut Kaldırımı, Tuğla Yol, Balıksırtı Parke, Koyu Ahşap Lambri, Kütük Kaplama, Kiremit ve Mavi Kiremit Çatı, Bakır / Demir / Elmas / Kömür / Kemik / Bal blokları ve bakırın yıpranmış, yeşillenmiş ve kesme hâlleri, Akvaryum, Buzlu Cam, Ahşap Çerçeveli Cam, 8 renk Sıva ve 8 renk Boyalı Kalas (eldeki boyayla renk değiştirir), Kâğıt / Taş / Demir Fener; 9 malzemenin merdiveni ve yarım bloğu, 7 malzemenin duvarı.
+- Üretim: yeni taşlar Taş Kesme Tezgâhında, maden blokları dokuz külçeden (geri de çözülür), et ve balıklar kamp ateşinde, fırında ya da ızgarada pişer. Mikrodalga, fırınlanmış patates, patlamış mısır, haşlanmış yumurta ve sütlacı kömürsüz yapar.
+
+## 51.2 (0.51.2): Akıcılık ve performans
+
+- **Kare süresi dengesi:** işçilerden gelen sonuçlar (üretilen parça, mesh) artık geldiği anda değil, oyun döngüsünde kare başına en çok 2,5 ms ve sınırlı geometri boyutuyla, oyuncuya yakın olandan başlayarak işlenir. Hızlı giderken birkaç sonucun aynı anda gelip bir kareyi uzatması (takılma) önlendi. Yükleme ekranında sonuçlar beklemeden işlenir. Ölçümde işçi sonuçlarının ana iş parçacığındaki toplam süresi yaklaşık yarıya indi (en uzun sonuç 27 ms'den 12 ms'ye).
+- **Parça taraması işçide:** yeni parçadaki ışık kaynakları, ekinler, yüzeye yakın sular ve en yüksek dolu katman işçide bulunur; ana iş parçacığı 65 536 bloğun hepsi yerine yalnızca bu dizinlere bakar (ışık kaynağı taraması ve akan su taraması).
+- **İş dağıtımı:** çevre taraması yalnızca bir şey değişince (oyuncu başka parçaya geçince, görüş değişince, parça verisi gelince, blok değişince) yapılır; acil parça taraması yalnızca acil parça varken; uzak parçaları boşaltma döngüsü yalnızca parça değişince.
+- **Işık kaynakları ızgarası:** ışık kaynakları 16 × 16 blokluk ızgarada da tutulur; canlıların meşale yakınlığı, canlı aydınlatması, en yakın 32 ışık ve lav sesi araması tüm listeyi (yeraltında binlerce lav ışığı) taramaz.
+- **Blok okuma:** son okunan parça önbellekte tutulur; en üst katı blok araması parçayı bir kez bulur ve parçanın en yüksek dolu katmanından başlar (önceden 255 ayrı okuma). Yağış ve kar sütun araması da öyle.
+- **Pusula:** 360 derecelik çentik ve yazı şeridi bir kez hazırlanır, bakış değişince yalnızca ilgili dilim kopyalanır.
+- **Gölgelendirici ön derlemesi:** dünya açılınca sahnedeki ve oyunda kullanılan başlıca malzeme türlerinin gölgelendiricileri (destekleyen tarayıcıda arka planda) derlenir; ilk kez görülen canlı, eşya ya da parçacıkta yaşanan kısa donmalar azalır.
+- **Otomatik çözünürlük:** tek bir takılmada çözünürlük oynamaz (düşürmek için art arda iki, yükseltmek için üç ölçüm gerekir; her değişiklik tuvali yeniden boyutlandırıyordu).
+- Ekran yenileme hızı ölçümü halka arabellekle ve daha seyrek yapılır.
+
 ## 51.1 (0.51.1): Görüntü ayarları ve gezgin tüccar testi
 
 - Ayarlar > Görüntü sekmesi bölümlere ayrıldı (Kare hızı ve akıcılık, Çözünürlük ve keskinlik, Dünya, Kamera ve renk); sekmenin başında ekranın algılanan yenileme hızı, anlık kare hızı, çizim çözünürlüğü ve ölçek görünür

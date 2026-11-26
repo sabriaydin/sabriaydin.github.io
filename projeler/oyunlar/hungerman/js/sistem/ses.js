@@ -319,6 +319,15 @@ export class Ses {
       case 'buziskelet': for (let i = 0; i < 3; i++) setTimeout(() => this.patlama(3200 * y, 0.05, 0.11 * h, 'bandpass', 6), i * 70); this.ton(1900 * y, 0.25, 0.03 * h, 'sine', 2400); break;
       case 'haydut': this.ton(170 * y, 0.18, 0.08 * h, 'sawtooth', 130 * y); setTimeout(() => this.ton(150 * y, 0.2, 0.06 * h, 'sawtooth', 120 * y), 160); break;
       case 'muhafiz': this.patlama(140 * y, 0.9, 0.22 * h, 'lowpass', 1.2, 0.6); this.ton(55 * y, 0.8, 0.12 * h, 'sawtooth', 40); break;
+      /* 0.52.0: yeni hayvanlar */
+      case 'keci': for (let i = 0; i < 3; i++) setTimeout(() => this.ton(480 * y, 0.09, 0.08 * h, 'sawtooth', 420 * y), i * 80); break;
+      case 'ordek': for (let i = 0; i < (tip === 'normal' ? 3 : 2); i++) setTimeout(() => { this.ton(620 * y, 0.08, 0.08 * h, 'square', 520 * y); this.patlama(900, 0.06, 0.04 * h, 'bandpass', 3); }, i * 130); break;
+      case 'hindi': for (let i = 0; i < 5; i++) setTimeout(() => this.ton((700 - i * 40) * y, 0.05, 0.07 * h, 'triangle', (560 - i * 40) * y), i * 55); break;
+      case 'geyik': this.ton(380 * y, 0.35, 0.08 * h, 'triangle', 220 * y); break;
+      case 'yaban': this.ton(160 * y, 0.18, 0.12 * h, 'sawtooth', 120 * y); this.patlama(420, 0.16, 0.08 * h, 'lowpass', 2); break;
+      case 'tilki': this.ton(900 * y, 0.12, 0.06 * h, 'triangle', 1300 * y); setTimeout(() => this.ton(1100 * y, 0.1, 0.05 * h, 'triangle', 700 * y), 120); break;
+      case 'ayi': this.ton(80 * y, 0.8, 0.16 * h, 'sawtooth', 60 * y); this.patlama(260, 0.7, 0.1 * h, 'lowpass', 1.5, 0.7); break;
+      case 'deve': this.ton(140 * y, 0.6, 0.1 * h, 'sawtooth', 95 * y); this.patlama(500, 0.4, 0.05 * h, 'lowpass', 2); break;
       case 'yarasa': for (let i = 0; i < (tip === 'normal' ? 2 : 3); i++) setTimeout(() => this.ton((3400 + Math.random() * 900) * y, 0.05, 0.05 * h, 'square', 2800), i * 85); break;
     }
   }

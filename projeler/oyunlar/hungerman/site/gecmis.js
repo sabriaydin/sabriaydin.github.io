@@ -2,7 +2,24 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.52', b: 'Bereket', y: [
+  { s: '0.52.0', b: 'Bereket güncellemesi', m: [
+    'Oyuna 213 yeni eşya ve blok geldi.',
+    'Sekiz yeni hayvan: keçi, ördek, hindi, geyik, yaban domuzu, tilki, boz ayı ve deve. Denizde levrek ve palamut da yüzüyor. Keçiler sağılabiliyor, ördekler yumurtluyor; yaban domuzu ve ayıya bulaşmamakta fayda var.',
+    'Altı yeni ekin: çeltik, patlıcan, ayçiçeği, çay, kahve ve kakao. Tohumlarını yabanda, sazlarda ve çalılarda bulabilirsiniz.',
+    'Elli üç yeni yemek ve içecek: pizzadan karnıyarığa, Türk kahvesinden tiramisuya. Çoğu bir güç, hız ya da direnç etkisi veriyor.',
+    'Mutfağa elektrik geldi: blender, kahve makinesi, tost makinesi, mikrodalga, dondurma makinesi ve elektrikli ızgara. Ayrıca sekiz renkte LED panel, projektör, vantilatör ve radyo.',
+    'Seksen altı yeni yapı bloğu: kuvars, traverten, deniz taşı, kiremit çatı, boyanabilir sıva ve kalas, metal bloklar, akvaryum ve fenerler; birçoğunun merdiveni, yarım bloğu ve duvarı.'
+  ]}
+]},
 { g: '0.51', b: 'Yayın öncesi', y: [
+  { s: '0.51.2', b: 'Akıcılık', m: [
+    'Hızlı giderken ya da yeni bir bölgeye girerken yaşanan kısa takılmalar azaldı: yeni arazi parçaları artık karelere bölünerek, yakından uzağa ekleniyor.',
+    'Arazi yüklenirken yapılan taramaların büyük bölümü arka plandaki işçilere taşındı.',
+    'Yeraltında çok sayıda lav ve meşale varken canlıların ve ışıkların hesaplanması hızlandı.',
+    'İlk kez görülen canlı ya da eşyada yaşanan kısa donmaları önlemek için oyun açılırken gölgelendiriciler önceden hazırlanıyor.',
+    'Pusula daha az işlemle çiziliyor; otomatik çözünürlük tek bir takılmada değişmiyor.'
+  ]},
   { s: '0.51.1', b: 'Görüntü ayarları', m: [
     'Ayarlar\'daki Görüntü sekmesi yenilendi: ekranınızın yenileme hızı ve anlık kare hızı sekmenin başında görünüyor.',
     'Kare hızı sınırı seçilebiliyor; varsayılan olarak oyun ekranınızın yenileme hızında (144 Hz, 165 Hz...) çiziliyor.',

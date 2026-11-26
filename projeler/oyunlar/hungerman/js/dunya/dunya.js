@@ -17,6 +17,9 @@ const KAYNAK = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && (b.mesale || b.mekanik || b.elektrik || b.kovan || b.id === 58 || b.id === 59)) KAYNAK[b.id] = 1;
 
 
+/* 0.51.2: kare başına işçi sonucu bütçesi: süre (ms) ve geometri boyutu (konum dizisi öğe sayısı) */
+const BUTCE_MS = 2.5, BUTCE_BOY = 900000;
+
 /* 0.41.0: parçadaki en yüksek dolu katman (yukarıdan aşağı ilk dolu katman) */
 function ustBul(v) {
   const K = PB * PB;
@@ -34,8 +37,12 @@ export class Dunya {
     this.mesaleler = new Map();       // "x,y,z" -> [x, y, z, güç]
     /* 0.19.0: ışık listesi her değiştiğinde sürüm artar (yakın ışık önbelleği için) */
     this.mesaleSurum = 0;
-    { const M = this.mesaleler, set = M.set.bind(M), sil = M.delete.bind(M), temizle = M.clear.bind(M);
-      M.set = (k, v) => { this.mesaleSurum++; return set(k, v); }; M.delete = k => { const r = sil(k); if (r) this.mesaleSurum++; return r; }; M.clear = () => { this.mesaleSurum++; temizle(); }; }
+    /* 0.51.2: ışık kaynakları 16 x 16 blokluk ızgarada da tutulur (yakın ışık aramaları tüm listeyi taramaz) */
+    { const M = this.mesaleler, set = M.set.bind(M), sil = M.delete.bind(M), temizle = M.clear.bind(M), I = () => this.isikIzgara;
+      const hk = v => Math.floor(v[0] / 16) * 65536 + Math.floor(v[2] / 16);
+      M.set = (k, v) => { this.mesaleSurum++; const e = M.get(k); if (e) { const l = I().get(hk(e)); if (l) l.delete(k); } let l = I().get(hk(v)); if (!l) I().set(hk(v), l = new Map()); l.set(k, v); return set(k, v); };
+      M.delete = k => { const e = M.get(k); if (e) { const l = I().get(hk(e)); if (l) { l.delete(k); if (!l.size) I().delete(hk(e)); } } const r = sil(k); if (r) this.mesaleSurum++; return r; };
+      M.clear = () => { this.mesaleSurum++; I().clear(); temizle(); }; }
     this.ekinler = new Set();         // büyümekte olan ekinlerin "x,y,z" anahtarları
     this.sandiklar = new Map();       // "x,y,z" -> 27 yuvalık dizi
     this.mekanikler = new Map();      // 0.17.0: mekanik bloklar "x,y,z" -> [x, y, z]
@@ -44,6 +51,9 @@ export class Dunya {
     this.yuvalar = new Map();         // canavar yuvaları "x,y,z" -> { x, y, z, sayac }
     this.kovanlar = new Map();        // 0.21.0: arı kovanları "x,y,z" -> { x, y, z, sayac }
     this.gorus = 8;
+    /* 0.51.2: işçi sonuçları kuyruğu (kare başına süre bütçesiyle işlenir), tarama gereksinimi, son okunan parça önbelleği, ışık ızgarası */
+    this.bekleyen = []; this.butceli = false; this.taramaGerek = true; this.acilVar = false; this._bp = null; this._bcx = 0; this._bcz = 0;
+    this.isikIzgara = new Map();
     this.dinleyiciler = [];
     this.isciler = [];
     this.ofsetler = [];
@@ -71,7 +81,7 @@ export class Dunya {
     this.kapat = true;
     for (const i of this.isciler) i.w.terminate();
     for (const p of this.parcalar.values()) this.meshSil(p);
-    this.parcalar.clear();
+    this.parcalar.clear(); this._bp = null; this.bekleyen = [];
   }
 
   gorusAyarla(r) {
@@ -80,7 +90,7 @@ export class Dunya {
     const R = r + 1;
     for (let z = -R; z <= R; z++) for (let x = -R; x <= R; x++) { const d = x * x + z * z; if (d <= (R + 0.5) * (R + 0.5)) o.push([x, z, d]); }
     o.sort((a, b) => a[2] - b[2]);
-    this.ofsetler = o;
+    this.ofsetler = o; this.taramaGerek = true;
   }
 
   /* ---------- Blok erişimi ---------- */
@@ -89,8 +99,10 @@ export class Dunya {
     if (y < 0) return 1;
     if (y >= PY) return 0;
     const cx = Math.floor(x / PB), cz = Math.floor(z / PB);
-    const p = this.parcalar.get(parcaAnahtar(cx, cz));
-    if (!p || !p.v) return 0;
+    /* 0.51.2: son okunan parça önbellekte tutulur (art arda okumaların çoğu aynı parçadadır; anahtar metni ve Map araması atlanır) */
+    let p = this._bp;
+    if (!p || this._bcx !== cx || this._bcz !== cz) { p = this.parcalar.get(parcaAnahtar(cx, cz)); if (!p) return 0; this._bp = p; this._bcx = cx; this._bcz = cz; }
+    if (!p.v) return 0;
     return p.v[dizin(x - cx * PB, y, z - cz * PB)];
   }
   yuklu(x, z) { const p = this.parca(Math.floor(x / PB), Math.floor(z / PB)); return !!(p && p.v); }
@@ -153,11 +165,16 @@ export class Dunya {
     return false;
   }
   kirletK(cx, cz) { const p = this.parca(cx, cz); if (p) this.kirlet(p, true); }
-  kirlet(p, acil) { p.kirli = true; p.surum++; if (acil) p.acil = true; }
+  kirlet(p, acil) { p.kirli = true; p.surum++; if (acil) { p.acil = true; this.acilVar = true; } this.taramaGerek = true; }
 
   /* Sütunun en üst katı bloğu (gökyüzü görünürlüğü için) */
   ustKati(x, z) {
-    for (let y = PY - 1; y > 0; y--) { const b = this.blok(x, y, z); if (KATI[b]) return y; }
+    /* 0.51.2: parça bir kez bulunur ve arama parçanın en yüksek dolu katmanından başlar (önceden 255 ayrı blok okuması) */
+    x = Math.floor(x); z = Math.floor(z);
+    const cx = Math.floor(x / PB), cz = Math.floor(z / PB), p = this.parcalar.get(parcaAnahtar(cx, cz));
+    if (!p || !p.v) return 0;
+    const v = p.v, K = PB * PB, b = (z - cz * PB) * PB + (x - cx * PB);
+    for (let y = Math.min(PY - 1, p.ust ?? PY - 1); y > 0; y--) if (KATI[v[y * K + b]]) return y;
     return 0;
   }
 
@@ -165,25 +182,48 @@ export class Dunya {
   guncelle(px, pz) {
     if (this.kapat) return;
     const pcx = Math.floor(px / PB), pcz = Math.floor(pz / PB);
-    this.merkez = [pcx, pcz];
+    const degisti = pcx !== this.merkez[0] || pcz !== this.merkez[1];
+    if (degisti) { this.merkez = [pcx, pcz]; this.taramaGerek = true; }
     const R = this.gorus;
-    /* Uzaklaşan parçaları boşalt */
-    for (const p of this.parcalar.values()) {
+    /* Uzaklaşan parçaları boşalt (0.51.2: yalnızca oyuncu başka parçaya geçince, görüş değişince ya da çok oyunculu sunucuda) */
+    const bosalt = degisti || this.bosaltGorus !== R || this.ekMerkezler.length > 0 || this.parcalar.size !== this.bosaltBoyut;
+    this.bosaltGorus = R;
+    if (bosalt) for (const p of this.parcalar.values()) {
       const dx = p.cx - pcx, dz = p.cz - pcz;
       if (dx * dx + dz * dz > (R + 3) * (R + 3)) {
         /* Başka bir oyuncunun yakınındaysa veri kalır, yalnızca çizim kaldırılır */
         if (this.ekMerkezler.length && this.ekYakin(p.cx, p.cz, this.EK_R + 2)) { if (p.mesh || p.suMesh || p.altMesh) { this.meshSil(p); p.kirli = true; } continue; }
-        this.meshSil(p); this.parcalar.delete(p.k);
+        this.meshSil(p); this.parcalar.delete(p.k); if (this._bp === p) this._bp = null; this.taramaGerek = true;
         if (p.kaynaklar) for (const k of p.kaynaklar) { this.mesaleler.delete(k); this.ekinler.delete(k); this.yuvalar.delete(k); this.mekanikler.delete(k); this.elektrikler.delete(k); this.kovanlar.delete(k); }
       }
     }
+    if (bosalt) this.bosaltBoyut = this.parcalar.size;
+    this.kuyrukIsle();
     this.isDagit();
+  }
+
+  /* 0.51.2: işçi sonuçları (üretilen parça, mesh) kare başına en çok BUTCE_MS süre ve sınırlı geometri boyutuyla, yakından uzağa işlenir.
+     Önceden bir karede birkaç sonuç birden gelince (hızlı giderken) o kare uzuyor, görüntü takılıyordu. */
+  kuyrukIsle() {
+    const K = this.bekleyen; if (!K.length) return;
+    const [mx, mz] = this.merkez;
+    if (K.length > 1) K.sort((a, b) => ((a.cx - mx) ** 2 + (a.cz - mz) ** 2) - ((b.cx - mx) ** 2 + (b.cz - mz) ** 2));
+    const t0 = performance.now(); let boy = 0, n = 0;
+    while (K.length) {
+      const m = K[0];
+      const b = m.tur === 'meshle' && m.r ? m.r.opak.p.length + m.r.su.p.length + (m.r.alt ? m.r.alt.p.length : 0) : 0;
+      if (n > 0 && (performance.now() - t0 > BUTCE_MS || boy + b > BUTCE_BOY)) break;
+      K.shift(); boy += b; n++;
+      this.sonucIsle(m);
+    }
+    if (n) this.taramaGerek = true;
   }
 
   /* 0.50.0: hızlı giderken (at, tekne, uçuş) gidilen yöndeki parçalar önce üretilir: uzaklık, yöne göre 0,55 ile 1,45 arasında tartılır */
   hizAyarla(vx, vz) {
     const h = Math.hypot(vx, vz);
-    this.yonK = h > 6.5 ? (((Math.round(Math.atan2(vz, vx) / (Math.PI / 4)) % 8) + 8) % 8) : null;
+    const y = h > 6.5 ? (((Math.round(Math.atan2(vz, vx) / (Math.PI / 4)) % 8) + 8) % 8) : null;
+    if (y !== this.yonK) { this.yonK = y; this.taramaGerek = true; }
   }
   ofsetSirasi() {
     const y = this.yonK; if (y == null) return this.ofsetler;
@@ -205,13 +245,22 @@ export class Dunya {
     if (!bos.length) return;
     const [pcx, pcz] = this.merkez;
     const R = this.gorus;
-    /* Önce oyuncunun değiştirdiği (acil) parçalar */
-    for (const p of this.parcalar.values()) {
-      if (!bos.length) return;
-      if (p.acil && p.v && !p.meshleniyor && (p.cx - pcx) ** 2 + (p.cz - pcz) ** 2 <= (R + 3) * (R + 3) && this.komsularHazir(p)) { this.meshIste(bos.pop(), p); }
+    /* Önce oyuncunun değiştirdiği (acil) parçalar (0.51.2: yalnızca acil parça varken taranır) */
+    if (this.acilVar) {
+      let kaldi = false;
+      for (const p of this.parcalar.values()) {
+        if (!p.acil) continue;
+        if (!bos.length) return;
+        if (p.v && !p.meshleniyor && (p.cx - pcx) ** 2 + (p.cz - pcz) ** 2 <= (R + 3) * (R + 3) && this.komsularHazir(p)) this.meshIste(bos.pop(), p);
+        else kaldi = true;
+      }
+      this.acilVar = kaldi;
     }
+    /* 0.51.2: son taramadan beri hiçbir şey değişmediyse (merkez, görüş, parça verisi, kirlenen parça) çevre yeniden taranmaz */
+    if (!this.taramaGerek && !this.ekMerkezler.length) return;
+    this.taramaGerek = false;
     for (const [ox, oz, d] of this.ofsetSirasi()) {
-      if (!bos.length) return;
+      if (!bos.length) { this.taramaGerek = true; return; }
       const cx = pcx + ox, cz = pcz + oz;
       const k = parcaAnahtar(cx, cz);
       let p = this.parcalar.get(k);
@@ -227,7 +276,7 @@ export class Dunya {
     }
     /* Diğer oyuncuların çevresi: yalnızca blok verisi */
     for (const [mx, mz] of this.ekMerkezler) for (const [ox, oz] of this.ekOfsetler) {
-      if (!bos.length) return;
+      if (!bos.length) { this.taramaGerek = true; return; }
       const cx = mx + ox, cz = mz + oz, k = parcaAnahtar(cx, cz);
       let p = this.parcalar.get(k);
       if (!p) { p = { k, cx, cz, v: null, uretiliyor: false, kirli: true, acil: false, surum: 0, meshleniyor: false, mesh: null, suMesh: null }; this.parcalar.set(k, p); }
@@ -265,28 +314,39 @@ export class Dunya {
     isci.mesgul = false;
     if (this.kapat) return;
     if (m.tur === 'hata') { console.error('İşçi:', m.mesaj); }
-    else if (m.tur === 'uret') {
+    else if (m.tur === 'uret' || m.tur === 'meshle') {
+      /* 0.51.2: oyun sırasında sonuçlar kuyruğa alınır ve karede bütçeyle işlenir; yükleme ekranında hemen işlenir */
+      if (this.butceli) this.bekleyen.push(m);
+      else { while (this.bekleyen.length) this.sonucIsle(this.bekleyen.shift()); this.sonucIsle(m); }
+    }
+    this.isDagit();
+  }
+  sonucIsle(m) {
+    if (m.tur === 'uret') {
       const p = this.parca(m.cx, m.cz);
       if (p && !p.v) {
         const d = this.degisiklikler.get(p.k);
-        if (d) for (const [i, id] of d) m.v[i] = id;
-        p.v = m.v; p.uretiliyor = false; p.kirli = true; p.ust = ustBul(p.v);
+        let ozel = m.ozel || null;
+        if (d) { for (const [i, id] of d) m.v[i] = id; if (ozel) { const ek = []; for (const [i] of d) ek.push(i); const y = new Uint32Array(ozel.length + ek.length); y.set(ozel); y.set(ek, ozel.length); ozel = y; } }
+        p.v = m.v; p.uretiliyor = false; p.kirli = true; p.ust = m.ust != null && !d ? m.ust : ustBul(p.v);
+        p.ozel = ozel;   // 0.51.2: işçinin bulduğu ışık kaynağı, ekin ve su blokları (dizinler); tarama yalnızca bunlara bakar
         this.kaynakTara(p);
         if (this.parcaYuklendi) this.parcaYuklendi(p);   // 0.30.5: akan su taraması
+        p.ozel = null;
+        this.taramaGerek = true;
       }
     } else if (m.tur === 'meshle') {
       const p = this.parca(m.cx, m.cz);
       if (p) { p.meshleniyor = false; this.meshKur(p, m.r); }
     }
-    this.isDagit();
   }
 
   /* Parçadaki ışık kaynaklarını ve büyüyen ekinleri kaydet */
   kaynakTara(p) {
     p.kaynaklar = [];
-    const v = p.v;
-    for (let i = 0; i < v.length; i++) {
-      const id = v[i];
+    const v = p.v, oz = p.ozel, n = oz ? oz.length : v.length;
+    for (let j = 0; j < n; j++) {
+      const i = oz ? oz[j] : j, id = v[i];
       if (!KAYNAK[id] && !EKIN_SONRAKI[id]) continue;
       const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
       /* Lav gölleri: her 4 x 4 alanda yüzeydeki bir blok ışık kaynağı sayılır */
@@ -501,9 +561,15 @@ export class Dunya {
   }
   yakinMesalelerHesapla(x, y, z, adet) {
     const l = [];
-    for (const m of this.mesaleler.values()) { const d = (m[0] - x) ** 2 + (m[1] - y) ** 2 + (m[2] - z) ** 2; if (d < 48 * 48) l.push([m, d]); }
+    this.isikTara(x, z, 48, m => { const d = (m[0] - x) ** 2 + (m[1] - y) ** 2 + (m[2] - z) ** 2; if (d < 48 * 48) l.push([m, d]); });
     l.sort((a, b) => a[1] - b[1]);
     return l.slice(0, adet).map(a => a[0]);
+  }
+  /* 0.51.2: (x, z) çevresinde r blok içindeki ızgara hücrelerinde bulunan ışık kaynakları için f çağrılır; f true döndürürse durur */
+  isikTara(x, z, r, f) {
+    const I = this.isikIzgara, x0 = Math.floor((x - r) / 16), x1 = Math.floor((x + r) / 16), z0 = Math.floor((z - r) / 16), z1 = Math.floor((z + r) / 16);
+    for (let a = x0; a <= x1; a++) for (let b = z0; b <= z1; b++) { const l = I.get(a * 65536 + b); if (l) for (const m of l.values()) if (f(m)) return true; }
+    return false;
   }
 }
 

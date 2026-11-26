@@ -33,7 +33,12 @@ export const PORT = {
   taret: [G(0.3, 0.06, 0.87), K(0.7, 0.06, 0.87)],
   algilayici0: [G(0.42, 0.3, 0.97), K(0.58, 0.3, 0.97)],
   algilayici1: [G(0.36, 0.07, 0.5), K(0.64, 0.07, 0.5)],
-  fiskiye: [G(0.36, 0.07, 0.5), K(0.64, 0.07, 0.5)]
+  fiskiye: [G(0.36, 0.07, 0.5), K(0.64, 0.07, 0.5)],
+  /* 0.52.0: LED panel (güney yüzü), projektör ve mutfak cihazları (arka), vantilatör (üst) */
+  ledpanel: [G(0.3, 0.5, 1.01), K(0.7, 0.5, 1.01)],
+  projektor: [G(0.3, 0.3, -0.01), K(0.7, 0.3, -0.01)],
+  vantilator: [G(0.3, 1.01, 0.5), K(0.7, 1.01, 0.5)],
+  mutfak52: [G(0.36, 0.1, 0.16), K(0.64, 0.1, 0.16)]
 };
 export const PORT_AD = { giris: 'Giriş', cikis: 'Çıkış' };
 /* Bloğun bağlantı noktası listesi (yoksa boş) */

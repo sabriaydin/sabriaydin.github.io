@@ -179,7 +179,7 @@ export class Hava {
     const p = this.dunya.parca(Math.floor(x / PB), Math.floor(z / PB));
     if (!p || !p.v) return 0;
     const v = p.v, b = (((z % PB) + PB) % PB) * PB + (((x % PB) + PB) % PB);
-    for (let y = PY - 1; y > 0; y--) { const id = v[b + y * PB * PB]; if (KATI[id] || SIVI[id]) return y; }
+    for (let y = Math.min(PY - 1, p.ust ?? PY - 1); y > 0; y--) { const id = v[b + y * PB * PB]; if (KATI[id] || SIVI[id]) return y; }   // 0.51.2: en yüksek dolu katmandan başlar
     return 0;
   }
   /* Kaba hücrenin yağış türü ve zemin yüksekliği (önbellekli; kışın çöl ve savan dışında her yere kar) */

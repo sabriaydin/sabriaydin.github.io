@@ -61,8 +61,9 @@ export class SuAkisi {
     for (const [a, c] of YAN) this.ekle(x + a, y, z + c);
   }
   parcaTara(p) {
-    const v = p.v, x0 = p.cx * PB, z0 = p.cz * PB, d = this.d;
-    for (let i = 0; i < v.length; i++) {
+    const v = p.v, x0 = p.cx * PB, z0 = p.cz * PB, d = this.d, oz = p.ozel, n = oz ? oz.length : v.length;   // 0.51.2: işçinin bulduğu su dizinleri
+    for (let j = 0; j < n; j++) {
+      const i = oz ? oz[j] : j;
       if (!SU_SEVIYE[v[i]]) continue;
       const lx = i % PB, lz = Math.floor(i / PB) % PB, y = Math.floor(i / (PB * PB));
       if (y < DERIN) continue;

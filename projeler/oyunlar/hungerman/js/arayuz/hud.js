@@ -144,6 +144,41 @@ export class Hud {
     this.pTuval = $('#pusulaTuval');
     this.pCtx = this.pTuval.getContext('2d');
     this.pListe = [];
+    /* 0.51.2: yazı tipi yüklenince pusula şeridi yeniden hazırlanır */
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => { this.pSerit = null; this.son.pusula = null; });
+  }
+  /* 0.51.2: pusulanın çentik ve yön yazıları şeridi: -M/PX derecesinden 360 + M/PX derecesine; boyut değişmedikçe yeniden çizilmez */
+  pusulaSeridi(W, H, r, PX, M) {
+    const k = W + '|' + H + '|' + r;
+    if (this.pSerit && this.pSerit.k === k) return this.pSerit.cv;
+    const cv = document.createElement('canvas'), bas0 = -M / PX, gen = Math.ceil((360 * PX + W) * r) + 2;
+    cv.width = gen; cv.height = Math.round(H * r);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (let d = Math.ceil(bas0 / 5) * 5; d <= 360 + M / PX + 5; d += 5) {
+      const x = Math.round((d - bas0) * PX) + 0.5, n = ((d % 360) + 360) % 360;
+      const ana = n % 90 === 0, ara = n % 45 === 0, orta = n % 15 === 0;
+      const h = ana ? 6 : ara ? 5 : orta ? 3.5 : 2;
+      ctx.strokeStyle = ana ? 'rgba(255,255,255,.85)' : ara ? 'rgba(255,255,255,.6)' : orta ? 'rgba(255,255,255,.38)' : 'rgba(255,255,255,.2)';
+      ctx.lineWidth = ana ? 1.5 : 1;
+      ctx.beginPath(); ctx.moveTo(x, H - 1.5); ctx.lineTo(x, H - 1.5 - h); ctx.stroke();
+      if (ana) {
+        ctx.font = PF.ana;
+        ctx.fillStyle = n === 0 ? '#ff6a5c' : '#ffffff';
+        ctx.fillText(['K', 'D', 'G', 'B'][n / 90], x, 10.5);
+      } else if (ara) {
+        ctx.font = PF.ara;
+        ctx.fillStyle = 'rgba(255,255,255,.8)';
+        ctx.fillText(['KD', 'GD', 'GB', 'KB'][(n - 45) / 90], x, 10.5);
+      } else if (n % 30 === 0) {
+        ctx.font = PF.sayi;
+        ctx.fillStyle = 'rgba(255,255,255,.5)';
+        ctx.fillText(String(n), x, 10.5);
+      }
+    }
+    this.pSerit = { k, cv };
+    return cv;
   }
   /* yaw: 0 = kuzey (-z); isaretler: [{ aci (0 = kuzey, derece), sinif, baslik, mesafe, kenar, renk }] */
   pusula(yaw, isaretler) {
@@ -166,30 +201,12 @@ export class Hud {
     ctx.beginPath(); ctx.roundRect ? ctx.roundRect(0.5, 0.5, W - 1, H - 1, 7) : ctx.rect(0.5, 0.5, W - 1, H - 1);
     ctx.fillStyle = 'rgba(12,14,18,.58)'; ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 1; ctx.stroke();
-    /* Çentikler ve yazılar */
-    const bas = Math.ceil((a - M / PX) / 5) * 5, son = a + M / PX;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    for (let d = bas; d <= son; d += 5) {
-      const x = Math.round(M + (d - a) * PX) + 0.5, n = ((d % 360) + 360) % 360;
-      const ana = n % 90 === 0, ara = n % 45 === 0, orta = n % 15 === 0;
-      const h = ana ? 6 : ara ? 5 : orta ? 3.5 : 2;
-      ctx.strokeStyle = ana ? 'rgba(255,255,255,.85)' : ara ? 'rgba(255,255,255,.6)' : orta ? 'rgba(255,255,255,.38)' : 'rgba(255,255,255,.2)';
-      ctx.lineWidth = ana ? 1.5 : 1;
-      ctx.beginPath(); ctx.moveTo(x, H - 1.5); ctx.lineTo(x, H - 1.5 - h); ctx.stroke();
-      if (ana) {
-        ctx.font = PF.ana;
-        ctx.fillStyle = n === 0 ? '#ff6a5c' : '#ffffff';
-        ctx.fillText(['K', 'D', 'G', 'B'][n / 90], x, 10.5);
-      } else if (ara) {
-        ctx.font = PF.ara;
-        ctx.fillStyle = 'rgba(255,255,255,.8)';
-        ctx.fillText(['KD', 'GD', 'GB', 'KB'][(n - 45) / 90], x, 10.5);
-      } else if (n % 30 === 0) {
-        ctx.font = PF.sayi;
-        ctx.fillStyle = 'rgba(255,255,255,.5)';
-        ctx.fillText(String(n), x, 10.5);
-      }
-    }
+    /* Çentikler ve yazılar: 0.51.2: 360 derecelik şerit bir kez hazırlanır, her çizimde yalnızca bakılan dilimi kopyalanır */
+    const serit = this.pusulaSeridi(W, H, r, PX, M);
+    const sx = Math.round(a * PX * r);
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.drawImage(serit, sx, 0, Math.round(W * r), Math.round(H * r), 0, 0, Math.round(W * r), Math.round(H * r));
+    ctx.restore();
     /* Orta gösterge */
     ctx.fillStyle = '#ff6a5c';
     ctx.beginPath(); ctx.moveTo(M - 4, 0); ctx.lineTo(M + 4, 0); ctx.lineTo(M, 5); ctx.closePath(); ctx.fill();

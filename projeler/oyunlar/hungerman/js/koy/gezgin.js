@@ -3,7 +3,7 @@
    Köylerde bulunmayan ya da pahalı olan eşyaları satar (fidanlar, tohumlar, tılsım, eyer, ışıltaş...) ve nadir buluntuları
    köylülerden daha iyi fiyata alır (elmas, inci, yıldız parçası, altın): keşfe ek bir sikke kaynağıdır.
    Her gelişte havuzdan 7 takas seçilir; her takasın sınırlı stoğu vardır. Tüccara saldırılırsa küser ve gider. */
-import { ESYALAR, MEYVE_YAPRAK } from '../bloklar.js';
+import { ESYALAR, MEYVE_YAPRAK, ESYA52 } from '../bloklar.js';
 import { GUN_SURESI } from '../sabitler.js';
 
 const S = 288;
@@ -20,6 +20,9 @@ function havuz() {
   ekle([[S, 2]], [514, 1], 3);        // Işıltaş
   ekle([[S, 1]], [61, 2], 3);         // Parıltı Kristali
   ekle([[S, 4]], [290, 1], 1);        // Altın Elma
+  /* 0.52.0: yeni ekinlerin tohumları ve av ürünleri */
+  for (const k of ['pirinc', 'patlicanTohumu', 'aycicegi', 'cayFidesi', 'kahve', 'kakao']) ekle([[S, 1]], [ESYA52[k], 3], 3);
+  ekle([[ESYA52.ayiPostu, 1]], [S, 3], 2); ekle([[ESYA52.tilkiKurku, 1]], [S, 2], 3); ekle([[ESYA52.boynuz, 1]], [S, 2], 3);
   /* nadir buluntuları alır */
   ekle([[264, 1]], [S, 6], 3);        // Elmas (demirci 5)
   ekle([[299, 1]], [S, 4], 3);        // İnci (balıkçı 3)

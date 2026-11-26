@@ -847,6 +847,7 @@ export class Etkilesim {
   yonluId(eb, f) {
     if (eb.sekil === 'merdiven' || eb.sekil === 'sandalye' || eb.sekil === 'koltuk') return eb.taban + f;
     if (eb.yuzlu) return eb.taban + f;   // heykel başı, oyma balkabağı: yüzü oyuncuya döner
+    if (eb.cihaz52) return eb.cihaz52 + f * 2;   // 0.52.0: projektör ve mutfak cihazlarının önü oyuncuya bakar
     if (eb.sekil === 'citKapi') return 105 + (f === 0 || f === 2 ? 0 : 1) * 2;
     if (eb.sekil === 'tuzak') return 121 + f * 2;
     if (eb.mekanik === 'ters') return 243 + f * 2;   // 0.17.0: çıkış, oyuncunun baktığı yöndedir

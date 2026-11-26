@@ -1,7 +1,7 @@
 /* HungerMan - biçimli bloklar: merdiven, yarım blok, kapı, tuzak kapı, çit, çit kapısı, cam bölme, tırmanma merdiveni, tarla, örs, simya masası
    Her blok, hücre içinde 0..1 aralığında kutulardan oluşur: [x0, y0, z0, x1, y1, z1, doku?].
    Aynı tanımlar meshleme (işçi), çarpışma (oyuncu ve canlılar), ışın izleme ve seçim kutusu için kullanılır. */
-import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T, BLOK_UST } from './bloklar.js';
+import { BLOKLAR, OPAK, CIZIM, C_KUP, C_SEKIL, KATI, T, BLOK_UST, CIHAZ52_KUTU } from './bloklar.js';
 import { CIHAZ, cihazHucreKutulari } from './cihazlar.js';
 import { COKLU, cokluHucreKutulari } from './coklu.js';
 
@@ -416,6 +416,8 @@ export function sekilKutulari(id, komsu, carp = false) {
       return [[P, 0, P, x1, 8 * P, 15 * P]];
     }
     /* Semaver: pirinç gövde, musluk, üstte demlik */
+    /* 0.52.0: küçük mutfak cihazları ve radyo (ön yüz yön 0'da +z; yöne göre döndürülür) */
+    case 'cihaz52': { const K = (CIHAZ52_KUTU[b.model] || [[2, 0, 2, 14, 8, 14]]).map(k => k.map(v => v * P)); return dondur(carp ? [K[0]] : K, b.yon || 0); }
     case 'semaver':
       if (carp) return [[4 * P, 0, 4 * P, 12 * P, 15 * P, 12 * P]];
       return [[5 * P, 0, 5 * P, 11 * P, P, 11 * P], [4 * P, P, 4 * P, 12 * P, 10 * P, 12 * P], [5 * P, 10 * P, 5 * P, 11 * P, 11 * P, 11 * P], [7.5 * P, 4 * P, 12 * P, 8.5 * P, 5 * P, 14 * P],

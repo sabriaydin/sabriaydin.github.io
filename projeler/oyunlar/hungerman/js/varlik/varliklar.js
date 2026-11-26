@@ -5,7 +5,7 @@ import { THREE } from '../grafik/sahne.js';
 import { MODELLER, okModeli } from './modeller.js';
 import { TURLER, HAYVANLAR } from './turler.js';
 import { BY, KARLI } from '../dunya/uretici.js';
-import { KATI, SIVI, KESIK, BITKI, LAV, BLOKLAR, dusmeHasari } from '../bloklar.js';
+import { KATI, SIVI, KESIK, BITKI, LAV, BLOKLAR, dusmeHasari, ESYA52 } from '../bloklar.js';
 import { blokRengi } from '../grafik/doku.js';
 import { zindanAt, YUVA_TURLERI } from '../dunya/zindan-uretici.js';
 import { madenAt } from '../dunya/maden-uretici.js';
@@ -26,11 +26,11 @@ const GOLGE_MALZ = (() => {
   return new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, opacity: 0.4, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
 })();
 const CICEK = new Set([26, 27, 44]);   // 0.21.0: arıların polen topladığı çiçekler
-const AV = new Set(['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'at']);   // 0.44.0: kurttan kaçan hayvanlar
+const AV = new Set(['inek', 'koyun', 'domuz', 'tavuk', 'tavsan', 'at', 'keci', 'ordek', 'hindi', 'geyik', 'deve']);   // 0.52.0: yeni otçullar   // 0.44.0: kurttan kaçan hayvanlar
 const MAX_HAYVAN = 18, HAYVAN_UZAK = 120, ZOMBI_UZAK = 72;
 
 /* 0.41.0: alt biyomlara özgü hayvanlar (ana biyomun hayvanlarına eklenir) */
-const ALT_HAYVAN = { [BY.CICEKLI]: ['at', 'tavsan', 'koyun'], [BY.SONBAHAR]: ['domuz', 'tavsan', 'kurt'], [BY.SIK]: ['domuz', 'kurt'], [BY.KAYALIK]: ['koyun', 'tavsan'], [BY.KARLI_ZIRVE]: ['koyun'], [BY.YALIYAR]: ['koyun'] };
+const ALT_HAYVAN = { [BY.CICEKLI]: ['at', 'tavsan', 'koyun', 'hindi'], [BY.SONBAHAR]: ['domuz', 'tavsan', 'kurt', 'tilki', 'geyik'], [BY.SIK]: ['domuz', 'kurt', 'yaban', 'ayi'], [BY.KAYALIK]: ['koyun', 'tavsan', 'keci'], [BY.KARLI_ZIRVE]: ['koyun', 'keci'], [BY.YALIYAR]: ['koyun', 'keci'], [BY.GOL]: ['ordek'], [BY.MANGROV]: ['ordek'] };   // 0.52.0: yeni hayvanlar
 
 export class Varliklar {
   constructor(o) {
@@ -123,6 +123,7 @@ export class Varliklar {
   }
   gokAcik(x, y, z) { return this.dunya.ustKati(Math.floor(x), Math.floor(z)) < y; }
   mesaleYakin(x, y, z, r) {
+    if (this.dunya.isikTara) return this.dunya.isikTara(x, z, r, m => (m[0] - x) ** 2 + (m[1] - y) ** 2 + (m[2] - z) ** 2 < r * r);   // 0.51.2: ızgaradan
     for (const m of this.dunya.mesaleler.values()) if ((m[0] - x) ** 2 + (m[1] - y) ** 2 + (m[2] - z) ** 2 < r * r) return true;
     return false;
   }
@@ -164,7 +165,7 @@ export class Varliklar {
         while (y > 2 && SIVI[this.dunya.blok(x, y, z)] && !LAV[this.dunya.blok(x, y, z)]) { derin++; y--; }
         if (derin >= 2) {
           const b = this.uretici.kolon(x, z, {}).b, s = Math.random();
-          let tur = s < 0.38 ? 'hamsi' : s < 0.8 ? 'cipura' : 'ahtapot';
+          let tur = s < 0.32 ? 'hamsi' : s < 0.58 ? 'cipura' : s < 0.72 ? 'levrek' : s < 0.86 ? 'palamut' : 'ahtapot';   // 0.52.0: levrek ve palamut
           if (tur === 'hamsi' && hamsi >= 8) tur = Math.random() < 0.7 ? 'cipura' : 'ahtapot';
           if (tur === 'ahtapot' && derin < 4) tur = 'cipura';
           if (derin >= 12 && b === BY.DERIN && kopek < 2 && Math.random() < 0.18) tur = 'kopekbaligi';
@@ -531,7 +532,7 @@ export class Varliklar {
       const acik = this.gokAcik(p.x, p.y + T.boy, p.z);
       let l = acik ? ctx.gunIsigi : 0.08;
       if (this.mesaleYakin(p.x, p.y + 1, p.z, 12)) {
-        let en = 1e9; for (const t of this.dunya.mesaleler.values()) en = Math.min(en, Math.hypot(t[0] - p.x, t[1] - p.y - 1, t[2] - p.z));
+        let en = 1e9; this.dunya.isikTara(p.x, p.z, 13, t => { en = Math.min(en, Math.hypot(t[0] - p.x, t[1] - p.y - 1, t[2] - p.z)); });   // 0.51.2: ızgaradan
         l = Math.max(l, Math.min(1, 1.1 * (1 - en / 12.5)));
       }
       v.isikHedef = Math.max(0.08, l);
@@ -635,7 +636,7 @@ export class Varliklar {
     const T = v.tur, sahipli = this.ayna ? !!((v.agBayrak || 0) & 8192) : !!v.sahip;
     const yavru = this.ayna ? !!((v.agBayrak || 0) & 64) : v.yavru > 0;
     /* 0.21.0: kovayla inek sağılır, makasla koyun kırkılır */
-    if (eldeki === 477 && v.turAd === 'inek' && !yavru) return true;
+    if (eldeki === 477 && (v.turAd === 'inek' || v.turAd === 'keci') && !yavru) return true;   // 0.52.0: keçi de sağılır
     if (eldeki === 481 && v.turAd === 'koyun' && !yavru) return !(this.ayna ? ((v.agBayrak || 0) & 65536) : v.kirkildi);
     if (v.turAd === 'kurt') return eldeki === 295;
     if (v.turAd === 'kedi' && !sahipli) return T.mama.includes(eldeki);
@@ -650,6 +651,7 @@ export class Varliklar {
     if (v.olu) return S;
     /* 0.21.0: sağma ve kırkma */
     if (eldeki === 477 && v.turAd === 'inek' && !(v.yavru > 0)) { S.degistir = 479; S.mesaj = 'İnek sağıldı: süt kovası.'; S.olay = 'sut'; S.ses = 'sut'; return S; }
+    if (eldeki === 477 && v.turAd === 'keci' && !(v.yavru > 0)) { S.degistir = ESYA52.keciSutu; S.mesaj = 'Keçi sağıldı: keçi sütü kovası.'; S.olay = 'sut'; S.ses = 'sut'; return S; }
     if (eldeki === 481 && v.turAd === 'koyun' && !(v.yavru > 0) && !v.kirkildi) {
       v.kirkildi = true; v.yunSayac = 120 + Math.random() * 120;
       this.dusenler.birak(49, 1 + Math.floor(Math.random() * 3), p.x, p.y + 0.8, p.z);
@@ -738,7 +740,7 @@ export class Varliklar {
     if (v.yavru > 0) { v.yavru -= dt; v.m.kok.scale.setScalar(v.yavru > 0 ? 0.55 : 1); if (v.yavru <= 0) v.yavru = 0; }
     /* 0.21.0: kırkılan koyunun yünü 2-4 dakikada uzar; tavuk 5-10 dakikada bir yumurtlar */
     if (v.kirkildi) { v.yunSayac -= dt; if (v.yunSayac <= 0) v.kirkildi = false; }
-    if (v.turAd === 'tavuk' && !(v.yavru > 0)) {
+    if ((v.turAd === 'tavuk' || v.turAd === 'ordek') && !(v.yavru > 0)) {   // 0.52.0: ördek de yumurtlar
       if (v.yumurtaSayac == null) v.yumurtaSayac = 60 + Math.random() * 360;
       v.yumurtaSayac -= dt;
       if (v.yumurtaSayac <= 0) { v.yumurtaSayac = 300 + Math.random() * 300; this.dusenler.birak(480, 1, v.konum.x, v.konum.y + 0.3, v.konum.z); this.sesCal(v.konum, 28, () => { if (!this.ses.cal('tavuk_yumurta', 1)) this.ses.canli('tavuk', 'normal', 1); }); }
@@ -1853,7 +1855,7 @@ export class Varliklar {
         v.isikSayac = 0.3;
         let l = this.gokAcik(p.x, p.y + T.boy, p.z) ? ctx.gunIsigi : 0.08;
         if (this.mesaleYakin(p.x, p.y + 1, p.z, 12)) {
-          let en = 1e9; for (const t of this.dunya.mesaleler.values()) en = Math.min(en, Math.hypot(t[0] - p.x, t[1] - p.y - 1, t[2] - p.z));
+          let en = 1e9; this.dunya.isikTara(p.x, p.z, 13, t => { en = Math.min(en, Math.hypot(t[0] - p.x, t[1] - p.y - 1, t[2] - p.z)); });   // 0.51.2: ızgaradan
           l = Math.max(l, Math.min(1, 1.1 * (1 - en / 12.5)));
         }
         v.isikHedef = Math.max(0.08, l);
