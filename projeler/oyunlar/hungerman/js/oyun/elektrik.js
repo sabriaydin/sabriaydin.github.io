@@ -93,11 +93,11 @@ export function cihazUretim(d, b, x, y, z, O) {
 }
 
 /* ---------- 0.53.3: Rüzgâr Türbini ----------
-   Rüzgâr hızı (m/sn) hava durumundan gelir (yerde 2-9; yağışta +3, fırtınada +12; esintili). Göbek yüksekliğindeki hız, zeminden yüksekliğe göre
-   rüzgâr kesme yasasıyla artar (v = v10 · (h / 10)^α; α: su üstü 0,11, açık arazi 0,18, orman 0,28); yüksek tepelerde rüzgâr biraz daha güçlüdür.
-   Çevredeki yüksek engeller (ağaç, bina) türbülans yaratır ve verimi düşürür. Güç eğrisi: 3 m/sn'de başlar, 12 m/sn'de tam güçtür (küp yasası);
-   ortalama rüzgâr 25 m/sn'yi aşarsa türbin kendini korumak için durur (fırtına freni). */
-export const TURBIN = { baslangic: 3, anma: 12, durma: 25 };
+   Rüzgâr hızı (m/sn) hava durumundan gelir (yerde 3-11; yağışta +3, fırtınada +12; esintili). Göbek yüksekliğindeki hız, zeminden yüksekliğe göre
+   rüzgâr kesme yasasıyla artar (v = v · (h / 4)^α; α: su üstü 0,11, açık arazi 0,18, orman 0,28); yüksek tepelerde rüzgâr biraz daha güçlüdür.
+   Çevredeki yüksek engeller (ağaç, bina) türbülans yaratır ve verimi düşürür. Güç eğrisi: 2,5 m/sn'de başlar, 11 m/sn'de tam güçtür (küp yasası);
+   ortalama rüzgâr 28 m/sn'yi aşarsa türbin kendini korumak için durur (fırtına freni). */
+export const TURBIN = { baslangic: 2.5, anma: 11, durma: 28 };   // 0.53.4: daha erken başlar, daha erken tam güce ulaşır
 function ruzgarUretim(d, b, x, y, z, O) {
   const H = O.hava, [ox, oz] = dondurXZ(0.5, 0.5, b.yon), cx = x + 0.5 + ox, cz = z + 0.5 + oz, gob = y + PERVANE.y;
   /* çevre zemini ve arazi pürüzü (8 nokta, 7 blok uzakta) */
@@ -108,7 +108,7 @@ function ruzgarUretim(d, b, x, y, z, O) {
   }
   zemin /= 8;
   const alfa = su >= 4 ? 0.11 : orman >= 3 ? 0.28 : 0.18, h = Math.max(2, gob - zemin);
-  const kat = Math.pow(h / 10, alfa) * (1 + Math.min(0.35, Math.max(0, (gob - DENIZ - 15) / 150)));
+  const kat = Math.pow(h / 4, alfa) * (1 + Math.min(0.5, Math.max(0, (gob - DENIZ - 10) / 130)));   // 0.53.4: oyun ölçeğinde kesme (4 blok taban), tepelerde %50'ye kadar
   /* türbülans: göbek yüksekliğinde 4-9 blok çevredeki katı engeller */
   let engel = 0;
   for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8; for (const r of [4, 6.5, 9]) if (KATI[d.blok(Math.floor(cx + Math.cos(a) * r), Math.floor(gob), Math.floor(cz + Math.sin(a) * r))]) { engel++; break; } }

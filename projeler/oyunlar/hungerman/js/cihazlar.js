@@ -11,7 +11,7 @@ export const CIHAZ = {
     carp: [[0.05, 0, 0.05, 1.95, 0.95, 0.95]], aciklama: 'Gündüzleri en çok 10 E/sn üretir; üstü açık olmalıdır' },
   ruzgar: { port: [1, 0.32, 1.45], ad: 'Rüzgâr Türbini', esya: 498, taban: 634, w: 2, d: 2, h: 8, elektrik: 'ruzgar', uretim: 30, sertlik: 2.5, alet: 'kazma', ses: 'tas',
     carp: [[0.15, 0, 0.15, 1.85, 0.3, 1.85], [0.62, 0.3, 0.62, 1.38, 7.2, 1.38], [0.6, 7.2, 0.25, 1.4, 7.85, 1.95]],
-    aciklama: 'Rüzgâr hızına göre en çok 30 E/sn üretir: 3 m/sn\'de dönmeye başlar, 12 m/sn\'de tam güce ulaşır, 25 m/sn\'yi aşan fırtınada kendini korumak için durur. Yüksek, açık ve engelsiz yerlerde (tepe, kıyı) rüzgâr güçlüdür; yağışta ve fırtınada artar. Pervanenin döndüğü alan boş olmalıdır' },
+    aciklama: 'Rüzgâr hızına göre en çok 30 E/sn üretir: 2,5 m/sn\'de dönmeye başlar, 11 m/sn\'de tam güce ulaşır, 28 m/sn\'yi aşan sert fırtınada (çoğunlukla yüksek tepelerde) kendini korumak için durur. Yüksek, açık ve engelsiz yerlerde (tepe, kıyı) rüzgâr güçlüdür; yağışta ve fırtınada artar. Pervanenin döndüğü alan boş olmalıdır' },
   su: { port: [1.5, 1.98, 0.88], ad: 'Su Çarkı', esya: 499, taban: 762, w: 3, d: 1, h: 3, elektrik: 'su', uretim: 16, sertlik: 2, alet: 'balta', ses: 'odun',
     carp: [[0.05, 0, 0.25, 2.95, 2.95, 0.75], [1.35, 0, 0.02, 1.65, 1.7, 0.2], [1.35, 0, 0.8, 1.65, 1.7, 0.98]],
     aciklama: 'Çarkın alt sırasına değen her su bloğu için 1,5 E/sn üretir (en çok 16); kışın yarı yarıya' },

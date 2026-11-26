@@ -119,6 +119,13 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.4 (0.53.4): Daha güçlü rüzgâr türbini
+
+- Yerdeki rüzgâr 3-11 m/sn arasında değişir (önceden 2-9). Türbin 2,5 m/sn'de dönmeye başlar, 11 m/sn'de tam güce (30 E/sn) ulaşır.
+- Yükseklik etkisi oyun ölçeğine uyarlandı; yüksek tepelerde rüzgâr %50'ye kadar güçlenir.
+- Fırtına freni 28 m/sn'ye çıktı: düz arazide fırtınada tam güç üretir; yüksek tepelerde sert fırtınada kendini korumak için durabilir.
+- Sonuç: açık havada düz arazide ortalama 10-20 E/sn, tepede ve kıyıda daha fazla; yağmurda ve fırtınada tam güç.
+
 ## 53.3 (0.53.3): Rüzgâr ve güneş
 
 - Hava durumuna gök durumu eklendi: Açık, Az bulutlu, Parçalı bulutlu, Çok bulutlu, Yağmurlu, Fırtınalı. Bulutluluk yağış alanlarıyla birlikte değişir; parçalı bulutlu havada geçen bulutların gölgesi anlık düşüş yapar.

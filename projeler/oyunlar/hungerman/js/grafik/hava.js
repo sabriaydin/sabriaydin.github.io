@@ -142,11 +142,11 @@ export class Hava {
     const ad = f > 0.5 ? 'Fırtınalı' : y > 0.5 ? 'Yağmurlu' : bulut > 0.72 ? 'Çok bulutlu' : bulut > 0.4 ? 'Parçalı bulutlu' : bulut > 0.15 ? 'Az bulutlu' : 'Açık';
     return { bulut, yagis: y, firtina: f, ad, golge };
   }
-  /* Yerdeki (10 m) rüzgâr hızı (m/sn): yavaş değişen temel rüzgâr (2-9), yağış ve fırtına cephesinde artar; esinti kısa süreli dalgalanmadır.
+  /* Yerdeki rüzgâr hızı (m/sn): yavaş değişen temel rüzgâr (3-11), yağış ve fırtına cephesinde artar; esinti kısa süreli dalgalanmadır.
      Dönen: { ort: ortalama, hiz: esintili anlık hız, yon: esme yönü (radyan, x ekseninden) } */
   ruzgar(x, z) {
     const [y, f] = this.alan(x, z), t = this.t, s = this.tohum || 1;
-    const ort = 2 + 7 * gurultu(x / 900 + t / 700, z / 900 - t / 900, s ^ 0x2b1) + y * 3 + f * 12;
+    const ort = 3 + 8 * gurultu(x / 900 + t / 700, z / 900 - t / 900, s ^ 0x2b1) + y * 3 + f * 9;   // 0.53.4: 3-11 m/sn; yağışta +3, fırtınada +12
     const e = gurultu(x / 40 + t * 0.35, z / 40 - t * 0.2, s ^ 0x71) - 0.5, hiz = Math.max(0, ort * (1 + e * (0.3 + f * 0.4)));
     return { ort, hiz, yon: Math.atan2(RUZGAR[1], RUZGAR[0]) + (gurultu(t / 400, 3.1, s ^ 0x13) - 0.5) * 0.8 };
   }

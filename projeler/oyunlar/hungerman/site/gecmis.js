@@ -3,6 +3,9 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.4', b: 'Daha güçlü türbin', m: [
+    'Rüzgâr türbini güçlendirildi: daha düşük rüzgârda dönmeye başlıyor ve daha erken tam güce ulaşıyor. Açık havada ortalama 10-20 E/sn, tepelerde ve kıyıda daha fazla, yağmurda ve fırtınada tam güç üretiyor; yalnızca yüksek tepelerdeki sert fırtınada kendini korumak için duruyor.'
+  ]},
   { s: '0.53.3', b: 'Rüzgâr ve güneş', m: [
     'Rüzgâr türbini artık gerçek rüzgâra göre çalışıyor: yükseklik, arazi, engeller ve hava durumu üretimi belirliyor; sert fırtınada kendini korumak için duruyor.',
     'Güneş takip sistemi güneşin yüksekliğine ve göğe göre üretiyor: açık, az bulutlu, parçalı bulutlu, çok bulutlu, yağmurlu ve fırtınalı hava farklı sonuç veriyor; kar paneli örtüyor, sert rüzgârda panel yatıyor.',
