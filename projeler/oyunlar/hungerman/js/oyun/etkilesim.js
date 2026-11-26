@@ -1213,6 +1213,16 @@ export class Etkilesim {
       else { const l = (b.cesit + 1) % 4; d.blokKoy(h.x, h.y, h.z, BLOK53.sigorta + l * 2); this.ses.kol(true); this.arayuz.bildirim(`Sigorta sınırı: ${[10, 25, 50, 100][l]} E/sn`); }
       return true;
     }
+    /* 0.53.1: Güvenlik Kepengi güç varken kapı gibi açılıp kapanır */
+    if (b.cihaz === 'kepenk') {
+      const C = CIHAZ.kepenk, [ax, ay, az] = kokKonumu(b, h.x, h.y, h.z);
+      if (!(this.arayuz.gucVar && this.arayuz.gucVar(ax + ',' + ay + ',' + az))) { this.arayuz.bildirim('Kepengin çalışması için enerji gerekir.'); return true; }
+      const H = cihazHucreleri(C, b.yon, ax, ay, az);
+      if (b.acik && H.some(([x, y, z]) => this.oyuncu.hucreyiKapliyor(x, y, z))) { this.arayuz.bildirim('Kepengin altında durulmaktadır.'); return true; }
+      for (const [x, y, z, i] of H) { const q = BLOKLAR[d.blok(x, y, z)]; if (q && q.cihaz === 'kepenk') d.blokKoy(x, y, z, C.taban + ((b.acik ? 0 : 4) + b.yon) * C.n + i); }
+      if (this.ses.kepenk) this.ses.kepenk(!b.acik); else this.ses.kapi(!b.acik);
+      return true;
+    }
     if (b.cihaz === 'tv' || b.cihaz === 'monitor') {
       const k = kokKonumu(b, h.x, h.y, h.z).join(','), m = this.arayuz.ekranDegistir ? this.arayuz.ekranDegistir(k, b.cihaz) : null;
       this.ses.tik(); if (m) this.arayuz.bildirim(m); return true;

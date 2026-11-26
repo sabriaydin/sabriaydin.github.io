@@ -25,7 +25,7 @@ export { YAKIT };
 const MANTIK53 = new Set(['zamanlayici', 'fotosel', 'mantik', 'role', 'engelleyici', 'edugme']);
 export const PARATONER = { menzil: 48, yildirim: 5000, cikis: 150, statik: 2 };
 const CEVHER = new Set(); for (const b of BLOKLAR) if (b && /Cevheri$/.test(b.ad || '') && !b.gizli) CEVHER.add(b.id);
-const DUGME_SURE = 5;
+const DUGME_SURE = 5, DUGME_ELEKTRIK = 3;
 export const kokAnahtari = (b, x, y, z) => (b && b.cihaz && b.parca ? kokKonumu(b, x, y, z).join(',') : x + ',' + y + ',' + z);
 
 /* Kök hücresi (x, y, z) olan üreticinin bu anki üretimi (E/sn) ve durmasının nedeni; çizici de dönüş hızı için kullanır.
@@ -171,6 +171,7 @@ export class Elektrik {
       else if (b.elektrik === 'direk' || b.elektrik === 'olcer') t = alt();
       else if (b.tuketim) t = b.tuketim + alt();
       else if (b.elektrik === 'salter') t = b.acik ? alt() : 0;
+      else if (b.elektrik === 'kol' || b.elektrik === 'dugme') t = this.gecir(n) ? alt() : 0;   // 0.53.1
       else if (b.elektrik === 'dagitici' || b.elektrik === 'birlestirici') t = alt();
       else if (b.elektrik === 'batarya') { const e = d.enerji.get(n.k) || 0; t = e < b.kapasite - 0.5 ? BATARYA_HIZ[b.cihaz] : 0; }
       for (const c of n.cik) { const t2 = talep(c.n); c.talep = (c.n.tp && c.n.tp[c.w.bp] != null ? c.n.tp[c.w.bp] : t2) / c.f; }
@@ -206,6 +207,7 @@ export class Elektrik {
       else if (b.elektrik === 'sigorta') { P = b.atik ? 0 : n.gelen; n.asiri = !b.atik && n.gelen > b.sinir + 0.05; }
       else if (b.tuketim) { n.calisiyor = n.gelen >= b.tuketim * 0.95; P = n.calisiyor ? Math.max(0, n.gelen - b.tuketim) : 0; }   // kablo kaybı için %5 pay
       else if (b.elektrik === 'salter') P = b.acik ? n.gelen : 0;
+      else if (b.elektrik === 'kol' || b.elektrik === 'dugme') P = this.gecir(n) ? n.gelen : 0;   // 0.53.1
       else P = n.gelen;   // dağıtıcı, birleştirici
       if (!n.cik.length) return;
       if (n.cik.length === 1) { gonder(n, n.cik[0], P); return; }
@@ -231,10 +233,12 @@ export class Elektrik {
       else if (MANTIK53.has(b.elektrik)) this.mantik(n, O, dt);
       else if (b.elektrik === 'sigorta') this.sigorta(n);
       else if (b.elektrik === 'olcer') this.oranlar.set(n.k, r1(n.gelen));
+      else if (b.elektrik === 'dugme') { const k = 'dg:' + n.k; if (b.acik) this.sayaclar.set(k, DUGME_ELEKTRIK); else if (this.sayaclar.has(k)) { const t = this.sayaclar.get(k) - dt; if (t <= 0) this.sayaclar.delete(k); else this.sayaclar.set(k, t); } }
       else if (b.cihaz && b.tuketim) {
         this.oranlar.set(n.k, n.calisiyor ? 1 : 0);   // 0.28.0: çok bloklu tüketici (taret): durum 'bo' ile dağıtılır
         /* 0.53.0: durumlu cihazlar (kepenk, alarm, ark ocağı, sokak lambası) hücreleriyle açılır / kapanır; makineler işini yapar */
-        if (CIHAZ[b.cihaz].durum && !!b.acik !== !!n.calisiyor) this.durumDegis(n, n.calisiyor ? 1 : 0);
+        if (b.cihaz === 'kepenk') this.kepenk(n);   // 0.53.1: güç varken elle açılıp kapanır
+        else if (CIHAZ[b.cihaz].durum && !!b.acik !== !!n.calisiyor) this.durumDegis(n, n.calisiyor ? 1 : 0);
         if (DONUSUM[b.cihaz]) this.donustur(n, dt, DONUSUM[b.cihaz]);
         else if (b.cihaz === 'matkap') this.kaz(n, dt);
         else if (b.cihaz === 'pompa') this.pompala(n);
@@ -390,6 +394,8 @@ export class Elektrik {
     }
     if (!!b.acik !== ac) d.blokKoy(n.x, n.y, n.z, b.taban + (ac ? 1 : 0), 'elektrik');
   }
+  /* 0.53.1: Kol açıkken, Düğme basılıyken ve bırakıldıktan sonra 3 saniye gücü geçirir */
+  gecir(n) { return n.b.elektrik === 'kol' ? !!n.b.acik : !!n.b.acik || (this.sayaclar.get('dg:' + n.k) || 0) > 0; }
   /* ---------- 0.53.0: Sigorta: sınırı 1 saniye aşan güç sigortayı attırır ---------- */
   sigorta(n) {
     const b = n.b, k = 's:' + n.k;
@@ -409,6 +415,13 @@ export class Elektrik {
     }
     for (const [x, y, z, i] of H) { const q = BLOKLAR[d.blok(x, y, z)]; if (q && q.cihaz === b.cihaz) d.blokKoy(x, y, z, C.taban + ((a ? 4 : 0) + b.yon) * C.n + i, 'elektrik'); }
     if (b.cihaz === 'kepenk') this.sesler.push(['kepenk', n.x + 0.5, n.y + 1, n.z + 0.5, a]);
+  }
+  /* 0.53.1: Güvenlik Kepengi: güç geldiği anda açılır, güç kesilince iner; güç varken sağ tıkla kapı gibi açılıp kapanır (durum blokta saklanır) */
+  kepenk(n) {
+    const k = 'kp:' + n.k, c = n.calisiyor ? 1 : 0, once = this.sayaclar.get(k);
+    this.sayaclar.set(k, c);
+    if (!c && n.b.acik) this.durumDegis(n, 0);
+    else if (c && once === 0 && !n.b.acik) this.durumDegis(n, 1);
   }
   /* ---------- 0.53.0: dönüştürücü makineler (çamaşır, ark ocağı, kereste, kırıcı) ----------
      Çalışırken ilk 9 yuvadaki girdilerden partiler işlenir; çıktılar sonraki yuvalara konur. İlerleme 'p:' anahtarıyla saklanır. */
@@ -622,7 +635,7 @@ export function enerjiMetni(b, v) {
     if (b.cihaz === 'pompa') l.push(`Boşaltılan <b>${v.bo || 0}</b> blok${v.ne ? ` · ${v.ne}` : ''}`);
     if (v.cb) l.push(`Geçiş çıkışı <b>${s(v.c)}</b> E/sn`);
     durum = !v.gb ? 'bagsiz' : v.on ? 'calisiyor' : 'eksik';
-  } else if (b.elektrik === 'salter') {
+  } else if (b.elektrik === 'salter' || b.elektrik === 'kol' || b.elektrik === 'dugme') {   // 0.53.1: kol ve düğme
     l.push(`${b.acik ? 'Açık' : 'Kapalı'} · Giriş <b>${s(v.g)}</b> · Çıkış <b>${s(v.c)}</b> E/sn`);
     durum = b.acik ? (v.g > 0 ? 'calisiyor' : 'bagsiz') : 'kapali';
   } else {

@@ -119,6 +119,11 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.2 (0.53.2): Kepenk, Kol ve Düğme
+
+- Güvenlik Kepengi: gücü varken sağ tıkla kapı gibi açılıp kapanır. Güç geldiği anda kendiliğinden açılır, güç kesilince iner; gücü yokken açılmaz. Altında biri varken inmez.
+- Kol ve Düğme elektrik ağına uyarlandı: ikisinin de giriş ve çıkış noktası vardır. Kol açıkken gücü geçirir (şalter gibi); Düğme basılınca gücü 3 saniye geçirir. Mekanik devrelerdeki (bakır tel) işlevleri aynen sürer.
+
 ## 53.1 (0.53.1): Su görünümü
 
 - Su yüzeyinin kıyıya ve bloklara değen kenarlarında, akan ve düşen suda beliren beyaz köpük benekleri kaldırıldı; su eski düz görünümüne döndü.

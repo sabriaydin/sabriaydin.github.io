@@ -3,6 +3,10 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.2', b: 'Kepenk, Kol ve Düğme', m: [
+    'Güvenlik kepengi, enerjisi varken kapı gibi sağ tıkla açılıp kapanıyor; güç gelince kendiliğinden açılıp güç kesilince iniyor.',
+    'Kol ve Düğme artık elektrik kablolarıyla da kullanılabiliyor: kol açıkken gücü geçiriyor, düğme basılınca 3 saniye geçiriyor.'
+  ]},
   { s: '0.53.1', b: 'Su görünümü', m: [
     'Suyun kenarlarında ve akan suda görünen beyaz köpük benekleri kaldırıldı; su yeniden düz ve temiz görünüyor.'
   ]},

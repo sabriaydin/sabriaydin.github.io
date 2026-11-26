@@ -922,6 +922,7 @@ function oyunBaslat(v) {
     tilsim: () => tilsimBaslat(),
     zaman: () => ({ zaman: oyun.zaman, gun: oyun.gun, mevsim: `${MEVSIMLER[oyun.mevsim]} ${((oyun.gun - 1) % MEVSIM_GUN) + 1}/${MEVSIM_GUN}` }),   // 0.37.0: cep saati
     koyluAc: w => panelAc(koyluEkrani, w),
+    gucVar: k => (oyun.elektrik ? oyun.elektrik.oranlar.get(k) : oyun.bataryaOran.get(k)) === 1,   // 0.53.1: kepengin gücü
     ekranDegistir: (k, tur) => (oyun.cihazCizici ? oyun.cihazCizici.ekranDegistir(k, tur) : null),   // 0.53.0: televizyon kanalı, monitör kamerası
     gezginAc: () => panelAc(gezginEkrani),
     sandikAc: (x, y, z) => {

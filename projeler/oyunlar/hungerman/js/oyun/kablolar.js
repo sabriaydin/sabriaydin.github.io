@@ -68,7 +68,10 @@ export const PORT = {
   engelleyici: [G(0.22, 0.29, 0.3), G(0.22, 0.29, 0.7), K(0.78, 0.29, 0.5)],
   sigorta: [G(0.28, 0.78, 0.5), K(0.72, 0.78, 0.5)],
   klima: [G(0.36, 0.5, 0.97), K(0.64, 0.5, 0.97)],
-  citunite: [G(0.3, 1.01, 0.5), K(0.7, 1.01, 0.5)]
+  citunite: [G(0.3, 1.01, 0.5), K(0.7, 1.01, 0.5)],
+  /* 0.53.1: Kol (taban arkası) ve Düğme (taban yanları) */
+  kol: [G(0.36, 0.13, 0.7), K(0.64, 0.13, 0.7)],
+  dugme: [G(0.26, 0.07, 0.5), K(0.74, 0.07, 0.5)]
 };
 /* 0.53.0: bağlantı noktası adları (mantık parçalarının girişleri) */
 export const PORT_ETIKET = { role: ['Güç girişi', 'Sinyal girişi'], engelleyici: ['Güç girişi', 'Sinyal girişi'], mantik: ['Giriş A', 'Giriş B'] };

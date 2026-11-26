@@ -862,6 +862,9 @@ export const BLOK53 = {}, ESYA53 = {};
     elektrik: 'citunite', tuketim: 4, acik: a, taban: BLOK53.citUnite, gizli: a > 0, dusur: () => [[BLOK53.citUnite, 1]] });
   BLOK53.ecit = ayir53(1);
   blok(BLOK53.ecit, { ad: 'Elektrikli Çit', dok: 'ecit_tel', cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'kazma', seviye: 0, ses: 'tas', sekil: 'ecit', harita: 2 });
+  /* 0.53.1: Kol ve Düğme elektrik ağına da bağlanır (giriş ve çıkış noktaları); mekanik devrelerdeki işlevleri aynen sürer */
+  for (const id of [233, 234]) B[id].elektrik = 'kol';
+  for (const id of [235, 236]) B[id].elektrik = 'dugme';
   /* Parçalar ve tozlar (eşya) */
   for (const k of ['motor', 'lityum', 'izolator', 'cip', 'ekran', 'demirTozu', 'bakirTozu', 'altinTozu']) ESYA53[k] = ayir53(1);
 }
@@ -1341,6 +1344,9 @@ E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
     [B5.klima, '2,5 E/sn harcar · Duvara asılır; 7 blok içinde sıcaklığı 22 °C\'ye çeker (yazın serinletir, kışın ısıtır)'],
     [B5.citUnite, '4 E/sn harcar · Bitişiğindeki elektrikli çit hattını (en çok 128 blok) elektrikler'],
     [B5.ecit, 'Çit ünitesine bağlanınca elektriklenir: değen canavarlar çarpılıp geri savrulur, oyuncular hafifçe çarpılır']]) E[id].ozellik = oz;
+  /* 0.53.1 */
+  E[233].ozellik = 'Sağ tıkla açılıp kapanır. Mekanik: açıkken bakır tele güç verir · Elektrik: açıkken girişindeki gücü çıkışına geçirir (şalter gibi)';
+  E[235].ozellik = 'Sağ tıkla basılır. Mekanik: 1 saniye güç verir · Elektrik: basılınca girişindeki gücü 3 saniye çıkışına geçirir';
 }
 
 /* Örste onarım malzemesi */
@@ -1408,3 +1414,5 @@ for (const b of B) if (b) {
   if (b.ses === 'tas' && ([139, 159, 165, 182, 1411, 1923, 1993].includes(b.id) || b.cihaz || b.elektrik || b.sekil === 'cihaz')) b.ses = 'metal';
   else if (b.ses === 'cam' && /Buz/.test(b.ad || '')) b.ses = 'buz';
 }
+/* 0.53.1: Kol ve Düğme elektrikli olsa da taş sesini korur */
+for (const id of [233, 234, 235, 236]) B[id].ses = 'tas';
