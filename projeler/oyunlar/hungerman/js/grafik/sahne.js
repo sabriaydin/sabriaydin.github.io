@@ -70,6 +70,7 @@ uniform float zaman;
 uniform float magara;
 uniform float islak;
 uniform vec4 isiklar[${ISIK_SAYISI}];
+uniform vec4 isikRenk[${ISIK_SAYISI}];   /* 0.53.6: renkli ışık (rgb; 0 ise varsayılan sıcak ışık), a: 1 aşağı bakan koni (sokak lambası) */
 uniform float isikAdet;
 uniform vec4 elFener;
 uniform vec3 elFenerYon;
@@ -104,6 +105,7 @@ void main() {
     if (t.a < 0.5) discard;
   #endif
   float m = 0.0, mc = 0.0, ml = 0.0;
+  vec3 mr = vec3(0.0);
   for (int i = 0; i < ${ISIK_SAYISI}; i++) {
     if (float(i) >= isikAdet) break;
     vec4 L = isiklar[i];
@@ -112,8 +114,12 @@ void main() {
     if (r > 500.0) { r -= 1000.0; lavI = 1.0; }   /* 0.48.0: 1000 üstü güç: lav ve magma (turuncu ışık) */
     float d = distance(vDunya, L.xyz);
     float k = clamp(1.0 - d / (r * 0.9), 0.0, 1.0);
-    /* 0.15.1: birden çok ışık kaynağı toplanır; 0.15.4: eksi güç soğuk (buz) ışığıdır */
-    if (lavI > 0.5) ml += k * k; else if (L.w > 0.0) m += k * k; else mc += k * k;
+    vec4 R = isikRenk[i];
+    /* 0.53.6: aşağı bakan koni: ışık çoğunlukla alttaki alana düşer, yanlara ve yukarı az */
+    if (R.a > 0.5) k *= 0.12 + 0.88 * smoothstep(-0.15, 0.55, (L.y - vDunya.y) / max(d, 0.001));
+    /* 0.15.1: birden çok ışık kaynağı toplanır; 0.15.4: eksi güç soğuk (buz) ışığıdır; 0.53.6: renkli elektrik ışıkları */
+    if (R.r + R.g + R.b > 0.0) mr += R.rgb * (R.a > 0.5 ? pow(k, 1.4) * 1.25 : k * k);
+    else if (lavI > 0.5) ml += k * k; else if (L.w > 0.0) m += k * k; else mc += k * k;
   }
   /* 0.48.0: el feneri: bakış yönünde dar bir ışık konisi ve elin çevresinde zayıf bir hale */
   if (elFener.w > 0.0) {
@@ -127,7 +133,7 @@ void main() {
   if (ao > 1.5) { ao = ao - 1.0; isik = vec3(1.0); }   /* lav: kendi ışığıyla parlar */
   else {
     vec3 gokIsik = gokRenk * max(vGok * gun, magara);
-    isik = max(gokIsik, min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc + vec3(1.0, 0.58, 0.28) * ml * 1.1, vec3(1.1)));
+    isik = max(gokIsik, min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc + vec3(1.0, 0.58, 0.28) * ml * 1.1 + mr * 1.05, vec3(1.1)));
   }
   vec3 renk = t.rgb * vTon * ao * isik;
   /* Yağmur: açıktaki yüzeyler ıslak ve koyu görünür */
@@ -214,6 +220,7 @@ export class Sahne {
       harita: { value: doku }, gun: { value: 1 }, gokRenk: { value: new THREE.Color(1, 1, 1) }, sisRenk: { value: new THREE.Color(0.7, 0.8, 1) },
       sisBas: { value: 80 }, sisSon: { value: 120 }, pus: { value: 0.32 }, salinim: { value: 1 }, alfa: { value: 1 }, zaman: { value: 0 }, ruzgar: { value: 0.3 }, yaprakSal: { value: 0 }, magara: { value: 0.07 }, islak: { value: 0 }, sicak: { value: 0 },
       isiklar: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) }, isikAdet: { value: 0 },
+      isikRenk: { value: Array.from({ length: ISIK_SAYISI }, () => new THREE.Vector4(0, 0, 0, 0)) },
       elFener: { value: new THREE.Vector4(0, 0, 0, 0) }, elFenerYon: { value: new THREE.Vector3(0, 0, -1) },
       gokUst: { value: new THREE.Color(0.4, 0.6, 1) }, gokUfuk: { value: new THREE.Color(0.7, 0.8, 1) }, gunesYon: { value: new THREE.Vector3(0, 1, 0) }
     });
@@ -459,7 +466,8 @@ export class Sahne {
     const ust = Math.min(this.dusukGuc ? 12 : ISIK_SAYISI, this.isikUst);   // 0.51.1: ışık kalitesi ayarı   // 0.50.0: düşük güç kipinde en yakın 12 ışık (gölgelendiricideki döngü kısalır)
     for (const m of this.malzemeler) {
       const a = m.uniforms.isiklar.value;
-      for (let i = 0; i < ISIK_SAYISI; i++) { const L = i < ust ? liste[i] : null; if (L) a[i].set(L[0], L[1], L[2], L[3]); else a[i].set(0, 0, 0, 0); }
+      const c = m.uniforms.isikRenk ? m.uniforms.isikRenk.value : null;   // 0.53.6: [4..6] renk, [7] koni
+      for (let i = 0; i < ISIK_SAYISI; i++) { const L = i < ust ? liste[i] : null; if (L) a[i].set(L[0], L[1], L[2], L[3]); else a[i].set(0, 0, 0, 0); if (c) { if (L && L.length > 4) c[i].set(L[4], L[5], L[6], L[7] || 0); else c[i].set(0, 0, 0, 0); } }
       m.uniforms.isikAdet.value = Math.min(liste.length, ust);
     }
   }

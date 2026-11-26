@@ -6,7 +6,7 @@
    - Bataryalar: gövde ve önde doluluğu gösteren ışıklı gösterge.
    Modeller yerel düzende tanımlanır (cihazlar.js): kök hücrenin köşesi başlangıçtır, ön -z tarafıdır.
    Önizleme: elde cihaz ya da yönlü blok tutulurken konulacağı yerde yarı saydam hayalet model; uygunsa yeşil, değilse kırmızı. */
-import { THREE } from './sahne.js';
+import { THREE, ISIK_SAYISI } from './sahne.js';
 import { T, YUZ_DOKU, BLOKLAR, ATLAS_N } from '../bloklar.js';
 import { CIHAZ, PERVANE } from '../cihazlar.js';
 import { sekilKutulari } from '../sekiller.js';
@@ -332,6 +332,48 @@ function modeller() {
   return M;
 }
 
+/* ---------- 0.53.6: cihaz modelleri ve kablolar dünyadaki gibi aydınlanır ----------
+   MeshBasicMaterial'e blok gölgelendiricisindeki ışık hesabı eklenir: gök ışığı (cihazın üstünün açıklığına göre: cGok) ve çevredeki ışık kaynakları
+   (meşale, lamba, renkli elektrik ışıkları, aşağı bakan sokak lambası, el feneri) parça parça hesaplanır. Önceden bütün modeller oyuncunun bulunduğu
+   yerin aydınlığıyla tek renk boyanıyordu (karanlıkta parlayan kablolar ve direkler). */
+const ISIK_FS = `
+uniform vec4 isiklar[${ISIK_SAYISI}];
+uniform vec4 isikRenk[${ISIK_SAYISI}];
+uniform float isikAdet; uniform vec3 gokRenk; uniform float gun; uniform float magara; uniform vec4 elFener; uniform vec3 elFenerYon; uniform float cGok;
+varying vec3 vDunyaC;
+vec3 cIsik() {
+  float m = 0.0, mc = 0.0, ml = 0.0; vec3 mr = vec3(0.0);
+  for (int i = 0; i < ${ISIK_SAYISI}; i++) {
+    if (float(i) >= isikAdet) break;
+    vec4 L = isiklar[i];
+    if (L.w == 0.0) continue;
+    float r = abs(L.w), lavI = 0.0;
+    if (r > 500.0) { r -= 1000.0; lavI = 1.0; }
+    float d = distance(vDunyaC, L.xyz), k = clamp(1.0 - d / (r * 0.9), 0.0, 1.0);
+    vec4 R = isikRenk[i];
+    if (R.a > 0.5) k *= 0.12 + 0.88 * smoothstep(-0.15, 0.55, (L.y - vDunyaC.y) / max(d, 0.001));
+    if (R.r + R.g + R.b > 0.0) mr += R.rgb * (R.a > 0.5 ? pow(k, 1.4) * 1.25 : k * k); else if (lavI > 0.5) ml += k * k; else if (L.w > 0.0) m += k * k; else mc += k * k;
+  }
+  if (elFener.w > 0.0) { vec3 q = vDunyaC - elFener.xyz; float d = length(q), c = dot(q / max(d, 0.001), elFenerYon);
+    m += smoothstep(0.84, 0.965, c) * pow(clamp(1.0 - d / elFener.w, 0.0, 1.0), 1.3) * 1.25 + clamp(1.0 - d / 4.0, 0.0, 1.0) * 0.35; }
+  m = min(m, 1.0); mc = min(mc, 1.0); ml = min(ml, 1.0);
+  vec3 isik = max(gokRenk * max(cGok * gun, magara), min(vec3(1.0, 0.8, 0.55) * m * 1.05 + vec3(0.66, 0.84, 1.08) * mc + vec3(1.0, 0.58, 0.28) * ml * 1.1 + mr * 1.05, vec3(1.1)));
+  return pow(isik, vec3(2.2));   /* blok gölgelendiricisi ekran renginde çarpar; burada doğrusal renkte çarpıldığı için üs alınır */
+}
+`;
+function isikEkle(malz, sahne) {
+  const U = sahne.opakMalzeme.uniforms;
+  malz.userData.gok = { value: 1 };
+  malz.onBeforeCompile = sh => {
+    for (const k of ['isiklar', 'isikRenk', 'isikAdet', 'gokRenk', 'gun', 'magara', 'elFener', 'elFenerYon']) sh.uniforms[k] = U[k];
+    sh.uniforms.cGok = malz.userData.gok;
+    sh.vertexShader = 'varying vec3 vDunyaC;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n  vDunyaC = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = ISIK_FS + sh.fragmentShader.replace('#include <opaque_fragment>', 'outgoingLight *= cIsik();\n  #include <opaque_fragment>');
+  };
+  malz.customProgramCacheKey = () => 'cizici-isik-53';
+  return malz;
+}
+
 export class CihazCizici {
   constructor(sahne, dunya) {
     this.sahne = sahne; this.dunya = dunya;
@@ -355,6 +397,13 @@ export class CihazCizici {
     this.hayalet = null;
   }
   get map() { return this.malz.map; }
+  /* 0.53.6: her cihazın kendi aydınlanan malzemesi (gök açıklığı ayrı tutulur; doku ortaktır) */
+  isikliMalz() { return isikEkle(new THREE.MeshBasicMaterial({ map: this.malz.map, vertexColors: true, alphaTest: 0.5, side: THREE.DoubleSide }), this.sahne); }
+  /* (x, z) çevresinde y yüksekliğinin üstünün açıklığı (0,15 kapalı ... 1 açık) */
+  gokAcik(x, y, z) {
+    let a = 0; for (const [dx, dz] of [[0, 0], [2, 0], [-2, 0], [0, 2], [0, -2]]) if (this.dunya.ustKati(Math.floor(x + dx), Math.floor(z + dz)) <= y) a++;
+    return 0.15 + 0.85 * a / 5;
+  }
   /* Modelin geometrileri (bir kez kurulur) */
   geometri(tur) {
     if (this.geo[tur]) return this.geo[tur];
@@ -386,10 +435,10 @@ export class CihazCizici {
     }
     /* 0.29.0: taretin durum lambası (ışık saçmaz; rengi guncelle'de değişir) */
     let durumIsik = null;
-    if (m.kafa && m.kafa.isik && malz === this.malz) { durumIsik = new THREE.Mesh(this.isikGeo || (this.isikGeo = kutuGeo([{ k: m.kafa.isik, t: 0 }])), this.gostergeMalz.bos); kafa.add(durumIsik); }
+    if (m.kafa && m.kafa.isik && malz !== this.hayaletMalz) { durumIsik = new THREE.Mesh(this.isikGeo || (this.isikGeo = kutuGeo([{ k: m.kafa.isik, t: 0 }])), this.gostergeMalz.bos); kafa.add(durumIsik); }
     const gostergeler = [];
     /* 0.26.0: LED göstergesi: koyu çerçeve ve ayrı ayrı yanan bölmeler */
-    if (m.gosterge && malz === this.malz) for (const [x0, x1, y0, y1, z, n, yatay] of m.gosterge) {
+    if (m.gosterge && malz !== this.hayaletMalz) for (const [x0, x1, y0, y1, z, n, yatay] of m.gosterge) {
       const zemin = new THREE.Mesh(this.duz, this.gostergeMalz.bos); zemin.position.set((x0 + x1) / 2, y0, z - 0.003); zemin.scale.set(x1 - x0, y1 - y0, 1); ic.add(zemin);
       const ledler = [], ara = 0.012, W = x1 - x0 - 0.03, H = y1 - y0 - 0.03;
       for (let i = 0; i < n; i++) {
@@ -404,7 +453,7 @@ export class CihazCizici {
     const ek = { donenler: [], isikli: [], kosullu: [], perde: null, sonda: null, ibre: null, ekran: null };
     if (m.donenler) m.donenler.forEach((q, i) => { const p = new THREE.Group(); p.position.set(...q.merkez); p.add(new THREE.Mesh(g.donenler[i], malz)); ic.add(p); ek.donenler.push({ g: p, eksen: q.eksen || 'z', hiz: q.hiz || 3, aci: Math.random() * 6, v: 0 }); });
     if (m.kosullu) m.kosullu.forEach((q, i) => { const x = new THREE.Mesh(g.kosullu[i], malz); x.visible = false; ic.add(x); ek.kosullu.push({ mesh: x, kosul: q.kosul }); });
-    if (m.isikli && malz === this.malz) m.isikli.forEach((q, i) => {
+    if (m.isikli && malz !== this.hayaletMalz) m.isikli.forEach((q, i) => {
       const x = new THREE.Mesh(g.isikli[i], this.isikMalz[q.renk] || this.isikMalz.beyaz); let tut = x, don = null;
       if (q.don) { don = new THREE.Group(); don.position.set(...q.don.merkez); don.add(x); tut = don; }
       tut.visible = false; ic.add(tut); ek.isikli.push({ g: tut, kosul: q.kosul, don, hiz: q.don ? q.don.hiz : 0, aci: 0 });
@@ -416,7 +465,7 @@ export class CihazCizici {
       c.scale.y = m.sonda.ust - 0.5; u.position.y = -(m.sonda.ust - 0.5);
     }
     if (m.ibre) { const p = new THREE.Group(); p.position.set(...m.ibre.merkez); p.add(new THREE.Mesh(g.ibre, malz)); ic.add(p); p.rotation.z = m.ibre.min; ek.ibre = { g: p, min: m.ibre.min, maks: m.ibre.maks, v: 0 }; }
-    if (m.ekran && malz === this.malz) {
+    if (m.ekran && malz !== this.hayaletMalz) {
       const E = m.ekran, x = new THREE.Mesh(this.ekranGeo, this.gostergeMalz.bos); x.position.set(...E.merkez); x.scale.set(E.w, E.h, 1); x.rotation.y = Math.PI; ic.add(x);
       ek.ekran = { mesh: x, tur: E.tur, kanal: 0, sayac: 0, yazi: 0 };
     }
@@ -453,17 +502,19 @@ export class CihazCizici {
       let o = this.liste.get(k);
       if (o && o.id !== id) { if (o.tur === b.cihaz && o.yon === b.yon && CIHAZ[b.cihaz].durum) o.id = id; else { this.ekranBirak(o); this.grup.remove(o.dis); this.liste.delete(k); o = null; } }   // 0.53.0: durumlu cihazın açılıp kapanması modeli yenilemez
       if (!o) {
-        o = { id, k, yon: b.yon, tur: b.cihaz, ...this.ornekKur(b.cihaz, this.malz), hiz: 0, hedefHiz: 0, aci: Math.random() * 6 };
+        const mz = this.isikliMalz();
+        o = { id, k, yon: b.yon, tur: b.cihaz, malz: mz, ...this.ornekKur(b.cihaz, mz), hiz: 0, hedefHiz: 0, aci: Math.random() * 6 };
         this.yerlestir(o.dis, b.yon, x, y, z); this.grup.add(o.dis); this.liste.set(k, o);
       }
       if (o.donen) { const r = cihazUretim(d, b, x, y, z, O), n = r.u / b.uretim; o.hedefHiz = r.u > 0 ? (b.cihaz === 'ruzgar' ? 0.5 + 2.4 * n : 0.7 + 1.2 * n) : 0; }
       this.durum53(o, b, x, y, z, O, oran(k));   // 0.53.0
+      if (o.malz) o.malz.userData.gok.value = this.gokAcik(x + 0.5, y + CIHAZ[b.cihaz].h - 1, z + 0.5);   // 0.53.6
       if (o.gostergeler.length) {
         const r = Math.max(0, Math.min(1, oran(k) ?? 0)), malz = r < 0.2 ? this.gostergeMalz.kirmizi : r < 0.5 ? this.gostergeMalz.sari : this.gostergeMalz.yesil;
         for (const g of o.gostergeler) { const n = g.ledler.length, yanan = r <= 0.01 ? 0 : Math.max(1, Math.round(r * n)); g.ledler.forEach((l, i) => { l.material = i < yanan ? malz : this.gostergeMalz.sonuk; }); }
       }
     }
-    for (const [k, o] of this.liste) if (!gorulen.has(k)) { this.ekranBirak(o); this.grup.remove(o.dis); this.liste.delete(k); }
+    for (const [k, o] of this.liste) if (!gorulen.has(k)) { this.ekranBirak(o); if (o.malz) o.malz.dispose(); this.grup.remove(o.dis); this.liste.delete(k); }
     this.portlariKur(this.kablolar);
   }
   temizle() { for (const o of this.liste.values()) { this.ekranBirak(o); this.grup.remove(o.dis); } this.liste.clear(); this.onizleme(null); }
@@ -608,12 +659,13 @@ export class CihazCizici {
     if (!this.kabloGrup) {
       this.kabloGrup = new THREE.Group(); this.grup.add(this.kabloGrup);
       this.kabloMalz = new THREE.MeshBasicMaterial({ color: 0x24282e }); this.kabloVurguMalz = new THREE.MeshBasicMaterial({ color: 0xe8a33d });
+      this.kabloMalzler = [];   // 0.53.6: her kablonun kendi aydınlanan malzemesi
       this.kabloYol = new Map(); this.kSurum = -1; this.kEksik = false;
     }
-    const c = 0.16 * Math.max(0.35, isik); this.kabloMalz.color.setRGB(c * 0.95, c, c * 1.1);
     if (K.surum === this.kSurum && !this.kEksik) return;
     if (this.kEksik && K.surum === this.kSurum && (this.kSayac = (this.kSayac || 0) + 1) % 30) return;   // yüklenmemiş uçlar ara sıra yeniden denenir
     for (const m of this.kabloGrup.children) m.geometry.dispose();
+    for (const m of this.kabloMalzler) m.dispose(); this.kabloMalzler = [];
     this.kabloGrup.clear(); this.kabloYol.clear();
     this.kSurum = K.surum; this.kEksik = false;
     for (const w of K.liste.values()) {
@@ -621,7 +673,10 @@ export class CihazCizici {
       if (!n) { this.kEksik = true; continue; }
       const yol = CihazCizici.sarkik(n, w.s), g = this.boru(yol);
       if (!g) continue;
-      const m = new THREE.Mesh(g, this.kabloMalz); m.userData.i = w.i; this.kabloGrup.add(m); this.kabloYol.set(w.i, yol);
+      /* 0.53.6: koyu kablo kılıfı, bulunduğu yerin ışığıyla aydınlanır (gök açıklığı kablonun ortasından) */
+      const km = isikEkle(new THREE.MeshBasicMaterial({ color: 0x2a2e34 }), this.sahne), orta = yol[Math.floor(yol.length / 2)];
+      km.userData.gok.value = this.gokAcik(orta.x, orta.y, orta.z); this.kabloMalzler.push(km);
+      const m = new THREE.Mesh(g, km); m.userData.i = w.i; m.userData.malz = km; this.kabloGrup.add(m); this.kabloYol.set(w.i, yol);
     }
     this.vurgu = null;
   }
@@ -641,7 +696,7 @@ export class CihazCizici {
   kabloVurgula(i) {
     if (!this.kabloGrup || this.vurgu === i) return;
     this.vurgu = i;
-    for (const m of this.kabloGrup.children) m.material = m.userData.i === i ? this.kabloVurguMalz : this.kabloMalz;
+    for (const m of this.kabloGrup.children) m.material = m.userData.i === i ? this.kabloVurguMalz : (m.userData.malz || this.kabloMalz);
   }
   /* ---------- 0.27.0: bağlantı noktaları ----------
      Her elektrikli cihazın giriş (mavi) ve çıkış (turuncu) noktaları küçük soketler olarak çizilir; dolu soketin ortası koyudur.

@@ -385,7 +385,7 @@ for (const C of Object.values(CIHAZ)) for (let a = 0; a < (C.durum || 1); a++) f
     cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: k0, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, tuketim: C.tuketim || 0, gizli: true, dusur: () => [], harita: 2,
     ...(C.sandik && i === 0 ? { sandik: true } : {}),   // 0.29.0: taretin ok haznesi
     ...(C.hazne ? { hazne: true } : {}), ...(C.durum ? { acik: a, durumTaban: C.taban + f * C.n } : {}),
-    ...(a && C.isikHucre === i ? { mesale: true, isik: C.isik || 15, lamba: true } : {}) });
+    ...(a && C.isikHucre === i ? { mesale: true, isik: C.isik || 15, lamba: true, isikRenk: C.isikRenk, isikKoni: C.isikKoni, isikNabiz: C.isikNabiz, isikTitre: C.isikTitre, isikOfset: C.isikOfset } : {}) });
 }
 /* 0.26.0: kablolar Rust'taki gibi kablo aracıyla cihazdan cihaza çekilir (oyun/kablolar.js); eski yer kablosu (617) eski kayıtlar için iletmeye devam eder */
 blok(617, { ad: 'Eski Yer Kablosu', dok: 'ekablo', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'tas', sekil: 'ekablo', elektrik: 'kablo', gizli: true, dusur: () => [[503, 1]], harita: 2, port: [0.5, 0.1, 0.5] });
@@ -1414,5 +1414,10 @@ for (const b of B) if (b) {
   if (b.ses === 'tas' && ([139, 159, 165, 182, 1411, 1923, 1993].includes(b.id) || b.cihaz || b.elektrik || b.sekil === 'cihaz')) b.ses = 'metal';
   else if (b.ses === 'cam' && /Buz/.test(b.ad || '')) b.ses = 'buz';
 }
+/* 0.53.6: elektrikli ışıkların rengi: lamba sıcak beyaz, projektör soğuk beyaz, LED paneller kendi renginde */
+for (const id of [621, 843, 845, 847, 849, 851]) if (B[id] && B[id].mesale) B[id].isikRenk = [1, 0.88, 0.7];
+for (const b of B) if (b && b.mesale && b.elektrik === 'projektor') b.isikRenk = [0.94, 0.97, 1];
+for (const r of RENK8) { const c = parseInt(r.renk.slice(1), 16), v = [(c >> 16) / 255, ((c >> 8) & 255) / 255, (c & 255) / 255], m = Math.max(...v, 0.01);
+  for (const b of B) if (b && b.mesale && b.elektrik === 'ledpanel' && b.ad === `${r.ad} LED Panel`) b.isikRenk = v.map(x => 0.35 + 0.65 * x / m); }
 /* 0.53.1: Kol ve Düğme elektrikli olsa da taş sesini korur */
 for (const id of [233, 234, 235, 236]) B[id].ses = 'tas';

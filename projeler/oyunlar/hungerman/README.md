@@ -119,6 +119,15 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.6 (0.53.6): Elektrikli ışıklar ve aydınlatma
+
+- Renkli ışık: elektrikli ışıklar kendi renginde aydınlatır: Elektrikli Lamba sıcak beyaz, projektör ve LED Sokak Lambası soğuk beyaz, LED paneller kendi renginde, Alarm Sireni kırmızı, Ark Ergitme Ocağı turuncu.
+- Elektrikli ışıklar meşale gibi titremez; alarm sireninin ışığı döner lambayla birlikte yanıp söner, ark ocağının ışığı hafifçe dalgalanır.
+- LED Sokak Lambası aşağı bakan bir ışık konisi verir: altındaki zeminde belirgin bir ışık alanı oluşur, yanlara ve yukarıya az ışık gider; ışık direğin içinden değil, lamba başlığından çıkar (çok bloklu cihazların ışık konumu düzeltildi).
+- Cihaz modelleri ve kablolar dünyadaki bloklar gibi aydınlanır: gece karanlıkta kalır, yakındaki ışıklarla (meşale, lamba, renkli ışıklar, el feneri) parça parça aydınlanır; üstü kapalı yerde daha karanlıktır. Önceden bütün modeller oyuncunun bulunduğu yerin aydınlığıyla boyandığı için kablolar ve direkler karanlıkta açık gri parlıyordu.
+- Kablo kılıfı koyu renktedir.
+- Klima ve vantilatörün sıcaklık işaretleri ışık sayılmaz (yakındaki ışık sayısını boşa harcamaz).
+
 ## 53.5 (0.53.5): Rüzgâr türbini ayrıntıları
 
 - Tam güç 60 E/sn'ye çıktı; türbin 2,5 m/sn'de döner, 18 m/sn'de tam güce ulaşır, arada güç hızın karesiyle artar. Böylece her yükseklikte ve her havada üretim farklıdır.

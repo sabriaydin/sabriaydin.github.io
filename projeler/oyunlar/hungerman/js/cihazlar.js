@@ -63,9 +63,9 @@ yeni53('kamera', { ...M53, ad: 'Güvenlik Kamerası', esya: 3038, w: 1, d: 1, h:
   carp: [[0.3, 0, 0.3, 0.7, 0.95, 0.7]], aciklama: '0,5 E/sn harcar · Çalışırken çevreyi tarar; görüntüsü 64 blok içindeki monitörlerde izlenir' });
 yeni53('monitor', { ...M53, ad: 'Güvenlik Monitörü', esya: 3039, w: 1, d: 1, h: 1, elektrik: 'monitor', tuketim: 0.5, sertlik: 1.5,
   carp: [[0.08, 0, 0.3, 0.92, 0.78, 0.72]], aciklama: '0,5 E/sn harcar · 64 blok içindeki çalışan güvenlik kameralarının canlı görüntüsünü gösterir · Sağ tık: sonraki kamera' });
-yeni53('alarm', { ...M53, ad: 'Alarm Sireni', esya: 3040, w: 1, d: 1, h: 1, elektrik: 'alarm', tuketim: 0.5, sertlik: 1.5, durum: 2, isikHucre: 0, isik: 9,
+yeni53('alarm', { ...M53, ad: 'Alarm Sireni', esya: 3040, w: 1, d: 1, h: 1, elektrik: 'alarm', tuketim: 0.5, sertlik: 1.5, durum: 2, isikHucre: 0, isik: 10, isikRenk: [1, 0.1, 0.06], isikNabiz: 1, isikOfset: [0.5, 0.75, 0.5],
   carp: [[0.2, 0, 0.22, 0.8, 0.85, 0.8]], aciklama: 'Güç geldiğinde siren çalar ve döner ışık yanar (0,5 E/sn). Hareket algılayıcıyla hırsız alarmı olur' });
-yeni53('ark', { ...M53, ad: 'Ark Ergitme Ocağı', esya: 3041, w: 2, d: 2, h: 3, elektrik: 'ark', tuketim: 15, sertlik: 4, sandik: true, hazne: true, durum: 2, isikHucre: 0, isik: 12,
+yeni53('ark', { ...M53, ad: 'Ark Ergitme Ocağı', esya: 3041, w: 2, d: 2, h: 3, elektrik: 'ark', tuketim: 15, sertlik: 4, sandik: true, hazne: true, durum: 2, isikHucre: 0, isik: 12, isikRenk: [1, 0.5, 0.18], isikTitre: 1, isikOfset: [1, 1.2, 0.1],
   carp: [[0.05, 0, 0.05, 1.95, 1.45, 1.95], [0.3, 1.45, 0.3, 1.7, 2.95, 1.7]],
   aciklama: '15 E/sn harcar · Haznesindeki cevherleri, tozları ve fırın malzemelerini aynı anda iki parti hâlinde 1,5 saniyede eritir; yakıt gerekmez' });
 yeni53('kereste', { ...M53, ad: 'Elektrikli Kereste Tezgâhı', esya: 3042, w: 2, d: 1, h: 1, elektrik: 'kereste', tuketim: 3, sertlik: 2, alet: 'balta', ses: 'odun', sandik: true, hazne: true,
@@ -79,7 +79,7 @@ yeni53('matkap', { ...M53, ad: 'Maden Matkabı', esya: 3044, w: 3, d: 3, h: 4, e
   aciklama: '20 E/sn harcar · Ortasından aşağıya bir kuyu kazar; geçtiği her katta 2 blok çevresindeki cevherleri de çıkarır. Kazılanlar haznede toplanır; sıvıya ya da ana kayaya gelince durur' });
 yeni53('pompa', { ...M53, ad: 'Sıvı Pompası', esya: 3045, w: 1, d: 1, h: 2, elektrik: 'pompa', tuketim: 3, sertlik: 2.5,
   carp: [[0.12, 0, 0.12, 0.88, 1.35, 0.88]], aciklama: '3 E/sn harcar · Altındaki ve çevresindeki (4 blok yarıçap, 8 blok derinlik) su ve lavı yarım saniyede bir blok boşaltır' });
-yeni53('sokak', { ...M53, ad: 'LED Sokak Lambası', esya: 3046, w: 1, d: 1, h: 5, elektrik: 'sokak', tuketim: 0.6, sertlik: 2, durum: 2, isikHucre: 4, isik: 15,
+yeni53('sokak', { ...M53, ad: 'LED Sokak Lambası', esya: 3046, w: 1, d: 1, h: 5, elektrik: 'sokak', tuketim: 0.6, sertlik: 2, durum: 2, isikHucre: 4, isik: 18, isikRenk: [0.95, 0.97, 1], isikKoni: 1, isikOfset: [0.5, 4.4, -0.68],
   carp: [[0.28, 0, 0.28, 0.72, 0.3, 0.72], [0.42, 0.3, 0.42, 0.58, 4.95, 0.58]], aciklama: '0,6 E/sn harcar · Güçlü beyaz ışık verir. Gün ışığı algılayıcısıyla geceleri kendiliğinden yanar' });
 
 for (const [k, C] of Object.entries(CIHAZ)) { C.tur = k; C.n = C.w * C.d * C.h; }

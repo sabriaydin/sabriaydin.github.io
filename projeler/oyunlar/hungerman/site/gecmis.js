@@ -3,6 +3,11 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.6', b: 'Işıklar', m: [
+    'Elektrikli ışıklar artık kendi renginde aydınlatıyor: sıcak beyaz lamba, soğuk beyaz sokak lambası, renkli LED paneller, kırmızı alarm ve turuncu ark ocağı; titremiyorlar.',
+    'Sokak lambası, başlığından aşağıya doğru ışık konisi veriyor ve altındaki zemini aydınlatıyor.',
+    'Cihazlar ve kablolar dünyadaki bloklar gibi aydınlanıyor: karanlıkta parlamıyor, yakındaki ışıklarla aydınlanıyor.'
+  ]},
   { s: '0.53.5', b: 'Rüzgâr türbini ayrıntıları', m: [
     'Rüzgâr türbini en çok 60 E/sn üretiyor; üretim her yükseklikte ve her havada farklı: yükseğe kurulan türbin daha güçlü, yağmurda üretim artıyor, fırtınada alçaktaki türbin tam güce yaklaşırken yüksektekiler kendini korumak için durabiliyor.',
     'Yeni ayrıntılar: türbülans, art arda kurulan türbinlerin birbirinin rüzgârını kesmesi (iz etkisi), kışın yoğun havada fazla, yazın az üretim ve kar yağışında kanat buzlanması.',

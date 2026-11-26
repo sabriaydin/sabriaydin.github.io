@@ -29,6 +29,7 @@ import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
 import { Elektrik, enerjiMetni, cihazUretim } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
+import { kokKonumu, dondurXZ } from './cihazlar.js';   // 0.53.6: cihaz ışığının konumu
 import { Taretler } from './oyun/taret.js';
 import { kapFiltresiId, kapBoyu } from './oyun/kaplar.js';
 import { Firinlar } from './oyun/firinlar.js';
@@ -1598,14 +1599,29 @@ function adim(t) {
     for (const m of o.dunya.yakinMesaleler(goz.x, goz.y, goz.z, ISIK_SAYISI - 4)) {
       const k = m[0] * 73856093 ^ m[1] * 19349663 ^ m[2] * 83492791; gor.add(k);
       let q = S.get(k);
-      if (!q || q.m !== m) { const id = o.dunya.blok(Math.floor(m[0]), Math.floor(m[1] - 0.6), Math.floor(m[2])); q = { f: q ? q.f : ilk ? 1 : 0, m, lav: !!(LAV[id] || (BLOKLAR[id] && BLOKLAR[id].magma)) }; S.set(k, q); }
+      if (!q || q.m !== m) {
+        const bx = Math.floor(m[0]), by = Math.floor(m[1] - 0.6), bz = Math.floor(m[2]), id = o.dunya.blok(bx, by, bz), B = BLOKLAR[id];
+        q = { f: q ? q.f : ilk ? 1 : 0, m, lav: !!(LAV[id] || (B && B.magma)) };
+        /* 0.53.6: elektrikli ışıklar titremez; renkli ve konili ışıklar; çok bloklu cihazların ışığı gerçek lamba konumundan çıkar */
+        if (B && (B.elektrik || B.isikRenk)) {
+          q.el = 1; q.renk = B.isikRenk || null; q.koni = B.isikKoni ? 1 : 0; q.nabiz = !!B.isikNabiz; q.titre = !!B.isikTitre;
+          if (B.isikOfset && B.cihaz) { const [kx, ky, kz] = kokKonumu(B, bx, by, bz), [dx, dz] = dondurXZ(B.isikOfset[0] - 0.5, B.isikOfset[2] - 0.5, B.yon); q.p = [kx + 0.5 + dx, ky + B.isikOfset[1], kz + 0.5 + dz]; }
+        }
+        S.set(k, q);
+      }
       q.f = Math.min(1, q.f + dt * 4); q.var = true;
     }
     for (const [k, q] of S) if (!gor.has(k)) { q.f -= dt * 3; if (q.f <= 0) S.delete(k); }
     o.isikIlk = true;
     for (const q of S.values()) {
       if (liste.length >= ISIK_SAYISI) break;
+      if ((q.m[3] || 14) <= 2) continue;   // 0.53.6: klima ve vantilatörün sıcaklık işaretleri ışık saymaz
       const m = q.m, f = q.f * (2 - q.f);
+      if (q.el) {   // 0.53.6: elektrikli ışık
+        const p = q.p || m, g = (m[3] || 14) * f * (q.nabiz ? 0.35 + 0.65 * Math.max(0, Math.sin(o.sure * 9 + m[0])) : q.titre ? 0.85 + 0.15 * Math.sin(o.sure * 31 + m[2]) * Math.sin(o.sure * 13) : 1);
+        liste.push(q.renk ? [p[0], p[1], p[2], g, q.renk[0], q.renk[1], q.renk[2], q.koni] : [p[0], p[1], p[2], g, 1, 0.9, 0.74, q.koni]);
+        continue;
+      }
       if (q.lav) liste.push([m[0], m[1], m[2], 1000 + (m[3] || 11) * f * (1 + 0.07 * Math.sin(o.sure * 1.4 + m[0] * 0.7 + m[2] * 0.3))]);
       else liste.push([m[0], m[1], m[2], (m[3] || 14) * f * (m[5] ? 1 : titre / 13.5) * (m[4] ? -1 : 1)]);   // 0.39.0: magma ve ışıltaş titremez   // eksi: soğuk (buz) ışık
     } }
