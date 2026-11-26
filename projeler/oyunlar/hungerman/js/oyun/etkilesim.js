@@ -1,6 +1,6 @@
 /* HungerMan - etkileşim: bakılan bloğu bulma, kazma/kırma, blok koyma, yeme, toplama */
 import { THREE } from '../grafik/sahne.js';
-import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37, ESYA39, ESYA45, OKLAR } from '../bloklar.js';
+import { buyuSeviye, BLOKLAR, ESYALAR, KATI, SIVI, BITKI, CIZIM, C_YOK, C_KUP, OPAK, ETKILER, EKIN_SONRAKI, OCAK_ID, ISITICI_ID, SU_SEVIYE, YAPI_ID, VAZO_BOS, YATAK, ESYA37, ESYA39, ESYA45, OKLAR, BLOK53, LAV } from '../bloklar.js';
 import { COKLU, cokluHucreler, cokluCapaKonumu, cokluYerel } from '../coklu.js';
 import { SEKIL, YONLER, hucreKutulari, kutuIsin, sinirKutusu } from '../sekiller.js';
 import { ezgiTuru } from './mekanik.js';
@@ -117,7 +117,7 @@ export class Etkilesim {
     if (b.oturak && this.binek) return this.binek.otur(h.x, h.y, h.z);
     if (b.firinKap && !this.shift) { this.arayuz.sandikAc(h.x, h.y, h.z); return true; }   // 0.33.0
     if (b.istasyon) { this.arayuz.envanterAc(b.istasyon); return true; }
-    if (b.sandik || b.firinKap) { const [kx, ky, kz] = this.kokHucre(h.x, h.y, h.z, b); this.arayuz.sandikAc(kx, ky, kz); return true; }   // 0.33.0: fırın ve kamp ateşi haznesi; 0.37.0: çok bloklu dolapta kök hücre
+    if (b.sandik || b.firinKap || b.hazne) { const [kx, ky, kz] = this.kokHucre(h.x, h.y, h.z, b); this.arayuz.sandikAc(kx, ky, kz); return true; }   // 0.33.0: fırın ve kamp ateşi haznesi; 0.37.0: çok bloklu dolapta kök hücre
     if (b.yatak) { this.arayuz.uyu(h); return true; }
     if (this.ac(h)) { this.vurus = 0.01; return true; }
     return false;
@@ -265,7 +265,7 @@ export class Etkilesim {
 
     /* Olta: her sağ tık bir kez atar ya da çeker (istasyon ve sandıklar yine açılır) */
     const eldeOlta = ESYALAR[eldeki] && ESYALAR[eldeki].tur === 'olta';
-    const blokEtkin = h && (BLOKLAR[h.id].istasyon || BLOKLAR[h.id].sandik || BLOKLAR[h.id].yatak) && !g.egil;
+    const blokEtkin = h && (BLOKLAR[h.id].istasyon || BLOKLAR[h.id].sandik || BLOKLAR[h.id].hazne || BLOKLAR[h.id].yatak) && !g.egil;
     if (eldeOlta && !blokEtkin) {
       if (sagYeni && this.olta && this.olta.kullan()) this.vurus = 0.01;
     }
@@ -583,7 +583,7 @@ export class Etkilesim {
     /* Sandık */
     /* 0.37.0: piyano ve gramofon çalar */
     if (h && BLOKLAR[h.id].muzik && !g.egil) { this.ses.melodi([0, 3, 2][Math.floor(Math.random() * 3)]); this.dusenler.renkliParcacik([0.95, 0.85, 0.4], h.x + 0.5, h.y + 1.1, h.z + 0.5, 6); return true; }
-    if (h && BLOKLAR[h.id].sandik && !g.egil) { const [kx, ky, kz] = this.kokHucre(h.x, h.y, h.z, BLOKLAR[h.id]); this.arayuz.sandikAc(kx, ky, kz); return true; }
+    if (h && (BLOKLAR[h.id].sandik || BLOKLAR[h.id].hazne) && !g.egil) { const [kx, ky, kz] = this.kokHucre(h.x, h.y, h.z, BLOKLAR[h.id]); this.arayuz.sandikAc(kx, ky, kz); return true; }   // 0.53.0: çok bloklu makinelerin haznesi
     /* Yatak */
     if (h && BLOKLAR[h.id].yatak) { this.arayuz.uyu(h); return true; }
     /* Kapı, çit kapısı ve tuzak kapı açılıp kapanır (eğilirken blok konur) */
@@ -909,8 +909,11 @@ export class Etkilesim {
     } else if (h) son = this.hizala(sonN, this.isabetNoktasi(h));
     else { const g = this.oyuncu.gozKonumu(), y = this.oyuncu.bakisYonu(); son = this.hizala(sonN, [g.x + y.x * 3, g.y + y.y * 3, g.z + y.z * 3]); }
     const n = [...onceki, son], uz = yolUzunlugu(n), parca = mesafe(sonN, son);
-    if (!neden && parca > KABLO.parca) neden = `Bir parça en çok ${KABLO.parca} blok olabilir; araya bir tutturma noktası ekleyiniz.`;
-    else if (!neden && uz > KABLO.toplam) neden = `Kablo en çok ${KABLO.toplam} blok uzunluğunda olabilir.`;
+    /* 0.53.0: iki elektrik direği arasındaki kablo daha uzun olabilir */
+    const direkMi = k => { const [x, y, z] = String(k).split(',').map(Number), q = BLOKLAR[this.dunya.blok(x, y, z)]; return !!(q && q.cihaz === 'direk'); };
+    const iki = direkMi(this.kablo.k) && hedefPort && direkMi(hedefPort.k), PS = iki ? KABLO.direkParca : KABLO.parca, TS = iki ? KABLO.direkToplam : KABLO.toplam;
+    if (!neden && parca > PS) neden = `Bir parça en çok ${PS} blok olabilir; araya bir tutturma noktası ekleyiniz${iki ? '' : ' (iki elektrik direği arasında 32 blok)'}.`;
+    else if (!neden && uz > TS) neden = `Kablo en çok ${TS} blok uzunluğunda olabilir${iki ? '' : ' (iki elektrik direği arasında 64 blok)'}.`;
     return { noktalar: n, sarkmalar: [...this.kablo.s, this.kablo.sark], uz, maliyet: kabloMaliyeti(uz), port: hedefPort, gecerli: !neden, neden, sark: this.kablo.sark };
   }
   kabloIptal(mesaj = 'Kablo çekme iptal edildi.') { if (!this.kablo) return; this.kablo = null; this.arayuz.bildirim(mesaj); }
@@ -980,6 +983,8 @@ export class Etkilesim {
   yuzeyId(eb, h, f) {
     /* 0.31.0: merdiven bir bloğun alt yüzüne ya da yan yüzün üst yarısına konunca ters (tavana yaslanan) olur */
     if (eb.sekil === 'merdiven' && eb.ters != null) return (h.ny === -1 || (h.ny === 0 && h.py > 0.5) ? eb.ters : eb.taban) + f;
+    /* 0.53.0: klima duvara asılır (arkası tıklanan duvara); duvar yoksa önü oyuncuya bakar */
+    if (eb.klima53) { const yk = h.ny === 0 ? YONLER.findIndex(([a, b]) => a === h.nx && b === h.nz) : -1; return BLOK53.klima + (yk >= 0 && KATI[h.id] ? yk : (f + 2) % 4) * 2; }
     if (eb.sekil !== 'salter' && eb.sekil !== 'elamba' && eb.sekil !== 'algilayici') return null;
     const yi = h.ny === 0 ? YONLER.findIndex(([a, b]) => a === h.nx && b === h.nz) : -1, duvar = yi >= 0 && KATI[h.id] && OPAK[h.id];
     if (eb.sekil === 'algilayici') return duvar ? 872 + yi * 6 : 872 + (4 + (f + 2) % 4) * 6;   // 0.28.0
@@ -1016,7 +1021,7 @@ export class Etkilesim {
       if (C.elektrik === 'su') {
         const [fx, fz] = dondurXZ(0, 1, yon);
         for (const [a, b, c] of [[0, -1, 0], [fx, 0, fz], [-fx, 0, -fz]]) { if (ic.has((hx + a) + ',' + (hy + b) + ',' + (hz + c))) continue; const w = d.blok(hx + a, hy + b, hz + c); if (SIVI[w] && w !== 59) su++; }
-      } else if (!KATI[alt]) return sonuc(false, `${C.ad} düz ve katı bir zemine kurulur.`);
+      } else if (!KATI[alt] && !(C.elektrik === 'jeotermal' && LAV[alt])) return sonuc(false, `${C.ad} düz ve katı bir zemine kurulur.`);   // 0.53.0: jeotermal lavın üstüne de kurulur
     }
     if (C.elektrik === 'su' && !su) return sonuc(false, 'Su çarkının alt kısmı suya değmelidir (çarkı suyun içine ya da kıyısına kurunuz).');
     if (C.elektrik === 'ruzgar') for (const [px, py, pz] of pervaneHucreleri(yon, ax, y, az)) {
@@ -1085,6 +1090,7 @@ export class Etkilesim {
   }
   /* Çok bloklu nesnenin kök hücresi (sandık içeriği burada tutulur); diğer bloklar için kendisi */
   kokHucre(x, y, z, b) {
+    if (b && b.cihaz && b.parca) return kokKonumu(b, x, y, z);   // 0.53.0: çok bloklu cihazın haznesi kök hücrededir
     if (!b || !b.ck) return [x, y, z];
     const D = COKLU[b.ck], [ax, ay, az] = cokluCapaKonumu(D, b, x, y, z), k = cokluHucreler(D, b.yon, ax, ay, az)[0];
     return [k[0], k[1], k[2]];
@@ -1198,6 +1204,19 @@ export class Etkilesim {
     if (b.sekil === 'somine') { d.blokKoy(h.x, h.y, h.z, b.taban + b.yon * 2 + (b.acik ? 0 : 1)); if (b.acik) this.ses.koy('tas'); else if (this.ses.cakmak) this.ses.cakmak(); else this.ses.koy('odun'); return true; }
     /* 0.17.0: kol açılıp kapanır, düğmeye basılır (bir saniye sonra kendiliğinden kalkar), müzik kutusu ezgisini çalar */
     /* 0.28.0: Hareket algılayıcının kipi sağ tıkla değişir */
+    /* 0.53.0: Şebeke parçaları: zamanlayıcının süresi, gün ışığı algılayıcının kipi, sigortanın sınırı / kurulması, düğmeye basma; televizyon kanalı, monitörün kamerası */
+    if (b.elektrik === 'zamanlayici') { const p = (b.cesit + 1) % 4; d.blokKoy(h.x, h.y, h.z, BLOK53.zaman + p * 2 + b.acik); this.ses.kol(true); this.arayuz.bildirim(`Zamanlayıcı: ${[1, 2, 5, 10][p]} saniyede bir açılıp kapanır.`); return true; }
+    if (b.elektrik === 'fotosel') { const m = b.kip ? 0 : 1; d.blokKoy(h.x, h.y, h.z, BLOK53.fotosel + m * 2 + b.acik); this.ses.kol(true); this.arayuz.bildirim(`Gün Işığı Algılayıcı: ${m ? 'gündüzleri' : 'geceleri'} gücü geçirir.`); return true; }
+    if (b.elektrik === 'edugme') { if (!b.acik) { d.blokKoy(h.x, h.y, h.z, b.taban + 1); this.ses.dugme(); } return true; }
+    if (b.elektrik === 'sigorta') {
+      if (b.atik) { d.blokKoy(h.x, h.y, h.z, b.taban); this.ses.kol(true); this.arayuz.bildirim('Sigorta kuruldu.'); }
+      else { const l = (b.cesit + 1) % 4; d.blokKoy(h.x, h.y, h.z, BLOK53.sigorta + l * 2); this.ses.kol(true); this.arayuz.bildirim(`Sigorta sınırı: ${[10, 25, 50, 100][l]} E/sn`); }
+      return true;
+    }
+    if (b.cihaz === 'tv' || b.cihaz === 'monitor') {
+      const k = kokKonumu(b, h.x, h.y, h.z).join(','), m = this.arayuz.ekranDegistir ? this.arayuz.ekranDegistir(k, b.cihaz) : null;
+      this.ses.tik(); if (m) this.arayuz.bildirim(m); return true;
+    }
     if (b.elektrik === 'algilayici') { const m = (b.kip + 1) % 3; d.blokKoy(h.x, h.y, h.z, h.id + (m - b.kip) * 2); this.ses.kol(true); this.arayuz.bildirim(`Hareket Algılayıcı: ${['herkesi', 'yalnızca oyuncuları', 'yalnızca canavarları'][m]} algılar.`); return true; }
     /* 0.24.0: Şalter elektrik ağını açar / keser */
     if (b.mekanik === 'salter') { d.blokKoy(h.x, h.y, h.z, b.taban + (b.acik ? 0 : 1)); this.ses.kol(!b.acik); this.arayuz.bildirim(b.acik ? 'Şalter kapatıldı: ağ kesildi.' : 'Şalter açıldı: ağ bağlandı.'); return true; }

@@ -103,9 +103,17 @@ export const BASARIMLAR = [
   { k: 'kumas', ad: 'Dokumacı', aciklama: 'Pamuktan kumaş dokut.', ikon: 391, grup: 'Zanaat' },
   { k: 'plan', ad: 'Mimar', aciklama: 'Bir Yapı Planı edin.', ikon: 345, grup: 'Zanaat' },
   { k: 'obsidyenZirh', ad: 'Gece Şövalyesi', aciklama: 'Bir obsidyen zırh parçası giy.', ikon: 429, grup: 'Zanaat' },
+  /* 0.53.0: Şebeke */
+  { k: 'buhar53', ad: 'Sanayi Devrimi', aciklama: 'Bir buhar jeneratörü edin.', ikon: 3028, grup: 'Şebeke' },
+  { k: 'jeo53', ad: 'Yerin Isısı', aciklama: 'Bir jeotermal jeneratör edin.', ikon: 3029, grup: 'Şebeke' },
+  { k: 'depo53', ad: 'Enerji Bankası', aciklama: 'Bir enerji depolama konteyneri edin.', ikon: 3032, grup: 'Şebeke' },
+  { k: 'mantik53', ad: 'Devre Tasarımcısı', aciklama: 'Bir mantık kapısı, röle ya da engelleyici edin.', ikon: 2085, grup: 'Şebeke' },
+  { k: 'guvenlik53', ad: 'Güvenli Yuva', aciklama: 'Bir güvenlik kepengi, kamerası ya da alarm sireni edin.', ikon: 3037, grup: 'Şebeke' },
+  { k: 'matkap53', ad: 'Derin Kazı', aciklama: 'Bir maden matkabı edin.', ikon: 3044, grup: 'Şebeke' },
+  { k: 'yildirim53', ad: 'Yıldırım Avcısı', aciklama: 'Bir yıldırımı paratonerle yakala.', ikon: 3031, grup: 'Şebeke' }
 ];
 export const BASARIM = Object.fromEntries(BASARIMLAR.map(b => [b.k, b]));
-export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler', 'Çiftlik', 'Hayatta Kalma'];
+export const GRUP_SIRASI = ['Başlangıç', 'Madencilik', 'Mücadele', 'Bosslar', 'Zanaat', 'Keşif', 'Köyler', 'Yuva ve Dostlar', 'Diyar ve Mevsimler', 'Çiftlik', 'Hayatta Kalma', 'Şebeke'];
 /* 0.22.0: hayatta kalma istatistikleri (başarımlar penceresinde gösterilir) */
 export const ISTATISTIKLER = [
   ['sure', 'Oynama süresi', 'sure'], ['hayat', 'Bu hayat', 'gun'], ['enUzun', 'En uzun hayat', 'gun'], ['olum', 'Ölüm', 'sayi'],
@@ -114,7 +122,8 @@ export const ISTATISTIKLER = [
 ];
 
 /* Envanterde bulunması yeten başarımlar: eşya kimlikleri */
-const ESYA_BASARIM = [['meyve', [378, 379, 380]], ['tirpan', [388, 389]], ['gubre', [390]], ['menemen', [382]], ['kumas', [391]], ['plan', [345]], ['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144, 3005]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]]];
+const ESYA_BASARIM = [['meyve', [378, 379, 380]], ['tirpan', [388, 389]], ['gubre', [390]], ['menemen', [382]], ['kumas', [391]], ['plan', [345]], ['yildiz', [492]], ['fener', [564, 565, 566, 567]], ['odun', [8, 10, 12, 144, 3005]], ['masa', [32]], ['kazma', [300, 304, 308, 312, 316]], ['tasKazma', [304]], ['demir', [261]], ['elmas', [264]], ['asci', [463, 464, 465, 466, 470]], ['isiltas', [471, 514]], ['korKilic', [474]],
+  /* 0.53.0 */ ['buhar53', [3028]], ['jeo53', [3029]], ['depo53', [3032]], ['mantik53', [2085, 2087, 2089, 2091, 2093]], ['guvenlik53', [3037, 3038, 3040]], ['matkap53', [3044]]];
 
 export class Basarimlar {
   constructor() {

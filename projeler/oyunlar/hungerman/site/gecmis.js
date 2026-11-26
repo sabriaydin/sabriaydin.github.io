@@ -2,6 +2,17 @@
    Yeni sürüm eklerken ilgili grubun "y" listesinin en başına yazın. Yeni bir ara sürüm (0.42 gibi) için listenin başına yeni grup ekleyin.
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
+{ g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.0', b: 'Şebeke güncellemesi', m: [
+    'Elektriğe büyük güncelleme: 39 yeni cihaz, devre parçası ve malzeme. Büyük cihazlar gerçek boyutlarında, ayrıntılı 3B modellerle geliyor.',
+    'Yeni enerji kaynakları: kömürle çalışan buhar jeneratörü, lavdan güç alan jeotermal jeneratör, güneşi izleyen panel ve fırtınada yıldırım yakalayan paratoner.',
+    'Dev enerji konteyneri, uzak mesafe için elektrik direkleri, güç ölçer ve aşırı yükte atan sigorta.',
+    'Devre kurmak isteyenlere zamanlayıcı, gün ışığı algılayıcı, VE / VEYA / ÖZEL VEYA kapıları, röle, engelleyici ve düğme.',
+    'Evinize televizyon (dört kanal), çamaşır makinesi, klima ve LED sokak lambası; üssünüze güvenlik kepengi, kamera ve monitör, alarm sireni ve elektrikli çit.',
+    'Atölyede ark ergitme ocağı, kereste tezgâhı, cevheri ikiye katlayan taş kırıcı, kuyu kazan maden matkabı ve sıvı pompası.',
+    'Yerleştirme yönü çevrilirken çıkan bildirim kaldırıldı.'
+  ]}
+]},
 { g: '0.52', b: 'Bereket', y: [
   { s: '0.52.0', b: 'Bereket güncellemesi', m: [
     'Oyuna 213 yeni eşya ve blok geldi.',

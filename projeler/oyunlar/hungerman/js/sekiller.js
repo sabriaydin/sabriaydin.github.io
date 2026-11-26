@@ -11,7 +11,7 @@ export const YONLER = [[0, -1], [1, 0], [0, 1], [-1, 0]];
 export const SEKIL = new Uint8Array(BLOK_UST);
 for (const b of BLOKLAR) if (b && b.cizim === C_SEKIL) SEKIL[b.id] = 1;
 const CIHAZ_KUTU = [];
-for (const b of BLOKLAR) if (b && b.sekil === 'cihaz') CIHAZ_KUTU[b.id] = cihazHucreKutulari(CIHAZ[b.cihaz], b.parca);
+for (const b of BLOKLAR) if (b && b.sekil === 'cihaz') CIHAZ_KUTU[b.id] = cihazHucreKutulari(CIHAZ[b.cihaz], b.parca, b.durumTaban != null ? b.acik : 0);
 
 /* Hücrenin bir kenarına yaslanan ince panel */
 function panel(f, k, y0 = 0, y1 = 1) {
@@ -35,6 +35,7 @@ function baglanir(id, n, f) {
   const b = BLOKLAR[id];
   /* 0.31.0: duvarlar duvarlara, cam bölmelere ve kendi doğrultusundaki çit kapılarına bağlanır */
   if (b.sekil === 'duvar') return sekliOlan(n, 'duvar') || BOLME_AILE(n) || (sekliOlan(n, 'citKapi') && BLOKLAR[n].eksen === (f === 1 || f === 3 ? 0 : 1));
+  if (b.sekil === 'ecit') return sekliOlan(n, 'ecit') || !!(BLOKLAR[n] && BLOKLAR[n].elektrik === 'citunite');   // 0.53.0: elektrikli çit
   if (b.sekil === 'cit') {
     if (sekliOlan(n, 'cit')) return true;   // 0.31.0: tüm ahşap çitler birbirine bağlanır
     /* Çit kapısı yalnızca kendi doğrultusundaki çitlere bağlanır */
@@ -417,6 +418,43 @@ export function sekilKutulari(id, komsu, carp = false) {
     }
     /* Semaver: pirinç gövde, musluk, üstte demlik */
     /* 0.52.0: küçük mutfak cihazları ve radyo (ön yüz yön 0'da +z; yöne göre döndürülür) */
+    /* 0.53.0: mantık parçaları: alçak devre kutusu, üstte simgeli kapak, bağlantı noktası yuvaları ve durum ışığı (açıkken yeşil) */
+    case 'mantik53': {
+      if (carp) return [[2 * P, 0, 2 * P, 14 * P, 5 * P, 14 * P]];
+      const D = T.demir_cubuk, L = [[2 * P, 0, 2 * P, 14 * P, 4 * P, 14 * P], [3 * P, 4 * P, 3 * P, 13 * P, 4.6 * P, 13 * P, T[b.ust53] ?? T.salter_on],
+        [12 * P, 4.6 * P, 3.5 * P, 13 * P, 5.4 * P, 4.5 * P, b.acik ? T.led_yesil : T.led_kirmizi], [1.5 * P, 0, 1.5 * P, 14.5 * P, 0.6 * P, 14.5 * P, D]];
+      if (b.elektrik === 'edugme') L.push([5.5 * P, 4.6 * P, 5.5 * P, 10.5 * P, (b.acik ? 5.2 : 6.6) * P, 10.5 * P, T.led_kirmizi], [5 * P, 4.6 * P, 5 * P, 11 * P, 5 * P, 11 * P, D]);
+      return L;
+    }
+    /* 0.53.0: Sigorta: ayaklı küçük pano, önde sınır etiketi ve kol (atıkken aşağıda, kırmızı) */
+    case 'sigorta53': {
+      if (carp) return [[3 * P, 0, 4 * P, 13 * P, 12 * P, 12 * P]];
+      const D = T.demir_cubuk;
+      return [[3 * P, 0, 4 * P, 13 * P, P, 12 * P, D], [3.5 * P, P, 4.5 * P, 12.5 * P, 11 * P, 11.5 * P], [4 * P, 2 * P, 4.1 * P, 12 * P, 10 * P, 4.5 * P, b.atik ? T.sigorta_on_a : T.sigorta_on],
+        [7 * P, b.atik ? 3 * P : 6.5 * P, 3.2 * P, 9 * P, b.atik ? 5.5 * P : 9 * P, 4.1 * P, b.atik ? T.led_kirmizi : T.led_yesil], [4 * P, 11 * P, 5 * P, 12 * P, 12 * P, 11 * P, T.batarya_ust]];
+    }
+    /* 0.53.0: Klima iç ünitesi: duvara dayalı uzun gövde, önde hava çıkış kanatları (çalışırken açık) */
+    case 'klima53': {
+      if (carp) return dondur([[0, 7 * P, 10 * P, 1, 13 * P, 1]], b.yon);
+      const D = T.demir_cubuk;
+      return dondur([[0, 7 * P, 11 * P, 1, 13 * P, 1], [0.3 * P, 7.5 * P, 10.6 * P, 15.7 * P, 12.6 * P, 11 * P, b.acik ? T.klima_on_a : T.klima_on],
+        [P, b.acik ? 6.4 * P : 7 * P, b.acik ? 10 * P : 10.8 * P, 15 * P, b.acik ? 7 * P : 7.5 * P, 11.6 * P, T.beyaz_govde],
+        [13 * P, 11.6 * P, 10.5 * P, 14 * P, 12.2 * P, 10.7 * P, b.acik ? T.led_yesil : D]], b.yon);
+    }
+    /* 0.53.0: Elektrikli Çit: beton direk, sarı izolatörler ve komşulara uzanan dört sıra çelik tel */
+    case 'ecit': {
+      const h = carp ? 1.5 : 1, l = [[6.5 * P, 0, 6.5 * P, 9.5 * P, carp ? h : 15 * P, 9.5 * P, ...(carp ? [] : [T.beton53])]];
+      if (!carp) for (const y of [3, 6.5, 10, 13.5]) l.push([6 * P, y * P, 6 * P, 10 * P, (y + 1) * P, 10 * P, T.izolator]);
+      for (let f = 0; f < 4; f++) {
+        if (!baglanir(id, komsu(f), f)) continue;
+        if (carp) { l.push(f === 0 ? [7 * P, 0, 0, 9 * P, h, 6.5 * P] : f === 1 ? [9.5 * P, 0, 7 * P, 1, h, 9 * P] : f === 2 ? [7 * P, 0, 9.5 * P, 9 * P, h, 1] : [0, 0, 7 * P, 6.5 * P, h, 9 * P]); continue; }
+        for (const y of [3.3, 6.8, 10.3, 13.8]) {
+          const y0 = y * P, y1 = (y + 0.4) * P;
+          l.push(f === 0 ? [7.8 * P, y0, 0, 8.2 * P, y1, 6.5 * P, T.ecit_tel] : f === 1 ? [9.5 * P, y0, 7.8 * P, 1, y1, 8.2 * P, T.ecit_tel] : f === 2 ? [7.8 * P, y0, 9.5 * P, 8.2 * P, y1, 1, T.ecit_tel] : [0, y0, 7.8 * P, 6.5 * P, y1, 8.2 * P, T.ecit_tel]);
+        }
+      }
+      return l;
+    }
     case 'cihaz52': { const K = (CIHAZ52_KUTU[b.model] || [[2, 0, 2, 14, 8, 14]]).map(k => k.map(v => v * P)); return dondur(carp ? [K[0]] : K, b.yon || 0); }
     case 'semaver':
       if (carp) return [[4 * P, 0, 4 * P, 12 * P, 15 * P, 12 * P]];

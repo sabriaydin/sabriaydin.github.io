@@ -212,7 +212,7 @@ export class SunucuOyun {
         if (!o.kablolar || typeof m.a !== 'string' || typeof m.b !== 'string' || !Array.isArray(m.n) || m.n.length > 10 || m.a === m.b) break;
         const nokta = (k2, i, tur) => { const [x, y, z] = k2.split(',').map(Number); if (kabloUcu(o.dunya, x, y, z) !== k2) return false; const q = portBilgi(o.dunya, k2, +i); return !!q && q.tur === tur && !o.kablolar.portKablosu(k2, +i); };
         if (!nokta(m.a, m.ap, 'cikis') || !nokta(m.b, m.bp, 'giris')) break;
-        o.kablolar.ekle(m.a, +m.ap, m.b, +m.bp, m.n.filter(p => Array.isArray(p) && p.length === 3 && p.every(Number.isFinite)), Array.isArray(m.s) ? m.s : [], undefined, Math.min(KABLO.toplam, +m.uz || 3));
+        o.kablolar.ekle(m.a, +m.ap, m.b, +m.bp, m.n.filter(p => Array.isArray(p) && p.length === 3 && p.every(Number.isFinite)), Array.isArray(m.s) ? m.s : [], undefined, Math.min(KABLO.direkToplam, +m.uz || 3));
         break;
       }
       case 'ks': if (o.kablolar) o.kablolar.sil(+m.i); break;

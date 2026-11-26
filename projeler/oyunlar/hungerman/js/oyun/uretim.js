@@ -1,7 +1,7 @@
 /* HungerMan - üretim tarifleri
    istasyon: null (her yerde), 'masa' (Üretim Masası yakınında), 'firin' (Fırın yakınında), 'ates' (Kamp Ateşi), 'simya' (Simya Masası), 'tencere' (Tencere)
    Girdi olarak eşya kimliği ya da grup adı ('kalas', 'kutuk') kullanılabilir. */
-import { ESYA45, ESYA48, aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37, YAPI52, ESYA52, CIHAZ52, YAPI_MALZEME52, DUVAR_MALZEME52 } from '../bloklar.js';
+import { ESYA45, ESYA48, aletId, ESYALAR, ZIRH_MALZEME, KIYAFETLER, TARIM, VAZO_BOS, YUN_RENKLERI, YAPI_ID, YAPI_MALZEME, DUVAR_MALZEME, CIT_MALZEME, RENK8, MUTFAK, COKLU_ID, YAPI37, YAPI_MALZEME37, DUVAR_MALZEME37, ESYA37, YAPI52, ESYA52, CIHAZ52, YAPI_MALZEME52, DUVAR_MALZEME52, ESYA53, BLOK53 } from '../bloklar.js';
 
 export const GRUPLAR = {
   kalas: { ad: 'Herhangi bir kalas', idler: [14, 38, 39, YAPI_ID.akasyaKalas] },
@@ -620,6 +620,51 @@ t(C.gazLambasi, 1, [[259, 2], [34, 1], [1190, 1]], 'masa', 'mobilya');
   t(384, 1, [[367, 1]], 'mikrodalga', 'yiyecek');
   t(491, 1, [[480, 1]], 'mikrodalga', 'yiyecek');
   t(449, 1, [[479, 1], [476, 1], [396, 1], [270, 1]], 'mikrodalga', 'yiyecek');
+}
+
+/* ---------- 0.53.0: Şebeke güncellemesi tarifleri ---------- */
+{
+  const S = ESYA53, B = BLOK53, E = 'elektrik';
+  /* Parçalar ve cevher tozlarının eritilmesi */
+  t(S.motor, 1, [[261, 2], [496, 2], [259, 1]], 'masa', E);
+  t(S.lityum, 2, [[259, 2], [471, 1], [34, 1]], 'masa', E);
+  t(S.izolator, 2, [[960, 2]], 'masa', E);
+  t(S.cip, 2, [[495, 1], [263, 1], [471, 1]], 'masa', E);
+  t(S.ekran, 1, [[34, 2], [495, 1], [61, 1]], 'masa', E);
+  t(261, 2, [[S.demirTozu, 2], [257, 1]], 'firin', 'malzeme');
+  t(259, 2, [[S.bakirTozu, 2], [257, 1]], 'firin', 'malzeme');
+  t(263, 2, [[S.altinTozu, 2], [257, 1]], 'firin', 'malzeme');
+  /* Çok bloklu cihazlar */
+  t(3028, 1, [[261, 16], [15, 12], [496, 4], [495, 2]], 'masa', E);           // Buhar Jeneratörü
+  t(3029, 1, [[261, 12], [YAPI_ID.beton, 6], [496, 4], [495, 2]], 'masa', E); // Jeotermal Jeneratör
+  t(3030, 1, [[497, 1], [S.motor, 1], [261, 4], [495, 1]], 'masa', E);        // Güneş Takip Sistemi
+  t(3031, 1, [[259, 8], [261, 6], [S.izolator, 2], [495, 1]], 'masa', E);     // Paratoner
+  t(3032, 1, [[S.lityum, 12], [261, 16], [495, 4], [S.cip, 1]], 'masa', E);   // Enerji Depolama Konteyneri
+  t(3033, 1, [['kutuk', 2], [S.izolator, 3], [261, 1]], 'masa', E);          // Elektrik Direği
+  t(3034, 1, [[S.ekran, 1], [495, 1], [259, 2]], 'masa', E);                  // Güç Ölçer
+  t(3035, 1, [[S.ekran, 2], [495, 2], ['kalas', 4], [259, 2]], 'masa', E);    // Televizyon
+  t(3036, 1, [[261, 6], [S.motor, 1], [34, 2], [495, 1]], 'masa', E);         // Çamaşır Makinesi
+  t(3037, 1, [[261, 12], [S.motor, 1], [495, 1]], 'masa', E);                 // Güvenlik Kepengi
+  t(3038, 1, [[34, 1], [495, 1], [261, 2], [S.cip, 1]], 'masa', E);           // Güvenlik Kamerası
+  t(3039, 1, [[S.ekran, 1], [495, 1], [261, 1]], 'masa', E);                  // Güvenlik Monitörü
+  t(3040, 1, [[261, 2], [495, 1], [34, 1], [321, 1]], 'masa', E);             // Alarm Sireni
+  t(3041, 1, [[35, 12], [261, 8], [257, 8], [496, 4], [495, 2]], 'masa', E);  // Ark Ergitme Ocağı
+  t(3042, 1, [[261, 6], [S.motor, 1], ['kalas', 4]], 'masa', E);             // Elektrikli Kereste Tezgâhı
+  t(3043, 1, [[261, 10], [S.motor, 2], [495, 1]], 'masa', E);                 // Taş Kırıcı
+  t(3044, 1, [[261, 24], [S.motor, 2], [495, 2], [264, 2]], 'masa', E);       // Maden Matkabı
+  t(3045, 1, [[261, 6], [S.motor, 1], [477, 1]], 'masa', E);                  // Sıvı Pompası
+  t(3046, 1, [[261, 6], [34, 2], [61, 1], [495, 1]], 'masa', E);              // LED Sokak Lambası
+  /* Tek bloklu parçalar */
+  t(B.zaman, 1, [[S.cip, 1], [503, 1]], 'masa', E);
+  t(B.fotosel, 1, [[S.cip, 1], [34, 1]], 'masa', E);
+  for (const k of ['ve', 'veya', 'xor']) t(B[k], 2, [[S.cip, 1], [503, 1]], 'masa', E);
+  t(B.role, 1, [[S.cip, 1], [496, 1]], 'masa', E);
+  t(B.engel, 1, [[S.cip, 1], [496, 1]], 'masa', E);
+  t(B.dugme, 1, [[S.cip, 1], [15, 1]], 'masa', E);
+  t(B.sigorta, 1, [[259, 2], [495, 1], [34, 1]], 'masa', E);
+  t(B.klima, 1, [[261, 4], [S.motor, 1], [496, 2], [495, 1]], 'masa', E);
+  t(B.citUnite, 1, [[261, 4], [496, 3], [495, 1]], 'masa', E);
+  t(B.ecit, 6, [[261, 1], [S.izolator, 1], [15, 1]], 'masa', E);
 }
 
 export const TARIFLER = R;

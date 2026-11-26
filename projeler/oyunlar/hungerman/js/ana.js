@@ -27,7 +27,7 @@ import { Yolculuk } from './oyun/yolculuk.js';
 import { ISTASYON_BLOK, ISTASYON_ADI, ELOCAK } from './oyun/uretim.js';
 import { Binek } from './oyun/binek.js';
 import { Mekanik } from './oyun/mekanik.js';
-import { Elektrik, enerjiMetni } from './oyun/elektrik.js';
+import { Elektrik, enerjiMetni, cihazUretim } from './oyun/elektrik.js';
 import { CihazCizici } from './grafik/cihaz-cizici.js';
 import { Taretler } from './oyun/taret.js';
 import { kapFiltresiId, kapBoyu } from './oyun/kaplar.js';
@@ -473,7 +473,7 @@ addEventListener('keydown', e => {
     if (e.code === T.at) oyun.etkilesim.at(e.shiftKey);
     /* 0.25.0: R: elde tutulan cihazın ya da yönlü bloğun konulacağı yönü çevirir */
     if (e.code === T.dondur && !e.repeat && oyun.etkilesim.kablo) { oyun.etkilesim.kabloIptal(); ses.tik(); }
-    else if (e.code === T.dondur && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { const n = oyun.etkilesim.dondur(); ses.tik(); oyun.hud.bildirim(`Yerleştirme yönü çevrildi (${n * 90}°)`); }
+    else if (e.code === T.dondur && !e.repeat && oyun.etkilesim.dondurulebilir(oyun.envanter.seciliId())) { oyun.etkilesim.dondur(); ses.tik(); }   // 0.53.0: yön bildirimi kaldırıldı (önizleme yönü gösterir)
     if (e.code === T.etkiles && !e.repeat) oyun.etkilesim.etkiles();
     if ((e.code === T.sohbet || e.code === 'Enter') && oyun.ag) { e.preventDefault(); sohbetAc(); }
     if (e.code === T.hata) $('#hata').hidden = !$('#hata').hidden;
@@ -922,6 +922,7 @@ function oyunBaslat(v) {
     tilsim: () => tilsimBaslat(),
     zaman: () => ({ zaman: oyun.zaman, gun: oyun.gun, mevsim: `${MEVSIMLER[oyun.mevsim]} ${((oyun.gun - 1) % MEVSIM_GUN) + 1}/${MEVSIM_GUN}` }),   // 0.37.0: cep saati
     koyluAc: w => panelAc(koyluEkrani, w),
+    ekranDegistir: (k, tur) => (oyun.cihazCizici ? oyun.cihazCizici.ekranDegistir(k, tur) : null),   // 0.53.0: televizyon kanalı, monitör kamerası
     gezginAc: () => panelAc(gezginEkrani),
     sandikAc: (x, y, z) => {
       const k = x + ',' + y + ',' + z;
@@ -1042,7 +1043,7 @@ function gecitGec(h) {
 }
 
 /* ---------- 0.40.5: dünya olay kaydı: dünyada olan her şey geliştirici konsoluna (F8) yazılır ---------- */
-const SEBEP_AD = { dusme: 'düşme', aclik: 'açlık', bogulma: 'boğulma', lav: 'lav', yanma: 'yanma', donma: 'donma', sicak: 'sıcak çarpması', kanama: 'kanama', zehir: 'zehir', agu: 'örümcek zehri', bosluk: 'boşluk', yildirim: 'yıldırım', meteor: 'meteor', patlama: 'patlama', kaktus: 'kaktüs', ok: 'ok', tuzak: 'tuzak' };
+const SEBEP_AD = { dusme: 'düşme', aclik: 'açlık', bogulma: 'boğulma', lav: 'lav', yanma: 'yanma', donma: 'donma', sicak: 'sıcak çarpması', kanama: 'kanama', zehir: 'zehir', agu: 'örümcek zehri', bosluk: 'boşluk', yildirim: 'yıldırım', meteor: 'meteor', patlama: 'patlama', kaktus: 'kaktüs', ok: 'ok', tuzak: 'tuzak', elektrik: 'elektrik çarpması' };
 function sebepAdi(s) { return !s ? 'bilinmiyor' : SEBEP_AD[s] || (TURLER[s] && TURLER[s].ad) || s; }
 function olayKaydiKur(o, koyler) {
   const K = (t, m, e) => konsol.kayit(t, m, e), acik = t => !konsol.kayitKapali.has(t), ad = id => (BLOKLAR[id] && BLOKLAR[id].ad) || '#' + id;
@@ -1664,7 +1665,7 @@ function adim(t) {
   else o.hud.bakilan(null);
   /* 0.25.0: cihaz modelleri ve yerleştirme önizlemesi */
   if (o.cihazCizici) {
-    o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure },
+    o.cihazCizici.guncelle(dt, o.isik, { gunIsigi: o.gunIsigi, yogunluk: o.hava ? o.hava.yogunluk : 0, firtina: !!(o.hava && o.hava.firtina), mevsim: o.mevsim || 0, sure: o.sure, zaman: o.zaman, gun: o.gun, oyuncu: o.oyuncu.konum },
       k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k)));
     const etkin = kilitli && !gelPencere.acik && !o.hayatta.olu && !o.fotoModu && !o.izleyici;
     /* 0.28.0: taretler; çalışan jeneratörlerden duman, fıskiyelerden su */
@@ -1680,6 +1681,7 @@ function adim(t) {
         if (b.elektrik === 'jenerator' && Math.random() < 0.7) { const [ex, ez] = [[12.75, 10.75], [5.25, 12.75], [3.25, 5.25], [10.75, 3.25]][b.yon].map(v => v / 16); o.dusenler.atesParcacik(x + ex, y + 1, z + ez, true); }
         else if (b.elektrik === 'fiskiye') for (let i = 0; i < 3; i++) { const a = Math.random() * Math.PI * 2, r = 1 + Math.random() * 3; o.dusenler.renkliParcacik([0.55, 0.75, 1], x + 0.5 + Math.cos(a) * r, y + 0.2, z + 0.5 + Math.sin(a) * r, 1); }
       }
+      cihazEfektleri53(o);
     }
     o.cihazCizici.onizleme(ayar.onizleme !== false && etkin && !o.etkilesim.kablo ? o.etkilesim.onizlemeBilgisi() : null);
     /* 0.26.0: kablolar, çekilen kablonun önizlemesi ve elde kablo varken bakılan kablonun vurgusu */
@@ -1952,10 +1954,57 @@ function uyu(h, konak = false) {
   $('#uyku').classList.add('acik');
 }
 
+/* ---------- 0.53.0: Şebeke cihazlarının görsel ve işitsel etkileri (0,15 saniyede bir) ----------
+   Buhar jeneratörünün bacasından duman, jeotermalden buhar, ark ocağından kıvılcım, matkaptan toz; sirenler; elektrikli çitin çarpması (tek oyunculu ve sunucu). */
+const DONDUR53 = (lx, lz, f) => (f === 1 ? [-lz, lx] : f === 2 ? [-lx, -lz] : f === 3 ? [lz, -lx] : [lx, lz]);
+function cihazEfektleri53(o) {
+  const P = o.oyuncu.konum, D = o.dusenler, oran = k => (o.elektrik ? o.elektrik.oranlar.get(k) : o.bataryaOran.get(k));
+  o.siren53 = (o.siren53 || 0) + 0.15;
+  let siren = null, sirenD = 48 * 48;
+  for (const [k, [x, y, z]] of o.dunya.elektrikler) {
+    if (Math.abs(x - P.x) > 48 || Math.abs(z - P.z) > 48) continue;
+    const b = BLOKLAR[o.dunya.blok(x, y, z)];
+    if (!b || !b.cihaz || b.parca) continue;
+    const yer = (lx, ly, lz) => { const [dx, dz] = DONDUR53(lx - 0.5, lz - 0.5, b.yon); return [x + 0.5 + dx, y + ly, z + 0.5 + dz]; };
+    const yakin = Math.abs(x - P.x) < 28 && Math.abs(z - P.z) < 28;
+    if (b.cihaz === 'buhar' && yakin) { const r = oran(k) || 0; if (r >= 2 && Math.random() < 0.8) { const [a, c, e] = yer(0.46, 3.0, 1.38); D.renkliParcacik([0.32, 0.31, 0.3], a, c, e, 2); } if ((r % 2) > 0.3 && Math.random() < 0.25) { const [a, c, e] = yer(1.9, 1.75, 1.0); D.renkliParcacik([0.92, 0.94, 0.96], a, c, e, 1); } }
+    else if (b.cihaz === 'jeotermal' && yakin && Math.random() < 0.6 && cihazUretim(o.dunya, b, x, y, z, {}).u > 0) { const [a, c, e] = yer(1, 3.0, 1.18); D.renkliParcacik([0.9, 0.92, 0.95], a, c, e, 2); }
+    else if (b.cihaz === 'ark' && b.acik && yakin && Math.random() < 0.7) { const [a, c, e] = yer(1, 1.5, 1); D.renkliParcacik([1, 0.75, 0.3], a + (Math.random() - 0.5) * 0.6, c, e + (Math.random() - 0.5) * 0.6, 3); }
+    else if (b.cihaz === 'matkap' && yakin && (oran(k) || 0) % 2 === 1 && Math.random() < 0.5) { const [a, c, e] = yer(1.5, 0.3, 1.5); D.renkliParcacik([0.55, 0.5, 0.45], a, c, e, 2); }
+    else if (b.cihaz === 'alarm' && b.acik) { const u = (x + 0.5 - P.x) ** 2 + (z + 0.5 - P.z) ** 2; if (u < sirenD) { sirenD = u; siren = [x + 0.5, y + 0.5, z + 0.5]; } }
+  }
+  /* En yakın siren 0,6 saniyede bir çalar */
+  if (siren && o.siren53 >= 0.6) { o.siren53 = 0; ses.konumlu(siren[0], siren[1], siren[2], () => ses.siren(o.sure * 0.8), 48); }
+  /* Elektrik ağının ses olayları (sigorta, kepenk, matkap) */
+  if (o.elektrik && o.elektrik.sesler.length) {
+    for (const [t, x, y, z, a] of o.elektrik.sesler.splice(0)) ses.konumlu(x, y, z, () => (t === 'sigorta' ? ses.sigortaAtti() : t === 'kepenk' ? ses.kepenk(a) : ses.matkap()), 32);
+  }
+  /* Elektrikli çit: değen canavarlar 4 hasar alıp savrulur, hayvanlar ve oyuncu hafifçe çarpılır */
+  const E = o.elektrik;
+  if (!E || !E.citler.size) return;
+  o.cit53 = (o.cit53 || 0) - 0.15;
+  if (Math.random() < 0.3) { const l = [...E.citler]; const [x, y, z] = l[Math.floor(Math.random() * l.length)].split(',').map(Number); if (Math.abs(x - P.x) < 24 && Math.abs(z - P.z) < 24) D.renkliParcacik([0.7, 0.85, 1], x + 0.5, y + 0.3 + Math.random() * 0.6, z + 0.5, 1); }
+  if (o.cit53 > 0) return;
+  o.cit53 = 0.5;
+  const degiyor = (p, yuk) => { for (const dy of [0, 1]) for (const [dx, dz] of [[0, 0], [0.45, 0], [-0.45, 0], [0, 0.45], [0, -0.45]]) { const k = Math.floor(p.x + dx) + ',' + Math.floor(p.y + dy * yuk) + ',' + Math.floor(p.z + dz); if (E.citler.has(k)) return k; } return null; };
+  for (const w of o.varliklar.liste) {
+    if (w.olu || w.tur.koylu || w.tur.gezgin) continue;
+    const k = degiyor(w.konum, 0.9); if (!k) continue;
+    const [cx, , cz] = k.split(',').map(Number);
+    o.varliklar.hasarVer(w, w.tur.dusman || w.ofkeli ? 4 : 1, { x: cx + 0.5, z: cz + 0.5 }, { itme: 0.9 });
+    ses.konumlu(w.konum.x, w.konum.y, w.konum.z, () => ses.elektrikCarp(), 24);
+    D.renkliParcacik([0.7, 0.85, 1], w.konum.x, w.konum.y + 0.8, w.konum.z, 6);
+  }
+  if (!o.hayatta.olu && degiyor(P, 1.5)) { o.hayatta.hasar(1, 'elektrik'); ses.elektrikCarp(); D.renkliParcacik([0.7, 0.85, 1], P.x, P.y + 0.8, P.z, 6); }
+}
+
 /* Yıldırım (tek oyunculu ve sunucu): görüntü, yakındaki canlılara ve oyunculara hasar */
 function simsekOlayi(x, y, z) {
   const o = oyun;
   if (!o) return;
+  /* 0.53.0: 48 blok içindeki paratoner yıldırımı kendine çeker */
+  const pt = o.elektrik && o.elektrik.paratonerCek(x, y, z);
+  if (pt) { [x, y, z] = pt; if (o.basarimlar) o.basarimlar.ver('yildirim53'); }
   o.hava.simsekGoster(x, y, z, o.oyuncu.konum, ses);
   o.varliklar.yildirim(x, y, z);
   const p = o.oyuncu.konum;

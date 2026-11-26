@@ -7,7 +7,7 @@
 import { BLOKLAR } from '../bloklar.js';
 import { CIHAZ, kokKonumu, dondurXZ } from '../cihazlar.js';
 
-export const KABLO = { parca: 16, toplam: 40, esya: 503, bloktaBir: 3, sarkmaUst: 3 };
+export const KABLO = { parca: 16, toplam: 40, esya: 503, bloktaBir: 3, sarkmaUst: 3, direkParca: 32, direkToplam: 64 };   // 0.53.0: iki elektrik direği arasında daha uzun
 const C = k => String(k).split(',').map(Number);
 
 /* Bağlantı noktaları: [tür, yerel konum] (yön 0; çok bloklu cihazlarda kök hücreye, diğerlerinde hücreye göre) */
@@ -38,8 +38,40 @@ export const PORT = {
   ledpanel: [G(0.3, 0.5, 1.01), K(0.7, 0.5, 1.01)],
   projektor: [G(0.3, 0.3, -0.01), K(0.7, 0.3, -0.01)],
   vantilator: [G(0.3, 1.01, 0.5), K(0.7, 1.01, 0.5)],
-  mutfak52: [G(0.36, 0.1, 0.16), K(0.64, 0.1, 0.16)]
+  mutfak52: [G(0.36, 0.1, 0.16), K(0.64, 0.1, 0.16)],
+  /* 0.53.0: Şebeke güncellemesi. Çok bloklu cihazlarda konumlar kök hücrenin köşesine göredir (ön -z) */
+  buhar: [K(2.47, 1.33, 0.62)],
+  jeotermal: [K(1, 0.93, 0.3)],
+  takip: [K(1, 0.6, 0.79)],
+  paratoner: [K(0.5, 0.5, 0.1)],
+  konteyner: [G(0.42, 1.62, 0.1), K(0.72, 1.62, 0.1)],
+  direk: [G(-0.45, 6.78, 0.5), K(0.5, 6.78, 0.5), K(1.45, 6.78, 0.5)],
+  olcer: [G(0.32, 0.58, 0.62), K(0.68, 0.58, 0.62)],
+  tv: [G(0.42, 0.26, 0.92), K(0.62, 0.26, 0.92)],
+  camasir: [G(0.36, 0.16, 0.94), K(0.64, 0.16, 0.94)],
+  kepenk: [G(1.93, 0.5, 0.28), K(1.93, 0.8, 0.28)],
+  kamera: [G(0.42, 0.1, 0.33), K(0.58, 0.1, 0.33)],
+  monitor: [G(0.42, 0.22, 0.6), K(0.58, 0.22, 0.6)],
+  alarm: [G(0.36, 0.16, 0.82), K(0.64, 0.16, 0.82)],
+  ark: [G(0.7, 0.55, 1.97), K(1.3, 0.55, 1.97)],
+  kereste: [G(0.3, 0.3, 0.92), K(0.55, 0.3, 0.92)],
+  kirici: [G(0.4, 0.3, 0.94), K(0.6, 0.3, 0.94)],
+  matkap: [G(2.35, 1.17, 2.5), K(2.65, 1.17, 2.5)],
+  pompa: [G(0.4, 0.95, 0.89), K(0.6, 0.95, 0.89)],
+  sokak: [G(0.44, 0.6, 0.6), K(0.56, 0.9, 0.6)],
+  /* Tek bloklu parçalar: mantık kutusunun üstünde girişler batıda, çıkış doğuda */
+  zamanlayici: [G(0.22, 0.29, 0.5), K(0.78, 0.29, 0.5)],
+  fotosel: [G(0.22, 0.29, 0.5), K(0.78, 0.29, 0.5)],
+  edugme: [G(0.22, 0.29, 0.5), K(0.78, 0.29, 0.5)],
+  mantik: [G(0.22, 0.29, 0.3), G(0.22, 0.29, 0.7), K(0.78, 0.29, 0.5)],
+  role: [G(0.22, 0.29, 0.3), G(0.22, 0.29, 0.7), K(0.78, 0.29, 0.5)],
+  engelleyici: [G(0.22, 0.29, 0.3), G(0.22, 0.29, 0.7), K(0.78, 0.29, 0.5)],
+  sigorta: [G(0.28, 0.78, 0.5), K(0.72, 0.78, 0.5)],
+  klima: [G(0.36, 0.5, 0.97), K(0.64, 0.5, 0.97)],
+  citunite: [G(0.3, 1.01, 0.5), K(0.7, 1.01, 0.5)]
 };
+/* 0.53.0: bağlantı noktası adları (mantık parçalarının girişleri) */
+export const PORT_ETIKET = { role: ['Güç girişi', 'Sinyal girişi'], engelleyici: ['Güç girişi', 'Sinyal girişi'], mantik: ['Giriş A', 'Giriş B'] };
 export const PORT_AD = { giris: 'Giriş', cikis: 'Çıkış' };
 /* Bloğun bağlantı noktası listesi (yoksa boş) */
 export function portlar(b) {

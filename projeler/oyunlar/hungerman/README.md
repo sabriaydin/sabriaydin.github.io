@@ -119,6 +119,19 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.0 (0.53.0): Şebeke güncellemesi (39 yeni elektrik cihazı, parçası ve malzemesi)
+
+- Yeni üreticiler (gerçek boyutlarında, çok bloklu): Buhar Jeneratörü (3 × 2 × 3; kömür / odun yakar, yanında su ister, basınç 10 saniyede dolar, en çok 60 E/sn), Jeotermal Jeneratör (2 × 2 × 3; altındaki ve yanındaki lav başına 15 E/sn, en çok 45, Yeraltı Diyarı'nda da çalışır), Güneş Takip Sistemi (2 × 2 × 3; paneli güneşe döner, en çok 28 E/sn), Paratoner (1 × 1 × 6; fırtınada 48 blok içindeki yıldırımları çeker, her yıldırım 5.000 E depolar).
+- Depolama ve şebeke: Enerji Depolama Konteyneri (4 × 2 × 3; 150.000 E, 250 E/sn), Elektrik Direği (1 × 1 × 7; bir giriş, iki çıkış; iki direk arasında 32 blokluk parça, 64 blokluk kablo), Güç Ölçer (geçen gücü ekranında gösterir), Sigorta (10 / 25 / 50 / 100 E/sn sınırı aşılınca atar).
+- Devre parçaları: Zamanlayıcı (1 / 2 / 5 / 10 sn), Gün Işığı Algılayıcı (gece / gündüz), VE, VEYA ve ÖZEL VEYA kapıları, Röle ve Engelleyici (güç + sinyal girişi), Elektrikli Düğme (5 sn). Kapıların iki girişi ayrı ayrı izlenir.
+- Ev: Televizyon (2 × 1 × 2; dört kanal: doğa belgeseli, haber, maç, hava durumu; sağ tıkla kanal), Çamaşır Makinesi (renkli yün ve halıyı beyaza döndürür), Klima (duvara asılır; 7 blok içinde sıcaklığı 22 °C'ye çeker), LED Sokak Lambası (1 × 1 × 5).
+- Güvenlik: Güvenlik Kepengi (2 × 1 × 3; güç gelince yukarı sarılır, kesilince iner; altında biri varken inmez), Güvenlik Kamerası (tarar) ve Güvenlik Monitörü (64 blok içindeki kameraların canlı görüntüsü; sağ tıkla kamera değişir), Alarm Sireni (döner ışık ve siren), Elektrikli Çit Ünitesi ve Elektrikli Çit (değen canavarlar çarpılıp savrulur).
+- Atölye: Ark Ergitme Ocağı (2 × 2 × 3; yakıtsız, iki parti, 1,5 sn), Elektrikli Kereste Tezgâhı (kütükten 6 kalas), Taş Kırıcı (ham cevherden iki toz: cevher verimi iki katı), Maden Matkabı (3 × 3 × 4; kuyu kazar ve her kattaki 2 blok çevresindeki cevherleri çıkarır), Sıvı Pompası (su ve lavı boşaltır). Makinelerde üst sıra girdi, alt sıralar çıktı yuvasıdır.
+- Yeni parçalar: Elektrik Motoru, Lityum Hücre, Seramik İzolatör, Mantık Çipi, Ekran Paneli; Demir / Bakır / Altın Tozu.
+- Elektrik ağı: kablo kaybı artık talebe eklenir; uzun tüketici zincirlerinin sonundaki cihazlar da beslenir.
+- Yeni başarım grubu "Şebeke" (7 başarım); gezgin tüccar elektrik parçaları satar; geliştirici penceresine üç Şebeke hazır seti eklendi.
+- R ile yerleştirme yönü çevrildiğinde çıkan "Yerleştirme yönü çevrildi" bildirimi kaldırıldı (yön önizlemeden görülür).
+
 ## 52.0 (0.52.0): Bereket güncellemesi (213 yeni eşya ve blok)
 
 Kimlikler 2200'den başlayan ayrı bir aralıktan ayrılır (bloklar.js, ayir52); eski aralık 2073'ten devam eder. Eski kayıtlar etkilenmez.

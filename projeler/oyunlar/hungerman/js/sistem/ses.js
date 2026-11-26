@@ -390,6 +390,13 @@ export class Ses {
   /* 0.38.1: çakmak çakma sesi: iki kısa kıvılcım */
   cakmak() { if (!this.ctx) return; if (this.cal('cakmak', 1)) return; this.patlama(3200, 0.04, 0.16, 'highpass', 2); setTimeout(() => this.patlama(2600, 0.06, 0.12, 'highpass', 2), 70); }
   dugme() { if (this.cal('dugme', 1)) return; this.ton(1000, 0.03, 0.07, 'square', 800); }
+  /* 0.53.0: Şebeke güncellemesi: sigorta atması, siren, kepenk motoru, matkap, elektrik çarpması, kazan ateşi */
+  sigortaAtti() { this.patlama(3200, 0.08, 0.35, 'highpass', 1); this.ton(180, 0.12, 0.12, 'square', 60); this.patlama(900, 0.18, 0.12, 'bandpass', 1.5, 0.4); }
+  siren(t) { const f = 620 + 260 * Math.sin(t * Math.PI); this.ton(f, 0.55, 0.06, 'sawtooth', 620 + 260 * Math.sin((t + 0.5) * Math.PI)); this.ton(f * 1.5, 0.55, 0.025, 'square', f * 1.4); }
+  kepenk(acik) { this.patlama(acik ? 380 : 300, 1.1, 0.16, 'bandpass', 2.5, acik ? 1.4 : 0.7); this.ton(90, 1.0, 0.05, 'sawtooth', acik ? 120 : 70); }
+  matkap() { this.patlama(260, 0.35, 0.22, 'lowpass', 1, 0.7); this.ton(70 + Math.random() * 20, 0.3, 0.06, 'sawtooth', 55); }
+  elektrikCarp() { this.patlama(4200, 0.12, 0.3, 'highpass', 0.8); this.ton(120, 0.15, 0.09, 'square', 240); }
+  makineUgultu(hz = 110) { this.ton(hz, 0.5, 0.025, 'sawtooth', hz * 1.02); }
   melodi(tur = 0, h = 1) {
     if (!this.ctx) return;
     const notalar = [[523, 659, 784, 1047], [131, 165, 196, 262], [1047, 1319, 1568, 2093], [587, 740, 880, 1175], [0, 0, 0, 0]][tur] || [523, 659, 784, 1047];

@@ -43,9 +43,12 @@ export function hissedilenSicaklik(o) {
   if (o.oyuncu.suda && !o.oyuncu.lavda) t -= 8;
   else if (o.hayatta.islak > 0) t -= 5;
   /* Isı kaynakları */
-  let ek = 0;
+  let ek = 0, klima = 0;
   for (const m of d.yakinMesaleler(p.x, y + 1, p.z, 31)) {
-    const ks = KAYNAK[d.blok(Math.floor(m[0]), Math.floor(m[1] - 0.6), Math.floor(m[2]))];
+    const kid = d.blok(Math.floor(m[0]), Math.floor(m[1] - 0.6), Math.floor(m[2]));
+    /* 0.53.0: çalışan klima 7 blok içinde sıcaklığı 22 °C'ye çeker */
+    if (BLOKLAR[kid] && BLOKLAR[kid].klima) { const u = Math.hypot(m[0] - p.x, m[1] - (y + 0.9), m[2] - p.z); if (u < 7) klima = Math.max(klima, 0.9 * (1 - u / 9)); continue; }
+    const ks = KAYNAK[kid];
     if (!ks) continue;
     const u = Math.hypot(m[0] - p.x, m[1] - (y + 0.9), m[2] - p.z);
     if (u >= ks[1]) continue;
@@ -53,6 +56,7 @@ export function hissedilenSicaklik(o) {
     if (ks[0] >= 10 && u < ks[1] * 0.8) ates = true;
   }
   t += Math.max(-12, Math.min(30, ek));
+  if (klima) t += (22 - t) * klima;
   const ortam = t;
   /* 0.33.0: giysiler: soğukta yalıtım ısıtır (çıplak beden daha çok üşür); sıcakta (ör. çölde) kalın giysi ve metal zırh ısıtır, ince giysi serinletir */
   const G = o.envanter.giysiIsi ? o.envanter.giysiIsi() : { y: 0, s: 0, g: 0, ust: true, alt: true };

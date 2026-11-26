@@ -98,7 +98,13 @@ export const DOKULAR = [
   ...['0', 'k', 't', 's', 'y', 'm', 'mo', 'si'].flatMap(e => ['siva_' + e, 'boyali_kalas_' + e, 'led_kapali_' + e, 'led_' + e]),
   'kagit_fener', 'tas_fener', 'demir_fener', 'proj_yan', 'proj_on', 'proj_on_a', 'vant_ust', 'vant_yan', 'vant_yan_a',
   ...['blender', 'kahve', 'tost', 'mikrodalga', 'dondurma', 'izgara', 'radyo'].flatMap(k => [k + '_yan', k + '_on', k + '_on_a']),
-  ...['celtik', 'patlican', 'aycicegi', 'cay', 'kahve', 'kakao'].flatMap(k => [0, 1, 2, 3].map(e => k + e))
+  ...['celtik', 'patlican', 'aycicegi', 'cay', 'kahve', 'kakao'].flatMap(k => [0, 1, 2, 3].map(e => k + e)),
+  /* 0.53.0: Şebeke güncellemesi */
+  'kazan', 'kazan_kapak', 'kazan_kapak_a', 'manometre', 'boru53', 'konteyner', 'konteyner_kapi', 'konteyner_ust', 'jeo_kaplama', 'jeo_isaret', 'kafes', 'izolator',
+  'ekran_kasa', 'tv_dolap', 'kepenk', 'kepenk_kutu', 'kamera_govde', 'alarm_govde', 'alarm_kubbe', 'alarm_kubbe_a', 'refrakter', 'ark_ic', 'elektrot', 'sari_metal',
+  'pompa_govde', 'sokak_led', 'sokak_led_a', 'camasir_on', 'beyaz_govde', 'testere', 'takip_panel', 'beton53',
+  'm_govde', 'm_ve', 'm_veya', 'm_xor', 'm_degil', 'm_role', 'm_zaman', 'm_fotosel', 'm_fotosel_g', 'm_dugme', 'sigorta_on', 'sigorta_on_a',
+  'klima_on', 'klima_on_a', 'klima_yan', 'cit_unite', 'cit_unite_a', 'ecit_tel'
 ];
 export const T = Object.fromEntries(DOKULAR.map((n, i) => [n, i]));
 
@@ -373,11 +379,13 @@ blok(595, { ad: 'Yıldız Feneri', dok: 'yildiz_feneri', sertlik: 0.4, ses: 'cam
    eski kayıtlar için kalır; kırılınca yeni cihazın eşyasını verir. */
 for (let id = 596; id <= 616; id++) { const e = id === 596 ? 497 : id <= 600 ? 498 : id === 601 ? 499 : id <= 606 ? 500 : id <= 611 ? 501 : 502;
   blok(id, { ad: 'Eski Elektrik Bloğu', dok: 'panel_yan', sertlik: 1, ses: 'tas', gizli: true, dusur: () => [[e, 1]], harita: 2 }); }
-for (const C of Object.values(CIHAZ)) for (let f = 0; f < 4; f++) for (let i = 0; i < C.n; i++) {
-  const [lx, ly, lz] = hucreYerel(C, i);
-  blok(C.taban + f * C.n + i, { ad: C.ad, dok: 'panel_yan', cizim: C_SEKIL, opak: false, sertlik: C.sertlik, alet: C.alet, ses: C.ses, sekil: 'cihaz', gorunmez: true, ustuneKonmaz: true,
-    cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: C.taban + f * C.n, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, tuketim: C.tuketim || 0, gizli: true, dusur: () => [], harita: 2,
-    ...(C.sandik && i === 0 ? { sandik: true } : {}) });   // 0.29.0: taretin ok haznesi
+for (const C of Object.values(CIHAZ)) for (let a = 0; a < (C.durum || 1); a++) for (let f = 0; f < 4; f++) for (let i = 0; i < C.n; i++) {
+  const [lx, ly, lz] = hucreYerel(C, i), k0 = C.taban + (a * 4 + f) * C.n;   // 0.53.0: durumlu cihazların açık hâli (a = 1) ayrı kimliklerdedir
+  blok(k0 + i, { ad: C.ad, dok: 'panel_yan', cizim: C_SEKIL, opak: false, sertlik: C.sertlik, alet: C.alet, ses: C.ses, sekil: 'cihaz', gorunmez: true, ustuneKonmaz: true,
+    cihaz: C.tur, yon: f, parca: i, lx, ly, lz, kok: k0, elektrik: C.elektrik, uretim: C.uretim || 0, kapasite: C.kapasite || 0, tuketim: C.tuketim || 0, gizli: true, dusur: () => [], harita: 2,
+    ...(C.sandik && i === 0 ? { sandik: true } : {}),   // 0.29.0: taretin ok haznesi
+    ...(C.hazne ? { hazne: true } : {}), ...(C.durum ? { acik: a, durumTaban: C.taban + f * C.n } : {}),
+    ...(a && C.isikHucre === i ? { mesale: true, isik: C.isik || 15, lamba: true } : {}) });
 }
 /* 0.26.0: kablolar Rust'taki gibi kablo aracıyla cihazdan cihaza çekilir (oyun/kablolar.js); eski yer kablosu (617) eski kayıtlar için iletmeye devam eder */
 blok(617, { ad: 'Eski Yer Kablosu', dok: 'ekablo', cizim: C_SEKIL, opak: false, kati: false, sertlik: 0.2, ses: 'tas', sekil: 'ekablo', elektrik: 'kablo', gizli: true, dusur: () => [[503, 1]], harita: 2, port: [0.5, 0.1, 0.5] });
@@ -818,6 +826,46 @@ EKIN52.forEach(E => {
   ek(DOGA41.savanCali, [[ESYA52.kahve, 0.08], [ESYA52.aycicegi, 0.06]]); ek(DOGA41.mangrovYaprak, [[ESYA52.kakao, 0.04]]); ek(25, [[ESYA52.aycicegi, 0.015], [ESYA52.patlicanTohumu, 0.012]]);
 }
 
+/* ---------- 0.53.0: Şebeke güncellemesi: tek bloklu elektrik parçaları ----------
+   Kimlikler eski sıranın boş kalan 2073-2199 aralığından ayrılır (ayir53); yeni parçalar yalnızca bu bölümün sonuna eklenir.
+   Mantık parçaları: alçak devre kutusu; bağlantı noktaları üstte (girişler batıda, çıkış doğuda). Açık hâl (taban + 1) gücü çıkışa geçirir. */
+let ID53 = 2073;
+const ayir53 = n => { const s = ID53; ID53 += n; return s; };
+export const BLOK53 = {}, ESYA53 = {};
+{
+  const ort = { cizim: C_SEKIL, opak: false, sertlik: 0.8, alet: null, seviye: 0, ses: 'tas', harita: 2 };
+  /* Zamanlayıcı: 4 süre (1, 2, 5, 10 sn) × açık; gücü sırayla bu sürelerle açıp keser */
+  BLOK53.zaman = ayir53(8);
+  for (let p = 0; p < 4; p++) for (let a = 0; a < 2; a++) blok(BLOK53.zaman + p * 2 + a, { ...ort, ad: 'Zamanlayıcı', dok: 'm_govde', sekil: 'mantik53', ust53: 'm_zaman', elektrik: 'zamanlayici', tuketim: 0.1,
+    cesit: p, sure: [1, 2, 5, 10][p], acik: a, taban: BLOK53.zaman + p * 2, gizli: p + a > 0, dusur: () => [[BLOK53.zaman, 1]] });
+  /* Gün Işığı Algılayıcı: kip 0 gece, 1 gündüz geçirir */
+  BLOK53.fotosel = ayir53(4);
+  for (let m = 0; m < 2; m++) for (let a = 0; a < 2; a++) blok(BLOK53.fotosel + m * 2 + a, { ...ort, ad: 'Gün Işığı Algılayıcı', dok: 'm_govde', sekil: 'mantik53', ust53: m ? 'm_fotosel_g' : 'm_fotosel', elektrik: 'fotosel', tuketim: 0.1,
+    kip: m, acik: a, taban: BLOK53.fotosel + m * 2, gizli: m + a > 0, dusur: () => [[BLOK53.fotosel, 1]] });
+  /* Mantık kapıları (iki giriş, bir çıkış), Röle ve Engelleyici (güç girişi + sinyal girişi), Elektrikli Düğme */
+  for (const [k, ad, el, ust, ek] of [['ve', 'VE Kapısı', 'mantik', 'm_ve', { mantik: 've' }], ['veya', 'VEYA Kapısı', 'mantik', 'm_veya', { mantik: 'veya' }], ['xor', 'ÖZEL VEYA Kapısı', 'mantik', 'm_xor', { mantik: 'xor' }],
+    ['role', 'Röle', 'role', 'm_role', {}], ['engel', 'Engelleyici', 'engelleyici', 'm_degil', {}], ['dugme', 'Elektrikli Düğme', 'edugme', 'm_dugme', {}]]) {
+    const id = BLOK53[k] = ayir53(2);
+    for (let a = 0; a < 2; a++) blok(id + a, { ...ort, ad, dok: 'm_govde', sekil: 'mantik53', ust53: ust, elektrik: el, tuketim: 0.1, acik: a, taban: id, gizli: a > 0, dusur: () => [[id, 1]], ...ek });
+  }
+  /* Sigorta: sınır (10, 25, 50, 100 E/sn) × atık; sınırı aşan güç 1 saniye sürerse atar ve ağı keser. Sağ tık: atıksa kurar, değilse sınırı değiştirir */
+  BLOK53.sigorta = ayir53(8);
+  for (let l = 0; l < 4; l++) for (let a = 0; a < 2; a++) blok(BLOK53.sigorta + l * 2 + a, { ...ort, ad: 'Sigorta', dok: 'm_govde', sekil: 'sigorta53', sertlik: 1.2, elektrik: 'sigorta',
+    cesit: l, sinir: [10, 25, 50, 100][l], atik: a, taban: BLOK53.sigorta + l * 2, gizli: l + a > 0, dusur: () => [[BLOK53.sigorta, 1]] });
+  /* Klima: duvara asılan iç ünite (yon: arkasının dayandığı duvarın tersi); çalışırken 7 blok içinde hissedilen sıcaklığı 22 °C'ye çeker */
+  BLOK53.klima = ayir53(8);
+  for (let f = 0; f < 4; f++) for (let a = 0; a < 2; a++) blok(BLOK53.klima + f * 2 + a, { ...ort, ad: 'Klima', dok: 'klima_yan', sekil: 'klima53', sertlik: 1.5, alet: 'kazma', elektrik: 'klima', tuketim: 2.5,
+    klima53: true, yon: f, acik: a, taban: BLOK53.klima + f * 2, gizli: f + a > 0, dusur: () => [[BLOK53.klima, 1]], ...(a ? { mesale: true, isik: 1, klima: true } : {}) });
+  /* Elektrikli Çit Ünitesi ve Elektrikli Çit: ünite çalışırken ona bitişik çit hattı (en çok 128 blok) elektriklenir; değen canavarlar çarpılır ve geri savrulur */
+  BLOK53.citUnite = ayir53(2);
+  for (let a = 0; a < 2; a++) blok(BLOK53.citUnite + a, { ad: 'Elektrikli Çit Ünitesi', dok: ['m_govde', a ? 'cit_unite_a' : 'cit_unite', 'm_govde'], sertlik: 2, alet: 'kazma', ses: 'tas', harita: 2,
+    elektrik: 'citunite', tuketim: 4, acik: a, taban: BLOK53.citUnite, gizli: a > 0, dusur: () => [[BLOK53.citUnite, 1]] });
+  BLOK53.ecit = ayir53(1);
+  blok(BLOK53.ecit, { ad: 'Elektrikli Çit', dok: 'ecit_tel', cizim: C_SEKIL, opak: false, sertlik: 1.5, alet: 'kazma', seviye: 0, ses: 'tas', sekil: 'ecit', harita: 2 });
+  /* Parçalar ve tozlar (eşya) */
+  for (const k of ['motor', 'lityum', 'izolator', 'cip', 'ekran', 'demirTozu', 'bakirTozu', 'altinTozu']) ESYA53[k] = ayir53(1);
+}
+
 /* Hızlı erişim tabloları (0.18.0: blok kimlikleri 16 bittir; 256-511 eşyalara ayrılmıştır, yeni bloklar 512'den başlar) */
 export const BLOK_UST = 4096;   // 0.31.0: 1024'ten 2048'e; 0.37.0: 4096'ya
 export const KATI = new Uint8Array(BLOK_UST), OPAK = new Uint8Array(BLOK_UST), CIZIM = new Uint8Array(BLOK_UST), KESIK = new Uint8Array(BLOK_UST);
@@ -1166,6 +1214,7 @@ esya(496, { ad: 'Bakır Bobin', simge: 'bobin', ozellik: 'Türbin, ocak ve ısı
 esya(503, { ad: 'Elektrik Kablosu', tur: 'kablo', simge: 'kablo', ozellik: 'Bir çıkış noktasından bir giriş noktasına çekilir; yüzeye sağ tık ara nokta ekler. Shift: düz çek, Shift + tekerlek: sarkma, R: iptal. Her 3 blok için 1 kablo harcanır' });
 /* 0.25.0: çok bloklu cihazların eşyaları (sağ tıkla kurulur; R tuşu yönü çevirir) */
 const CIHAZ_SIMGE = { gunes: 'cihazGunes', ruzgar: 'cihazRuzgar', su: 'cihazSu', bataryaK: 'cihazBatarya', bataryaO: 'cihazBatarya', bataryaB: 'cihazBatarya', taret: 'cihazTaret' };
+for (const k of Object.keys(CIHAZ)) if (!CIHAZ_SIMGE[k]) CIHAZ_SIMGE[k] = 'c53_' + k;   // 0.53.0
 for (const C of Object.values(CIHAZ)) esya(C.esya, { ad: C.ad, tur: 'cihaz', cihaz: C.tur, simge: CIHAZ_SIMGE[C.tur], boyut: { bataryaK: 0, bataryaO: 1, bataryaB: 2 }[C.tur], yigin: 16,
   ozellik: `${C.aciklama} · ${C.w} × ${C.d} taban, ${C.h} blok yükseklik` });
 for (const [id, oz] of [[826, 'Ağı açar / keser: sağ tık ya da kol ve bakır tel sinyali. Duvara ya da zemine konur'], [860, 'Kömür, kütük, kalas ya da çubuk yakarak 20 E/sn üretir; çıkışına talep varken yakıt harcar. Sağ tık: yakıt deposu'], [872, 'Yakınında (7 blok) canlı varken gücü çıkışına geçirir; 0,5 E/sn harcar. Sağ tık: kip (herkes / oyuncular / canavarlar)'], [920, 'Çevresindeki 9 × 9 tarlayı sular ve ekinleri hızlandırır; 2 E/sn harcar'], [852, 'Bir girişteki gücü üç çıkışa, bağlı cihazların talebine göre böler'], [856, 'İki girişteki gücü toplayıp tek çıkıştan verir (ör. güneş panellerini birleştirmek için)'], [620, '0,5 E/sn harcar · Zemine, tavana ya da duvara konur'],
@@ -1265,6 +1314,33 @@ E[486].serin = 150; E[486].ozellik += ' · Serinlik (150 saniye)';
   Y('sosisli', 'Sucuklu Sandviç', 'sosisli', '#c84a2a', 9, [['hiz', 45], ['tokluk', 45]]);
   Y('misirEkmegi', 'Mısır Ekmeği', 'pide', '#f2c43c', 6, [['tokluk', 60]]);
   Y('kakaoluPuding', 'Kakaolu Puding', 'corba2', '#6a3a1e', 6, [['yenilenme', 30]], { kase: true });
+}
+
+/* ---------- 0.53.0: Şebeke güncellemesi: elektrik parçaları, cevher tozları ve tek bloklu parçaların açıklamaları ---------- */
+{
+  const S = ESYA53;
+  esya(S.motor, { ad: 'Elektrik Motoru', simge: 'motor53', ozellik: 'Dönen parçaları olan elektrikli makinelerin yapımında kullanılır' });
+  esya(S.lityum, { ad: 'Lityum Hücre', simge: 'lityum53', ozellik: 'Yüksek kapasiteli enerji depolarının yapımında kullanılır' });
+  esya(S.izolator, { ad: 'Seramik İzolatör', simge: 'izolator53', ozellik: 'Elektrik direklerinin ve paratonerin yapımında kullanılır' });
+  esya(S.cip, { ad: 'Mantık Çipi', simge: 'cip53', ozellik: 'Mantık kapıları, zamanlayıcı ve algılayıcıların yapımında kullanılır' });
+  esya(S.ekran, { ad: 'Ekran Paneli', simge: 'ekran53', ozellik: 'Televizyon, monitör ve güç ölçerin yapımında kullanılır' });
+  esya(S.demirTozu, { ad: 'Demir Tozu', simge: 'toz53', renk: '#b8a294', ozellik: 'Taş kırıcıdan çıkar; fırında ya da ark ocağında Demir Külçe olur' });
+  esya(S.bakirTozu, { ad: 'Bakır Tozu', simge: 'toz53', renk: '#d88a52', ozellik: 'Taş kırıcıdan çıkar; fırında ya da ark ocağında Bakır Külçe olur' });
+  esya(S.altinTozu, { ad: 'Altın Tozu', simge: 'toz53', renk: '#f2cc48', ozellik: 'Taş kırıcıdan çıkar; fırında ya da ark ocağında Altın Külçe olur' });
+  const B5 = BLOK53;
+  for (const [id, oz] of [
+    [B5.zaman, 'Girişindeki gücü sırayla açıp keser · Sağ tık: süre (1, 2, 5, 10 sn) · 0,1 E/sn harcar'],
+    [B5.fotosel, 'Geceleri (ya da gündüzleri) gücü çıkışına geçirir · Sağ tık: kip · 0,1 E/sn harcar'],
+    [B5.ve, 'İki girişin ikisinde de güç varken çıkışa güç verir · 0,1 E/sn harcar'],
+    [B5.veya, 'Girişlerden en az birinde güç varken çıkışa güç verir · 0,1 E/sn harcar'],
+    [B5.xor, 'Girişlerden yalnızca birinde güç varken çıkışa güç verir · 0,1 E/sn harcar'],
+    [B5.role, 'Sinyal girişinde (ikinci giriş) güç varken güç girişindekini çıkışa geçirir · 0,1 E/sn harcar'],
+    [B5.engel, 'Sinyal girişinde (ikinci giriş) güç yokken güç girişindekini çıkışa geçirir · 0,1 E/sn harcar'],
+    [B5.dugme, 'Basılınca gücü 5 saniye çıkışa geçirir (kepenk ve alarm için) · 0,1 E/sn harcar'],
+    [B5.sigorta, 'Sınırı aşan güç 1 saniye sürerse atar ve arkasındaki ağı keser · Sağ tık: atıksa kurar, değilse sınırı değiştirir (10 / 25 / 50 / 100 E/sn)'],
+    [B5.klima, '2,5 E/sn harcar · Duvara asılır; 7 blok içinde sıcaklığı 22 °C\'ye çeker (yazın serinletir, kışın ısıtır)'],
+    [B5.citUnite, '4 E/sn harcar · Bitişiğindeki elektrikli çit hattını (en çok 128 blok) elektrikler'],
+    [B5.ecit, 'Çit ünitesine bağlanınca elektriklenir: değen canavarlar çarpılıp geri savrulur, oyuncular hafifçe çarpılır']]) E[id].ozellik = oz;
 }
 
 /* Örste onarım malzemesi */

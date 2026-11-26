@@ -3,7 +3,7 @@
    satırlardan oluşur: her satırda başlık, kısa açıklama ve sağda tek bir denetim (anahtar, kaydırıcı, seçim kutusu ya da tek işlem düğmesi).
    İşlemler konsol komutlarıyla yürür (aynı izin kuralları geçerlidir, konsol kaydına yazılır); anahtar ve kaydırıcılar hemen uygulanır.
    Sekmeler: Oyuncu, Eşyalar, Dünya, Canlılar, Işınlanma, Köy ve Görev, Görünüm, Bilgi. */
-import { ESYALAR, BLOKLAR, ETKILER, YAPI_ID, TARIM, MUTFAK, COKLU_ID, YAPI37, ESYA37, ESYA39 } from '../bloklar.js';
+import { ESYALAR, BLOKLAR, ETKILER, YAPI_ID, TARIM, MUTFAK, COKLU_ID, YAPI37, ESYA37, ESYA39, ESYA53, BLOK53 } from '../bloklar.js';
 import { TURLER, HAYVANLAR, DENIZ_CANLILARI, CANAVARLAR } from '../varlik/turler.js';
 import { BIYOMLAR } from '../dunya/uretici.js';
 import { simge } from '../grafik/doku.js';
@@ -50,7 +50,11 @@ const SETLER = [
   { ad: 'Aşçı', not: 'Mutfak istasyonları, tarif defteri ve temel malzemeler', esya: [[320, 1], [MUTFAK.degirmen, 1], [MUTFAK.tezgah, 1], [MUTFAK.tandir, 1], [232, 1], [C.mangal, 1], [291, 32], [396, 16], [397, 8], [480, 16], [476, 16], [484, 8], [479, 2], [270, 16], [331, 8]] },
   { ad: 'Denizci ve kâşif', not: 'Sandal, yelkenli, olta, dalış takımı, dürbün ve cep saati', esya: [[454, 1], [455, 1], [453, 1], [456, 1], [457, 1], [E7.durbun, 1], [E7.cepSaati, 1], [298, 16], [46, 16]] },
   { ad: 'Büyü ve simya', not: 'Büyü masası, simya masası, örs, şişeler, kristaller ve iksir malzemeleri', esya: [[156, 1], [140, 1], [139, 1], [331, 16], [61, 32], [283, 8], [265, 16], [297, 8], [296, 8], [263, 8]] },
-  { ad: 'Elektrik', not: 'Üreticiler, bataryalar, kablo, şalter, lamba, algılayıcı ve taret', esya: [[497, 4], [498, 1], [499, 1], [500, 2], [502, 1], [503, 64], [826, 2], [852, 2], [860, 1], [257, 32], [504, 1], [287, 64], [872, 2], [620, 8]] }
+  { ad: 'Elektrik', not: 'Üreticiler, bataryalar, kablo, şalter, lamba, algılayıcı ve taret', esya: [[497, 4], [498, 1], [499, 1], [500, 2], [502, 1], [503, 64], [826, 2], [852, 2], [860, 1], [257, 32], [504, 1], [287, 64], [872, 2], [620, 8]] },
+  /* 0.53.0 */
+  { ad: 'Şebeke: üretim ve depolama', not: 'Buhar, jeotermal, güneş takip, paratoner, konteyner, direk, güç ölçer, sigorta ve yakıt', esya: [[3028, 1], [3029, 1], [3030, 1], [3031, 1], [3032, 1], [3033, 4], [3034, 2], [BLOK53.sigorta, 2], [503, 64], [257, 32]] },
+  { ad: 'Şebeke: makineler ve güvenlik', not: 'Ark ocağı, kereste, kırıcı, matkap, pompa, çamaşır, TV, kepenk, kamera, monitör, alarm, sokak lambası, klima, elektrikli çit', esya: [[3041, 1], [3042, 1], [3043, 1], [3044, 1], [3045, 1], [3036, 1], [3035, 1], [3037, 1], [3038, 2], [3039, 1], [3040, 1], [3046, 2], [BLOK53.klima, 1], [BLOK53.citUnite, 1], [BLOK53.ecit, 32], [503, 64]] },
+  { ad: 'Şebeke: devre parçaları', not: 'Zamanlayıcı, gün ışığı algılayıcı, VE / VEYA / ÖZEL VEYA, röle, engelleyici, düğme, hareket algılayıcı, şalter ve kablo', esya: [[BLOK53.zaman, 4], [BLOK53.fotosel, 4], [BLOK53.ve, 4], [BLOK53.veya, 4], [BLOK53.xor, 4], [BLOK53.role, 4], [BLOK53.engel, 4], [BLOK53.dugme, 4], [872, 2], [826, 2], [852, 2], [856, 2], [620, 8], [503, 64]] }
 ];
 
 /* Işınlanma yerleri (konsoldaki isinla anahtar sözcükleri) */
@@ -381,7 +385,7 @@ export class GelistiriciPenceresi {
     if (!this.izin(o)) return;
     if (!o.elektrik) { this.mesaj('Çok oyunculu istemcide batarya işlemleri kullanılamaz.', 'hata'); return; }
     let n = 0;
-    for (const [k, [x, y, z]] of o.dunya.elektrikler) { const t = BLOKLAR[o.dunya.blok(x, y, z)]; if (t && t.elektrik === 'batarya') { o.dunya.enerji.set(k, a === 'doldur' ? t.kapasite : 0); n++; } }
+    for (const [k, [x, y, z]] of o.dunya.elektrikler) { const t = BLOKLAR[o.dunya.blok(x, y, z)]; if (t && (t.elektrik === 'batarya' || t.elektrik === 'paratoner') && !t.parca) { o.dunya.enerji.set(k, a === 'doldur' ? t.kapasite : 0); n++; } }
     o.elektrik.hesapla(0.001); this.ses.tik();
     this.mesaj(n ? `${n} batarya ${a === 'doldur' ? 'dolduruldu' : 'boşaltıldı'}.` : 'Yüklü bölgede batarya yok.', n ? 'tamam' : 'hata');
   }
