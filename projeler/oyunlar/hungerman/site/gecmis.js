@@ -3,6 +3,9 @@
    g: grup sürümü, b: grubun başlığı, y: yamalar { s: sürüm, b: başlık, m: maddeler } */
 window.GECMIS = [
 { g: '0.53', b: 'Şebeke', y: [
+  { s: '0.53.1', b: 'Su görünümü', m: [
+    'Suyun kenarlarında ve akan suda görünen beyaz köpük benekleri kaldırıldı; su yeniden düz ve temiz görünüyor.'
+  ]},
   { s: '0.53.0', b: 'Şebeke güncellemesi', m: [
     'Elektriğe büyük güncelleme: 39 yeni cihaz, devre parçası ve malzeme. Büyük cihazlar gerçek boyutlarında, ayrıntılı 3B modellerle geliyor.',
     'Yeni enerji kaynakları: kömürle çalışan buhar jeneratörü, lavdan güç alan jeotermal jeneratör, güneşi izleyen panel ve fırtınada yıldırım yakalayan paratoner.',

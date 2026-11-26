@@ -149,11 +149,7 @@ void main() {
       float sp = pow(max(dot(R, gy), 0.0), gunesYon.y > -0.05 ? 140.0 : 220.0) * ac * clamp(gy.y * 4.0, 0.0, 1.0);
       renk += (gunesYon.y > -0.05 ? vec3(1.0, 0.92, 0.75) * 1.6 : vec3(0.55, 0.62, 0.8) * 0.7) * sp * (1.0 - islak * 0.8);
       a = mix(alfa, 0.93, clamp(fr, 0.0, 1.0));
-      if (vKopuk > 0.02) {
-        vec2 hc = floor(vDunya.xz * 16.0);
-        float n = h21(hc), dalga = 0.5 + 0.5 * sin(zaman * 1.6 + n * 6.2832 + (vDunya.x + vDunya.z) * 0.8);
-        if (n < vKopuk * (0.55 + 0.45 * dalga) - 0.12) { renk = mix(renk, vec3(0.92, 0.96, 1.0) * max(isik.r, isik.b), 0.75); a = max(a, 0.9); }
-      }
+      /* 0.53.1: kıyı köpüğü (beyaz benekler) kaldırıldı; su yüzeyi eski düz görünümündedir */
     }
   #endif
   /* 0.48.0: sis: yumuşak başlayan geçiş ve uzak dağlarda hafif hava perspektifi (pus) */

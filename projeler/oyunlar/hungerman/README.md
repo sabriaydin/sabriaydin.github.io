@@ -119,6 +119,10 @@ Tarayıcıda çalışan, her seferinde rastgele oluşan açık dünya hayatta ka
   - Bilgi: kare hızı, konum, biyom, zaman, canlı ve eşya sayıları, yüklü parça, harita, blok değişikliği, bellek, ağ ve açık modlar (canlı tablo); FPS, F3 paneli ve mini harita anahtarları; tohumu kopyalama.
 - Penceredeki işlemler konsol komutlarıyla yürür; aynı izin kuralları geçerlidir ve işlemler konsol kaydına yazılır. Çok oyunculu istemcide dünyayı değiştiren işlemler kapalıdır; komut izni sunucu olan oyuncunun dünyasından gelir.
 
+## 53.1 (0.53.1): Su görünümü
+
+- Su yüzeyinin kıyıya ve bloklara değen kenarlarında, akan ve düşen suda beliren beyaz köpük benekleri kaldırıldı; su eski düz görünümüne döndü.
+
 ## 53.0 (0.53.0): Şebeke güncellemesi (39 yeni elektrik cihazı, parçası ve malzemesi)
 
 - Yeni üreticiler (gerçek boyutlarında, çok bloklu): Buhar Jeneratörü (3 × 2 × 3; kömür / odun yakar, yanında su ister, basınç 10 saniyede dolar, en çok 60 E/sn), Jeotermal Jeneratör (2 × 2 × 3; altındaki ve yanındaki lav başına 15 E/sn, en çok 45, Yeraltı Diyarı'nda da çalışır), Güneş Takip Sistemi (2 × 2 × 3; paneli güneşe döner, en çok 28 E/sn), Paratoner (1 × 1 × 6; fırtınada 48 blok içindeki yıldırımları çeker, her yıldırım 5.000 E depolar).
